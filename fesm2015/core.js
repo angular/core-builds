@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+4.sha-05a43ca.with-local-changes
+ * @license Angular v8.1.0-next.1+6.sha-3859bcc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15411,6 +15411,42 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
     }
 }
 /**
+ * @param {?} index
+ * @param {?} name
+ * @param {?} value
+ * @param {?} lView
+ * @param {?=} sanitizer
+ * @param {?=} namespace
+ * @return {?}
+ */
+function elementAttributeInternal(index, name, value, lView, sanitizer, namespace) {
+    ngDevMode && assertNotSame(value, (/** @type {?} */ (NO_CHANGE)), 'Incoming value should never be NO_CHANGE.');
+    ngDevMode && validateAgainstEventAttributes(name);
+    /** @type {?} */
+    const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
+    /** @type {?} */
+    const renderer = lView[RENDERER];
+    if (value == null) {
+        ngDevMode && ngDevMode.rendererRemoveAttribute++;
+        isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
+            element.removeAttribute(name);
+    }
+    else {
+        ngDevMode && ngDevMode.rendererSetAttribute++;
+        /** @type {?} */
+        const tNode = getTNode(index, lView);
+        /** @type {?} */
+        const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
+        if (isProceduralRenderer(renderer)) {
+            renderer.setAttribute(element, name, strValue, namespace);
+        }
+        else {
+            namespace ? element.setAttributeNS(namespace, name, strValue) :
+                element.setAttribute(name, strValue);
+        }
+    }
+}
+/**
  * Sets initial input properties on directive instances from attribute data
  *
  * @template T
@@ -16095,6 +16131,1234 @@ function prefillHostVars(tView, lView, totalHostVars) {
         tView.blueprint.push(NO_CHANGE);
         tView.data.push(null);
     }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let _symbolIterator = null;
+function getSymbolIterator() {
+    if (!_symbolIterator) {
+        const Symbol = _global['Symbol'];
+        if (Symbol && Symbol.iterator) {
+            _symbolIterator = Symbol.iterator;
+        }
+        else {
+            // es6-shim specific logic
+            const keys = Object.getOwnPropertyNames(Map.prototype);
+            for (let i = 0; i < keys.length; ++i) {
+                const key = keys[i];
+                if (key !== 'entries' && key !== 'size' &&
+                    Map.prototype[key] === Map.prototype['entries']) {
+                    _symbolIterator = key;
+                }
+            }
+        }
+    }
+    return _symbolIterator;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// JS has NaN !== NaN
+function looseIdentical(a, b) {
+    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function devModeEqual(a, b) {
+    /** @type {?} */
+    const isListLikeIterableA = isListLikeIterable(a);
+    /** @type {?} */
+    const isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        /** @type {?} */
+        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        /** @type {?} */
+        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return looseIdentical(a, b);
+        }
+    }
+}
+/**
+ * Indicates that the result of a {\@link Pipe} transformation has changed even though the
+ * reference has not changed.
+ *
+ * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
+ * is stored.
+ *
+ * Example:
+ *
+ * ```
+ * if (this._latestValue === this._latestReturnedValue) {
+ *    return this._latestReturnedValue;
+ *  } else {
+ *    this._latestReturnedValue = this._latestValue;
+ *    return WrappedValue.wrap(this._latestValue); // this will force update
+ *  }
+ * ```
+ *
+ * \@publicApi
+ */
+class WrappedValue {
+    /**
+     * @param {?} value
+     */
+    constructor(value) { this.wrapped = value; }
+    /**
+     * Creates a wrapped value.
+     * @param {?} value
+     * @return {?}
+     */
+    static wrap(value) { return new WrappedValue(value); }
+    /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     *
+     * @param {?} value
+     * @return {?}
+     */
+    static unwrap(value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; }
+    /**
+     * Returns true if `value` is a wrapped value.
+     * @param {?} value
+     * @return {?}
+     */
+    static isWrapped(value) { return value instanceof WrappedValue; }
+}
+/**
+ * @param {?} obj
+ * @return {?}
+ */
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return Array.isArray(obj) ||
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+}
+/**
+ * @param {?} a
+ * @param {?} b
+ * @param {?} comparator
+ * @return {?}
+ */
+function areIterablesEqual(a, b, comparator) {
+    /** @type {?} */
+    const iterator1 = a[getSymbolIterator()]();
+    /** @type {?} */
+    const iterator2 = b[getSymbolIterator()]();
+    while (true) {
+        /** @type {?} */
+        const item1 = iterator1.next();
+        /** @type {?} */
+        const item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+/**
+ * @param {?} obj
+ * @param {?} fn
+ * @return {?}
+ */
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        /** @type {?} */
+        const iterator = obj[getSymbolIterator()]();
+        /** @type {?} */
+        let item;
+        while (!((item = iterator.next()).done)) {
+            fn(item.value);
+        }
+    }
+}
+/**
+ * @param {?} o
+ * @return {?}
+ */
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+// TODO(misko): consider inlining
+/**
+ * Updates binding and returns the value.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @param {?} value
+ * @return {?}
+ */
+function updateBinding(lView, bindingIndex, value) {
+    return lView[bindingIndex] = value;
+}
+/**
+ * Gets the current binding value.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @return {?}
+ */
+function getBinding(lView, bindingIndex) {
+    ngDevMode && assertDataInRange(lView, bindingIndex);
+    ngDevMode &&
+        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+    return lView[bindingIndex];
+}
+/**
+ * Updates binding if changed, then returns whether it was updated.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @param {?} value
+ * @return {?}
+ */
+function bindingUpdated(lView, bindingIndex, value) {
+    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+    ngDevMode &&
+        assertLessThan(bindingIndex, lView.length, `Slot should have been initialized to NO_CHANGE`);
+    /** @type {?} */
+    const oldValue = lView[bindingIndex];
+    if (isDifferent(oldValue, value)) {
+        if (ngDevMode && getCheckNoChangesMode()) {
+            // View engine didn't report undefined values as changed on the first checkNoChanges pass
+            // (before the change detection was run).
+            /** @type {?} */
+            const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
+            if (!devModeEqual(oldValueToCompare, value)) {
+                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
+            }
+        }
+        lView[bindingIndex] = value;
+        return true;
+    }
+    return false;
+}
+/**
+ * Updates 2 bindings if changed, then returns whether either was updated.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @param {?} exp1
+ * @param {?} exp2
+ * @return {?}
+ */
+function bindingUpdated2(lView, bindingIndex, exp1, exp2) {
+    /** @type {?} */
+    const different = bindingUpdated(lView, bindingIndex, exp1);
+    return bindingUpdated(lView, bindingIndex + 1, exp2) || different;
+}
+/**
+ * Updates 3 bindings if changed, then returns whether any was updated.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @return {?}
+ */
+function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
+    /** @type {?} */
+    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
+    return bindingUpdated(lView, bindingIndex + 2, exp3) || different;
+}
+/**
+ * Updates 4 bindings if changed, then returns whether any was updated.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @return {?}
+ */
+function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
+    /** @type {?} */
+    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
+    return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {\@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value New value to write.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
+ * @param {?=} nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ * @return {?} This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ */
+function ɵɵproperty(propName, value, sanitizer, nativeOnly) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
+    /** @type {?} */
+    const bindReconciledValue = ɵɵbind(value);
+    if (bindReconciledValue !== NO_CHANGE) {
+        elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
+    }
+    return ɵɵproperty;
+}
+/**
+ * Creates a single value binding.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} value Value to diff
+ *
+ * @return {?}
+ */
+function ɵɵbind(value) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX]++;
+    storeBindingMetadata(lView);
+    return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
+}
+/**
+ * Updates a synthetic host binding (e.g. `[\@foo]`) on a component.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `\@HostBinding('\@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation \@triggers, they need to be
+ * evaluated with the sub component's renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value New value to write.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
+ * @param {?=} nativeOnly Whether or not we should only set native properties and skip input check
+ * (this is necessary for host property bindings)
+ *
+ * @return {?}
+ */
+function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer, nativeOnly) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    // TODO(benlesh): remove bind call here.
+    /** @type {?} */
+    const bound = ɵɵbind(value);
+    if (bound !== NO_CHANGE) {
+        elementPropertyInternal(index, propName, bound, sanitizer, nativeOnly, loadComponentRenderer);
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Updates the value of or removes a bound attribute on an Element.
+ *
+ * Used in the case of `[attr.title]="value"`
+ *
+ * \@codeGenApi
+ * @param {?} name name The name of the attribute.
+ * @param {?} value value The attribute is removed when value is `null` or `undefined`.
+ *                  Otherwise the attribute value is set to the stringified value.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
+ * @param {?=} namespace Optional namespace to use when setting the attribute.
+ *
+ * @return {?}
+ */
+function ɵɵattribute(name, value, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const bound = ɵɵbind(value);
+    if (bound !== NO_CHANGE) {
+        return elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and iterate over it.
+ *
+ * `values`:
+ * - has static text at even indexes,
+ * - has evaluated expressions at odd indexes.
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ *
+ * \@codeGenApi
+ * @param {?} values
+ * @return {?}
+ */
+function ɵɵinterpolationV(values) {
+    ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
+    ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
+    /** @type {?} */
+    let isBindingUpdated = false;
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tData = lView[TVIEW].data;
+    /** @type {?} */
+    let bindingIndex = lView[BINDING_INDEX];
+    if (tData[bindingIndex] == null) {
+        // 2 is the index of the first static interstitial value (ie. not prefix)
+        for (let i = 2; i < values.length; i += 2) {
+            tData[bindingIndex++] = values[i];
+        }
+        bindingIndex = lView[BINDING_INDEX];
+    }
+    for (let i = 1; i < values.length; i += 2) {
+        // Check if bindings (odd indexes) have changed
+        isBindingUpdated = bindingUpdated(lView, bindingIndex++, values[i]) || isBindingUpdated;
+    }
+    lView[BINDING_INDEX] = bindingIndex;
+    storeBindingMetadata(lView, values[0], values[values.length - 1]);
+    if (!isBindingUpdated) {
+        return NO_CHANGE;
+    }
+    // Build the updated content
+    /** @type {?} */
+    let content = values[0];
+    for (let i = 1; i < values.length; i += 2) {
+        content += renderStringify(values[i]) + values[i + 1];
+    }
+    return content;
+}
+/**
+ * Creates an interpolation binding with 1 expression.
+ *
+ * \@codeGenApi
+ * @param {?} prefix static value used for concatenation only.
+ * @param {?} v0 value checked for change.
+ * @param {?} suffix static value used for concatenation only.
+ *
+ * @return {?}
+ */
+function ɵɵinterpolation1(prefix, v0, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
+    storeBindingMetadata(lView, prefix, suffix);
+    return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 2 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    const different = bindingUpdated2(lView, bindingIndex, v0, v1);
+    lView[BINDING_INDEX] += 2;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        lView[TVIEW].data[bindingIndex] = i0;
+    }
+    return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 3 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    const different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
+    lView[BINDING_INDEX] += 3;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        /** @type {?} */
+        const tData = lView[TVIEW].data;
+        tData[bindingIndex] = i0;
+        tData[bindingIndex + 1] = i1;
+    }
+    return different ?
+        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix :
+        NO_CHANGE;
+}
+/**
+ * Create an interpolation binding with 4 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    const different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    lView[BINDING_INDEX] += 4;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        /** @type {?} */
+        const tData = lView[TVIEW].data;
+        tData[bindingIndex] = i0;
+        tData[bindingIndex + 1] = i1;
+        tData[bindingIndex + 2] = i2;
+    }
+    return different ?
+        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
+            renderStringify(v3) + suffix :
+        NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 5 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
+    lView[BINDING_INDEX] += 5;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        /** @type {?} */
+        const tData = lView[TVIEW].data;
+        tData[bindingIndex] = i0;
+        tData[bindingIndex + 1] = i1;
+        tData[bindingIndex + 2] = i2;
+        tData[bindingIndex + 3] = i3;
+    }
+    return different ?
+        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
+            renderStringify(v3) + i3 + renderStringify(v4) + suffix :
+        NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 6 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} i4
+ * @param {?} v5
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
+    lView[BINDING_INDEX] += 6;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        /** @type {?} */
+        const tData = lView[TVIEW].data;
+        tData[bindingIndex] = i0;
+        tData[bindingIndex + 1] = i1;
+        tData[bindingIndex + 2] = i2;
+        tData[bindingIndex + 3] = i3;
+        tData[bindingIndex + 4] = i4;
+    }
+    return different ?
+        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
+            renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + suffix :
+        NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 7 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} i4
+ * @param {?} v5
+ * @param {?} i5
+ * @param {?} v6
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
+    lView[BINDING_INDEX] += 7;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        /** @type {?} */
+        const tData = lView[TVIEW].data;
+        tData[bindingIndex] = i0;
+        tData[bindingIndex + 1] = i1;
+        tData[bindingIndex + 2] = i2;
+        tData[bindingIndex + 3] = i3;
+        tData[bindingIndex + 4] = i4;
+        tData[bindingIndex + 5] = i5;
+    }
+    return different ?
+        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
+            renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
+            renderStringify(v6) + suffix :
+        NO_CHANGE;
+}
+/**
+ * Creates an interpolation binding with 8 expressions.
+ *
+ * \@codeGenApi
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} i4
+ * @param {?} v5
+ * @param {?} i5
+ * @param {?} v6
+ * @param {?} i6
+ * @param {?} v7
+ * @param {?} suffix
+ * @return {?}
+ */
+function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX];
+    /** @type {?} */
+    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
+    different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
+    lView[BINDING_INDEX] += 8;
+    // Only set static strings the first time (data will be null subsequent runs).
+    /** @type {?} */
+    const data = storeBindingMetadata(lView, prefix, suffix);
+    if (data) {
+        /** @type {?} */
+        const tData = lView[TVIEW].data;
+        tData[bindingIndex] = i0;
+        tData[bindingIndex + 1] = i1;
+        tData[bindingIndex + 2] = i2;
+        tData[bindingIndex + 3] = i3;
+        tData[bindingIndex + 4] = i4;
+        tData[bindingIndex + 5] = i5;
+        tData[bindingIndex + 6] = i6;
+    }
+    return different ?
+        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
+            renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
+            renderStringify(v6) + i6 + renderStringify(v7) + suffix :
+        NO_CHANGE;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ *
+ * Update an interpolated attribute on an element with single bound value surrounded by text.
+ *
+ * Used when the value passed to a property has 1 interpolated value in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate1('title', 'prefix', v0, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate1;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 2 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 2 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate2;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 3 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 3 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate3(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate3;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 4 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 4 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate4(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate4;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 5 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 5 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate5(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate5;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 6 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 6 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate6(
+ *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} i4 Static value used for concatenation only.
+ * @param {?} v5 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate6;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 7 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 7 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate7(
+ *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} i4 Static value used for concatenation only.
+ * @param {?} v5 Value checked for change.
+ * @param {?} i5 Static value used for concatenation only.
+ * @param {?} v6 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate7;
+}
+/**
+ *
+ * Update an interpolated attribute on an element with 8 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 8 interpolated values in it:
+ *
+ * ```html
+ * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolate8(
+ *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update
+ * @param {?} prefix Static value used for concatenation only.
+ * @param {?} v0 Value checked for change.
+ * @param {?} i0 Static value used for concatenation only.
+ * @param {?} v1 Value checked for change.
+ * @param {?} i1 Static value used for concatenation only.
+ * @param {?} v2 Value checked for change.
+ * @param {?} i2 Static value used for concatenation only.
+ * @param {?} v3 Value checked for change.
+ * @param {?} i3 Static value used for concatenation only.
+ * @param {?} v4 Value checked for change.
+ * @param {?} i4 Static value used for concatenation only.
+ * @param {?} v5 Value checked for change.
+ * @param {?} i5 Static value used for concatenation only.
+ * @param {?} v6 Value checked for change.
+ * @param {?} i6 Static value used for concatenation only.
+ * @param {?} v7 Value checked for change.
+ * @param {?} suffix Static value used for concatenation only.
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolate8;
+}
+/**
+ * Update an interpolated attribute on an element with 8 or more bound values surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 7.
+ *
+ * ```html
+ * <div
+ *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵattributeInterpolateV(
+ *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+ *  'suffix']);
+ * ```
+ *
+ * \@codeGenApi
+ * @param {?} attrName The name of the attribute to update.
+ * @param {?} values The a collection of values and the strings in-between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ * @param {?=} sanitizer An optional sanitizer function
+ * @param {?=} namespace
+ * @return {?} itself, so that it may be chained.
+ */
+function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
+    /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
+    const lView = getLView();
+    // TODO(FW-1340): Refactor to remove the use of other instructions here.
+    /** @type {?} */
+    const interpolated = ɵɵinterpolationV(values);
+    if (interpolated !== NO_CHANGE) {
+        elementAttributeInternal(index, attrName, interpolated, lView, sanitizer, namespace);
+    }
+    return ɵɵattributeInterpolateV;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {\@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
+ * @template T
+ * @param {?} component The component which the change detection should be performed on.
+ * @return {?}
+ */
+function detectChanges(component) {
+    /** @type {?} */
+    const view = getComponentViewByInstance(component);
+    detectChangesInternal(view, component);
+}
+/**
+ * Mark the component as dirty (needing change detection).
+ *
+ * Marking a component dirty will schedule a change detection on this
+ * component at some point in the future. Marking an already dirty
+ * component as dirty is a noop. Only one outstanding change detection
+ * can be scheduled per component tree. (Two components bootstrapped with
+ * separate `renderComponent` will have separate schedulers)
+ *
+ * When the root component is bootstrapped with `renderComponent`, a scheduler
+ * can be provided.
+ *
+ * \@publicApi
+ * @template T
+ * @param {?} component Component to mark as dirty.
+ *
+ * @return {?}
+ */
+function markDirty(component) {
+    ngDevMode && assertDefined(component, 'component');
+    /** @type {?} */
+    const rootView = (/** @type {?} */ (markViewDirty(getComponentViewByInstance(component))));
+    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
+    scheduleTick((/** @type {?} */ (rootView[CONTEXT])), 1 /* DetectChanges */);
 }
 
 /**
@@ -16933,14 +18197,16 @@ function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentVi
     }
     else {
         while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                appendProjectedNodes(lView, tProjectionNode, ((/** @type {?} */ (nodeToProject))).projection, findComponentView(projectedView));
-            }
-            else {
-                // This flag must be set now or we won't know that this node is projected
-                // if the nodes are inserted into a container later.
-                nodeToProject.flags |= 2 /* isProjected */;
-                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+            if (!(nodeToProject.flags & 32 /* isDetached */)) {
+                if (nodeToProject.type === 1 /* Projection */) {
+                    appendProjectedNodes(lView, tProjectionNode, ((/** @type {?} */ (nodeToProject))).projection, findComponentView(projectedView));
+                }
+                else {
+                    // This flag must be set now or we won't know that this node is projected
+                    // if the nodes are inserted into a container later.
+                    nodeToProject.flags |= 2 /* isProjected */;
+                    appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+                }
             }
             nodeToProject = nodeToProject.projectionNext;
         }
@@ -16989,6 +18255,269 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
             appendChild(nodeOrContainer[NATIVE], tProjectionNode, currentView);
         }
     }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Creates an LContainer for inline views, e.g.
+ *
+ * % if (showing) {
+ *   <div></div>
+ * % }
+ *
+ * \@codeGenApi
+ * @param {?} index The index of the container in the data array
+ *
+ * @return {?}
+ */
+function ɵɵcontainer(index) {
+    /** @type {?} */
+    const tNode = containerInternal(index, null, null);
+    /** @type {?} */
+    const lView = getLView();
+    if (lView[TVIEW].firstTemplatePass) {
+        tNode.tViews = [];
+    }
+    addTContainerToQueries(lView, tNode);
+    setIsNotParent();
+}
+/**
+ * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
+ *
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
+ *
+ * \@codeGenApi
+ * @param {?} index The index of the container in the data array
+ * @param {?} templateFn Inline template
+ * @param {?} consts The number of nodes, local refs, and pipes for this template
+ * @param {?} vars The number of bindings for this template
+ * @param {?=} tagName The name of the container element, if applicable
+ * @param {?=} attrs The attrs attached to the container, if applicable
+ * @param {?=} localRefs A set of local reference bindings on the element.
+ * @param {?=} localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ *
+ * @return {?}
+ */
+function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    // TODO: consider a separate node type for templates
+    /** @type {?} */
+    const tContainerNode = containerInternal(index, tagName || null, attrs || null);
+    if (tView.firstTemplatePass) {
+        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+    }
+    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
+    addTContainerToQueries(lView, tContainerNode);
+    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
+    registerPostOrderHooks(tView, tContainerNode);
+    setIsNotParent();
+}
+/**
+ * Sets a container up to receive views.
+ *
+ * \@codeGenApi
+ * @param {?} index The index of the container in the data array
+ *
+ * @return {?}
+ */
+function ɵɵcontainerRefreshStart(index) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    /** @type {?} */
+    let previousOrParentTNode = (/** @type {?} */ (loadInternal(tView.data, index)));
+    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
+    setPreviousOrParentTNode(previousOrParentTNode, true);
+    lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
+    // We need to execute init hooks here so ngOnInit hooks are called in top level views
+    // before they are called in embedded views (for backwards compatibility).
+    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
+}
+/**
+ * Marks the end of the LContainer.
+ *
+ * Marking the end of LContainer is the time when to child views get inserted or removed.
+ *
+ * \@codeGenApi
+ * @return {?}
+ */
+function ɵɵcontainerRefreshEnd() {
+    /** @type {?} */
+    let previousOrParentTNode = getPreviousOrParentTNode();
+    if (getIsParent()) {
+        setIsNotParent();
+    }
+    else {
+        ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
+        ngDevMode && assertHasParent(previousOrParentTNode);
+        previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
+        setPreviousOrParentTNode(previousOrParentTNode, false);
+    }
+    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
+    /** @type {?} */
+    const lContainer = getLView()[previousOrParentTNode.index];
+    /** @type {?} */
+    const nextIndex = lContainer[ACTIVE_INDEX];
+    // remove extra views at the end of the container
+    while (nextIndex < lContainer.length - CONTAINER_HEADER_OFFSET) {
+        removeView(lContainer, nextIndex);
+    }
+}
+/**
+ * Reporting a TContainer node queries is a 2-step process as we need to:
+ * - check if the container node itself is matching (query might match a <ng-template> node);
+ * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
+ * container.
+ *
+ * Those 2 operations need to happen in the specific order (match the container node itself, then
+ * prepare space for nodes from views).
+ * @param {?} lView
+ * @param {?} tContainerNode
+ * @return {?}
+ */
+function addTContainerToQueries(lView, tContainerNode) {
+    /** @type {?} */
+    const queries = lView[QUERIES];
+    if (queries) {
+        /** @type {?} */
+        const lContainer = lView[tContainerNode.index];
+        if (lContainer[QUERIES]) {
+            // Query container should only exist if it was created through a dynamic view
+            // in a directive constructor. In this case, we must splice the template
+            // matches in before the view matches to ensure query results in embedded views
+            // don't clobber query results on the template node itself.
+            queries.insertNodeBeforeViews(tContainerNode);
+        }
+        else {
+            queries.addNode(tContainerNode);
+            lContainer[QUERIES] = queries.container();
+        }
+    }
+}
+/**
+ * @param {?} index
+ * @param {?} tagName
+ * @param {?} attrs
+ * @return {?}
+ */
+function containerInternal(index, tagName, attrs) {
+    /** @type {?} */
+    const lView = getLView();
+    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
+    /** @type {?} */
+    const adjustedIndex = index + HEADER_OFFSET;
+    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    /** @type {?} */
+    const comment = lView[index + HEADER_OFFSET] =
+        lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+    /** @type {?} */
+    const tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 0 /* Container */, tagName, attrs);
+    /** @type {?} */
+    const lContainer = lView[adjustedIndex] =
+        createLContainer(lView[adjustedIndex], lView, comment, tNode);
+    appendChild(comment, tNode, lView);
+    // Containers are added to the current view tree instead of their embedded views
+    // because views can be removed and re-inserted.
+    addToViewTree(lView, lContainer);
+    ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
+    return tNode;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Store a value in the `data` at a given `index`.
+ * @template T
+ * @param {?} index
+ * @param {?} value
+ * @return {?}
+ */
+function store(index, value) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
+    // We don't store any static data for local variables, so the first time
+    // we see the template, we should store as null to avoid a sparse array
+    /** @type {?} */
+    const adjustedIndex = index + HEADER_OFFSET;
+    if (adjustedIndex >= tView.data.length) {
+        tView.data[adjustedIndex] = null;
+        tView.blueprint[adjustedIndex] = null;
+    }
+    lView[adjustedIndex] = value;
+}
+/**
+ * Retrieves a local reference from the current contextViewData.
+ *
+ * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+ * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} index The index of the local ref in contextViewData.
+ *
+ * @return {?}
+ */
+function ɵɵreference(index) {
+    /** @type {?} */
+    const contextLView = getContextLView();
+    return loadInternal(contextLView, index);
+}
+/**
+ * Retrieves a value from current `viewData`.
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} index
+ * @return {?}
+ */
+function ɵɵload(index) {
+    return loadInternal(getLView(), index);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @template T
+ * @param {?} token
+ * @param {?=} flags
+ * @return {?}
+ */
+function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
+    token = resolveForwardRef(token);
+    /** @type {?} */
+    const lView = getLView();
+    // Fall back to inject() if view hasn't been created. This situation can happen in tests
+    // if inject utilities are used before bootstrapping.
+    if (lView == null)
+        return ɵɵinject(token, flags);
+    return getOrCreateInjectable((/** @type {?} */ (getPreviousOrParentTNode())), lView, token, flags);
+}
+/**
+ * Facade for the attribute injection from DI.
+ *
+ * \@codeGenApi
+ * @param {?} attrNameToInject
+ * @return {?}
+ */
+function ɵɵinjectAttribute(attrNameToInject) {
+    return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
 }
 
 /**
@@ -17925,62 +19454,6 @@ function ɵɵelement(index, name, attrs, localRefs) {
     ɵɵelementEnd();
 }
 /**
- * Updates the value or removes an attribute on an Element.
- *
- * \@codeGenApi
- * @param {?} index The index of the element in the data array
- * @param {?} name name The name of the attribute.
- * @param {?} value value The attribute is removed when value is `null` or `undefined`.
- *                  Otherwise the attribute value is set to the stringified value.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @param {?=} namespace Optional namespace to use when setting the attribute.
- *
- * @return {?}
- */
-function ɵɵelementAttribute(index, name, value, sanitizer, namespace) {
-    if (value !== NO_CHANGE) {
-        /** @type {?} */
-        const lView = getLView();
-        /** @type {?} */
-        const renderer = lView[RENDERER];
-        elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace);
-    }
-}
-/**
- * @param {?} index
- * @param {?} name
- * @param {?} value
- * @param {?} lView
- * @param {?} renderer
- * @param {?=} sanitizer
- * @param {?=} namespace
- * @return {?}
- */
-function elementAttributeInternal(index, name, value, lView, renderer, sanitizer, namespace) {
-    ngDevMode && validateAgainstEventAttributes(name);
-    /** @type {?} */
-    const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
-    if (value == null) {
-        ngDevMode && ngDevMode.rendererRemoveAttribute++;
-        isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
-            element.removeAttribute(name);
-    }
-    else {
-        ngDevMode && ngDevMode.rendererSetAttribute++;
-        /** @type {?} */
-        const tNode = getTNode(index, lView);
-        /** @type {?} */
-        const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
-        if (isProceduralRenderer(renderer)) {
-            renderer.setAttribute(element, name, strValue, namespace);
-        }
-        else {
-            namespace ? element.setAttributeNS(namespace, name, strValue) :
-                element.setAttribute(name, strValue);
-        }
-    }
-}
-/**
  * Assign static attribute values to a host element.
  *
  * This instruction will assign static attribute values as well as class and style
@@ -18048,1453 +19521,6 @@ function ɵɵelementHostAttrs(attrs) {
             }
         }
     }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-let _symbolIterator = null;
-function getSymbolIterator() {
-    if (!_symbolIterator) {
-        const Symbol = _global['Symbol'];
-        if (Symbol && Symbol.iterator) {
-            _symbolIterator = Symbol.iterator;
-        }
-        else {
-            // es6-shim specific logic
-            const keys = Object.getOwnPropertyNames(Map.prototype);
-            for (let i = 0; i < keys.length; ++i) {
-                const key = keys[i];
-                if (key !== 'entries' && key !== 'size' &&
-                    Map.prototype[key] === Map.prototype['entries']) {
-                    _symbolIterator = key;
-                }
-            }
-        }
-    }
-    return _symbolIterator;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// JS has NaN !== NaN
-function looseIdentical(a, b) {
-    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function devModeEqual(a, b) {
-    /** @type {?} */
-    const isListLikeIterableA = isListLikeIterable(a);
-    /** @type {?} */
-    const isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        /** @type {?} */
-        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        /** @type {?} */
-        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return looseIdentical(a, b);
-        }
-    }
-}
-/**
- * Indicates that the result of a {\@link Pipe} transformation has changed even though the
- * reference has not changed.
- *
- * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
- * is stored.
- *
- * Example:
- *
- * ```
- * if (this._latestValue === this._latestReturnedValue) {
- *    return this._latestReturnedValue;
- *  } else {
- *    this._latestReturnedValue = this._latestValue;
- *    return WrappedValue.wrap(this._latestValue); // this will force update
- *  }
- * ```
- *
- * \@publicApi
- */
-class WrappedValue {
-    /**
-     * @param {?} value
-     */
-    constructor(value) { this.wrapped = value; }
-    /**
-     * Creates a wrapped value.
-     * @param {?} value
-     * @return {?}
-     */
-    static wrap(value) { return new WrappedValue(value); }
-    /**
-     * Returns the underlying value of a wrapped value.
-     * Returns the given `value` when it is not wrapped.
-     *
-     * @param {?} value
-     * @return {?}
-     */
-    static unwrap(value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; }
-    /**
-     * Returns true if `value` is a wrapped value.
-     * @param {?} value
-     * @return {?}
-     */
-    static isWrapped(value) { return value instanceof WrappedValue; }
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return Array.isArray(obj) ||
-        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
-}
-/**
- * @param {?} a
- * @param {?} b
- * @param {?} comparator
- * @return {?}
- */
-function areIterablesEqual(a, b, comparator) {
-    /** @type {?} */
-    const iterator1 = a[getSymbolIterator()]();
-    /** @type {?} */
-    const iterator2 = b[getSymbolIterator()]();
-    while (true) {
-        /** @type {?} */
-        const item1 = iterator1.next();
-        /** @type {?} */
-        const item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-/**
- * @param {?} obj
- * @param {?} fn
- * @return {?}
- */
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        /** @type {?} */
-        const iterator = obj[getSymbolIterator()]();
-        /** @type {?} */
-        let item;
-        while (!((item = iterator.next()).done)) {
-            fn(item.value);
-        }
-    }
-}
-/**
- * @param {?} o
- * @return {?}
- */
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-// TODO(misko): consider inlining
-/**
- * Updates binding and returns the value.
- * @param {?} lView
- * @param {?} bindingIndex
- * @param {?} value
- * @return {?}
- */
-function updateBinding(lView, bindingIndex, value) {
-    return lView[bindingIndex] = value;
-}
-/**
- * Gets the current binding value.
- * @param {?} lView
- * @param {?} bindingIndex
- * @return {?}
- */
-function getBinding(lView, bindingIndex) {
-    ngDevMode && assertDataInRange(lView, bindingIndex);
-    ngDevMode &&
-        assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
-    return lView[bindingIndex];
-}
-/**
- * Updates binding if changed, then returns whether it was updated.
- * @param {?} lView
- * @param {?} bindingIndex
- * @param {?} value
- * @return {?}
- */
-function bindingUpdated(lView, bindingIndex, value) {
-    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    ngDevMode &&
-        assertLessThan(bindingIndex, lView.length, `Slot should have been initialized to NO_CHANGE`);
-    /** @type {?} */
-    const oldValue = lView[bindingIndex];
-    if (isDifferent(oldValue, value)) {
-        if (ngDevMode && getCheckNoChangesMode()) {
-            // View engine didn't report undefined values as changed on the first checkNoChanges pass
-            // (before the change detection was run).
-            /** @type {?} */
-            const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
-            if (!devModeEqual(oldValueToCompare, value)) {
-                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
-            }
-        }
-        lView[bindingIndex] = value;
-        return true;
-    }
-    return false;
-}
-/**
- * Updates 2 bindings if changed, then returns whether either was updated.
- * @param {?} lView
- * @param {?} bindingIndex
- * @param {?} exp1
- * @param {?} exp2
- * @return {?}
- */
-function bindingUpdated2(lView, bindingIndex, exp1, exp2) {
-    /** @type {?} */
-    const different = bindingUpdated(lView, bindingIndex, exp1);
-    return bindingUpdated(lView, bindingIndex + 1, exp2) || different;
-}
-/**
- * Updates 3 bindings if changed, then returns whether any was updated.
- * @param {?} lView
- * @param {?} bindingIndex
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @return {?}
- */
-function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
-    /** @type {?} */
-    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
-    return bindingUpdated(lView, bindingIndex + 2, exp3) || different;
-}
-/**
- * Updates 4 bindings if changed, then returns whether any was updated.
- * @param {?} lView
- * @param {?} bindingIndex
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @param {?} exp4
- * @return {?}
- */
-function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
-    /** @type {?} */
-    const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
-    return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Update a property on a selected element.
- *
- * Operates on the element selected by index via the {\@link select} instruction.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled
- *
- * \@codeGenApi
- * @template T
- * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param {?} value New value to write.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @param {?=} nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- * @return {?} This function returns itself so that it may be chained
- * (e.g. `property('name', ctx.name)('title', ctx.title)`)
- *
- */
-function ɵɵproperty(propName, value, sanitizer, nativeOnly) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
-    /** @type {?} */
-    const bindReconciledValue = ɵɵbind(value);
-    if (bindReconciledValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
-    }
-    return ɵɵproperty;
-}
-/**
- * Creates a single value binding.
- *
- * \@codeGenApi
- * @template T
- * @param {?} value Value to diff
- *
- * @return {?}
- */
-function ɵɵbind(value) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
-    storeBindingMetadata(lView);
-    return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
-}
-/**
- * Updates a synthetic host binding (e.g. `[\@foo]`) on a component.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host binding (e.g. `\@HostBinding('\@foo')`) properly gets rendered in
- * the component's renderer. Normally all host bindings are evaluated with the parent
- * component's renderer, but, in the case of animation \@triggers, they need to be
- * evaluated with the sub component's renderer (because that's where the animation
- * triggers are defined).
- *
- * Do not use this instruction as a replacement for `elementProperty`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * \@codeGenApi
- * @template T
- * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param {?} value New value to write.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @param {?=} nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
- *
- * @return {?}
- */
-function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer, nativeOnly) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(benlesh): remove bind call here.
-    /** @type {?} */
-    const bound = ɵɵbind(value);
-    if (bound !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, bound, sanitizer, nativeOnly, loadComponentRenderer);
-    }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Updates the value of or removes a bound attribute on an Element.
- *
- * Used in the case of `[attr.title]="value"`
- *
- * \@codeGenApi
- * @param {?} name name The name of the attribute.
- * @param {?} value value The attribute is removed when value is `null` or `undefined`.
- *                  Otherwise the attribute value is set to the stringified value.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @param {?=} namespace Optional namespace to use when setting the attribute.
- *
- * @return {?}
- */
-function ɵɵattribute(name, value, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    return ɵɵelementAttribute(index, name, ɵɵbind(value), sanitizer, namespace);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Create interpolation bindings with a variable number of expressions.
- *
- * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
- * Those are faster because there is no need to create an array of expressions and iterate over it.
- *
- * `values`:
- * - has static text at even indexes,
- * - has evaluated expressions at odd indexes.
- *
- * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- *
- * \@codeGenApi
- * @param {?} values
- * @return {?}
- */
-function ɵɵinterpolationV(values) {
-    ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
-    ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
-    /** @type {?} */
-    let isBindingUpdated = false;
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tData = lView[TVIEW].data;
-    /** @type {?} */
-    let bindingIndex = lView[BINDING_INDEX];
-    if (tData[bindingIndex] == null) {
-        // 2 is the index of the first static interstitial value (ie. not prefix)
-        for (let i = 2; i < values.length; i += 2) {
-            tData[bindingIndex++] = values[i];
-        }
-        bindingIndex = lView[BINDING_INDEX];
-    }
-    for (let i = 1; i < values.length; i += 2) {
-        // Check if bindings (odd indexes) have changed
-        isBindingUpdated = bindingUpdated(lView, bindingIndex++, values[i]) || isBindingUpdated;
-    }
-    lView[BINDING_INDEX] = bindingIndex;
-    storeBindingMetadata(lView, values[0], values[values.length - 1]);
-    if (!isBindingUpdated) {
-        return NO_CHANGE;
-    }
-    // Build the updated content
-    /** @type {?} */
-    let content = values[0];
-    for (let i = 1; i < values.length; i += 2) {
-        content += renderStringify(values[i]) + values[i + 1];
-    }
-    return content;
-}
-/**
- * Creates an interpolation binding with 1 expression.
- *
- * \@codeGenApi
- * @param {?} prefix static value used for concatenation only.
- * @param {?} v0 value checked for change.
- * @param {?} suffix static value used for concatenation only.
- *
- * @return {?}
- */
-function ɵɵinterpolation1(prefix, v0, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
-    storeBindingMetadata(lView, prefix, suffix);
-    return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 2 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    const different = bindingUpdated2(lView, bindingIndex, v0, v1);
-    lView[BINDING_INDEX] += 2;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        lView[TVIEW].data[bindingIndex] = i0;
-    }
-    return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 3 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} i1
- * @param {?} v2
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    const different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
-    lView[BINDING_INDEX] += 3;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-    }
-    return different ?
-        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix :
-        NO_CHANGE;
-}
-/**
- * Create an interpolation binding with 4 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} i1
- * @param {?} v2
- * @param {?} i2
- * @param {?} v3
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    const different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    lView[BINDING_INDEX] += 4;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-    }
-    return different ?
-        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
-            renderStringify(v3) + suffix :
-        NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 5 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} i1
- * @param {?} v2
- * @param {?} i2
- * @param {?} v3
- * @param {?} i3
- * @param {?} v4
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
-    lView[BINDING_INDEX] += 5;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-    }
-    return different ?
-        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
-            renderStringify(v3) + i3 + renderStringify(v4) + suffix :
-        NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 6 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} i1
- * @param {?} v2
- * @param {?} i2
- * @param {?} v3
- * @param {?} i3
- * @param {?} v4
- * @param {?} i4
- * @param {?} v5
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
-    lView[BINDING_INDEX] += 6;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-        tData[bindingIndex + 4] = i4;
-    }
-    return different ?
-        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
-            renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + suffix :
-        NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 7 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} i1
- * @param {?} v2
- * @param {?} i2
- * @param {?} v3
- * @param {?} i3
- * @param {?} v4
- * @param {?} i4
- * @param {?} v5
- * @param {?} i5
- * @param {?} v6
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
-    lView[BINDING_INDEX] += 7;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-        tData[bindingIndex + 4] = i4;
-        tData[bindingIndex + 5] = i5;
-    }
-    return different ?
-        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
-            renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
-            renderStringify(v6) + suffix :
-        NO_CHANGE;
-}
-/**
- * Creates an interpolation binding with 8 expressions.
- *
- * \@codeGenApi
- * @param {?} prefix
- * @param {?} v0
- * @param {?} i0
- * @param {?} v1
- * @param {?} i1
- * @param {?} v2
- * @param {?} i2
- * @param {?} v3
- * @param {?} i3
- * @param {?} v4
- * @param {?} i4
- * @param {?} v5
- * @param {?} i5
- * @param {?} v6
- * @param {?} i6
- * @param {?} v7
- * @param {?} suffix
- * @return {?}
- */
-function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
-    /** @type {?} */
-    let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
-    lView[BINDING_INDEX] += 8;
-    // Only set static strings the first time (data will be null subsequent runs).
-    /** @type {?} */
-    const data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-        tData[bindingIndex + 4] = i4;
-        tData[bindingIndex + 5] = i5;
-        tData[bindingIndex + 6] = i6;
-    }
-    return different ?
-        prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
-            renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
-            renderStringify(v6) + i6 + renderStringify(v7) + suffix :
-        NO_CHANGE;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- *
- * Update an interpolated attribute on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate1('title', 'prefix', v0, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate1;
-}
-/**
- *
- * Update an interpolated attribute on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate2;
-}
-/**
- *
- * Update an interpolated attribute on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate3(
- * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate3;
-}
-/**
- *
- * Update an interpolated attribute on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate4(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate4;
-}
-/**
- *
- * Update an interpolated attribute on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate5(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate5;
-}
-/**
- *
- * Update an interpolated attribute on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate6(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} i4 Static value used for concatenation only.
- * @param {?} v5 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate6;
-}
-/**
- *
- * Update an interpolated attribute on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate7(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} i4 Static value used for concatenation only.
- * @param {?} v5 Value checked for change.
- * @param {?} i5 Static value used for concatenation only.
- * @param {?} v6 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate7;
-}
-/**
- *
- * Update an interpolated attribute on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div attr.title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolate8(
- *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update
- * @param {?} prefix Static value used for concatenation only.
- * @param {?} v0 Value checked for change.
- * @param {?} i0 Static value used for concatenation only.
- * @param {?} v1 Value checked for change.
- * @param {?} i1 Static value used for concatenation only.
- * @param {?} v2 Value checked for change.
- * @param {?} i2 Static value used for concatenation only.
- * @param {?} v3 Value checked for change.
- * @param {?} i3 Static value used for concatenation only.
- * @param {?} v4 Value checked for change.
- * @param {?} i4 Static value used for concatenation only.
- * @param {?} v5 Value checked for change.
- * @param {?} i5 Static value used for concatenation only.
- * @param {?} v6 Value checked for change.
- * @param {?} i6 Static value used for concatenation only.
- * @param {?} v7 Value checked for change.
- * @param {?} suffix Static value used for concatenation only.
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    ɵɵelementAttribute(index, attrName, interpolatedValue, sanitizer, namespace);
-    return ɵɵattributeInterpolate8;
-}
-/**
- * Update an interpolated attribute on an element with 8 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 7.
- *
- * ```html
- * <div
- *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵattributeInterpolateV(
- *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *
- * \@codeGenApi
- * @param {?} attrName The name of the attribute to update.
- * @param {?} values The a collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param {?=} sanitizer An optional sanitizer function
- * @param {?=} namespace
- * @return {?} itself, so that it may be chained.
- */
-function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
-    /** @type {?} */
-    const index = getSelectedIndex();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    ɵɵelementAttribute(index, attrName, ɵɵinterpolationV(values), sanitizer, namespace);
-    return ɵɵattributeInterpolateV;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {\@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
- *
- * @template T
- * @param {?} component The component which the change detection should be performed on.
- * @return {?}
- */
-function detectChanges(component) {
-    /** @type {?} */
-    const view = getComponentViewByInstance(component);
-    detectChangesInternal(view, component);
-}
-/**
- * Mark the component as dirty (needing change detection).
- *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent`, a scheduler
- * can be provided.
- *
- * \@publicApi
- * @template T
- * @param {?} component Component to mark as dirty.
- *
- * @return {?}
- */
-function markDirty(component) {
-    ngDevMode && assertDefined(component, 'component');
-    /** @type {?} */
-    const rootView = (/** @type {?} */ (markViewDirty(getComponentViewByInstance(component))));
-    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
-    scheduleTick((/** @type {?} */ (rootView[CONTEXT])), 1 /* DetectChanges */);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Creates an LContainer for inline views, e.g.
- *
- * % if (showing) {
- *   <div></div>
- * % }
- *
- * \@codeGenApi
- * @param {?} index The index of the container in the data array
- *
- * @return {?}
- */
-function ɵɵcontainer(index) {
-    /** @type {?} */
-    const tNode = containerInternal(index, null, null);
-    /** @type {?} */
-    const lView = getLView();
-    if (lView[TVIEW].firstTemplatePass) {
-        tNode.tViews = [];
-    }
-    addTContainerToQueries(lView, tNode);
-    setIsNotParent();
-}
-/**
- * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
- *
- * <ng-template #foo>
- *    <div></div>
- * </ng-template>
- *
- * \@codeGenApi
- * @param {?} index The index of the container in the data array
- * @param {?} templateFn Inline template
- * @param {?} consts The number of nodes, local refs, and pipes for this template
- * @param {?} vars The number of bindings for this template
- * @param {?=} tagName The name of the container element, if applicable
- * @param {?=} attrs The attrs attached to the container, if applicable
- * @param {?=} localRefs A set of local reference bindings on the element.
- * @param {?=} localRefExtractor A function which extracts local-refs values from the template.
- *        Defaults to the current element associated with the local-ref.
- *
- * @return {?}
- */
-function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    // TODO: consider a separate node type for templates
-    /** @type {?} */
-    const tContainerNode = containerInternal(index, tagName || null, attrs || null);
-    if (tView.firstTemplatePass) {
-        tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
-    }
-    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
-    addTContainerToQueries(lView, tContainerNode);
-    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
-    registerPostOrderHooks(tView, tContainerNode);
-    setIsNotParent();
-}
-/**
- * Sets a container up to receive views.
- *
- * \@codeGenApi
- * @param {?} index The index of the container in the data array
- *
- * @return {?}
- */
-function ɵɵcontainerRefreshStart(index) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    /** @type {?} */
-    let previousOrParentTNode = (/** @type {?} */ (loadInternal(tView.data, index)));
-    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-    setPreviousOrParentTNode(previousOrParentTNode, true);
-    lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
-    // We need to execute init hooks here so ngOnInit hooks are called in top level views
-    // before they are called in embedded views (for backwards compatibility).
-    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
-}
-/**
- * Marks the end of the LContainer.
- *
- * Marking the end of LContainer is the time when to child views get inserted or removed.
- *
- * \@codeGenApi
- * @return {?}
- */
-function ɵɵcontainerRefreshEnd() {
-    /** @type {?} */
-    let previousOrParentTNode = getPreviousOrParentTNode();
-    if (getIsParent()) {
-        setIsNotParent();
-    }
-    else {
-        ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
-        ngDevMode && assertHasParent(previousOrParentTNode);
-        previousOrParentTNode = (/** @type {?} */ (previousOrParentTNode.parent));
-        setPreviousOrParentTNode(previousOrParentTNode, false);
-    }
-    ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-    /** @type {?} */
-    const lContainer = getLView()[previousOrParentTNode.index];
-    /** @type {?} */
-    const nextIndex = lContainer[ACTIVE_INDEX];
-    // remove extra views at the end of the container
-    while (nextIndex < lContainer.length - CONTAINER_HEADER_OFFSET) {
-        removeView(lContainer, nextIndex);
-    }
-}
-/**
- * Reporting a TContainer node queries is a 2-step process as we need to:
- * - check if the container node itself is matching (query might match a <ng-template> node);
- * - prepare room for nodes from views that might be created based on the TemplateRef linked to this
- * container.
- *
- * Those 2 operations need to happen in the specific order (match the container node itself, then
- * prepare space for nodes from views).
- * @param {?} lView
- * @param {?} tContainerNode
- * @return {?}
- */
-function addTContainerToQueries(lView, tContainerNode) {
-    /** @type {?} */
-    const queries = lView[QUERIES];
-    if (queries) {
-        /** @type {?} */
-        const lContainer = lView[tContainerNode.index];
-        if (lContainer[QUERIES]) {
-            // Query container should only exist if it was created through a dynamic view
-            // in a directive constructor. In this case, we must splice the template
-            // matches in before the view matches to ensure query results in embedded views
-            // don't clobber query results on the template node itself.
-            queries.insertNodeBeforeViews(tContainerNode);
-        }
-        else {
-            queries.addNode(tContainerNode);
-            lContainer[QUERIES] = queries.container();
-        }
-    }
-}
-/**
- * @param {?} index
- * @param {?} tagName
- * @param {?} attrs
- * @return {?}
- */
-function containerInternal(index, tagName, attrs) {
-    /** @type {?} */
-    const lView = getLView();
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
-    /** @type {?} */
-    const adjustedIndex = index + HEADER_OFFSET;
-    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    /** @type {?} */
-    const comment = lView[index + HEADER_OFFSET] =
-        lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-    /** @type {?} */
-    const tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 0 /* Container */, tagName, attrs);
-    /** @type {?} */
-    const lContainer = lView[adjustedIndex] =
-        createLContainer(lView[adjustedIndex], lView, comment, tNode);
-    appendChild(comment, tNode, lView);
-    // Containers are added to the current view tree instead of their embedded views
-    // because views can be removed and re-inserted.
-    addToViewTree(lView, lContainer);
-    ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
-    return tNode;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Store a value in the `data` at a given `index`.
- * @template T
- * @param {?} index
- * @param {?} value
- * @return {?}
- */
-function store(index, value) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tView = lView[TVIEW];
-    // We don't store any static data for local variables, so the first time
-    // we see the template, we should store as null to avoid a sparse array
-    /** @type {?} */
-    const adjustedIndex = index + HEADER_OFFSET;
-    if (adjustedIndex >= tView.data.length) {
-        tView.data[adjustedIndex] = null;
-        tView.blueprint[adjustedIndex] = null;
-    }
-    lView[adjustedIndex] = value;
-}
-/**
- * Retrieves a local reference from the current contextViewData.
- *
- * If the reference to retrieve is in a parent view, this instruction is used in conjunction
- * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
- *
- * \@codeGenApi
- * @template T
- * @param {?} index The index of the local ref in contextViewData.
- *
- * @return {?}
- */
-function ɵɵreference(index) {
-    /** @type {?} */
-    const contextLView = getContextLView();
-    return loadInternal(contextLView, index);
-}
-/**
- * Retrieves a value from current `viewData`.
- *
- * \@codeGenApi
- * @template T
- * @param {?} index
- * @return {?}
- */
-function ɵɵload(index) {
-    return loadInternal(getLView(), index);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @template T
- * @param {?} token
- * @param {?=} flags
- * @return {?}
- */
-function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
-    token = resolveForwardRef(token);
-    /** @type {?} */
-    const lView = getLView();
-    // Fall back to inject() if view hasn't been created. This situation can happen in tests
-    // if inject utilities are used before bootstrapping.
-    if (lView == null)
-        return ɵɵinject(token, flags);
-    return getOrCreateInjectable((/** @type {?} */ (getPreviousOrParentTNode())), lView, token, flags);
-}
-/**
- * Facade for the attribute injection from DI.
- *
- * \@codeGenApi
- * @param {?} attrNameToInject
- * @return {?}
- */
-function ɵɵinjectAttribute(attrNameToInject) {
-    return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
 }
 
 /**
@@ -23572,7 +23598,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.1+4.sha-05a43ca.with-local-changes');
+const VERSION = new Version('8.1.0-next.1+6.sha-3859bcc.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29281,11 +29307,9 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const attrName = (/** @type {?} */ (createOpCodes[++i]));
                     /** @type {?} */
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
-                    /** @type {?} */
-                    const renderer = viewData[RENDERER];
                     // This code is used for ICU expressions only, since we don't support
                     // directives/components in ICUs, we don't need to worry about inputs here
-                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, viewData, renderer);
+                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, viewData);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -29464,6 +29488,8 @@ function removeNode(index, viewData) {
             nativeRemoveNode(viewData[RENDERER], lContainer[NATIVE]);
         }
     }
+    // Define this node as detached so that we don't risk projecting it
+    removedPhTNode.flags |= 32 /* isDetached */;
     ngDevMode && ngDevMode.rendererRemoveNode++;
 }
 /**
@@ -29553,9 +29579,7 @@ function i18nAttributesFirstPass(tView, index, values) {
                 else {
                     /** @type {?} */
                     const lView = getLView();
-                    /** @type {?} */
-                    const renderer = lView[RENDERER];
-                    elementAttributeInternal(previousElementIndex, attrName, value, lView, renderer);
+                    elementAttributeInternal(previousElementIndex, attrName, value, lView);
                     // Check if that attribute is a directive input
                     /** @type {?} */
                     const tNode = getTNode(previousElementIndex, lView);
@@ -31699,7 +31723,6 @@ const ɵ0$9 = /**
     'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
     'ɵɵProvidersFeature': ɵɵProvidersFeature,
     'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
-    'ɵɵelementAttribute': ɵɵelementAttribute,
     'ɵɵbind': ɵɵbind,
     'ɵɵcontainer': ɵɵcontainer,
     'ɵɵnextContext': ɵɵnextContext,
@@ -39899,5 +39922,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementAttribute, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, NullInjector as ɵangular_packages_core_core_b, injectInjectorOnly as ɵangular_packages_core_core_a, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_bd, getPreviousOrParentTNode as ɵangular_packages_core_core_be, nextContextImpl as ɵangular_packages_core_core_bf, BoundPlayerFactory as ɵangular_packages_core_core_bj, getRootContext as ɵangular_packages_core_core_bp, loadInternal as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_g, createTemplateRef as ɵangular_packages_core_core_h, createViewRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bh, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bq, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵbind, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵstyleProp, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+4.sha-05a43ca.with-local-changes
+ * @license Angular v8.1.0-next.1+6.sha-3859bcc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7505,7 +7505,9 @@ declare const enum TNodeFlags {
     /** This bit is set if the node has any "class" inputs */
     hasClassInput = 8,
     /** This bit is set if the node has any "style" inputs */
-    hasStyleInput = 16
+    hasStyleInput = 16,
+    /** This bit is set if the node has been detached by i18n */
+    isDetached = 32
 }
 
 /**
@@ -12123,20 +12125,6 @@ export declare function ɵɵdisableBindings(): void;
  * @codeGenApi
  */
 export declare function ɵɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
-
-/**
- * Updates the value or removes an attribute on an Element.
- *
- * @param index The index of the element in the data array
- * @param name name The name of the attribute.
- * @param value value The attribute is removed when value is `null` or `undefined`.
- *                  Otherwise the attribute value is set to the stringified value.
- * @param sanitizer An optional function used to sanitize the value.
- * @param namespace Optional namespace to use when setting the attribute.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
 
 /**
  * Mark the end of the <ng-container>.
