@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+1.sha-17bfedd.with-local-changes
+ * @license Angular v8.1.0-next.1+5.sha-30efb6b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13095,14 +13095,16 @@ function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentVi
     }
     else {
         while (nodeToProject) {
-            if (nodeToProject.type === 1 /* Projection */) {
-                appendProjectedNodes(lView, tProjectionNode, nodeToProject.projection, findComponentView(projectedView));
-            }
-            else {
-                // This flag must be set now or we won't know that this node is projected
-                // if the nodes are inserted into a container later.
-                nodeToProject.flags |= 2 /* isProjected */;
-                appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+            if (!(nodeToProject.flags & 32 /* isDetached */)) {
+                if (nodeToProject.type === 1 /* Projection */) {
+                    appendProjectedNodes(lView, tProjectionNode, nodeToProject.projection, findComponentView(projectedView));
+                }
+                else {
+                    // This flag must be set now or we won't know that this node is projected
+                    // if the nodes are inserted into a container later.
+                    nodeToProject.flags |= 2 /* isProjected */;
+                    appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
+                }
             }
             nodeToProject = nodeToProject.projectionNext;
         }
@@ -18563,7 +18565,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.1+1.sha-17bfedd.with-local-changes');
+var VERSION = new Version('8.1.0-next.1+5.sha-30efb6b.with-local-changes');
 
 /**
  * @license
@@ -22779,6 +22781,8 @@ function removeNode(index, viewData) {
             nativeRemoveNode(viewData[RENDERER], lContainer[NATIVE]);
         }
     }
+    // Define this node as detached so that we don't risk projecting it
+    removedPhTNode.flags |= 32 /* isDetached */;
     ngDevMode && ngDevMode.rendererRemoveNode++;
 }
 /**
