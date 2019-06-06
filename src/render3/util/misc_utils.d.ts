@@ -23,7 +23,7 @@ export declare function renderStringify(value: any): string;
  * Important! This function contains a megamorphic read and should only be
  * used for error messages.
  */
-export declare function stringifyForError(value: any): string;
+export declare function stringifyForError(value: any): any;
 export declare const defaultScheduler: any;
 /**
  *
