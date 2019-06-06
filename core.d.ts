@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+5.sha-30efb6b.with-local-changes
+ * @license Angular v8.1.0-next.1+4.sha-05a43ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7505,9 +7505,7 @@ declare const enum TNodeFlags {
     /** This bit is set if the node has any "class" inputs */
     hasClassInput = 8,
     /** This bit is set if the node has any "style" inputs */
-    hasStyleInput = 16,
-    /** This bit is set if the node has been detached by i18n */
-    isDetached = 32
+    hasStyleInput = 16
 }
 
 /**
