@@ -1,7 +1,4 @@
 import { TAttributes } from '../interfaces/node';
-import { Renderer3 } from '../interfaces/renderer';
-import { SanitizerFn } from '../interfaces/sanitization';
-import { LView } from '../interfaces/view';
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -36,20 +33,6 @@ export declare function ɵɵelementEnd(): void;
  * @codeGenApi
  */
 export declare function ɵɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
-/**
- * Updates the value or removes an attribute on an Element.
- *
- * @param index The index of the element in the data array
- * @param name name The name of the attribute.
- * @param value value The attribute is removed when value is `null` or `undefined`.
- *                  Otherwise the attribute value is set to the stringified value.
- * @param sanitizer An optional function used to sanitize the value.
- * @param namespace Optional namespace to use when setting the attribute.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
-export declare function elementAttributeInternal(index: number, name: string, value: any, lView: LView, renderer: Renderer3, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Assign static attribute values to a host element.
  *

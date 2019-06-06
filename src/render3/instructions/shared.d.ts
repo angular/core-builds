@@ -191,6 +191,7 @@ export declare function queueComponentIndexForCheck(previousOrParentTNode: TNode
  * @param index the initial index
  */
 export declare function initNodeFlags(tNode: TNode, index: number, numberOfDirectives: number): void;
+export declare function elementAttributeInternal(index: number, name: string, value: any, lView: LView, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
