@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+11.sha-383ab85.with-local-changes
+ * @license Angular v8.1.0-next.1+8.sha-b4b7af8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3771,6 +3771,8 @@ function isDifferent(a, b) {
  * be extra careful not to introduce megamorphic reads in it.
  */
 function renderStringify(value) {
+    if (typeof value === 'function')
+        return value.name || value;
     if (typeof value === 'string')
         return value;
     if (value == null)
@@ -3783,10 +3785,8 @@ function renderStringify(value) {
  * used for error messages.
  */
 function stringifyForError(value) {
-    if (typeof value === 'function')
-        return value.name || value.toString();
     if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-        return value.type.name || value.type.toString();
+        return value.type.name || value.type;
     }
     return renderStringify(value);
 }
@@ -18896,7 +18896,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.1+11.sha-383ab85.with-local-changes');
+var VERSION = new Version('8.1.0-next.1+8.sha-b4b7af8.with-local-changes');
 
 /**
  * @license
@@ -28088,40 +28088,10 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
         get: function () {
             var attributes = {};
             var element = this.nativeElement;
-            if (!element) {
-                return attributes;
-            }
-            var context = loadLContext(element);
-            var lView = context.lView;
-            var tNodeAttrs = lView[TVIEW].data[context.nodeIndex].attrs;
-            var lowercaseTNodeAttrs = [];
-            // For debug nodes we take the element's attribute directly from the DOM since it allows us
-            // to account for ones that weren't set via bindings (e.g. ViewEngine keeps track of the ones
-            // that are set through `Renderer2`). The problem is that the browser will lowercase all names,
-            // however since we have the attributes already on the TNode, we can preserve the case by going
-            // through them once, adding them to the `attributes` map and putting their lower-cased name
-            // into an array. Afterwards when we're going through the native DOM attributes, we can check
-            // whether we haven't run into an attribute already through the TNode.
-            if (tNodeAttrs) {
-                var i = 0;
-                while (i < tNodeAttrs.length) {
-                    var attrName = tNodeAttrs[i];
-                    // Stop as soon as we hit a marker. We only care about the regular attributes. Everything
-                    // else will be handled below when we read the final attributes off the DOM.
-                    if (typeof attrName !== 'string')
-                        break;
-                    var attrValue = tNodeAttrs[i + 1];
-                    attributes[attrName] = attrValue;
-                    lowercaseTNodeAttrs.push(attrName.toLowerCase());
-                    i += 2;
-                }
-            }
-            var eAttrs = element.attributes;
-            for (var i = 0; i < eAttrs.length; i++) {
-                var attr = eAttrs[i];
-                // Make sure that we don't assign the same attribute both in its
-                // case-sensitive form and the lower-cased one from the browser.
-                if (lowercaseTNodeAttrs.indexOf(attr.name) === -1) {
+            if (element) {
+                var eAttrs = element.attributes;
+                for (var i = 0; i < eAttrs.length; i++) {
+                    var attr = eAttrs[i];
                     attributes[attr.name] = attr.value;
                 }
             }
