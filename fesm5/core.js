@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+9.sha-04587a3.with-local-changes
+ * @license Angular v8.1.0-next.1+12.sha-8b6fbf8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3467,8 +3467,6 @@ function isDifferent(a, b) {
  * be extra careful not to introduce megamorphic reads in it.
  */
 function renderStringify(value) {
-    if (typeof value === 'function')
-        return value.name || value;
     if (typeof value === 'string')
         return value;
     if (value == null)
@@ -3481,8 +3479,10 @@ function renderStringify(value) {
  * used for error messages.
  */
 function stringifyForError(value) {
+    if (typeof value === 'function')
+        return value.name || value.toString();
     if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-        return value.type.name || value.type;
+        return value.type.name || value.type.toString();
     }
     return renderStringify(value);
 }
@@ -18580,7 +18580,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.1+9.sha-04587a3.with-local-changes');
+var VERSION = new Version('8.1.0-next.1+12.sha-8b6fbf8.with-local-changes');
 
 /**
  * @license
