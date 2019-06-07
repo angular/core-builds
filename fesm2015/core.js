@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+18.sha-c038675.with-local-changes
+ * @license Angular v8.1.0-next.1+14.sha-297222f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13569,55 +13569,6 @@ class I18nUpdateOpCodesDebug {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Selects an element for later binding instructions.
- *
- * Used in conjunction with instructions like {\@link property} to act on elements with specified
- * indices, for example those created with {\@link element} or {\@link elementStart}.
- *
- * ```ts
- * (rf: RenderFlags, ctx: any) => {
- *   if (rf & 1) {
- *     element(0, 'div');
- *   }
- *   if (rf & 2) {
- *     select(0); // Select the <div/> created above.
- *     property('title', 'test');
- *   }
- *  }
- * ```
- * \@codeGenApi
- * @param {?} index the index of the item to act on with the following instructions
- *
- * @return {?}
- */
-function ɵɵselect(index) {
-    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
-    ngDevMode &&
-        assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
-    /** @type {?} */
-    const lView = getLView();
-    selectInternal(lView, index);
-}
-/**
- * @param {?} lView
- * @param {?} index
- * @return {?}
- */
-function selectInternal(lView, index) {
-    // Flush the initial hooks for elements in the view that have been added up to this point.
-    executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
-    // We must set the selected index *after* running the hooks, because hooks may have side-effects
-    // that cause other template functions to run, thus updating the selected index, which is global
-    // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
-    // will be altered by the time we leave the `ɵɵselect` instruction.
-    setSelectedIndex(index);
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
  * @type {?}
@@ -13994,7 +13945,7 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
             setPreviousOrParentTNode((/** @type {?} */ (null)), true);
             oldView = enterView(viewToRender, viewToRender[T_HOST]);
             resetPreOrderHookFlags(viewToRender);
-            executeTemplate(viewToRender, (/** @type {?} */ (tView.template)), getRenderFlags(viewToRender), context);
+            executeTemplate((/** @type {?} */ (tView.template)), getRenderFlags(viewToRender), context);
             // This must be set to false immediately after the first creation run because in an
             // ngFor loop, all the views will be created together before update mode runs and turns
             // off firstTemplatePass. If we don't set it here, instances will perform directive
@@ -14030,13 +13981,13 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
         }
         if (creationModeIsActive) {
             // creation mode pass
-            templateFn && executeTemplate(hostView, templateFn, 1 /* Create */, context);
+            templateFn && executeTemplate(templateFn, 1 /* Create */, context);
             refreshDescendantViews(hostView);
             hostView[FLAGS] &= ~4 /* CreationMode */;
         }
         // update mode pass
         resetPreOrderHookFlags(hostView);
-        templateFn && executeTemplate(hostView, templateFn, 2 /* Update */, context);
+        templateFn && executeTemplate(templateFn, 2 /* Update */, context);
         refreshDescendantViews(hostView);
     }
     finally {
@@ -14048,23 +13999,17 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
 }
 /**
  * @template T
- * @param {?} lView
  * @param {?} templateFn
  * @param {?} rf
  * @param {?} context
  * @return {?}
  */
-function executeTemplate(lView, templateFn, rf, context) {
+function executeTemplate(templateFn, rf, context) {
     ɵɵnamespaceHTML();
     /** @type {?} */
     const prevSelectedIndex = getSelectedIndex();
     try {
         setActiveHostElement(null);
-        if (rf & 2 /* Update */) {
-            // When we're updating, have an inherent ɵɵselect(0) so we don't have to generate that
-            // instruction for most update blocks
-            selectInternal(lView, 0);
-        }
         templateFn(rf, context);
     }
     finally {
@@ -15485,7 +15430,7 @@ function checkView(hostView, component) {
     try {
         resetPreOrderHookFlags(hostView);
         creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
-        executeTemplate(hostView, templateFn, getRenderFlags(hostView), component);
+        executeTemplate(templateFn, getRenderFlags(hostView), component);
         refreshDescendantViews(hostView);
         // Only check view queries again in creation mode if there are static view queries
         if (!creationMode || hostTView.staticViewQueries) {
@@ -20295,6 +20240,47 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Selects an element for later binding instructions.
+ *
+ * Used in conjunction with instructions like {\@link property} to act on elements with specified
+ * indices, for example those created with {\@link element} or {\@link elementStart}.
+ *
+ * ```ts
+ * (rf: RenderFlags, ctx: any) => {
+ *   if (rf & 1) {
+ *     element(0, 'div');
+ *   }
+ *   if (rf & 2) {
+ *     select(0); // Select the <div/> created above.
+ *     property('title', 'test');
+ *   }
+ *  }
+ * ```
+ * \@codeGenApi
+ * @param {?} index the index of the item to act on with the following instructions
+ *
+ * @return {?}
+ */
+function ɵɵselect(index) {
+    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
+    ngDevMode &&
+        assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
+    /** @type {?} */
+    const lView = getLView();
+    // Flush the initial hooks for elements in the view that have been added up to this point.
+    executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
+    // We must set the selected index *after* running the hooks, because hooks may have side-effects
+    // that cause other template functions to run, thus updating the selected index, which is global
+    // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
+    // will be altered by the time we leave the `ɵɵselect` instruction.
+    setSelectedIndex(index);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * Create static text node
  *
  * \@codeGenApi
@@ -23174,7 +23160,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.1+18.sha-c038675.with-local-changes');
+const VERSION = new Version('8.1.0-next.1+14.sha-297222f.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
