@@ -1,3 +1,4 @@
+import { LView } from '../interfaces/view';
 /**
  * Selects an element for later binding instructions.
  *
@@ -20,3 +21,4 @@
  * @codeGenApi
  */
 export declare function ɵɵselect(index: number): void;
+export declare function selectInternal(lView: LView, index: number): void;
