@@ -36,7 +36,7 @@ export declare type FactoryFn<T> = {
     /**
      * If no constructor to instantiate is provided, an instance of type T itself is created.
      */
-    (t: null): T;
+    (t?: undefined): T;
 };
 /**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
