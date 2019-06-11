@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+43.sha-b086676.with-local-changes
+ * @license Angular v8.1.0-next.1+47.sha-7912db3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -362,7 +362,8 @@
      */
     function ɵɵdefineInjectable(opts) {
         return {
-            providedIn: opts.providedIn || null, factory: opts.factory, value: undefined,
+            token: opts.token, providedIn: opts.providedIn || null, factory: opts.factory,
+            value: undefined,
         };
     }
     /**
@@ -403,7 +404,15 @@
      * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
      */
     function getInjectableDef(type) {
-        return type && type.hasOwnProperty(NG_INJECTABLE_DEF) ? type[NG_INJECTABLE_DEF] : null;
+        var def = type[NG_INJECTABLE_DEF];
+        // The definition read above may come from a base class. `hasOwnProperty` is not sufficient to
+        // distinguish this case, as in older browsers (e.g. IE10) static property inheritance is
+        // implemented by copying the properties.
+        //
+        // Instead, the ngInjectableDef's token is compared to the type, and if they don't match then the
+        // property was not defined directly on the type itself, and was likely inherited. The definition
+        // is only returned if the type matches the def.token.
+        return def && def.token === type ? def : null;
     }
     /**
      * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
@@ -625,6 +634,7 @@
             }
             else if (options !== undefined) {
                 this.ngInjectableDef = ɵɵdefineInjectable({
+                    token: this,
                     providedIn: options.providedIn || 'root',
                     factory: options.factory,
                 });
@@ -1363,6 +1373,7 @@
     function render2CompileInjectable(injectableType, options) {
         if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
             injectableType.ngInjectableDef = ɵɵdefineInjectable({
+                token: injectableType,
                 providedIn: options.providedIn,
                 factory: convertInjectableProviderToFactory(injectableType, options),
             });
@@ -1835,7 +1846,7 @@
         // just instantiates the zero-arg constructor.
         var inheritedInjectableDef = getInheritedInjectableDef(token);
         if (inheritedInjectableDef !== null) {
-            return inheritedInjectableDef.factory;
+            return function () { return inheritedInjectableDef.factory(token); };
         }
         else {
             return function () { return new token(); };
@@ -1977,6 +1988,7 @@
         Injector.NULL = new NullInjector();
         /** @nocollapse */
         Injector.ngInjectableDef = ɵɵdefineInjectable({
+            token: Injector,
             providedIn: 'any',
             factory: function () { return ɵɵinject(INJECTOR); },
         });
@@ -3576,7 +3588,7 @@
             // be retrieved through the node injector, so this isn't a problem.
             if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
                 type[NG_INJECTABLE_DEF] =
-                    ɵɵdefineInjectable({ factory: componentDefinition.factory });
+                    ɵɵdefineInjectable({ token: type, factory: componentDefinition.factory });
             }
         });
         return def;
@@ -18952,7 +18964,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.1+43.sha-b086676.with-local-changes');
+    var VERSION = new Version('8.1.0-next.1+47.sha-7912db3.with-local-changes');
 
     /**
      * @license
@@ -19954,6 +19966,7 @@
         };
         /** @nocollapse */
         IterableDiffers.ngInjectableDef = ɵɵdefineInjectable({
+            token: IterableDiffers,
             providedIn: 'root',
             factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
         });
@@ -20030,6 +20043,7 @@
         };
         /** @nocollapse */
         KeyValueDiffers.ngInjectableDef = ɵɵdefineInjectable({
+            token: KeyValueDiffers,
             providedIn: 'root',
             factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
         });
@@ -24088,7 +24102,7 @@
         else {
             pipeDef = tView.data[adjustedIndex];
         }
-        var pipeInstance = pipeDef.factory(null);
+        var pipeInstance = pipeDef.factory();
         store(index, pipeInstance);
         return pipeInstance;
     }
