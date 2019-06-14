@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+10.sha-0c3bb6a.with-local-changes
+ * @license Angular v8.1.0-next.2+11.sha-8f5c396.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23630,7 +23630,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.2+10.sha-0c3bb6a.with-local-changes');
+const VERSION = new Version('8.1.0-next.2+11.sha-8f5c396.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -28282,22 +28282,24 @@ class ComponentRef$1 extends ComponentRef {
      * @return {?}
      */
     destroy() {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        (/** @type {?} */ (this.destroyCbs)).forEach((/**
-         * @param {?} fn
-         * @return {?}
-         */
-        fn => fn()));
-        this.destroyCbs = null;
-        !this.hostView.destroyed && this.hostView.destroy();
+        if (this.destroyCbs) {
+            this.destroyCbs.forEach((/**
+             * @param {?} fn
+             * @return {?}
+             */
+            fn => fn()));
+            this.destroyCbs = null;
+            !this.hostView.destroyed && this.hostView.destroy();
+        }
     }
     /**
      * @param {?} callback
      * @return {?}
      */
     onDestroy(callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        (/** @type {?} */ (this.destroyCbs)).push(callback);
+        if (this.destroyCbs) {
+            this.destroyCbs.push(callback);
+        }
     }
 }
 

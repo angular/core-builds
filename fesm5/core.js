@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+10.sha-0c3bb6a.with-local-changes
+ * @license Angular v8.1.0-next.2+11.sha-8f5c396.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18919,7 +18919,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.2+10.sha-0c3bb6a.with-local-changes');
+var VERSION = new Version('8.1.0-next.2+11.sha-8f5c396.with-local-changes');
 
 /**
  * @license
@@ -22177,14 +22177,16 @@ var ComponentRef$1 = /** @class */ (function (_super) {
         configurable: true
     });
     ComponentRef.prototype.destroy = function () {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.forEach(function (fn) { return fn(); });
-        this.destroyCbs = null;
-        !this.hostView.destroyed && this.hostView.destroy();
+        if (this.destroyCbs) {
+            this.destroyCbs.forEach(function (fn) { return fn(); });
+            this.destroyCbs = null;
+            !this.hostView.destroyed && this.hostView.destroy();
+        }
     };
     ComponentRef.prototype.onDestroy = function (callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.push(callback);
+        if (this.destroyCbs) {
+            this.destroyCbs.push(callback);
+        }
     };
     return ComponentRef;
 }(ComponentRef));
