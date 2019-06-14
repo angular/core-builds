@@ -310,3 +310,7 @@ export declare function handleError(lView: LView, error: any): void;
  * @param value Value to set.
  */
 export declare function setInputsForProperty(lView: LView, inputs: PropertyAliasValue, value: any): void;
+/**
+ * Updates a text binding at a given index in a given LView.
+ */
+export declare function textBindingInternal(lView: LView, index: number, value: string): void;
