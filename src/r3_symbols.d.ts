@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+18.sha-c038675.with-local-changes
+ * @license Angular v8.1.0-next.2+14.sha-4ad323a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -886,6 +886,7 @@ declare abstract class ViewRef extends ChangeDetectorRef {
  * @codeGenApi
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
+    token: unknown;
     providedIn?: Type<any> | 'root' | 'any' | null;
     factory: () => T;
 }): never;
@@ -979,9 +980,15 @@ export declare interface ɵɵInjectableDef<T> {
      */
     providedIn: InjectorType<any> | 'root' | 'any' | null;
     /**
+     * The token to which this definition belongs.
+     *
+     * Note that this may not be the same as the type that the `factory` will create.
+     */
+    token: unknown;
+    /**
      * Factory method to execute to create an instance of the injectable.
      */
-    factory: () => T;
+    factory: (t?: Type<any>) => T;
     /**
      * In a case of no explicit injector, a location where the instance of the injectable is stored.
      */

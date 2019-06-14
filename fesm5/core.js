@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.1+18.sha-c038675.with-local-changes
+ * @license Angular v8.1.0-next.2+14.sha-4ad323a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -277,7 +277,8 @@ function fillProperties(target, source) {
  */
 function ɵɵdefineInjectable(opts) {
     return {
-        providedIn: opts.providedIn || null, factory: opts.factory, value: undefined,
+        token: opts.token, providedIn: opts.providedIn || null, factory: opts.factory,
+        value: undefined,
     };
 }
 /**
@@ -318,7 +319,15 @@ function ɵɵdefineInjector(options) {
  * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
  */
 function getInjectableDef(type) {
-    return type && type.hasOwnProperty(NG_INJECTABLE_DEF) ? type[NG_INJECTABLE_DEF] : null;
+    var def = type[NG_INJECTABLE_DEF];
+    // The definition read above may come from a base class. `hasOwnProperty` is not sufficient to
+    // distinguish this case, as in older browsers (e.g. IE10) static property inheritance is
+    // implemented by copying the properties.
+    //
+    // Instead, the ngInjectableDef's token is compared to the type, and if they don't match then the
+    // property was not defined directly on the type itself, and was likely inherited. The definition
+    // is only returned if the type matches the def.token.
+    return def && def.token === type ? def : null;
 }
 /**
  * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
@@ -540,6 +549,7 @@ var InjectionToken = /** @class */ (function () {
         }
         else if (options !== undefined) {
             this.ngInjectableDef = ɵɵdefineInjectable({
+                token: this,
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,
             });
@@ -1278,6 +1288,7 @@ var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, ɵ
 function render2CompileInjectable(injectableType, options) {
     if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
         injectableType.ngInjectableDef = ɵɵdefineInjectable({
+            token: injectableType,
             providedIn: options.providedIn,
             factory: convertInjectableProviderToFactory(injectableType, options),
         });
@@ -1750,7 +1761,7 @@ function getUndecoratedInjectableFactory(token) {
     // just instantiates the zero-arg constructor.
     var inheritedInjectableDef = getInheritedInjectableDef(token);
     if (inheritedInjectableDef !== null) {
-        return inheritedInjectableDef.factory;
+        return function () { return inheritedInjectableDef.factory(token); };
     }
     else {
         return function () { return new token(); };
@@ -1892,6 +1903,7 @@ var Injector = /** @class */ (function () {
     Injector.NULL = new NullInjector();
     /** @nocollapse */
     Injector.ngInjectableDef = ɵɵdefineInjectable({
+        token: Injector,
         providedIn: 'any',
         factory: function () { return ɵɵinject(INJECTOR); },
     });
@@ -3516,7 +3528,7 @@ function ɵɵdefineComponent(componentDefinition) {
         // be retrieved through the node injector, so this isn't a problem.
         if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
             type[NG_INJECTABLE_DEF] =
-                ɵɵdefineInjectable({ factory: componentDefinition.factory });
+                ɵɵdefineInjectable({ token: type, factory: componentDefinition.factory });
         }
     });
     return def;
@@ -3931,7 +3943,8 @@ function assertDomNode(node) {
         (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, 'The provided value must be an instance of a DOM Node');
 }
 function assertDataInRange(arr, index) {
-    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
+    var maxLen = arr ? arr.length : 0;
+    assertLessThan(index, maxLen, "Index expected to be less than " + maxLen + " but got " + index);
 }
 
 /**
@@ -7162,7 +7175,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
     // This special case happens when there is a @host on the inject and when we are searching
     // on the host element node.
     var isHostSpecialCase = (flags & InjectFlags.Host) && hostTElementNode === tNode;
-    var injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase);
+    var injectableIdx = locateDirectiveOrProvider(tNode, currentTView, token, canAccessViewProviders, isHostSpecialCase);
     if (injectableIdx !== null) {
         return getNodeInjectable(currentTView.data, lView, injectableIdx, tNode);
     }
@@ -7174,14 +7187,13 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
  * Searches for the given token among the node's directives and providers.
  *
  * @param tNode TNode on which directives are present.
- * @param lView The view we are currently processing
+ * @param tView The tView we are currently processing
  * @param token Provider token or type of a directive to look for.
  * @param canAccessViewProviders Whether view providers should be considered.
  * @param isHostSpecialCase Whether the host special case applies.
  * @returns Index of a found directive or provider, or null when none found.
  */
-function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase) {
-    var tView = lView[TVIEW];
+function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, isHostSpecialCase) {
     var nodeProviderIndexes = tNode.providerIndexes;
     var tInjectables = tView.data;
     var injectablesStart = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
@@ -11295,7 +11307,9 @@ function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, 
     var tParentNode = parentInSameView ? parent : null;
     var tNode = tView.data[adjustedIndex] =
         createTNode(tParentNode, type, adjustedIndex, name, attrs);
-    if (index === 0) {
+    // The first node is not always the one at index 0, in case of i18n, index 0 can be the
+    // instruction `i18nStart` and the first node has the index 1 or more
+    if (index === 0 || !tView.firstChild) {
         tView.firstChild = tNode;
     }
     // Now link ourselves into the tree.
@@ -15426,7 +15440,7 @@ function ɵɵelementEnd() {
     if (currentQueries && previousOrParentTNode.index === currentQueries.nodeIndex) {
         lView[QUERIES] = currentQueries.parent;
     }
-    registerPostOrderHooks(getLView()[TVIEW], previousOrParentTNode);
+    registerPostOrderHooks(lView[TVIEW], previousOrParentTNode);
     decreaseElementDepthCount();
     // this is fired at the end of elementEnd because ALL of the stylingBindings code
     // (for directives and the template) have now executed which means the styling
@@ -18904,7 +18918,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.1+18.sha-c038675.with-local-changes');
+var VERSION = new Version('8.1.0-next.2+14.sha-4ad323a.with-local-changes');
 
 /**
  * @license
@@ -19906,6 +19920,7 @@ var IterableDiffers = /** @class */ (function () {
     };
     /** @nocollapse */
     IterableDiffers.ngInjectableDef = ɵɵdefineInjectable({
+        token: IterableDiffers,
         providedIn: 'root',
         factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
     });
@@ -19982,6 +19997,7 @@ var KeyValueDiffers = /** @class */ (function () {
     };
     /** @nocollapse */
     KeyValueDiffers.ngInjectableDef = ɵɵdefineInjectable({
+        token: KeyValueDiffers,
         providedIn: 'root',
         factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
     });
@@ -22160,14 +22176,16 @@ var ComponentRef$1 = /** @class */ (function (_super) {
         configurable: true
     });
     ComponentRef.prototype.destroy = function () {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.forEach(function (fn) { return fn(); });
-        this.destroyCbs = null;
-        !this.hostView.destroyed && this.hostView.destroy();
+        if (this.destroyCbs) {
+            this.destroyCbs.forEach(function (fn) { return fn(); });
+            this.destroyCbs = null;
+            !this.hostView.destroyed && this.hostView.destroy();
+        }
     };
     ComponentRef.prototype.onDestroy = function (callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.push(callback);
+        if (this.destroyCbs) {
+            this.destroyCbs.push(callback);
+        }
     };
     return ComponentRef;
 }(ComponentRef));
@@ -22759,10 +22777,9 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
     };
     tView.data[index + HEADER_OFFSET] = tI18n;
 }
-function appendI18nNode(tNode, parentTNode, previousTNode) {
+function appendI18nNode(tNode, parentTNode, previousTNode, viewData) {
     ngDevMode && ngDevMode.rendererMoveNode++;
     var nextNode = tNode.next;
-    var viewData = getLView();
     if (!previousTNode) {
         previousTNode = parentTNode;
     }
@@ -22981,7 +22998,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     }
                     ngDevMode &&
                         assertDefined(currentTNode, "You need to create or select a node before you can insert it into the DOM");
-                    previousTNode = appendI18nNode(currentTNode, destinationTNode, previousTNode);
+                    previousTNode = appendI18nNode(currentTNode, destinationTNode, previousTNode, viewData);
                     break;
                 case 0 /* Select */:
                     var nodeIndex = opCode >>> 3 /* SHIFT_REF */;
@@ -24045,7 +24062,7 @@ function ɵɵpipe(index, pipeName) {
     else {
         pipeDef = tView.data[adjustedIndex];
     }
-    var pipeInstance = pipeDef.factory(null);
+    var pipeInstance = pipeDef.factory();
     store(index, pipeInstance);
     return pipeInstance;
 }
@@ -24616,9 +24633,10 @@ function queryByReadToken(read, tNode, currentView) {
         return factoryFn();
     }
     else {
-        var matchingIdx = locateDirectiveOrProvider(tNode, currentView, read, false, false);
+        var tView = currentView[TVIEW];
+        var matchingIdx = locateDirectiveOrProvider(tNode, tView, read, false, false);
         if (matchingIdx !== null) {
-            return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, tNode);
+            return getNodeInjectable(tView.data, currentView, matchingIdx, tNode);
         }
     }
     return null;
@@ -24660,19 +24678,20 @@ function queryRead(tNode, currentView, read, matchingIdx) {
  * out of order (e.g. a view was created in a constructor)
  */
 function add(query, tNode, insertBeforeContainer) {
-    var currentView = getLView();
+    var lView = getLView();
+    var tView = lView[TVIEW];
     while (query) {
         var predicate = query.predicate;
         var type = predicate.type;
         if (type) {
             var result = null;
             if (type === TemplateRef) {
-                result = queryByTemplateRef(type, tNode, currentView, predicate.read);
+                result = queryByTemplateRef(type, tNode, lView, predicate.read);
             }
             else {
-                var matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false, false);
+                var matchingIdx = locateDirectiveOrProvider(tNode, tView, type, false, false);
                 if (matchingIdx !== null) {
-                    result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                    result = queryRead(tNode, lView, predicate.read, matchingIdx);
                 }
             }
             if (result !== null) {
@@ -24684,7 +24703,7 @@ function add(query, tNode, insertBeforeContainer) {
             for (var i = 0; i < selector.length; i++) {
                 var matchingIdx = getIdxOfMatchingSelector(tNode, selector[i]);
                 if (matchingIdx !== null) {
-                    var result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                    var result = queryRead(tNode, lView, predicate.read, matchingIdx);
                     if (result !== null) {
                         addMatch(query, result, insertBeforeContainer);
                     }
