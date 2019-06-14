@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+20.sha-6c4d912.with-local-changes
+ * @license Angular v8.1.0-next.2+23.sha-16aa6ce.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12660,6 +12660,18 @@ function setInputsForProperty(lView, inputs, value) {
         }
     }
 }
+/**
+ * Updates a text binding at a given index in a given LView.
+ */
+function textBindingInternal(lView, index, value) {
+    ngDevMode && assertNotSame(value, NO_CHANGE, 'value should not be NO_CHANGE');
+    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+    var element = getNativeByIndex(index, lView);
+    ngDevMode && assertDefined(element, 'native element should exist');
+    ngDevMode && ngDevMode.rendererSetText++;
+    var renderer = lView[RENDERER];
+    isProceduralRenderer(renderer) ? renderer.setValue(element, value) : element.textContent = value;
+}
 
 /**
  * @license
@@ -16580,6 +16592,7 @@ function ɵɵtext(index, value) {
     ngDevMode && ngDevMode.rendererCreateTextNode++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     var textNative = lView[index + HEADER_OFFSET] = createTextNode(value, lView[RENDERER]);
+    ngDevMode && ngDevMode.rendererSetText++;
     var tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 3 /* Element */, null, null);
     // Text nodes are self closing.
     setIsNotParent();
@@ -16589,21 +16602,16 @@ function ɵɵtext(index, value) {
  * Create text node with binding
  * Bindings should be handled externally with the proper interpolation(1-8) method
  *
- * @param index Index of the node in the data array.
  * @param value Stringified value to write.
  *
  * @codeGenApi
  */
-function ɵɵtextBinding(index, value) {
-    if (value !== NO_CHANGE) {
-        var lView = getLView();
-        ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
-        var element = getNativeByIndex(index, lView);
-        ngDevMode && assertDefined(element, 'native element should exist');
-        ngDevMode && ngDevMode.rendererSetText++;
-        var renderer = lView[RENDERER];
-        isProceduralRenderer(renderer) ? renderer.setValue(element, renderStringify(value)) :
-            element.textContent = renderStringify(value);
+function ɵɵtextBinding(value) {
+    var lView = getLView();
+    var index = getSelectedIndex();
+    var bound = ɵɵbind(value);
+    if (bound !== NO_CHANGE) {
+        textBindingInternal(lView, index, renderStringify(bound));
     }
 }
 
@@ -16659,7 +16667,11 @@ function ɵɵtextInterpolate(v0) {
  */
 function ɵɵtextInterpolate1(prefix, v0, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation1(prefix, v0, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation1(prefix, v0, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate1;
 }
 /**
@@ -16683,7 +16695,11 @@ function ɵɵtextInterpolate1(prefix, v0, suffix) {
  */
 function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation2(prefix, v0, i0, v1, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate2;
 }
 /**
@@ -16708,7 +16724,11 @@ function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
  */
 function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate3;
 }
 /**
@@ -16733,7 +16753,11 @@ function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
  */
 function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate4;
 }
 /**
@@ -16758,7 +16782,11 @@ function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  */
 function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate5;
 }
 /**
@@ -16785,7 +16813,11 @@ function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix
  */
 function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate6;
 }
 /**
@@ -16810,7 +16842,11 @@ function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
  */
 function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate7;
 }
 /**
@@ -16835,7 +16871,11 @@ function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
  */
 function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolate8;
 }
 /**
@@ -16864,7 +16904,11 @@ function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
  */
 function ɵɵtextInterpolateV(values) {
     var index = getSelectedIndex();
-    ɵɵtextBinding(index, ɵɵinterpolationV(values));
+    var lView = getLView();
+    var interpolated = ɵɵinterpolationV(values);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, index, interpolated);
+    }
     return ɵɵtextInterpolateV;
 }
 
@@ -17951,6 +17995,7 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
  * and publish them into the DI system, making it visible to others for injection.
  *
  * For example:
+ * ```ts
  * class ComponentWithProviders {
  *   constructor(private greeter: GreeterDE) {}
  *
@@ -17962,15 +18007,17 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
  *    vars: 1,
  *    template: function(fs: RenderFlags, ctx: ComponentWithProviders) {
  *      if (fs & RenderFlags.Create) {
- *        text(0);
+ *        ɵɵtext(0);
  *      }
  *      if (fs & RenderFlags.Update) {
- *        textBinding(0, bind(ctx.greeter.greet()));
+ *        ɵɵselect(0);
+ *        ɵɵtextBinding(ctx.greeter.greet());
  *      }
  *    },
  *    features: [ProvidersFeature([GreeterDE])]
  *  });
  * }
+ * ```
  *
  * @param definition
  *
@@ -18918,7 +18965,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.2+20.sha-6c4d912.with-local-changes');
+var VERSION = new Version('8.1.0-next.2+23.sha-16aa6ce.with-local-changes');
 
 /**
  * @license
@@ -23093,7 +23140,7 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 elementPropertyInternal(nodeIndex, propName, value, sanitizeFn);
                                 break;
                             case 0 /* Text */:
-                                ɵɵtextBinding(nodeIndex, value);
+                                textBindingInternal(viewData, nodeIndex, value);
                                 break;
                             case 2 /* IcuSwitch */:
                                 tIcuIndex = updateOpCodes[++j];

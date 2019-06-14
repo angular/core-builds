@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+20.sha-6c4d912.with-local-changes
+ * @license Angular v8.1.0-next.2+23.sha-16aa6ce.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13198,6 +13198,7 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  * and publish them into the DI system, making it visible to others for injection.
  *
  * For example:
+ * ```ts
  * class ComponentWithProviders {
  *   constructor(private greeter: GreeterDE) {}
  *
@@ -13209,15 +13210,17 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  *    vars: 1,
  *    template: function(fs: RenderFlags, ctx: ComponentWithProviders) {
  *      if (fs & RenderFlags.Create) {
- *        text(0);
+ *        ɵɵtext(0);
  *      }
  *      if (fs & RenderFlags.Update) {
- *        textBinding(0, bind(ctx.greeter.greet()));
+ *        ɵɵselect(0);
+ *        ɵɵtextBinding(ctx.greeter.greet());
  *      }
  *    },
  *    features: [ProvidersFeature([GreeterDE])]
  *  });
  * }
+ * ```
  *
  * @param definition
  *
@@ -13781,12 +13784,11 @@ export declare function ɵɵtext(index: number, value?: any): void;
  * Create text node with binding
  * Bindings should be handled externally with the proper interpolation(1-8) method
  *
- * @param index Index of the node in the data array.
  * @param value Stringified value to write.
  *
  * @codeGenApi
  */
-export declare function ɵɵtextBinding<T>(index: number, value: T | ɵNO_CHANGE): void;
+export declare function ɵɵtextBinding<T>(value: T | ɵNO_CHANGE): void;
 
 /**
  *
