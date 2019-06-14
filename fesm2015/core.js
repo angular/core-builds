@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+11.sha-8f5c396.with-local-changes
+ * @license Angular v8.1.0-next.2+13.sha-a4601ec.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8837,7 +8837,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
     /** @type {?} */
     const isHostSpecialCase = (flags & InjectFlags.Host) && hostTElementNode === tNode;
     /** @type {?} */
-    const injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase);
+    const injectableIdx = locateDirectiveOrProvider(tNode, currentTView, token, canAccessViewProviders, isHostSpecialCase);
     if (injectableIdx !== null) {
         return getNodeInjectable(currentTView.data, lView, injectableIdx, (/** @type {?} */ (tNode)));
     }
@@ -8850,15 +8850,13 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
  *
  * @template T
  * @param {?} tNode TNode on which directives are present.
- * @param {?} lView The view we are currently processing
+ * @param {?} tView The tView we are currently processing
  * @param {?} token Provider token or type of a directive to look for.
  * @param {?} canAccessViewProviders Whether view providers should be considered.
  * @param {?} isHostSpecialCase Whether the host special case applies.
  * @return {?} Index of a found directive or provider, or null when none found.
  */
-function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase) {
-    /** @type {?} */
-    const tView = lView[TVIEW];
+function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, isHostSpecialCase) {
     /** @type {?} */
     const nodeProviderIndexes = tNode.providerIndexes;
     /** @type {?} */
@@ -23630,7 +23628,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.2+11.sha-8f5c396.with-local-changes');
+const VERSION = new Version('8.1.0-next.2+13.sha-a4601ec.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -31337,9 +31335,11 @@ function queryByReadToken(read, tNode, currentView) {
     }
     else {
         /** @type {?} */
-        const matchingIdx = locateDirectiveOrProvider(tNode, currentView, (/** @type {?} */ (read)), false, false);
+        const tView = currentView[TVIEW];
+        /** @type {?} */
+        const matchingIdx = locateDirectiveOrProvider(tNode, tView, (/** @type {?} */ (read)), false, false);
         if (matchingIdx !== null) {
-            return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, (/** @type {?} */ (tNode)));
+            return getNodeInjectable(tView.data, currentView, matchingIdx, (/** @type {?} */ (tNode)));
         }
     }
     return null;
@@ -31403,7 +31403,9 @@ function queryRead(tNode, currentView, read, matchingIdx) {
  */
 function add(query, tNode, insertBeforeContainer) {
     /** @type {?} */
-    const currentView = getLView();
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
     while (query) {
         /** @type {?} */
         const predicate = query.predicate;
@@ -31413,13 +31415,13 @@ function add(query, tNode, insertBeforeContainer) {
             /** @type {?} */
             let result = null;
             if (type === TemplateRef) {
-                result = queryByTemplateRef(type, tNode, currentView, predicate.read);
+                result = queryByTemplateRef(type, tNode, lView, predicate.read);
             }
             else {
                 /** @type {?} */
-                const matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false, false);
+                const matchingIdx = locateDirectiveOrProvider(tNode, tView, type, false, false);
                 if (matchingIdx !== null) {
-                    result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                    result = queryRead(tNode, lView, predicate.read, matchingIdx);
                 }
             }
             if (result !== null) {
@@ -31434,7 +31436,7 @@ function add(query, tNode, insertBeforeContainer) {
                 const matchingIdx = getIdxOfMatchingSelector(tNode, selector[i]);
                 if (matchingIdx !== null) {
                     /** @type {?} */
-                    const result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                    const result = queryRead(tNode, lView, predicate.read, matchingIdx);
                     if (result !== null) {
                         addMatch(query, result, insertBeforeContainer);
                     }
