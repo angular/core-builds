@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.0.1+4.sha-3bbc89b.with-local-changes
+ * @license Angular v8.0.1+10.sha-7f21449.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -383,7 +383,10 @@ export declare interface TestBedStatic {
     }): TestBedStatic;
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * This does not use the deprecated jsdoc tag on purpose
+     * because it renders all overloads as deprecated in TSLint
+     * due to https://github.com/palantir/tslint/issues/4522.
      */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
