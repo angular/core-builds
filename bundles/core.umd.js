@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+11.sha-8f5c396.with-local-changes
+ * @license Angular v8.1.0-next.2+13.sha-a4601ec.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6903,7 +6903,7 @@
         // This special case happens when there is a @host on the inject and when we are searching
         // on the host element node.
         var isHostSpecialCase = (flags & exports.InjectFlags.Host) && hostTElementNode === tNode;
-        var injectableIdx = locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase);
+        var injectableIdx = locateDirectiveOrProvider(tNode, currentTView, token, canAccessViewProviders, isHostSpecialCase);
         if (injectableIdx !== null) {
             return getNodeInjectable(currentTView.data, lView, injectableIdx, tNode);
         }
@@ -6915,14 +6915,13 @@
      * Searches for the given token among the node's directives and providers.
      *
      * @param tNode TNode on which directives are present.
-     * @param lView The view we are currently processing
+     * @param tView The tView we are currently processing
      * @param token Provider token or type of a directive to look for.
      * @param canAccessViewProviders Whether view providers should be considered.
      * @param isHostSpecialCase Whether the host special case applies.
      * @returns Index of a found directive or provider, or null when none found.
      */
-    function locateDirectiveOrProvider(tNode, lView, token, canAccessViewProviders, isHostSpecialCase) {
-        var tView = lView[TVIEW];
+    function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, isHostSpecialCase) {
         var nodeProviderIndexes = tNode.providerIndexes;
         var tInjectables = tView.data;
         var injectablesStart = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
@@ -18632,7 +18631,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.2+11.sha-8f5c396.with-local-changes');
+    var VERSION = new Version('8.1.0-next.2+13.sha-a4601ec.with-local-changes');
 
     /**
      * @license
@@ -24323,9 +24322,10 @@
             return factoryFn();
         }
         else {
-            var matchingIdx = locateDirectiveOrProvider(tNode, currentView, read, false, false);
+            var tView = currentView[TVIEW];
+            var matchingIdx = locateDirectiveOrProvider(tNode, tView, read, false, false);
             if (matchingIdx !== null) {
-                return getNodeInjectable(currentView[TVIEW].data, currentView, matchingIdx, tNode);
+                return getNodeInjectable(tView.data, currentView, matchingIdx, tNode);
             }
         }
         return null;
@@ -24367,19 +24367,20 @@
      * out of order (e.g. a view was created in a constructor)
      */
     function add(query, tNode, insertBeforeContainer) {
-        var currentView = getLView();
+        var lView = getLView();
+        var tView = lView[TVIEW];
         while (query) {
             var predicate = query.predicate;
             var type = predicate.type;
             if (type) {
                 var result = null;
                 if (type === TemplateRef) {
-                    result = queryByTemplateRef(type, tNode, currentView, predicate.read);
+                    result = queryByTemplateRef(type, tNode, lView, predicate.read);
                 }
                 else {
-                    var matchingIdx = locateDirectiveOrProvider(tNode, currentView, type, false, false);
+                    var matchingIdx = locateDirectiveOrProvider(tNode, tView, type, false, false);
                     if (matchingIdx !== null) {
-                        result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                        result = queryRead(tNode, lView, predicate.read, matchingIdx);
                     }
                 }
                 if (result !== null) {
@@ -24391,7 +24392,7 @@
                 for (var i = 0; i < selector.length; i++) {
                     var matchingIdx = getIdxOfMatchingSelector(tNode, selector[i]);
                     if (matchingIdx !== null) {
-                        var result = queryRead(tNode, currentView, predicate.read, matchingIdx);
+                        var result = queryRead(tNode, lView, predicate.read, matchingIdx);
                         if (result !== null) {
                             addMatch(query, result, insertBeforeContainer);
                         }
