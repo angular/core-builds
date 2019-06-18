@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import '../util/ng_i18n_closure_mode';
-import { NO_CHANGE } from './tokens';
 /**
  * Extracts a part of a message and removes the rest.
  *
@@ -122,11 +121,11 @@ export declare function ɵɵi18nAttributes(index: number, values: string[]): voi
  * Stores the values of the bindings during each update cycle in order to determine if we need to
  * update the translated nodes.
  *
- * @param expression The binding's new value or NO_CHANGE
+ * @param value The binding's value
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nExp<T>(expression: T | NO_CHANGE): void;
+export declare function ɵɵi18nExp<T>(value: T): void;
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
  *
