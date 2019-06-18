@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+32.sha-036294d.with-local-changes
+ * @license Angular v8.1.0-next.2+35.sha-65544ac.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14204,6 +14204,20 @@
         }
     }
     /**
+     * Loops over all children of a TNode container and appends them to the DOM
+     *
+     * @param ngContainerChildTNode The first child of the TNode container
+     * @param tProjectionNode The projection (ng-content) TNode
+     * @param currentView Current LView
+     * @param projectionView Projection view (view above current)
+     */
+    function appendProjectedChildren(ngContainerChildTNode, tProjectionNode, currentView, projectionView) {
+        while (ngContainerChildTNode) {
+            appendProjectedNode(ngContainerChildTNode, tProjectionNode, currentView, projectionView);
+            ngContainerChildTNode = ngContainerChildTNode.next;
+        }
+    }
+    /**
      * Appends a projected node to the DOM, or in the case of a projected container,
      * appends the nodes from all of the container's active views to the DOM.
      *
@@ -14230,13 +14244,15 @@
                 addRemoveViewFromContainer(nodeOrContainer[i], true, nodeOrContainer[NATIVE]);
             }
         }
+        else if (projectedTNode.type === 5 /* IcuContainer */) {
+            // The node we are adding is an ICU container which is why we also need to project all the
+            // children nodes that might have been created previously and are linked to this anchor
+            var ngContainerChildTNode = projectedTNode.child;
+            appendProjectedChildren(ngContainerChildTNode, ngContainerChildTNode, projectionView, projectionView);
+        }
         else {
             if (projectedTNode.type === 4 /* ElementContainer */) {
-                var ngContainerChildTNode = projectedTNode.child;
-                while (ngContainerChildTNode) {
-                    appendProjectedNode(ngContainerChildTNode, tProjectionNode, currentView, projectionView);
-                    ngContainerChildTNode = ngContainerChildTNode.next;
-                }
+                appendProjectedChildren(projectedTNode.child, tProjectionNode, currentView, projectionView);
             }
             if (isLContainer(nodeOrContainer)) {
                 appendChild(nodeOrContainer[NATIVE], tProjectionNode, currentView);
@@ -18678,7 +18694,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.2+32.sha-036294d.with-local-changes');
+    var VERSION = new Version('8.1.0-next.2+35.sha-65544ac.with-local-changes');
 
     /**
      * @license
