@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+35.sha-65544ac.with-local-changes
+ * @license Angular v8.1.0-next.2+37.sha-beaab27.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23716,7 +23716,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.2+35.sha-65544ac.with-local-changes');
+const VERSION = new Version('8.1.0-next.2+37.sha-beaab27.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29727,11 +29727,13 @@ let shiftsCounter = 0;
  *
  * \@codeGenApi
  * @template T
- * @param {?} expression The binding's new value or NO_CHANGE
+ * @param {?} value The binding's value
  *
  * @return {?}
  */
-function ɵɵi18nExp(expression) {
+function ɵɵi18nExp(value) {
+    /** @type {?} */
+    const expression = ɵɵbind(value);
     if (expression !== NO_CHANGE) {
         changeMask = changeMask | (1 << shiftsCounter);
     }

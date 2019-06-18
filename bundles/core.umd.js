@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.2+35.sha-65544ac.with-local-changes
+ * @license Angular v8.1.0-next.2+37.sha-beaab27.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19026,7 +19026,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.2+35.sha-65544ac.with-local-changes');
+    var VERSION = new Version('8.1.0-next.2+37.sha-beaab27.with-local-changes');
 
     /**
      * @license
@@ -23356,11 +23356,12 @@
      * Stores the values of the bindings during each update cycle in order to determine if we need to
      * update the translated nodes.
      *
-     * @param expression The binding's new value or NO_CHANGE
+     * @param value The binding's value
      *
      * @codeGenApi
      */
-    function ɵɵi18nExp(expression) {
+    function ɵɵi18nExp(value) {
+        var expression = ɵɵbind(value);
         if (expression !== NO_CHANGE) {
             changeMask = changeMask | (1 << shiftsCounter);
         }
