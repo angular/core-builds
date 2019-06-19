@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+7.sha-91008bd.with-local-changes
+ * @license Angular v8.1.0-next.3+8.sha-029f1be.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23716,7 +23716,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.3+7.sha-91008bd.with-local-changes');
+const VERSION = new Version('8.1.0-next.3+8.sha-029f1be.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30049,18 +30049,19 @@ const LOCALIZE_PH_REGEXP = /\{\$(.*?)\}/g;
  * @param {?=} placeholders
  * @return {?}
  */
-function ɵɵi18nLocalize(input, placeholders = {}) {
+function ɵɵi18nLocalize(input, placeholders) {
     if (typeof TRANSLATIONS[input] !== 'undefined') { // to account for empty string
         input = TRANSLATIONS[input];
     }
-    return Object.keys(placeholders).length ?
-        input.replace(LOCALIZE_PH_REGEXP, (/**
-         * @param {?} match
+    if (placeholders !== undefined && Object.keys(placeholders).length) {
+        return input.replace(LOCALIZE_PH_REGEXP, (/**
+         * @param {?} _
          * @param {?} key
          * @return {?}
          */
-        (match, key) => placeholders[key] || '')) :
-        input;
+        (_, key) => placeholders[key] || ''));
+    }
+    return input;
 }
 /**
  * The locale id that the application is currently using (for translations and ICU expressions).
