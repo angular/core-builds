@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+24.sha-3fb78aa.with-local-changes
+ * @license Angular v8.1.0-next.3+25.sha-7ff628f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12743,7 +12743,8 @@
     function ɵɵproperty(propName, value, sanitizer, nativeOnly) {
         var index = getSelectedIndex();
         ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
-        var bindReconciledValue = ɵɵbind(value);
+        var lView = getLView();
+        var bindReconciledValue = bind(lView, value);
         if (bindReconciledValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
         }
@@ -12752,12 +12753,10 @@
     /**
      * Creates a single value binding.
      *
+     * @param lView Current view
      * @param value Value to diff
-     *
-     * @codeGenApi
      */
-    function ɵɵbind(value) {
-        var lView = getLView();
+    function bind(lView, value) {
         var bindingIndex = lView[BINDING_INDEX]++;
         storeBindingMetadata(lView);
         return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
@@ -12787,8 +12786,9 @@
      */
     function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer, nativeOnly) {
         var index = getSelectedIndex();
+        var lView = getLView();
         // TODO(benlesh): remove bind call here.
-        var bound = ɵɵbind(value);
+        var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             elementPropertyInternal(index, propName, bound, sanitizer, nativeOnly, loadComponentRenderer);
         }
@@ -12811,7 +12811,7 @@
         var index = getSelectedIndex();
         var lView = getLView();
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var bound = ɵɵbind(value);
+        var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             return elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
         }
@@ -16352,7 +16352,7 @@
     function ɵɵtextBinding(value) {
         var lView = getLView();
         var index = getSelectedIndex();
-        var bound = ɵɵbind(value);
+        var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             textBindingInternal(lView, index, renderStringify(bound));
         }
@@ -18694,7 +18694,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+24.sha-3fb78aa.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+25.sha-7ff628f.with-local-changes');
 
     /**
      * @license
@@ -23009,7 +23009,8 @@
      * @codeGenApi
      */
     function ɵɵi18nExp(value) {
-        var expression = ɵɵbind(value);
+        var lView = getLView();
+        var expression = bind(lView, value);
         if (expression !== NO_CHANGE) {
             changeMask = changeMask | (1 << shiftsCounter);
         }
@@ -24711,7 +24712,6 @@
         'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
         'ɵɵProvidersFeature': ɵɵProvidersFeature,
         'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
-        'ɵɵbind': ɵɵbind,
         'ɵɵcontainer': ɵɵcontainer,
         'ɵɵnextContext': ɵɵnextContext,
         'ɵɵcontainerRefreshStart': ɵɵcontainerRefreshStart,
@@ -30812,7 +30812,6 @@
     exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
     exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
     exports.ɵɵprojection = ɵɵprojection;
-    exports.ɵɵbind = ɵɵbind;
     exports.ɵɵinterpolation1 = ɵɵinterpolation1;
     exports.ɵɵinterpolation2 = ɵɵinterpolation2;
     exports.ɵɵinterpolation3 = ɵɵinterpolation3;
