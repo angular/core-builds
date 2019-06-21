@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+34.sha-a950288.with-local-changes
+ * @license Angular v8.1.0-next.3+33.sha-4bd6fca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -107,7 +107,6 @@ declare abstract class ChangeDetectorRef {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
@@ -136,9 +135,13 @@ declare interface ClassProvider extends ClassSansProvider {
 
 /**
  * Configures the `Injector` to return a value by invoking a `useClass` function.
- * Base for `ClassProvider` decorator.
  *
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * {@example core/di/ts/provider_spec.ts region='ClassSansProvider'}
  *
  * @publicApi
  */
@@ -245,7 +248,6 @@ declare abstract class ComponentRef<C> {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
@@ -253,8 +255,6 @@ declare abstract class ComponentRef<C> {
  * ### Multi-value example
  *
  * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
- *
- * @publicApi
  */
 declare interface ConstructorProvider extends ConstructorSansProvider {
     /**
@@ -274,7 +274,6 @@ declare interface ConstructorProvider extends ConstructorSansProvider {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * ```
@@ -336,7 +335,6 @@ declare class ElementRef<T = any> {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
@@ -365,12 +363,9 @@ declare interface ExistingProvider extends ExistingSansProvider {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ExistingSansProvider'}
- *
- * @publicApi
  */
 declare interface ExistingSansProvider {
     /**
@@ -385,7 +380,6 @@ declare interface ExistingSansProvider {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='FactoryProvider'}
@@ -721,7 +715,6 @@ export declare function setClassMetadata(type: Type<any>, decorators: any[] | nu
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='StaticClassProvider'}
@@ -733,8 +726,6 @@ export declare function setClassMetadata(type: Type<any>, decorators: any[] | nu
  * ### Multi-value example
  *
  * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
- *
- * @publicApi
  */
 declare interface StaticClassProvider extends StaticClassSansProvider {
     /**
@@ -750,7 +741,13 @@ declare interface StaticClassProvider extends StaticClassSansProvider {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * Base for `StaticClassProvider` decorator.
+ *
+ * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * {@example core/di/ts/provider_spec.ts region='StaticClassSansProvider'}
  *
  * @publicApi
  */
@@ -802,7 +799,6 @@ declare interface Type<T> extends Function {
  * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
@@ -827,7 +823,13 @@ declare interface ValueProvider extends ValueSansProvider {
 
 /**
  * Configures the `Injector` to return a value for a token.
- * Base for `ValueProvider` decorator.
+ *
+ * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * {@example core/di/ts/provider_spec.ts region='ValueSansProvider'}
  *
  * @publicApi
  */
