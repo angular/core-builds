@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+29.sha-6a381d9.with-local-changes
+ * @license Angular v8.1.0-next.3+32.sha-bd3b056.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3806,6 +3806,12 @@ declare interface LContainer extends Array<any> {
     [T_HOST]: TNode;
     /** The comment element that serves as an anchor for this LContainer. */
     readonly [NATIVE]: RComment;
+    /**
+     * Array of `ViewRef`s used by any `ViewContainerRef`s that point to this container.
+     *
+     * This is lazily initialized by `ViewContainerRef` when the first view is inserted.
+     */
+    [VIEW_REFS]: ViewRef[] | null;
 }
 
 /**
@@ -8373,6 +8379,8 @@ export declare class Version {
     readonly patch: string;
     constructor(full: string);
 }
+
+declare const VIEW_REFS = 8;
 
 /**
  * Type of the ViewChild metadata.
