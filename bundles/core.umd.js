@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+24.sha-3fb78aa.with-local-changes
+ * @license Angular v8.1.0-next.3+34.sha-a950288.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4029,13 +4029,14 @@
     // PARENT, NEXT, QUERIES and T_HOST are indices 3, 4, 5 and 6.
     // As we already have these constants in LView, we don't need to re-create them.
     var NATIVE = 7;
+    var VIEW_REFS = 8;
     /**
      * Size of LContainer's header. Represents the index after which all views in the
      * container will be inserted. We need to keep a record of current views so we know
      * which views are already in the DOM (and don't need to be re-added) and so we can
      * remove views from the DOM when they are no longer required.
      */
-    var CONTAINER_HEADER_OFFSET = 8;
+    var CONTAINER_HEADER_OFFSET = 9;
 
     /**
      * @license
@@ -12373,7 +12374,8 @@
         null, // next
         null, // queries
         tNode, // t_host
-        native);
+        native, // native,
+        null);
         ngDevMode && attachLContainerDebug(lContainer);
         return lContainer;
     }
@@ -13066,7 +13068,8 @@
     function ɵɵproperty(propName, value, sanitizer, nativeOnly) {
         var index = getSelectedIndex();
         ngDevMode && assertNotEqual(index, -1, 'selected index cannot be -1');
-        var bindReconciledValue = ɵɵbind(value);
+        var lView = getLView();
+        var bindReconciledValue = bind(lView, value);
         if (bindReconciledValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, bindReconciledValue, sanitizer, nativeOnly);
         }
@@ -13075,12 +13078,10 @@
     /**
      * Creates a single value binding.
      *
+     * @param lView Current view
      * @param value Value to diff
-     *
-     * @codeGenApi
      */
-    function ɵɵbind(value) {
-        var lView = getLView();
+    function bind(lView, value) {
         var bindingIndex = lView[BINDING_INDEX]++;
         storeBindingMetadata(lView);
         return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
@@ -13110,8 +13111,9 @@
      */
     function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer, nativeOnly) {
         var index = getSelectedIndex();
+        var lView = getLView();
         // TODO(benlesh): remove bind call here.
-        var bound = ɵɵbind(value);
+        var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             elementPropertyInternal(index, propName, bound, sanitizer, nativeOnly, loadComponentRenderer);
         }
@@ -13134,7 +13136,7 @@
         var index = getSelectedIndex();
         var lView = getLView();
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var bound = ɵɵbind(value);
+        var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             return elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
         }
@@ -16675,7 +16677,7 @@
     function ɵɵtextBinding(value) {
         var lView = getLView();
         var index = getSelectedIndex();
-        var bound = ɵɵbind(value);
+        var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             textBindingInternal(lView, index, renderStringify(bound));
         }
@@ -18648,7 +18650,6 @@
                     _this._lContainer = _lContainer;
                     _this._hostTNode = _hostTNode;
                     _this._hostView = _hostView;
-                    _this._viewRefs = [];
                     return _this;
                 }
                 Object.defineProperty(ViewContainerRef_.prototype, "element", {
@@ -18681,7 +18682,9 @@
                         this.remove(0);
                     }
                 };
-                ViewContainerRef_.prototype.get = function (index) { return this._viewRefs[index] || null; };
+                ViewContainerRef_.prototype.get = function (index) {
+                    return this._lContainer[VIEW_REFS] !== null && this._lContainer[VIEW_REFS][index] || null;
+                };
                 Object.defineProperty(ViewContainerRef_.prototype, "length", {
                     get: function () {
                         // Note that if there are no views, the container
@@ -18693,11 +18696,12 @@
                     configurable: true
                 });
                 ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+                    this.allocateContainerIfNeeded();
                     var adjustedIdx = this._adjustIndex(index);
                     var viewRef = templateRef
                         .createEmbeddedView(context || {}, this._lContainer, adjustedIdx);
                     viewRef.attachToViewContainerRef(this);
-                    this._viewRefs.splice(adjustedIdx, 0, viewRef);
+                    this._lContainer[VIEW_REFS].splice(adjustedIdx, 0, viewRef);
                     return viewRef;
                 };
                 ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
@@ -18713,6 +18717,7 @@
                     if (viewRef.destroyed) {
                         throw new Error('Cannot insert a destroyed View in a ViewContainer!');
                     }
+                    this.allocateContainerIfNeeded();
                     var lView = viewRef._lView;
                     var adjustedIdx = this._adjustIndex(index);
                     if (viewAttachedToContainer(lView)) {
@@ -18724,7 +18729,7 @@
                     var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
                     addRemoveViewFromContainer(lView, true, beforeNode);
                     viewRef.attachToViewContainerRef(this);
-                    this._viewRefs.splice(adjustedIdx, 0, viewRef);
+                    this._lContainer[VIEW_REFS].splice(adjustedIdx, 0, viewRef);
                     return viewRef;
                 };
                 ViewContainerRef_.prototype.move = function (viewRef, newIndex) {
@@ -18737,16 +18742,22 @@
                     this.insert(viewRef, newIndex);
                     return viewRef;
                 };
-                ViewContainerRef_.prototype.indexOf = function (viewRef) { return this._viewRefs.indexOf(viewRef); };
+                ViewContainerRef_.prototype.indexOf = function (viewRef) {
+                    return this._lContainer[VIEW_REFS] !== null ?
+                        this._lContainer[VIEW_REFS].indexOf(viewRef) :
+                        0;
+                };
                 ViewContainerRef_.prototype.remove = function (index) {
+                    this.allocateContainerIfNeeded();
                     var adjustedIdx = this._adjustIndex(index, -1);
                     removeView(this._lContainer, adjustedIdx);
-                    this._viewRefs.splice(adjustedIdx, 1);
+                    this._lContainer[VIEW_REFS].splice(adjustedIdx, 1);
                 };
                 ViewContainerRef_.prototype.detach = function (index) {
+                    this.allocateContainerIfNeeded();
                     var adjustedIdx = this._adjustIndex(index, -1);
                     var view = detachView(this._lContainer, adjustedIdx);
-                    var wasDetached = view && this._viewRefs.splice(adjustedIdx, 1)[0] != null;
+                    var wasDetached = view && this._lContainer[VIEW_REFS].splice(adjustedIdx, 1)[0] != null;
                     return wasDetached ? new ViewRef(view, view[CONTEXT], -1) : null;
                 };
                 ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
@@ -18760,6 +18771,11 @@
                         assertLessThan(index, this.length + 1 + shift, 'index');
                     }
                     return index;
+                };
+                ViewContainerRef_.prototype.allocateContainerIfNeeded = function () {
+                    if (this._lContainer[VIEW_REFS] === null) {
+                        this._lContainer[VIEW_REFS] = [];
+                    }
                 };
                 return ViewContainerRef_;
             }(ViewContainerRefToken));
@@ -19026,7 +19042,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+24.sha-3fb78aa.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+34.sha-a950288.with-local-changes');
 
     /**
      * @license
@@ -23361,7 +23377,8 @@
      * @codeGenApi
      */
     function ɵɵi18nExp(value) {
-        var expression = ɵɵbind(value);
+        var lView = getLView();
+        var expression = bind(lView, value);
         if (expression !== NO_CHANGE) {
             changeMask = changeMask | (1 << shiftsCounter);
         }
@@ -25058,7 +25075,6 @@
         'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
         'ɵɵProvidersFeature': ɵɵProvidersFeature,
         'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
-        'ɵɵbind': ɵɵbind,
         'ɵɵcontainer': ɵɵcontainer,
         'ɵɵnextContext': ɵɵnextContext,
         'ɵɵcontainerRefreshStart': ɵɵcontainerRefreshStart,
@@ -31317,7 +31333,6 @@
     exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
     exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
     exports.ɵɵprojection = ɵɵprojection;
-    exports.ɵɵbind = ɵɵbind;
     exports.ɵɵinterpolation1 = ɵɵinterpolation1;
     exports.ɵɵinterpolation2 = ɵɵinterpolation2;
     exports.ɵɵinterpolation3 = ɵɵinterpolation3;
