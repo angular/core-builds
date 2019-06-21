@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+29.sha-6a381d9.with-local-changes
+ * @license Angular v8.1.0-next.3+32.sha-bd3b056.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3663,13 +3663,14 @@ var ACTIVE_INDEX = 2;
 // PARENT, NEXT, QUERIES and T_HOST are indices 3, 4, 5 and 6.
 // As we already have these constants in LView, we don't need to re-create them.
 var NATIVE = 7;
+var VIEW_REFS = 8;
 /**
  * Size of LContainer's header. Represents the index after which all views in the
  * container will be inserted. We need to keep a record of current views so we know
  * which views are already in the DOM (and don't need to be re-added) and so we can
  * remove views from the DOM when they are no longer required.
  */
-var CONTAINER_HEADER_OFFSET = 8;
+var CONTAINER_HEADER_OFFSET = 9;
 
 /**
  * @license
@@ -12015,7 +12016,8 @@ function createLContainer(hostNative, currentView, native, tNode, isForViewConta
     null, // next
     null, // queries
     tNode, // t_host
-    native);
+    native, // native,
+    null);
     ngDevMode && attachLContainerDebug(lContainer);
     return lContainer;
 }
@@ -18290,7 +18292,6 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 _this._lContainer = _lContainer;
                 _this._hostTNode = _hostTNode;
                 _this._hostView = _hostView;
-                _this._viewRefs = [];
                 return _this;
             }
             Object.defineProperty(ViewContainerRef_.prototype, "element", {
@@ -18323,7 +18324,9 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                     this.remove(0);
                 }
             };
-            ViewContainerRef_.prototype.get = function (index) { return this._viewRefs[index] || null; };
+            ViewContainerRef_.prototype.get = function (index) {
+                return this._lContainer[VIEW_REFS] !== null && this._lContainer[VIEW_REFS][index] || null;
+            };
             Object.defineProperty(ViewContainerRef_.prototype, "length", {
                 get: function () {
                     // Note that if there are no views, the container
@@ -18335,11 +18338,12 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 configurable: true
             });
             ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+                this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index);
                 var viewRef = templateRef
                     .createEmbeddedView(context || {}, this._lContainer, adjustedIdx);
                 viewRef.attachToViewContainerRef(this);
-                this._viewRefs.splice(adjustedIdx, 0, viewRef);
+                this._lContainer[VIEW_REFS].splice(adjustedIdx, 0, viewRef);
                 return viewRef;
             };
             ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
@@ -18355,6 +18359,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 if (viewRef.destroyed) {
                     throw new Error('Cannot insert a destroyed View in a ViewContainer!');
                 }
+                this.allocateContainerIfNeeded();
                 var lView = viewRef._lView;
                 var adjustedIdx = this._adjustIndex(index);
                 if (viewAttachedToContainer(lView)) {
@@ -18366,7 +18371,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
                 addRemoveViewFromContainer(lView, true, beforeNode);
                 viewRef.attachToViewContainerRef(this);
-                this._viewRefs.splice(adjustedIdx, 0, viewRef);
+                this._lContainer[VIEW_REFS].splice(adjustedIdx, 0, viewRef);
                 return viewRef;
             };
             ViewContainerRef_.prototype.move = function (viewRef, newIndex) {
@@ -18379,16 +18384,22 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 this.insert(viewRef, newIndex);
                 return viewRef;
             };
-            ViewContainerRef_.prototype.indexOf = function (viewRef) { return this._viewRefs.indexOf(viewRef); };
+            ViewContainerRef_.prototype.indexOf = function (viewRef) {
+                return this._lContainer[VIEW_REFS] !== null ?
+                    this._lContainer[VIEW_REFS].indexOf(viewRef) :
+                    0;
+            };
             ViewContainerRef_.prototype.remove = function (index) {
+                this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index, -1);
                 removeView(this._lContainer, adjustedIdx);
-                this._viewRefs.splice(adjustedIdx, 1);
+                this._lContainer[VIEW_REFS].splice(adjustedIdx, 1);
             };
             ViewContainerRef_.prototype.detach = function (index) {
+                this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index, -1);
                 var view = detachView(this._lContainer, adjustedIdx);
-                var wasDetached = view && this._viewRefs.splice(adjustedIdx, 1)[0] != null;
+                var wasDetached = view && this._lContainer[VIEW_REFS].splice(adjustedIdx, 1)[0] != null;
                 return wasDetached ? new ViewRef(view, view[CONTEXT], -1) : null;
             };
             ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
@@ -18402,6 +18413,11 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                     assertLessThan(index, this.length + 1 + shift, 'index');
                 }
                 return index;
+            };
+            ViewContainerRef_.prototype.allocateContainerIfNeeded = function () {
+                if (this._lContainer[VIEW_REFS] === null) {
+                    this._lContainer[VIEW_REFS] = [];
+                }
             };
             return ViewContainerRef_;
         }(ViewContainerRefToken));
@@ -18664,7 +18680,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-next.3+29.sha-6a381d9.with-local-changes');
+var VERSION = new Version('8.1.0-next.3+32.sha-bd3b056.with-local-changes');
 
 /**
  * @license

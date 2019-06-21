@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ViewRef } from '../../linker/view_ref';
 import { TNode } from './node';
 import { LQueries } from './query';
 import { RComment, RElement } from './renderer';
@@ -23,13 +24,14 @@ export declare const TYPE = 1;
  */
 export declare const ACTIVE_INDEX = 2;
 export declare const NATIVE = 7;
+export declare const VIEW_REFS = 8;
 /**
  * Size of LContainer's header. Represents the index after which all views in the
  * container will be inserted. We need to keep a record of current views so we know
  * which views are already in the DOM (and don't need to be re-added) and so we can
  * remove views from the DOM when they are no longer required.
  */
-export declare const CONTAINER_HEADER_OFFSET = 8;
+export declare const CONTAINER_HEADER_OFFSET = 9;
 /**
  * The state associated with a container.
  *
@@ -83,5 +85,11 @@ export interface LContainer extends Array<any> {
     [T_HOST]: TNode;
     /** The comment element that serves as an anchor for this LContainer. */
     readonly [NATIVE]: RComment;
+    /**
+     * Array of `ViewRef`s used by any `ViewContainerRef`s that point to this container.
+     *
+     * This is lazily initialized by `ViewContainerRef` when the first view is inserted.
+     */
+    [VIEW_REFS]: ViewRef[] | null;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
