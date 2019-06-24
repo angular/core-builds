@@ -71,5 +71,5 @@ export declare function injectChangeDetectorRef(): ViewEngine_ChangeDetectorRef;
  * @returns The ChangeDetectorRef to use
  */
 export declare function createViewRef(hostTNode: TNode, hostView: LView, context: any): ViewEngine_ChangeDetectorRef;
-/** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
+/** Injects a Renderer2 for the current component. */
 export declare function injectRenderer2(): Renderer2;
