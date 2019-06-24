@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+44.sha-fcb03ab.with-local-changes
+ * @license Angular v8.1.0-next.3+45.sha-23c0171.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11071,7 +11071,7 @@ export declare function ɵɵallocHostVars(count: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): TsickleIssue1009;
 
 /**
  *
