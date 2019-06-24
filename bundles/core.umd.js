@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+40.sha-a4fc98c.with-local-changes
+ * @license Angular v8.1.0-next.3+44.sha-fcb03ab.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18843,6 +18843,7 @@
         }
         return null;
     }
+    /** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
     function getOrCreateRenderer2(view) {
         var renderer = view[RENDERER];
         if (isProceduralRenderer(renderer)) {
@@ -18852,9 +18853,14 @@
             throw new Error('Cannot inject Renderer2 when the application uses Renderer3!');
         }
     }
-    /** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
+    /** Injects a Renderer2 for the current component. */
     function injectRenderer2() {
-        return getOrCreateRenderer2(getLView());
+        // We need the Renderer to be based on the component that it's being injected into, however since
+        // DI happens before we've entered its view, `getLView` will return the parent view instead.
+        var lView = getLView();
+        var tNode = getPreviousOrParentTNode();
+        var nodeAtIndex = getComponentViewByIndex(tNode.index, lView);
+        return getOrCreateRenderer2(isLView(nodeAtIndex) ? nodeAtIndex : lView);
     }
 
     /**
@@ -19042,7 +19048,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+40.sha-a4fc98c.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+44.sha-fcb03ab.with-local-changes');
 
     /**
      * @license

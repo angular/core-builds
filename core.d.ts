@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+40.sha-a4fc98c.with-local-changes
+ * @license Angular v8.1.0-next.3+44.sha-fcb03ab.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3387,7 +3387,7 @@ declare interface InjectorTypeWithProviders<T> {
     providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
 }
 
-/** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
+/** Injects a Renderer2 for the current component. */
 declare function injectRenderer2(): Renderer2;
 
 /**
