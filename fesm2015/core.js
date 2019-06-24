@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+37.sha-7035f22.with-local-changes
+ * @license Angular v8.1.0-next.3+45.sha-23c0171.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16628,8 +16628,9 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     /** @type {?} */
     const bound = bind(lView, value);
     if (bound !== NO_CHANGE) {
-        return elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
+        elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
     }
+    return ɵɵattribute;
 }
 
 /**
@@ -23521,6 +23522,7 @@ function createViewRef(hostTNode, hostView, context) {
     return (/** @type {?} */ (null));
 }
 /**
+ * Returns a Renderer2 (or throws when application was bootstrapped with Renderer3)
  * @param {?} view
  * @return {?}
  */
@@ -23535,11 +23537,19 @@ function getOrCreateRenderer2(view) {
     }
 }
 /**
- * Returns a Renderer2 (or throws when application was bootstrapped with Renderer3)
+ * Injects a Renderer2 for the current component.
  * @return {?}
  */
 function injectRenderer2() {
-    return getOrCreateRenderer2(getLView());
+    // We need the Renderer to be based on the component that it's being injected into, however since
+    // DI happens before we've entered its view, `getLView` will return the parent view instead.
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const nodeAtIndex = getComponentViewByIndex(tNode.index, lView);
+    return getOrCreateRenderer2(isLView(nodeAtIndex) ? nodeAtIndex : lView);
 }
 
 /**
@@ -23738,7 +23748,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.3+37.sha-7035f22.with-local-changes');
+const VERSION = new Version('8.1.0-next.3+45.sha-23c0171.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
