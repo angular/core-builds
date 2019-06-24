@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { SanitizerFn } from '../interfaces/sanitization';
+import { TsickleIssue1009 } from './shared';
 /**
  * Updates the value of or removes a bound attribute on an Element.
  *
@@ -19,4 +20,4 @@ import { SanitizerFn } from '../interfaces/sanitization';
  *
  * @codeGenApi
  */
-export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): TsickleIssue1009;

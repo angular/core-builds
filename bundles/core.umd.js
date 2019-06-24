@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+44.sha-fcb03ab.with-local-changes
+ * @license Angular v8.1.0-next.3+45.sha-23c0171.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12815,8 +12815,9 @@
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
         var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
-            return elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
+            elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
         }
+        return ɵɵattribute;
     }
 
     /**
@@ -18716,7 +18717,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+44.sha-fcb03ab.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+45.sha-23c0171.with-local-changes');
 
     /**
      * @license
