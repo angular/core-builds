@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+50.sha-74f4f5d.with-local-changes
+ * @license Angular v8.1.0-next.3+80.sha-280e856.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19049,7 +19049,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+50.sha-74f4f5d.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+80.sha-280e856.with-local-changes');
 
     /**
      * @license
@@ -23380,6 +23380,8 @@
      * update the translated nodes.
      *
      * @param value The binding's value
+     * @returns This function returns itself so that it may be chained
+     * (e.g. `i18nExp(ctx.name)(ctx.title)`)
      *
      * @codeGenApi
      */
@@ -23390,6 +23392,7 @@
             changeMask = changeMask | (1 << shiftsCounter);
         }
         shiftsCounter++;
+        return ɵɵi18nExp;
     }
     /**
      * Updates a translation block or an i18n attribute when the bindings have changed.
@@ -25952,7 +25955,7 @@
     var HostBinding = makePropDecorator('HostBinding', ɵ8);
     var ɵ9 = function (eventName, args) { return ({ eventName: eventName, args: args }); };
     /**
-     * Binds a CSS event to a host listener and supplies configuration metadata.
+     * Binds a DOM event to a host listener and supplies configuration metadata.
      * Angular invokes the supplied handler method when the host element emits the specified event,
      * and updates the bound element with the result.
      * If the handler method returns false, applies `preventDefault` on the bound element.

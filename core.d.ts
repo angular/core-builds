@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+50.sha-74f4f5d.with-local-changes
+ * @license Angular v8.1.0-next.3+80.sha-280e856.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2665,7 +2665,7 @@ declare interface HostInstructionsQueue extends Array<number | Function | any[]>
  */
 export declare interface HostListener {
     /**
-     * The CSS event to listen for.
+     * The DOM event to listen for.
      */
     eventName?: string;
     /**
@@ -2675,7 +2675,7 @@ export declare interface HostListener {
 }
 
 /**
- * Binds a CSS event to a host listener and supplies configuration metadata.
+ * Binds a DOM event to a host listener and supplies configuration metadata.
  * Angular invokes the supplied handler method when the host element emits the specified event,
  * and updates the bound element with the result.
  * If the handler method returns false, applies `preventDefault` on the bound element.
@@ -12333,10 +12333,12 @@ export declare function ɵɵi18nEnd(): void;
  * update the translated nodes.
  *
  * @param value The binding's value
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `i18nExp(ctx.name)(ctx.title)`)
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nExp<T>(value: T): void;
+export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
 
 /**
  * A goog.getMsg-like function for users that do not use Closure.
