@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+68.sha-a1d436e.with-local-changes
+ * @license Angular v8.1.0-next.3+72.sha-98685e6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12333,10 +12333,12 @@ export declare function ɵɵi18nEnd(): void;
  * update the translated nodes.
  *
  * @param value The binding's value
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `i18nExp(ctx.name)(ctx.title)`)
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nExp<T>(value: T): void;
+export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
 
 /**
  * A goog.getMsg-like function for users that do not use Closure.

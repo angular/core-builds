@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+68.sha-a1d436e.with-local-changes
+ * @license Angular v8.1.0-next.3+72.sha-98685e6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19049,7 +19049,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+68.sha-a1d436e.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+72.sha-98685e6.with-local-changes');
 
     /**
      * @license
@@ -23380,6 +23380,8 @@
      * update the translated nodes.
      *
      * @param value The binding's value
+     * @returns This function returns itself so that it may be chained
+     * (e.g. `i18nExp(ctx.name)(ctx.title)`)
      *
      * @codeGenApi
      */
@@ -23390,6 +23392,7 @@
             changeMask = changeMask | (1 << shiftsCounter);
         }
         shiftsCounter++;
+        return ɵɵi18nExp;
     }
     /**
      * Updates a translation block or an i18n attribute when the bindings have changed.
