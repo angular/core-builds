@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+68.sha-a1d436e.with-local-changes
+ * @license Angular v8.1.0-next.3+72.sha-98685e6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23309,7 +23309,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.3+68.sha-a1d436e.with-local-changes');
+const VERSION = new Version('8.1.0-next.3+72.sha-98685e6.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29306,8 +29306,9 @@ let shiftsCounter = 0;
  * \@codeGenApi
  * @template T
  * @param {?} value The binding's value
+ * @return {?} This function returns itself so that it may be chained
+ * (e.g. `i18nExp(ctx.name)(ctx.title)`)
  *
- * @return {?}
  */
 function ɵɵi18nExp(value) {
     /** @type {?} */
@@ -29318,6 +29319,7 @@ function ɵɵi18nExp(value) {
         changeMask = changeMask | (1 << shiftsCounter);
     }
     shiftsCounter++;
+    return ɵɵi18nExp;
 }
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
