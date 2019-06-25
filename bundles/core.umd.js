@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+80.sha-280e856.with-local-changes
+ * @license Angular v8.1.0-next.3+81.sha-ae1ac45.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18717,7 +18717,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+80.sha-280e856.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+81.sha-ae1ac45.with-local-changes');
 
     /**
      * @license
@@ -27377,7 +27377,8 @@
             this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
-            return this.loadAndCompile(path);
+            var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+            return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         };
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
