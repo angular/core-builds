@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+52.sha-f7e9659.with-local-changes
+ * @license Angular v8.1.0-next.3+61.sha-b11a205.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19049,7 +19049,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-next.3+52.sha-f7e9659.with-local-changes');
+    var VERSION = new Version('8.1.0-next.3+61.sha-b11a205.with-local-changes');
 
     /**
      * @license
@@ -25952,7 +25952,7 @@
     var HostBinding = makePropDecorator('HostBinding', ɵ8);
     var ɵ9 = function (eventName, args) { return ({ eventName: eventName, args: args }); };
     /**
-     * Binds a CSS event to a host listener and supplies configuration metadata.
+     * Binds a DOM event to a host listener and supplies configuration metadata.
      * Angular invokes the supplied handler method when the host element emits the specified event,
      * and updates the bound element with the result.
      * If the handler method returns false, applies `preventDefault` on the bound element.
