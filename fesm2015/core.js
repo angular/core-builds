@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+86.sha-4fe0e75.with-local-changes
+ * @license Angular v8.1.0-next.3+98.sha-3788ebb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5570,9 +5570,12 @@ function resetComponentState() {
  * the direction of traversal (up or down the view tree) a bit clearer.
  *
  * @param {?} newView New state to become active
+ * @param {?} safeToRunHooks Whether the runtime is in a state where running lifecycle hooks is valid.
+ * This is not always the case (for example, the application may have crashed and `leaveView` is
+ * being executed while unwinding the call stack).
  * @return {?}
  */
-function leaveView(newView) {
+function leaveView(newView, safeToRunHooks) {
     /** @type {?} */
     const tView = lView[TVIEW];
     if (isCreationMode(lView)) {
@@ -5581,7 +5584,7 @@ function leaveView(newView) {
     else {
         try {
             resetPreOrderHookFlags(lView);
-            executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode, 2 /* AfterViewInitHooksToBeRun */, undefined);
+            safeToRunHooks && executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode, 2 /* AfterViewInitHooksToBeRun */, undefined);
         }
         finally {
             // Views are clean and in update mode after being checked, so these bits are cleared
@@ -14012,6 +14015,9 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
         tickRootContext(getRootContext(viewToRender));
     }
     else {
+        // Will become true if the `try` block executes with no errors.
+        /** @type {?} */
+        let safeToRunHooks = false;
         try {
             setPreviousOrParentTNode((/** @type {?} */ (null)), true);
             oldView = enterView(viewToRender, viewToRender[T_HOST]);
@@ -14023,9 +14029,10 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
             // matching, etc again and again.
             viewToRender[TVIEW].firstTemplatePass = false;
             refreshDescendantViews(viewToRender);
+            safeToRunHooks = true;
         }
         finally {
-            leaveView((/** @type {?} */ (oldView)));
+            leaveView((/** @type {?} */ (oldView)), safeToRunHooks);
             setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
         }
     }
@@ -14046,6 +14053,9 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
     const normalExecutionPath = !getCheckNoChangesMode();
     /** @type {?} */
     const creationModeIsActive = isCreationMode(hostView);
+    // Will become true if the `try` block executes with no errors.
+    /** @type {?} */
+    let safeToRunHooks = false;
     try {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
             rendererFactory.begin();
@@ -14060,12 +14070,13 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
         resetPreOrderHookFlags(hostView);
         templateFn && executeTemplate(hostView, templateFn, 2 /* Update */, context);
         refreshDescendantViews(hostView);
+        safeToRunHooks = true;
     }
     finally {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
             rendererFactory.end();
         }
-        leaveView(oldView);
+        leaveView(oldView, safeToRunHooks);
     }
 }
 /**
@@ -15505,6 +15516,9 @@ function checkView(hostView, component) {
     const templateFn = (/** @type {?} */ (hostTView.template));
     /** @type {?} */
     const creationMode = isCreationMode(hostView);
+    // Will become true if the `try` block executes with no errors.
+    /** @type {?} */
+    let safeToRunHooks = false;
     try {
         resetPreOrderHookFlags(hostView);
         creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
@@ -15514,9 +15528,10 @@ function checkView(hostView, component) {
         if (!creationMode || hostTView.staticViewQueries) {
             executeViewQueryFn(2 /* Update */, hostTView, component);
         }
+        safeToRunHooks = true;
     }
     finally {
-        leaveView(oldView);
+        leaveView(oldView, safeToRunHooks);
     }
 }
 /**
@@ -19444,7 +19459,10 @@ function ɵɵembeddedViewEnd() {
     /** @type {?} */
     const lContainer = (/** @type {?} */ (lView[PARENT]));
     ngDevMode && assertLContainerOrUndefined(lContainer);
-    leaveView((/** @type {?} */ (lContainer[PARENT])));
+    // It's always safe to run hooks here, as `leaveView` is not called during the 'finally' block
+    // of a try-catch-finally statement, so it can never be reached while unwinding the stack due to
+    // an error being thrown.
+    leaveView((/** @type {?} */ (lContainer[PARENT])), /* safeToRunHooks */ true);
     setPreviousOrParentTNode((/** @type {?} */ (viewHost)), false);
 }
 
@@ -21333,6 +21351,9 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const oldView = enterView(rootView, null);
     /** @type {?} */
     let component;
+    // Will become true if the `try` block executes with no errors.
+    /** @type {?} */
+    let safeToRunHooks = false;
     try {
         if (rendererFactory.begin)
             rendererFactory.begin();
@@ -21344,9 +21365,10 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         rootView[FLAGS] &= ~4 /* CreationMode */;
         resetPreOrderHookFlags(rootView);
         refreshDescendantViews(rootView); // update mode pass
+        safeToRunHooks = true;
     }
     finally {
-        leaveView(oldView);
+        leaveView(oldView, safeToRunHooks);
         if (rendererFactory.end)
             rendererFactory.end();
     }
@@ -23334,7 +23356,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.3+86.sha-4fe0e75.with-local-changes');
+const VERSION = new Version('8.1.0-next.3+98.sha-3788ebb.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -27899,6 +27921,9 @@ class ComponentFactory$1 extends ComponentFactory {
         let component;
         /** @type {?} */
         let tElementNode;
+        // Will become true if the `try` block executes with no errors.
+        /** @type {?} */
+        let safeToRunHooks = false;
         try {
             /** @type {?} */
             const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
@@ -27920,9 +27945,10 @@ class ComponentFactory$1 extends ComponentFactory {
             component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
             addToViewTree(rootLView, componentView);
             refreshDescendantViews(rootLView);
+            safeToRunHooks = true;
         }
         finally {
-            leaveView(oldLView);
+            leaveView(oldLView, safeToRunHooks);
         }
         /** @type {?} */
         const componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
