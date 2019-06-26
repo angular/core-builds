@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+83.sha-7186f9c.with-local-changes
+ * @license Angular v8.1.0-next.3+86.sha-4fe0e75.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7486,7 +7486,7 @@ declare interface TNode {
      *   - This would return the first head node to project:
      *     `getHost(currentTNode).projection[currentTNode.projection]`.
      * - When projecting nodes the parent node retrieved may be a `<ng-content>` node, in which case
-     *   the process is recursive in nature (not implementation).
+     *   the process is recursive in nature.
      *
      * If `projection` is of type `RNode[][]` than we have a collection of native nodes passed as
      * projectable nodes during dynamic component creation.
@@ -8065,7 +8065,7 @@ declare interface TView {
      */
     viewQuery: ViewQueriesFunction<{}> | null;
     /**
-     * Pointer to the `TNode` that represents the root of the view.
+     * Pointer to the host `TNode` (not part of this TView).
      *
      * If this is a `TViewNode` for an `LViewNode`, this is an embedded view of a container.
      * We need this pointer to be able to efficiently find this node when inserting the view
