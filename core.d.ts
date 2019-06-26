@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+80.sha-280e856.with-local-changes
+ * @license Angular v8.1.0-next.3+83.sha-7186f9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1706,18 +1706,25 @@ export declare interface Directive {
      * ### Example
      *
      * ```typescript
-     * @Directive({
+     * @Component({
      *   selector: 'child-dir',
-     *   exportAs: 'child'
+     *   outputs: [ 'bankNameChange' ]
+     *   template: `<input (input)="bankNameChange.emit($event.target.value)" />`
      * })
      * class ChildDir {
+     *  bankNameChange: EventEmitter<string> = new EventEmitter<string>();
      * }
      *
      * @Component({
      *   selector: 'main',
-     *   template: `<child-dir #c="child"></child-dir>`
+     *   template: ` {{ bankName }} <child-dir (bankNameChange)="onBankNameChange($event)"></child-dir>`
      * })
      * class MainComponent {
+     *  bankName: string;
+     *
+     *   onBankNameChange(bankName: string) {
+     *     this.bankName = bankName;
+     *   }
      * }
      * ```
      *
