@@ -18,12 +18,12 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
  * to propagate deeply into the nested containers to remove all elements in the
  * views beneath it.
  *
- * @param viewToWalk The view from which elements should be added or removed
+ * @param lView The view from which elements should be added or removed
  * @param insertMode Whether or not elements should be added (if false, removing)
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-export declare function addRemoveViewFromContainer(viewToWalk: LView, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(viewToWalk: LView, insertMode: false): void;
+export declare function addRemoveViewFromContainer(lView: LView, insertMode: true, beforeNode: RNode | null): void;
+export declare function addRemoveViewFromContainer(lView: LView, insertMode: false): void;
 /**
  * Detach a `LView` from the DOM by detaching its nodes.
  *
@@ -79,9 +79,9 @@ export declare function removeView(lContainer: LContainer, removeIndex: number):
  * A standalone function which destroys an LView,
  * conducting cleanup (e.g. removing listeners, calling onDestroys).
  *
- * @param view The view to be destroyed.
+ * @param lView The view to be destroyed.
  */
-export declare function destroyLView(view: LView): void;
+export declare function destroyLView(lView: LView): void;
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
  * tree in destroyViewTree.
@@ -134,7 +134,7 @@ export declare function nativeRemoveNode(renderer: Renderer3, rNode: RNode, isHo
 /**
  * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
  * stored on a component host level.
- * @param lView A LView where nodes are inserted (target VLview)
+ * @param lView A LView where nodes are inserted (target LView)
  * @param tProjectionNode A projection node where previously re-distribution should be appended
  * (target insertion place)
  * @param selectorIndex A bucket from where nodes to project should be taken
