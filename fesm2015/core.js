@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+101.sha-e01d697.with-local-changes
+ * @license Angular v8.1.0-next.3+106.sha-2be061a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18285,8 +18285,8 @@ function executeActionOnView(renderer, action, lView, renderParent, beforeNode) 
     }
 }
 /**
- * `executeActionOnProjection` performs an operation on the projection specified by `action` (insert,
- * detach, destroy)
+ * `executeActionOnProjection` performs an operation on the projection specified by `action`
+ * (insert, detach, destroy).
  *
  * Inserting a projection requires us to locate the projected nodes from the parent component. The
  * complication is that those nodes themselves could be re-projected from their parent component.
@@ -18362,8 +18362,8 @@ function executeActionOnContainer(renderer, action, lContainer, renderParent, be
     }
 }
 /**
- * `executeActionOnElementContainer` performs an operation on the ng-container node and its child nodes
- * as specified by the `action` (insert, detach, destroy)
+ * `executeActionOnElementContainer` performs an operation on the ng-container node and its child
+ * nodes as specified by the `action` (insert, detach, destroy).
  *
  * @param {?} renderer Renderer to use
  * @param {?} action action to perform (insert, detach, destroy)
@@ -23795,7 +23795,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.1.0-next.3+101.sha-e01d697.with-local-changes');
+const VERSION = new Version('8.1.0-next.3+106.sha-2be061a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
