@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-next.3+86.sha-4fe0e75.with-local-changes
+ * @license Angular v8.1.0-rc.0+2.sha-f2360aa.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1717,7 +1717,9 @@ export declare interface Directive {
      *
      * @Component({
      *   selector: 'main',
-     *   template: ` {{ bankName }} <child-dir (bankNameChange)="onBankNameChange($event)"></child-dir>`
+     *   template: `
+     *     {{ bankName }} <child-dir (bankNameChange)="onBankNameChange($event)"></child-dir>
+     *   `
      * })
      * class MainComponent {
      *  bankName: string;
@@ -12616,7 +12618,7 @@ export declare function ɵɵloadContentQuery<T>(): QueryList<T>;
 export declare function ɵɵloadViewQuery<T>(): T;
 
 /**
- * Sets the namespace used to create elements no `null`, which forces element creation to use
+ * Sets the namespace used to create elements to `null`, which forces element creation to use
  * `createElement` rather than `createElementNS`.
  *
  * @codeGenApi
