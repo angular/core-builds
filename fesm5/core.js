@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-rc.0+12.sha-d171006.with-local-changes
+ * @license Angular v8.1.0-rc.0+14.sha-4f38419.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14210,20 +14210,20 @@ function executeActionOnContainer(renderer, action, lContainer, renderParent, be
     }
 }
 /**
- * `executeActionOnElementContainer` performs an operation on the ng-container node and its child
- * nodes as specified by the `action` (insert, detach, destroy).
+ * `executeActionOnElementContainerOrIcuContainer` performs an operation on the ng-container node
+ * and its child nodes as specified by the `action` (insert, detach, destroy).
  *
  * @param renderer Renderer to use
  * @param action action to perform (insert, detach, destroy)
  * @param lView The LView which needs to be inserted, detached, destroyed.
- * @param tElementContainerNode The TNode associated with the ElementContainer.
+ * @param tNode The TNode associated with the `ElementContainer` or `IcuContainer`.
  * @param renderParent parent DOM element for insertion/removal.
  * @param beforeNode Before which node the insertions should happen.
  */
-function executeActionOnElementContainer(renderer, action, lView, tElementContainerNode, renderParent, beforeNode) {
-    var node = lView[tElementContainerNode.index];
+function executeActionOnElementContainerOrIcuContainer(renderer, action, lView, tNode, renderParent, beforeNode) {
+    var node = lView[tNode.index];
     executeActionOnElementOrContainer(action, renderer, renderParent, node, beforeNode);
-    var childTNode = tElementContainerNode.child;
+    var childTNode = tNode.child;
     while (childTNode) {
         executeActionOnNode(renderer, action, lView, childTNode, renderParent, beforeNode);
         childTNode = childTNode.next;
@@ -14231,8 +14231,9 @@ function executeActionOnElementContainer(renderer, action, lView, tElementContai
 }
 function executeActionOnNode(renderer, action, lView, tNode, renderParent, beforeNode) {
     var elementContainerRootTNodeType = tNode.type;
-    if (elementContainerRootTNodeType === 4 /* ElementContainer */) {
-        executeActionOnElementContainer(renderer, action, lView, tNode, renderParent, beforeNode);
+    if (elementContainerRootTNodeType === 4 /* ElementContainer */ ||
+        elementContainerRootTNodeType === 5 /* IcuContainer */) {
+        executeActionOnElementContainerOrIcuContainer(renderer, action, lView, tNode, renderParent, beforeNode);
     }
     else if (elementContainerRootTNodeType === 1 /* Projection */) {
         executeActionOnProjection(renderer, action, lView, tNode, renderParent, beforeNode);
@@ -18708,7 +18709,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-rc.0+12.sha-d171006.with-local-changes');
+var VERSION = new Version('8.1.0-rc.0+14.sha-4f38419.with-local-changes');
 
 /**
  * @license
