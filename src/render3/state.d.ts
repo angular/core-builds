@@ -226,10 +226,15 @@ export declare function ɵɵnamespaceSVG(): void;
  */
 export declare function ɵɵnamespaceMathML(): void;
 /**
- * Sets the namespace used to create elements no `null`, which forces element creation to use
+ * Sets the namespace used to create elements to `null`, which forces element creation to use
  * `createElement` rather than `createElementNS`.
  *
  * @codeGenApi
  */
 export declare function ɵɵnamespaceHTML(): void;
+/**
+ * Sets the namespace used to create elements to `null`, which forces element creation to use
+ * `createElement` rather than `createElementNS`.
+ */
+export declare function namespaceHTMLInternal(): void;
 export declare function getNamespace(): string | null;
