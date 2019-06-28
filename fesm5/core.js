@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-rc.0+23.sha-a29dc96.with-local-changes
+ * @license Angular v8.1.0-rc.0+24.sha-c12b6fa.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19027,7 +19027,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.1.0-rc.0+23.sha-a29dc96.with-local-changes');
+var VERSION = new Version('8.1.0-rc.0+24.sha-c12b6fa.with-local-changes');
 
 /**
  * @license
@@ -22254,8 +22254,9 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             leaveView(oldLView, safeToRunHooks);
         }
         var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
-        if (isInternalRootView) {
-            // The host element of the internal root view is attached to the component's host view node
+        if (isInternalRootView || isIsolated) {
+            // The host element of the internal or isolated root view is attached to the component's host
+            // view node.
             componentRef.hostView._tViewNode.child = tElementNode;
         }
         return componentRef;
