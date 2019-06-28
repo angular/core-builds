@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-rc.0+24.sha-c12b6fa.with-local-changes
+ * @license Angular v8.1.0-rc.0+25.sha-7ca611c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14514,26 +14514,30 @@
      * @param renderer Renderer to use
      * @param action action to perform (insert, detach, destroy)
      * @param lView The LView which needs to be inserted, detached, destroyed.
+     * @param tProjectionNode projection TNode to process
      * @param renderParent parent DOM element for insertion/removal.
      * @param beforeNode Before which node the insertions should happen.
      */
     function executeActionOnProjection(renderer, action, lView, tProjectionNode, renderParent, beforeNode) {
         var componentLView = findComponentView(lView);
         var componentNode = componentLView[T_HOST];
+        ngDevMode && assertDefined(componentNode.projection, 'Element nodes for which projection is processed must have projection defined.');
         var nodeToProject = componentNode.projection[tProjectionNode.projection];
-        if (Array.isArray(nodeToProject)) {
-            for (var i = 0; i < nodeToProject.length; i++) {
-                var rNode = nodeToProject[i];
-                ngDevMode && assertDomNode(rNode);
-                executeActionOnElementOrContainer(action, renderer, renderParent, rNode, beforeNode);
+        if (nodeToProject !== undefined) {
+            if (Array.isArray(nodeToProject)) {
+                for (var i = 0; i < nodeToProject.length; i++) {
+                    var rNode = nodeToProject[i];
+                    ngDevMode && assertDomNode(rNode);
+                    executeActionOnElementOrContainer(action, renderer, renderParent, rNode, beforeNode);
+                }
             }
-        }
-        else {
-            var projectionTNode = nodeToProject;
-            var projectedComponentLView = componentLView[PARENT];
-            while (projectionTNode !== null) {
-                executeActionOnNode(renderer, action, projectedComponentLView, projectionTNode, renderParent, beforeNode);
-                projectionTNode = projectionTNode.projectionNext;
+            else {
+                var projectionTNode = nodeToProject;
+                var projectedComponentLView = componentLView[PARENT];
+                while (projectionTNode !== null) {
+                    executeActionOnNode(renderer, action, projectedComponentLView, projectionTNode, renderParent, beforeNode);
+                    projectionTNode = projectionTNode.projectionNext;
+                }
             }
         }
     }
@@ -14589,12 +14593,11 @@
         }
     }
     function executeActionOnNode(renderer, action, lView, tNode, renderParent, beforeNode) {
-        var elementContainerRootTNodeType = tNode.type;
-        if (elementContainerRootTNodeType === 4 /* ElementContainer */ ||
-            elementContainerRootTNodeType === 5 /* IcuContainer */) {
+        var nodeType = tNode.type;
+        if (nodeType === 4 /* ElementContainer */ || nodeType === 5 /* IcuContainer */) {
             executeActionOnElementContainerOrIcuContainer(renderer, action, lView, tNode, renderParent, beforeNode);
         }
-        else if (elementContainerRootTNodeType === 1 /* Projection */) {
+        else if (nodeType === 1 /* Projection */) {
             executeActionOnProjection(renderer, action, lView, tNode, renderParent, beforeNode);
         }
         else {
@@ -19072,7 +19075,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-rc.0+24.sha-c12b6fa.with-local-changes');
+    var VERSION = new Version('8.1.0-rc.0+25.sha-7ca611c.with-local-changes');
 
     /**
      * @license
