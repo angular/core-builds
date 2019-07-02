@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-rc.0+37.sha-a4a423a.with-local-changes
+ * @license Angular v8.1.0-rc.0+40.sha-02491a6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15028,7 +15028,7 @@
             // inputs are only evaluated from a template binding into a directive, therefore,
             // there should not be a situation where a directive host bindings function
             // evaluates the inputs (this should only happen in the template function)
-            if (hasClassInput(tNode) && classes !== NO_CHANGE) {
+            if (hasClassInput(tNode)) {
                 var initialClasses = getInitialClassNameValue(stylingContext);
                 var classInputVal = (initialClasses.length ? (initialClasses + ' ') : '') + forceClassesAsString(classes);
                 setInputsForProperty(lView, tNode.inputs['class'], classInputVal);
@@ -16679,6 +16679,715 @@
             textBindingInternal(lView, index, interpolated);
         }
         return ɵɵtextInterpolateV;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     *
+     * Update an interpolated class on an element with single bound value surrounded by text.
+     *
+     * Used when the value passed to a property has 1 interpolated value in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate1('prefix', v0, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 2 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 2 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate2('prefix', v0, '-', v1, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 3 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 3 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate3(
+     * 'prefix', v0, '-', v1, '-', v2, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 4 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 4 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate4(
+     * 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 5 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 5 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate5(
+     * 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 6 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 6 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate6(
+     *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 7 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 7 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate7(
+     *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     *
+     * Update an interpolated class on an element with 8 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 8 interpolated values in it:
+     *
+     * ```html
+     * <div class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolate8(
+     *  'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param i6 Static value used for concatenation only.
+     * @param v7 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+    /**
+     * Update an interpolated class on an element with 8 or more bound values surrounded by text.
+     *
+     * Used when the number of interpolated values exceeds 7.
+     *
+     * ```html
+     * <div
+     *  class="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵclassMapInterpolateV(
+     *  ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+     *  'suffix']);
+     * ```
+     *.
+     * @param values The a collection of values and the strings in-between those values, beginning with
+     * a string prefix and ending with a string suffix.
+     * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+     * @codeGenApi
+     */
+    function ɵɵclassMapInterpolateV(values) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolationV(values);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵclassMap(interpolatedValue);
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     *
+     * Update an interpolated style property on an element with single bound value surrounded by text.
+     *
+     * Used when the value passed to a property has 1 interpolated value in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate1(0, 'prefix', v0, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate1;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 2 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 2 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate2(0, 'prefix', v0, '-', v1, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate2;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 3 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 3 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate3(0, 'prefix', v0, '-', v1, '-', v2, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate3;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 4 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 4 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate4(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate4;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 5 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 5 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate5(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate5;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 6 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 6 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate6(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate6;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 7 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 7 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate7(
+     *    0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate7;
+    }
+    /**
+     *
+     * Update an interpolated style property on an element with 8 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 8 interpolated values in it:
+     *
+     * ```html
+     * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolate8(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6,
+     * '-', v7, 'suffix');
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`.
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param i6 Static value used for concatenation only.
+     * @param v7 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        if (interpolatedValue !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolate8;
+    }
+    /**
+     * Update an interpolated style property on an element with 8 or more bound values surrounded by
+     * text.
+     *
+     * Used when the number of interpolated values exceeds 7.
+     *
+     * ```html
+     * <div
+     *  style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix">
+     * </div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstylePropInterpolateV(
+     *  0, ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+     *  'suffix']);
+     * ```
+     *
+     * @param styleIndex Index of style to update. This index value refers to the
+     *        index of the style in the style bindings array that was passed into
+     *        `styling`..
+     * @param values The a collection of values and the strings in-between those values, beginning with
+     * a string prefix and ending with a string suffix.
+     * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+     * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+     * @param forceOverride Whether or not to update the styling value immediately.
+     * @returns itself, so that it may be chained.
+     * @codeGenApi
+     */
+    function ɵɵstylePropInterpolateV(styleIndex, values, valueSuffix, forceOverride) {
+        // TODO(FW-1340): Refactor to remove the use of other instructions here.
+        var interpolated = ɵɵinterpolationV(values);
+        if (interpolated !== NO_CHANGE) {
+            ɵɵstyleProp(styleIndex, interpolated, valueSuffix, forceOverride);
+        }
+        return ɵɵstylePropInterpolateV;
     }
 
     /**
@@ -18743,7 +19452,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-rc.0+37.sha-a4a423a.with-local-changes');
+    var VERSION = new Version('8.1.0-rc.0+40.sha-02491a6.with-local-changes');
 
     /**
      * @license
@@ -24840,9 +25549,27 @@
         'ɵɵreference': ɵɵreference,
         'ɵɵelementHostAttrs': ɵɵelementHostAttrs,
         'ɵɵclassMap': ɵɵclassMap,
+        'ɵɵclassMapInterpolate1': ɵɵclassMapInterpolate1,
+        'ɵɵclassMapInterpolate2': ɵɵclassMapInterpolate2,
+        'ɵɵclassMapInterpolate3': ɵɵclassMapInterpolate3,
+        'ɵɵclassMapInterpolate4': ɵɵclassMapInterpolate4,
+        'ɵɵclassMapInterpolate5': ɵɵclassMapInterpolate5,
+        'ɵɵclassMapInterpolate6': ɵɵclassMapInterpolate6,
+        'ɵɵclassMapInterpolate7': ɵɵclassMapInterpolate7,
+        'ɵɵclassMapInterpolate8': ɵɵclassMapInterpolate8,
+        'ɵɵclassMapInterpolateV': ɵɵclassMapInterpolateV,
         'ɵɵstyling': ɵɵstyling,
         'ɵɵstyleMap': ɵɵstyleMap,
         'ɵɵstyleProp': ɵɵstyleProp,
+        'ɵɵstylePropInterpolate1': ɵɵstylePropInterpolate1,
+        'ɵɵstylePropInterpolate2': ɵɵstylePropInterpolate2,
+        'ɵɵstylePropInterpolate3': ɵɵstylePropInterpolate3,
+        'ɵɵstylePropInterpolate4': ɵɵstylePropInterpolate4,
+        'ɵɵstylePropInterpolate5': ɵɵstylePropInterpolate5,
+        'ɵɵstylePropInterpolate6': ɵɵstylePropInterpolate6,
+        'ɵɵstylePropInterpolate7': ɵɵstylePropInterpolate7,
+        'ɵɵstylePropInterpolate8': ɵɵstylePropInterpolate8,
+        'ɵɵstylePropInterpolateV': ɵɵstylePropInterpolateV,
         'ɵɵstyleSanitizer': styleSanitizer,
         'ɵɵstylingApply': ɵɵstylingApply,
         'ɵɵclassProp': ɵɵclassProp,
@@ -25489,7 +26216,7 @@
         }
         // Only generate the base def if there's any info inside it.
         if (inputs || outputs || viewQueries.length || queries.length || hasHostDecorators) {
-            return { name: type.name, inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries, propMetadata: propMetadata };
+            return { name: type.name, type: type, inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries, propMetadata: propMetadata };
         }
         return null;
     }
@@ -30931,7 +31658,25 @@
     exports.ɵɵstyling = ɵɵstyling;
     exports.ɵɵstyleMap = ɵɵstyleMap;
     exports.ɵɵclassMap = ɵɵclassMap;
+    exports.ɵɵclassMapInterpolate1 = ɵɵclassMapInterpolate1;
+    exports.ɵɵclassMapInterpolate2 = ɵɵclassMapInterpolate2;
+    exports.ɵɵclassMapInterpolate3 = ɵɵclassMapInterpolate3;
+    exports.ɵɵclassMapInterpolate4 = ɵɵclassMapInterpolate4;
+    exports.ɵɵclassMapInterpolate5 = ɵɵclassMapInterpolate5;
+    exports.ɵɵclassMapInterpolate6 = ɵɵclassMapInterpolate6;
+    exports.ɵɵclassMapInterpolate7 = ɵɵclassMapInterpolate7;
+    exports.ɵɵclassMapInterpolate8 = ɵɵclassMapInterpolate8;
+    exports.ɵɵclassMapInterpolateV = ɵɵclassMapInterpolateV;
     exports.ɵɵstyleProp = ɵɵstyleProp;
+    exports.ɵɵstylePropInterpolate1 = ɵɵstylePropInterpolate1;
+    exports.ɵɵstylePropInterpolate2 = ɵɵstylePropInterpolate2;
+    exports.ɵɵstylePropInterpolate3 = ɵɵstylePropInterpolate3;
+    exports.ɵɵstylePropInterpolate4 = ɵɵstylePropInterpolate4;
+    exports.ɵɵstylePropInterpolate5 = ɵɵstylePropInterpolate5;
+    exports.ɵɵstylePropInterpolate6 = ɵɵstylePropInterpolate6;
+    exports.ɵɵstylePropInterpolate7 = ɵɵstylePropInterpolate7;
+    exports.ɵɵstylePropInterpolate8 = ɵɵstylePropInterpolate8;
+    exports.ɵɵstylePropInterpolateV = ɵɵstylePropInterpolateV;
     exports.ɵɵstylingApply = ɵɵstylingApply;
     exports.ɵɵclassProp = ɵɵclassProp;
     exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
