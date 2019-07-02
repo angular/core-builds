@@ -120,7 +120,7 @@ export declare function ɵɵstyleMap(styles: {
  */
 export declare function ɵɵclassMap(classes: {
     [styleName: string]: any;
-} | string | null): void;
+} | NO_CHANGE | string | null): void;
 /**
  * Apply all style and class binding values to the element.
  *
