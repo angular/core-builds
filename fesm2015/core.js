@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.0+3.sha-1d3e227.with-local-changes
+ * @license Angular v8.2.0-next.0+4.sha-e30f494.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16221,7 +16221,6 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
     const bound = bind(lView, value);
     if (bound !== NO_CHANGE) {
@@ -16245,18 +16244,15 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
  * - has evaluated expressions at odd indexes.
  *
  * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} values
  * @return {?}
  */
-function ɵɵinterpolationV(values) {
+function interpolationV(lView, values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     /** @type {?} */
     let isBindingUpdated = false;
-    /** @type {?} */
-    const lView = getLView();
     /** @type {?} */
     const tData = lView[TVIEW].data;
     /** @type {?} */
@@ -16288,16 +16284,13 @@ function ɵɵinterpolationV(values) {
 /**
  * Creates an interpolation binding with 1 expression.
  *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix static value used for concatenation only.
  * @param {?} v0 value checked for change.
  * @param {?} suffix static value used for concatenation only.
- *
  * @return {?}
  */
-function ɵɵinterpolation1(prefix, v0, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation1(lView, prefix, v0, suffix) {
     /** @type {?} */
     const different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
     storeBindingMetadata(lView, prefix, suffix);
@@ -16305,8 +16298,7 @@ function ɵɵinterpolation1(prefix, v0, suffix) {
 }
 /**
  * Creates an interpolation binding with 2 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16314,9 +16306,7 @@ function ɵɵinterpolation1(prefix, v0, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation2(lView, prefix, v0, i0, v1, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16332,8 +16322,7 @@ function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
 }
 /**
  * Creates an interpolation binding with 3 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16343,9 +16332,7 @@ function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16366,8 +16353,7 @@ function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
 }
 /**
  * Create an interpolation binding with 4 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16379,9 +16365,7 @@ function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16404,8 +16388,7 @@ function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
 }
 /**
  * Creates an interpolation binding with 5 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16419,9 +16402,7 @@ function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16446,8 +16427,7 @@ function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) 
 }
 /**
  * Creates an interpolation binding with 6 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16463,9 +16443,7 @@ function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) 
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16491,8 +16469,7 @@ function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, 
 }
 /**
  * Creates an interpolation binding with 7 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16510,9 +16487,7 @@ function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, 
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16540,8 +16515,7 @@ function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, 
 }
 /**
  * Creates an interpolation binding with 8 expressions.
- *
- * \@codeGenApi
+ * @param {?} lView
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16561,9 +16535,7 @@ function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, 
  * @param {?} suffix
  * @return {?}
  */
-function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    /** @type {?} */
-    const lView = getLView();
+function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     /** @type {?} */
     const bindingIndex = lView[BINDING_INDEX];
     /** @type {?} */
@@ -16625,9 +16597,8 @@ function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, name
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16665,9 +16636,8 @@ function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitiz
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16708,9 +16678,8 @@ function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix,
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16753,9 +16722,8 @@ function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16800,9 +16768,8 @@ function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16849,9 +16816,8 @@ function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16900,9 +16866,8 @@ function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16953,9 +16918,8 @@ function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
     }
@@ -16993,9 +16957,8 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
     const index = getSelectedIndex();
     /** @type {?} */
     const lView = getLView();
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolated = ɵɵinterpolationV(values);
+    const interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
         elementAttributeInternal(index, attrName, interpolated, lView, sanitizer, namespace);
     }
@@ -20025,7 +19988,7 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+    const interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20065,7 +20028,7 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    const interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20108,7 +20071,7 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    const interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20153,7 +20116,7 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    const interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20200,7 +20163,7 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    const interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20249,7 +20212,7 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    const interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20300,7 +20263,7 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    const interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20353,7 +20316,7 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    const interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20393,7 +20356,7 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     /** @type {?} */
     const index = getSelectedIndex();
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolationV(values);
+    const interpolatedValue = interpolationV(getLView(), values);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
     }
@@ -20507,7 +20470,7 @@ function ɵɵtextInterpolate1(prefix, v0, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation1(prefix, v0, suffix);
+    const interpolated = interpolation1(lView, prefix, v0, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20543,7 +20506,7 @@ function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    const interpolated = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20582,7 +20545,7 @@ function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    const interpolated = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20623,7 +20586,7 @@ function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    const interpolated = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20666,7 +20629,7 @@ function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    const interpolated = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20712,7 +20675,7 @@ function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    const interpolated = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20759,7 +20722,7 @@ function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    const interpolated = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20808,7 +20771,7 @@ function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    const interpolated = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20844,7 +20807,7 @@ function ɵɵtextInterpolateV(values) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const interpolated = ɵɵinterpolationV(values);
+    const interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
         textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
     }
@@ -20880,7 +20843,7 @@ function ɵɵtextInterpolateV(values) {
 function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+    const interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -20912,7 +20875,7 @@ function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
 function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    const interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -20947,7 +20910,7 @@ function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
 function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    const interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -20984,7 +20947,7 @@ function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
 function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    const interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -21023,7 +20986,7 @@ function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
 function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    const interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -21064,7 +21027,7 @@ function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, su
 function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    const interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -21107,7 +21070,7 @@ function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
 function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    const interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -21152,7 +21115,7 @@ function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
 function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    const interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -21184,7 +21147,7 @@ function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
 function ɵɵclassMapInterpolateV(values) {
     // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolationV(values);
+    const interpolatedValue = interpolationV(getLView(), values);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵclassMap(interpolatedValue);
     }
@@ -21222,9 +21185,8 @@ function ɵɵclassMapInterpolateV(values) {
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+    const interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21260,9 +21222,8 @@ function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, 
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+    const interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21300,9 +21261,8 @@ function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, value
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+    const interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21342,9 +21302,8 @@ function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffi
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    const interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21386,9 +21345,8 @@ function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    const interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21432,9 +21390,8 @@ function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    const interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21481,9 +21438,8 @@ function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    const interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21532,9 +21488,8 @@ function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    const interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolatedValue)), valueSuffix, forceOverride);
     }
@@ -21572,9 +21527,8 @@ function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @return {?} itself, so that it may be chained.
  */
 function ɵɵstylePropInterpolateV(styleIndex, values, valueSuffix, forceOverride) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
     /** @type {?} */
-    const interpolated = ɵɵinterpolationV(values);
+    const interpolated = interpolationV(getLView(), values);
     if (interpolated !== NO_CHANGE) {
         ɵɵstyleProp(styleIndex, (/** @type {?} */ (interpolated)), valueSuffix, forceOverride);
     }
@@ -24098,7 +24052,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.0+3.sha-1d3e227.with-local-changes');
+const VERSION = new Version('8.2.0-next.0+4.sha-e30f494.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -32265,15 +32219,6 @@ const angularCoreEnv = ((/**
     'ɵɵpureFunctionV': ɵɵpureFunctionV,
     'ɵɵgetCurrentView': ɵɵgetCurrentView,
     'ɵɵrestoreView': ɵɵrestoreView,
-    'ɵɵinterpolation1': ɵɵinterpolation1,
-    'ɵɵinterpolation2': ɵɵinterpolation2,
-    'ɵɵinterpolation3': ɵɵinterpolation3,
-    'ɵɵinterpolation4': ɵɵinterpolation4,
-    'ɵɵinterpolation5': ɵɵinterpolation5,
-    'ɵɵinterpolation6': ɵɵinterpolation6,
-    'ɵɵinterpolation7': ɵɵinterpolation7,
-    'ɵɵinterpolation8': ɵɵinterpolation8,
-    'ɵɵinterpolationV': ɵɵinterpolationV,
     'ɵɵlistener': ɵɵlistener,
     'ɵɵload': ɵɵload,
     'ɵɵprojection': ɵɵprojection,
@@ -35902,9 +35847,7 @@ class SystemJsNgModuleLoader {
      * @return {?}
      */
     load(path) {
-        /** @type {?} */
-        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+        return this.loadAndCompile(path);
     }
     /**
      * @private
@@ -40448,5 +40391,5 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵinterpolation1, ɵɵinterpolation2, ɵɵinterpolation3, ɵɵinterpolation4, ɵɵinterpolation5, ɵɵinterpolation6, ɵɵinterpolation7, ɵɵinterpolation8, ɵɵinterpolationV, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵelementEnd, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵstyling, ɵɵstyleMap, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵload, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, bindPlayerFactory as ɵbindPlayerFactory, addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
