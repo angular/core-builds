@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0+2.sha-7b0a287.with-local-changes
+ * @license Angular v8.1.0+6.sha-4bda800.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -434,7 +434,7 @@ export declare const Attribute: AttributeDecorator;
  */
 export declare interface AttributeDecorator {
     /**
-     * A parameter decorator for a directive constructor that designates
+     * Parameter decorator for a directive constructor that designates
      * a host-element attribute whose value is injected as a constant string literal.
      *
      * @usageNotes
@@ -447,11 +447,11 @@ export declare interface AttributeDecorator {
      *
      * The following example uses the decorator to inject the string literal `text`.
      *
-     * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
+     * {@example core/ts/metadata/metadata.ts region='attributeMetadata' linenums="false"}
      *
      * ### Example as TypeScript Decorator
      *
-     * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
+     * {@example core/ts/metadata/metadata.ts region='attributeFactory' linenums="false"}
      *
      */
     (name: string): any;
@@ -630,22 +630,19 @@ declare const CHILD_TAIL = 15;
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
  *
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ClassProvider' linenums="false"}
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
+ * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -655,7 +652,7 @@ export declare interface ClassProvider extends ClassSansProvider {
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -665,7 +662,7 @@ export declare interface ClassProvider extends ClassSansProvider {
  * Configures the `Injector` to return a value by invoking a `useClass` function.
  * Base for `ClassProvider` decorator.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -910,7 +907,8 @@ export declare interface ComponentDecorator {
      * The following example creates a component with two data-bound properties,
      * specified by the `inputs` value.
      *
-     * <code-example path="core/ts/metadata/directives.ts" region="component-input">
+     * <code-example path="core/ts/metadata/directives.ts" region="component-input"
+     * linenums="false">
      * </code-example>
      *
      *
@@ -919,14 +917,15 @@ export declare interface ComponentDecorator {
      * The following example shows two event emitters that emit on an interval. One
      * emits an output every second, while the other emits every five seconds.
      *
-     * {@example core/ts/metadata/directives.ts region='component-output-interval'}
+     * {@example core/ts/metadata/directives.ts region='component-output-interval
+     * linenums="false"}
      *
      * ### Injecting a class with a view provider
      *
      * The following simple example injects a class into a component
      * using the view provider specified in component metadata:
      *
-     * ```
+     * ```ts
      * class Greeter {
      *    greet(name:string) {
      *      return 'Hello ' + name + '!';
@@ -967,13 +966,13 @@ export declare interface ComponentDecorator {
      * * Trims all whitespaces at the beginning and the end of a template.
      * * Removes whitespace-only text nodes. For example,
      *
-     * ```
+     * ```html
      * <button>Action 1</button>  <button>Action 2</button>
      * ```
      *
      * becomes:
      *
-     * ```
+     * ```html
      * <button>Action 1</button><button>Action 2</button>
      * ```
      *
@@ -1041,6 +1040,12 @@ declare interface ComponentDefFeature {
 }
 
 /**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
+ *
  * @publicApi
  */
 declare abstract class ComponentFactory<C> {
@@ -1049,7 +1054,7 @@ declare abstract class ComponentFactory<C> {
      */
     abstract readonly selector: string;
     /**
-     * The component's type
+     * The type of component the factory will create.
      */
     abstract readonly componentType: Type<any>;
     /**
@@ -1079,10 +1084,20 @@ export { ComponentFactory }
 export { ComponentFactory as ɵComponentFactory }
 
 /**
+ * A simple registry that maps `Components` to generated `ComponentFactory` classes
+ * that can be used to create instances of components.
+ * Use to obtain the factory for a given component type,
+ * then use the factory's `create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
  * @publicApi
  */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
+    /**
+     * Retrieves the factory object that creates a component of the given type.
+     * @param component The component type.
+     */
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 
@@ -1118,7 +1133,7 @@ export declare abstract class ComponentRef<C> {
      */
     abstract readonly changeDetectorRef: ChangeDetectorRef;
     /**
-     * The component type.
+     * The type of this component (as created by a `ComponentFactory` class).
      */
     abstract readonly componentType: Type<any>;
     /**
@@ -1144,27 +1159,25 @@ declare type ComponentTemplate<T> = {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
  *
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
-declare interface ConstructorProvider extends ConstructorSansProvider {
+export declare interface ConstructorProvider extends ConstructorSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: Type<any>;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -1173,13 +1186,11 @@ declare interface ConstructorProvider extends ConstructorSansProvider {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
  *
- * ### Example
- *
- * ```
+ * ```ts
  * @Injectable(SomeModule, {deps: []})
  * class MyService {}
  * ```
@@ -1188,8 +1199,7 @@ declare interface ConstructorProvider extends ConstructorSansProvider {
  */
 export declare interface ConstructorSansProvider {
     /**
-     * A list of `token`s which need to be resolved by the injector. The list of values is then
-     * used as arguments to the `useClass` constructor.
+     * A list of `token`s to be resolved by the injector.
      */
     deps?: any[];
 }
@@ -1220,33 +1230,35 @@ export declare const ContentChild: ContentChildDecorator;
  */
 export declare interface ContentChildDecorator {
     /**
-     * Configures a content query.
+     * Parameter decorator that configures a content query.
      *
-     * You can use ContentChild to get the first element or the directive matching the selector from
-     * the content DOM. If the content DOM changes, and a new child matches the selector,
+     * Use to get the first element or the directive matching the selector from the content DOM.
+     * If the content DOM changes, and a new child matches the selector,
      * the property will be updated.
      *
      * Content queries are set before the `ngAfterContentInit` callback is called.
      *
      * **Metadata Properties**:
      *
-     * * **selector** - the directive type or the name used for querying.
-     * * **read** - read a different token from the queried element.
-     * * **static** - whether or not to resolve query results before change detection runs (i.e.
-     * return static results only). If this option is not provided, the compiler will fall back
-     * to its default behavior, which is to use query results to determine the timing of query
-     * resolution. If any query results are inside a nested view (e.g. *ngIf), the query will be
-     * resolved after change detection runs. Otherwise, it will be resolved before change detection
+     * * **selector** - The directive type or the name used for querying.
+     * * **read** - True to read a different token from the queried element.
+     * * **static** - True to resolve query results before change detection runs,
+     * false to resolve after change detection.
+     *
+     * When `static` is not provided, uses the query results to determine the timing of query
+     * resolution. If any query results are inside a nested view (such as `*ngIf`), the query is
+     * resolved after change detection runs. Otherwise, it is resolved before change detection
      * runs.
      *
      * @usageNotes
+     *
+     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'
+     * linenums="false"}
+     *
      * ### Example
      *
-     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
-     *
-     * ### Example
-     *
-     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
+     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'
+     * linenums="false"}
      *
      * @Annotation
      */
@@ -1286,33 +1298,34 @@ export declare const ContentChildren: ContentChildrenDecorator;
  */
 export declare interface ContentChildrenDecorator {
     /**
-     * Configures a content query.
+     * Parameter decorator that configures a content query.
      *
-     * You can use ContentChildren to get the `QueryList` of elements or directives from the
-     * content DOM. Any time a child element is added, removed, or moved, the query list will be
+     * Use to get the `QueryList` of elements or directives from the content DOM.
+     * Any time a child element is added, removed, or moved, the query list will be
      * updated, and the changes observable of the query list will emit a new value.
      *
      * Content queries are set before the `ngAfterContentInit` callback is called.
      *
      * **Metadata Properties**:
      *
-     * * **selector** - the directive type or the name used for querying.
-     * * **descendants** - include only direct children or all descendants.
-     * * **read** - read a different token from the queried elements.
+     * * **selector** - The directive type or the name used for querying.
+     * * **descendants** - True to include all descendants, otherwise include only direct children.
+     * * **read** - True to read a different token from the queried elements.
      *
      * @usageNotes
-     * ### Basic Example
      *
      * Here is a simple demonstration of how the `ContentChildren` decorator can be used.
      *
-     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
+     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'
+     * linenums="false"}
      *
-     * ### Tab-pane Example
+     * ### Tab-pane example
      *
      * Here is a slightly more realistic example that shows how `ContentChildren` decorators
      * can be used to implement a tab pane component.
      *
-     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
+     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'
+     * linenums="false"}
      *
      * @Annotation
      */
@@ -1666,9 +1679,8 @@ export declare interface Directive {
      * - `bindingProperty` specifies the DOM property where the value is read from.
      *
      * When `bindingProperty` is not provided, it is assumed to be equal to `directiveProperty`.
-     * @usageNotes
      *
-     * ### Example
+     * @usageNotes
      *
      * The following example creates a component with two data-bound properties.
      *
@@ -1702,8 +1714,6 @@ export declare interface Directive {
      * - `bindingProperty` specifies the DOM property the event handler is attached to.
      *
      * @usageNotes
-     *
-     * ### Example
      *
      * ```typescript
      * @Component({
@@ -1743,9 +1753,7 @@ export declare interface Directive {
      *
      * @usageNotes
      *
-     * ### Simple Example
-     *
-     * ```
+     * ```ts
      * @Directive({
      *   selector: 'child-dir',
      *   exportAs: 'child'
@@ -1771,12 +1779,10 @@ export declare interface Directive {
      *
      * @usageNotes
      *
-     * ### Example
-     *
      * The following example shows how queries are defined
      * and when their results are available in lifecycle hooks:
      *
-     * ```
+     * ```ts
      * @Component({
      *   selector: 'someDir',
      *   queries: {
@@ -1851,8 +1857,9 @@ export declare const Directive: DirectiveDecorator;
  */
 export declare interface DirectiveDecorator {
     /**
-     * Marks a class as an Angular directive. You can define your own
-     * directives to attach custom behavior to elements in the DOM.
+     * Decorator that marks a class as an Angular directive.
+     * You can define your own directives to attach custom behavior to elements in the DOM.
+     *
      * The options provide configuration metadata that determines
      * how the directive should be processed, instantiated and used at
      * runtime.
@@ -1864,7 +1871,7 @@ export declare interface DirectiveDecorator {
      * @usageNotes
      * To define a directive, mark the class with the decorator and provide metadata.
      *
-     * ```
+     * ```ts
      * import {Directive} from '@angular/core';
      *
      * @Directive({
@@ -1885,7 +1892,7 @@ export declare interface DirectiveDecorator {
      * a directive imported from another module.
      * List the directive class in the `declarations` field of an NgModule.
      *
-     * ```
+     * ```ts
      * declarations: [
      *  AppComponent,
      *  MyDirective
@@ -2231,7 +2238,7 @@ export declare class ErrorHandler {
  * that create event emitters. When the title is clicked, the emitter
  * emits an open or close event to toggle the current visibility state.
  *
- * ```
+ * ```html
  * @Component({
  *   selector: 'zippy',
  *   template: `
@@ -2260,16 +2267,9 @@ export declare class ErrorHandler {
  * Access the event object with the `$event` argument passed to the output event
  * handler:
  *
- * ```
+ * ```html
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
- *
- * ### Notes
- *
- * Uses Rx.Observable but provides an adapter to make it work as specified here:
- * https://github.com/jhusain/observable-spec
- *
- * Once a reference implementation of the spec is available, switch to it.
  *
  * @publicApi
  */
@@ -2305,27 +2305,25 @@ export declare class EventEmitter<T> extends Subject<T> {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
  *
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ExistingProvider' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
 export declare interface ExistingProvider extends ExistingSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -2334,19 +2332,14 @@ export declare interface ExistingProvider extends ExistingSansProvider {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- *
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ExistingSansProvider'}
+ * @see `ExistingProvider`
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
  */
-declare interface ExistingSansProvider {
+export declare interface ExistingSansProvider {
     /**
-     * Existing `token` to return. (equivalent to `injector.get(useExisting)`)
+     * Existing `token` to return. (Equivalent to `injector.get(useExisting)`)
      */
     useExisting: any;
 }
@@ -2376,22 +2369,19 @@ declare type FactoryFn<T> = {
 
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
  *
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='FactoryProvider'}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProvider' linenums="false"}
  *
  * Dependencies can also be marked as optional:
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -2401,7 +2391,7 @@ export declare interface FactoryProvider extends FactorySansProvider {
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -2410,23 +2400,19 @@ export declare interface FactoryProvider extends FactorySansProvider {
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='FactorySansProvider'}
+ * @see `FactoryProvider`
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
  */
-declare interface FactorySansProvider {
+export declare interface FactorySansProvider {
     /**
      * A function to invoke to create a value for this `token`. The function is invoked with
      * resolved values of `token`s in the `deps` field.
      */
     useFactory: Function;
     /**
-     * A list of `token`s which need to be resolved by the injector. The list of values is then
+     * A list of `token`s to be resolved by the injector. The list of values is then
      * used as arguments to the `useFactory` function.
      */
     deps?: any[];
@@ -2597,7 +2583,7 @@ declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U, 
  */
 export declare interface HostDecorator {
     /**
-     * A parameter decorator on a view-provider parameter of a class constructor
+     * Parameter decorator on a view-provider parameter of a class constructor
      * that tells the DI framework to resolve the view by checking injectors of child
      * elements, and stop when reaching the host element of the current component.
      *
@@ -2608,7 +2594,8 @@ export declare interface HostDecorator {
      *
      * The following shows use with the `@Optional` decorator, and allows for a null result.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Host"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Host"
+     *  linenums="false"></code-example>
      */
     (): any;
     new (): Host;
@@ -2684,9 +2671,10 @@ export declare interface HostListener {
 }
 
 /**
- * Binds a DOM event to a host listener and supplies configuration metadata.
+ * Decorator that binds a DOM event to a host listener and supplies configuration metadata.
  * Angular invokes the supplied handler method when the host element emits the specified event,
  * and updates the bound element with the result.
+ *
  * If the handler method returns false, applies `preventDefault` on the bound element.
  *
  * @usageNotes
@@ -2694,7 +2682,7 @@ export declare interface HostListener {
  * The following example declares a directive
  * that attaches a click listener to a button and counts clicks.
  *
- * ```
+ * ```ts
  * @Directive({selector: 'button[counting]'})
  * class CountClicks {
  *   numberOfClicks = 0;
@@ -3160,7 +3148,7 @@ export declare const Injectable: InjectableDecorator;
  */
 export declare interface InjectableDecorator {
     /**
-     * Marks a class as available to `Injector` for creation.
+     * Decorator that marks a class as available to `Injector` for creation.
      *
      * @see [Introduction to Services and DI](guide/architecture-services)
      * @see [Dependency Injection Guide](guide/dependency-injection)
@@ -3170,7 +3158,8 @@ export declare interface InjectableDecorator {
      * The following example shows how service classes are properly marked as
      * injectable.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"
+     *  linenums="false"></code-example>
      *
      */
     (): TypeDecorator;
@@ -3216,7 +3205,7 @@ declare function injectChangeDetectorRef(): ChangeDetectorRef;
  */
 export declare interface InjectDecorator {
     /**
-     * A parameter decorator on a dependency parameter of a class constructor
+     * Parameter decorator on a dependency parameter of a class constructor
      * that specifies a custom provider of the dependency.
      *
      * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
@@ -3229,7 +3218,7 @@ export declare interface InjectDecorator {
      * parameter as the provider.
      *
      * <code-example path="core/di/ts/metadata_spec.ts"
-     * region="InjectWithoutDecorator"></code-example>
+     * region="InjectWithoutDecorator"  linenums="false"></code-example>
      */
     (token: any): any;
     new (token: any): Inject;
@@ -4818,7 +4807,7 @@ export declare const Optional: OptionalDecorator;
  */
 export declare interface OptionalDecorator {
     /**
-     * A parameter decorator to be used on constructor parameters,
+     * Parameter decorator to be used on constructor parameters,
      * which marks the parameter as being an optional dependency.
      * The DI framework provides null if the dependency is not found.
      *
@@ -4831,7 +4820,8 @@ export declare interface OptionalDecorator {
      *
      * The following code allows the possibility of a null result:
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional"
+     *  linenums="false"></code-example>
      *
      */
     (): any;
@@ -4973,17 +4963,15 @@ declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
 
 
 /**
- * To create a Pipe, you must implement this interface.
- *
+ * An interface that is implemented by pipes in order to perform a transformation.
  * Angular invokes the `transform` method with the value of a binding
  * as the first argument, and any parameters as the second argument in list form.
  *
  * @usageNotes
- * ### Example
  *
- * The `RepeatPipe` below repeats the value as many times as indicated by the first argument:
+ * In the following example, `RepeatPipe` repeats a given value a given number of times.
  *
- * ```
+ * ```ts
  * import {Pipe, PipeTransform} from '@angular/core';
  *
  * @Pipe({name: 'repeat'})
@@ -5213,7 +5201,7 @@ declare interface ProceduralRenderer3 {
 }
 
 /**
- * Describes a function that is used to process provider list (for example in case of provider
+ * Describes a function that is used to process provider lists (such as provider
  * overrides).
  */
 declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
@@ -5255,11 +5243,8 @@ declare type PropertyAliasValue = (number | string)[];
 
 /**
  * Describes how the `Injector` should be configured.
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @see `TypeProvider`
- * @see `ClassProvider`
  * @see `StaticProvider`
  *
  * @publicApi
@@ -6352,7 +6337,7 @@ export declare const Self: SelfDecorator;
  */
 export declare interface SelfDecorator {
     /**
-     * A parameter decorator to be used on constructor parameters,
+     * Parameter decorator to be used on constructor parameters,
      * which tells the DI framework to start dependency resolution from the local injector.
      *
      * Resolution works upward through the injector hierarchy, so the children
@@ -6364,7 +6349,8 @@ export declare interface SelfDecorator {
      * by the local injector when instantiating the class itself, but not
      * when instantiating a child.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Self"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Self"
+     *  linenums="false"></code-example>
      *
      *
      * @see `SkipSelf`
@@ -6476,7 +6462,7 @@ export declare const SkipSelf: SkipSelfDecorator;
  */
 export declare interface SkipSelfDecorator {
     /**
-     * A parameter decorator to be used on constructor parameters,
+     * Parameter decorator to be used on constructor parameters,
      * which tells the DI framework to start dependency resolution from the parent injector.
      * Resolution works upward through the injector hierarchy, so the local injector
      * is not checked for a provider.
@@ -6486,7 +6472,8 @@ export declare interface SkipSelfDecorator {
      * In the following example, the dependency can be resolved when
      * instantiating a child, but not when instantiating the class itself.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf"
+     *  linenums="false"></code-example>
      *
      * Learn more in the
      * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
@@ -6501,32 +6488,29 @@ export declare interface SkipSelfDecorator {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- *
- * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='StaticClassProvider'}
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
+ * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
-declare interface StaticClassProvider extends StaticClassSansProvider {
+export declare interface StaticClassProvider extends StaticClassSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -6538,27 +6522,22 @@ declare interface StaticClassProvider extends StaticClassSansProvider {
  *
  * @publicApi
  */
-declare interface StaticClassSansProvider {
+export declare interface StaticClassSansProvider {
     /**
-     * An optional class to instantiate for the `token`. (If not provided `provide` is assumed to be a
-     * class to instantiate)
+     * An optional class to instantiate for the `token`. By default, the `provide`
+     * class is instantiated.
      */
     useClass: Type<any>;
     /**
-     * A list of `token`s which need to be resolved by the injector. The list of values is then
+     * A list of `token`s to be resolved by the injector. The list of values is then
      * used as arguments to the `useClass` constructor.
      */
     deps: any[];
 }
 
 /**
- * Describes how the `Injector` should be configured in a static way (Without reflection).
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @see `ValueProvider`
- * @see `ExistingProvider`
- * @see `FactoryProvider`
+ * Describes how the `Injector` should be configured as static (that is, without reflection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -8287,11 +8266,8 @@ export declare interface Type<T> extends Function {
 }
 
 /**
- * An interface implemented by all Angular type decorators, which allows them to be used as ES7
- * decorators as well as
- * Angular DSL syntax.
- *
- * ES7 syntax:
+ * An interface implemented by all Angular type decorators, which allows them to be used as
+ * decorators as well as Angular syntax.
  *
  * ```
  * @ng.Component({...})
@@ -8302,7 +8278,7 @@ export declare interface Type<T> extends Function {
  */
 export declare interface TypeDecorator {
     /**
-     * Invoke as ES7 decorator.
+     * Invoke as decorator.
      */
     <T extends Type<any>>(type: T): T;
     (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
@@ -8318,9 +8294,7 @@ export declare interface TypeDecorator {
  *
  * @usageNotes
  *
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='TypeProvider'}
+ * {@example core/di/ts/provider_spec.ts region='TypeProvider' linenums="false"}
  *
  * @publicApi
  */
@@ -8329,28 +8303,27 @@ export declare interface TypeProvider extends Type<any> {
 
 /**
  * Configures the `Injector` to return a value for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
  *
  * ### Example
  *
- * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ValueProvider' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
 export declare interface ValueProvider extends ValueSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -8423,37 +8396,40 @@ export declare interface ViewChildDecorator {
      *
      * **Metadata Properties**:
      *
-     * * **selector** - the directive type or the name used for querying.
-     * * **read** - read a different token from the queried elements.
-     * * **static** - whether or not to resolve query results before change detection runs (i.e.
-     * return static results only). If this option is not provided, the compiler will fall back
-     * to its default behavior, which is to use query results to determine the timing of query
-     * resolution. If any query results are inside a nested view (e.g. *ngIf), the query will be
-     * resolved after change detection runs. Otherwise, it will be resolved before change detection
+     * * **selector** - The directive type or the name used for querying.
+     * * **read** - True to read a different token from the queried elements.
+     * * **static** - True to resolve query results before change detection runs
+     *
+     * When `static` is not provided, uses query results to determine the timing of query
+     * resolution. If any query results are inside a nested view (such as `*ngIf`), the query is
+     * resolved after change detection runs. Otherwise, it is resolved before change detection
      * runs.
      *
-     * Supported selectors include:
-     *   * any class with the `@Component` or `@Directive` decorator
-     *   * a template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
+     * The following selectors are supported.
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
      * with `@ViewChild('cmp')`)
-     *   * any provider defined in the child component tree of the current component (e.g.
+     *   * Any provider defined in the child component tree of the current component (e.g.
      * `@ViewChild(SomeService) someService: SomeService`)
-     *   * any provider defined through a string token (e.g. `@ViewChild('someToken') someTokenVal:
+     *   * Any provider defined through a string token (e.g. `@ViewChild('someToken') someTokenVal:
      * any`)
-     *   * a `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChild(TemplateRef)
+     *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChild(TemplateRef)
      * template;`)
      *
      * @usageNotes
      *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
+     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'
+     * linenums="false"}
      *
-     * ### Example
+     * ### Example 2
      *
-     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
+     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'
+     * linenums="false"}
      *
-     * ### Example
+     * ### Example 3
      *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
+     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'
+     * linenums="false"}
      *
      * @Annotation
      */
@@ -8491,28 +8467,28 @@ export declare const ViewChildren: ViewChildrenDecorator;
  */
 export declare interface ViewChildrenDecorator {
     /**
-     * Configures a view query.
+     * Parameter decorator that configures a view query.
      *
-     * You can use ViewChildren to get the `QueryList` of elements or directives from the
-     * view DOM. Any time a child element is added, removed, or moved, the query list will be updated,
+     * Use to get the `QueryList` of elements or directives from the view DOM.
+     * Any time a child element is added, removed, or moved, the query list will be updated,
      * and the changes observable of the query list will emit a new value.
      *
      * View queries are set before the `ngAfterViewInit` callback is called.
      *
      * **Metadata Properties**:
      *
-     * * **selector** - the directive type or the name used for querying.
-     * * **read** - read a different token from the queried elements.
+     * * **selector** - The directive type or the name used for querying.
+     * * **read** - True to read a different token from the queried elements.
      *
      * @usageNotes
      *
-     * ### Example
+     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'
+     * linenums="false"}
      *
-     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
+     * ### Another example
      *
-     * ### Example
-     *
-     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
+     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'
+     * linenums="false"}
      *
      * @Annotation
      */
