@@ -12,10 +12,20 @@ import { NgModuleRef } from './ng_module_factory';
 export declare function noComponentFactoryError(component: Function): Error;
 export declare function getComponent(error: Error): Type<any>;
 /**
+ * A simple registry that maps `Components` to generated `ComponentFactory` classes
+ * that can be used to create instances of components.
+ * Use to obtain the factory for a given component type,
+ * then use the factory's `create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
  * @publicApi
  */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
+    /**
+     * Retrieves the factory object that creates a component of the given type.
+     * @param component The component type.
+     */
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 export declare class CodegenComponentFactoryResolver implements ComponentFactoryResolver {

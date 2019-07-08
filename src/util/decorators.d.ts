@@ -7,11 +7,8 @@
  */
 import { Type } from '../interface/type';
 /**
- * An interface implemented by all Angular type decorators, which allows them to be used as ES7
- * decorators as well as
- * Angular DSL syntax.
- *
- * ES7 syntax:
+ * An interface implemented by all Angular type decorators, which allows them to be used as
+ * decorators as well as Angular syntax.
  *
  * ```
  * @ng.Component({...})
@@ -22,7 +19,7 @@ import { Type } from '../interface/type';
  */
 export interface TypeDecorator {
     /**
-     * Invoke as ES7 decorator.
+     * Invoke as decorator.
      */
     <T extends Type<any>>(type: T): T;
     (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;

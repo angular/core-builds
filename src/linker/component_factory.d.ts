@@ -41,7 +41,7 @@ export declare abstract class ComponentRef<C> {
      */
     abstract readonly changeDetectorRef: ChangeDetectorRef;
     /**
-     * The component type.
+     * The type of this component (as created by a `ComponentFactory` class).
      */
     abstract readonly componentType: Type<any>;
     /**
@@ -57,6 +57,12 @@ export declare abstract class ComponentRef<C> {
     abstract onDestroy(callback: Function): void;
 }
 /**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
+ *
  * @publicApi
  */
 export declare abstract class ComponentFactory<C> {
@@ -65,7 +71,7 @@ export declare abstract class ComponentFactory<C> {
      */
     abstract readonly selector: string;
     /**
-     * The component's type
+     * The type of component the factory will create.
      */
     abstract readonly componentType: Type<any>;
     /**

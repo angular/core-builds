@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.0+5.sha-4b05ebc.with-local-changes
+ * @license Angular v8.2.0-next.0+7.sha-40aaa42.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22941,6 +22941,12 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
 class ComponentRef {
 }
 /**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
+ *
  * \@publicApi
  * @abstract
  * @template C
@@ -22975,6 +22981,12 @@ class _NullComponentFactoryResolver {
     }
 }
 /**
+ * A simple registry that maps `Components` to generated `ComponentFactory` classes
+ * that can be used to create instances of components.
+ * Use to obtain the factory for a given component type,
+ * then use the factory's `create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
  * \@publicApi
  * @abstract
  */
@@ -24052,7 +24064,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.0+5.sha-4b05ebc.with-local-changes');
+const VERSION = new Version('8.2.0-next.0+7.sha-40aaa42.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -31190,7 +31202,7 @@ function unwrapValue$1(newValue) {
  * that create event emitters. When the title is clicked, the emitter
  * emits an open or close event to toggle the current visibility state.
  *
- * ```
+ * ```html
  * \@Component({
  *   selector: 'zippy',
  *   template: `
@@ -31219,16 +31231,9 @@ function unwrapValue$1(newValue) {
  * Access the event object with the `$event` argument passed to the output event
  * handler:
  *
- * ```
+ * ```html
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
- *
- * ### Notes
- *
- * Uses Rx.Observable but provides an adapter to make it work as specified here:
- * https://github.com/jhusain/observable-spec
- *
- * Once a reference implementation of the spec is available, switch to it.
  *
  * \@publicApi
  * @template T
@@ -33413,9 +33418,10 @@ const HostBinding = makePropDecorator('HostBinding', (/**
 (hostPropertyName) => ({ hostPropertyName })));
 // WARNING: interface has both a type and a value, skipping emit
 /**
- * Binds a DOM event to a host listener and supplies configuration metadata.
+ * Decorator that binds a DOM event to a host listener and supplies configuration metadata.
  * Angular invokes the supplied handler method when the host element emits the specified event,
  * and updates the bound element with the result.
+ *
  * If the handler method returns false, applies `preventDefault` on the bound element.
  *
  * \@usageNotes
@@ -33423,7 +33429,7 @@ const HostBinding = makePropDecorator('HostBinding', (/**
  * The following example declares a directive
  * that attaches a click listener to a button and counts clicks.
  *
- * ```
+ * ```ts
  * \@Directive({selector: 'button[counting]'})
  * class CountClicks {
  *   numberOfClicks = 0;
