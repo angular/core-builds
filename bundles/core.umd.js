@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0-rc.0+44.sha-95a9d67.with-local-changes
+ * @license Angular v8.2.0-next.0+11.sha-6aaca21.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13160,7 +13160,6 @@
     function ɵɵattribute(name, value, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
         var bound = bind(lView, value);
         if (bound !== NO_CHANGE) {
             elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
@@ -13186,14 +13185,11 @@
      * - has evaluated expressions at odd indexes.
      *
      * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolationV(values) {
+    function interpolationV(lView, values) {
         ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
         ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
         var isBindingUpdated = false;
-        var lView = getLView();
         var tData = lView[TVIEW].data;
         var bindingIndex = lView[BINDING_INDEX];
         if (tData[bindingIndex] == null) {
@@ -13225,22 +13221,16 @@
      * @param prefix static value used for concatenation only.
      * @param v0 value checked for change.
      * @param suffix static value used for concatenation only.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation1(prefix, v0, suffix) {
-        var lView = getLView();
+    function interpolation1(lView, prefix, v0, suffix) {
         var different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
         storeBindingMetadata(lView, prefix, suffix);
         return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
     }
     /**
      * Creates an interpolation binding with 2 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation2(prefix, v0, i0, v1, suffix) {
-        var lView = getLView();
+    function interpolation2(lView, prefix, v0, i0, v1, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated2(lView, bindingIndex, v0, v1);
         lView[BINDING_INDEX] += 2;
@@ -13253,11 +13243,8 @@
     }
     /**
      * Creates an interpolation binding with 3 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
-        var lView = getLView();
+    function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
         lView[BINDING_INDEX] += 3;
@@ -13274,11 +13261,8 @@
     }
     /**
      * Create an interpolation binding with 4 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-        var lView = getLView();
+    function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         lView[BINDING_INDEX] += 4;
@@ -13297,11 +13281,8 @@
     }
     /**
      * Creates an interpolation binding with 5 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-        var lView = getLView();
+    function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
@@ -13322,11 +13303,8 @@
     }
     /**
      * Creates an interpolation binding with 6 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-        var lView = getLView();
+    function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
@@ -13348,11 +13326,8 @@
     }
     /**
      * Creates an interpolation binding with 7 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-        var lView = getLView();
+    function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
@@ -13376,11 +13351,8 @@
     }
     /**
      * Creates an interpolation binding with 8 expressions.
-     *
-     * @codeGenApi
      */
-    function ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-        var lView = getLView();
+    function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
         var bindingIndex = lView[BINDING_INDEX];
         var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
         different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
@@ -13431,8 +13403,7 @@
     function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13467,8 +13438,7 @@
     function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13506,8 +13476,7 @@
     function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13547,8 +13516,7 @@
     function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13590,8 +13558,7 @@
     function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13635,8 +13602,7 @@
     function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13682,8 +13648,7 @@
     function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13731,8 +13696,7 @@
     function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
         }
@@ -13767,8 +13731,7 @@
     function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
         var index = getSelectedIndex();
         var lView = getLView();
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolated = ɵɵinterpolationV(values);
+        var interpolated = interpolationV(lView, values);
         if (interpolated !== NO_CHANGE) {
             elementAttributeInternal(index, attrName, interpolated, lView, sanitizer, namespace);
         }
@@ -16304,7 +16267,7 @@
      */
     function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16342,7 +16305,7 @@
      */
     function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16383,7 +16346,7 @@
      */
     function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16426,7 +16389,7 @@
      */
     function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16471,7 +16434,7 @@
      */
     function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16518,7 +16481,7 @@
      */
     function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16567,7 +16530,7 @@
      */
     function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16618,7 +16581,7 @@
      */
     function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16656,7 +16619,7 @@
      */
     function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
         var index = getSelectedIndex();
-        var interpolatedValue = ɵɵinterpolationV(values);
+        var interpolatedValue = interpolationV(getLView(), values);
         if (interpolatedValue !== NO_CHANGE) {
             elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
         }
@@ -16760,7 +16723,7 @@
     function ɵɵtextInterpolate1(prefix, v0, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation1(prefix, v0, suffix);
+        var interpolated = interpolation1(lView, prefix, v0, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16788,7 +16751,7 @@
     function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        var interpolated = interpolation2(lView, prefix, v0, i0, v1, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16817,7 +16780,7 @@
     function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        var interpolated = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16846,7 +16809,7 @@
     function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var interpolated = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16875,7 +16838,7 @@
     function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var interpolated = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16906,7 +16869,7 @@
     function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var interpolated = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16935,7 +16898,7 @@
     function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var interpolated = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16964,7 +16927,7 @@
     function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var interpolated = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -16997,7 +16960,7 @@
     function ɵɵtextInterpolateV(values) {
         var index = getSelectedIndex();
         var lView = getLView();
-        var interpolated = ɵɵinterpolationV(values);
+        var interpolated = interpolationV(lView, values);
         if (interpolated !== NO_CHANGE) {
             textBindingInternal(lView, index, interpolated);
         }
@@ -17034,7 +16997,7 @@
      */
     function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17064,7 +17027,7 @@
      */
     function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17097,7 +17060,7 @@
      */
     function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17132,7 +17095,7 @@
      */
     function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17169,7 +17132,7 @@
      */
     function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17208,7 +17171,7 @@
      */
     function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17249,7 +17212,7 @@
      */
     function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17292,7 +17255,7 @@
      */
     function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17322,7 +17285,7 @@
      */
     function ɵɵclassMapInterpolateV(values) {
         // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolationV(values);
+        var interpolatedValue = interpolationV(getLView(), values);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵclassMap(interpolatedValue);
         }
@@ -17363,8 +17326,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation1(prefix, v0, suffix);
+        var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17400,8 +17362,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation2(prefix, v0, i0, v1, suffix);
+        var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17439,8 +17400,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation3(prefix, v0, i0, v1, i1, v2, suffix);
+        var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17480,8 +17440,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17523,8 +17482,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17568,8 +17526,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17616,8 +17573,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17666,8 +17622,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = ɵɵinterpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolatedValue !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
         }
@@ -17705,8 +17660,7 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolateV(styleIndex, values, valueSuffix, forceOverride) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolated = ɵɵinterpolationV(values);
+        var interpolated = interpolationV(getLView(), values);
         if (interpolated !== NO_CHANGE) {
             ɵɵstyleProp(styleIndex, interpolated, valueSuffix, forceOverride);
         }
@@ -18859,6 +18813,12 @@
         return ComponentRef;
     }());
     /**
+     * Base class for a factory that can create a component dynamically.
+     * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+     * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+     *
+     * @see [Dynamic Components](guide/dynamic-component-loader)
+     *
      * @publicApi
      */
     var ComponentFactory = /** @class */ (function () {
@@ -18889,6 +18849,12 @@
         return _NullComponentFactoryResolver;
     }());
     /**
+     * A simple registry that maps `Components` to generated `ComponentFactory` classes
+     * that can be used to create instances of components.
+     * Use to obtain the factory for a given component type,
+     * then use the factory's `create()` method to create a component of that type.
+     *
+     * @see [Dynamic Components](guide/dynamic-component-loader)
      * @publicApi
      */
     var ComponentFactoryResolver = /** @class */ (function () {
@@ -19784,7 +19750,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.1.0-rc.0+44.sha-95a9d67.with-local-changes');
+    var VERSION = new Version('8.2.0-next.0+11.sha-6aaca21.with-local-changes');
 
     /**
      * @license
@@ -25094,7 +25060,7 @@
      * that create event emitters. When the title is clicked, the emitter
      * emits an open or close event to toggle the current visibility state.
      *
-     * ```
+     * ```html
      * @Component({
      *   selector: 'zippy',
      *   template: `
@@ -25123,16 +25089,9 @@
      * Access the event object with the `$event` argument passed to the output event
      * handler:
      *
-     * ```
+     * ```html
      * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
      * ```
-     *
-     * ### Notes
-     *
-     * Uses Rx.Observable but provides an adapter to make it work as specified here:
-     * https://github.com/jhusain/observable-spec
-     *
-     * Once a reference implementation of the spec is available, switch to it.
      *
      * @publicApi
      */
@@ -25854,15 +25813,6 @@
         'ɵɵpureFunctionV': ɵɵpureFunctionV,
         'ɵɵgetCurrentView': ɵɵgetCurrentView,
         'ɵɵrestoreView': ɵɵrestoreView,
-        'ɵɵinterpolation1': ɵɵinterpolation1,
-        'ɵɵinterpolation2': ɵɵinterpolation2,
-        'ɵɵinterpolation3': ɵɵinterpolation3,
-        'ɵɵinterpolation4': ɵɵinterpolation4,
-        'ɵɵinterpolation5': ɵɵinterpolation5,
-        'ɵɵinterpolation6': ɵɵinterpolation6,
-        'ɵɵinterpolation7': ɵɵinterpolation7,
-        'ɵɵinterpolation8': ɵɵinterpolation8,
-        'ɵɵinterpolationV': ɵɵinterpolationV,
         'ɵɵlistener': ɵɵlistener,
         'ɵɵload': ɵɵload,
         'ɵɵprojection': ɵɵprojection,
@@ -26715,9 +26665,10 @@
     var HostBinding = makePropDecorator('HostBinding', ɵ8);
     var ɵ9 = function (eventName, args) { return ({ eventName: eventName, args: args }); };
     /**
-     * Binds a DOM event to a host listener and supplies configuration metadata.
+     * Decorator that binds a DOM event to a host listener and supplies configuration metadata.
      * Angular invokes the supplied handler method when the host element emits the specified event,
      * and updates the bound element with the result.
+     *
      * If the handler method returns false, applies `preventDefault` on the bound element.
      *
      * @usageNotes
@@ -26725,7 +26676,7 @@
      * The following example declares a directive
      * that attaches a click listener to a button and counts clicks.
      *
-     * ```
+     * ```ts
      * @Directive({selector: 'button[counting]'})
      * class CountClicks {
      *   numberOfClicks = 0;
@@ -32103,15 +32054,6 @@
     exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
     exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
     exports.ɵɵprojection = ɵɵprojection;
-    exports.ɵɵinterpolation1 = ɵɵinterpolation1;
-    exports.ɵɵinterpolation2 = ɵɵinterpolation2;
-    exports.ɵɵinterpolation3 = ɵɵinterpolation3;
-    exports.ɵɵinterpolation4 = ɵɵinterpolation4;
-    exports.ɵɵinterpolation5 = ɵɵinterpolation5;
-    exports.ɵɵinterpolation6 = ɵɵinterpolation6;
-    exports.ɵɵinterpolation7 = ɵɵinterpolation7;
-    exports.ɵɵinterpolation8 = ɵɵinterpolation8;
-    exports.ɵɵinterpolationV = ɵɵinterpolationV;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
     exports.ɵɵpipeBind2 = ɵɵpipeBind2;
     exports.ɵɵpipeBind3 = ɵɵpipeBind3;
