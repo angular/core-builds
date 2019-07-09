@@ -20,3 +20,14 @@ export declare function ɵɵelementContainerStart(index: number, attrs?: TAttrib
  * @codeGenApi
  */
 export declare function ɵɵelementContainerEnd(): void;
+/**
+ * Creates an empty logical container using {@link elementContainerStart}
+ * and {@link elementContainerEnd}
+ *
+ * @param index Index of the element in the LView array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵelementContainer(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;

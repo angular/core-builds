@@ -61,6 +61,9 @@ export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode 
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
  * template passes.
+ *
+ * @param view The LView containing the blueprint to adjust
+ * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
  */
 export declare function allocExpando(view: LView, numSlotsToAlloc: number): void;
 /**
