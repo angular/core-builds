@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.0+20.sha-7724f74.with-local-changes
+ * @license Angular v8.2.0-next.0+24.sha-2b44be9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12381,6 +12381,18 @@ export declare function ɵɵdisableBindings(): void;
  * @codeGenApi
  */
 export declare function ɵɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+
+/**
+ * Creates an empty logical container using {@link elementContainerStart}
+ * and {@link elementContainerEnd}
+ *
+ * @param index Index of the element in the LView array
+ * @param attrs Set of attributes to be used when matching directives.
+ * @param localRefs A set of local reference bindings on the element.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵelementContainer(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
 
 /**
  * Mark the end of the <ng-container>.
