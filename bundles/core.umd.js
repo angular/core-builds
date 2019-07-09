@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.0+17.sha-7f2330a.with-local-changes
+ * @license Angular v8.2.0-next.0+23.sha-989ebcb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15673,6 +15673,20 @@
         previousOrParentTNode.onElementCreationFns && applyOnCreateInstructions(previousOrParentTNode);
         registerPostOrderHooks(tView, previousOrParentTNode);
     }
+    /**
+     * Creates an empty logical container using {@link elementContainerStart}
+     * and {@link elementContainerEnd}
+     *
+     * @param index Index of the element in the LView array
+     * @param attrs Set of attributes to be used when matching directives.
+     * @param localRefs A set of local reference bindings on the element.
+     *
+     * @codeGenApi
+     */
+    function ɵɵelementContainer(index, attrs, localRefs) {
+        ɵɵelementContainerStart(index, attrs, localRefs);
+        ɵɵelementContainerEnd();
+    }
 
     /**
      * @license
@@ -19750,7 +19764,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.0+17.sha-7f2330a.with-local-changes');
+    var VERSION = new Version('8.2.0-next.0+23.sha-989ebcb.with-local-changes');
 
     /**
      * @license
@@ -25801,6 +25815,7 @@
         'ɵɵelement': ɵɵelement,
         'ɵɵelementContainerStart': ɵɵelementContainerStart,
         'ɵɵelementContainerEnd': ɵɵelementContainerEnd,
+        'ɵɵelementContainer': ɵɵelementContainer,
         'ɵɵpureFunction0': ɵɵpureFunction0,
         'ɵɵpureFunction1': ɵɵpureFunction1,
         'ɵɵpureFunction2': ɵɵpureFunction2,
@@ -28856,7 +28871,9 @@
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "context", {
-            get: function () { return getContext$1(this.nativeNode); },
+            get: function () {
+                return getComponent(this.nativeNode) || getContext$1(this.nativeNode);
+            },
             enumerable: true,
             configurable: true
         });
@@ -32103,6 +32120,7 @@
     exports.ɵɵallocHostVars = ɵɵallocHostVars;
     exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
     exports.ɵɵelementContainerEnd = ɵɵelementContainerEnd;
+    exports.ɵɵelementContainer = ɵɵelementContainer;
     exports.ɵɵstyling = ɵɵstyling;
     exports.ɵɵstyleMap = ɵɵstyleMap;
     exports.ɵɵclassMap = ɵɵclassMap;
