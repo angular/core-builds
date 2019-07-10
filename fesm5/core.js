@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1.with-local-changes
+ * @license Angular v8.2.0-next.1+2.sha-6da1446.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19408,7 +19408,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.1.with-local-changes');
+var VERSION = new Version('8.2.0-next.1+2.sha-6da1446.with-local-changes');
 
 /**
  * @license
@@ -23183,7 +23183,7 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
     var updateOpCodes = [];
     var icuExpressions = [];
     var templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
-    var msgParts = templateTranslation.split(PH_REGEXP);
+    var msgParts = replaceNgsp(templateTranslation).split(PH_REGEXP);
     for (var i = 0; i < msgParts.length; i++) {
         var value = msgParts[i];
         if (i & 1) {
@@ -23978,6 +23978,17 @@ function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expand
             icuCase.remove.push(nestTIcuIndex << 3 /* SHIFT_REF */ | 6 /* RemoveNestedIcu */, nestedIcuNodeIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
         }
     }
+}
+/**
+ * Angular Dart introduced &ngsp; as a placeholder for non-removable space, see:
+ * https://github.com/dart-lang/angular/blob/0bb611387d29d65b5af7f9d2515ab571fd3fbee4/_tests/test/compiler/preserve_whitespace_test.dart#L25-L32
+ * In Angular Dart &ngsp; is converted to the 0xE500 PUA (Private Use Areas) unicode character
+ * and later on replaced by a space. We are re-implementing the same idea here, since translations
+ * might contain this special character.
+ */
+var NGSP_UNICODE_REGEXP = /\uE500/g;
+function replaceNgsp(value) {
+    return value.replace(NGSP_UNICODE_REGEXP, ' ');
 }
 var TRANSLATIONS = {};
 /**
@@ -28109,7 +28120,8 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
         this._config = config || DEFAULT_CONFIG;
     }
     SystemJsNgModuleLoader.prototype.load = function (path) {
-        return this.loadAndCompile(path);
+        var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     };
     SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
         var _this = this;
