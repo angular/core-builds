@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+1.sha-76e3b57.with-local-changes
+ * @license Angular v8.2.0-next.1+3.sha-dee16a4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19770,7 +19770,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.1+1.sha-76e3b57.with-local-changes');
+    var VERSION = new Version('8.2.0-next.1+3.sha-dee16a4.with-local-changes');
 
     /**
      * @license
@@ -23278,6 +23278,7 @@
     var PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
     var PP_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]|(�\/?\*\d+:\d+�)/g;
     var PP_ICU_VARS_REGEXP = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
+    var PP_ICU_PLACEHOLDERS_REGEXP = /{([A-Z0-9_]+)}/g;
     var PP_ICUS_REGEXP = /�I18N_EXP_(ICU(_\d+)?)�/g;
     var PP_CLOSE_TEMPLATE_REGEXP = /\/\*/;
     var PP_TEMPLATE_ID_REGEXP = /\d+\:(\d+)/;
@@ -23561,7 +23562,7 @@
         var updateOpCodes = [];
         var icuExpressions = [];
         var templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
-        var msgParts = templateTranslation.split(PH_REGEXP);
+        var msgParts = replaceNgsp(templateTranslation).split(PH_REGEXP);
         for (var i = 0; i < msgParts.length; i++) {
             var value = msgParts[i];
             if (i & 1) {
@@ -23686,7 +23687,8 @@
      *
      * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
      * 2. Replace all ICU vars (like "VAR_PLURAL")
-     * 3. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+     * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+     * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
      *    in case multiple ICUs have the same placeholder name
      *
      * @param message Raw translation string for post processing
@@ -23760,7 +23762,13 @@
             return replacements.hasOwnProperty(key) ? "" + start + replacements[key] + end : match;
         });
         /**
-         * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
+         * Step 3: replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+         */
+        result = result.replace(PP_ICU_PLACEHOLDERS_REGEXP, function (match, key) {
+            return replacements.hasOwnProperty(key) ? replacements[key] : match;
+        });
+        /**
+         * Step 4: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
          * multiple ICUs have the same placeholder name
          */
         result = result.replace(PP_ICUS_REGEXP, function (match, key) {
@@ -24356,6 +24364,17 @@
                 icuCase.remove.push(nestTIcuIndex << 3 /* SHIFT_REF */ | 6 /* RemoveNestedIcu */, nestedIcuNodeIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
             }
         }
+    }
+    /**
+     * Angular Dart introduced &ngsp; as a placeholder for non-removable space, see:
+     * https://github.com/dart-lang/angular/blob/0bb611387d29d65b5af7f9d2515ab571fd3fbee4/_tests/test/compiler/preserve_whitespace_test.dart#L25-L32
+     * In Angular Dart &ngsp; is converted to the 0xE500 PUA (Private Use Areas) unicode character
+     * and later on replaced by a space. We are re-implementing the same idea here, since translations
+     * might contain this special character.
+     */
+    var NGSP_UNICODE_REGEXP = /\uE500/g;
+    function replaceNgsp(value) {
+        return value.replace(NGSP_UNICODE_REGEXP, ' ');
     }
     var TRANSLATIONS = {};
     /**

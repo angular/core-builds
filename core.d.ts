@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+1.sha-76e3b57.with-local-changes
+ * @license Angular v8.2.0-next.1+3.sha-dee16a4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12632,7 +12632,8 @@ export declare function ɵɵi18nLocalize(input: string, placeholders?: {
  *
  * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
  * 2. Replace all ICU vars (like "VAR_PLURAL")
- * 3. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+ * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+ * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
  *    in case multiple ICUs have the same placeholder name
  *
  * @param message Raw translation string for post processing
