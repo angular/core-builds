@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+22.sha-7c62a8f.with-local-changes
+ * @license Angular v8.2.0-next.1+24.sha-ef44f51.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11753,7 +11753,7 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
  *
  * @codeGenApi
 */
-export declare function ɵɵcomponentHostSyntheticListener<T>(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
 
 /**
  * Creates an LContainer for inline views, e.g.
