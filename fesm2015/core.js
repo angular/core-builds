@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+7.sha-103a5b4.with-local-changes
+ * @license Angular v8.2.0-next.1+18.sha-e85fa5d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24083,7 +24083,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.1+7.sha-103a5b4.with-local-changes');
+const VERSION = new Version('8.2.0-next.1+18.sha-e85fa5d.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -35905,9 +35905,7 @@ class SystemJsNgModuleLoader {
      * @return {?}
      */
     load(path) {
-        /** @type {?} */
-        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+        return this.loadAndCompile(path);
     }
     /**
      * @private
