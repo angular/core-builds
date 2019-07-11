@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+25.sha-6f50aad.with-local-changes
+ * @license Angular v8.2.0-next.1+27.sha-565a58e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8142,12 +8142,12 @@ function getParentInjectorLocation(tNode, view) {
  * injector's bloom filter.
  *
  * @param {?} injectorIndex
- * @param {?} view
+ * @param {?} tView
  * @param {?} token The type or the injection token to be made public
  * @return {?}
  */
-function diPublicInInjector(injectorIndex, view, token) {
-    bloomAdd(injectorIndex, view[TVIEW], token);
+function diPublicInInjector(injectorIndex, tView, token) {
+    bloomAdd(injectorIndex, tView, token);
 }
 /**
  * Inject static attribute value into directive constructor.
@@ -14175,22 +14175,21 @@ function executeContentQueries(tView, tNode, lView) {
  *
  * @param {?} tView
  * @param {?} lView
+ * @param {?} tNode
  * @param {?} localRefs Local refs of the node in question
  * @param {?=} localRefExtractor mapping function that extracts local ref value from TNode
  * @return {?}
  */
-function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor = getNativeByTNode) {
+function createDirectivesAndLocals(tView, lView, tNode, localRefs, localRefExtractor = getNativeByTNode) {
     if (!getBindingsEnabled())
         return;
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
-        resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
+        resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, tNode), tNode, localRefs || null);
     }
-    instantiateAllDirectives(tView, lView, previousOrParentTNode);
-    invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
-    saveResolvedLocalsInData(lView, previousOrParentTNode, localRefExtractor);
+    instantiateAllDirectives(tView, lView, tNode);
+    invokeDirectivesHostBindings(tView, lView, tNode);
+    saveResolvedLocalsInData(lView, tNode, localRefExtractor);
     setActiveHostElement(null);
 }
 /**
@@ -14948,7 +14947,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
             const def = (/** @type {?} */ (registry[i]));
             if (isNodeMatchingSelectorList(tNode, (/** @type {?} */ (def.selectors)), /* isProjectionMode */ false)) {
                 matches || (matches = ngDevMode ? new (/** @type {?} */ (MatchesArray))() : []);
-                diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (getPreviousOrParentTNode())), viewData), viewData, def.type);
+                diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
                     if (tNode.flags & 1 /* isComponent */)
                         throwMultipleComponentError(tNode);
@@ -18013,7 +18012,7 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
     if (tView.firstTemplatePass) {
         tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
     }
-    createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
+    createDirectivesAndLocals(tView, lView, tContainerNode, localRefs, localRefExtractor);
     addTContainerToQueries(lView, tContainerNode);
     attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
     registerPostOrderHooks(tView, tContainerNode);
@@ -19062,7 +19061,7 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
         }
     }
     appendChild(native, tNode, lView);
-    createDirectivesAndLocals(tView, lView, localRefs);
+    createDirectivesAndLocals(tView, lView, tNode, localRefs);
     // any immediate children of a component or template container must be pre-emptively
     // monkey-patched with the component view data so that the element can be inspected
     // later on using any element discovery utility methods (see `element_discovery.ts`)
@@ -19276,7 +19275,7 @@ function ɵɵelementContainerStart(index, attrs, localRefs) {
         setNodeStylingTemplate(tView, tNode, attrs, 0);
     }
     appendChild(native, tNode, lView);
-    createDirectivesAndLocals(tView, lView, localRefs);
+    createDirectivesAndLocals(tView, lView, tNode, localRefs);
     attachPatchData(native, lView);
     /** @type {?} */
     const currentQueries = lView[QUERIES];
@@ -22151,7 +22150,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, renderer
     /** @type {?} */
     const componentView = createLView(rootView, getOrCreateTView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
     if (tView.firstTemplatePass) {
-        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
+        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
         tNode.flags = 1 /* isComponent */;
         initNodeFlags(tNode, rootView.length, 1);
         queueComponentIndexForCheck(tNode);
@@ -22704,6 +22703,8 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
         /** @type {?} */
         const lView = getLView();
         /** @type {?} */
+        const tView = lView[TVIEW];
+        /** @type {?} */
         let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
         /** @type {?} */
         let providerFactory = providerToFactory(provider);
@@ -22721,8 +22722,6 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
             /** @type {?} */
             const ngOnDestroy = prototype.ngOnDestroy;
             if (ngOnDestroy) {
-                /** @type {?} */
-                const tView = lView[TVIEW];
                 (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
             }
         }
@@ -22733,7 +22732,7 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
             /** @type {?} */
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
             if (existingFactoryIndex == -1) {
-                diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView), lView, token);
+                diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView), tView, token);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -22782,7 +22781,7 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
             if (isViewProvider && !doesViewProvidersFactoryExist ||
                 !isViewProvider && !doesProvidersFactoryExist) {
                 // Cases 1.a and 2.a
-                diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView), lView, token);
+                diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView), tView, token);
                 /** @type {?} */
                 const factory = multiFactory(isViewProvider ? multiViewProvidersFactoryResolver : multiProvidersFactoryResolver, lInjectablesBlueprint.length, isViewProvider, isComponent, providerFactory);
                 if (!isViewProvider && doesViewProvidersFactoryExist) {
@@ -24122,7 +24121,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.1+25.sha-6f50aad.with-local-changes');
+const VERSION = new Version('8.2.0-next.1+27.sha-565a58e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

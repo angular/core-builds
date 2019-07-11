@@ -102,7 +102,7 @@ export declare function executeContentQueries(tView: TView, tNode: TNode, lView:
  * @param localRefs Local refs of the node in question
  * @param localRefExtractor mapping function that extracts local ref value from TNode
  */
-export declare function createDirectivesAndLocals(tView: TView, lView: LView, localRefs: string[] | null | undefined, localRefExtractor?: LocalRefExtractor): void;
+export declare function createDirectivesAndLocals(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null | undefined, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Gets TView from a template function or creates a new TView
  * if it doesn't already exist.

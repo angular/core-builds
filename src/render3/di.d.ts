@@ -44,7 +44,7 @@ export declare function getParentInjectorLocation(tNode: TNode, view: LView): Re
  * @param di The node injector in which a directive will be added
  * @param token The type or the injection token to be made public
  */
-export declare function diPublicInInjector(injectorIndex: number, view: LView, token: InjectionToken<any> | Type<any>): void;
+export declare function diPublicInInjector(injectorIndex: number, tView: TView, token: InjectionToken<any> | Type<any>): void;
 /**
  * Inject static attribute value into directive constructor.
  *
