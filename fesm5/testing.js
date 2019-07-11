@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+34.sha-4bb283c.with-local-changes
+ * @license Angular v8.2.0-next.1+35.sha-d545bbe.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1294,10 +1294,18 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.moduleProvidersOverridden.add(moduleType);
         var injectorDef = moduleType[ɵNG_INJECTOR_DEF];
         if (this.providerOverridesByToken.size > 0) {
-            if (this.hasProviderOverrides(injectorDef.providers)) {
+            // Extract the list of providers from ModuleWithProviders, so we can define the final list of
+            // providers that might have overrides.
+            // Note: second `flatten` operation is needed to convert an array of providers
+            // (e.g. `[[], []]`) into one flat list, also eliminating empty arrays.
+            var providersFromModules = flatten(flatten(injectorDef.imports, function (imported) {
+                return isModuleWithProviders(imported) ? imported.providers : [];
+            }));
+            var providers = __spread(providersFromModules, injectorDef.providers);
+            if (this.hasProviderOverrides(providers)) {
                 this.maybeStoreNgDef(ɵNG_INJECTOR_DEF, moduleType);
                 this.storeFieldOfDefOnType(moduleType, ɵNG_INJECTOR_DEF, 'providers');
-                injectorDef.providers = this.getOverriddenProviders(injectorDef.providers);
+                injectorDef.providers = this.getOverriddenProviders(providers);
             }
             // Apply provider overrides to imported modules recursively
             var moduleDef = moduleType[ɵNG_MODULE_DEF];
@@ -1651,6 +1659,9 @@ function getProviderToken(provider) {
 }
 function isMultiProvider(provider) {
     return !!getProviderField(provider, 'multi');
+}
+function isModuleWithProviders(value) {
+    return value.hasOwnProperty('ngModule');
 }
 function forEachRight(values, fn) {
     for (var idx = values.length - 1; idx >= 0; idx--) {
