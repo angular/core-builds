@@ -7,6 +7,7 @@
  */
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { PlayerFactory } from '../interfaces/player';
+import { LView } from '../interfaces/view';
 import { NO_CHANGE } from '../tokens';
 /**
  * Allocates style and class binding properties on the element during creation mode.
@@ -57,6 +58,7 @@ export declare function ɵɵstyling(classBindingNames?: string[] | null, styleBi
  * @codeGenApi
  */
 export declare function ɵɵstyleProp(styleIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function stylePropInternal(lView: LView, selectedIndex: number, styleIndex: number, directiveStylingIndex: number, value: string | number | String | PlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
 /**
  * Update a class binding on an element with the provided value.
  *
@@ -119,6 +121,9 @@ export declare function ɵɵstyleMap(styles: {
  * @codeGenApi
  */
 export declare function ɵɵclassMap(classes: {
+    [styleName: string]: any;
+} | string | null): void;
+export declare function classMapInternal(lView: LView, selectedIndex: number, directiveStylingIndex: number, classes: {
     [styleName: string]: any;
 } | string | null): void;
 /**

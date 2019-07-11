@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+22.sha-7c62a8f.with-local-changes
+ * @license Angular v8.2.0-next.1+24.sha-ef44f51.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11172,7 +11172,7 @@ function renderComponentOrTemplate(hostView, context, templateFn) {
     }
 }
 function executeTemplate(lView, templateFn, rf, context) {
-    ɵɵnamespaceHTML();
+    namespaceHTMLInternal();
     var prevSelectedIndex = getSelectedIndex();
     try {
         setActiveHostElement(null);
@@ -14801,10 +14801,11 @@ function initStyling(tNode, classBindingNames, styleBindingNames, styleSanitizer
  * @codeGenApi
  */
 function ɵɵstyleProp(styleIndex, value, suffix, forceOverride) {
-    var index = getSelectedIndex();
+    stylePropInternal(getLView(), getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), value, suffix, forceOverride);
+}
+function stylePropInternal(lView, selectedIndex, styleIndex, directiveStylingIndex, value, suffix, forceOverride) {
     var valueToAdd = resolveStylePropValue$1(value, suffix);
-    var stylingContext = getStylingContext(index, getLView());
-    var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
+    var stylingContext = getStylingContext(selectedIndex, lView);
     if (directiveStylingIndex) {
         var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
         enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
@@ -14949,16 +14950,16 @@ function ɵɵstyleMap(styles) {
  * @codeGenApi
  */
 function ɵɵclassMap(classes) {
-    var index = getSelectedIndex();
-    var lView = getLView();
-    var stylingContext = getStylingContext(index, lView);
-    var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
+    classMapInternal(getLView(), getSelectedIndex(), getActiveDirectiveStylingIndex$1(), classes);
+}
+function classMapInternal(lView, selectedIndex, directiveStylingIndex, classes) {
+    var stylingContext = getStylingContext(selectedIndex, lView);
     if (directiveStylingIndex) {
         var args = [stylingContext, classes, directiveStylingIndex];
         enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
     }
     else {
-        var tNode = getTNode(index, lView);
+        var tNode = getTNode(selectedIndex, lView);
         // inputs are only evaluated from a template binding into a directive, therefore,
         // there should not be a situation where a directive host bindings function
         // evaluates the inputs (this should only happen in the template function)
@@ -16658,10 +16659,10 @@ function ɵɵtextInterpolateV(values) {
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16688,10 +16689,10 @@ function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16721,10 +16722,10 @@ function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16756,10 +16757,10 @@ function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16793,10 +16794,10 @@ function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16832,10 +16833,10 @@ function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, su
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16873,10 +16874,10 @@ function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16916,10 +16917,10 @@ function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
  * @codeGenApi
  */
 function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 /**
@@ -16946,10 +16947,10 @@ function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
  * @codeGenApi
  */
 function ɵɵclassMapInterpolateV(values) {
-    // TODO(FW-1340): Refactor to remove the use of other instructions here.
-    var interpolatedValue = interpolationV(getLView(), values);
+    var lView = getLView();
+    var interpolatedValue = interpolationV(lView, values);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵclassMap(interpolatedValue);
+        classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
     }
 }
 
@@ -16988,9 +16989,10 @@ function ɵɵclassMapInterpolateV(values) {
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate1;
 }
@@ -17024,9 +17026,10 @@ function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, 
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate2;
 }
@@ -17062,9 +17065,10 @@ function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, value
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate3;
 }
@@ -17102,9 +17106,10 @@ function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffi
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate4;
 }
@@ -17144,9 +17149,10 @@ function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate5;
 }
@@ -17188,9 +17194,10 @@ function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate6;
 }
@@ -17235,9 +17242,10 @@ function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate7;
 }
@@ -17284,9 +17292,10 @@ function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @codeGenApi
  */
 function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix, forceOverride) {
-    var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    var lView = getLView();
+    var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolate8;
 }
@@ -17322,9 +17331,10 @@ function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v
  * @codeGenApi
  */
 function ɵɵstylePropInterpolateV(styleIndex, values, valueSuffix, forceOverride) {
-    var interpolated = interpolationV(getLView(), values);
+    var lView = getLView();
+    var interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
-        ɵɵstyleProp(styleIndex, interpolated, valueSuffix, forceOverride);
+        stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolated, valueSuffix, forceOverride);
     }
     return ɵɵstylePropInterpolateV;
 }
@@ -19408,7 +19418,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.1+22.sha-7c62a8f.with-local-changes');
+var VERSION = new Version('8.2.0-next.1+24.sha-ef44f51.with-local-changes');
 
 /**
  * @license
