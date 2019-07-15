@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+50.sha-d6c8087.with-local-changes
+ * @license Angular v8.2.0-next.1+52.sha-31ea254.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24560,7 +24560,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.1+50.sha-d6c8087.with-local-changes');
+const VERSION = new Version('8.2.0-next.1+52.sha-31ea254.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -32961,6 +32961,11 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
          */
         () => {
             if (ngModuleDef === null) {
+                if (ngDevMode && ngModule.imports && ngModule.imports.indexOf(moduleType) > -1) {
+                    // We need to assert this immediately, because allowing it to continue will cause it to
+                    // go into an infinite loop before we've reached the point where we throw all the errors.
+                    throw new Error(`'${stringifyForError(moduleType)}' module can't import itself`);
+                }
                 ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng:///${moduleType.name}/ngModuleDef.js`, {
                     type: moduleType,
                     bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4).map(resolveForwardRef),
@@ -33010,28 +33015,39 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
 /**
  * @param {?} moduleType
  * @param {?} allowDuplicateDeclarationsInRoot
+ * @param {?=} importingModule
  * @return {?}
  */
-function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot) {
+function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
     if (verifiedNgModule.get(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
     moduleType = resolveForwardRef(moduleType);
     /** @type {?} */
-    /** @nocollapse */ const ngModuleDef = getNgModuleDef(moduleType, true);
+    let ngModuleDef;
+    if (importingModule) {
+        ngModuleDef = (/** @type {?} */ (getNgModuleDef(moduleType)));
+        if (!ngModuleDef) {
+            throw new Error(`Unexpected value '${moduleType.name}' imported by the module '${importingModule.name}'. Please add a @NgModule annotation.`);
+        }
+    }
+    else {
+        ngModuleDef = getNgModuleDef(moduleType, true);
+    }
     /** @type {?} */
     const errors = [];
     /** @type {?} */
     const declarations = maybeUnwrapFn(ngModuleDef.declarations);
     /** @type {?} */
     const imports = maybeUnwrapFn(ngModuleDef.imports);
-    flatten(imports)
-        .map(unwrapModuleWithProvidersImports)
-        .forEach((/**
+    flatten(imports).map(unwrapModuleWithProvidersImports).forEach((/**
      * @param {?} mod
      * @return {?}
      */
-    mod => verifySemanticsOfNgModuleDef(mod, false)));
+    mod => {
+        verifySemanticsOfNgModuleImport(mod, moduleType);
+        verifySemanticsOfNgModuleDef(mod, false, moduleType);
+    }));
     /** @type {?} */
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
@@ -33051,13 +33067,14 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
-            flatten(ngModule.imports)
-                .map(unwrapModuleWithProvidersImports)
-                .forEach((/**
+            flatten(ngModule.imports).map(unwrapModuleWithProvidersImports).forEach((/**
              * @param {?} mod
              * @return {?}
              */
-            mod => verifySemanticsOfNgModuleDef(mod, false)));
+            mod => {
+                verifySemanticsOfNgModuleImport(mod, moduleType);
+                verifySemanticsOfNgModuleDef(mod, false, moduleType);
+            }));
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
         ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
         ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -33155,6 +33172,20 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
             if (component && component.entryComponents) {
                 component.entryComponents.forEach(verifyComponentIsPartOfNgModule);
             }
+        }
+    }
+    /**
+     * @param {?} type
+     * @param {?} importingModule
+     * @return {?}
+     */
+    function verifySemanticsOfNgModuleImport(type, importingModule) {
+        type = resolveForwardRef(type);
+        if (getComponentDef(type) || getDirectiveDef(type)) {
+            throw new Error(`Unexpected directive '${type.name}' imported by the module '${importingModule.name}'. Please add a @NgModule annotation.`);
+        }
+        if (getPipeDef(type)) {
+            throw new Error(`Unexpected pipe '${type.name}' imported by the module '${importingModule.name}'. Please add a @NgModule annotation.`);
         }
     }
 }
