@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.0+23.sha-989ebcb.with-local-changes
+ * @license Angular v8.2.0-next.1+52.sha-31ea254.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1403,10 +1403,18 @@
             this.moduleProvidersOverridden.add(moduleType);
             var injectorDef = moduleType[core.ɵNG_INJECTOR_DEF];
             if (this.providerOverridesByToken.size > 0) {
-                if (this.hasProviderOverrides(injectorDef.providers)) {
+                // Extract the list of providers from ModuleWithProviders, so we can define the final list of
+                // providers that might have overrides.
+                // Note: second `flatten` operation is needed to convert an array of providers
+                // (e.g. `[[], []]`) into one flat list, also eliminating empty arrays.
+                var providersFromModules = flatten(flatten(injectorDef.imports, function (imported) {
+                    return isModuleWithProviders(imported) ? imported.providers : [];
+                }));
+                var providers = __spread(providersFromModules, injectorDef.providers);
+                if (this.hasProviderOverrides(providers)) {
                     this.maybeStoreNgDef(core.ɵNG_INJECTOR_DEF, moduleType);
                     this.storeFieldOfDefOnType(moduleType, core.ɵNG_INJECTOR_DEF, 'providers');
-                    injectorDef.providers = this.getOverriddenProviders(injectorDef.providers);
+                    injectorDef.providers = this.getOverriddenProviders(providers);
                 }
                 // Apply provider overrides to imported modules recursively
                 var moduleDef = moduleType[core.ɵNG_MODULE_DEF];
@@ -1760,6 +1768,9 @@
     }
     function isMultiProvider(provider) {
         return !!getProviderField(provider, 'multi');
+    }
+    function isModuleWithProviders(value) {
+        return value.hasOwnProperty('ngModule');
     }
     function forEachRight(values, fn) {
         for (var idx = values.length - 1; idx >= 0; idx--) {

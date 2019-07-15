@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.0+23.sha-989ebcb.with-local-changes
+ * @license Angular v8.2.0-next.1+52.sha-31ea254.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7000,8 +7000,8 @@
      * @param di The node injector in which a directive will be added
      * @param token The type or the injection token to be made public
      */
-    function diPublicInInjector(injectorIndex, view, token) {
-        bloomAdd(injectorIndex, view[TVIEW], token);
+    function diPublicInInjector(injectorIndex, tView, token) {
+        bloomAdd(injectorIndex, tView, token);
     }
     /**
      * Inject static attribute value into directive constructor.
@@ -11407,24 +11407,30 @@
      * When elements are created dynamically after a view blueprint is created (e.g. through
      * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
      * template passes.
+     *
+     * @param view The LView containing the blueprint to adjust
+     * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
      */
     function allocExpando(view, numSlotsToAlloc) {
-        var tView = view[TVIEW];
-        if (tView.firstTemplatePass) {
-            for (var i = 0; i < numSlotsToAlloc; i++) {
-                tView.blueprint.push(null);
-                tView.data.push(null);
-                view.push(null);
-            }
-            // We should only increment the expando start index if there aren't already directives
-            // and injectors saved in the "expando" section
-            if (!tView.expandoInstructions) {
-                tView.expandoStartIndex += numSlotsToAlloc;
-            }
-            else {
-                // Since we're adding the dynamic nodes into the expando section, we need to let the host
-                // bindings know that they should skip x slots
-                tView.expandoInstructions.push(numSlotsToAlloc);
+        ngDevMode && assertGreaterThan(numSlotsToAlloc, 0, 'The number of slots to alloc should be greater than 0');
+        if (numSlotsToAlloc > 0) {
+            var tView = view[TVIEW];
+            if (tView.firstTemplatePass) {
+                for (var i = 0; i < numSlotsToAlloc; i++) {
+                    tView.blueprint.push(null);
+                    tView.data.push(null);
+                    view.push(null);
+                }
+                // We should only increment the expando start index if there aren't already directives
+                // and injectors saved in the "expando" section
+                if (!tView.expandoInstructions) {
+                    tView.expandoStartIndex += numSlotsToAlloc;
+                }
+                else {
+                    // Since we're adding the dynamic nodes into the expando section, we need to let the host
+                    // bindings know that they should skip x slots
+                    tView.expandoInstructions.push(numSlotsToAlloc);
+                }
             }
         }
     }
@@ -11524,7 +11530,7 @@
         }
     }
     function executeTemplate(lView, templateFn, rf, context) {
-        ɵɵnamespaceHTML();
+        namespaceHTMLInternal();
         var prevSelectedIndex = getSelectedIndex();
         try {
             setActiveHostElement(null);
@@ -11585,18 +11591,17 @@
      * @param localRefs Local refs of the node in question
      * @param localRefExtractor mapping function that extracts local ref value from TNode
      */
-    function createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor) {
+    function createDirectivesAndLocals(tView, lView, tNode, localRefs, localRefExtractor) {
         if (localRefExtractor === void 0) { localRefExtractor = getNativeByTNode; }
         if (!getBindingsEnabled())
             return;
-        var previousOrParentTNode = getPreviousOrParentTNode();
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
-            resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, previousOrParentTNode), previousOrParentTNode, localRefs || null);
+            resolveDirectives(tView, lView, findDirectiveMatches(tView, lView, tNode), tNode, localRefs || null);
         }
-        instantiateAllDirectives(tView, lView, previousOrParentTNode);
-        invokeDirectivesHostBindings(tView, lView, previousOrParentTNode);
-        saveResolvedLocalsInData(lView, previousOrParentTNode, localRefExtractor);
+        instantiateAllDirectives(tView, lView, tNode);
+        invokeDirectivesHostBindings(tView, lView, tNode);
+        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
         setActiveHostElement(null);
     }
     /**
@@ -12173,7 +12178,7 @@
                 var def = registry[i];
                 if (isNodeMatchingSelectorList(tNode, def.selectors, /* isProjectionMode */ false)) {
                     matches || (matches = ngDevMode ? new MatchesArray() : []);
-                    diPublicInInjector(getOrCreateNodeInjectorForNode(getPreviousOrParentTNode(), viewData), viewData, def.type);
+                    diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                     if (isComponentDef(def)) {
                         if (tNode.flags & 1 /* isComponent */)
                             throwMultipleComponentError(tNode);
@@ -14623,7 +14628,7 @@
         if (tView.firstTemplatePass) {
             tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
         }
-        createDirectivesAndLocals(tView, lView, localRefs, localRefExtractor);
+        createDirectivesAndLocals(tView, lView, tContainerNode, localRefs, localRefExtractor);
         addTContainerToQueries(lView, tContainerNode);
         attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
         registerPostOrderHooks(tView, tContainerNode);
@@ -15153,10 +15158,11 @@
      * @codeGenApi
      */
     function ɵɵstyleProp(styleIndex, value, suffix, forceOverride) {
-        var index = getSelectedIndex();
+        stylePropInternal(getLView(), getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), value, suffix, forceOverride);
+    }
+    function stylePropInternal(lView, selectedIndex, styleIndex, directiveStylingIndex, value, suffix, forceOverride) {
         var valueToAdd = resolveStylePropValue$1(value, suffix);
-        var stylingContext = getStylingContext(index, getLView());
-        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
+        var stylingContext = getStylingContext(selectedIndex, lView);
         if (directiveStylingIndex) {
             var args = [stylingContext, styleIndex, valueToAdd, directiveStylingIndex, forceOverride];
             enqueueHostInstruction(stylingContext, directiveStylingIndex, updateStyleProp, args);
@@ -15301,16 +15307,16 @@
      * @codeGenApi
      */
     function ɵɵclassMap(classes) {
-        var index = getSelectedIndex();
-        var lView = getLView();
-        var stylingContext = getStylingContext(index, lView);
-        var directiveStylingIndex = getActiveDirectiveStylingIndex$1();
+        classMapInternal(getLView(), getSelectedIndex(), getActiveDirectiveStylingIndex$1(), classes);
+    }
+    function classMapInternal(lView, selectedIndex, directiveStylingIndex, classes) {
+        var stylingContext = getStylingContext(selectedIndex, lView);
         if (directiveStylingIndex) {
             var args = [stylingContext, classes, directiveStylingIndex];
             enqueueHostInstruction(stylingContext, directiveStylingIndex, updateClassMap, args);
         }
         else {
-            var tNode = getTNode(index, lView);
+            var tNode = getTNode(selectedIndex, lView);
             // inputs are only evaluated from a template binding into a directive, therefore,
             // there should not be a situation where a directive host bindings function
             // evaluates the inputs (this should only happen in the template function)
@@ -15441,7 +15447,7 @@
             }
         }
         appendChild(native, tNode, lView);
-        createDirectivesAndLocals(tView, lView, localRefs);
+        createDirectivesAndLocals(tView, lView, tNode, localRefs);
         // any immediate children of a component or template container must be pre-emptively
         // monkey-patched with the component view data so that the element can be inspected
         // later on using any element discovery utility methods (see `element_discovery.ts`)
@@ -15636,7 +15642,7 @@
             setNodeStylingTemplate(tView, tNode, attrs, 0);
         }
         appendChild(native, tNode, lView);
-        createDirectivesAndLocals(tView, lView, localRefs);
+        createDirectivesAndLocals(tView, lView, tNode, localRefs);
         attachPatchData(native, lView);
         var currentQueries = lView[QUERIES];
         if (currentQueries) {
@@ -17010,10 +17016,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17040,10 +17046,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17073,10 +17079,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17108,10 +17114,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17145,10 +17151,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17184,10 +17190,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17225,10 +17231,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17268,10 +17274,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
     /**
@@ -17298,10 +17304,10 @@
      * @codeGenApi
      */
     function ɵɵclassMapInterpolateV(values) {
-        // TODO(FW-1340): Refactor to remove the use of other instructions here.
-        var interpolatedValue = interpolationV(getLView(), values);
+        var lView = getLView();
+        var interpolatedValue = interpolationV(lView, values);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵclassMap(interpolatedValue);
+            classMapInternal(lView, getSelectedIndex(), getActiveDirectiveStylingIndex$1(), interpolatedValue);
         }
     }
 
@@ -17340,9 +17346,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate1(styleIndex, prefix, v0, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate1;
     }
@@ -17376,9 +17383,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate2(styleIndex, prefix, v0, i0, v1, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate2;
     }
@@ -17414,9 +17422,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate3(styleIndex, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate3;
     }
@@ -17454,9 +17463,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate4(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate4;
     }
@@ -17496,9 +17506,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate5(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate5;
     }
@@ -17540,9 +17551,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate6(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate6;
     }
@@ -17587,9 +17599,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate7(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate7;
     }
@@ -17636,9 +17649,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolate8(styleIndex, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix, forceOverride) {
-        var interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        var lView = getLView();
+        var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
         if (interpolatedValue !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolatedValue, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolatedValue, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolate8;
     }
@@ -17674,9 +17688,10 @@
      * @codeGenApi
      */
     function ɵɵstylePropInterpolateV(styleIndex, values, valueSuffix, forceOverride) {
-        var interpolated = interpolationV(getLView(), values);
+        var lView = getLView();
+        var interpolated = interpolationV(lView, values);
         if (interpolated !== NO_CHANGE) {
-            ɵɵstyleProp(styleIndex, interpolated, valueSuffix, forceOverride);
+            stylePropInternal(lView, getSelectedIndex(), styleIndex, getActiveDirectiveStylingIndex$1(), interpolated, valueSuffix, forceOverride);
         }
         return ɵɵstylePropInterpolateV;
     }
@@ -18163,7 +18178,7 @@
         var tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
         var componentView = createLView(rootView, getOrCreateTView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
         if (tView.firstTemplatePass) {
-            diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), rootView, def.type);
+            diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
             tNode.flags = 1 /* isComponent */;
             initNodeFlags(tNode, rootView.length, 1);
             queueComponentIndexForCheck(tNode);
@@ -18600,6 +18615,7 @@
         }
         else {
             var lView = getLView();
+            var tView = lView[TVIEW];
             var token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
             var providerFactory = providerToFactory(provider);
             var tNode = getPreviousOrParentTNode();
@@ -18610,7 +18626,6 @@
                 var prototype = (provider.useClass || provider).prototype;
                 var ngOnDestroy = prototype.ngOnDestroy;
                 if (ngOnDestroy) {
-                    var tView = lView[TVIEW];
                     (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
                 }
             }
@@ -18619,7 +18634,7 @@
                 var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
                 var existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
                 if (existingFactoryIndex == -1) {
-                    diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), lView, token);
+                    diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, token);
                     tInjectables.push(token);
                     tNode.directiveStart++;
                     tNode.directiveEnd++;
@@ -18664,7 +18679,7 @@
                 if (isViewProvider && !doesViewProvidersFactoryExist ||
                     !isViewProvider && !doesProvidersFactoryExist) {
                     // Cases 1.a and 2.a
-                    diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), lView, token);
+                    diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, token);
                     var factory = multiFactory(isViewProvider ? multiViewProvidersFactoryResolver : multiProvidersFactoryResolver, lInjectablesBlueprint.length, isViewProvider, isComponent, providerFactory);
                     if (!isViewProvider && doesViewProvidersFactoryExist) {
                         lInjectablesBlueprint[existingViewProvidersFactoryIndex].providerFactory = factory;
@@ -19764,7 +19779,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.0+23.sha-989ebcb.with-local-changes');
+    var VERSION = new Version('8.2.0-next.1+52.sha-31ea254.with-local-changes');
 
     /**
      * @license
@@ -23272,6 +23287,7 @@
     var PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
     var PP_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]|(�\/?\*\d+:\d+�)/g;
     var PP_ICU_VARS_REGEXP = /({\s*)(VAR_(PLURAL|SELECT)(_\d+)?)(\s*,)/g;
+    var PP_ICU_PLACEHOLDERS_REGEXP = /{([A-Z0-9_]+)}/g;
     var PP_ICUS_REGEXP = /�I18N_EXP_(ICU(_\d+)?)�/g;
     var PP_CLOSE_TEMPLATE_REGEXP = /\/\*/;
     var PP_TEMPLATE_ID_REGEXP = /\d+\:(\d+)/;
@@ -23555,7 +23571,7 @@
         var updateOpCodes = [];
         var icuExpressions = [];
         var templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
-        var msgParts = templateTranslation.split(PH_REGEXP);
+        var msgParts = replaceNgsp(templateTranslation).split(PH_REGEXP);
         for (var i = 0; i < msgParts.length; i++) {
             var value = msgParts[i];
             if (i & 1) {
@@ -23614,7 +23630,9 @@
                 }
             }
         }
-        allocExpando(viewData, i18nVarsCount);
+        if (i18nVarsCount > 0) {
+            allocExpando(viewData, i18nVarsCount);
+        }
         ngDevMode &&
             attachI18nOpCodesDebug(createOpCodes, updateOpCodes, icuExpressions.length ? icuExpressions : null, viewData);
         // NOTE: local var needed to properly assert the type of `TI18n`.
@@ -23678,7 +23696,8 @@
      *
      * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
      * 2. Replace all ICU vars (like "VAR_PLURAL")
-     * 3. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+     * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+     * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
      *    in case multiple ICUs have the same placeholder name
      *
      * @param message Raw translation string for post processing
@@ -23752,7 +23771,13 @@
             return replacements.hasOwnProperty(key) ? "" + start + replacements[key] + end : match;
         });
         /**
-         * Step 3: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
+         * Step 3: replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+         */
+        result = result.replace(PP_ICU_PLACEHOLDERS_REGEXP, function (match, key) {
+            return replacements.hasOwnProperty(key) ? replacements[key] : match;
+        });
+        /**
+         * Step 4: replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�) in case
          * multiple ICUs have the same placeholder name
          */
         result = result.replace(PP_ICUS_REGEXP, function (match, key) {
@@ -24348,6 +24373,17 @@
                 icuCase.remove.push(nestTIcuIndex << 3 /* SHIFT_REF */ | 6 /* RemoveNestedIcu */, nestedIcuNodeIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
             }
         }
+    }
+    /**
+     * Angular Dart introduced &ngsp; as a placeholder for non-removable space, see:
+     * https://github.com/dart-lang/angular/blob/0bb611387d29d65b5af7f9d2515ab571fd3fbee4/_tests/test/compiler/preserve_whitespace_test.dart#L25-L32
+     * In Angular Dart &ngsp; is converted to the 0xE500 PUA (Private Use Areas) unicode character
+     * and later on replaced by a space. We are re-implementing the same idea here, since translations
+     * might contain this special character.
+     */
+    var NGSP_UNICODE_REGEXP = /\uE500/g;
+    function replaceNgsp(value) {
+        return value.replace(NGSP_UNICODE_REGEXP, ' ');
     }
     var TRANSLATIONS = {};
     /**
@@ -26010,6 +26046,11 @@
             configurable: true,
             get: function () {
                 if (ngModuleDef === null) {
+                    if (ngDevMode && ngModule.imports && ngModule.imports.indexOf(moduleType) > -1) {
+                        // We need to assert this immediately, because allowing it to continue will cause it to
+                        // go into an infinite loop before we've reached the point where we throw all the errors.
+                        throw new Error("'" + stringifyForError(moduleType) + "' module can't import itself");
+                    }
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng:///" + moduleType.name + "/ngModuleDef.js", {
                         type: moduleType,
                         bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$4).map(resolveForwardRef),
@@ -26051,18 +26092,28 @@
             configurable: !!ngDevMode,
         });
     }
-    function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot) {
+    function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
         if (verifiedNgModule.get(moduleType))
             return;
         verifiedNgModule.set(moduleType, true);
         moduleType = resolveForwardRef(moduleType);
-        var ngModuleDef = getNgModuleDef(moduleType, true);
+        var ngModuleDef;
+        if (importingModule) {
+            ngModuleDef = getNgModuleDef(moduleType);
+            if (!ngModuleDef) {
+                throw new Error("Unexpected value '" + moduleType.name + "' imported by the module '" + importingModule.name + "'. Please add a @NgModule annotation.");
+            }
+        }
+        else {
+            ngModuleDef = getNgModuleDef(moduleType, true);
+        }
         var errors = [];
         var declarations = maybeUnwrapFn(ngModuleDef.declarations);
         var imports = maybeUnwrapFn(ngModuleDef.imports);
-        flatten(imports)
-            .map(unwrapModuleWithProvidersImports)
-            .forEach(function (mod) { return verifySemanticsOfNgModuleDef(mod, false); });
+        flatten(imports).map(unwrapModuleWithProvidersImports).forEach(function (mod) {
+            verifySemanticsOfNgModuleImport(mod, moduleType);
+            verifySemanticsOfNgModuleDef(mod, false, moduleType);
+        });
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
         var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
@@ -26072,9 +26123,10 @@
         var ngModule = getAnnotation(moduleType, 'NgModule');
         if (ngModule) {
             ngModule.imports &&
-                flatten(ngModule.imports)
-                    .map(unwrapModuleWithProvidersImports)
-                    .forEach(function (mod) { return verifySemanticsOfNgModuleDef(mod, false); });
+                flatten(ngModule.imports).map(unwrapModuleWithProvidersImports).forEach(function (mod) {
+                    verifySemanticsOfNgModuleImport(mod, moduleType);
+                    verifySemanticsOfNgModuleDef(mod, false, moduleType);
+                });
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
             ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
             ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
@@ -26141,6 +26193,15 @@
                 if (component && component.entryComponents) {
                     component.entryComponents.forEach(verifyComponentIsPartOfNgModule);
                 }
+            }
+        }
+        function verifySemanticsOfNgModuleImport(type, importingModule) {
+            type = resolveForwardRef(type);
+            if (getComponentDef(type) || getDirectiveDef(type)) {
+                throw new Error("Unexpected directive '" + type.name + "' imported by the module '" + importingModule.name + "'. Please add a @NgModule annotation.");
+            }
+            if (getPipeDef(type)) {
+                throw new Error("Unexpected pipe '" + type.name + "' imported by the module '" + importingModule.name + "'. Please add a @NgModule annotation.");
             }
         }
     }
