@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+56.sha-8853f13.with-local-changes
+ * @license Angular v8.2.0-next.1+60.sha-09576e9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8426,11 +8426,6 @@ export declare interface ViewChildDecorator {
      * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'
      * linenums="false"}
      *
-     * ### Example 3
-     *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'
-     * linenums="false"}
-     *
      * @Annotation
      */
     (selector: Type<any> | Function | string, opts: {
@@ -12542,6 +12537,22 @@ export declare function ɵɵgetFactoryOf<T>(type: Type<any>): FactoryFn<T> | nul
 export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
 
 /**
+ * Update a property on a host element. Only applies to native node properties, not inputs.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+
+/**
  *
  * Use this instruction to create a translation block that doesn't contain any placeholder.
  * It calls both {@link i18nStart} and {@link i18nEnd} in one instruction.
@@ -13013,14 +13024,12 @@ export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): vo
  *        renaming as part of minification.
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
  * @returns This function returns itself so that it may be chained
  * (e.g. `property('name', ctx.name)('title', ctx.title)`)
  *
  * @codeGenApi
  */
-export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): TsickleIssue1009;
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
 
 /**
  *
@@ -14549,12 +14558,10 @@ export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
  *        renaming as part of minification.
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
- * @param nativeOnly Whether or not we should only set native properties and skip input check
- * (this is necessary for host property bindings)
  *
  * @codeGenApi
  */
-export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null, nativeOnly?: boolean): TsickleIssue1009;
+export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): TsickleIssue1009;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
