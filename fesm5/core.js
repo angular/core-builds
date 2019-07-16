@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+62.sha-0110de2.with-local-changes
+ * @license Angular v8.2.0-next.1+63.sha-1ac0775.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14200,8 +14200,8 @@ function executeActionOnNode(renderer, action, lView, tNode, renderParent, befor
  * @codeGenApi
  */
 function ɵɵcontainer(index) {
-    var tNode = containerInternal(index, null, null);
     var lView = getLView();
+    var tNode = containerInternal(lView, index, null, null);
     if (lView[TVIEW].firstTemplatePass) {
         tNode.tViews = [];
     }
@@ -14231,7 +14231,7 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
     var lView = getLView();
     var tView = lView[TVIEW];
     // TODO: consider a separate node type for templates
-    var tContainerNode = containerInternal(index, tagName || null, attrs || null);
+    var tContainerNode = containerInternal(lView, index, tagName || null, attrs || null);
     if (tView.firstTemplatePass) {
         tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
     }
@@ -14311,17 +14311,15 @@ function addTContainerToQueries(lView, tContainerNode) {
         }
     }
 }
-function containerInternal(index, tagName, attrs) {
-    var lView = getLView();
+function containerInternal(lView, nodeIndex, tagName, attrs) {
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
-    var adjustedIndex = index + HEADER_OFFSET;
-    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+    var adjustedIndex = nodeIndex + HEADER_OFFSET;
+    ngDevMode && assertDataInRange(lView, nodeIndex + HEADER_OFFSET);
     ngDevMode && ngDevMode.rendererCreateComment++;
-    var comment = lView[index + HEADER_OFFSET] =
+    var comment = lView[adjustedIndex] =
         lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-    var tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 0 /* Container */, tagName, attrs);
-    var lContainer = lView[adjustedIndex] =
-        createLContainer(lView[adjustedIndex], lView, comment, tNode);
+    var tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], nodeIndex, 0 /* Container */, tagName, attrs);
+    var lContainer = lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode);
     appendChild(comment, tNode, lView);
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
@@ -19445,7 +19443,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.1+62.sha-0110de2.with-local-changes');
+var VERSION = new Version('8.2.0-next.1+63.sha-1ac0775.with-local-changes');
 
 /**
  * @license
