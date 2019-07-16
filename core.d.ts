@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.1.0+50.sha-13dbb98.with-local-changes
+ * @license Angular v8.1.0+52.sha-177cf26.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8424,11 +8424,6 @@ export declare interface ViewChildDecorator {
      * ### Example 2
      *
      * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'
-     * linenums="false"}
-     *
-     * ### Example 3
-     *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'
      * linenums="false"}
      *
      * @Annotation
