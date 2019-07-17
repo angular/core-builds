@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+63.sha-1ac0775.with-local-changes
+ * @license Angular v8.2.0-next.1+66.sha-9e83822.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19760,7 +19760,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.1+63.sha-1ac0775.with-local-changes');
+var VERSION = new Version('8.2.0-next.1+66.sha-9e83822.with-local-changes');
 
 /**
  * @license
@@ -26087,7 +26087,7 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     if (importingModule) {
         ngModuleDef = getNgModuleDef(moduleType);
         if (!ngModuleDef) {
-            throw new Error("Unexpected value '" + moduleType.name + "' imported by the module '" + importingModule.name + "'. Please add a @NgModule annotation.");
+            throw new Error("Unexpected value '" + moduleType.name + "' imported by the module '" + importingModule.name + "'. Please add an @NgModule annotation.");
         }
     }
     else {
@@ -26184,10 +26184,10 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     function verifySemanticsOfNgModuleImport(type, importingModule) {
         type = resolveForwardRef(type);
         if (getComponentDef(type) || getDirectiveDef(type)) {
-            throw new Error("Unexpected directive '" + type.name + "' imported by the module '" + importingModule.name + "'. Please add a @NgModule annotation.");
+            throw new Error("Unexpected directive '" + type.name + "' imported by the module '" + importingModule.name + "'. Please add an @NgModule annotation.");
         }
         if (getPipeDef(type)) {
-            throw new Error("Unexpected pipe '" + type.name + "' imported by the module '" + importingModule.name + "'. Please add a @NgModule annotation.");
+            throw new Error("Unexpected pipe '" + type.name + "' imported by the module '" + importingModule.name + "'. Please add an @NgModule annotation.");
         }
     }
 }
