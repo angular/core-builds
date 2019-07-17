@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+60.sha-09576e9.with-local-changes
+ * @license Angular v8.2.0-next.1+67.sha-12fd069.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18365,9 +18365,9 @@ function executeActionOnNode(renderer, action, lView, tNode, renderParent, befor
  */
 function ɵɵcontainer(index) {
     /** @type {?} */
-    const tNode = containerInternal(index, null, null);
-    /** @type {?} */
     const lView = getLView();
+    /** @type {?} */
+    const tNode = containerInternal(lView, index, null, null);
     if (lView[TVIEW].firstTemplatePass) {
         tNode.tViews = [];
     }
@@ -18401,7 +18401,7 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
     const tView = lView[TVIEW];
     // TODO: consider a separate node type for templates
     /** @type {?} */
-    const tContainerNode = containerInternal(index, tagName || null, attrs || null);
+    const tContainerNode = containerInternal(lView, index, tagName || null, attrs || null);
     if (tView.firstTemplatePass) {
         tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
     }
@@ -18495,27 +18495,25 @@ function addTContainerToQueries(lView, tContainerNode) {
     }
 }
 /**
- * @param {?} index
+ * @param {?} lView
+ * @param {?} nodeIndex
  * @param {?} tagName
  * @param {?} attrs
  * @return {?}
  */
-function containerInternal(index, tagName, attrs) {
-    /** @type {?} */
-    const lView = getLView();
+function containerInternal(lView, nodeIndex, tagName, attrs) {
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
     /** @type {?} */
-    const adjustedIndex = index + HEADER_OFFSET;
-    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+    const adjustedIndex = nodeIndex + HEADER_OFFSET;
+    ngDevMode && assertDataInRange(lView, nodeIndex + HEADER_OFFSET);
     ngDevMode && ngDevMode.rendererCreateComment++;
     /** @type {?} */
-    const comment = lView[index + HEADER_OFFSET] =
+    const comment = lView[adjustedIndex] =
         lView[RENDERER].createComment(ngDevMode ? 'container' : '');
     /** @type {?} */
-    const tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 0 /* Container */, tagName, attrs);
+    const tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], nodeIndex, 0 /* Container */, tagName, attrs);
     /** @type {?} */
-    const lContainer = lView[adjustedIndex] =
-        createLContainer(lView[adjustedIndex], lView, comment, tNode);
+    const lContainer = lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode);
     appendChild(comment, tNode, lView);
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
@@ -24589,7 +24587,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.1+60.sha-09576e9.with-local-changes');
+const VERSION = new Version('8.2.0-next.1+67.sha-12fd069.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33058,7 +33056,7 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     if (importingModule) {
         ngModuleDef = (/** @type {?} */ (getNgModuleDef(moduleType)));
         if (!ngModuleDef) {
-            throw new Error(`Unexpected value '${moduleType.name}' imported by the module '${importingModule.name}'. Please add a @NgModule annotation.`);
+            throw new Error(`Unexpected value '${moduleType.name}' imported by the module '${importingModule.name}'. Please add an @NgModule annotation.`);
         }
     }
     else {
@@ -33212,10 +33210,10 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     function verifySemanticsOfNgModuleImport(type, importingModule) {
         type = resolveForwardRef(type);
         if (getComponentDef(type) || getDirectiveDef(type)) {
-            throw new Error(`Unexpected directive '${type.name}' imported by the module '${importingModule.name}'. Please add a @NgModule annotation.`);
+            throw new Error(`Unexpected directive '${type.name}' imported by the module '${importingModule.name}'. Please add an @NgModule annotation.`);
         }
         if (getPipeDef(type)) {
-            throw new Error(`Unexpected pipe '${type.name}' imported by the module '${importingModule.name}'. Please add a @NgModule annotation.`);
+            throw new Error(`Unexpected pipe '${type.name}' imported by the module '${importingModule.name}'. Please add an @NgModule annotation.`);
         }
     }
 }

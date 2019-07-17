@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.1+60.sha-09576e9.with-local-changes
+ * @license Angular v8.2.0-next.1+67.sha-12fd069.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3148,15 +3148,20 @@ export declare const Injectable: InjectableDecorator;
  */
 export declare interface InjectableDecorator {
     /**
-     * Decorator that marks a class as available to `Injector` for creation.
+     * Decorator that marks a class as available to be
+     * provided and injected as a dependency.
      *
      * @see [Introduction to Services and DI](guide/architecture-services)
      * @see [Dependency Injection Guide](guide/dependency-injection)
      *
      * @usageNotes
      *
-     * The following example shows how service classes are properly marked as
-     * injectable.
+     * Marking a class with `@Injectable` ensures that the compiler
+     * will generate the necessary metadata to create the class's
+     * dependencies when the class is injected.
+     *
+     * The following example shows how a service class is properly
+     *  marked so that a supporting service can be injected upon creation.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"
      *  linenums="false"></code-example>
