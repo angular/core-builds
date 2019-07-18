@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+7.sha-1e9eeaf.with-local-changes
+ * @license Angular v8.2.0-next.2+8.sha-78e7fdd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6438,7 +6438,7 @@ class Sanitizer {
  */
 const VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
 /** @type {?} */
-const TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+const TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|Z|3d)?';
 /** @type {?} */
 const COLOR_FNS = '(?:rgb|hsl)a?';
 /** @type {?} */
@@ -24148,7 +24148,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+7.sha-1e9eeaf.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+8.sha-78e7fdd.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
