@@ -346,7 +346,7 @@ export interface ComponentDefFeature {
 export declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
 export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[];
 export declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
-export declare type DirectiveTypeList = (DirectiveDef<any> | ComponentDef<any> | Type<any>)[];
+export declare type DirectiveTypeList = (DirectiveType<any> | ComponentType<any> | Type<any>)[];
 export declare type HostBindingsFunction<T> = <U extends T>(rf: RenderFlags, ctx: U, elementIndex: number) => void;
 /**
  * Type used for PipeDefs on component definition.
@@ -355,6 +355,6 @@ export declare type HostBindingsFunction<T> = <U extends T>(rf: RenderFlags, ctx
  */
 export declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
 export declare type PipeDefList = PipeDef<any>[];
-export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
-export declare type PipeTypeList = (PipeDef<any> | Type<any>)[];
+export declare type PipeTypesOrFactory = (() => PipeTypeList) | PipeTypeList;
+export declare type PipeTypeList = (PipeType<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;

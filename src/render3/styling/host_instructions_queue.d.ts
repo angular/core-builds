@@ -15,7 +15,7 @@ export declare function enqueueHostInstruction<T extends Function>(context: Styl
  * Iterates through the host instructions queue (if present within the provided
  * context) and executes each queued instruction entry.
  */
-export declare function flushQueue(context: StylingContext): void;
+export declare function flushQueue(this: unknown, context: StylingContext): void;
 /**
  * Determines whether or not to allow the host instructions queue to be flushed or not.
  *

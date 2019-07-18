@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+8.sha-78e7fdd.with-local-changes
+ * @license Angular v8.2.0-next.2+22.sha-60f58bf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1402,6 +1402,51 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+    * Equivalent to ES6 spread, add each item to an array.
+    *
+    * @param items The items to add
+    * @param arr The array to which you want to add the items
+    */
+    function addAllToArray(items, arr) {
+        for (var i = 0; i < items.length; i++) {
+            arr.push(items[i]);
+        }
+    }
+    /**
+     * Flattens an array.
+     */
+    function flatten(list, dst) {
+        if (dst === undefined)
+            dst = list;
+        for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            if (Array.isArray(item)) {
+                // we need to inline it.
+                if (dst === list) {
+                    // Our assumption that the list was already flat was wrong and
+                    // we need to clone flat since we need to write to it.
+                    dst = list.slice(0, i);
+                }
+                flatten(item, dst);
+            }
+            else if (dst !== list) {
+                dst.push(item);
+            }
+        }
+        return dst;
+    }
+    function deepForEach(input, fn) {
+        input.forEach(function (value) { return Array.isArray(value) ? deepForEach(value, fn) : fn(value); });
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * An internal token whose presence in an injector indicates that the injector should treat itself
      * as a root scoped injector when processing requests for unknown tokens which may indicate
      * they are provided in the root scope.
@@ -1822,9 +1867,6 @@
             value: value,
             multi: multi ? [] : undefined,
         };
-    }
-    function deepForEach(input, fn) {
-        input.forEach(function (value) { return Array.isArray(value) ? deepForEach(value, fn) : fn(value); });
     }
     function isValueProvider(value) {
         return value !== null && typeof value == 'object' && USE_VALUE in value;
@@ -6986,7 +7028,7 @@
             var saveLView = getLView();
             setTNodeAndViewData(tNode, lData);
             try {
-                value = lData[index] = factory.factory(null, tData, lData, tNode);
+                value = lData[index] = factory.factory(undefined, tData, lData, tNode);
             }
             finally {
                 if (factory.injectImpl)
@@ -9369,7 +9411,7 @@
     var sanitizeUsingSanitizerObject = function (prop, value, mode) {
         var sanitizer = getCurrentStyleSanitizer();
         if (sanitizer) {
-            if (mode & 2 /* SanitizeOnly */) {
+            if (mode !== undefined && mode & 2 /* SanitizeOnly */) {
                 return sanitizer.sanitize(exports.SecurityContext.STYLE, value);
             }
             else {
@@ -10257,9 +10299,7 @@
             if (hasMaps) {
                 activeStylingMapFeature();
             }
-            var mapFn = function (renderer, element, prop, value, bindingIndex) {
-                fn(prop, value, bindingIndex || null);
-            };
+            var mapFn = function (renderer, element, prop, value, bindingIndex) { fn(prop, value, bindingIndex || null); };
             var sanitizer = this._isClassBased ? null : (this._sanitizer ||
                 getCurrentOrLViewSanitizer(this._data));
             applyStyling(this.context, null, mockElement, this._data, true, mapFn, sanitizer);
@@ -19473,7 +19513,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+8.sha-78e7fdd.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+22.sha-60f58bf.with-local-changes');
 
     /**
      * @license
@@ -22908,48 +22948,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-    * Equivalent to ES6 spread, add each item to an array.
-    *
-    * @param items The items to add
-    * @param arr The array to which you want to add the items
-    */
-    function addAllToArray(items, arr) {
-        for (var i = 0; i < items.length; i++) {
-            arr.push(items[i]);
-        }
-    }
-    /**
-     * Flattens an array.
-     */
-    function flatten(list, dst) {
-        if (dst === undefined)
-            dst = list;
-        for (var i = 0; i < list.length; i++) {
-            var item = list[i];
-            if (Array.isArray(item)) {
-                // we need to inline it.
-                if (dst === list) {
-                    // Our assumption that the list was already flat was wrong and
-                    // we need to clone flat since we need to write to it.
-                    dst = list.slice(0, i);
-                }
-                flatten(item, dst);
-            }
-            else if (dst !== list) {
-                dst.push(item);
-            }
-        }
-        return dst;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var MARKER = "\uFFFD";
     var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
@@ -25801,9 +25799,10 @@
                     verifySemanticsOfNgModuleImport(mod, moduleType);
                     verifySemanticsOfNgModuleDef(mod, false, moduleType);
                 });
-            ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
-            ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
-            ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+            ngModule.bootstrap && deepForEach(ngModule.bootstrap, verifyCorrectBootstrapType);
+            ngModule.bootstrap && deepForEach(ngModule.bootstrap, verifyComponentIsPartOfNgModule);
+            ngModule.entryComponents &&
+                deepForEach(ngModule.entryComponents, verifyComponentIsPartOfNgModule);
         }
         // Throw Error if any errors were detected.
         if (errors.length) {
@@ -25865,7 +25864,7 @@
                 // We know we are component
                 var component = getAnnotation(type, 'Component');
                 if (component && component.entryComponents) {
-                    component.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+                    deepForEach(component.entryComponents, verifyComponentIsPartOfNgModule);
                 }
             }
         }
@@ -28191,7 +28190,8 @@
             this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
-            return this.loadAndCompile(path);
+            var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+            return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         };
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
@@ -28742,14 +28742,6 @@
         };
         return DebugElement__POST_R3__;
     }(DebugNode__POST_R3__));
-    /**
-     * Walk the TNode tree to find matches for the predicate.
-     *
-     * @param parentElement the element from which the walk is started
-     * @param predicate the predicate to match
-     * @param matches the list of positive matches
-     * @param elementsOnly whether only elements should be searched
-     */
     function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
         var context = loadLContext(parentElement.nativeNode);
         var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
@@ -28763,7 +28755,7 @@
      * @param predicate the predicate to match
      * @param matches the list of positive matches
      * @param elementsOnly whether only elements should be searched
-     * @param rootNativeNode the root native node on which prediccate shouold not be matched
+     * @param rootNativeNode the root native node on which predicate should not be matched
      */
     function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, rootNativeNode) {
         var e_1, _a;
@@ -28848,7 +28840,7 @@
      * @param predicate the predicate to match
      * @param matches the list of positive matches
      * @param elementsOnly whether only elements should be searched
-     * @param rootNativeNode the root native node on which prediccate shouold not be matched
+     * @param rootNativeNode the root native node on which predicate should not be matched
      */
     function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode) {
         for (var i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
@@ -28863,13 +28855,21 @@
      * @param predicate the predicate to match
      * @param matches the list of positive matches
      * @param elementsOnly whether only elements should be searched
-     * @param rootNativeNode the root native node on which prediccate shouold not be matched
+     * @param rootNativeNode the root native node on which predicate should not be matched
      */
     function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode) {
         if (rootNativeNode !== nativeNode) {
             var debugNode = getDebugNode(nativeNode);
-            if (debugNode && (elementsOnly ? debugNode instanceof DebugElement__POST_R3__ : true) &&
-                predicate(debugNode)) {
+            if (!debugNode) {
+                return;
+            }
+            // Type of the "predicate and "matches" array are set based on the value of
+            // the "elementsOnly" parameter. TypeScript is not able to properly infer these
+            // types with generics, so we manually cast the parameters accordingly.
+            if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode)) {
+                matches.push(debugNode);
+            }
+            else if (!elementsOnly && predicate(debugNode)) {
                 matches.push(debugNode);
             }
         }

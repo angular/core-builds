@@ -13,6 +13,7 @@ export * from './ng_zone_mock';
 export declare const proxy: ClassDecorator;
 export declare const afterEach: Function;
 export declare const expect: <T>(actual: T) => jasmine.Matchers<T>;
+export declare type TestFn = ((done: DoneFn) => any) | (() => any);
 export declare function describe(...args: any[]): void;
 export declare function ddescribe(...args: any[]): void;
 export declare function xdescribe(...args: any[]): void;
@@ -30,9 +31,9 @@ export declare function beforeEach(fn: Function): void;
  *   ]);
  */
 export declare function beforeEachProviders(fn: Function): void;
-export declare function it(expectation: string, assertion: (done: DoneFn) => any, timeout?: number): void;
-export declare function fit(expectation: string, assertion: (done: DoneFn) => any, timeout?: number): void;
-export declare function xit(expectation: string, assertion: (done: DoneFn) => any, timeout?: number): void;
+export declare function it(expectation: string, assertion: TestFn, timeout?: number): void;
+export declare function fit(expectation: string, assertion: TestFn, timeout?: number): void;
+export declare function xit(expectation: string, assertion: TestFn, timeout?: number): void;
 export declare class SpyObject {
     constructor(type?: any);
     spy(name: string): any;

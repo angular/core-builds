@@ -11,7 +11,7 @@ import { Type } from '../interface/type';
 import { NgModuleDef } from '../metadata/ng_module';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeType, PipeTypesOrFactory, ViewQueriesFunction, ɵɵBaseDef } from './interfaces/definition';
+import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction, ɵɵBaseDef } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -221,8 +221,8 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
  * @codeGenApi
  */
 export declare function ɵɵsetComponentScope(type: ComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
-export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
-export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
+export declare function extractDirectiveDef(type: Type<any>): DirectiveDef<any> | ComponentDef<any>;
+export declare function extractPipeDef(type: Type<any>): PipeDef<any>;
 /**
  * @codeGenApi
  */

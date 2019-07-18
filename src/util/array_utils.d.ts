@@ -16,3 +16,4 @@ export declare function addAllToArray(items: any[], arr: any[]): void;
  * Flattens an array.
  */
 export declare function flatten(list: any[], dst?: any[]): any[];
+export declare function deepForEach<T>(input: (T | any[])[], fn: (value: T) => void): void;

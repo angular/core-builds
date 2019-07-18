@@ -85,4 +85,4 @@ export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: any[]): any;
+export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: [any, ...any[]]): any;
