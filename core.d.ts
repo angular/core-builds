@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+8.sha-78e7fdd.with-local-changes
+ * @license Angular v8.2.0-next.2+22.sha-60f58bf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1975,7 +1975,7 @@ declare const enum DirectiveRegistryValuesIndex {
     Size = 2
 }
 
-declare type DirectiveTypeList = (ɵDirectiveDef<any> | ɵComponentDef<any> | Type<any>)[];
+declare type DirectiveTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | Type<any>)[];
 
 declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
 
@@ -4995,7 +4995,17 @@ export declare interface PipeTransform {
     transform(value: any, ...args: any[]): any;
 }
 
-declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
+/**
+ * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
+ * consumable for rendering.
+ */
+declare interface PipeType<T> extends Type<T> {
+    ngPipeDef: never;
+}
+
+declare type PipeTypeList = (PipeType<any> | Type<any>)[];
+
+declare type PipeTypesOrFactory = (() => PipeTypeList) | PipeTypeList;
 
 /**
  * A token that indicates an opaque platform id.
@@ -12969,7 +12979,7 @@ export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: any[]): any;
+export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: [any, ...any[]]): any;
 
 /**
  * @codeGenApi

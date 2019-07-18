@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+8.sha-78e7fdd.with-local-changes
+ * @license Angular v8.2.0-next.2+22.sha-60f58bf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1432,12 +1432,12 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
 /**
  * Supports \@Injectable() in JIT mode for Render2.
  * @param {?} injectableType
- * @param {?} options
+ * @param {?=} options
  * @return {?}
  */
 function render2CompileInjectable(injectableType, options) {
     if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
-        /** @nocollapse */ injectableType.ngInjectableDef = ɵɵdefineInjectable({
+        ((/** @type {?} */ (injectableType))).ngInjectableDef = ɵɵdefineInjectable({
             token: injectableType,
             providedIn: options.providedIn,
             factory: convertInjectableProviderToFactory(injectableType, options),
@@ -1576,6 +1576,51 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
             ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
     }
     throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+* Equivalent to ES6 spread, add each item to an array.
+*
+* @param items The items to add
+* @param arr The array to which you want to add the items
+*/
+function addAllToArray(items, arr) {
+    for (let i = 0; i < items.length; i++) {
+        arr.push(items[i]);
+    }
+}
+/**
+ * Flattens an array.
+ */
+function flatten(list, dst) {
+    if (dst === undefined)
+        dst = list;
+    for (let i = 0; i < list.length; i++) {
+        let item = list[i];
+        if (Array.isArray(item)) {
+            // we need to inline it.
+            if (dst === list) {
+                // Our assumption that the list was already flat was wrong and
+                // we need to clone flat since we need to write to it.
+                dst = list.slice(0, i);
+            }
+            flatten(item, dst);
+        }
+        else if (dst !== list) {
+            dst.push(item);
+        }
+    }
+    return dst;
+}
+function deepForEach(input, fn) {
+    input.forEach(value => Array.isArray(value) ? deepForEach(value, fn) : fn(value));
 }
 
 /**
@@ -2152,19 +2197,6 @@ function makeRecord(factory, value, multi = false) {
         value: value,
         multi: multi ? [] : undefined,
     };
-}
-/**
- * @template T
- * @param {?} input
- * @param {?} fn
- * @return {?}
- */
-function deepForEach(input, fn) {
-    input.forEach((/**
-     * @param {?} value
-     * @return {?}
-     */
-    value => Array.isArray(value) ? deepForEach(value, fn) : fn(value)));
 }
 /**
  * @param {?} value
@@ -3222,7 +3254,7 @@ function _normalizeProviders(providers, res) {
      */
     b => {
         if (b instanceof Type) {
-            res.push({ provide: b, useClass: b });
+            res.push((/** @type {?} */ ({ provide: b, useClass: b })));
         }
         else if (b && typeof b == 'object' && ((/** @type {?} */ (b))).provide !== undefined) {
             res.push((/** @type {?} */ (b)));
@@ -4315,7 +4347,7 @@ function ɵɵdefineComponent(componentDefinition) {
         // assigned in noSideEffects
         selectors: componentDefinition.selectors,
         viewQuery: componentDefinition.viewQuery || null,
-        features: componentDefinition.features || null,
+        features: (/** @type {?} */ (componentDefinition.features)) || null,
         data: componentDefinition.data || {},
         // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in the
         // next line. Also `None` should be 0 not 2.
@@ -8944,7 +8976,7 @@ function getNodeInjectable(tData, lData, index, tNode) {
         const saveLView = getLView();
         setTNodeAndViewData(tNode, lData);
         try {
-            value = lData[index] = factory.factory(null, tData, lData, tNode);
+            value = lData[index] = factory.factory(undefined, tData, lData, tNode);
         }
         finally {
             if (factory.injectImpl)
@@ -9387,6 +9419,7 @@ function findNextInsertionIndex(buffer, priority) {
 /**
  * Iterates through the host instructions queue (if present within the provided
  * context) and executes each queued instruction entry.
+ * @this {?}
  * @param {?} context
  * @return {?}
  */
@@ -12174,14 +12207,14 @@ function getCurrentOrLViewSanitizer(lView) {
 const sanitizeUsingSanitizerObject = (/**
  * @param {?} prop
  * @param {?} value
- * @param {?} mode
+ * @param {?=} mode
  * @return {?}
  */
 (prop, value, mode) => {
     /** @type {?} */
     const sanitizer = (/** @type {?} */ (getCurrentStyleSanitizer()));
     if (sanitizer) {
-        if (mode & 2 /* SanitizeOnly */) {
+        if (mode !== undefined && mode & 2 /* SanitizeOnly */) {
             return sanitizer.sanitize(SecurityContext.STYLE, value);
         }
         else {
@@ -13352,12 +13385,10 @@ class NodeStylingDebug {
          * @param {?} element
          * @param {?} prop
          * @param {?} value
-         * @param {?} bindingIndex
+         * @param {?=} bindingIndex
          * @return {?}
          */
-        (renderer, element, prop, value, bindingIndex) => {
-            fn(prop, value, bindingIndex || null);
-        });
+        (renderer, element, prop, value, bindingIndex) => { fn(prop, value, bindingIndex || null); });
         /** @type {?} */
         const sanitizer = this._isClassBased ? null : (this._sanitizer ||
             getCurrentOrLViewSanitizer((/** @type {?} */ (this._data))));
@@ -24587,7 +24618,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+8.sha-78e7fdd.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+22.sha-60f58bf.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29477,48 +29508,6 @@ function getPluralCase(value, locale) {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
-* Equivalent to ES6 spread, add each item to an array.
-*
-* @param items The items to add
-* @param arr The array to which you want to add the items
-*/
-function addAllToArray(items, arr) {
-    for (let i = 0; i < items.length; i++) {
-        arr.push(items[i]);
-    }
-}
-/**
- * Flattens an array.
- */
-function flatten(list, dst) {
-    if (dst === undefined)
-        dst = list;
-    for (let i = 0; i < list.length; i++) {
-        let item = list[i];
-        if (Array.isArray(item)) {
-            // we need to inline it.
-            if (dst === list) {
-                // Our assumption that the list was already flat was wrong and
-                // we need to clone flat since we need to write to it.
-                dst = list.slice(0, i);
-            }
-            flatten(item, dst);
-        }
-        else if (dst !== list) {
-            dst.push(item);
-        }
-    }
-    return dst;
-}
-
-/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -31066,7 +31055,7 @@ function registerNgModuleType(ngModuleType) {
          * @param {?} i
          * @return {?}
          */
-        (i) => registerNgModuleType(i)));
+        i => registerNgModuleType((/** @type {?} */ (i)))));
     }
 }
 /**
@@ -33103,9 +33092,10 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
                 verifySemanticsOfNgModuleImport(mod, moduleType);
                 verifySemanticsOfNgModuleDef(mod, false, moduleType);
             }));
-        ngModule.bootstrap && ngModule.bootstrap.forEach(verifyCorrectBootstrapType);
-        ngModule.bootstrap && ngModule.bootstrap.forEach(verifyComponentIsPartOfNgModule);
-        ngModule.entryComponents && ngModule.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+        ngModule.bootstrap && deepForEach(ngModule.bootstrap, verifyCorrectBootstrapType);
+        ngModule.bootstrap && deepForEach(ngModule.bootstrap, verifyComponentIsPartOfNgModule);
+        ngModule.entryComponents &&
+            deepForEach(ngModule.entryComponents, verifyComponentIsPartOfNgModule);
     }
     // Throw Error if any errors were detected.
     if (errors.length) {
@@ -33198,7 +33188,7 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
             /** @type {?} */
             const component = getAnnotation(type, 'Component');
             if (component && component.entryComponents) {
-                component.entryComponents.forEach(verifyComponentIsPartOfNgModule);
+                deepForEach(component.entryComponents, verifyComponentIsPartOfNgModule);
             }
         }
     }
@@ -34119,7 +34109,7 @@ const ɵ0$b = /**
 const NgModule = makeDecorator('NgModule', (ɵ0$b), undefined, undefined, (ɵ1$3));
 /**
  * @param {?} moduleType
- * @param {?} metadata
+ * @param {?=} metadata
  * @return {?}
  */
 function preR3NgModuleCompile(moduleType, metadata) {
@@ -34128,7 +34118,7 @@ function preR3NgModuleCompile(moduleType, metadata) {
     if (metadata && metadata.exports) {
         imports = [...imports, metadata.exports];
     }
-    /** @nocollapse */ moduleType.ngInjectorDef = ɵɵdefineInjector({
+    ((/** @type {?} */ (moduleType))).ngInjectorDef = ɵɵdefineInjector({
         factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
         providers: metadata && metadata.providers,
         imports: imports,
@@ -35049,8 +35039,8 @@ function forkInnerZoneWithAngularBehavior(zone) {
          * @param {?} target
          * @param {?} callback
          * @param {?} applyThis
-         * @param {?} applyArgs
-         * @param {?} source
+         * @param {?=} applyArgs
+         * @param {?=} source
          * @return {?}
          */
         (delegate, current, target, callback, applyThis, applyArgs, source) => {
@@ -37210,12 +37200,10 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
     }
 }
 /**
- * Walk the TNode tree to find matches for the predicate.
- *
- * @param {?} parentElement the element from which the walk is started
- * @param {?} predicate the predicate to match
- * @param {?} matches the list of positive matches
- * @param {?} elementsOnly whether only elements should be searched
+ * @param {?} parentElement
+ * @param {?} predicate
+ * @param {?} matches
+ * @param {?} elementsOnly
  * @return {?}
  */
 function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
@@ -37233,7 +37221,7 @@ function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
  * @param {?} predicate the predicate to match
  * @param {?} matches the list of positive matches
  * @param {?} elementsOnly whether only elements should be searched
- * @param {?} rootNativeNode the root native node on which prediccate shouold not be matched
+ * @param {?} rootNativeNode the root native node on which predicate should not be matched
  * @return {?}
  */
 function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, rootNativeNode) {
@@ -37318,7 +37306,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
  * @param {?} predicate the predicate to match
  * @param {?} matches the list of positive matches
  * @param {?} elementsOnly whether only elements should be searched
- * @param {?} rootNativeNode the root native node on which prediccate shouold not be matched
+ * @param {?} rootNativeNode the root native node on which predicate should not be matched
  * @return {?}
  */
 function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode) {
@@ -37335,16 +37323,24 @@ function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, element
  * @param {?} predicate the predicate to match
  * @param {?} matches the list of positive matches
  * @param {?} elementsOnly whether only elements should be searched
- * @param {?} rootNativeNode the root native node on which prediccate shouold not be matched
+ * @param {?} rootNativeNode the root native node on which predicate should not be matched
  * @return {?}
  */
 function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode) {
     if (rootNativeNode !== nativeNode) {
         /** @type {?} */
         const debugNode = getDebugNode(nativeNode);
-        if (debugNode && (elementsOnly ? debugNode instanceof DebugElement__POST_R3__ : true) &&
-            predicate(debugNode)) {
+        if (!debugNode) {
+            return;
+        }
+        // Type of the "predicate and "matches" array are set based on the value of
+        // the "elementsOnly" parameter. TypeScript is not able to properly infer these
+        // types with generics, so we manually cast the parameters accordingly.
+        if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode)) {
             matches.push(debugNode);
+        }
+        else if (!elementsOnly && ((/** @type {?} */ (predicate)))(debugNode)) {
+            ((/** @type {?} */ (matches))).push(debugNode);
         }
     }
 }

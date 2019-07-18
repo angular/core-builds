@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+8.sha-78e7fdd.with-local-changes
+ * @license Angular v8.2.0-next.2+22.sha-60f58bf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -46,6 +46,7 @@ function asyncFallback(fn) {
     if (_global.jasmine) {
         // Not using an arrow function to preserve context passed from call site
         return (/**
+         * @this {?}
          * @param {?} done
          * @return {?}
          */
@@ -82,6 +83,7 @@ function asyncFallback(fn) {
     // it('...', async(myFn)); or can be used in a custom framework.
     // Not using an arrow function to preserve context passed from call site
     return (/**
+     * @this {?}
      * @return {?}
      */
     function () {
@@ -502,6 +504,7 @@ let _inFakeAsyncCall = false;
 function fakeAsyncFallback(fn) {
     // Not using an arrow function to preserve context passed from call site
     return (/**
+     * @this {?}
      * @param {...?} args
      * @return {?}
      */
@@ -1915,11 +1918,11 @@ class R3TestBedCompiler {
             const [prop, descriptor] = value;
             if (!descriptor) {
                 // Delete operations are generally undesirable since they have performance implications
-                // on objects they were applied to. In this particular case, situations where this code is
-                // invoked should be quite rare to cause any noticable impact, since it's applied only to
-                // some test cases (for example when class with no annotations extends some @Component)
-                // when we need to clear 'ngComponentDef' field on a given class to restore its original
-                // state (before applying overrides and running tests).
+                // on objects they were applied to. In this particular case, situations where this code
+                // is invoked should be quite rare to cause any noticeable impact, since it's applied
+                // only to some test cases (for example when class with no annotations extends some
+                // @Component) when we need to clear 'ngComponentDef' field on a given class to restore
+                // its original state (before applying overrides and running tests).
                 delete ((/** @type {?} */ (type)))[prop];
             }
             else {
@@ -3530,6 +3533,7 @@ function inject(tokens, fn) {
     if (tokens.indexOf(AsyncTestCompleter) >= 0) {
         // Not using an arrow function to preserve context passed from call site
         return (/**
+         * @this {?}
          * @return {?}
          */
         function () {
@@ -3549,6 +3553,7 @@ function inject(tokens, fn) {
     else {
         // Not using an arrow function to preserve context passed from call site
         return (/**
+         * @this {?}
          * @return {?}
          */
         function () { return testBed.execute(tokens, fn, this); });
@@ -3585,6 +3590,7 @@ class InjectSetupWrapper {
         const self = this;
         // Not using an arrow function to preserve context passed from call site
         return (/**
+         * @this {?}
          * @return {?}
          */
         function () {
@@ -3602,6 +3608,7 @@ function withModule(moduleDef, fn) {
     if (fn) {
         // Not using an arrow function to preserve context passed from call site
         return (/**
+         * @this {?}
          * @return {?}
          */
         function () {
