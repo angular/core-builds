@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+7.sha-1e9eeaf.with-local-changes
+ * @license Angular v8.2.0-next.2+8.sha-78e7fdd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5624,7 +5624,7 @@
      * transformation values.
      */
     var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
-    var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+    var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|Z|3d)?';
     var COLOR_FNS = '(?:rgb|hsl)a?';
     var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
     var CSS3_FNS = '(?:calc|attr)';
@@ -19805,7 +19805,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+7.sha-1e9eeaf.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+8.sha-78e7fdd.with-local-changes');
 
     /**
      * @license
