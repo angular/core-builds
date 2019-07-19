@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+32.sha-f14693b.with-local-changes
+ * @license Angular v8.2.0-next.2+33.sha-9c954eb.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1501,11 +1501,11 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
     readonly attributes: {
         [key: string]: string | null;
     };
-    readonly classes: {
-        [key: string]: boolean;
-    };
     readonly styles: {
         [key: string]: string | null;
+    };
+    readonly classes: {
+        [key: string]: boolean;
     };
     readonly childNodes: DebugNode[];
     readonly children: DebugElement[];
@@ -3776,11 +3776,8 @@ declare interface LContainer extends Array<any> {
      *
      * The host could be an LView if this container is on a component node.
      * In that case, the component LView is its HOST.
-     *
-     * It could also be a styling context if this is a node with a style/class
-     * binding.
      */
-    readonly [HOST]: RElement | RComment | StylingContext | ɵangular_packages_core_core_bm;
+    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bm;
     /**
      * This is a type field which allows us to differentiate `LContainer` from `StylingContext` in an
      * efficient way. The value is always set to `true`
@@ -3932,36 +3929,6 @@ declare interface LQueries {
      * @param read Indicates which token should be read from DI for this query.
      */
     track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: Type<T>): void;
-}
-
-/**
- * Array-based representation of a key/value array.
- *
- * The format of the array is "property", "value", "property2",
- * "value2", etc...
- *
- * The first value in the array is reserved to store the instance
- * of the key/value array that was used to populate the property/
- * value entries that take place in the remainder of the array.
- */
-declare interface LStylingMap extends Array<{} | string | number | null> {
-    [LStylingMapIndex.RawValuePosition]: {} | string | null;
-}
-
-/**
- * An index of position and offset points for any data stored within a `LStylingMap` instance.
- */
-declare const enum LStylingMapIndex {
-    /** The location of the raw key/value map instance used last to populate the array entries */
-    RawValuePosition = 0,
-    /** Where the values start in the array */
-    ValuesStartPosition = 1,
-    /** The size of each property/value entry */
-    TupleSize = 2,
-    /** The offset for the property entry in the tuple */
-    PropOffset = 0,
-    /** The offset for the value entry in the tuple */
-    ValueOffset = 1
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -6928,6 +6895,36 @@ declare const enum StylingIndex {
 }
 
 /**
+ * Array-based representation of a key/value array.
+ *
+ * The format of the array is "property", "value", "property2",
+ * "value2", etc...
+ *
+ * The first value in the array is reserved to store the instance
+ * of the key/value array that was used to populate the property/
+ * value entries that take place in the remainder of the array.
+ */
+declare interface StylingMapArray extends Array<{} | string | number | null> {
+    [StylingMapArrayIndex.RawValuePosition]: {} | string | null;
+}
+
+/**
+ * An index of position and offset points for any data stored within a `StylingMapArray` instance.
+ */
+declare const enum StylingMapArrayIndex {
+    /** The location of the raw key/value map instance used last to populate the array entries */
+    RawValuePosition = 0,
+    /** Where the values start in the array */
+    ValuesStartPosition = 1,
+    /** The size of each property/value entry */
+    TupleSize = 2,
+    /** The offset for the property entry in the tuple */
+    PropOffset = 0,
+    /** The offset for the value entry in the tuple */
+    ValueOffset = 1
+}
+
+/**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * @publicApi
  * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
@@ -7500,8 +7497,44 @@ declare interface TNode {
      * with functions each time the creation block is called.
      */
     onElementCreationFns: Function[] | null;
-    newStyles: TStylingContext | null;
-    newClasses: TStylingContext | null;
+    /**
+     * A collection of all style bindings and/or static style values for an element.
+     *
+     * This field will be populated if and when:
+     *
+     * - There are one or more initial styles on an element (e.g. `<div style="width:200px">`)
+     * - There are one or more style bindings on an element (e.g. `<div [style.width]="w">`)
+     *
+     * If and when there are only initial styles (no bindings) then an instance of `StylingMapArray`
+     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
+     * are one or more style bindings on an element.
+     *
+     * During element creation this value is likely to be populated with an instance of
+     * `StylingMapArray` and only when the bindings are evaluated (which happens during
+     * update mode) then it will be converted to a `TStylingContext` if any style bindings
+     * are encountered. If and when this happens then the existing `StylingMapArray` value
+     * will be placed into the initial styling slot in the newly created `TStylingContext`.
+     */
+    styles: StylingMapArray | TStylingContext | null;
+    /**
+     * A collection of all class bindings and/or static class values for an element.
+     *
+     * This field will be populated if and when:
+     *
+     * - There are one or more initial classes on an element (e.g. `<div class="one two three">`)
+     * - There are one or more class bindings on an element (e.g. `<div [class.foo]="f">`)
+     *
+     * If and when there are only initial classes (no bindings) then an instance of `StylingMapArray`
+     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
+     * are one or more class bindings on an element.
+     *
+     * During element creation this value is likely to be populated with an instance of
+     * `StylingMapArray` and only when the bindings are evaluated (which happens during
+     * update mode) then it will be converted to a `TStylingContext` if any class bindings
+     * are encountered. If and when this happens then the existing `StylingMapArray` value
+     * will be placed into the initial styling slot in the newly created `TStylingContext`.
+     */
+    classes: StylingMapArray | TStylingContext | null;
 }
 
 /**
@@ -7725,7 +7758,22 @@ declare const enum TStylingConfigFlags {
      * it has been flushed once then it will be locked for good (no extra
      * bindings can be added to it).
      */
-    Locked = 1
+    Locked = 1,
+    /**
+     * Whether or not to store the state between updates in a global storage map.
+     *
+     * This flag helps the algorithm avoid storing all state values temporarily in
+     * a storage map (that lives in `state.ts`). The flag is only flipped to true if
+     * and when an element contains style/class bindings that exist both on the
+     * template-level as well as within host bindings on the same element. This is a
+     * rare case, and a storage map is required so that the state values can be restored
+     * between the template code running and the host binding code executing.
+     */
+    PersistStateValues = 2,
+    /** A Mask of all the configurations */
+    Mask = 3,
+    /** Total amount of configuration bits used */
+    TotalBits = 2
 }
 
 /**
@@ -7755,17 +7803,37 @@ declare const enum TStylingConfigFlags {
  * tNode.classes = [ ... a context only for classes ... ];
  * ```
  *
+ * `tNode.styles` and `tNode.classes` can be an instance of the following:
+ *
+ * ```typescript
+ * tNode.styles = null; // no static styling or styling bindings active
+ * tNode.styles = StylingMapArray; // only static values present (e.g. `<div style="width:200">`)
+ * tNode.styles = TStylingContext; // one or more styling bindings present (e.g. `<div
+ * [style.width]>`)
+ * ```
+ *
+ * Both `tNode.styles` and `tNode.classes` are instantiated when anything
+ * styling-related is active on an element. They are first created from
+ * from the any of the element-level instructions (e.g. `element`,
+ * `elementStart`, `elementHostAttrs`). When any static style/class
+ * values are encountered they are registered on the `tNode.styles`
+ * and `tNode.classes` data-structures. By default (when any static
+ * values are encountered) the `tNode.styles` or `tNode.classes` values
+ * are instances of a `StylingMapArray`. Only when style/class bindings
+ * are detected then that styling map is converted into an instance of
+ * `TStylingContext`.
+ *
  * Due to the fact the the `TStylingContext` is stored on a `TNode`
  * this means that all data within the context is static. Instead of
  * storing actual styling binding values, the lView binding index values
  * are stored within the context. (static nature means it is more compact.)
-
  *
  * ```typescript
  * // <div [class.active]="c"  // lView binding index = 20
  * //      [style.width]="x"   // lView binding index = 21
  * //      [style.height]="y"> // lView binding index = 22
  * tNode.stylesContext = [
+ *   [], // initial values array
  *   0, // the context config value
  *
  *   0b001, // guard mask for width
@@ -7782,6 +7850,7 @@ declare const enum TStylingConfigFlags {
  * ];
  *
  * tNode.classesContext = [
+ *   [], // initial values array
  *   0, // the context config value
  *
  *   0b001, // guard mask for active
@@ -7978,14 +8047,16 @@ declare const enum TStylingConfigFlags {
  * If sanitization returns an empty value then that empty value will be applied
  * to the element.
  */
-declare interface TStylingContext extends Array<number | string | number | boolean | null | LStylingMap> {
+declare interface TStylingContext extends Array<number | string | number | boolean | null | StylingMapArray | {}> {
+    /** Initial value position for static styles */
+    [TStylingContextIndex.InitialStylingValuePosition]: StylingMapArray | null;
     /** Configuration data for the context */
     [TStylingContextIndex.ConfigPosition]: TStylingConfigFlags;
     /** Temporary value used to track directive index entries until
        the old styling code is fully removed. The reason why this
        is required is to figure out which directive is last and,
        when encountered, trigger a styling flush to happen */
-    [TStylingContextIndex.MaxDirectiveIndexPosition]: number;
+    [TStylingContextIndex.LastDirectiveIndexPosition]: number;
     /** The bit guard value for all map-based bindings on an element */
     [TStylingContextIndex.MapBindingsBitGuardPosition]: number;
     /** The total amount of map-based bindings present on an element */
@@ -8001,17 +8072,19 @@ declare interface TStylingContext extends Array<number | string | number | boole
  * An index of position and offset values used to natigate the `TStylingContext`.
  */
 declare const enum TStylingContextIndex {
-    ConfigPosition = 0,
-    MaxDirectiveIndexPosition = 1,
-    MapBindingsPosition = 2,
-    MapBindingsBitGuardPosition = 2,
-    MapBindingsValuesCountPosition = 3,
-    MapBindingsPropPosition = 4,
-    MapBindingsBindingsStartPosition = 5,
+    InitialStylingValuePosition = 0,
+    ConfigPosition = 1,
+    LastDirectiveIndexPosition = 2,
+    MapBindingsPosition = 3,
+    MapBindingsBitGuardPosition = 3,
+    MapBindingsValuesCountPosition = 4,
+    MapBindingsPropPosition = 5,
+    MapBindingsBindingsStartPosition = 6,
     ConfigAndGuardOffset = 0,
     ValuesCountOffset = 1,
     PropOffset = 2,
-    BindingsStartOffset = 3
+    BindingsStartOffset = 3,
+    MinTupleLength = 4
 }
 
 /** Static data for a text node */
@@ -9238,13 +9311,9 @@ export declare function ɵangular_packages_core_core_bl(name: string, props?: (.
 export declare interface ɵangular_packages_core_core_bm extends Array<any> {
     /**
      * The host node for this LView instance, if this is a component view.
-     *
      * If this is an embedded view, HOST will be null.
-     *
-     * If the component uses host bindings for styling that the `RElement` will be wrapped with
-     * `StylingContext`.
      */
-    [HOST]: RElement | StylingContext | null;
+    [HOST]: RElement | null;
     /**
      * The static data for this view. We need a reference to this so we can easily walk up the
      * node tree in DI and get the TView.data array associated with a node (where the
@@ -11436,8 +11505,8 @@ export declare interface ɵɵBaseDef<T> {
  * @codeGenApi
  */
 export declare function ɵɵclassMap(classes: {
-    [styleName: string]: any;
-} | string | null): void;
+    [className: string]: any;
+} | ɵNO_CHANGE | string | null): void;
 
 
 /**
@@ -11718,20 +11787,15 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
  * therefore, the class binding itself must already be allocated using
  * `styling` within the creation block.
  *
- * @param classIndex Index of class to toggle. This index value refers to the
- *        index of the class in the class bindings array that was passed into
- *        `styling` (which is meant to be called before this
- *        function is).
+ * @param prop A valid CSS class (only one).
  * @param value A true/false value which will turn the class on or off.
- * @param forceOverride Whether or not this value will be applied regardless
- *        of where it is being set within the styling priority structure.
  *
  * Note that this will apply the provided class value to the host element if this function
  * is called within a host binding.
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ɵɵclassProp(className: string, value: boolean | null): void;
 
 /**
  * @codeGenApi
@@ -13907,22 +13971,18 @@ export declare function ɵɵstyleMap(styles: {
  *
  * Note that the styling element is updated as part of `stylingApply`.
  *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param value New value to write (falsy to remove).
+ * @param prop A valid CSS property.
+ * @param value New value to write (`null` or an empty string to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param forceOverride Whether or not to update the styling value immediately
- *        (despite the other bindings possibly having priority)
  *
  * Note that this will apply the provided style value to the host element if this function is called
  * within a host binding.
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | String | null, suffix?: string | null): void;
 
 /**
  *
@@ -13947,11 +14007,10 @@ export declare function ɵɵstyleProp(styleIndex: number, value: string | number
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(styleIndex: number, prefix: string, v0: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -13978,11 +14037,10 @@ export declare function ɵɵstylePropInterpolate1(styleIndex: number, prefix: st
  * @param v1 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14011,11 +14069,10 @@ export declare function ɵɵstylePropInterpolate2(styleIndex: number, prefix: st
  * @param v2 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14046,11 +14103,10 @@ export declare function ɵɵstylePropInterpolate3(styleIndex: number, prefix: st
  * @param v3 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14083,11 +14139,10 @@ export declare function ɵɵstylePropInterpolate4(styleIndex: number, prefix: st
  * @param v4 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14122,11 +14177,10 @@ export declare function ɵɵstylePropInterpolate5(styleIndex: number, prefix: st
  * @param v5 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14164,11 +14218,10 @@ export declare function ɵɵstylePropInterpolate6(styleIndex: number, prefix: st
  * @param v6 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14208,11 +14261,10 @@ export declare function ɵɵstylePropInterpolate7(styleIndex: number, prefix: st
  * @param v7 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  * Update an interpolated style property on an element with 8 or more bound values surrounded by
@@ -14241,42 +14293,65 @@ export declare function ɵɵstylePropInterpolate8(styleIndex: number, prefix: st
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolateV(styleIndex: number, values: any[], valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): TsickleIssue1009;
 
 /**
- * Allocates style and class binding properties on the element during creation mode.
+ * Sets the current style sanitizer function which will then be used
+ * within all follow-up prop and map-based style binding instructions
+ * for the given element.
  *
- * This instruction is meant to be called during creation mode to register all
- * dynamic style and class bindings on the element. Note that this is only used
- * for binding values (see `elementStart` to learn how to assign static styling
- * values to an element).
+ * Note that once styling has been applied to the element (i.e. once
+ * `select(n)` is executed or the hostBindings/template function exits)
+ * then the active `sanitizerFn` will be set to `null`. This means that
+ * once styling is applied to another element then a another call to
+ * `styleSanitizer` will need to be made.
  *
- * @param classBindingNames An array containing bindable class names.
- *        The `classProp` instruction refers to the class name by index in
- *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
- * @param styleBindingNames An array containing bindable style properties.
- *        The `styleProp` instruction refers to the class name by index in
- *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
- * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        style values that are applied to the element (during rendering).
- *
- * Note that this will allocate the provided style/class bindings to the host element if
- * this function is called within a host binding.
+ * @param sanitizerFn The sanitization function that will be used to
+ *       process style prop/value entries.
  *
  * @codeGenApi
  */
-export declare function ɵɵstyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 
 /**
- * Apply all style and class binding values to the element.
+ * --------
  *
- * This instruction is meant to be run after `styleMap`, `classMap`,
- * `styleProp` or `classProp` instructions have been run and will
- * only apply styling to the element if any styling bindings have been updated.
+ * This file contains the core logic for how styling instructions are processed in Angular.
+ *
+ * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
+ */
+/**
+ * Temporary function to bridge styling functionality between this new
+ * refactor (which is here inside of `styling_next/`) and the old
+ * implementation (which lives inside of `styling/`).
+ *
+ * This function is executed during the creation block of an element.
+ * Because the existing styling implementation issues a call to the
+ * `styling()` instruction, this instruction will also get run. The
+ * central idea here is that the directive index values are bound
+ * into the context. The directive index is temporary and is only
+ * required until the `select(n)` instruction is fully functional.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵstyling(): void;
+
+/**
+ * Temporary function to bridge styling functionality between this new
+ * refactor (which is here inside of `styling_next/`) and the old
+ * implementation (which lives inside of `styling/`).
+ *
+ * The new styling refactor ensures that styling flushing is called
+ * automatically when a template function exits or a follow-up element
+ * is visited (i.e. when `select(n)` is called). Because the `select(n)`
+ * instruction is not fully implemented yet (it doesn't actually execute
+ * host binding instruction code at the right time), this means that a
+ * styling apply function is still needed.
  *
  * @codeGenApi
  */
