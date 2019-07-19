@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+7.sha-1e9eeaf.with-local-changes
+ * @license Angular v8.2.0-next.2+25.sha-7151eae.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1592,11 +1592,11 @@
                 var _a = __read(value, 2), prop = _a[0], descriptor = _a[1];
                 if (!descriptor) {
                     // Delete operations are generally undesirable since they have performance implications
-                    // on objects they were applied to. In this particular case, situations where this code is
-                    // invoked should be quite rare to cause any noticable impact, since it's applied only to
-                    // some test cases (for example when class with no annotations extends some @Component)
-                    // when we need to clear 'ngComponentDef' field on a given class to restore its original
-                    // state (before applying overrides and running tests).
+                    // on objects they were applied to. In this particular case, situations where this code
+                    // is invoked should be quite rare to cause any noticeable impact, since it's applied
+                    // only to some test cases (for example when class with no annotations extends some
+                    // @Component) when we need to clear 'ngComponentDef' field on a given class to restore
+                    // its original state (before applying overrides and running tests).
                     delete type[prop];
                 }
                 else {
