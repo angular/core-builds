@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+31.sha-f10d6c6.with-local-changes
+ * @license Angular v8.2.0-next.2+32.sha-f14693b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3723,50 +3723,9 @@ var CONTAINER_HEADER_OFFSET = 9;
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * This property will be monkey-patched on elements, components and directives
- */
-var MONKEY_PATCH_KEY_NAME = '__ngContext__';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`,
- * `StylingContext`) in same location in `LView`. This is because we don't want to pre-allocate
- * space for it because the storage is sparse. This file contains utilities for dealing with such
- * data types.
- *
- * How do we know what is stored at a given location in `LView`.
- * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
- * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
- *   - `typeof value[TYPE] === 'object'` => `LView`
- *      - This happens when we have a component at a given location
- *   - `typeof value[TYPE] === 'number'` => `StylingContext`
- *      - This happens when we have style/class binding at a given location.
- *   - `typeof value[TYPE] === true` => `LContainer`
- *      - This happens when we have `LContainer` binding at a given location.
- *
- *
- * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
- */
-/**
- * Returns `RNode`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
- */
-function unwrapRNode(value) {
-    while (Array.isArray(value)) {
-        value = value[HOST];
-    }
-    return value;
-}
-/**
- * True if `value` is `LView`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
- */
+* True if `value` is `LView`.
+* @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+*/
 function isLView(value) {
     return Array.isArray(value) && typeof value[TYPE] === 'object';
 }
@@ -3784,65 +3743,6 @@ function isLContainer(value) {
 function isStylingContext(value) {
     return Array.isArray(value) && typeof value[TYPE] === 'number';
 }
-/**
- * Retrieves an element value from the provided `viewData`, by unwrapping
- * from any containers, component views, or style contexts.
- */
-function getNativeByIndex(index, lView) {
-    return unwrapRNode(lView[index + HEADER_OFFSET]);
-}
-/**
- * Retrieve an `RNode` for a given `TNode` and `LView`.
- *
- * This function guarantees in dev mode to retrieve a non-null `RNode`.
- *
- * @param tNode
- * @param lView
- */
-function getNativeByTNode(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    ngDevMode && assertDataInRange(lView, tNode.index);
-    var node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && assertDomNode(node);
-    return node;
-}
-/**
- * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
- *
- * Some `TNode`s don't have associated `RNode`s. For example `Projection`
- *
- * @param tNode
- * @param lView
- */
-function getNativeByTNodeOrNull(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    var index = tNode.index;
-    var node = index == -1 ? null : unwrapRNode(lView[index]);
-    ngDevMode && node !== null && assertDomNode(node);
-    return node;
-}
-/**
- * A helper function that returns `true` if a given `TNode` has any matching directives.
- */
-function hasDirectives(tNode) {
-    return tNode.directiveEnd > tNode.directiveStart;
-}
-function getTNode(index, view) {
-    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
-    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
-    return view[TVIEW].data[index + HEADER_OFFSET];
-}
-/** Retrieves a value from any `LView` or `TData`. */
-function loadInternal(view, index) {
-    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
-}
-function getComponentViewByIndex(nodeIndex, hostView) {
-    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-    var slotValue = hostView[nodeIndex];
-    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
-    return lView;
-}
 function isContentQueryHost(tNode) {
     return (tNode.flags & 4 /* hasContentQuery */) !== 0;
 }
@@ -3854,41 +3754,6 @@ function isComponentDef(def) {
 }
 function isRootView(target) {
     return (target[FLAGS] & 512 /* IsRoot */) !== 0;
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-function readPatchedData(target) {
-    ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME];
-}
-function readPatchedLView(target) {
-    var value = readPatchedData(target);
-    if (value) {
-        return Array.isArray(value) ? value : value.lView;
-    }
-    return null;
-}
-/**
- * Returns a boolean for whether the view is attached to the change detection tree.
- *
- * Note: This determines whether a view should be checked, not whether it's inserted
- * into a container. For that, you'll want `viewAttachedToContainer` below.
- */
-function viewAttachedToChangeDetector(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
-}
-/** Returns a boolean for whether the view is attached to a container. */
-function viewAttachedToContainer(view) {
-    return isLContainer(view[PARENT]);
-}
-/**
- * Resets the pre-order hook flags of the view.
- * @param lView the LView on which the flags are reset
- */
-function resetPreOrderHookFlags(lView) {
-    lView[PREORDER_HOOK_FLAGS] = 0;
 }
 
 /**
@@ -4192,6 +4057,149 @@ function getCachedStylingContext() {
  */
 function setCachedStylingContext(context) {
     stylingContext = context;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This property will be monkey-patched on elements, components and directives
+ */
+var MONKEY_PATCH_KEY_NAME = '__ngContext__';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`,
+ * `StylingContext`) in same location in `LView`. This is because we don't want to pre-allocate
+ * space for it because the storage is sparse. This file contains utilities for dealing with such
+ * data types.
+ *
+ * How do we know what is stored at a given location in `LView`.
+ * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
+ * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
+ *   - `typeof value[TYPE] === 'object'` => `LView`
+ *      - This happens when we have a component at a given location
+ *   - `typeof value[TYPE] === 'number'` => `StylingContext`
+ *      - This happens when we have style/class binding at a given location.
+ *   - `typeof value[TYPE] === true` => `LContainer`
+ *      - This happens when we have `LContainer` binding at a given location.
+ *
+ *
+ * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
+ */
+/**
+ * Returns `RNode`.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ */
+function unwrapRNode(value) {
+    while (Array.isArray(value)) {
+        value = value[HOST];
+    }
+    return value;
+}
+/**
+ * Retrieves an element value from the provided `viewData`, by unwrapping
+ * from any containers, component views, or style contexts.
+ */
+function getNativeByIndex(index, lView) {
+    return unwrapRNode(lView[index + HEADER_OFFSET]);
+}
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param tNode
+ * @param lView
+ */
+function getNativeByTNode(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    ngDevMode && assertDataInRange(lView, tNode.index);
+    var node = unwrapRNode(lView[tNode.index]);
+    ngDevMode && assertDomNode(node);
+    return node;
+}
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param tNode
+ * @param lView
+ */
+function getNativeByTNodeOrNull(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    var index = tNode.index;
+    var node = index == -1 ? null : unwrapRNode(lView[index]);
+    ngDevMode && node !== null && assertDomNode(node);
+    return node;
+}
+/**
+ * A helper function that returns `true` if a given `TNode` has any matching directives.
+ */
+function hasDirectives(tNode) {
+    return tNode.directiveEnd > tNode.directiveStart;
+}
+function getTNode(index, view) {
+    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
+    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
+    return view[TVIEW].data[index + HEADER_OFFSET];
+}
+/** Retrieves a value from any `LView` or `TData`. */
+function loadInternal(view, index) {
+    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+    return view[index + HEADER_OFFSET];
+}
+function getComponentViewByIndex(nodeIndex, hostView) {
+    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
+    var slotValue = hostView[nodeIndex];
+    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
+    return lView;
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ */
+function readPatchedData(target) {
+    ngDevMode && assertDefined(target, 'Target expected');
+    return target[MONKEY_PATCH_KEY_NAME];
+}
+function readPatchedLView(target) {
+    var value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : value.lView;
+    }
+    return null;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/** Returns a boolean for whether the view is attached to a container. */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
+}
+/**
+ * Resets the pre-order hook flags of the view.
+ * @param lView the LView on which the flags are reset
+ */
+function resetPreOrderHookFlags(lView) {
+    lView[PREORDER_HOOK_FLAGS] = 0;
 }
 
 /**
@@ -19644,7 +19652,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.2+31.sha-f10d6c6.with-local-changes');
+var VERSION = new Version('8.2.0-next.2+32.sha-f14693b.with-local-changes');
 
 /**
  * @license

@@ -7,7 +7,6 @@
  */
 import { LContainer } from '../interfaces/container';
 import { LContext } from '../interfaces/context';
-import { ComponentDef, DirectiveDef } from '../interfaces/definition';
 import { TNode } from '../interfaces/node';
 import { RNode } from '../interfaces/renderer';
 import { StylingContext } from '../interfaces/styling';
@@ -52,21 +51,6 @@ export declare function unwrapLContainer(value: RNode | LView | LContainer | Sty
  */
 export declare function unwrapStylingContext(value: RNode | LView | LContainer | StylingContext): StylingContext | null;
 /**
- * True if `value` is `LView`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
- */
-export declare function isLView(value: RNode | LView | LContainer | StylingContext | {} | null): value is LView;
-/**
- * True if `value` is `LContainer`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
- */
-export declare function isLContainer(value: RNode | LView | LContainer | StylingContext | {} | null): value is LContainer;
-/**
- * True if `value` is `StylingContext`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
- */
-export declare function isStylingContext(value: RNode | LView | LContainer | StylingContext | {} | null): value is StylingContext;
-/**
  * Retrieves an element value from the provided `viewData`, by unwrapping
  * from any containers, component views, or style contexts.
  */
@@ -97,10 +81,6 @@ export declare function getTNode(index: number, view: LView): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function loadInternal<T>(view: LView | TData, index: number): T;
 export declare function getComponentViewByIndex(nodeIndex: number, hostView: LView): LView;
-export declare function isContentQueryHost(tNode: TNode): boolean;
-export declare function isComponent(tNode: TNode): boolean;
-export declare function isComponentDef<T>(def: DirectiveDef<T>): def is ComponentDef<T>;
-export declare function isRootView(target: LView): boolean;
 /**
  * Returns the monkey-patch value data present on the target (which could be
  * a component, directive or a DOM node).
