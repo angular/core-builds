@@ -156,6 +156,7 @@ export declare type TsickleIssue1009 = any;
 /**
  * Constructs a TNode object from the arguments.
  *
+ * @param tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)
  * @param type The type of the node
  * @param adjustedIndex The index of the TNode in TView.data, adjusted for HEADER_OFFSET
  * @param tagName The tag name of the node
@@ -163,7 +164,7 @@ export declare type TsickleIssue1009 = any;
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
+export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *

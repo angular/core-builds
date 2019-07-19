@@ -71,7 +71,24 @@ export declare function isStylingContext(value: RNode | LView | LContainer | Sty
  * from any containers, component views, or style contexts.
  */
 export declare function getNativeByIndex(index: number, lView: LView): RNode;
-export declare function getNativeByTNode(tNode: TNode, hostView: LView): RNode;
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param tNode
+ * @param lView
+ */
+export declare function getNativeByTNode(tNode: TNode, lView: LView): RNode;
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param tNode
+ * @param lView
+ */
+export declare function getNativeByTNodeOrNull(tNode: TNode, lView: LView): RNode | null;
 /**
  * A helper function that returns `true` if a given `TNode` has any matching directives.
  */

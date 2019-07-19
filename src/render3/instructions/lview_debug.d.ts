@@ -5,16 +5,18 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentTemplate } from '..';
+import { AttributeMarker, ComponentTemplate } from '..';
 import { SchemaMetadata } from '../../core';
 import { LContainer } from '../interfaces/container';
 import { ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
-import { TElementNode, TNode, TViewNode } from '../interfaces/node';
+import { PropertyAliases, TContainerNode, TElementNode, TNode as ITNode, TNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { SelectorFlags } from '../interfaces/projection';
 import { LQueries } from '../interfaces/query';
-import { RComment, RElement } from '../interfaces/renderer';
+import { RComment, RElement, RNode } from '../interfaces/renderer';
 import { StylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
+import { TStylingContext } from '../styling_next/interfaces';
 import { DebugStyling as DebugNewStyling } from '../styling_next/styling_debug';
 export declare const LViewArray: ArrayConstructor | null;
 /**
@@ -28,13 +30,13 @@ export declare function cloneToLView(list: any[]): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (id: number, blueprint: LView, template: ComponentTemplate<{}> | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | import("@angular/core/src/core").InjectionToken<any> | TNode | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/render3/interfaces/i18n").TI18n | I18nUpdateOpCodes | null)[], bindingStartIndex: number, viewQueryStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstTemplatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: TNode | null, schemas: SchemaMetadata[] | null): {
+    new (id: number, blueprint: LView, template: ComponentTemplate<{}> | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | import("@angular/core/src/core").InjectionToken<any> | ITNode | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/render3/interfaces/i18n").TI18n | I18nUpdateOpCodes | null)[], bindingStartIndex: number, viewQueryStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstTemplatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null): {
         id: number;
         blueprint: LView;
         template: ComponentTemplate<{}> | null;
         viewQuery: ViewQueriesFunction<{}> | null;
         node: TElementNode | TViewNode | null;
-        data: (string | number | import("@angular/core/src/core").Type<any> | import("@angular/core/src/core").InjectionToken<any> | TNode | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/render3/interfaces/i18n").TI18n | I18nUpdateOpCodes | null)[];
+        data: (string | number | import("@angular/core/src/core").Type<any> | import("@angular/core/src/core").InjectionToken<any> | ITNode | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/render3/interfaces/i18n").TI18n | I18nUpdateOpCodes | null)[];
         bindingStartIndex: number;
         viewQueryStartIndex: number;
         expandoStartIndex: number;
@@ -54,8 +56,40 @@ export declare const TViewConstructor: {
         components: number[] | null;
         directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null;
         pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null;
-        firstChild: TNode | null;
+        firstChild: ITNode | null;
         schemas: SchemaMetadata[] | null;
+    };
+};
+export declare const TNodeConstructor: {
+    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyMetadataStartIndex: number, propertyMetadataEndIndex: number, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null | undefined, outputs: PropertyAliases | null | undefined, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, stylingTemplate: StylingContext | null, projection: number | (ITNode | RNode[])[] | null, onElementCreationFns: Function[] | null, newStyles: TStylingContext | null, newClasses: TStylingContext | null): {
+        tView_: ITView;
+        type: TNodeType;
+        index: number;
+        injectorIndex: number;
+        directiveStart: number;
+        directiveEnd: number;
+        propertyMetadataStartIndex: number;
+        propertyMetadataEndIndex: number;
+        flags: TNodeFlags;
+        providerIndexes: TNodeProviderIndexes;
+        tagName: string | null;
+        attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null;
+        localNames: (string | number)[] | null;
+        initialInputs: (string[] | null)[] | null | undefined;
+        inputs: PropertyAliases | null | undefined;
+        outputs: PropertyAliases | null | undefined;
+        tViews: ITView | ITView[] | null;
+        next: ITNode | null;
+        projectionNext: ITNode | null;
+        child: ITNode | null;
+        parent: TElementNode | TContainerNode | null;
+        stylingTemplate: StylingContext | null;
+        projection: number | (ITNode | RNode[])[] | null;
+        onElementCreationFns: Function[] | null;
+        newStyles: TStylingContext | null;
+        newClasses: TStylingContext | null;
+        readonly type_: string;
+        readonly flags_: string;
     };
 };
 /**
@@ -169,7 +203,7 @@ export declare class I18NDebugItem {
     nodeIndex: number;
     type: string;
     [key: string]: any;
-    readonly tNode: TNode;
+    readonly tNode: ITNode;
     constructor(__raw_opCode: any, _lView: LView, nodeIndex: number, type: string);
 }
 /**

@@ -7,6 +7,7 @@
  */
 import { TNode } from './interfaces/node';
 import { LView } from './interfaces/view';
+export declare function assertTNodeForLView(tNode: TNode, lView: LView): void;
 export declare function assertComponentType(actual: any, msg?: string): void;
 export declare function assertNgModuleType(actual: any, msg?: string): void;
 export declare function assertPreviousIsParent(isParent: boolean): void;
