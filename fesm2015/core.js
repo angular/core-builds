@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+28.sha-7b6ee5e.with-local-changes
+ * @license Angular v8.2.0-next.2+30.sha-4495a46.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4925,7 +4925,8 @@ function throwError(msg) {
 function assertDomNode(node) {
     // If we're in a worker, `Node` will not be defined.
     assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
-        (typeof node === 'object' && node.constructor.name === 'WebWorkerRenderNode'), true, `The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
+        (typeof node === 'object' && node != null &&
+            node.constructor.name === 'WebWorkerRenderNode'), true, `The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
 }
 function assertDataInRange(arr, index) {
     const maxLen = arr ? arr.length : 0;
@@ -5051,12 +5052,39 @@ function getNativeByIndex(index, lView) {
     return unwrapRNode(lView[index + HEADER_OFFSET]);
 }
 /**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
  * @param {?} tNode
- * @param {?} hostView
+ * @param {?} lView
  * @return {?}
  */
-function getNativeByTNode(tNode, hostView) {
-    return unwrapRNode(hostView[tNode.index]);
+function getNativeByTNode(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    ngDevMode && assertDataInRange(lView, tNode.index);
+    /** @type {?} */
+    const node = unwrapRNode(lView[tNode.index]);
+    ngDevMode && assertDomNode(node);
+    return node;
+}
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param {?} tNode
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByTNodeOrNull(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    /** @type {?} */
+    const index = tNode.index;
+    /** @type {?} */
+    const node = index == -1 ? null : unwrapRNode(lView[index]);
+    ngDevMode && node !== null && assertDomNode(node);
+    return node;
 }
 /**
  * A helper function that returns `true` if a given `TNode` has any matching directives.
@@ -5183,6 +5211,14 @@ function resetPreOrderHookFlags(lView) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * @param {?} tNode
+ * @param {?} lView
+ * @return {?}
+ */
+function assertTNodeForLView(tNode, lView) {
+    tNode.hasOwnProperty('tView_') && assertEqual(((/** @type {?} */ ((/** @type {?} */ (tNode))))).tView_, lView[TVIEW], 'This TNode does not belong to this LView.');
+}
 /**
  * @param {?} actual
  * @param {?=} msg
@@ -7656,7 +7692,7 @@ function findViaNativeElement(lView, target) {
     let tNode = lView[TVIEW].firstChild;
     while (tNode) {
         /** @type {?} */
-        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+        const native = (/** @type {?} */ (getNativeByTNodeOrNull(tNode, lView)));
         if (native === target) {
             return tNode.index;
         }
@@ -13538,6 +13574,131 @@ const TViewConstructor = class TView {
     }
 };
 /** @type {?} */
+const TNodeConstructor = class TNode {
+    /**
+     * @param {?} tView_
+     * @param {?} type
+     * @param {?} index
+     * @param {?} injectorIndex
+     * @param {?} directiveStart
+     * @param {?} directiveEnd
+     * @param {?} propertyMetadataStartIndex
+     * @param {?} propertyMetadataEndIndex
+     * @param {?} flags
+     * @param {?} providerIndexes
+     * @param {?} tagName
+     * @param {?} attrs
+     * @param {?} localNames
+     * @param {?} initialInputs
+     * @param {?} inputs
+     * @param {?} outputs
+     * @param {?} tViews
+     * @param {?} next
+     * @param {?} projectionNext
+     * @param {?} child
+     * @param {?} parent
+     * @param {?} stylingTemplate
+     * @param {?} projection
+     * @param {?} onElementCreationFns
+     * @param {?} newStyles
+     * @param {?} newClasses
+     */
+    constructor(tView_, //
+    type, //
+    index, //
+    injectorIndex, //
+    directiveStart, //
+    directiveEnd, //
+    propertyMetadataStartIndex, //
+    propertyMetadataEndIndex, //
+    flags, //
+    providerIndexes, //
+    tagName, //
+    attrs, //
+    localNames, //
+    initialInputs, //
+    inputs, //
+    outputs, //
+    tViews, //
+    next, //
+    projectionNext, //
+    child, //
+    parent, //
+    stylingTemplate, //
+    projection, //
+    onElementCreationFns, //
+    newStyles, //
+    newClasses) {
+        this.tView_ = tView_;
+        this.type = type;
+        this.index = index;
+        this.injectorIndex = injectorIndex;
+        this.directiveStart = directiveStart;
+        this.directiveEnd = directiveEnd;
+        this.propertyMetadataStartIndex = propertyMetadataStartIndex;
+        this.propertyMetadataEndIndex = propertyMetadataEndIndex;
+        this.flags = flags;
+        this.providerIndexes = providerIndexes;
+        this.tagName = tagName;
+        this.attrs = attrs;
+        this.localNames = localNames;
+        this.initialInputs = initialInputs;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.tViews = tViews;
+        this.next = next;
+        this.projectionNext = projectionNext;
+        this.child = child;
+        this.parent = parent;
+        this.stylingTemplate = stylingTemplate;
+        this.projection = projection;
+        this.onElementCreationFns = onElementCreationFns;
+        this.newStyles = newStyles;
+        this.newClasses = newClasses;
+    }
+    /**
+     * @return {?}
+     */
+    get type_() {
+        switch (this.type) {
+            case 0 /* Container */:
+                return 'TNodeType.Container';
+            case 3 /* Element */:
+                return 'TNodeType.Element';
+            case 4 /* ElementContainer */:
+                return 'TNodeType.ElementContainer';
+            case 5 /* IcuContainer */:
+                return 'TNodeType.IcuContainer';
+            case 1 /* Projection */:
+                return 'TNodeType.Projection';
+            case 2 /* View */:
+                return 'TNodeType.View';
+            default:
+                return 'TNodeType.???';
+        }
+    }
+    /**
+     * @return {?}
+     */
+    get flags_() {
+        /** @type {?} */
+        const flags = [];
+        if (this.flags & 8 /* hasClassInput */)
+            flags.push('TNodeFlags.hasClassInput');
+        if (this.flags & 4 /* hasContentQuery */)
+            flags.push('TNodeFlags.hasContentQuery');
+        if (this.flags & 16 /* hasStyleInput */)
+            flags.push('TNodeFlags.hasStyleInput');
+        if (this.flags & 1 /* isComponent */)
+            flags.push('TNodeFlags.isComponent');
+        if (this.flags & 32 /* isDetached */)
+            flags.push('TNodeFlags.isDetached');
+        if (this.flags & 2 /* isProjected */)
+            flags.push('TNodeFlags.isProjected');
+        return flags.join('|');
+    }
+};
+/** @type {?} */
 const TViewData = ngDevMode && createNamedArrayType('TViewData');
 /** @type {?} */
 let TVIEWDATA_EMPTY;
@@ -14356,7 +14517,7 @@ function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, 
     const tParentNode = parentInSameView ? (/** @type {?} */ (parent)) : null;
     /** @type {?} */
     const tNode = tView.data[adjustedIndex] =
-        createTNode(tParentNode, type, adjustedIndex, name, attrs);
+        createTNode(tView, tParentNode, type, adjustedIndex, name, attrs);
     // The first node is not always the one at index 0, in case of i18n, index 0 can be the
     // instruction `i18nStart` and the first node has the index 1 or more
     if (index === 0 || !tView.firstChild) {
@@ -14390,7 +14551,7 @@ function assignTViewNodeToLView(tView, tParentNode, index, lView) {
     if (tNode == null) {
         ngDevMode && tParentNode &&
             assertNodeOfPossibleTypes(tParentNode, 3 /* Element */, 0 /* Container */);
-        tView.node = tNode = (/** @type {?} */ (createTNode((/** @type {?} */ (tParentNode)), //
+        tView.node = tNode = (/** @type {?} */ (createTNode(tView, (/** @type {?} */ (tParentNode)), //
         2 /* View */, index, null, null)));
     }
     return lView[T_HOST] = (/** @type {?} */ (tNode));
@@ -14859,6 +15020,7 @@ function storeCleanupFn(view, cleanupFn) {
 /**
  * Constructs a TNode object from the arguments.
  *
+ * @param {?} tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)
  * @param {?} tParent
  * @param {?} type The type of the node
  * @param {?} adjustedIndex The index of the TNode in TView.data, adjusted for HEADER_OFFSET
@@ -14866,37 +15028,68 @@ function storeCleanupFn(view, cleanupFn) {
  * @param {?} attrs The attributes defined on this node
  * @return {?} the TNode object
  */
-function createTNode(tParent, type, adjustedIndex, tagName, attrs) {
+function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
     ngDevMode && ngDevMode.tNode++;
-    return {
-        type: type,
-        index: adjustedIndex,
-        injectorIndex: tParent ? tParent.injectorIndex : -1,
-        directiveStart: -1,
-        directiveEnd: -1,
-        propertyMetadataStartIndex: -1,
-        propertyMetadataEndIndex: -1,
-        flags: 0,
-        providerIndexes: 0,
-        tagName: tagName,
-        attrs: attrs,
-        localNames: null,
-        initialInputs: undefined,
-        inputs: undefined,
-        outputs: undefined,
-        tViews: null,
-        next: null,
-        projectionNext: null,
-        child: null,
-        parent: tParent,
-        stylingTemplate: null,
-        projection: null,
-        onElementCreationFns: null,
+    /** @type {?} */
+    let injectorIndex = tParent ? tParent.injectorIndex : -1;
+    return ngDevMode ?
+        new TNodeConstructor(tView, // tView_: TView
+        type, // type: TNodeType
+        adjustedIndex, // index: number
+        injectorIndex, // injectorIndex: number
+        -1, // directiveStart: number
+        -1, // directiveEnd: number
+        -1, // propertyMetadataStartIndex: number
+        -1, // propertyMetadataEndIndex: number
+        0, // flags: TNodeFlags
+        0, // providerIndexes: TNodeProviderIndexes
+        tagName, // tagName: string|null
+        attrs, // attrs: (string|AttributeMarker|(string|SelectorFlags)[])[]|null
+        null, // localNames: (string|number)[]|null
+        undefined, // initialInputs: (string[]|null)[]|null|undefined
+        undefined, // inputs: PropertyAliases|null|undefined
+        undefined, // outputs: PropertyAliases|null|undefined
+        null, // tViews: ITView|ITView[]|null
+        null, // next: ITNode|null
+        null, // projectionNext: ITNode|null
+        null, // child: ITNode|null
+        tParent, // parent: TElementNode|TContainerNode|null
+        null, // stylingTemplate: StylingContext|null
+        null, // projection: number|(ITNode|RNode[])[]|null
+        null, // onElementCreationFns: Function[]|null
         // TODO (matsko): rename this to `styles` once the old styling impl is gone
-        newStyles: null,
+        null, // newStyles: TStylingContext|null
         // TODO (matsko): rename this to `classes` once the old styling impl is gone
-        newClasses: null,
-    };
+        null) :
+        {
+            type: type,
+            index: adjustedIndex,
+            injectorIndex: injectorIndex,
+            directiveStart: -1,
+            directiveEnd: -1,
+            propertyMetadataStartIndex: -1,
+            propertyMetadataEndIndex: -1,
+            flags: 0,
+            providerIndexes: 0,
+            tagName: tagName,
+            attrs: attrs,
+            localNames: null,
+            initialInputs: undefined,
+            inputs: undefined,
+            outputs: undefined,
+            tViews: null,
+            next: null,
+            projectionNext: null,
+            child: null,
+            parent: tParent,
+            stylingTemplate: null,
+            projection: null,
+            onElementCreationFns: null,
+            // TODO (matsko): rename this to `styles` once the old styling impl is gone
+            newStyles: null,
+            // TODO (matsko): rename this to `classes` once the old styling impl is gone
+            newClasses: null,
+        };
 }
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
@@ -18093,7 +18286,8 @@ function getBeforeNodeForView(viewIndexInContainer, lContainer) {
         ngDevMode && assertDefined(lView[T_HOST], 'Missing Host TNode');
         /** @type {?} */
         const tViewNodeChild = ((/** @type {?} */ (lView[T_HOST]))).child;
-        return tViewNodeChild !== null ? getNativeByTNode(tViewNodeChild, lView) : lContainer[NATIVE];
+        return tViewNodeChild !== null ? getNativeByTNodeOrNull(tViewNodeChild, lView) :
+            lContainer[NATIVE];
     }
     else {
         return lContainer[NATIVE];
@@ -23950,7 +24144,7 @@ function collectNativeNodes(lView, parentTNode, result) {
     let tNodeChild = parentTNode.child;
     while (tNodeChild) {
         /** @type {?} */
-        const nativeNode = getNativeByTNode(tNodeChild, lView);
+        const nativeNode = getNativeByTNodeOrNull(tNodeChild, lView);
         nativeNode && result.push(nativeNode);
         if (tNodeChild.type === 4 /* ElementContainer */) {
             collectNativeNodes(lView, tNodeChild, result);
@@ -24618,7 +24812,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+28.sha-7b6ee5e.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+30.sha-4495a46.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -37226,7 +37420,7 @@ function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
  */
 function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, rootNativeNode) {
     /** @type {?} */
-    const nativeNode = getNativeByTNode(tNode, lView);
+    const nativeNode = getNativeByTNodeOrNull(tNode, lView);
     // For each type of TNode, specific logic is executed.
     if (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) {
         // Case 1: the TNode is an element
