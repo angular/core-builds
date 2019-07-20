@@ -9,7 +9,6 @@ import '../../util/ng_dev_mode';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LContainer } from '../interfaces/container';
 import { LContext } from '../interfaces/context';
-import { TNode } from '../interfaces/node';
 import { Player, PlayerContext } from '../interfaces/player';
 import { RElement } from '../interfaces/renderer';
 import { InitialStylingValues, StylingContext } from '../interfaces/styling';
@@ -53,8 +52,6 @@ export declare function allocStylingContext(element: RElement | null, templateSt
  */
 export declare function getStylingContextFromLView(index: number, viewData: LView): StylingContext;
 export declare function isAnimationProp(name: string): boolean;
-export declare function hasClassInput(tNode: TNode): boolean;
-export declare function hasStyleInput(tNode: TNode): boolean;
 export declare function forceClassesAsString(classes: string | {
     [key: string]: any;
 } | null | undefined): string;

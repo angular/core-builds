@@ -5,7 +5,6 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.io/license
 */
-import { Sanitizer } from '../../sanitization/security';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { TAttributes, TNode } from '../interfaces/node';
 import { NO_CHANGE } from '../tokens';
@@ -29,8 +28,10 @@ import { NO_CHANGE } from '../tokens';
  * central idea here is that the directive index values are bound
  * into the context. The directive index is temporary and is only
  * required until the `select(n)` instruction is fully functional.
+ *
+ * @codeGenApi
  */
-export declare function stylingInit(): void;
+export declare function ɵɵstyling(): void;
 /**
  * Sets the current style sanitizer function which will then be used
  * within all follow-up prop and map-based style binding instructions
@@ -47,25 +48,90 @@ export declare function stylingInit(): void;
  *
  * @codeGenApi
  */
-export declare function styleSanitizer(sanitizer: Sanitizer | StyleSanitizeFn | null): void;
+export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 /**
- * Mirror implementation of the `styleProp()` instruction (found in `instructions/styling.ts`).
+ * Update a style binding on an element with the provided value.
+ *
+ * If the style value is falsy then it will be removed from the element
+ * (or assigned a different value depending if there are any styles placed
+ * on the element with `styleMap` or any static styles that are
+ * present from when the element was created with `styling`).
+ *
+ * Note that the styling element is updated as part of `stylingApply`.
+ *
+ * @param prop A valid CSS property.
+ * @param value New value to write (`null` or an empty string to remove).
+ * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ *        Note that when a suffix is provided then the underlying sanitizer will
+ *        be ignored.
+ *
+ * Note that this will apply the provided style value to the host element if this function is called
+ * within a host binding.
+ *
+ * @codeGenApi
  */
-export declare function styleProp(prop: string, value: string | number | String | null, suffix?: string | null): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | String | null, suffix?: string | null): void;
+export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | String | null, suffix?: string | null | undefined): void;
 /**
- * Mirror implementation of the `classProp()` instruction (found in `instructions/styling.ts`).
+ * Update a class binding on an element with the provided value.
+ *
+ * This instruction is meant to handle the `[class.foo]="exp"` case and,
+ * therefore, the class binding itself must already be allocated using
+ * `styling` within the creation block.
+ *
+ * @param prop A valid CSS class (only one).
+ * @param value A true/false value which will turn the class on or off.
+ *
+ * Note that this will apply the provided class value to the host element if this function
+ * is called within a host binding.
+ *
+ * @codeGenApi
  */
-export declare function classProp(className: string, value: boolean | null): void;
+export declare function ɵɵclassProp(className: string, value: boolean | null): void;
 /**
- * Mirror implementation of the `styleMap()` instruction (found in `instructions/styling.ts`).
+ * Update style bindings using an object literal on an element.
+ *
+ * This instruction is meant to apply styling via the `[style]="exp"` template bindings.
+ * When styles are applied to the element they will then be updated with respect to
+ * any styles/classes set via `styleProp`. If any styles are set to falsy
+ * then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `stylingApply` is called.
+ *
+ * @param styles A key/value style map of the styles that will be applied to the given element.
+ *        Any missing styles (that have already been applied to the element beforehand) will be
+ *        removed (unset) from the element's styling.
+ *
+ * Note that this will apply the provided styleMap value to the host element if this function
+ * is called within a host binding.
+ *
+ * @codeGenApi
  */
-export declare function styleMap(styles: {
+export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
 } | NO_CHANGE | null): void;
 /**
- * Mirror implementation of the `classMap()` instruction (found in `instructions/styling.ts`).
+ * Update class bindings using an object literal or class-string on an element.
+ *
+ * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
+ * When classes are applied to the element they will then be updated with
+ * respect to any styles/classes set via `classProp`. If any
+ * classes are set to falsy then they will be removed from the element.
+ *
+ * Note that the styling instruction will not be applied until `stylingApply` is called.
+ * Note that this will the provided classMap value to the host element if this function is called
+ * within a host binding.
+ *
+ * @param classes A key/value map or string of CSS classes that will be added to the
+ *        given element. Any missing classes (that have already been applied to the element
+ *        beforehand) will be removed (unset) from the element's list of CSS classes.
+ *
+ * @codeGenApi
  */
-export declare function classMap(classes: {
+export declare function ɵɵclassMap(classes: {
+    [className: string]: any;
+} | NO_CHANGE | string | null): void;
+export declare function classMapInternal(elementIndex: number, classes: {
     [className: string]: any;
 } | NO_CHANGE | string | null): void;
 /**
@@ -80,16 +146,12 @@ export declare function classMap(classes: {
  * host binding instruction code at the right time), this means that a
  * styling apply function is still needed.
  *
- * This function is a mirror implementation of the `stylingApply()`
- * instruction (found in `instructions/styling.ts`).
+ * @codeGenApi
  */
-export declare function stylingApply(): void;
+export declare function ɵɵstylingApply(): void;
 /**
  * Searches and assigns provided all static style/class entries (found in the `attrs` value)
  * and registers them in their respective styling contexts.
  */
-export declare function registerInitialStylingIntoContext(tNode: TNode, attrs: TAttributes, startIndex: number): void;
-/**
- * Mirror implementation of the same function found in `instructions/styling.ts`.
- */
+export declare function registerInitialStylingOnTNode(tNode: TNode, attrs: TAttributes, startIndex: number): boolean;
 export declare function getActiveDirectiveStylingIndex(): number;

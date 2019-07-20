@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { ComponentDef, DirectiveDef } from './interfaces/definition';
 import { TElementNode, TNode, TViewNode } from './interfaces/node';
 import { LView, OpaqueViewState } from './interfaces/view';
@@ -238,3 +239,5 @@ export declare function ɵɵnamespaceHTML(): void;
  */
 export declare function namespaceHTMLInternal(): void;
 export declare function getNamespace(): string | null;
+export declare function setCurrentStyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
+export declare function getCurrentStyleSanitizer(): StyleSanitizeFn | null;

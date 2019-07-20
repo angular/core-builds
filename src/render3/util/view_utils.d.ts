@@ -32,19 +32,19 @@ import { LView, TData } from '../interfaces/view';
  */
 /**
  * Returns `RNode`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
  */
-export declare function unwrapRNode(value: RNode | LView | LContainer | StylingContext): RNode;
+export declare function unwrapRNode(value: RNode | LView | LContainer): RNode;
 /**
  * Returns `LView` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
  */
-export declare function unwrapLView(value: RNode | LView | LContainer | StylingContext): LView | null;
+export declare function unwrapLView(value: RNode | LView | LContainer): LView | null;
 /**
  * Returns `LContainer` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
  */
-export declare function unwrapLContainer(value: RNode | LView | LContainer | StylingContext): LContainer | null;
+export declare function unwrapLContainer(value: RNode | LView | LContainer): LContainer | null;
 /**
  * Returns `StylingContext` or `null` if not found.
  * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`

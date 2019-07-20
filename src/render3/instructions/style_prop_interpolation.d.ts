@@ -22,11 +22,10 @@ import { TsickleIssue1009 } from './shared';
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(styleIndex: number, prefix: string, v0: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 2 bound values surrounded by text.
@@ -52,11 +51,10 @@ export declare function ɵɵstylePropInterpolate1(styleIndex: number, prefix: st
  * @param v1 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 3 bound values surrounded by text.
@@ -84,11 +82,10 @@ export declare function ɵɵstylePropInterpolate2(styleIndex: number, prefix: st
  * @param v2 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 4 bound values surrounded by text.
@@ -118,11 +115,10 @@ export declare function ɵɵstylePropInterpolate3(styleIndex: number, prefix: st
  * @param v3 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 5 bound values surrounded by text.
@@ -154,11 +150,10 @@ export declare function ɵɵstylePropInterpolate4(styleIndex: number, prefix: st
  * @param v4 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 6 bound values surrounded by text.
@@ -192,11 +187,10 @@ export declare function ɵɵstylePropInterpolate5(styleIndex: number, prefix: st
  * @param v5 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 7 bound values surrounded by text.
@@ -233,11 +227,10 @@ export declare function ɵɵstylePropInterpolate6(styleIndex: number, prefix: st
  * @param v6 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  *
  * Update an interpolated style property on an element with 8 bound values surrounded by text.
@@ -276,11 +269,10 @@ export declare function ɵɵstylePropInterpolate7(styleIndex: number, prefix: st
  * @param v7 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 /**
  * Update an interpolated style property on an element with 8 or more bound values surrounded by
  * text.
@@ -308,8 +300,7 @@ export declare function ɵɵstylePropInterpolate8(styleIndex: number, prefix: st
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolateV(styleIndex: number, values: any[], valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): TsickleIssue1009;

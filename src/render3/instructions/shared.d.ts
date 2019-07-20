@@ -85,16 +85,6 @@ export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, d
  */
 export declare function renderEmbeddedTemplate<T>(viewToRender: LView, tView: TView, context: T): void;
 export declare function renderComponentOrTemplate<T>(hostView: LView, context: T, templateFn?: ComponentTemplate<T>): void;
-/**
- * Appropriately sets `stylingTemplate` on a TNode
- *
- * Does not apply styles to DOM nodes
- *
- * @param tNode The node whose `stylingTemplate` to set
- * @param attrs The attribute array source to set the attributes from
- * @param attrsStartIndex Optional start index to start processing the `attrs` from
- */
-export declare function setNodeStylingTemplate(tView: TView, tNode: TNode, attrs: TAttributes, attrsStartIndex: number): void;
 export declare function executeContentQueries(tView: TView, tNode: TNode, lView: LView): void;
 /**
  * Creates directive instances and populates local refs.
@@ -318,3 +308,13 @@ export declare function setInputsForProperty(lView: LView, inputs: PropertyAlias
  * Updates a text binding at a given index in a given LView.
  */
 export declare function textBindingInternal(lView: LView, index: number, value: string): void;
+/**
+ * Renders all initial styling (class and style values) on to the element from the tNode.
+ *
+ * All initial styling data (i.e. any values extracted from the `style` or `class` attributes
+ * on an element) are collected into the `tNode.styles` and `tNode.classes` data structures.
+ * These values are populated during the creation phase of an element and are then later
+ * applied once the element is instantiated. This function applies each of the static
+ * style and class entries to the element.
+ */
+export declare function renderInitialStyling(renderer: Renderer3, native: RElement, tNode: TNode): void;

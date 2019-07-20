@@ -1,4 +1,4 @@
-import { LStylingMap, SyncStylingMapsFn } from './interfaces';
+import { StylingMapArray, SyncStylingMapsFn } from './interfaces';
 /**
  * --------
  *
@@ -30,8 +30,8 @@ import { LStylingMap, SyncStylingMapsFn } from './interfaces';
  *
  * # The Algorithm
  * Whenever a map-based binding updates (which is when the identity of the
- * map-value changes) then the map is iterated over and a `LStylingMap` array
- * is produced. The `LStylingMap` instance is stored in the binding location
+ * map-value changes) then the map is iterated over and a `StylingMapArray` array
+ * is produced. The `StylingMapArray` instance is stored in the binding location
  * where the `BINDING_INDEX` is situated when the `styleMap()` or `classMap()`
  * instruction were called. Once the binding changes, then the internal `bitMask`
  * value is marked as dirty.
@@ -91,24 +91,42 @@ export declare const syncStylingMap: SyncStylingMapsFn;
 /**
  * Enables support for map-based styling bindings (e.g. `[style]` and `[class]` bindings).
  */
-export declare function activeStylingMapFeature(): void;
+export declare function activateStylingMapFeature(): void;
 /**
- * Used to convert a {key:value} map into a `LStylingMap` array.
+ * Used to convert a {key:value} map into a `StylingMapArray` array.
  *
- * This function will either generate a new `LStylingMap` instance
+ * This function will either generate a new `StylingMapArray` instance
  * or it will patch the provided `newValues` map value into an
- * existing `LStylingMap` value (this only happens if `bindingValue`
- * is an instance of `LStylingMap`).
+ * existing `StylingMapArray` value (this only happens if `bindingValue`
+ * is an instance of `StylingMapArray`).
  *
- * If a new key/value map is provided with an old `LStylingMap`
+ * If a new key/value map is provided with an old `StylingMapArray`
  * value then all properties will be overwritten with their new
  * values or with `null`. This means that the array will never
  * shrink in size (but it will also not be created and thrown
  * away whenever the {key:value} map entries change).
  */
-export declare function normalizeIntoStylingMap(bindingValue: null | LStylingMap, newValues: {
+export declare function normalizeIntoStylingMap(bindingValue: null | StylingMapArray, newValues: {
     [key: string]: any;
-} | string | null | undefined): LStylingMap;
-export declare function getMapProp(map: LStylingMap, index: number): string;
-export declare function setMapValue(map: LStylingMap, index: number, value: string | null): void;
-export declare function getMapValue(map: LStylingMap, index: number): string | null;
+} | string | null | undefined, normalizeProps?: boolean): StylingMapArray;
+/**
+ * Inserts the provided item into the provided styling array at the right spot.
+ *
+ * The `StylingMapArray` type is a sorted key/value array of entries. This means
+ * that when a new entry is inserted it must be placed at the right spot in the
+ * array. This function figures out exactly where to place it.
+ */
+export declare function addItemToStylingMap(stylingMapArr: StylingMapArray, prop: string, value: string | boolean | null, allowOverwrite?: boolean): boolean;
+/**
+ * Converts the provided styling map array into a string.
+ *
+ * Classes => `one two three`
+ * Styles => `prop:value; prop2:value2`
+ */
+export declare function stylingMapToString(map: StylingMapArray, isClassBased: boolean): string;
+/**
+ * Converts the provided styling map array into a key value map.
+ */
+export declare function stylingMapToStringMap(map: StylingMapArray | null): {
+    [key: string]: any;
+};

@@ -1,3 +1,10 @@
+/**
+* @license
+* Copyright Google Inc. All Rights Reserved.
+*
+* Use of this source code is governed by an MIT-style license that can be
+* found in the LICENSE file at https://angular.io/license
+*/
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LStylingData, TStylingContext } from './interfaces';
 /**
@@ -54,7 +61,7 @@ export interface DebugStyling {
 export interface TStylingTupleSummary {
     /** The property (style or class property) that this tuple represents */
     prop: string;
-    /** The total amount of styling entries apart of this tuple */
+    /** The total amount of styling entries a part of this tuple */
     valuesCount: number;
     /**
      * The bit guard mask that is used to compare and protect against

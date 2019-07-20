@@ -61,7 +61,7 @@ export declare const TViewConstructor: {
     };
 };
 export declare const TNodeConstructor: {
-    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyMetadataStartIndex: number, propertyMetadataEndIndex: number, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null | undefined, outputs: PropertyAliases | null | undefined, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, stylingTemplate: StylingContext | null, projection: number | (ITNode | RNode[])[] | null, onElementCreationFns: Function[] | null, newStyles: TStylingContext | null, newClasses: TStylingContext | null): {
+    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyMetadataStartIndex: number, propertyMetadataEndIndex: number, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null | undefined, outputs: PropertyAliases | null | undefined, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, stylingTemplate: StylingContext | null, projection: number | (ITNode | RNode[])[] | null, onElementCreationFns: Function[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
         tView_: ITView;
         type: TNodeType;
         index: number;
@@ -86,8 +86,8 @@ export declare const TNodeConstructor: {
         stylingTemplate: StylingContext | null;
         projection: number | (ITNode | RNode[])[] | null;
         onElementCreationFns: Function[] | null;
-        newStyles: TStylingContext | null;
-        newClasses: TStylingContext | null;
+        styles: TStylingContext | null;
+        classes: TStylingContext | null;
         readonly type_: string;
         readonly flags_: string;
     };

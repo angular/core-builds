@@ -35,10 +35,15 @@ declare global {
         styleMapCacheMiss: number;
         classMap: number;
         classMapCacheMiss: number;
-        stylingProp: number;
-        stylingPropCacheMiss: number;
-        stylingApply: number;
-        stylingApplyCacheMiss: number;
+        styleProp: number;
+        stylePropCacheMiss: number;
+        classProp: number;
+        classPropCacheMiss: number;
+        flushStyling: number;
+        classesApplied: number;
+        stylesApplied: number;
+        stylingWritePersistedState: number;
+        stylingReadPersistedState: number;
     }
 }
 export declare function ngDevModeResetPerfCounters(): NgDevModePerfCounters;

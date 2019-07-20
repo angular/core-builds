@@ -7,7 +7,25 @@
 */
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ProceduralRenderer3, RElement, Renderer3 } from '../interfaces/renderer';
-import { ApplyStylingFn, LStylingData, LStylingMap, SyncStylingMapsFn, TStylingContext } from './interfaces';
+import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext } from './interfaces';
+/**
+ * --------
+ *
+ * This file contains the core logic for styling in Angular.
+ *
+ * All styling bindings (i.e. `[style]`, `[style.prop]`, `[class]` and `[class.name]`)
+ * will have their values be applied through the logic in this file.
+ *
+ * When a binding is encountered (e.g. `<div [style.width]="w">`) then
+ * the binding data will be populated into a `TStylingContext` data-structure.
+ * There is only one `TStylingContext` per `TNode` and each element instance
+ * will update its style/class binding values in concert with the styling
+ * context.
+ *
+ * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
+ */
 export declare const DEFAULT_GUARD_MASK_VALUE = 1;
 /**
  * Visits a class-based binding and updates the new value (if changed).
@@ -19,7 +37,7 @@ export declare const DEFAULT_GUARD_MASK_VALUE = 1;
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateClassBinding(context: TStylingContext, data: LStylingData, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | LStylingMap, deferRegistration: boolean, forceUpdate: boolean): void;
+export declare function updateClassBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray, deferRegistration: boolean, forceUpdate: boolean): boolean;
 /**
  * Visits a style-based binding and updates the new value (if changed).
  *
@@ -30,7 +48,7 @@ export declare function updateClassBinding(context: TStylingContext, data: LStyl
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, prop: string | null, bindingIndex: number, value: String | string | number | null | undefined | LStylingMap, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): void;
+export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: String | string | number | null | undefined | StylingMapArray, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): boolean;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *
@@ -67,21 +85,32 @@ export declare function updateStyleBinding(context: TStylingContext, data: LStyl
  * (since it's a map), all map-based entries are stored in an already populated area of
  * the context at the top (which is reserved for map-based entries).
  */
-export declare function registerBinding(context: TStylingContext, countId: number, prop: string | null, bindingValue: number | null | string | boolean, sanitizationRequired?: boolean): void;
+export declare function registerBinding(context: TStylingContext, countId: number, prop: string | null, bindingValue: number | null | string | boolean, sanitizationRequired?: boolean): boolean;
 /**
- * Applies all class entries in the provided context to the provided element and resets
- * any counter and/or bitMask values associated with class bindings.
+ * Applies all pending style and class bindings to the provided element.
  *
- * @returns whether or not the classes were flushed to the element.
- */
-export declare function applyClasses(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, context: TStylingContext, element: RElement, directiveIndex: number): boolean;
-/**
- * Applies all style entries in the provided context to the provided element and resets
- * any counter and/or bitMask values associated with style bindings.
+ * This function will attempt to flush styling via the provided `classesContext`
+ * and `stylesContext` context values. This function is designed to be run from
+ * the `stylingApply()` instruction (which is run at the very end of styling
+ * change detection) and will rely on any state values that are set from when
+ * any styling bindings update.
  *
- * @returns whether or not the styles were flushed to the element.
+ * This function may be called multiple times on the same element because it can
+ * be called from the template code as well as from host bindings. In order for
+ * styling to be successfully flushed to the element (which will only happen once
+ * despite this being called multiple times), the following criteria must be met:
+ *
+ * - `flushStyling` is called from the very last directive that has styling for
+ *    the element (see `allowStylingFlush()`).
+ * - one or more bindings for classes or styles has updated (this is checked by
+ *   examining the classes or styles bit mask).
+ *
+ * If the style and class values are successfully applied to the element then
+ * the temporary state values for the element will be cleared. Otherwise, if
+ * this did not occur then the styling state is persisted (see `state.ts` for
+ * more information on how this works).
  */
-export declare function applyStyles(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, context: TStylingContext, element: RElement, directiveIndex: number, sanitizer: StyleSanitizeFn | null): boolean;
+export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, classesContext: TStylingContext | null, stylesContext: TStylingContext | null, element: RElement, directiveIndex: number, styleSanitizer: StyleSanitizeFn | null): void;
 /**
  * Runs through the provided styling context and applies each value to
  * the provided element (via the renderer) if one or more values are present.
@@ -95,7 +124,7 @@ export declare function applyStyles(renderer: Renderer3 | ProceduralRenderer3 | 
  *
  * If there are any map-based entries present (which are applied to the
  * element via the `[style]` and `[class]` bindings) then those entries
- * will be applied as well. However, the code for that is not apart of
+ * will be applied as well. However, the code for that is not a part of
  * this function. Instead, each time a property is visited, then the
  * code below will call an external function called `stylingMapsSyncFn`
  * and, if present, it will keep the application of styling values in
@@ -111,3 +140,13 @@ export declare function applyStyles(renderer: Renderer3 | ProceduralRenderer3 | 
 export declare function applyStyling(context: TStylingContext, renderer: Renderer3 | ProceduralRenderer3 | null, element: RElement, bindingData: LStylingData, bitMaskValue: number | boolean, applyStylingFn: ApplyStylingFn, sanitizer: StyleSanitizeFn | null): void;
 export declare function getStylingMapsSyncFn(): SyncStylingMapsFn | null;
 export declare function setStylingMapsSyncFn(fn: SyncStylingMapsFn): void;
+/**
+ * Iterates over all provided styling entries and renders them on the element.
+ *
+ * This function is used alongside a `StylingMapArray` entry. This entry is not
+ * the same as the `TStylingContext` and is only really used when an element contains
+ * initial styling values (e.g. `<div style="width:200px">`), but no style/class bindings
+ * are present. If and when that happens then this function will be called to render all
+ * initial styling values on an element.
+ */
+export declare function renderStylingMap(renderer: Renderer3, element: RElement, stylingValues: TStylingContext | StylingMapArray | null, isClassBased: boolean): void;

@@ -1,24 +1,34 @@
-import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
-import { StylingContext } from '../interfaces/styling';
-import { LView } from '../interfaces/view';
-import { LStylingMap, TStylingContext } from './interfaces';
+/**
+* @license
+* Copyright Google Inc. All Rights Reserved.
+*
+* Use of this source code is governed by an MIT-style license that can be
+* found in the LICENSE file at https://angular.io/license
+*/
+import { TNode } from '../interfaces/node';
+import { StylingMapArray, TStylingContext } from './interfaces';
 /**
  * Creates a new instance of the `TStylingContext`.
  *
- * This function will also pre-fill the context with data
- * for map-based bindings.
+ * The `TStylingContext` is used as a manifest of all style or all class bindings on
+ * an element. Because it is a T-level data-structure, it is only created once per
+ * tNode for styles and for classes. This function allocates a new instance of a
+ * `TStylingContext` with the initial values (see `interfaces.ts` for more info).
  */
-export declare function allocTStylingContext(): TStylingContext;
+export declare function allocTStylingContext(initialStyling?: StylingMapArray | null): TStylingContext;
 /**
- * Temporary function that allows for a string-based property name to be
- * obtained from an index-based property identifier.
+ * Sets the provided directive as the last directive index in the provided `TStylingContext`.
  *
- * This function will be removed once the new styling refactor code (which
- * lives inside of `render3/styling_next/`) replaces the existing styling
- * implementation.
+ * Styling in Angular can be applied from the template as well as multiple sources of
+ * host bindings. This means that each binding function (the template function or the
+ * hostBindings functions) will generate styling instructions as well as a styling
+ * apply function (i.e. `stylingApply()`). Because host bindings functions and the
+ * template function are independent from one another this means that the styling apply
+ * function will be called multiple times. By tracking the last directive index (which
+ * is what happens in this function) the styling algorithm knows exactly when to flush
+ * styling (which is when the last styling apply function is executed).
  */
-export declare function getBindingNameFromIndex(stylingContext: StylingContext, offset: number, directiveIndex: number, isClassBased: boolean): string;
-export declare function updateContextDirectiveIndex(context: TStylingContext, index: number): void;
+export declare function updateLastDirectiveIndex(context: TStylingContext, lastDirectiveIndex: number): void;
 export declare function setConfig(context: TStylingContext, value: number): void;
 export declare function getProp(context: TStylingContext, index: number): string;
 export declare function isSanitizationRequired(context: TStylingContext, index: number): boolean;
@@ -31,21 +41,33 @@ export declare function getDefaultValue(context: TStylingContext, index: number)
  * Temporary function which determines whether or not a context is
  * allowed to be flushed based on the provided directive index.
  */
-export declare function allowStylingFlush(context: TStylingContext, index: number): boolean;
+export declare function allowStylingFlush(context: TStylingContext | null, index: number): boolean;
 export declare function lockContext(context: TStylingContext): void;
 export declare function isContextLocked(context: TStylingContext): boolean;
+export declare function stateIsPersisted(context: TStylingContext): boolean;
+export declare function markContextToPersistState(context: TStylingContext): void;
 export declare function getPropValuesStartPosition(context: TStylingContext): number;
 export declare function isMapBased(prop: string): boolean;
-export declare function hasValueChanged(a: LStylingMap | number | String | string | null | boolean | undefined | {}, b: LStylingMap | number | String | string | null | boolean | undefined | {}): boolean;
+export declare function hasValueChanged(a: StylingMapArray | number | String | string | null | boolean | undefined | {}, b: StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 /**
  * Determines whether the provided styling value is truthy or falsy.
  */
 export declare function isStylingValueDefined(value: any): boolean;
+export declare function concatString(a: string, b: string, separator?: string): string;
+export declare function hyphenate(value: string): string;
 /**
- * Returns the current style sanitizer function for the given view.
+ * Returns an instance of `StylingMapArray`.
  *
- * The default style sanitizer (which lives inside of `LView`) will
- * be returned depending on whether the `styleSanitizer` instruction
- * was called or not prior to any styling instructions running.
+ * This function is designed to find an instance of `StylingMapArray` in case it is stored
+ * inside of an instance of `TStylingContext`. When a styling context is created it
+ * will copy over an initial styling values from the tNode (which are stored as a
+ * `StylingMapArray` on the `tNode.classes` or `tNode.styles` values).
  */
-export declare function getCurrentOrLViewSanitizer(lView: LView): StyleSanitizeFn | null;
+export declare function getStylingMapArray(value: TStylingContext | StylingMapArray | null): StylingMapArray | null;
+export declare function isStylingContext(value: TStylingContext | StylingMapArray | null): boolean;
+export declare function getInitialStylingValue(context: TStylingContext | StylingMapArray | null): string;
+export declare function hasClassInput(tNode: TNode): boolean;
+export declare function hasStyleInput(tNode: TNode): boolean;
+export declare function getMapProp(map: StylingMapArray, index: number): string;
+export declare function setMapValue(map: StylingMapArray, index: number, value: string | boolean | null): void;
+export declare function getMapValue(map: StylingMapArray, index: number): string | null;

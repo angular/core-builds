@@ -135,11 +135,11 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
     readonly attributes: {
         [key: string]: string | null;
     };
-    readonly classes: {
-        [key: string]: boolean;
-    };
     readonly styles: {
         [key: string]: string | null;
+    };
+    readonly classes: {
+        [key: string]: boolean;
     };
     readonly childNodes: DebugNode[];
     readonly children: DebugElement[];
