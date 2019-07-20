@@ -7,9 +7,8 @@
  */
 import { ViewRef } from '../../linker/view_ref';
 import { TNode } from './node';
-import { LQueries } from './query';
 import { RComment, RElement } from './renderer';
-import { HOST, LView, NEXT, PARENT, QUERIES, T_HOST } from './view';
+import { HOST, LView, NEXT, PARENT, T_HOST } from './view';
 /**
  * Special location which allows easy identification of type. If we have an array which was
  * retrieved from the `LView` and that array has `true` at `TYPE` location, we know it is
@@ -22,6 +21,7 @@ export declare const TYPE = 1;
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
 export declare const ACTIVE_INDEX = 2;
+export declare const MOVED_VIEWS = 5;
 export declare const NATIVE = 7;
 export declare const VIEW_REFS = 8;
 /**
@@ -71,10 +71,11 @@ export interface LContainer extends Array<any> {
      */
     [NEXT]: LView | LContainer | null;
     /**
-     * Queries active for this container - all the views inserted to / removed from
-     * this container are reported to queries referenced here.
+     * A collection of views created based on the underlying `<ng-template>` element but inserted into
+     * a different `LContainer`. We need to track views created from a given declaration point since
+     * queries collect matches from the embedded view declaration point and _not_ the insertion point.
      */
-    [QUERIES]: LQueries | null;
+    [MOVED_VIEWS]: LView[] | null;
     /**
      * Pointer to the `TNode` which represents the host of the container.
      */

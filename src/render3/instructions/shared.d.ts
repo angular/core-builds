@@ -11,7 +11,6 @@ import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
 import { LocalRefExtractor, PropertyAliasValue, PropertyAliases, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
-import { LQueries } from '../interfaces/query';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { StylingContext } from '../interfaces/styling';
@@ -71,7 +70,7 @@ export declare function allocExpando(view: LView, numSlotsToAlloc: number): void
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
  */
-export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, queries: LQueries | null, injectorIndex: number): LView;
+export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, injectorIndex: number): LView;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -92,7 +91,7 @@ export declare function executeContentQueries(tView: TView, tNode: TNode, lView:
  * @param localRefs Local refs of the node in question
  * @param localRefExtractor mapping function that extracts local ref value from TNode
  */
-export declare function createDirectivesAndLocals(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null | undefined, localRefExtractor?: LocalRefExtractor): void;
+export declare function createDirectivesAndLocals(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Gets TView from a template function or creates a new TView
  * if it doesn't already exist.
@@ -169,6 +168,10 @@ export declare function setNgReflectProperty(lView: LView, element: RElement | R
  * Instantiate a root component.
  */
 export declare function instantiateRootComponent<T>(tView: TView, viewData: LView, def: ComponentDef<T>): T;
+/**
+ * Resolve the matched directives on a node.
+ */
+export declare function resolveDirectives(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null): void;
 export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstTemplatePass: boolean): void;
 /**
 * Generates a new block in TView.expandoInstructions for this node.

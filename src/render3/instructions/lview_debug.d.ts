@@ -12,7 +12,7 @@ import { ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
 import { PropertyAliases, TContainerNode, TElementNode, TNode as ITNode, TNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
-import { LQueries } from '../interfaces/query';
+import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
 import { StylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
@@ -30,15 +30,15 @@ export declare function cloneToLView(list: any[]): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (id: number, blueprint: LView, template: ComponentTemplate<{}> | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | import("@angular/core/src/core").InjectionToken<any> | ITNode | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/render3/interfaces/i18n").TI18n | I18nUpdateOpCodes | null)[], bindingStartIndex: number, viewQueryStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstTemplatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null): {
+    new (id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | null)[], bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstTemplatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null): {
         id: number;
         blueprint: LView;
         template: ComponentTemplate<{}> | null;
+        queries: TQueries | null;
         viewQuery: ViewQueriesFunction<{}> | null;
         node: TElementNode | TViewNode | null;
-        data: (string | number | import("@angular/core/src/core").Type<any> | import("@angular/core/src/core").InjectionToken<any> | ITNode | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/render3/interfaces/i18n").TI18n | I18nUpdateOpCodes | null)[];
+        data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | import("@angular/core/src/core").ɵPipeDef<any> | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | null)[];
         bindingStartIndex: number;
-        viewQueryStartIndex: number;
         expandoStartIndex: number;
         expandoInstructions: ExpandoInstructions | null;
         firstTemplatePass: boolean;
@@ -153,8 +153,7 @@ export declare class LViewDebug {
         next: LViewDebug | LContainerDebug | null;
         childTail: LViewDebug | LContainerDebug | null;
         declarationView: LViewDebug | null;
-        contentQueries: import("@angular/core/src/core").QueryList<any>[] | null;
-        queries: LQueries | null;
+        queries: null;
         tHost: TElementNode | TViewNode | null;
         bindingIndex: number;
     };
@@ -184,7 +183,7 @@ export declare class LContainerDebug {
     readonly activeIndex: number;
     readonly views: LViewDebug[];
     readonly parent: LViewDebug | LContainerDebug | null;
-    readonly queries: LQueries | null;
+    readonly movedViews: LView[] | null;
     readonly host: RElement | RComment | StylingContext | LView;
     readonly native: RComment;
     readonly __other__: {

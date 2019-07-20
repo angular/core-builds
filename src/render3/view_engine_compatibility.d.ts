@@ -38,9 +38,9 @@ export declare function injectTemplateRef<T>(TemplateRefToken: typeof ViewEngine
  *
  * @param TemplateRefToken The TemplateRef type
  * @param ElementRefToken The ElementRef type
- * @param hostTNode The node that is requesting a TemplateRef
+ * @param hostTNode The node on which a TemplateRef is requested
  * @param hostView The view to which the node belongs
- * @returns The TemplateRef instance to use
+ * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
  */
 export declare function createTemplateRef<T>(TemplateRefToken: typeof ViewEngine_TemplateRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TNode, hostView: LView): ViewEngine_TemplateRef<T> | null;
 /**

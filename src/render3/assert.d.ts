@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { TNode } from './interfaces/node';
-import { LView } from './interfaces/view';
+import { LView, TView } from './interfaces/view';
 export declare function assertTNodeForLView(tNode: TNode, lView: LView): void;
 export declare function assertComponentType(actual: any, msg?: string): void;
 export declare function assertNgModuleType(actual: any, msg?: string): void;
@@ -17,3 +17,4 @@ export declare function assertLContainerOrUndefined(value: any): void;
 export declare function assertLContainer(value: any): void;
 export declare function assertLViewOrUndefined(value: any): void;
 export declare function assertLView(value: any): void;
+export declare function assertFirstTemplatePass(tView: TView, errMessage: string): void;
