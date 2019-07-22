@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+39.sha-b9a94c6.with-local-changes
+ * @license Angular v8.2.0-next.2+42.sha-c845a7b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1439,6 +1439,24 @@ function flatten(list, dst) {
 }
 function deepForEach(input, fn) {
     input.forEach(function (value) { return Array.isArray(value) ? deepForEach(value, fn) : fn(value); });
+}
+function addToArray(arr, index, value) {
+    // perf: array.push is faster than array.splice!
+    if (index >= arr.length) {
+        arr.push(value);
+    }
+    else {
+        arr.splice(index, 0, value);
+    }
+}
+function removeFromArray(arr, index) {
+    // perf: array.pop is faster than array.splice!
+    if (index >= arr.length - 1) {
+        return arr.pop();
+    }
+    else {
+        return arr.splice(index, 1)[0];
+    }
 }
 
 /**
@@ -12718,7 +12736,7 @@ function insertView(lView, lContainer, index) {
     }
     if (index < containerLength - CONTAINER_HEADER_OFFSET) {
         lView[NEXT] = lContainer[indexInContainer];
-        lContainer.splice(CONTAINER_HEADER_OFFSET + index, 0, lView);
+        addToArray(lContainer, CONTAINER_HEADER_OFFSET + index, lView);
     }
     else {
         lContainer.push(lView);
@@ -12762,7 +12780,7 @@ function detachMovedView(declarationContainer, lView) {
 /**
  * Detaches a view from a container.
  *
- * This method splices the view from the container's array of active views. It also
+ * This method removes the view from the container's array of active views. It also
  * removes the view's elements from the DOM.
  *
  * @param lContainer The container from which to detach a view
@@ -12782,7 +12800,7 @@ function detachView(lContainer, removeIndex) {
         if (removeIndex > 0) {
             lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
         }
-        var removedLView = lContainer.splice(CONTAINER_HEADER_OFFSET + removeIndex, 1)[0];
+        var removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
         addRemoveViewFromContainer(viewToDetach, false);
         // notify query that a view has been removed
         var lQueries = removedLView[QUERIES];
@@ -18063,8 +18081,8 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 configurable: true
             });
             ViewContainerRef_.prototype.clear = function () {
-                while (this.length) {
-                    this.remove(0);
+                while (this.length > 0) {
+                    this.remove(this.length - 1);
                 }
             };
             ViewContainerRef_.prototype.get = function (index) {
@@ -18110,7 +18128,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
                 addRemoveViewFromContainer(lView, true, beforeNode);
                 viewRef.attachToViewContainerRef(this);
-                this._lContainer[VIEW_REFS].splice(adjustedIdx, 0, viewRef);
+                addToArray(this._lContainer[VIEW_REFS], adjustedIdx, viewRef);
                 return viewRef;
             };
             ViewContainerRef_.prototype.move = function (viewRef, newIndex) {
@@ -18132,13 +18150,13 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index, -1);
                 removeView(this._lContainer, adjustedIdx);
-                this._lContainer[VIEW_REFS].splice(adjustedIdx, 1);
+                removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx);
             };
             ViewContainerRef_.prototype.detach = function (index) {
                 this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index, -1);
                 var view = detachView(this._lContainer, adjustedIdx);
-                var wasDetached = view && this._lContainer[VIEW_REFS].splice(adjustedIdx, 1)[0] != null;
+                var wasDetached = view && removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx) != null;
                 return wasDetached ? new ViewRef(view, view[CONTEXT], -1) : null;
             };
             ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
@@ -18434,7 +18452,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.2+39.sha-b9a94c6.with-local-changes');
+var VERSION = new Version('8.2.0-next.2+42.sha-c845a7b.with-local-changes');
 
 /**
  * @license
@@ -20501,24 +20519,6 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
 }
 function renderDetachView$1(view) {
     visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
-}
-function addToArray(arr, index, value) {
-    // perf: array.push is faster than array.splice!
-    if (index >= arr.length) {
-        arr.push(value);
-    }
-    else {
-        arr.splice(index, 0, value);
-    }
-}
-function removeFromArray(arr, index) {
-    // perf: array.pop is faster than array.splice!
-    if (index >= arr.length - 1) {
-        arr.pop();
-    }
-    else {
-        arr.splice(index, 1);
-    }
 }
 
 /**
