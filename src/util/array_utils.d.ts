@@ -17,3 +17,5 @@ export declare function addAllToArray(items: any[], arr: any[]): void;
  */
 export declare function flatten(list: any[], dst?: any[]): any[];
 export declare function deepForEach<T>(input: (T | any[])[], fn: (value: T) => void): void;
+export declare function addToArray(arr: any[], index: number, value: any): void;
+export declare function removeFromArray(arr: any[], index: number): any;

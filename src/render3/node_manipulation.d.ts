@@ -60,7 +60,7 @@ export declare function insertView(lView: LView, lContainer: LContainer, index: 
 /**
  * Detaches a view from a container.
  *
- * This method splices the view from the container's array of active views. It also
+ * This method removes the view from the container's array of active views. It also
  * removes the view's elements from the DOM.
  *
  * @param lContainer The container from which to detach a view
