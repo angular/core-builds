@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+52.sha-221782a.with-local-changes
+ * @license Angular v8.2.0-next.2+55.sha-f69e4e6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17921,7 +17921,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+52.sha-221782a.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+55.sha-f69e4e6.with-local-changes');
 
     /**
      * @license
@@ -20926,10 +20926,6 @@
         return array;
     }
     /**
-     * Default {@link RootContext} for all components rendered with {@link renderComponent}.
-     */
-    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(ɵɵinject(SCHEDULER)); } });
-    /**
      * A change detection scheduler token for {@link RootContext}. This token is the default value used
      * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
      */
@@ -20989,7 +20985,6 @@
             configurable: true
         });
         ComponentFactory.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
-            var isInternalRootView = rootSelectorOrNode === undefined;
             ngModule = ngModule || this.ngModule;
             var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
@@ -20997,9 +20992,9 @@
             // Ensure that the namespace for the root node is correct,
             // otherwise the browser might not render out the element properly.
             namespaceHTMLInternal();
-            var hostRNode = isInternalRootView ?
-                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
-                locateHostElement(rendererFactory, rootSelectorOrNode);
+            var hostRNode = rootSelectorOrNode ?
+                locateHostElement(rendererFactory, rootSelectorOrNode) :
+                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef));
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
             // Check whether this Component needs to be isolated from other components, i.e. whether it
@@ -21008,9 +21003,7 @@
             // relied upon externally.
             var isIsolated = typeof rootSelectorOrNode === 'string' &&
                 /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
-            var rootContext = (isInternalRootView || isIsolated) ?
-                createRootContext() :
-                rootViewInjector.get(ROOT_CONTEXT);
+            var rootContext = createRootContext();
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             if (rootSelectorOrNode && hostRNode) {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
@@ -21048,7 +21041,7 @@
                 leaveView(oldLView, safeToRunHooks);
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
-            if (isInternalRootView || isIsolated) {
+            if (!rootSelectorOrNode || isIsolated) {
                 // The host element of the internal or isolated root view is attached to the component's host
                 // view node.
                 componentRef.hostView._tViewNode.child = tElementNode;
@@ -26627,8 +26620,7 @@
             this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
-            var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-            return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+            return this.loadAndCompile(path);
         };
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
