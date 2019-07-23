@@ -15,7 +15,7 @@ import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
 import { ComponentDef } from './interfaces/definition';
 import { TContainerNode, TElementContainerNode, TElementNode } from './interfaces/node';
-import { LView } from './interfaces/view';
+import { LView, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
     private ngModule?;
@@ -25,6 +25,10 @@ export declare class ComponentFactoryResolver extends viewEngine_ComponentFactor
     constructor(ngModule?: viewEngine_NgModuleRef<any> | undefined);
     resolveComponentFactory<T>(component: Type<T>): viewEngine_ComponentFactory<T>;
 }
+/**
+ * Default {@link RootContext} for all components rendered with {@link renderComponent}.
+ */
+export declare const ROOT_CONTEXT: InjectionToken<RootContext>;
 /**
  * A change detection scheduler token for {@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
