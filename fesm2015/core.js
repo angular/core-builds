@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+43.sha-5a8eb92.with-local-changes
+ * @license Angular v8.2.0-next.2+45.sha-54ef63b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15841,37 +15841,43 @@ function getContainerRenderParent(tViewNode, view) {
  * @return {?}
  */
 function executeActionOnElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode) {
-    ngDevMode && assertDefined(lNodeToHandle, '\'lNodeToHandle\' is undefined');
-    /** @type {?} */
-    let lContainer;
-    /** @type {?} */
-    let isComponent = false;
-    // We are expecting an RNode, but in the case of a component or LContainer the `RNode` is wrapped
-    // in an array which needs to be unwrapped. We need to know if it is a component and if
-    // it has LContainer so that we can process all of those cases appropriately.
-    if (isLContainer(lNodeToHandle)) {
-        lContainer = lNodeToHandle;
-    }
-    else if (isLView(lNodeToHandle)) {
-        isComponent = true;
-        ngDevMode && assertDefined(lNodeToHandle[HOST], 'HOST must be defined for a component LView');
-        lNodeToHandle = (/** @type {?} */ (lNodeToHandle[HOST]));
-    }
-    /** @type {?} */
-    const rNode = unwrapRNode(lNodeToHandle);
-    ngDevMode && assertDomNode(rNode);
-    if (action === 0 /* Insert */) {
-        nativeInsertBefore(renderer, (/** @type {?} */ (parent)), rNode, beforeNode || null);
-    }
-    else if (action === 1 /* Detach */) {
-        nativeRemoveNode(renderer, rNode, isComponent);
-    }
-    else if (action === 2 /* Destroy */) {
-        ngDevMode && ngDevMode.rendererDestroyNode++;
-        (/** @type {?} */ (((/** @type {?} */ (renderer))).destroyNode))(rNode);
-    }
-    if (lContainer != null) {
-        executeActionOnContainer(renderer, action, lContainer, parent, beforeNode);
+    // If this slot was allocated for a text node dynamically created by i18n, the text node itself
+    // won't be created until i18nApply() in the update block, so this node should be skipped.
+    // For more info, see "ICU expressions should work inside an ngTemplateOutlet inside an ngFor"
+    // in `i18n_spec.ts`.
+    if (lNodeToHandle != null) {
+        /** @type {?} */
+        let lContainer;
+        /** @type {?} */
+        let isComponent = false;
+        // We are expecting an RNode, but in the case of a component or LContainer the `RNode` is
+        // wrapped
+        // in an array which needs to be unwrapped. We need to know if it is a component and if
+        // it has LContainer so that we can process all of those cases appropriately.
+        if (isLContainer(lNodeToHandle)) {
+            lContainer = lNodeToHandle;
+        }
+        else if (isLView(lNodeToHandle)) {
+            isComponent = true;
+            ngDevMode && assertDefined(lNodeToHandle[HOST], 'HOST must be defined for a component LView');
+            lNodeToHandle = (/** @type {?} */ (lNodeToHandle[HOST]));
+        }
+        /** @type {?} */
+        const rNode = unwrapRNode(lNodeToHandle);
+        ngDevMode && assertDomNode(rNode);
+        if (action === 0 /* Insert */) {
+            nativeInsertBefore(renderer, (/** @type {?} */ (parent)), rNode, beforeNode || null);
+        }
+        else if (action === 1 /* Detach */) {
+            nativeRemoveNode(renderer, rNode, isComponent);
+        }
+        else if (action === 2 /* Destroy */) {
+            ngDevMode && ngDevMode.rendererDestroyNode++;
+            (/** @type {?} */ (((/** @type {?} */ (renderer))).destroyNode))(rNode);
+        }
+        if (lContainer != null) {
+            executeActionOnContainer(renderer, action, lContainer, parent, beforeNode);
+        }
     }
 }
 /**
@@ -22734,7 +22740,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+43.sha-5a8eb92.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+45.sha-54ef63b.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
