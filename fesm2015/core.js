@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+52.sha-221782a.with-local-changes
+ * @license Angular v8.2.0-next.2+55.sha-f69e4e6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22397,7 +22397,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+52.sha-221782a.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+55.sha-f69e4e6.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26747,14 +26747,6 @@ function toRefArray(map) {
     return array;
 }
 /**
- * Default {\@link RootContext} for all components rendered with {\@link renderComponent}.
- * @type {?}
- */
-const ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: (/**
-     * @return {?}
-     */
-    () => createRootContext(ɵɵinject(SCHEDULER))) });
-/**
  * A change detection scheduler token for {\@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
  * @type {?}
@@ -26835,8 +26827,6 @@ class ComponentFactory$1 extends ComponentFactory {
      * @return {?}
      */
     create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
-        /** @type {?} */
-        const isInternalRootView = rootSelectorOrNode === undefined;
         ngModule = ngModule || this.ngModule;
         /** @type {?} */
         const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
@@ -26848,9 +26838,9 @@ class ComponentFactory$1 extends ComponentFactory {
         // otherwise the browser might not render out the element properly.
         namespaceHTMLInternal();
         /** @type {?} */
-        const hostRNode = isInternalRootView ?
-            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
-            locateHostElement(rendererFactory, rootSelectorOrNode);
+        const hostRNode = rootSelectorOrNode ?
+            locateHostElement(rendererFactory, rootSelectorOrNode) :
+            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef));
         /** @type {?} */
         const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
@@ -26862,9 +26852,7 @@ class ComponentFactory$1 extends ComponentFactory {
         const isIsolated = typeof rootSelectorOrNode === 'string' &&
             /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
         /** @type {?} */
-        const rootContext = (isInternalRootView || isIsolated) ?
-            createRootContext() :
-            rootViewInjector.get(ROOT_CONTEXT);
+        const rootContext = createRootContext();
         /** @type {?} */
         const renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
         if (rootSelectorOrNode && hostRNode) {
@@ -26914,7 +26902,7 @@ class ComponentFactory$1 extends ComponentFactory {
         }
         /** @type {?} */
         const componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
-        if (isInternalRootView || isIsolated) {
+        if (!rootSelectorOrNode || isIsolated) {
             // The host element of the internal or isolated root view is attached to the component's host
             // view node.
             (/** @type {?} */ (componentRef.hostView._tViewNode)).child = tElementNode;
