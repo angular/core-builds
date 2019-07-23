@@ -8,7 +8,6 @@
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LView } from './interfaces/view';
-export declare function applyOnCreateInstructions(tNode: TNode): void;
 /**
  * Unwraps a parent injector location number to find the view offset from the current injector,
  * then walks up the declaration view tree until the TNode of the parent injector is found.

@@ -13,7 +13,6 @@ import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactor
 import { LocalRefExtractor, PropertyAliasValue, PropertyAliases, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
-import { StylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TView } from '../interfaces/view';
 export declare const enum BindingDirection {
     Input = 0,
@@ -199,7 +198,7 @@ export declare function elementAttributeInternal(index: number, name: string, va
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(hostNative: RElement | RComment | StylingContext | LView, currentView: LView, native: RComment, tNode: TNode, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(hostNative: RElement | RComment | LView, currentView: LView, native: RComment, tNode: TNode, isForViewContainerRef?: boolean): LContainer;
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *

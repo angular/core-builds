@@ -71,3 +71,9 @@ export declare function hasStyleInput(tNode: TNode): boolean;
 export declare function getMapProp(map: StylingMapArray, index: number): string;
 export declare function setMapValue(map: StylingMapArray, index: number, value: string | boolean | null): void;
 export declare function getMapValue(map: StylingMapArray, index: number): string | null;
+export declare function forceClassesAsString(classes: string | {
+    [key: string]: any;
+} | null | undefined): string;
+export declare function forceStylesAsString(styles: {
+    [key: string]: any;
+} | null | undefined): string;

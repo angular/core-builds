@@ -135,16 +135,12 @@ export declare function classMapInternal(elementIndex: number, classes: {
     [className: string]: any;
 } | NO_CHANGE | string | null): void;
 /**
- * Temporary function to bridge styling functionality between this new
- * refactor (which is here inside of `styling_next/`) and the old
- * implementation (which lives inside of `styling/`).
+ * Flushes all styling code to the element.
  *
- * The new styling refactor ensures that styling flushing is called
- * automatically when a template function exits or a follow-up element
- * is visited (i.e. when `select(n)` is called). Because the `select(n)`
- * instruction is not fully implemented yet (it doesn't actually execute
- * host binding instruction code at the right time), this means that a
- * styling apply function is still needed.
+ * This function is designed to be called from the template and hostBindings
+ * functions and may be called multiple times depending whether multiple
+ * sources of styling exist. If called multiple times, only the last call
+ * to `stlyingApply()` will render styling to the element.
  *
  * @codeGenApi
  */

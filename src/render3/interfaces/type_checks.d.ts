@@ -9,23 +9,17 @@ import { ComponentDef, DirectiveDef } from '..';
 import { LContainer } from './container';
 import { TNode } from './node';
 import { RNode } from './renderer';
-import { StylingContext } from './styling';
 import { LView } from './view';
 /**
 * True if `value` is `LView`.
-* @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+* @param value wrapped value of `RNode`, `LView`, `LContainer`
 */
-export declare function isLView(value: RNode | LView | LContainer | StylingContext | {} | null): value is LView;
+export declare function isLView(value: RNode | LView | LContainer | {} | null): value is LView;
 /**
  * True if `value` is `LContainer`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
  */
-export declare function isLContainer(value: RNode | LView | LContainer | StylingContext | {} | null): value is LContainer;
-/**
- * True if `value` is `StylingContext`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`, `StylingContext`
- */
-export declare function isStylingContext(value: RNode | LView | LContainer | StylingContext | {} | null): value is StylingContext;
+export declare function isLContainer(value: RNode | LView | LContainer | {} | null): value is LContainer;
 export declare function isContentQueryHost(tNode: TNode): boolean;
 export declare function isComponent(tNode: TNode): boolean;
 export declare function isComponentDef<T>(def: DirectiveDef<T>): def is ComponentDef<T>;

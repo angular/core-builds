@@ -14,7 +14,6 @@ import { PropertyAliases, TContainerNode, TElementNode, TNode as ITNode, TNode, 
 import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
-import { StylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
 import { TStylingContext } from '../styling_next/interfaces';
 import { DebugStyling as DebugNewStyling } from '../styling_next/styling_debug';
@@ -61,7 +60,7 @@ export declare const TViewConstructor: {
     };
 };
 export declare const TNodeConstructor: {
-    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyMetadataStartIndex: number, propertyMetadataEndIndex: number, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null | undefined, outputs: PropertyAliases | null | undefined, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, stylingTemplate: StylingContext | null, projection: number | (ITNode | RNode[])[] | null, onElementCreationFns: Function[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
+    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyMetadataStartIndex: number, propertyMetadataEndIndex: number, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null | undefined, outputs: PropertyAliases | null | undefined, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, projection: number | (ITNode | RNode[])[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
         tView_: ITView;
         type: TNodeType;
         index: number;
@@ -83,9 +82,7 @@ export declare const TNodeConstructor: {
         projectionNext: ITNode | null;
         child: ITNode | null;
         parent: TElementNode | TContainerNode | null;
-        stylingTemplate: StylingContext | null;
         projection: number | (ITNode | RNode[])[] | null;
-        onElementCreationFns: Function[] | null;
         styles: TStylingContext | null;
         classes: TStylingContext | null;
         readonly type_: string;
@@ -184,7 +181,7 @@ export declare class LContainerDebug {
     readonly views: LViewDebug[];
     readonly parent: LViewDebug | LContainerDebug | null;
     readonly movedViews: LView[] | null;
-    readonly host: RElement | RComment | StylingContext | LView;
+    readonly host: RElement | RComment | LView;
     readonly native: RComment;
     readonly __other__: {
         next: LViewDebug | LContainerDebug | null;

@@ -17,8 +17,6 @@ export { NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DE
 export { NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, } from './di/interface/defs';
 export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayState as ɵPlayState, PlayerHandler as ɵPlayerHandler, } from './render3/interfaces/player';
 export { LContext as ɵLContext, } from './render3/interfaces/context';
-export { bindPlayerFactory as ɵbindPlayerFactory, } from './render3/styling/player_factory';
-export { addPlayer as ɵaddPlayer, getPlayers as ɵgetPlayers, } from './render3/players';
 export { compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__ } from './application_ref';
 export { SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, } from './metadata/directives';
 export { SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, } from './metadata/ng_module';
