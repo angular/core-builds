@@ -51,7 +51,8 @@ export declare type StringMapWithRename = {
 export declare type Provider = any;
 export declare enum R3ResolvedDependencyType {
     Token = 0,
-    Attribute = 1
+    Attribute = 1,
+    ChangeDetectorRef = 2
 }
 export interface R3DependencyMetadataFacade {
     token: any;

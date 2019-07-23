@@ -25,7 +25,7 @@ export { setClassMetadata, } from './metadata';
 export { ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, } from './pipe';
 export { ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵstaticContentQuery } from './query';
 export { ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, } from './pure_function';
-export { ɵɵtemplateRefExtractor } from './view_engine_compatibility_prebound';
+export { ɵɵtemplateRefExtractor, ɵɵinjectPipeChangeDetectorRef } from './view_engine_compatibility_prebound';
 export { ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody } from './util/misc_utils';
 export { ɵɵBaseDef, ComponentDef, ɵɵComponentDefWithMeta, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, ɵɵDirectiveDefWithMeta, DirectiveType, ɵɵNgOnChangesFeature, ɵɵInheritDefinitionFeature, ɵɵProvidersFeature, PipeDef, ɵɵPipeDefWithMeta, LifecycleHooksFeature, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefineBase, ɵɵdefinePipe, getHostElement, getComponent, getDirectives, getRenderedText, renderComponent, ɵɵsetComponentScope, ɵɵsetNgModuleScope, whenRendered, };
 export { NO_CHANGE } from './tokens';

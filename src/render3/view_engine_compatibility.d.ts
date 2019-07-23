@@ -61,15 +61,6 @@ export declare function injectViewContainerRef(ViewContainerRefToken: typeof Vie
  */
 export declare function createContainerRef(ViewContainerRefToken: typeof ViewEngine_ViewContainerRef, ElementRefToken: typeof ViewEngine_ElementRef, hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LView): ViewEngine_ViewContainerRef;
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-export declare function injectChangeDetectorRef(): ViewEngine_ChangeDetectorRef;
-/**
- * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
- *
- * @param hostTNode The node that is requesting a ChangeDetectorRef
- * @param hostView The view to which the node belongs
- * @param context The context for this change detector ref
- * @returns The ChangeDetectorRef to use
- */
-export declare function createViewRef(hostTNode: TNode, hostView: LView, context: any): ViewEngine_ChangeDetectorRef;
+export declare function injectChangeDetectorRef(isPipe?: boolean): ViewEngine_ChangeDetectorRef;
 /** Injects a Renderer2 for the current component. */
 export declare function injectRenderer2(): Renderer2;

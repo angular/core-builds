@@ -5,8 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectFlags, InjectionToken } from '../di';
+import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
+import { InjectFlags } from '../di/interface/injector';
 import { Type } from '../interface/type';
 import { FactoryFn } from './interfaces/definition';
 import { RelativeInjectorLocation } from './interfaces/injector';
