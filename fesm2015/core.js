@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+45.sha-54ef63b.with-local-changes
+ * @license Angular v8.2.0-next.2+46.sha-0e68c7e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12484,6 +12484,12 @@ function refreshDescendantViews(lView) {
     if (creationMode && tView.staticContentQueries) {
         refreshContentQueries(tView, lView);
     }
+    // We must materialize query results before child components are processed
+    // in case a child component has projected a container. The LContainer needs
+    // to exist so the embedded views are properly attached by the container.
+    if (!creationMode || tView.staticViewQueries) {
+        executeViewQueryFn(2 /* Update */, tView, lView[CONTEXT]);
+    }
     refreshChildComponents(tView.components);
 }
 /**
@@ -14333,10 +14339,6 @@ function checkView(hostView, component) {
         creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
         executeTemplate(hostView, templateFn, getRenderFlags(hostView), component);
         refreshDescendantViews(hostView);
-        // Only check view queries again in creation mode if there are static view queries
-        if (!creationMode || hostTView.staticViewQueries) {
-            executeViewQueryFn(2 /* Update */, hostTView, component);
-        }
         safeToRunHooks = true;
     }
     finally {
@@ -22740,7 +22742,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+45.sha-54ef63b.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+46.sha-0e68c7e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
