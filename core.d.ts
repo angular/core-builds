@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+32.sha-f14693b.with-local-changes
+ * @license Angular v8.2.0-next.2+46.sha-0e68c7e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1204,8 +1204,6 @@ export declare interface ConstructorSansProvider {
     deps?: any[];
 }
 
-declare const CONTENT_QUERIES = 16;
-
 /**
  * Type of the ContentChild metadata.
  *
@@ -1501,11 +1499,11 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
     readonly attributes: {
         [key: string]: string | null;
     };
-    readonly classes: {
-        [key: string]: boolean;
-    };
     readonly styles: {
         [key: string]: string | null;
+    };
+    readonly classes: {
+        [key: string]: boolean;
     };
     readonly childNodes: DebugNode[];
     readonly children: DebugElement[];
@@ -1561,7 +1559,9 @@ declare class DebugNode__POST_R3__ implements DebugNode {
     readonly providerTokens: any[];
 }
 
-declare const DECLARATION_VIEW = 17;
+declare const DECLARATION_LCONTAINER = 17;
+
+declare const DECLARATION_VIEW = 16;
 
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
@@ -3776,11 +3776,8 @@ declare interface LContainer extends Array<any> {
      *
      * The host could be an LView if this container is on a component node.
      * In that case, the component LView is its HOST.
-     *
-     * It could also be a styling context if this is a node with a style/class
-     * binding.
      */
-    readonly [HOST]: RElement | RComment | StylingContext | ɵangular_packages_core_core_bm;
+    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bm;
     /**
      * This is a type field which allows us to differentiate `LContainer` from `StylingContext` in an
      * efficient way. The value is always set to `true`
@@ -3805,10 +3802,11 @@ declare interface LContainer extends Array<any> {
      */
     [NEXT]: ɵangular_packages_core_core_bm | LContainer | null;
     /**
-     * Queries active for this container - all the views inserted to / removed from
-     * this container are reported to queries referenced here.
+     * A collection of views created based on the underlying `<ng-template>` element but inserted into
+     * a different `LContainer`. We need to track views created from a given declaration point since
+     * queries collect matches from the embedded view declaration point and _not_ the insertion point.
      */
-    [QUERIES]: LQueries | null;
+    [MOVED_VIEWS]: ɵangular_packages_core_core_bm[] | null;
     /**
      * Pointer to the `TNode` which represents the host of the container.
      */
@@ -3855,113 +3853,59 @@ export declare const LOCALE_ID: InjectionToken<string>;
  */
 declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_bm) => any;
 
-/** Used for tracking queries (e.g. ViewChild, ContentChild). */
+/**
+ * lQueries represent a collection of individual LQuery objects tracked in a given view.
+ */
 declare interface LQueries {
     /**
-     * The parent LQueries instance.
-     *
-     * When there is a content query, a new LQueries instance is created to avoid mutating any
-     * existing LQueries. After we are done searching content children, the parent property allows
-     * us to traverse back up to the original LQueries instance to continue to search for matches
-     * in the main view.
+     * A collection of queries tracked in a given view.
      */
-    parent: LQueries | null;
+    queries: LQuery<any>[];
     /**
-     * The index of the node on which this LQueries instance was created / cloned in a given LView.
-     *
-     * This index is stored to minimize LQueries cloning: we can observe that LQueries can be mutated
-     * only under 2 conditions:
-     * - we are crossing an element that has directives with content queries (new queries are added);
-     * - we are descending into element hierarchy (creating a child element of an existing element)
-     * and the current LQueries object is tracking shallow queries (shallow queries are removed).
-     *
-     * Since LQueries are not cloned systematically we need to know exactly where (on each element)
-     * cloning occurred, so we can properly restore the set of tracked queries when going up the
-     * elements hierarchy.
-     *
-     * Always set to -1 for view queries as view queries are created before we process any node in a
-     * given view.
+     * A method called when a new embedded view is created. As a result a set of LQueries applicable
+     * for a new embedded view is instantiated (cloned) from the declaration view.
+     * @param tView
      */
-    nodeIndex: number;
+    createEmbeddedView(tView: TView): LQueries | null;
     /**
-     * Ask queries to prepare a copy of itself. This ensures that:
-     * - tracking new queries on content nodes doesn't mutate list of queries tracked on a parent
-     * node;
-     * - we don't track shallow queries when descending into elements hierarchy.
-     *
-     * We will clone LQueries before constructing content queries
+     * A method called when an embedded view is inserted into a container. As a result all impacted
+     * `LQuery` objects (and associated `QueryList`) are marked as dirty.
+     * @param tView
      */
-    clone(tNode: TNode): LQueries;
+    insertView(tView: TView): void;
     /**
-     * Notify `LQueries` that a new `TNode` has been created and needs to be added to query results
-     * if matching query predicate.
+     * A method called when an embedded view is detached from a container. As a result all impacted
+     * `LQuery` objects (and associated `QueryList`) are marked as dirty.
+     * @param tView
      */
-    addNode(tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode): void;
-    /**
-     * Notify `LQueries` that a new `TNode` has been created and needs to be added to query results
-     * if matching query predicate. This is a special mode invoked if the query container has to
-     * be created out of order (e.g. view created in the constructor of a directive).
-     */
-    insertNodeBeforeViews(tNode: ɵangular_packages_core_core_bg | TContainerNode | TElementContainerNode): void;
-    /**
-     * Notify `LQueries` that a new LContainer was added to ivy data structures. As a result we need
-     * to prepare room for views that might be inserted into this container.
-     */
-    container(): LQueries | null;
-    /**
-     * Notify `LQueries` that a new `LView` has been created. As a result we need to prepare room
-     * and collect nodes that match query predicate.
-     */
-    createView(): LQueries | null;
-    /**
-     * Notify `LQueries` that a new `LView` has been added to `LContainer`. As a result all
-     * the matching nodes from this view should be added to container's queries.
-     */
-    insertView(newViewIndex: number): void;
-    /**
-     * Notify `LQueries` that an `LView` has been removed from `LContainer`. As a result all
-     * the matching nodes from this view should be removed from container's queries.
-     */
-    removeView(): void;
-    /**
-     * Add additional `QueryList` to track.
-     *
-     * @param queryList `QueryList` to update with changes.
-     * @param predicate Either `Type` or selector array of [key, value] predicates.
-     * @param descend If true the query will recursively apply to the children.
-     * @param read Indicates which token should be read from DI for this query.
-     */
-    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: Type<T>): void;
+    detachView(tView: TView): void;
 }
 
 /**
- * Array-based representation of a key/value array.
- *
- * The format of the array is "property", "value", "property2",
- * "value2", etc...
- *
- * The first value in the array is reserved to store the instance
- * of the key/value array that was used to populate the property/
- * value entries that take place in the remainder of the array.
+ * An interface that represents query-related information specific to a view instance. Most notably
+ * it contains:
+ * - materialized query matches;
+ * - a pointer to a QueryList where materialized query results should be reported.
  */
-declare interface LStylingMap extends Array<{} | string | number | null> {
-    [LStylingMapIndex.RawValuePosition]: {} | string | null;
-}
-
-/**
- * An index of position and offset points for any data stored within a `LStylingMap` instance.
- */
-declare const enum LStylingMapIndex {
-    /** The location of the raw key/value map instance used last to populate the array entries */
-    RawValuePosition = 0,
-    /** Where the values start in the array */
-    ValuesStartPosition = 1,
-    /** The size of each property/value entry */
-    TupleSize = 2,
-    /** The offset for the property entry in the tuple */
-    PropOffset = 0,
-    /** The offset for the value entry in the tuple */
-    ValueOffset = 1
+declare interface LQuery<T> {
+    /**
+     * Materialized query matches for a given view only (!). Results are initialized lazily so the
+     * array of matches is set to `null` initially.
+     */
+    matches: (T | null)[] | null;
+    /**
+     * A QueryList where materialized query results should be reported.
+     */
+    queryList: QueryList<T>;
+    /**
+     * Clones an LQuery for an embedded view. A cloned query shares the same `QueryList` but has a
+     * separate collection of materialized matches.
+     */
+    clone(): LQuery<T>;
+    /**
+     * Called when an embedded view, impacting results of this query, is inserted or removed.
+     */
+    setDirty(): void;
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -4140,6 +4084,8 @@ export declare interface ModuleWithProviders<T = any /** TODO(alxhub): remove de
     ngModule: Type<T>;
     providers?: Provider[];
 }
+
+declare const MOVED_VIEWS = 5;
 
 declare const NATIVE = 7;
 
@@ -5406,7 +5352,7 @@ export declare class QueryList<T> {
      * on change detection, it will not notify of changes to the queries, unless a new change
      * occurs.
      *
-     * @param resultsTree The results tree to store
+     * @param resultsTree The query results to store
      */
     reset(resultsTree: Array<T | any[]>): void;
     /**
@@ -6928,6 +6874,36 @@ declare const enum StylingIndex {
 }
 
 /**
+ * Array-based representation of a key/value array.
+ *
+ * The format of the array is "property", "value", "property2",
+ * "value2", etc...
+ *
+ * The first value in the array is reserved to store the instance
+ * of the key/value array that was used to populate the property/
+ * value entries that take place in the remainder of the array.
+ */
+declare interface StylingMapArray extends Array<{} | string | number | null> {
+    [StylingMapArrayIndex.RawValuePosition]: {} | string | null;
+}
+
+/**
+ * An index of position and offset points for any data stored within a `StylingMapArray` instance.
+ */
+declare const enum StylingMapArrayIndex {
+    /** The location of the raw key/value map instance used last to populate the array entries */
+    RawValuePosition = 0,
+    /** Where the values start in the array */
+    ValuesStartPosition = 1,
+    /** The size of each property/value entry */
+    TupleSize = 2,
+    /** The offset for the property entry in the tuple */
+    PropOffset = 0,
+    /** The offset for the value entry in the tuple */
+    ValueOffset = 1
+}
+
+/**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * @publicApi
  * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
@@ -7500,8 +7476,44 @@ declare interface TNode {
      * with functions each time the creation block is called.
      */
     onElementCreationFns: Function[] | null;
-    newStyles: TStylingContext | null;
-    newClasses: TStylingContext | null;
+    /**
+     * A collection of all style bindings and/or static style values for an element.
+     *
+     * This field will be populated if and when:
+     *
+     * - There are one or more initial styles on an element (e.g. `<div style="width:200px">`)
+     * - There are one or more style bindings on an element (e.g. `<div [style.width]="w">`)
+     *
+     * If and when there are only initial styles (no bindings) then an instance of `StylingMapArray`
+     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
+     * are one or more style bindings on an element.
+     *
+     * During element creation this value is likely to be populated with an instance of
+     * `StylingMapArray` and only when the bindings are evaluated (which happens during
+     * update mode) then it will be converted to a `TStylingContext` if any style bindings
+     * are encountered. If and when this happens then the existing `StylingMapArray` value
+     * will be placed into the initial styling slot in the newly created `TStylingContext`.
+     */
+    styles: StylingMapArray | TStylingContext | null;
+    /**
+     * A collection of all class bindings and/or static class values for an element.
+     *
+     * This field will be populated if and when:
+     *
+     * - There are one or more initial classes on an element (e.g. `<div class="one two three">`)
+     * - There are one or more class bindings on an element (e.g. `<div [class.foo]="f">`)
+     *
+     * If and when there are only initial classes (no bindings) then an instance of `StylingMapArray`
+     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
+     * are one or more class bindings on an element.
+     *
+     * During element creation this value is likely to be populated with an instance of
+     * `StylingMapArray` and only when the bindings are evaluated (which happens during
+     * update mode) then it will be converted to a `TStylingContext` if any class bindings
+     * are encountered. If and when this happens then the existing `StylingMapArray` value
+     * will be placed into the initial styling slot in the newly created `TStylingContext`.
+     */
+    classes: StylingMapArray | TStylingContext | null;
 }
 
 /**
@@ -7582,6 +7594,133 @@ declare interface TProjectionNode extends TNode {
     tViews: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
+}
+
+/**
+ * TQueries represent a collection of individual TQuery objects tracked in a given view. Most of the
+ * methods on this interface are simple proxy methods to the corresponding functionality on TQuery.
+ */
+declare interface TQueries {
+    /**
+     * Adds a new TQuery to a collection of queries tracked in a given view.
+     * @param tQuery
+     */
+    track(tQuery: TQuery): void;
+    /**
+     * Returns a TQuery instance for at the given index  in the queries array.
+     * @param index
+     */
+    getByIndex(index: number): TQuery;
+    /**
+     * Returns the number of queries tracked in a given view.
+     */
+    length: number;
+    /**
+     * A proxy method that iterates over all the TQueries in a given TView and calls the corresponding
+     * `elementStart` on each and every TQuery.
+     * @param tView
+     * @param tNode
+     */
+    elementStart(tView: TView, tNode: TNode): void;
+    /**
+     * A proxy method that iterates over all the TQueries in a given TView and calls the corresponding
+     * `elementEnd` on each and every TQuery.
+     * @param tNode
+     */
+    elementEnd(tNode: TNode): void;
+    /**
+     * A proxy method that iterates over all the TQueries in a given TView and calls the corresponding
+     * `template` on each and every TQuery.
+     * @param tView
+     * @param tNode
+     */
+    template(tView: TView, tNode: TNode): void;
+    /**
+    * A proxy method that iterates over all the TQueries in a given TView and calls the corresponding
+     * `embeddedTView` on each and every TQuery.
+     * @param tNode
+     */
+    embeddedTView(tNode: TNode): TQueries | null;
+}
+
+/**
+ * TQuery objects represent all the query-related data that remain the same from one view instance
+ * to another and can be determined on the very first template pass. Most notably TQuery holds all
+ * the matches for a given view.
+ */
+declare interface TQuery {
+    /**
+     * Query metadata extracted from query annotations.
+     */
+    metadata: TQueryMetadata;
+    /**
+     * Index of a query in a declaration view in case of queries propagated to en embedded view, -1
+     * for queries declared in a given view. We are storing this index so we can find a parent query
+     * to clone for an embedded view (when an embedded view is created).
+     */
+    indexInDeclarationView: number;
+    /**
+     * Matches collected on the first template pass. Each match is a pair of:
+     * - TNode index;
+     * - match index;
+     *
+     * A TNode index can be either:
+     * - a positive number (the most common case) to indicate a matching TNode;
+     * - a negative number to indicate that a given query is crossing a <ng-template> element and
+     * results from views created based on TemplateRef should be inserted at this place.
+     *
+     * A match index is a number used to find an actual value (for a given node) when query results
+     * are materialized. This index can have one of the following values:
+     * - -2 - indicates that we need to read a special token (TemplateRef, ViewContainerRef etc.);
+     * - -1 - indicates that we need to read a default value based on the node type (TemplateRef for
+     * ng-template and ElementRef for other elements);
+     * - a positive number - index of an injectable to be read from the element injector.
+     */
+    matches: number[] | null;
+    /**
+     * A flag indicating if a given query crosses an <ng-template> element. This flag exists for
+     * performance reasons: we can notice that queries not crossing any <ng-template> elements will
+     * have matches from a given view only (and adapt processing accordingly).
+     */
+    crossesNgTemplate: boolean;
+    /**
+     * A method call when a given query is crossing an element (or element container). This is where a
+     * given TNode is matched against a query predicate.
+     * @param tView
+     * @param tNode
+     */
+    elementStart(tView: TView, tNode: TNode): void;
+    /**
+     * A method called when processing the elementEnd instruction - this is mostly useful to determine
+     * if a given content query should match any nodes past this point.
+     * @param tNode
+     */
+    elementEnd(tNode: TNode): void;
+    /**
+     * A method called when processing the template instruction. This is where a
+     * given TContainerNode is matched against a query predicate.
+     * @param tView
+     * @param tNode
+     */
+    template(tView: TView, tNode: TNode): void;
+    /**
+     * A query-related method called when an embedded TView is created based on the content of a
+     * <ng-template> element. We call this method to determine if a given query should be propagated
+     * to the embedded view and if so - return a cloned TQuery for this embedded view.
+     * @param tNode
+     * @param childQueryIndex
+     */
+    embeddedTView(tNode: TNode, childQueryIndex: number): TQuery | null;
+}
+
+/**
+ * An object representing query metadata extracted from query annotations.
+ */
+declare interface TQueryMetadata {
+    predicate: Type<any> | string[];
+    descendants: boolean;
+    read: any;
+    isStatic: boolean;
 }
 
 /**
@@ -7725,7 +7864,22 @@ declare const enum TStylingConfigFlags {
      * it has been flushed once then it will be locked for good (no extra
      * bindings can be added to it).
      */
-    Locked = 1
+    Locked = 1,
+    /**
+     * Whether or not to store the state between updates in a global storage map.
+     *
+     * This flag helps the algorithm avoid storing all state values temporarily in
+     * a storage map (that lives in `state.ts`). The flag is only flipped to true if
+     * and when an element contains style/class bindings that exist both on the
+     * template-level as well as within host bindings on the same element. This is a
+     * rare case, and a storage map is required so that the state values can be restored
+     * between the template code running and the host binding code executing.
+     */
+    PersistStateValues = 2,
+    /** A Mask of all the configurations */
+    Mask = 3,
+    /** Total amount of configuration bits used */
+    TotalBits = 2
 }
 
 /**
@@ -7755,17 +7909,37 @@ declare const enum TStylingConfigFlags {
  * tNode.classes = [ ... a context only for classes ... ];
  * ```
  *
+ * `tNode.styles` and `tNode.classes` can be an instance of the following:
+ *
+ * ```typescript
+ * tNode.styles = null; // no static styling or styling bindings active
+ * tNode.styles = StylingMapArray; // only static values present (e.g. `<div style="width:200">`)
+ * tNode.styles = TStylingContext; // one or more styling bindings present (e.g. `<div
+ * [style.width]>`)
+ * ```
+ *
+ * Both `tNode.styles` and `tNode.classes` are instantiated when anything
+ * styling-related is active on an element. They are first created from
+ * from the any of the element-level instructions (e.g. `element`,
+ * `elementStart`, `elementHostAttrs`). When any static style/class
+ * values are encountered they are registered on the `tNode.styles`
+ * and `tNode.classes` data-structures. By default (when any static
+ * values are encountered) the `tNode.styles` or `tNode.classes` values
+ * are instances of a `StylingMapArray`. Only when style/class bindings
+ * are detected then that styling map is converted into an instance of
+ * `TStylingContext`.
+ *
  * Due to the fact the the `TStylingContext` is stored on a `TNode`
  * this means that all data within the context is static. Instead of
  * storing actual styling binding values, the lView binding index values
  * are stored within the context. (static nature means it is more compact.)
-
  *
  * ```typescript
  * // <div [class.active]="c"  // lView binding index = 20
  * //      [style.width]="x"   // lView binding index = 21
  * //      [style.height]="y"> // lView binding index = 22
  * tNode.stylesContext = [
+ *   [], // initial values array
  *   0, // the context config value
  *
  *   0b001, // guard mask for width
@@ -7782,6 +7956,7 @@ declare const enum TStylingConfigFlags {
  * ];
  *
  * tNode.classesContext = [
+ *   [], // initial values array
  *   0, // the context config value
  *
  *   0b001, // guard mask for active
@@ -7978,14 +8153,16 @@ declare const enum TStylingConfigFlags {
  * If sanitization returns an empty value then that empty value will be applied
  * to the element.
  */
-declare interface TStylingContext extends Array<number | string | number | boolean | null | LStylingMap> {
+declare interface TStylingContext extends Array<number | string | number | boolean | null | StylingMapArray | {}> {
+    /** Initial value position for static styles */
+    [TStylingContextIndex.InitialStylingValuePosition]: StylingMapArray | null;
     /** Configuration data for the context */
     [TStylingContextIndex.ConfigPosition]: TStylingConfigFlags;
     /** Temporary value used to track directive index entries until
        the old styling code is fully removed. The reason why this
        is required is to figure out which directive is last and,
        when encountered, trigger a styling flush to happen */
-    [TStylingContextIndex.MaxDirectiveIndexPosition]: number;
+    [TStylingContextIndex.LastDirectiveIndexPosition]: number;
     /** The bit guard value for all map-based bindings on an element */
     [TStylingContextIndex.MapBindingsBitGuardPosition]: number;
     /** The total amount of map-based bindings present on an element */
@@ -8001,17 +8178,19 @@ declare interface TStylingContext extends Array<number | string | number | boole
  * An index of position and offset values used to natigate the `TStylingContext`.
  */
 declare const enum TStylingContextIndex {
-    ConfigPosition = 0,
-    MaxDirectiveIndexPosition = 1,
-    MapBindingsPosition = 2,
-    MapBindingsBitGuardPosition = 2,
-    MapBindingsValuesCountPosition = 3,
-    MapBindingsPropPosition = 4,
-    MapBindingsBindingsStartPosition = 5,
+    InitialStylingValuePosition = 0,
+    ConfigPosition = 1,
+    LastDirectiveIndexPosition = 2,
+    MapBindingsPosition = 3,
+    MapBindingsBitGuardPosition = 3,
+    MapBindingsValuesCountPosition = 4,
+    MapBindingsPropPosition = 5,
+    MapBindingsBindingsStartPosition = 6,
     ConfigAndGuardOffset = 0,
     ValuesCountOffset = 1,
     PropOffset = 2,
-    BindingsStartOffset = 3
+    BindingsStartOffset = 3,
+    MinTupleLength = 4
 }
 
 /** Static data for a text node */
@@ -8112,16 +8291,6 @@ declare interface TView {
      * refresh after creation mode to collect static query results.
      */
     staticContentQueries: boolean;
-    /**
-     * The index where the viewQueries section of `LView` begins. This section contains
-     * view queries defined for a component/directive.
-     *
-     * We store this start index so we know where the list of view queries starts.
-     * This is required when we invoke view queries at runtime. We invoke queries one by one and
-     * increment query index after each iteration. This information helps us to reset index back to
-     * the beginning of view query list before we invoke view queries again.
-     */
-    viewQueryStartIndex: number;
     /**
      * A reference to the first child node located in the view.
      */
@@ -8238,7 +8407,18 @@ declare interface TView {
      */
     components: number[] | null;
     /**
-     * A list of indices for child directives that have content queries.
+     * A collection of queries tracked in a given view.
+     */
+    queries: TQueries | null;
+    /**
+     * An array of indices pointing to directives with content queries alongside with the
+     * corresponding
+     * query index. Each entry in this array is a tuple of:
+     * - index of the first content query index declared by a given directive;
+     * - index of a directive.
+     *
+     * We are storing those indexes so we can refresh content queries as part of a view refresh
+     * process.
      */
     contentQueries: number[] | null;
     /**
@@ -9238,13 +9418,9 @@ export declare function ɵangular_packages_core_core_bl(name: string, props?: (.
 export declare interface ɵangular_packages_core_core_bm extends Array<any> {
     /**
      * The host node for this LView instance, if this is a component view.
-     *
      * If this is an embedded view, HOST will be null.
-     *
-     * If the component uses host bindings for styling that the `RElement` will be wrapped with
-     * `StylingContext`.
      */
-    [HOST]: RElement | StylingContext | null;
+    [HOST]: RElement | null;
     /**
      * The static data for this view. We need a reference to this so we can easily walk up the
      * node tree in DI and get the TView.data array associated with a node (where the
@@ -9335,12 +9511,6 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      */
     [CHILD_TAIL]: ɵangular_packages_core_core_bm | LContainer | null;
     /**
-     * Stores QueryLists associated with content queries of a directive. This data structure is
-     * filled-in as part of a directive creation process and is later used to retrieve a QueryList to
-     * be refreshed.
-     */
-    [CONTENT_QUERIES]: QueryList<any>[] | null;
-    /**
      * View where this view's template was declared.
      *
      * Only applicable for dynamically created views. Will be null for inline/component views.
@@ -9365,6 +9535,15 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * context.
      */
     [DECLARATION_VIEW]: ɵangular_packages_core_core_bm | null;
+    /**
+     * A declaration point of embedded views (ones instantiated based on the content of a
+     * <ng-template>), null for other types of views.
+     *
+     * We need to track all embedded views created from a given declaration point so we can prepare
+     * query matches in a proper order (query matches are ordered based on their declaration point and
+     * _not_ the insertion point).
+     */
+    [DECLARATION_LCONTAINER]: LContainer | null;
     /**
      * More flags for this view. See PreOrderHookFlags for more info.
      */
@@ -9457,9 +9636,9 @@ export declare function ɵangular_packages_core_core_g(ElementRefToken: typeof E
  *
  * @param TemplateRefToken The TemplateRef type
  * @param ElementRefToken The ElementRef type
- * @param hostTNode The node that is requesting a TemplateRef
+ * @param hostTNode The node on which a TemplateRef is requested
  * @param hostView The view to which the node belongs
- * @returns The TemplateRef instance to use
+ * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
  */
 export declare function ɵangular_packages_core_core_h<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef, hostTNode: TNode, hostView: ɵangular_packages_core_core_bm): TemplateRef<T> | null;
 
@@ -11436,8 +11615,8 @@ export declare interface ɵɵBaseDef<T> {
  * @codeGenApi
  */
 export declare function ɵɵclassMap(classes: {
-    [styleName: string]: any;
-} | string | null): void;
+    [className: string]: any;
+} | ɵNO_CHANGE | string | null): void;
 
 
 /**
@@ -11718,20 +11897,15 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
  * therefore, the class binding itself must already be allocated using
  * `styling` within the creation block.
  *
- * @param classIndex Index of class to toggle. This index value refers to the
- *        index of the class in the class bindings array that was passed into
- *        `styling` (which is meant to be called before this
- *        function is).
+ * @param prop A valid CSS class (only one).
  * @param value A true/false value which will turn the class on or off.
- * @param forceOverride Whether or not this value will be applied regardless
- *        of where it is being set within the styling priority structure.
  *
  * Note that this will apply the provided class value to the host element if this function
  * is called within a host binding.
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(classIndex: number, value: boolean | ɵPlayerFactory, forceOverride?: boolean): void;
+export declare function ɵɵclassProp(className: string, value: boolean | null): void;
 
 /**
  * @codeGenApi
@@ -11808,7 +11982,7 @@ export declare function ɵɵcontainerRefreshStart(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
 
 /**
  * The default style sanitizer will handle sanitization for style properties by
@@ -12816,17 +12990,18 @@ export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) =>
 export declare function ɵɵload<T>(index: number): T;
 
 /**
+ * Loads a QueryList corresponding to the current content query.
  *
  * @codeGenApi
  */
 export declare function ɵɵloadContentQuery<T>(): QueryList<T>;
 
 /**
- * Loads current View Query and moves the pointer/index to the next View Query in LView.
+ * Loads a QueryList corresponding to the current view query.
  *
  * @codeGenApi
  */
-export declare function ɵɵloadViewQuery<T>(): T;
+export declare function ɵɵloadViewQuery<T>(): QueryList<T>;
 
 /**
  * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -13907,22 +14082,18 @@ export declare function ɵɵstyleMap(styles: {
  *
  * Note that the styling element is updated as part of `stylingApply`.
  *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param value New value to write (falsy to remove).
+ * @param prop A valid CSS property.
+ * @param value New value to write (`null` or an empty string to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
  *        Note that when a suffix is provided then the underlying sanitizer will
  *        be ignored.
- * @param forceOverride Whether or not to update the styling value immediately
- *        (despite the other bindings possibly having priority)
  *
  * Note that this will apply the provided style value to the host element if this function is called
  * within a host binding.
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(styleIndex: number, value: string | number | String | ɵPlayerFactory | null, suffix?: string | null, forceOverride?: boolean): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | String | null, suffix?: string | null): void;
 
 /**
  *
@@ -13947,11 +14118,10 @@ export declare function ɵɵstyleProp(styleIndex: number, value: string | number
  * @param v0 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(styleIndex: number, prefix: string, v0: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -13978,11 +14148,10 @@ export declare function ɵɵstylePropInterpolate1(styleIndex: number, prefix: st
  * @param v1 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14011,11 +14180,10 @@ export declare function ɵɵstylePropInterpolate2(styleIndex: number, prefix: st
  * @param v2 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14046,11 +14214,10 @@ export declare function ɵɵstylePropInterpolate3(styleIndex: number, prefix: st
  * @param v3 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14083,11 +14250,10 @@ export declare function ɵɵstylePropInterpolate4(styleIndex: number, prefix: st
  * @param v4 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14122,11 +14288,10 @@ export declare function ɵɵstylePropInterpolate5(styleIndex: number, prefix: st
  * @param v5 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14164,11 +14329,10 @@ export declare function ɵɵstylePropInterpolate6(styleIndex: number, prefix: st
  * @param v6 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  *
@@ -14208,11 +14372,10 @@ export declare function ɵɵstylePropInterpolate7(styleIndex: number, prefix: st
  * @param v7 Value checked for change.
  * @param suffix Static value used for concatenation only.
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(styleIndex: number, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
 
 /**
  * Update an interpolated style property on an element with 8 or more bound values surrounded by
@@ -14241,42 +14404,65 @@ export declare function ɵɵstylePropInterpolate8(styleIndex: number, prefix: st
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @param forceOverride Whether or not to update the styling value immediately.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolateV(styleIndex: number, values: any[], valueSuffix?: string | null, forceOverride?: boolean): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): TsickleIssue1009;
 
 /**
- * Allocates style and class binding properties on the element during creation mode.
+ * Sets the current style sanitizer function which will then be used
+ * within all follow-up prop and map-based style binding instructions
+ * for the given element.
  *
- * This instruction is meant to be called during creation mode to register all
- * dynamic style and class bindings on the element. Note that this is only used
- * for binding values (see `elementStart` to learn how to assign static styling
- * values to an element).
+ * Note that once styling has been applied to the element (i.e. once
+ * `select(n)` is executed or the hostBindings/template function exits)
+ * then the active `sanitizerFn` will be set to `null`. This means that
+ * once styling is applied to another element then a another call to
+ * `styleSanitizer` will need to be made.
  *
- * @param classBindingNames An array containing bindable class names.
- *        The `classProp` instruction refers to the class name by index in
- *        this array (i.e. `['foo', 'bar']` means `foo=0` and `bar=1`).
- * @param styleBindingNames An array containing bindable style properties.
- *        The `styleProp` instruction refers to the class name by index in
- *        this array (i.e. `['width', 'height']` means `width=0` and `height=1`).
- * @param styleSanitizer An optional sanitizer function that will be used to sanitize any CSS
- *        style values that are applied to the element (during rendering).
- *
- * Note that this will allocate the provided style/class bindings to the host element if
- * this function is called within a host binding.
+ * @param sanitizerFn The sanitization function that will be used to
+ *       process style prop/value entries.
  *
  * @codeGenApi
  */
-export declare function ɵɵstyling(classBindingNames?: string[] | null, styleBindingNames?: string[] | null, styleSanitizer?: StyleSanitizeFn | null): void;
+export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 
 /**
- * Apply all style and class binding values to the element.
+ * --------
  *
- * This instruction is meant to be run after `styleMap`, `classMap`,
- * `styleProp` or `classProp` instructions have been run and will
- * only apply styling to the element if any styling bindings have been updated.
+ * This file contains the core logic for how styling instructions are processed in Angular.
+ *
+ * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
+ */
+/**
+ * Temporary function to bridge styling functionality between this new
+ * refactor (which is here inside of `styling_next/`) and the old
+ * implementation (which lives inside of `styling/`).
+ *
+ * This function is executed during the creation block of an element.
+ * Because the existing styling implementation issues a call to the
+ * `styling()` instruction, this instruction will also get run. The
+ * central idea here is that the directive index values are bound
+ * into the context. The directive index is temporary and is only
+ * required until the `select(n)` instruction is fully functional.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵstyling(): void;
+
+/**
+ * Temporary function to bridge styling functionality between this new
+ * refactor (which is here inside of `styling_next/`) and the old
+ * implementation (which lives inside of `styling/`).
+ *
+ * The new styling refactor ensures that styling flushing is called
+ * automatically when a template function exits or a follow-up element
+ * is visited (i.e. when `select(n)` is called). Because the `select(n)`
+ * instruction is not fully implemented yet (it doesn't actually execute
+ * host binding instruction code at the right time), this means that a
+ * styling apply function is still needed.
  *
  * @codeGenApi
  */
@@ -14584,10 +14770,9 @@ export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, valu
  * @param predicate The type for which the query will search
  * @param descend Whether or not to descend into children
  * @param read What to save in the query
- * @returns QueryList<T>
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): QueryList<T>;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
 
 export { }
