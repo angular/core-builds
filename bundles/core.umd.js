@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+50.sha-b31a292.with-local-changes
+ * @license Angular v8.2.0-next.2+53.sha-9eefe25.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18259,7 +18259,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+50.sha-b31a292.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+53.sha-9eefe25.with-local-changes');
 
     /**
      * @license
@@ -21278,10 +21278,6 @@
         return array;
     }
     /**
-     * Default {@link RootContext} for all components rendered with {@link renderComponent}.
-     */
-    var ROOT_CONTEXT = new InjectionToken('ROOT_CONTEXT_TOKEN', { providedIn: 'root', factory: function () { return createRootContext(ɵɵinject(SCHEDULER)); } });
-    /**
      * A change detection scheduler token for {@link RootContext}. This token is the default value used
      * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
      */
@@ -21341,7 +21337,6 @@
             configurable: true
         });
         ComponentFactory.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
-            var isInternalRootView = rootSelectorOrNode === undefined;
             ngModule = ngModule || this.ngModule;
             var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
@@ -21349,9 +21344,9 @@
             // Ensure that the namespace for the root node is correct,
             // otherwise the browser might not render out the element properly.
             namespaceHTMLInternal();
-            var hostRNode = isInternalRootView ?
-                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef)) :
-                locateHostElement(rendererFactory, rootSelectorOrNode);
+            var hostRNode = rootSelectorOrNode ?
+                locateHostElement(rendererFactory, rootSelectorOrNode) :
+                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef));
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
             // Check whether this Component needs to be isolated from other components, i.e. whether it
@@ -21360,9 +21355,7 @@
             // relied upon externally.
             var isIsolated = typeof rootSelectorOrNode === 'string' &&
                 /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
-            var rootContext = (isInternalRootView || isIsolated) ?
-                createRootContext() :
-                rootViewInjector.get(ROOT_CONTEXT);
+            var rootContext = createRootContext();
             var renderer = rendererFactory.createRenderer(hostRNode, this.componentDef);
             if (rootSelectorOrNode && hostRNode) {
                 ngDevMode && ngDevMode.rendererSetAttribute++;
@@ -21400,7 +21393,7 @@
                 leaveView(oldLView, safeToRunHooks);
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
-            if (isInternalRootView || isIsolated) {
+            if (!rootSelectorOrNode || isIsolated) {
                 // The host element of the internal or isolated root view is attached to the component's host
                 // view node.
                 componentRef.hostView._tViewNode.child = tElementNode;
@@ -27632,9 +27625,20 @@
                     _queryNodeChildrenR3(componentView[TVIEW].firstChild, componentView, predicate, matches, elementsOnly, rootNativeNode);
                 }
             }
-            else if (tNode.child) {
-                // Otherwise, its children have to be processed.
-                _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
+            else {
+                if (tNode.child) {
+                    // Otherwise, its children have to be processed.
+                    _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
+                }
+                // We also have to query the DOM directly in order to catch elements inserted through
+                // Renderer2. Note that this is __not__ optimal, because we're walking similar trees multiple
+                // times. ViewEngine could do it more efficiently, because all the insertions go through
+                // Renderer2, however that's not the case in Ivy. This approach is being used because:
+                // 1. Matching the ViewEngine behavior would mean potentially introducing a depedency
+                //    from `Renderer2` to Ivy which could bring Ivy code into ViewEngine.
+                // 2. We would have to make `Renderer3` "know" about debug nodes.
+                // 3. It allows us to capture nodes that were inserted directly via the DOM.
+                nativeNode && _queryNativeNodeDescendants(nativeNode, predicate, matches, elementsOnly);
             }
             // In all cases, if a dynamic container exists for this node, each view inside it has to be
             // processed.
@@ -27725,11 +27729,40 @@
             // Type of the "predicate and "matches" array are set based on the value of
             // the "elementsOnly" parameter. TypeScript is not able to properly infer these
             // types with generics, so we manually cast the parameters accordingly.
-            if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode)) {
+            if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode) &&
+                matches.indexOf(debugNode) === -1) {
                 matches.push(debugNode);
             }
-            else if (!elementsOnly && predicate(debugNode)) {
+            else if (!elementsOnly && predicate(debugNode) &&
+                matches.indexOf(debugNode) === -1) {
                 matches.push(debugNode);
+            }
+        }
+    }
+    /**
+     * Match all the descendants of a DOM node against a predicate.
+     *
+     * @param nativeNode the current native node
+     * @param predicate the predicate to match
+     * @param matches the list of positive matches
+     * @param elementsOnly whether only elements should be searched
+     */
+    function _queryNativeNodeDescendants(parentNode, predicate, matches, elementsOnly) {
+        var nodes = parentNode.childNodes;
+        var length = nodes.length;
+        for (var i = 0; i < length; i++) {
+            var node = nodes[i];
+            var debugNode = getDebugNode(node);
+            if (debugNode) {
+                if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode) &&
+                    matches.indexOf(debugNode) === -1) {
+                    matches.push(debugNode);
+                }
+                else if (!elementsOnly && predicate(debugNode) &&
+                    matches.indexOf(debugNode) === -1) {
+                    matches.push(debugNode);
+                }
+                _queryNativeNodeDescendants(node, predicate, matches, elementsOnly);
             }
         }
     }
