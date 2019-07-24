@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+67.sha-82055b2.with-local-changes
+ * @license Angular v8.2.0-next.2+69.sha-b6aeace.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7558,7 +7558,7 @@
         if (!creationMode || tView.staticViewQueries) {
             executeViewQueryFn(2 /* Update */, tView, lView[CONTEXT]);
         }
-        refreshChildComponents(tView.components);
+        refreshChildComponents(lView, tView.components);
     }
     /** Sets the host bindings for the current view. */
     function setHostBindings(tView, viewData) {
@@ -7630,10 +7630,10 @@
         }
     }
     /** Refreshes child components in the current view. */
-    function refreshChildComponents(components) {
+    function refreshChildComponents(hostLView, components) {
         if (components != null) {
             for (var i = 0; i < components.length; i++) {
-                componentRefresh(components[i]);
+                componentRefresh(hostLView, components[i]);
             }
         }
     }
@@ -7808,7 +7808,7 @@
                 // ngFor loop, all the views will be created together before update mode runs and turns
                 // off firstTemplatePass. If we don't set it here, instances will perform directive
                 // matching, etc again and again.
-                viewToRender[TVIEW].firstTemplatePass = false;
+                tView.firstTemplatePass = false;
                 refreshDescendantViews(viewToRender);
                 safeToRunHooks = true;
             }
@@ -8755,17 +8755,17 @@
      *
      * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
      */
-    function componentRefresh(adjustedElementIndex) {
-        var lView = getLView();
-        ngDevMode && assertDataInRange(lView, adjustedElementIndex);
-        var hostView = getComponentViewByIndex(adjustedElementIndex, lView);
-        ngDevMode && assertNodeType(lView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
+    function componentRefresh(hostLView, adjustedElementIndex) {
+        ngDevMode && assertDataInRange(hostLView, adjustedElementIndex);
+        var componentView = getComponentViewByIndex(adjustedElementIndex, hostLView);
+        ngDevMode &&
+            assertNodeType(hostLView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
         // Only components in creation mode, attached CheckAlways
         // components or attached, dirty OnPush components should be checked
-        if ((viewAttachedToChangeDetector(hostView) || isCreationMode(lView)) &&
-            hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
-            syncViewWithBlueprint(hostView);
-            checkView(hostView, hostView[CONTEXT]);
+        if ((viewAttachedToChangeDetector(componentView) || isCreationMode(hostLView)) &&
+            componentView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
+            syncViewWithBlueprint(componentView);
+            checkView(componentView, componentView[CONTEXT]);
         }
     }
     /**
@@ -10410,12 +10410,7 @@
                     return this._lContainer[VIEW_REFS] !== null && this._lContainer[VIEW_REFS][index] || null;
                 };
                 Object.defineProperty(ViewContainerRef_.prototype, "length", {
-                    get: function () {
-                        // Note that if there are no views, the container
-                        // length will be smaller than the header offset.
-                        var viewAmount = this._lContainer.length - CONTAINER_HEADER_OFFSET;
-                        return viewAmount > 0 ? viewAmount : 0;
-                    },
+                    get: function () { return this._lContainer.length - CONTAINER_HEADER_OFFSET; },
                     enumerable: true,
                     configurable: true
                 });
@@ -18259,7 +18254,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+67.sha-82055b2.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+69.sha-b6aeace.with-local-changes');
 
     /**
      * @license
