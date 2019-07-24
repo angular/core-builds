@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+69.sha-b6aeace.with-local-changes
+ * @license Angular v8.2.0-next.2+72.sha-2bb9a65.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22392,7 +22392,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+69.sha-b6aeace.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+72.sha-2bb9a65.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26797,7 +26797,8 @@ class ComponentFactory$1 extends ComponentFactory {
         this.componentDef = componentDef;
         this.ngModule = ngModule;
         this.componentType = componentDef.type;
-        this.selector = (/** @type {?} */ (componentDef.selectors[0][0]));
+        // default to 'div' in case this component has an attribute selector
+        this.selector = (/** @type {?} */ (componentDef.selectors[0][0])) || 'div';
         this.ngContentSelectors =
             componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
         this.isBoundToModule = !!ngModule;
