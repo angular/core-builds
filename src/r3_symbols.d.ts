@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+77.sha-716af10.with-local-changes
+ * @license Angular v8.2.0-next.2+83.sha-2c402d5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -107,15 +107,15 @@ declare abstract class ChangeDetectorRef {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -259,11 +259,11 @@ declare abstract class ComponentRef<C> {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ConstructorProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -345,11 +345,11 @@ declare class ElementRef<T = any> {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ExistingProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -386,15 +386,15 @@ declare interface ExistingSansProvider {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProvider'}
  *
  * Dependencies can also be marked as optional:
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -719,11 +719,11 @@ export declare function setClassMetadata(type: Type<any>, decorators: any[] | nu
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -790,11 +790,11 @@ declare interface Type<T> extends Function {
  *
  * ### Example
  *
- * {@example core/di/ts/provider_spec.ts region='ValueProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
