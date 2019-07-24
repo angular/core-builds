@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+67.sha-82055b2.with-local-changes
+ * @license Angular v8.2.0-next.2+69.sha-b6aeace.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9167,7 +9167,7 @@ function refreshDescendantViews(lView) {
     if (!creationMode || tView.staticViewQueries) {
         executeViewQueryFn(2 /* Update */, tView, lView[CONTEXT]);
     }
-    refreshChildComponents(tView.components);
+    refreshChildComponents(lView, tView.components);
 }
 /**
  * Sets the host bindings for the current view.
@@ -9261,13 +9261,14 @@ function refreshContentQueries(tView, lView) {
 }
 /**
  * Refreshes child components in the current view.
+ * @param {?} hostLView
  * @param {?} components
  * @return {?}
  */
-function refreshChildComponents(components) {
+function refreshChildComponents(hostLView, components) {
     if (components != null) {
         for (let i = 0; i < components.length; i++) {
-            componentRefresh(components[i]);
+            componentRefresh(hostLView, components[i]);
         }
     }
 }
@@ -9515,7 +9516,7 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
             // ngFor loop, all the views will be created together before update mode runs and turns
             // off firstTemplatePass. If we don't set it here, instances will perform directive
             // matching, etc again and again.
-            viewToRender[TVIEW].firstTemplatePass = false;
+            tView.firstTemplatePass = false;
             refreshDescendantViews(viewToRender);
             safeToRunHooks = true;
         }
@@ -10753,22 +10754,22 @@ function refreshDynamicEmbeddedViews(lView) {
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
+ * @param {?} hostLView
  * @param {?} adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
  * @return {?}
  */
-function componentRefresh(adjustedElementIndex) {
+function componentRefresh(hostLView, adjustedElementIndex) {
+    ngDevMode && assertDataInRange(hostLView, adjustedElementIndex);
     /** @type {?} */
-    const lView = getLView();
-    ngDevMode && assertDataInRange(lView, adjustedElementIndex);
-    /** @type {?} */
-    const hostView = getComponentViewByIndex(adjustedElementIndex, lView);
-    ngDevMode && assertNodeType((/** @type {?} */ (lView[TVIEW].data[adjustedElementIndex])), 3 /* Element */);
+    const componentView = getComponentViewByIndex(adjustedElementIndex, hostLView);
+    ngDevMode &&
+        assertNodeType((/** @type {?} */ (hostLView[TVIEW].data[adjustedElementIndex])), 3 /* Element */);
     // Only components in creation mode, attached CheckAlways
     // components or attached, dirty OnPush components should be checked
-    if ((viewAttachedToChangeDetector(hostView) || isCreationMode(lView)) &&
-        hostView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
-        syncViewWithBlueprint(hostView);
-        checkView(hostView, hostView[CONTEXT]);
+    if ((viewAttachedToChangeDetector(componentView) || isCreationMode(hostLView)) &&
+        componentView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
+        syncViewWithBlueprint(componentView);
+        checkView(componentView, componentView[CONTEXT]);
     }
 }
 /**
@@ -12756,13 +12757,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             /**
              * @return {?}
              */
-            get length() {
-                // Note that if there are no views, the container
-                // length will be smaller than the header offset.
-                /** @type {?} */
-                const viewAmount = this._lContainer.length - CONTAINER_HEADER_OFFSET;
-                return viewAmount > 0 ? viewAmount : 0;
-            }
+            get length() { return this._lContainer.length - CONTAINER_HEADER_OFFSET; }
             /**
              * @template C
              * @param {?} templateRef
@@ -21952,7 +21947,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+67.sha-82055b2.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+69.sha-b6aeace.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33785,7 +33780,9 @@ class SystemJsNgModuleLoader {
      * @return {?}
      */
     load(path) {
-        return this.loadAndCompile(path);
+        /** @type {?} */
+        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     }
     /**
      * @private

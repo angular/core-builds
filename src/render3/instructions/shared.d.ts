@@ -204,7 +204,7 @@ export declare function createLContainer(hostNative: RElement | RComment | LView
  *
  * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
  */
-export declare function componentRefresh(adjustedElementIndex: number): void;
+export declare function componentRefresh(hostLView: LView, adjustedElementIndex: number): void;
 /**
  * Adds LView or LContainer to the end of the current view tree.
  *
