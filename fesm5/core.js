@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+77.sha-716af10.with-local-changes
+ * @license Angular v8.2.0-next.2+83.sha-2c402d5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17886,7 +17886,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0-next.2+77.sha-716af10.with-local-changes');
+var VERSION = new Version('8.2.0-next.2+83.sha-2c402d5.with-local-changes');
 
 /**
  * @license
@@ -23363,11 +23363,12 @@ var LQueries_ = /** @class */ (function () {
     return LQueries_;
 }());
 var TQueryMetadata_ = /** @class */ (function () {
-    function TQueryMetadata_(predicate, descendants, read, isStatic) {
+    function TQueryMetadata_(predicate, descendants, isStatic, read) {
+        if (read === void 0) { read = null; }
         this.predicate = predicate;
         this.descendants = descendants;
-        this.read = read;
         this.isStatic = isStatic;
+        this.read = read;
     }
     return TQueryMetadata_;
 }());
@@ -23739,7 +23740,7 @@ function ɵɵviewQuery(predicate, descend, read) {
 function viewQueryInternal(lView, predicate, descend, read, isStatic) {
     var tView = lView[TVIEW];
     if (tView.firstTemplatePass) {
-        createTQuery(tView, new TQueryMetadata_(predicate, descend, read, isStatic), -1);
+        createTQuery(tView, new TQueryMetadata_(predicate, descend, isStatic, read), -1);
         if (isStatic) {
             tView.staticViewQueries = true;
         }
@@ -23787,7 +23788,7 @@ function ɵɵstaticContentQuery(directiveIndex, predicate, descend, read) {
 function contentQueryInternal(lView, predicate, descend, read, isStatic, tNode, directiveIndex) {
     var tView = lView[TVIEW];
     if (tView.firstTemplatePass) {
-        createTQuery(tView, new TQueryMetadata_(predicate, descend, read, isStatic), tNode.index);
+        createTQuery(tView, new TQueryMetadata_(predicate, descend, isStatic, read), tNode.index);
         saveContentQueryAndDirectiveIndex(tView, directiveIndex);
         if (isStatic) {
             tView.staticContentQueries = true;

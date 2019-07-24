@@ -26,7 +26,7 @@ export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
  *
  * @codeGenApi
  */
-export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
@@ -36,7 +36,7 @@ export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], 
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
 /**
  * Loads a QueryList corresponding to the current view query.
  *
@@ -55,7 +55,7 @@ export declare function ɵɵloadViewQuery<T>(): QueryList<T>;
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
 /**
  * Registers a QueryList, associated with a static content query, for later refresh
  * (part of a view refresh).
@@ -68,7 +68,7 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: T
  *
  * @codeGenApi
  */
-export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
 /**
  * Loads a QueryList corresponding to the current content query.
  *
