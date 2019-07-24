@@ -26,11 +26,11 @@ export interface ValueSansProvider {
  *
  * ### Example
  *
- * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ValueProvider' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -73,11 +73,11 @@ export interface StaticClassSansProvider {
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
+ * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -119,11 +119,11 @@ export interface ConstructorSansProvider {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -159,11 +159,11 @@ export interface ExistingSansProvider {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ExistingProvider' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -204,15 +204,15 @@ export interface FactorySansProvider {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProvider'}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProvider' linenums="false"}
  *
  * Dependencies can also be marked as optional:
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
@@ -244,7 +244,7 @@ export declare type StaticProvider = ValueProvider | ExistingProvider | StaticCl
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='TypeProvider'}
+ * {@example core/di/ts/provider_spec.ts region='TypeProvider' linenums="false"}
  *
  * @publicApi
  */
@@ -270,15 +270,15 @@ export interface ClassSansProvider {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
+ * {@example core/di/ts/provider_spec.ts region='ClassProvider' linenums="false"}
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
+ * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference' linenums="false"}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
  *
  * @publicApi
  */
