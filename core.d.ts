@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+70.sha-b696413.with-local-changes
+ * @license Angular v8.2.0-next.2+85.sha-c7542a1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -447,11 +447,11 @@ export declare interface AttributeDecorator {
      *
      * The following example uses the decorator to inject the string literal `text`.
      *
-     * {@example core/ts/metadata/metadata.ts region='attributeMetadata' linenums="false"}
+     * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
      *
      * ### Example as TypeScript Decorator
      *
-     * {@example core/ts/metadata/metadata.ts region='attributeFactory' linenums="false"}
+     * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
      *
      */
     (name: string): any;
@@ -624,15 +624,15 @@ declare const CHILD_TAIL = 15;
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -897,9 +897,7 @@ export declare interface ComponentDecorator {
      * The following example creates a component with two data-bound properties,
      * specified by the `inputs` value.
      *
-     * <code-example path="core/ts/metadata/directives.ts" region="component-input"
-     * linenums="false">
-     * </code-example>
+     * <code-example path="core/ts/metadata/directives.ts" region="component-input"></code-example>
      *
      *
      * ### Setting component outputs
@@ -907,8 +905,7 @@ export declare interface ComponentDecorator {
      * The following example shows two event emitters that emit on an interval. One
      * emits an output every second, while the other emits every five seconds.
      *
-     * {@example core/ts/metadata/directives.ts region='component-output-interval
-     * linenums="false"}
+     * {@example core/ts/metadata/directives.ts region='component-output-interval'}
      *
      * ### Injecting a class with a view provider
      *
@@ -1153,11 +1150,11 @@ declare type ComponentTemplate<T> = {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ConstructorProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -1240,13 +1237,11 @@ export declare interface ContentChildDecorator {
      *
      * @usageNotes
      *
-     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
      *
      * ### Example
      *
-     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
      *
      * @Annotation
      */
@@ -1304,16 +1299,14 @@ export declare interface ContentChildrenDecorator {
      *
      * Here is a simple demonstration of how the `ContentChildren` decorator can be used.
      *
-     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
      *
      * ### Tab-pane example
      *
      * Here is a slightly more realistic example that shows how `ContentChildren` decorators
      * can be used to implement a tab pane component.
      *
-     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
      *
      * @Annotation
      */
@@ -2256,11 +2249,11 @@ export declare class EventEmitter<T> extends Subject<T> {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='ExistingProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -2320,15 +2313,15 @@ declare type FactoryFn<T> = {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProvider'}
  *
  * Dependencies can also be marked as optional:
  *
- * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -2541,8 +2534,8 @@ export declare interface HostDecorator {
      *
      * The following shows use with the `@Optional` decorator, and allows for a null result.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Host"
-     *  linenums="false"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
+     * </code-example>
      */
     (): any;
     new (): Host;
@@ -2901,8 +2894,7 @@ export declare interface InjectableDecorator {
      * The following example shows how a service class is properly
      *  marked so that a supporting service can be injected upon creation.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"
-     *  linenums="false"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"></code-example>
      *
      */
     (): TypeDecorator;
@@ -2960,8 +2952,8 @@ export declare interface InjectDecorator {
      * When `@Inject()` is not present, the injector uses the type annotation of the
      * parameter as the provider.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts"
-     * region="InjectWithoutDecorator"  linenums="false"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
+     * </code-example>
      */
     (token: any): any;
     new (token: any): Inject;
@@ -4441,8 +4433,8 @@ export declare interface OptionalDecorator {
      *
      * The following code allows the possibility of a null result:
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional"
-     *  linenums="false"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
+     * </code-example>
      *
      */
     (): any;
@@ -5953,8 +5945,8 @@ export declare interface SelfDecorator {
      * by the local injector when instantiating the class itself, but not
      * when instantiating a child.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Self"
-     *  linenums="false"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
+     * </code-example>
      *
      *
      * @see `SkipSelf`
@@ -6038,8 +6030,8 @@ export declare interface SkipSelfDecorator {
      * In the following example, the dependency can be resolved when
      * instantiating a child, but not when instantiating the class itself.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf"
-     *  linenums="false"></code-example>
+     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
+     * </code-example>
      *
      * Learn more in the
      * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
@@ -6062,11 +6054,11 @@ export declare interface SkipSelfDecorator {
  *
  * Note that following two providers are not equal:
  *
- * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -7747,7 +7739,7 @@ export declare interface TypeDecorator {
  *
  * @usageNotes
  *
- * {@example core/di/ts/provider_spec.ts region='TypeProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='TypeProvider'}
  *
  * @publicApi
  */
@@ -7762,11 +7754,11 @@ export declare interface TypeProvider extends Type<any> {
  *
  * ### Example
  *
- * {@example core/di/ts/provider_spec.ts region='ValueProvider' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
  *
  * ### Multi-value example
  *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect' linenums="false"}
+ * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
  *
  * @publicApi
  */
@@ -7871,13 +7863,11 @@ export declare interface ViewChildDecorator {
      *
      * @usageNotes
      *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
      *
      * ### Example 2
      *
-     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
      *
      * @Annotation
      */
@@ -7930,13 +7920,11 @@ export declare interface ViewChildrenDecorator {
      *
      * @usageNotes
      *
-     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
      *
      * ### Another example
      *
-     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
      *
      * @Annotation
      */
@@ -11165,7 +11153,7 @@ export declare function ɵɵcontainerRefreshStart(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
 
 /**
  * The default style sanitizer will handle sanitization for style properties by
@@ -13226,7 +13214,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
 
 /**
  * Creates new QueryList for a static view query.
@@ -13237,7 +13225,7 @@ export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predic
  *
  * @codeGenApi
  */
-export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
 
 /**
  * Update style bindings using an object literal on an element.
@@ -13959,6 +13947,6 @@ export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, valu
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read: any): void;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
 
 export { }

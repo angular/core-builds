@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+70.sha-b696413.with-local-changes
+ * @license Angular v8.2.0-next.2+85.sha-c7542a1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22392,7 +22392,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+70.sha-b696413.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+85.sha-c7542a1.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29849,14 +29849,14 @@ class TQueryMetadata_ {
     /**
      * @param {?} predicate
      * @param {?} descendants
-     * @param {?} read
      * @param {?} isStatic
+     * @param {?=} read
      */
-    constructor(predicate, descendants, read, isStatic) {
+    constructor(predicate, descendants, isStatic, read = null) {
         this.predicate = predicate;
         this.descendants = descendants;
-        this.read = read;
         this.isStatic = isStatic;
+        this.read = read;
     }
 }
 class TQueries_ {
@@ -30289,7 +30289,7 @@ function ɵɵqueryRefresh(queryList) {
  * @template T
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
- * @param {?} read What to save in the query
+ * @param {?=} read What to save in the query
  *
  * @return {?}
  */
@@ -30303,7 +30303,7 @@ function ɵɵstaticViewQuery(predicate, descend, read) {
  * @template T
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
- * @param {?} read What to save in the query
+ * @param {?=} read What to save in the query
  *
  * @return {?}
  */
@@ -30323,7 +30323,7 @@ function viewQueryInternal(lView, predicate, descend, read, isStatic) {
     /** @type {?} */
     const tView = lView[TVIEW];
     if (tView.firstTemplatePass) {
-        createTQuery(tView, new TQueryMetadata_(predicate, descend, read, isStatic), -1);
+        createTQuery(tView, new TQueryMetadata_(predicate, descend, isStatic, read), -1);
         if (isStatic) {
             tView.staticViewQueries = true;
         }
@@ -30349,7 +30349,7 @@ function ɵɵloadViewQuery() {
  * @param {?} directiveIndex Current directive index
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
- * @param {?} read What to save in the query
+ * @param {?=} read What to save in the query
  * @return {?} QueryList<T>
  *
  */
@@ -30365,7 +30365,7 @@ function ɵɵcontentQuery(directiveIndex, predicate, descend, read) {
  * @param {?} directiveIndex Current directive index
  * @param {?} predicate The type for which the query will search
  * @param {?} descend Whether or not to descend into children
- * @param {?} read What to save in the query
+ * @param {?=} read What to save in the query
  * @return {?} QueryList<T>
  *
  */
@@ -30387,7 +30387,7 @@ function contentQueryInternal(lView, predicate, descend, read, isStatic, tNode, 
     /** @type {?} */
     const tView = lView[TVIEW];
     if (tView.firstTemplatePass) {
-        createTQuery(tView, new TQueryMetadata_(predicate, descend, read, isStatic), tNode.index);
+        createTQuery(tView, new TQueryMetadata_(predicate, descend, isStatic, read), tNode.index);
         saveContentQueryAndDirectiveIndex(tView, directiveIndex);
         if (isStatic) {
             tView.staticContentQueries = true;
