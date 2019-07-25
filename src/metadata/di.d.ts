@@ -65,8 +65,7 @@ export interface AttributeDecorator {
      *
      * A decorator can inject string literal `text` as in the following example.
      *
-     * {@example core/ts/metadata/metadata.ts region='attributeMetadata'
-     * linenums="false"}
+     * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
      *
      * @publicApi
      */
@@ -135,16 +134,14 @@ export interface ContentChildrenDecorator {
      *
      * Here is a simple demonstration of how the `ContentChildren` decorator can be used.
      *
-     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
      *
      * ### Tab-pane example
      *
      * Here is a slightly more realistic example that shows how `ContentChildren` decorators
      * can be used to implement a tab pane component.
      *
-     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
      *
      * @Annotation
      */
@@ -202,13 +199,11 @@ export interface ContentChildDecorator {
      *
      * @usageNotes
      *
-     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
      *
      * ### Example
      *
-     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
      *
      * @Annotation
      */
@@ -260,13 +255,11 @@ export interface ViewChildrenDecorator {
      *
      * @usageNotes
      *
-     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
      *
      * ### Another example
      *
-     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
      *
      * @Annotation
      */
@@ -330,13 +323,11 @@ export interface ViewChildDecorator {
      *
      * @usageNotes
      *
-     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'
-     * linenums="false"}
+     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
      *
      * ### Example 2
      *
-     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'
-     * linenums="false"}
+     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
      *
      * @Annotation
      */
