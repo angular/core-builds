@@ -52,7 +52,7 @@ import { Subject, Subscription } from 'rxjs';
  *
  * @publicApi
  */
-export declare class EventEmitter<T> extends Subject<T> {
+export declare class EventEmitter<T extends any> extends Subject<T> {
     /**
      * Internal
      */

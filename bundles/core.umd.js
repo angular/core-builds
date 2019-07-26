@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+89.sha-6b67cd5.with-local-changes
+ * @license Angular v8.2.0-next.2+94.sha-6ece7db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17263,7 +17263,7 @@
                 var features = superDef.features;
                 if (features) {
                     try {
-                        for (var features_1 = __values(features), features_1_1 = features_1.next(); !features_1_1.done; features_1_1 = features_1.next()) {
+                        for (var features_1 = (e_1 = void 0, __values(features)), features_1_1 = features_1.next(); !features_1_1.done; features_1_1 = features_1.next()) {
                             var feature = features_1_1.value;
                             if (feature && feature.ngInherit) {
                                 feature(definition);
@@ -17916,7 +17916,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+89.sha-6b67cd5.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+94.sha-6ece7db.with-local-changes');
 
     /**
      * @license
@@ -23693,7 +23693,7 @@
                     // different containers
                     if (declarationLContainer[MOVED_VIEWS] !== null) {
                         try {
-                            for (var _b = __values(declarationLContainer[MOVED_VIEWS]), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            for (var _b = (e_4 = void 0, __values(declarationLContainer[MOVED_VIEWS])), _c = _b.next(); !_c.done; _c = _b.next()) {
                                 var embeddedLView = _c.value;
                                 collectQueryResults(embeddedLView, childQueryIndex, result);
                             }
@@ -26418,8 +26418,8 @@
          * detection pass during which all change detection must complete.
          */
         ApplicationRef.prototype.tick = function () {
-            var _this = this;
             var e_1, _a, e_2, _b;
+            var _this = this;
             if (this._runningTick) {
                 throw new Error('ApplicationRef.tick is called recursively');
             }
@@ -26818,8 +26818,8 @@
             }
         };
         DebugElement__PRE_R3__.prototype.insertChildrenAfter = function (child, newChildren) {
-            var _this = this;
             var _a;
+            var _this = this;
             var siblingIndex = this.childNodes.indexOf(child);
             if (siblingIndex !== -1) {
                 (_a = this.childNodes).splice.apply(_a, __spread([siblingIndex + 1, 0], newChildren));
