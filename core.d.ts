@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-rc.0+4.sha-155f40c.with-local-changes
+ * @license Angular v8.2.0-rc.0+5.sha-9bdffb1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1223,6 +1223,9 @@ export declare interface ContentChildDecorator {
      *
      * Content queries are set before the `ngAfterContentInit` callback is called.
      *
+     * Does not retrieve elements or directives that are in other components' templates,
+     * since a component's template is always a black box to its ancestors.
+     *
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
@@ -1288,6 +1291,9 @@ export declare interface ContentChildrenDecorator {
      * updated, and the changes observable of the query list will emit a new value.
      *
      * Content queries are set before the `ngAfterContentInit` callback is called.
+     *
+     * Does not retrieve elements or directives that are in other components' templates,
+     * since a component's template is always a black box to its ancestors.
      *
      * **Metadata Properties**:
      *
