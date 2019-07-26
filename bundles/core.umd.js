@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+101.sha-4da8052.with-local-changes
+ * @license Angular v8.2.0-next.2+103.sha-5296c04.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -515,14 +515,12 @@
      * @publicApi
      */
     function resolveForwardRef(type) {
-        var fn = type;
-        if (typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
-            fn.__forward_ref__ === forwardRef) {
-            return fn();
-        }
-        else {
-            return type;
-        }
+        return isForwardRef(type) ? type() : type;
+    }
+    /** Checks whether a function is wrapped by a `forwardRef`. */
+    function isForwardRef(fn) {
+        return typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
+            fn.__forward_ref__ === forwardRef;
     }
 
     /**
@@ -865,6 +863,12 @@
     };
     function getFactoryOf(type) {
         var typeAny = type;
+        if (isForwardRef(type)) {
+            return (function () {
+                var factory = getFactoryOf(resolveForwardRef(typeAny));
+                return factory ? factory() : null;
+            });
+        }
         var def = getInjectableDef(typeAny) || getInjectorDef(typeAny);
         if (!def || def.factory === undefined) {
             return null;
@@ -3920,6 +3924,12 @@
      */
     function ɵɵgetFactoryOf(type) {
         var typeAny = type;
+        if (isForwardRef(type)) {
+            return (function () {
+                var factory = ɵɵgetFactoryOf(resolveForwardRef(typeAny));
+                return factory ? factory() : null;
+            });
+        }
         var def = getComponentDef(typeAny) || getDirectiveDef(typeAny) ||
             getPipeDef(typeAny) || getInjectableDef(typeAny) || getInjectorDef(typeAny);
         if (!def || def.factory === undefined) {
@@ -18254,7 +18264,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.0-next.2+101.sha-4da8052.with-local-changes');
+    var VERSION = new Version('8.2.0-next.2+103.sha-5296c04.with-local-changes');
 
     /**
      * @license
@@ -21609,6 +21619,10 @@
                 return 'other';
         }
     }
+    /**
+     * The locale id that the application is using by default (for translations and ICU expressions).
+     */
+    var DEFAULT_LOCALE_ID = 'en-US';
 
     /**
      * @license
@@ -22763,7 +22777,6 @@
      * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
      * but is now defined as a global value.
      */
-    var DEFAULT_LOCALE_ID = 'en-US';
     var LOCALE_ID = DEFAULT_LOCALE_ID;
     /**
      * Sets the locale id that will be used for translations and ICU expressions.
@@ -22773,7 +22786,10 @@
      * @param localeId
      */
     function setLocaleId(localeId) {
-        LOCALE_ID = localeId.toLowerCase().replace(/_/g, '-');
+        assertDefined(localeId, "Expected localeId to be defined");
+        if (typeof localeId === 'string') {
+            LOCALE_ID = localeId.toLowerCase().replace(/_/g, '-');
+        }
     }
     /**
      * Gets the locale id that will be used for translations and ICU expressions.
@@ -25520,6 +25536,17 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var SWITCH_IVY_ENABLED__POST_R3__ = true;
+    var SWITCH_IVY_ENABLED__PRE_R3__ = false;
+    var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Combination of NgModuleFactory and ComponentFactorys.
      *
@@ -26497,9 +26524,6 @@
                 if (!exceptionHandler) {
                     throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
                 }
-                // If the `LOCALE_ID` provider is defined at bootstrap we set the value for runtime i18n (ivy)
-                var localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
-                setLocaleId(localeId);
                 moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); });
                 ngZone.runOutsideAngular(function () { return ngZone.onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
                 return _callAndReportToErrorHandler(exceptionHandler, ngZone, function () {
@@ -27018,17 +27042,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var SWITCH_IVY_ENABLED__POST_R3__ = true;
-    var SWITCH_IVY_ENABLED__PRE_R3__ = false;
-    var ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var _SEPARATOR = '#';
     var FACTORY_CLASS_SUFFIX = 'NgFactory';
     /**
@@ -27060,7 +27073,7 @@
             this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
-            var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+            var legacyOfflineMode = this._compiler instanceof Compiler;
             return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         };
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
@@ -27940,15 +27953,21 @@
     }
     function _localeFactory(locale) {
         if (locale) {
+            if (ivyEnabled) {
+                setLocaleId(locale);
+            }
             return locale;
         }
         // Use `goog.LOCALE` as default value for `LOCALE_ID` token for Closure Compiler.
         // Note: default `goog.LOCALE` value is `en`, when Angular used `en-US`. In order to preserve
         // backwards compatibility, we use Angular default value over Closure Compiler's one.
         if (ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
+            if (ivyEnabled) {
+                setLocaleId(goog.LOCALE);
+            }
             return goog.LOCALE;
         }
-        return 'en-US';
+        return DEFAULT_LOCALE_ID;
     }
     /**
      * A built-in [dependency injection token](guide/glossary#di-token)
@@ -30362,44 +30381,45 @@
      * Generated bundle index. Do not edit.
      */
 
-    exports.ɵangular_packages_core_core_q = APPLICATION_MODULE_PROVIDERS;
-    exports.ɵangular_packages_core_core_n = _iterableDiffersFactory;
-    exports.ɵangular_packages_core_core_o = _keyValueDiffersFactory;
-    exports.ɵangular_packages_core_core_p = _localeFactory;
-    exports.ɵangular_packages_core_core_r = zoneSchedulerFactory;
-    exports.ɵangular_packages_core_core_f = _appIdRandomProviderFactory;
-    exports.ɵangular_packages_core_core_l = DefaultIterableDifferFactory;
-    exports.ɵangular_packages_core_core_m = DefaultKeyValueDifferFactory;
-    exports.ɵangular_packages_core_core_k = DebugElement__PRE_R3__;
-    exports.ɵangular_packages_core_core_j = DebugNode__PRE_R3__;
-    exports.ɵangular_packages_core_core_b = NullInjector;
-    exports.ɵangular_packages_core_core_a = injectInjectorOnly;
-    exports.ɵangular_packages_core_core_c = ReflectiveInjector_;
-    exports.ɵangular_packages_core_core_d = ReflectiveDependency;
-    exports.ɵangular_packages_core_core_e = resolveReflectiveProviders;
-    exports.ɵangular_packages_core_core_i = getModuleFactory__PRE_R3__;
-    exports.ɵangular_packages_core_core_s = wtfEnabled;
-    exports.ɵangular_packages_core_core_u = createScope;
-    exports.ɵangular_packages_core_core_t = detectWTF;
-    exports.ɵangular_packages_core_core_x = endTimeRange;
-    exports.ɵangular_packages_core_core_v = leave;
-    exports.ɵangular_packages_core_core_w = startTimeRange;
-    exports.ɵangular_packages_core_core_ba = SCHEDULER;
-    exports.ɵangular_packages_core_core_bb = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_bc = getLView;
-    exports.ɵangular_packages_core_core_bd = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_be = nextContextImpl;
-    exports.ɵangular_packages_core_core_bm = getRootContext;
-    exports.ɵangular_packages_core_core_bl = loadInternal;
-    exports.ɵangular_packages_core_core_g = createElementRef;
-    exports.ɵangular_packages_core_core_h = createTemplateRef;
-    exports.ɵangular_packages_core_core_bg = getUrlSanitizer;
-    exports.ɵangular_packages_core_core_bk = noSideEffects;
-    exports.ɵangular_packages_core_core_bh = makeParamDecorator;
-    exports.ɵangular_packages_core_core_bi = makePropDecorator;
-    exports.ɵangular_packages_core_core_bn = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_y = _def;
-    exports.ɵangular_packages_core_core_z = DebugContext;
+    exports.ɵangular_packages_core_core_r = APPLICATION_MODULE_PROVIDERS;
+    exports.ɵangular_packages_core_core_o = _iterableDiffersFactory;
+    exports.ɵangular_packages_core_core_p = _keyValueDiffersFactory;
+    exports.ɵangular_packages_core_core_q = _localeFactory;
+    exports.ɵangular_packages_core_core_s = zoneSchedulerFactory;
+    exports.ɵangular_packages_core_core_g = _appIdRandomProviderFactory;
+    exports.ɵangular_packages_core_core_m = DefaultIterableDifferFactory;
+    exports.ɵangular_packages_core_core_n = DefaultKeyValueDifferFactory;
+    exports.ɵangular_packages_core_core_l = DebugElement__PRE_R3__;
+    exports.ɵangular_packages_core_core_k = DebugNode__PRE_R3__;
+    exports.ɵangular_packages_core_core_a = isForwardRef;
+    exports.ɵangular_packages_core_core_c = NullInjector;
+    exports.ɵangular_packages_core_core_b = injectInjectorOnly;
+    exports.ɵangular_packages_core_core_d = ReflectiveInjector_;
+    exports.ɵangular_packages_core_core_e = ReflectiveDependency;
+    exports.ɵangular_packages_core_core_f = resolveReflectiveProviders;
+    exports.ɵangular_packages_core_core_j = getModuleFactory__PRE_R3__;
+    exports.ɵangular_packages_core_core_t = wtfEnabled;
+    exports.ɵangular_packages_core_core_v = createScope;
+    exports.ɵangular_packages_core_core_u = detectWTF;
+    exports.ɵangular_packages_core_core_y = endTimeRange;
+    exports.ɵangular_packages_core_core_w = leave;
+    exports.ɵangular_packages_core_core_x = startTimeRange;
+    exports.ɵangular_packages_core_core_bb = SCHEDULER;
+    exports.ɵangular_packages_core_core_bc = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_bd = getLView;
+    exports.ɵangular_packages_core_core_be = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bf = nextContextImpl;
+    exports.ɵangular_packages_core_core_bo = getRootContext;
+    exports.ɵangular_packages_core_core_bn = loadInternal;
+    exports.ɵangular_packages_core_core_h = createElementRef;
+    exports.ɵangular_packages_core_core_i = createTemplateRef;
+    exports.ɵangular_packages_core_core_bh = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bm = noSideEffects;
+    exports.ɵangular_packages_core_core_bi = makeParamDecorator;
+    exports.ɵangular_packages_core_core_bj = makePropDecorator;
+    exports.ɵangular_packages_core_core_bk = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_z = _def;
+    exports.ɵangular_packages_core_core_ba = DebugContext;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
@@ -30522,6 +30542,7 @@
     exports.ɵsetCurrentInjector = setCurrentInjector;
     exports.ɵgetInjectableDef = getInjectableDef;
     exports.ɵAPP_ROOT = APP_ROOT;
+    exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
     exports.ɵivyEnabled = ivyEnabled;
     exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
     exports.ɵclearResolutionOfComponentResourcesQueue = clearResolutionOfComponentResourcesQueue;
@@ -30696,7 +30717,6 @@
     exports.ɵi18nConfigureLocalize = i18nConfigureLocalize;
     exports.ɵɵi18nLocalize = ɵɵi18nLocalize;
     exports.ɵsetLocaleId = setLocaleId;
-    exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
     exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵɵresolveWindow = ɵɵresolveWindow;
     exports.ɵɵresolveDocument = ɵɵresolveDocument;
