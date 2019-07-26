@@ -45,3 +45,5 @@ export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
  * @publicApi
  */
 export declare function resolveForwardRef<T>(type: T): T;
+/** Checks whether a function is wrapped by a `forwardRef`. */
+export declare function isForwardRef(fn: any): fn is () => any;
