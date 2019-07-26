@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+89.sha-6b67cd5.with-local-changes
+ * @license Angular v8.2.0-next.2+94.sha-6ece7db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2473,8 +2473,8 @@
             this._instantiated = true;
         };
         TestBedViewEngine.prototype._createCompilerAndModule = function () {
-            var _this = this;
             var e_2, _a;
+            var _this = this;
             var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
             var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
             var rootScopeImports = [];

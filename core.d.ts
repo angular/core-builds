@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+89.sha-6b67cd5.with-local-changes
+ * @license Angular v8.2.0-next.2+94.sha-6ece7db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2035,7 +2035,7 @@ declare interface ElementHandleEventFn {
  *
  * @publicApi
  */
-export declare class ElementRef<T = any> {
+export declare class ElementRef<T extends any = any> {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported
      * (e.g. when the application runs in a web worker).
@@ -2213,7 +2213,7 @@ export declare class ErrorHandler {
  *
  * @publicApi
  */
-export declare class EventEmitter<T> extends Subject<T> {
+export declare class EventEmitter<T extends any> extends Subject<T> {
     /**
      * Internal
      */
@@ -13669,7 +13669,7 @@ export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplat
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bj): TemplateRef<{}> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bj): TemplateRef<unknown> | null;
 
 /**
  * Create static text node
