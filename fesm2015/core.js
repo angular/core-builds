@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+104.sha-5f0d5e9.with-local-changes
+ * @license Angular v8.2.0-next.2+105.sha-14dba72.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21968,7 +21968,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+104.sha-5f0d5e9.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+105.sha-14dba72.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -38010,7 +38010,12 @@ class DebugRenderer2 {
      * @return {?}
      */
     destroyNode(node) {
-        removeDebugNodeFromIndex((/** @type {?} */ (getDebugNode(node))));
+        /** @type {?} */
+        const debugNode = (/** @type {?} */ (getDebugNode(node)));
+        removeDebugNodeFromIndex(debugNode);
+        if (debugNode instanceof DebugNode__PRE_R3__) {
+            debugNode.listeners.length = 0;
+        }
         if (this.delegate.destroyNode) {
             this.delegate.destroyNode(node);
         }
