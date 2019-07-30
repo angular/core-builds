@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0-next.2+125.sha-185b3dd.with-local-changes
+ * @license Angular v8.2.0-next.2+116.sha-4f42eb4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2270,23 +2270,19 @@ function executePreOrderHooks(currentView, tView, checkNoChangesMode, currentNod
 function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMode, initPhaseState, currentNodeIndex) {
     if (checkNoChangesMode)
         return;
-    if (checkHooks !== null || firstPassHooks !== null) {
-        /** @type {?} */
-        const hooksToCall = (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhaseState ?
-            firstPassHooks :
-            checkHooks;
-        if (hooksToCall !== null) {
-            callHooks(currentView, hooksToCall, initPhaseState, currentNodeIndex);
-        }
+    /** @type {?} */
+    const hooksToCall = (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhaseState ?
+        firstPassHooks :
+        checkHooks;
+    if (hooksToCall) {
+        callHooks(currentView, hooksToCall, initPhaseState, currentNodeIndex);
     }
     // The init phase state must be always checked here as it may have been recursively updated
-    /** @type {?} */
-    let flags = currentView[FLAGS];
-    if (currentNodeIndex == null && (flags & 3 /* InitPhaseStateMask */) === initPhaseState &&
+    if (currentNodeIndex == null &&
+        (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhaseState &&
         initPhaseState !== 3 /* InitPhaseCompleted */) {
-        flags &= 1023 /* IndexWithinInitPhaseReset */;
-        flags += 1 /* InitPhaseStateIncrementer */;
-        currentView[FLAGS] = flags;
+        currentView[FLAGS] &= 1023 /* IndexWithinInitPhaseReset */;
+        currentView[FLAGS] += 1 /* InitPhaseStateIncrementer */;
     }
 }
 /**
@@ -2836,8 +2832,8 @@ let activeDirectiveSuperClassHeight = 0;
  */
 function setActiveHostElement(elementIndex = null) {
     if (_selectedIndex !== elementIndex) {
-        setSelectedIndex(elementIndex === null ? -1 : elementIndex);
-        activeDirectiveId = elementIndex === null ? 0 : MIN_DIRECTIVE_ID;
+        setSelectedIndex(elementIndex == null ? -1 : elementIndex);
+        activeDirectiveId = elementIndex == null ? 0 : MIN_DIRECTIVE_ID;
         activeDirectiveSuperClassDepthPosition = 0;
         activeDirectiveSuperClassHeight = 0;
     }
@@ -9163,35 +9159,28 @@ function refreshDescendantViews(lView) {
     const tView = lView[TVIEW];
     /** @type {?} */
     const creationMode = isCreationMode(lView);
+    // This needs to be set before children are processed to support recursive components
+    tView.firstTemplatePass = false;
+    // Resetting the bindingIndex of the current LView as the next steps may trigger change detection.
+    lView[BINDING_INDEX] = tView.bindingStartIndex;
+    // If this is a creation pass, we should not call lifecycle hooks or evaluate bindings.
+    // This will be done in the update pass.
     if (!creationMode) {
-        // Resetting the bindingIndex of the current LView as the next steps may trigger change
-        // detection.
-        lView[BINDING_INDEX] = tView.bindingStartIndex;
         /** @type {?} */
         const checkNoChangesMode = getCheckNoChangesMode();
         executePreOrderHooks(lView, tView, checkNoChangesMode, undefined);
         refreshDynamicEmbeddedViews(lView);
         // Content query results must be refreshed before content hooks are called.
-        if (tView.contentQueries !== null) {
-            refreshContentQueries(tView, lView);
-        }
+        refreshContentQueries(tView, lView);
         resetPreOrderHookFlags(lView);
         executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */, undefined);
         setHostBindings(tView, lView);
     }
-    else {
-        // This needs to be set before children are processed to support recursive components.
-        // This must be set to false immediately after the first creation run because in an
-        // ngFor loop, all the views will be created together before update mode runs and turns
-        // off firstTemplatePass. If we don't set it here, instances will perform directive
-        // matching, etc again and again.
-        tView.firstTemplatePass = false;
-        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
-        // content queries are resolved during change detection (i.e. update mode), after embedded
-        // views are refreshed (see block above).
-        if (tView.staticContentQueries) {
-            refreshContentQueries(tView, lView);
-        }
+    // We resolve content queries specifically marked as `static` in creation mode. Dynamic
+    // content queries are resolved during change detection (i.e. update mode), after embedded
+    // views are refreshed (see block above).
+    if (creationMode && tView.staticContentQueries) {
+        refreshContentQueries(tView, lView);
     }
     // We must materialize query results before child components are processed
     // in case a child component has projected a container. The LContainer needs
@@ -9199,11 +9188,7 @@ function refreshDescendantViews(lView) {
     if (!creationMode || tView.staticViewQueries) {
         executeViewQueryFn(2 /* Update */, tView, lView[CONTEXT]);
     }
-    /** @type {?} */
-    const components = tView.components;
-    if (components !== null) {
-        refreshChildComponents(lView, components);
-    }
+    refreshChildComponents(lView, tView.components);
 }
 /**
  * Sets the host bindings for the current view.
@@ -9215,7 +9200,7 @@ function setHostBindings(tView, viewData) {
     /** @type {?} */
     const selectedIndex = getSelectedIndex();
     try {
-        if (tView.expandoInstructions !== null) {
+        if (tView.expandoInstructions) {
             /** @type {?} */
             let bindingRootIndex = viewData[BINDING_INDEX] = tView.expandoStartIndex;
             setBindingRoot(bindingRootIndex);
@@ -9302,8 +9287,10 @@ function refreshContentQueries(tView, lView) {
  * @return {?}
  */
 function refreshChildComponents(hostLView, components) {
-    for (let i = 0; i < components.length; i++) {
-        componentRefresh(hostLView, components[i]);
+    if (components != null) {
+        for (let i = 0; i < components.length; i++) {
+            componentRefresh(hostLView, components[i]);
+        }
     }
 }
 /**
@@ -9542,9 +9529,15 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
         /** @type {?} */
         let safeToRunHooks = false;
         try {
+            setPreviousOrParentTNode((/** @type {?} */ (null)), true);
             oldView = enterView(viewToRender, viewToRender[T_HOST]);
             resetPreOrderHookFlags(viewToRender);
             executeTemplate(viewToRender, (/** @type {?} */ (tView.template)), getRenderFlags(viewToRender), context);
+            // This must be set to false immediately after the first creation run because in an
+            // ngFor loop, all the views will be created together before update mode runs and turns
+            // off firstTemplatePass. If we don't set it here, instances will perform directive
+            // matching, etc again and again.
+            tView.firstTemplatePass = false;
             refreshDescendantViews(viewToRender);
             safeToRunHooks = true;
         }
@@ -9797,12 +9790,11 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
  */
 function createViewBlueprint(bindingStartIndex, initialViewLength) {
     /** @type {?} */
-    const blueprint = ngDevMode ? new (/** @type {?} */ (LViewBlueprint))() : [];
-    for (let i = 0; i < initialViewLength; i++) {
-        blueprint.push(i < bindingStartIndex ? null : NO_CHANGE);
-    }
+    const blueprint = (/** @type {?} */ (new (ngDevMode ? (/** @type {?} */ (LViewBlueprint)) : Array)(initialViewLength)
+        .fill(null, 0, bindingStartIndex)
+        .fill(NO_CHANGE, bindingStartIndex)));
     blueprint[BINDING_INDEX] = bindingStartIndex;
-    return (/** @type {?} */ (blueprint));
+    return blueprint;
 }
 /**
  * @param {?} text
@@ -10763,22 +10755,20 @@ function createLContainer(hostNative, currentView, native, tNode, isForViewConta
  * @return {?}
  */
 function refreshDynamicEmbeddedViews(lView) {
-    /** @type {?} */
-    let viewOrContainer = lView[CHILD_HEAD];
-    while (viewOrContainer !== null) {
-        // Note: viewOrContainer can be an LView or an LContainer instance, but here we are only
-        // interested in LContainer
-        if (isLContainer(viewOrContainer) && viewOrContainer[ACTIVE_INDEX] === -1) {
-            for (let i = CONTAINER_HEADER_OFFSET; i < viewOrContainer.length; i++) {
+    for (let current = lView[CHILD_HEAD]; current !== null; current = current[NEXT]) {
+        // Note: current can be an LView or an LContainer instance, but here we are only interested
+        // in LContainer. We can tell it's an LContainer because its length is less than the LView
+        // header.
+        if (current[ACTIVE_INDEX] === -1 && isLContainer(current)) {
+            for (let i = CONTAINER_HEADER_OFFSET; i < current.length; i++) {
                 /** @type {?} */
-                const embeddedLView = viewOrContainer[i];
+                const dynamicViewData = current[i];
                 // The directives and pipes are not needed here as an existing view is only being
                 // refreshed.
-                ngDevMode && assertDefined(embeddedLView[TVIEW], 'TView must be allocated');
-                renderEmbeddedTemplate(embeddedLView, embeddedLView[TVIEW], (/** @type {?} */ (embeddedLView[CONTEXT])));
+                ngDevMode && assertDefined(dynamicViewData[TVIEW], 'TView must be allocated');
+                renderEmbeddedTemplate(dynamicViewData, dynamicViewData[TVIEW], (/** @type {?} */ (dynamicViewData[CONTEXT])));
             }
         }
-        viewOrContainer = viewOrContainer[NEXT];
     }
 }
 /////////////
@@ -10834,7 +10824,7 @@ function syncViewWithBlueprint(componentView) {
     /** @type {?} */
     const componentTView = componentView[TVIEW];
     for (let i = componentView.length; i < componentTView.blueprint.length; i++) {
-        componentView.push(componentTView.blueprint[i]);
+        componentView[i] = componentTView.blueprint[i];
     }
 }
 /**
@@ -21978,7 +21968,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.0-next.2+125.sha-185b3dd.with-local-changes');
+const VERSION = new Version('8.2.0-next.2+116.sha-4f42eb4.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
