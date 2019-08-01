@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+10.sha-e8b8f6d.with-local-changes
+ * @license Angular v9.0.0-next.0+11.sha-d0d875a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13685,7 +13685,7 @@
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
             resolveDirectives(tView, lView, tContainerNode, localRefs || null);
-            var embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+            var embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas);
             if (tView.queries !== null) {
                 tView.queries.template(tView, tContainerNode);
                 embeddedTView.queries = tView.queries.embeddedTView(tContainerNode);
@@ -17933,7 +17933,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.0+10.sha-e8b8f6d.with-local-changes');
+    var VERSION = new Version('9.0.0-next.0+11.sha-d0d875a.with-local-changes');
 
     /**
      * @license
