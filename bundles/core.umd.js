@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+12.sha-a610d12.with-local-changes
+ * @license Angular v9.0.0-next.0+13.sha-184d270.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15253,6 +15253,11 @@
         // Note: we are performing most of the work in the listener function itself
         // to optimize listener registration.
         return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+            // Ivy uses `Function` as a special token that allows us to unwrap the function
+            // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
+            if (e === Function) {
+                return listenerFn;
+            }
             // In order to be backwards compatible with View Engine, events on component host nodes
             // must also mark the component view itself dirty (i.e. the view that it owns).
             var startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
@@ -18271,7 +18276,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.0+12.sha-a610d12.with-local-changes');
+    var VERSION = new Version('9.0.0-next.0+13.sha-184d270.with-local-changes');
 
     /**
      * @license
@@ -27584,11 +27589,26 @@
             return matches;
         };
         DebugElement__POST_R3__.prototype.triggerEventHandler = function (eventName, eventObj) {
+            var node = this.nativeNode;
+            var invokedListeners = [];
             this.listeners.forEach(function (listener) {
                 if (listener.name === eventName) {
-                    listener.callback(eventObj);
+                    var callback = listener.callback;
+                    callback(eventObj);
+                    invokedListeners.push(callback);
                 }
             });
+            // We need to check whether `eventListeners` exists, because it's something
+            // that Zone.js only adds to `EventTarget` in browser environments.
+            if (typeof node.eventListeners === 'function') {
+                // Note that in Ivy we wrap event listeners with a call to `event.preventDefault` in some
+                // cases. We use `Function` as a special token that gives us access to the actual event
+                // listener.
+                node.eventListeners(eventName).forEach(function (listener) {
+                    var unwrappedListener = listener(Function);
+                    return invokedListeners.indexOf(unwrappedListener) === -1 && unwrappedListener(eventObj);
+                });
+            }
         };
         return DebugElement__POST_R3__;
     }(DebugNode__POST_R3__));
