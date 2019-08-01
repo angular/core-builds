@@ -131,7 +131,7 @@ export interface Directive {
      * class BankAccount {
      *   bankName: string;
      *   id: string;
-     *
+     * }
      * ```
      *
      */
