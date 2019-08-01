@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+12.sha-a610d12.with-local-changes
+ * @license Angular v9.0.0-next.0+13.sha-184d270.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18510,6 +18510,11 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
      * @return {?}
      */
     function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // Ivy uses `Function` as a special token that allows us to unwrap the function
+        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
+        if (e === Function) {
+            return listenerFn;
+        }
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         /** @type {?} */
@@ -21978,7 +21983,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.0+12.sha-a610d12.with-local-changes');
+const VERSION = new Version('9.0.0-next.0+13.sha-184d270.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33820,9 +33825,7 @@ class SystemJsNgModuleLoader {
      * @return {?}
      */
     load(path) {
-        /** @type {?} */
-        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+        return this.loadAndCompile(path);
     }
     /**
      * @private
@@ -34461,15 +34464,38 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
      * @return {?}
      */
     triggerEventHandler(eventName, eventObj) {
+        /** @type {?} */
+        const node = (/** @type {?} */ (this.nativeNode));
+        /** @type {?} */
+        const invokedListeners = [];
         this.listeners.forEach((/**
          * @param {?} listener
          * @return {?}
          */
-        (listener) => {
+        listener => {
             if (listener.name === eventName) {
-                listener.callback(eventObj);
+                /** @type {?} */
+                const callback = listener.callback;
+                callback(eventObj);
+                invokedListeners.push(callback);
             }
         }));
+        // We need to check whether `eventListeners` exists, because it's something
+        // that Zone.js only adds to `EventTarget` in browser environments.
+        if (typeof node.eventListeners === 'function') {
+            // Note that in Ivy we wrap event listeners with a call to `event.preventDefault` in some
+            // cases. We use `Function` as a special token that gives us access to the actual event
+            // listener.
+            node.eventListeners(eventName).forEach((/**
+             * @param {?} listener
+             * @return {?}
+             */
+            (listener) => {
+                /** @type {?} */
+                const unwrappedListener = listener(Function);
+                return invokedListeners.indexOf(unwrappedListener) === -1 && unwrappedListener(eventObj);
+            }));
+        }
     }
 }
 /**
