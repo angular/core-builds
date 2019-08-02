@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+14.sha-f2d47c9.with-local-changes
+ * @license Angular v9.0.0-next.0+18.sha-3122f34.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1875,13 +1875,6 @@ function assertNgModuleType(actual, msg = 'Type passed in is not NgModuleType, i
     }
 }
 /**
- * @param {?} isParent
- * @return {?}
- */
-function assertPreviousIsParent(isParent) {
-    assertEqual(isParent, true, 'previousOrParentTNode should be a parent');
-}
-/**
  * @param {?} tNode
  * @return {?}
  */
@@ -1921,11 +1914,11 @@ function assertLView(value) {
 }
 /**
  * @param {?} tView
- * @param {?} errMessage
+ * @param {?=} errMessage
  * @return {?}
  */
 function assertFirstTemplatePass(tView, errMessage) {
-    assertEqual(tView.firstTemplatePass, true, errMessage);
+    assertEqual(tView.firstTemplatePass, true, errMessage || 'Should only be called in first template pass.');
 }
 
 /**
@@ -10233,7 +10226,7 @@ function instantiateRootComponent(tView, viewData, def) {
 function resolveDirectives(tView, lView, tNode, localRefs) {
     // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in
     // tsickle.
-    ngDevMode && assertEqual(tView.firstTemplatePass, true, 'should run on first template pass only');
+    ngDevMode && assertFirstTemplatePass(tView);
     if (!getBindingsEnabled())
         return;
     /** @type {?} */
@@ -10268,6 +10261,9 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             const directiveDefIdx = tView.data.length;
             baseResolveDirective(tView, lView, def, def.factory);
             saveNameToExportMap((/** @type {?} */ (tView.data)).length - 1, def, exportsMap);
+            if (def.contentQueries) {
+                tNode.flags |= 4 /* hasContentQuery */;
+            }
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
@@ -10299,7 +10295,7 @@ function instantiateAllDirectives(tView, lView, tNode) {
         }
         /** @type {?} */
         const directive = getNodeInjectable(tView.data, (/** @type {?} */ (lView)), i, (/** @type {?} */ (tNode)));
-        postProcessDirective(lView, directive, def, i);
+        postProcessDirective(lView, tNode, directive, def, i);
     }
 }
 /**
@@ -10393,26 +10389,21 @@ function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
 /**
  * Process a directive on the current node after its creation.
  * @template T
- * @param {?} viewData
+ * @param {?} lView
+ * @param {?} hostTNode
  * @param {?} directive
  * @param {?} def
  * @param {?} directiveDefIdx
  * @return {?}
  */
-function postProcessDirective(viewData, directive, def, directiveDefIdx) {
-    /** @type {?} */
-    const previousOrParentTNode = getPreviousOrParentTNode();
-    postProcessBaseDirective(viewData, previousOrParentTNode, directive);
-    ngDevMode && assertDefined(previousOrParentTNode, 'previousOrParentTNode');
-    if (previousOrParentTNode && previousOrParentTNode.attrs) {
-        setInputsFromAttrs(directiveDefIdx, directive, def, previousOrParentTNode);
-    }
-    if (viewData[TVIEW].firstTemplatePass && def.contentQueries) {
-        previousOrParentTNode.flags |= 4 /* hasContentQuery */;
+function postProcessDirective(lView, hostTNode, directive, def, directiveDefIdx) {
+    postProcessBaseDirective(lView, hostTNode, directive);
+    if (hostTNode.attrs !== null) {
+        setInputsFromAttrs(directiveDefIdx, directive, def, hostTNode);
     }
     if (isComponentDef(def)) {
         /** @type {?} */
-        const componentView = getComponentViewByIndex(previousOrParentTNode.index, viewData);
+        const componentView = getComponentViewByIndex(hostTNode.index, lView);
         componentView[CONTEXT] = directive;
     }
 }
@@ -10420,16 +10411,15 @@ function postProcessDirective(viewData, directive, def, directiveDefIdx) {
  * A lighter version of postProcessDirective() that is used for the root component.
  * @template T
  * @param {?} lView
- * @param {?} previousOrParentTNode
+ * @param {?} hostTNode
  * @param {?} directive
  * @return {?}
  */
-function postProcessBaseDirective(lView, previousOrParentTNode, directive) {
-    /** @type {?} */
-    const native = getNativeByTNode(previousOrParentTNode, lView);
+function postProcessBaseDirective(lView, hostTNode, directive) {
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
-    ngDevMode && assertPreviousIsParent(getIsParent());
     attachPatchData(directive, lView);
+    /** @type {?} */
+    const native = getNativeByTNode(hostTNode, lView);
     if (native) {
         attachPatchData(native, lView);
     }
@@ -10443,7 +10433,8 @@ function postProcessBaseDirective(lView, previousOrParentTNode, directive) {
  * @return {?}
  */
 function findDirectiveMatches(tView, viewData, tNode) {
-    ngDevMode && assertEqual(tView.firstTemplatePass, true, 'should run on first template pass only');
+    ngDevMode && assertFirstTemplatePass(tView);
+    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 4 /* ElementContainer */, 0 /* Container */);
     /** @type {?} */
     const registry = tView.directiveRegistry;
     /** @type {?} */
@@ -10458,7 +10449,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
                 if (isComponentDef(def)) {
                     if (tNode.flags & 1 /* isComponent */)
                         throwMultipleComponentError(tNode);
-                    tNode.flags = 1 /* isComponent */;
+                    markAsComponentHost(tView, tNode);
                     // The component is always stored first with directives after.
                     matches.unshift(def);
                 }
@@ -10471,16 +10462,17 @@ function findDirectiveMatches(tView, viewData, tNode) {
     return matches;
 }
 /**
- * Stores index of component's host element so it will be queued for view refresh during CD.
- * @param {?} previousOrParentTNode
+ * Marks a given TNode as a component's host. This consists of:
+ * - setting appropriate TNode flags;
+ * - storing index of component's host element so it will be queued for view refresh during CD.
+ * @param {?} tView
+ * @param {?} hostTNode
  * @return {?}
  */
-function queueComponentIndexForCheck(previousOrParentTNode) {
-    /** @type {?} */
-    const tView = getLView()[TVIEW];
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
-    (tView.components || (tView.components = ngDevMode ? new (/** @type {?} */ (TViewComponents))() : [])).push(previousOrParentTNode.index);
+function markAsComponentHost(tView, hostTNode) {
+    ngDevMode && assertFirstTemplatePass(tView);
+    hostTNode.flags = 1 /* isComponent */;
+    (tView.components || (tView.components = ngDevMode ? new (/** @type {?} */ (TViewComponents))() : [])).push(hostTNode.index);
 }
 /**
  * Caches local names and their matching directive indices for query and template lookups.
@@ -10562,13 +10554,13 @@ function baseResolveDirective(tView, viewData, def, directiveFactory) {
 /**
  * @template T
  * @param {?} lView
- * @param {?} previousOrParentTNode
+ * @param {?} hostTNode
  * @param {?} def
  * @return {?}
  */
-function addComponentLogic(lView, previousOrParentTNode, def) {
+function addComponentLogic(lView, hostTNode, def) {
     /** @type {?} */
-    const native = getNativeByTNode(previousOrParentTNode, lView);
+    const native = getNativeByTNode(hostTNode, lView);
     /** @type {?} */
     const tView = getOrCreateTView(def);
     // Only component views should be added to the view tree directly. Embedded views are
@@ -10576,14 +10568,11 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
     /** @type {?} */
     const rendererFactory = lView[RENDERER_FACTORY];
     /** @type {?} */
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[previousOrParentTNode.index], (/** @type {?} */ (previousOrParentTNode)), rendererFactory, rendererFactory.createRenderer((/** @type {?} */ (native)), def)));
-    componentView[T_HOST] = (/** @type {?} */ (previousOrParentTNode));
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[hostTNode.index], (/** @type {?} */ (hostTNode)), rendererFactory, rendererFactory.createRenderer((/** @type {?} */ (native)), def)));
+    componentView[T_HOST] = (/** @type {?} */ (hostTNode));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
-    lView[previousOrParentTNode.index] = componentView;
-    if (lView[TVIEW].firstTemplatePass) {
-        queueComponentIndexForCheck(previousOrParentTNode);
-    }
+    lView[hostTNode.index] = componentView;
 }
 /**
  * @param {?} index
@@ -20801,7 +20790,6 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         /** @type {?} */
         const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
         component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
-        addToViewTree(rootView, componentView);
         refreshDescendantViews(rootView); // creation mode pass
         rootView[FLAGS] &= ~4 /* CreationMode */;
         resetPreOrderHookFlags(rootView);
@@ -20839,10 +20827,10 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, renderer
     const componentView = createLView(rootView, getOrCreateTView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
     if (tView.firstTemplatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
-        tNode.flags = 1 /* isComponent */;
+        markAsComponentHost(tView, tNode);
         initNodeFlags(tNode, rootView.length, 1);
-        queueComponentIndexForCheck(tNode);
     }
+    addToViewTree(rootView, componentView);
     // Store component view at node index, with node as the HOST
     return rootView[HEADER_OFFSET] = componentView;
 }
@@ -21983,7 +21971,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.0+14.sha-f2d47c9.with-local-changes');
+const VERSION = new Version('9.0.0-next.0+18.sha-3122f34.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26471,7 +26459,6 @@ class ComponentFactory$1 extends ComponentFactory {
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
             component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
-            addToViewTree(rootLView, componentView);
             refreshDescendantViews(rootLView);
             safeToRunHooks = true;
         }
