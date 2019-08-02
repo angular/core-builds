@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+18.sha-3122f34.with-local-changes
+ * @license Angular v9.0.0-next.0+19.sha-a2183dd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5587,7 +5587,7 @@
                 else if (maybeAttrName === 3 /* Bindings */ || maybeAttrName === 6 /* I18n */) {
                     bindingsMode = true;
                 }
-                else if (maybeAttrName === 1 /* Classes */) {
+                else if (maybeAttrName === 1 /* Classes */ || maybeAttrName === 2 /* Styles */) {
                     var value = attrs[++i];
                     // We should skip classes here because we have a separate mechanism for
                     // matching classes in projection mode.
@@ -18270,7 +18270,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.0+18.sha-3122f34.with-local-changes');
+    var VERSION = new Version('9.0.0-next.0+19.sha-a2183dd.with-local-changes');
 
     /**
      * @license
