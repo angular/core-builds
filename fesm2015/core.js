@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+57.sha-939529c.with-local-changes
+ * @license Angular v9.0.0-next.0+59.sha-a06043b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3834,14 +3834,12 @@ const domRendererFactory3 = {
  * Note that this instruction does not support assigning style and class values to
  * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
  * are applied to an element.
- *
+ * @param {?} renderer The renderer to be used
  * @param {?} native The element that the attributes will be assigned to
  * @param {?} attrs The attribute array of values that will be assigned to the element
  * @return {?} the index value that was last accessed in the attributes array
  */
-function setUpAttributes(native, attrs) {
-    /** @type {?} */
-    const renderer = getLView()[RENDERER];
+function setUpAttributes(renderer, native, attrs) {
     /** @type {?} */
     const isProc = isProceduralRenderer(renderer);
     /** @type {?} */
@@ -18225,7 +18223,7 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
     const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs || null);
     if (attrs != null) {
         /** @type {?} */
-        const lastAttrIndex = setUpAttributes(native, attrs);
+        const lastAttrIndex = setUpAttributes(renderer, native, attrs);
         if (tView.firstTemplatePass) {
             registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
         }
@@ -18370,7 +18368,7 @@ function ɵɵelementHostAttrs(attrs) {
         /** @type {?} */
         const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
         /** @type {?} */
-        const lastAttrIndex = setUpAttributes(native, attrs);
+        const lastAttrIndex = setUpAttributes(lView[RENDERER], native, attrs);
         if (tView.firstTemplatePass) {
             /** @type {?} */
             const stylingNeedsToBeRendered = registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
@@ -22416,7 +22414,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.0+57.sha-939529c.with-local-changes');
+const VERSION = new Version('9.0.0-next.0+59.sha-a06043b.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

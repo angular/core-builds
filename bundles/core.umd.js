@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+57.sha-939529c.with-local-changes
+ * @license Angular v9.0.0-next.0+59.sha-a06043b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3192,13 +3192,12 @@
      * Note that this instruction does not support assigning style and class values to
      * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
      * are applied to an element.
-     *
+     * @param renderer The renderer to be used
      * @param native The element that the attributes will be assigned to
      * @param attrs The attribute array of values that will be assigned to the element
      * @returns the index value that was last accessed in the attributes array
      */
-    function setUpAttributes(native, attrs) {
-        var renderer = getLView()[RENDERER];
+    function setUpAttributes(renderer, native, attrs) {
         var isProc = isProceduralRenderer(renderer);
         var i = 0;
         while (i < attrs.length) {
@@ -14639,7 +14638,7 @@
         var renderer = lView[RENDERER];
         var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs || null);
         if (attrs != null) {
-            var lastAttrIndex = setUpAttributes(native, attrs);
+            var lastAttrIndex = setUpAttributes(renderer, native, attrs);
             if (tView.firstTemplatePass) {
                 registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
             }
@@ -14771,7 +14770,7 @@
         // errors...
         if (tNode.type === 3 /* Element */) {
             var native = getNativeByTNode(tNode, lView);
-            var lastAttrIndex = setUpAttributes(native, attrs);
+            var lastAttrIndex = setUpAttributes(lView[RENDERER], native, attrs);
             if (tView.firstTemplatePass) {
                 var stylingNeedsToBeRendered = registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
                 // this is only called during the first template pass in the
@@ -18270,7 +18269,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.0+57.sha-939529c.with-local-changes');
+    var VERSION = new Version('9.0.0-next.0+59.sha-a06043b.with-local-changes');
 
     /**
      * @license
