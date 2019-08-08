@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0+28.sha-038d823.with-local-changes
+ * @license Angular v8.2.0+33.sha-a48376b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18209,7 +18209,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.0+28.sha-038d823.with-local-changes');
+var VERSION = new Version('8.2.0+33.sha-a48376b.with-local-changes');
 
 /**
  * @license
@@ -23400,11 +23400,15 @@ function unwrapValue$1(newValue) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Use in directives and components to emit custom events synchronously
- * or asynchronously, and register handlers for those events by subscribing
- * to an instance.
+ * Use in components with the `@Output` directive to emit custom events
+ * synchronously or asynchronously, and register handlers for those events
+ * by subscribing to an instance.
  *
  * @usageNotes
+ *
+ * Extends
+ * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
+ * for Angular by adding the `emit()` method.
  *
  * In the following example, a component defines two output properties
  * that create event emitters. When the title is clicked, the emitter
@@ -23443,6 +23447,7 @@ function unwrapValue$1(newValue) {
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
  *
+ * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
 var EventEmitter = /** @class */ (function (_super) {
