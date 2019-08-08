@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+19.sha-a2183dd.with-local-changes
+ * @license Angular v9.0.0-next.0+72.sha-4b8cdd4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2272,6 +2272,10 @@ function readPatchedLView(target) {
     }
     return null;
 }
+/** Checks whether a given view is in creation mode */
+function isCreationMode(view) {
+    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
+}
 /**
  * Returns a boolean for whether the view is attached to the change detection tree.
  *
@@ -2582,11 +2586,6 @@ function setIsNotParent() {
 }
 function setIsParent() {
     isParent = true;
-}
-/** Checks whether a given view is in creation mode */
-function isCreationMode(view) {
-    if (view === void 0) { view = lView; }
-    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
 }
 /**
  * State of the current view being processed.
@@ -3132,13 +3131,12 @@ var domRendererFactory3 = {
  * Note that this instruction does not support assigning style and class values to
  * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
  * are applied to an element.
- *
+ * @param renderer The renderer to be used
  * @param native The element that the attributes will be assigned to
  * @param attrs The attribute array of values that will be assigned to the element
  * @returns the index value that was last accessed in the attributes array
  */
-function setUpAttributes(native, attrs) {
-    var renderer = getLView()[RENDERER];
+function setUpAttributes(renderer, native, attrs) {
     var isProc = isProceduralRenderer(renderer);
     var i = 0;
     while (i < attrs.length) {
@@ -7608,25 +7606,17 @@ function refreshChildComponents(hostLView, components) {
 /**
  * Creates a native element from a tag name, using a renderer.
  * @param name the tag name
- * @param overriddenRenderer Optional A renderer to override the default one
+ * @param renderer A renderer to use
  * @returns the element created
  */
-function elementCreate(name, overriddenRenderer) {
-    var native;
-    var rendererToUse = overriddenRenderer || getLView()[RENDERER];
-    var namespace = getNamespace();
-    if (isProceduralRenderer(rendererToUse)) {
-        native = rendererToUse.createElement(name, namespace);
+function elementCreate(name, renderer, namespace) {
+    if (isProceduralRenderer(renderer)) {
+        return renderer.createElement(name, namespace);
     }
     else {
-        if (namespace === null) {
-            native = rendererToUse.createElement(name);
-        }
-        else {
-            native = rendererToUse.createElementNS(namespace, name);
-        }
+        return namespace === null ? renderer.createElement(name) :
+            renderer.createElementNS(namespace, name);
     }
-    return native;
 }
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector) {
     var lView = ngDevMode ? cloneToLView(tView.blueprint) : tView.blueprint.slice();
@@ -7728,25 +7718,21 @@ function allocExpando(view, numSlotsToAlloc) {
 //// Render
 //////////////////////////
 /**
- * Used for creating the LViewNode of a dynamic embedded view,
- * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
- * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
+ * Used for creating the LView of a dynamic embedded view, either through
+ * ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  */
 function createEmbeddedViewAndNode(tView, context, declarationView, injectorIndex) {
-    var _isParent = getIsParent();
-    var _previousOrParentTNode = getPreviousOrParentTNode();
-    setPreviousOrParentTNode(null, true);
     var lView = createLView(declarationView, tView, context, 16 /* CheckAlways */, null, null);
     lView[DECLARATION_VIEW] = declarationView;
     assignTViewNodeToLView(tView, null, -1, lView);
     if (tView.firstTemplatePass) {
         tView.node.injectorIndex = injectorIndex;
     }
-    setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
     return lView;
 }
 /**
- * Used for rendering embedded views (e.g. dynamically created views)
+ * Used for rendering views in a LContainer (embedded views or root component views for dynamically
+ * created components).
  *
  * Dynamically created views must store/retrieve their TViews differently from component views
  * because their template functions are nested in the template functions of their hosts, creating
@@ -7760,24 +7746,21 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
     var _isParent = getIsParent();
     var _previousOrParentTNode = getPreviousOrParentTNode();
     var oldView;
-    if (viewToRender[FLAGS] & 512 /* IsRoot */) {
-        // This is a root view inside the view tree
-        tickRootContext(getRootContext(viewToRender));
+    // Will become true if the `try` block executes with no errors.
+    var safeToRunHooks = false;
+    try {
+        oldView = enterView(viewToRender, viewToRender[T_HOST]);
+        resetPreOrderHookFlags(viewToRender);
+        var templateFn = tView.template;
+        if (templateFn !== null) {
+            executeTemplate(viewToRender, templateFn, getRenderFlags(viewToRender), context);
+        }
+        refreshDescendantViews(viewToRender);
+        safeToRunHooks = true;
     }
-    else {
-        // Will become true if the `try` block executes with no errors.
-        var safeToRunHooks = false;
-        try {
-            oldView = enterView(viewToRender, viewToRender[T_HOST]);
-            resetPreOrderHookFlags(viewToRender);
-            executeTemplate(viewToRender, tView.template, getRenderFlags(viewToRender), context);
-            refreshDescendantViews(viewToRender);
-            safeToRunHooks = true;
-        }
-        finally {
-            leaveView(oldView, safeToRunHooks);
-            setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
-        }
+    finally {
+        leaveView(oldView, safeToRunHooks);
+        setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
     }
 }
 function renderComponentOrTemplate(hostView, context, templateFn) {
@@ -14585,11 +14568,11 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
     ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
     ngDevMode && ngDevMode.rendererCreateElement++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
-    var native = lView[index + HEADER_OFFSET] = elementCreate(name);
     var renderer = lView[RENDERER];
+    var native = lView[index + HEADER_OFFSET] = elementCreate(name, renderer, getNamespace());
     var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs || null);
     if (attrs != null) {
-        var lastAttrIndex = setUpAttributes(native, attrs);
+        var lastAttrIndex = setUpAttributes(renderer, native, attrs);
         if (tView.firstTemplatePass) {
             registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
         }
@@ -14721,7 +14704,7 @@ function ɵɵelementHostAttrs(attrs) {
     // errors...
     if (tNode.type === 3 /* Element */) {
         var native = getNativeByTNode(tNode, lView);
-        var lastAttrIndex = setUpAttributes(native, attrs);
+        var lastAttrIndex = setUpAttributes(lView[RENDERER], native, attrs);
         if (tView.firstTemplatePass) {
             var stylingNeedsToBeRendered = registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
             // this is only called during the first template pass in the
@@ -18225,7 +18208,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.0+19.sha-a2183dd.with-local-changes');
+var VERSION = new Version('9.0.0-next.0+72.sha-4b8cdd4.with-local-changes');
 
 /**
  * @license
@@ -21313,7 +21296,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
         namespaceHTMLInternal();
         var hostRNode = rootSelectorOrNode ?
             locateHostElement(rendererFactory, rootSelectorOrNode) :
-            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef));
+            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
         var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
         // Check whether this Component needs to be isolated from other components, i.e. whether it
@@ -23013,7 +22996,7 @@ function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
     // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
     var bindingIndex = getBindingRoot() + slotOffset;
     var lView = getLView();
-    return isCreationMode() ?
+    return isCreationMode(lView) ?
         updateBinding(lView, bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
         getBinding(lView, bindingIndex);
 }
@@ -23421,11 +23404,15 @@ function unwrapValue$1(newValue) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Use in directives and components to emit custom events synchronously
- * or asynchronously, and register handlers for those events by subscribing
- * to an instance.
+ * Use in components with the `@Output` directive to emit custom events
+ * synchronously or asynchronously, and register handlers for those events
+ * by subscribing to an instance.
  *
  * @usageNotes
+ *
+ * Extends
+ * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
+ * for Angular by adding the `emit()` method.
  *
  * In the following example, a component defines two output properties
  * that create event emitters. When the title is clicked, the emitter
@@ -23464,6 +23451,7 @@ function unwrapValue$1(newValue) {
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
  *
+ * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
 var EventEmitter = /** @class */ (function (_super) {
@@ -24057,7 +24045,7 @@ function ɵɵqueryRefresh(queryList) {
     var queryIndex = getCurrentQueryIndex();
     setCurrentQueryIndex(queryIndex + 1);
     var tQuery = getTQuery(lView[TVIEW], queryIndex);
-    if (queryList.dirty && (isCreationMode() === tQuery.metadata.isStatic)) {
+    if (queryList.dirty && (isCreationMode(lView) === tQuery.metadata.isStatic)) {
         if (tQuery.matches === null) {
             queryList.reset([]);
         }
