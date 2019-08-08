@@ -7,7 +7,7 @@
  */
 import { AttributeMarker, TAttributes } from '../interfaces/node';
 import { CssSelector } from '../interfaces/projection';
-import { RElement } from '../interfaces/renderer';
+import { RElement, Renderer3 } from '../interfaces/renderer';
 /**
  * Assigns all attribute values to the provided element via the inferred renderer.
  *
@@ -30,13 +30,12 @@ import { RElement } from '../interfaces/renderer';
  * Note that this instruction does not support assigning style and class values to
  * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
  * are applied to an element.
- *
+ * @param renderer The renderer to be used
  * @param native The element that the attributes will be assigned to
  * @param attrs The attribute array of values that will be assigned to the element
  * @returns the index value that was last accessed in the attributes array
  */
-export declare function setUpAttributes(native: RElement, attrs: TAttributes): number;
-export declare function attrsStylingIndexOf(attrs: TAttributes, startIndex: number): number;
+export declare function setUpAttributes(renderer: Renderer3, native: RElement, attrs: TAttributes): number;
 /**
  * Test whether the given value is a marker that indicates that the following
  * attribute values in a `TAttributes` array are only the names of attributes,
