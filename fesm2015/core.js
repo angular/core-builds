@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+69.sha-f8c27d4.with-local-changes
+ * @license Angular v9.0.0-next.0+71.sha-17e289c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22396,7 +22396,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.0+69.sha-f8c27d4.with-local-changes');
+const VERSION = new Version('9.0.0-next.0+71.sha-17e289c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -29426,11 +29426,15 @@ function unwrapValue$1(newValue) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Use in directives and components to emit custom events synchronously
- * or asynchronously, and register handlers for those events by subscribing
- * to an instance.
+ * Use in components with the `\@Output` directive to emit custom events
+ * synchronously or asynchronously, and register handlers for those events
+ * by subscribing to an instance.
  *
  * \@usageNotes
+ *
+ * Extends
+ * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
+ * for Angular by adding the `emit()` method.
  *
  * In the following example, a component defines two output properties
  * that create event emitters. When the title is clicked, the emitter
@@ -29469,6 +29473,7 @@ function unwrapValue$1(newValue) {
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
  *
+ * @see [Observables in Angular](guide/observables-in-angular)
  * \@publicApi
  * @template T
  */
