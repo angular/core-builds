@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+63.sha-a8e2ee1.with-local-changes
+ * @license Angular v9.0.0-next.0+67.sha-9106271.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2635,6 +2635,14 @@ function readPatchedLView(target) {
     return null;
 }
 /**
+ * Checks whether a given view is in creation mode
+ * @param {?} view
+ * @return {?}
+ */
+function isCreationMode(view) {
+    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
+}
+/**
  * Returns a boolean for whether the view is attached to the change detection tree.
  *
  * Note: This determines whether a view should be checked, not whether it's inserted
@@ -3011,14 +3019,6 @@ function setIsNotParent() {
  */
 function setIsParent() {
     isParent = true;
-}
-/**
- * Checks whether a given view is in creation mode
- * @param {?=} view
- * @return {?}
- */
-function isCreationMode(view = lView) {
-    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
 }
 /**
  * State of the current view being processed.
@@ -9300,28 +9300,18 @@ function refreshChildComponents(hostLView, components) {
 /**
  * Creates a native element from a tag name, using a renderer.
  * @param {?} name the tag name
- * @param {?=} overriddenRenderer Optional A renderer to override the default one
+ * @param {?} renderer A renderer to use
+ * @param {?} namespace
  * @return {?} the element created
  */
-function elementCreate(name, overriddenRenderer) {
-    /** @type {?} */
-    let native;
-    /** @type {?} */
-    const rendererToUse = overriddenRenderer || getLView()[RENDERER];
-    /** @type {?} */
-    const namespace = getNamespace();
-    if (isProceduralRenderer(rendererToUse)) {
-        native = rendererToUse.createElement(name, namespace);
+function elementCreate(name, renderer, namespace) {
+    if (isProceduralRenderer(renderer)) {
+        return renderer.createElement(name, namespace);
     }
     else {
-        if (namespace === null) {
-            native = rendererToUse.createElement(name);
-        }
-        else {
-            native = rendererToUse.createElementNS(namespace, name);
-        }
+        return namespace === null ? renderer.createElement(name) :
+            renderer.createElementNS(namespace, name);
     }
-    return native;
 }
 /**
  * @template T
@@ -9475,9 +9465,8 @@ function allocExpando(view, numSlotsToAlloc) {
 //// Render
 //////////////////////////
 /**
- * Used for creating the LViewNode of a dynamic embedded view,
- * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
- * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
+ * Used for creating the LView of a dynamic embedded view, either through
+ * ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * @template T
  * @param {?} tView
  * @param {?} context
@@ -9487,22 +9476,17 @@ function allocExpando(view, numSlotsToAlloc) {
  */
 function createEmbeddedViewAndNode(tView, context, declarationView, injectorIndex) {
     /** @type {?} */
-    const _isParent = getIsParent();
-    /** @type {?} */
-    const _previousOrParentTNode = getPreviousOrParentTNode();
-    setPreviousOrParentTNode((/** @type {?} */ (null)), true);
-    /** @type {?} */
     const lView = createLView(declarationView, tView, context, 16 /* CheckAlways */, null, null);
     lView[DECLARATION_VIEW] = declarationView;
     assignTViewNodeToLView(tView, null, -1, lView);
     if (tView.firstTemplatePass) {
         (/** @type {?} */ (tView.node)).injectorIndex = injectorIndex;
     }
-    setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
     return lView;
 }
 /**
- * Used for rendering embedded views (e.g. dynamically created views)
+ * Used for rendering views in a LContainer (embedded views or root component views for dynamically
+ * created components).
  *
  * Dynamically created views must store/retrieve their TViews differently from component views
  * because their template functions are nested in the template functions of their hosts, creating
@@ -9524,25 +9508,23 @@ function renderEmbeddedTemplate(viewToRender, tView, context) {
     const _previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
     let oldView;
-    if (viewToRender[FLAGS] & 512 /* IsRoot */) {
-        // This is a root view inside the view tree
-        tickRootContext(getRootContext(viewToRender));
-    }
-    else {
-        // Will become true if the `try` block executes with no errors.
+    // Will become true if the `try` block executes with no errors.
+    /** @type {?} */
+    let safeToRunHooks = false;
+    try {
+        oldView = enterView(viewToRender, viewToRender[T_HOST]);
+        resetPreOrderHookFlags(viewToRender);
         /** @type {?} */
-        let safeToRunHooks = false;
-        try {
-            oldView = enterView(viewToRender, viewToRender[T_HOST]);
-            resetPreOrderHookFlags(viewToRender);
-            executeTemplate(viewToRender, (/** @type {?} */ (tView.template)), getRenderFlags(viewToRender), context);
-            refreshDescendantViews(viewToRender);
-            safeToRunHooks = true;
+        const templateFn = tView.template;
+        if (templateFn !== null) {
+            executeTemplate(viewToRender, templateFn, getRenderFlags(viewToRender), context);
         }
-        finally {
-            leaveView((/** @type {?} */ (oldView)), safeToRunHooks);
-            setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
-        }
+        refreshDescendantViews(viewToRender);
+        safeToRunHooks = true;
+    }
+    finally {
+        leaveView((/** @type {?} */ (oldView)), safeToRunHooks);
+        setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
     }
 }
 /**
@@ -17778,9 +17760,9 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
     ngDevMode && ngDevMode.rendererCreateElement++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
-    const native = lView[index + HEADER_OFFSET] = elementCreate(name);
-    /** @type {?} */
     const renderer = lView[RENDERER];
+    /** @type {?} */
+    const native = lView[index + HEADER_OFFSET] = elementCreate(name, renderer, getNamespace());
     /** @type {?} */
     const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs || null);
     if (attrs != null) {
@@ -21969,7 +21951,7 @@ class Version {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.0+63.sha-a8e2ee1.with-local-changes');
+const VERSION = new Version('9.0.0-next.0+67.sha-9106271.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -26404,7 +26386,7 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(rendererFactory, rootSelectorOrNode) :
-            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef));
+            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
         /** @type {?} */
         const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
@@ -28543,7 +28525,7 @@ function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
     const bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     const lView = getLView();
-    return isCreationMode() ?
+    return isCreationMode(lView) ?
         updateBinding(lView, bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
         getBinding(lView, bindingIndex);
 }
@@ -29840,7 +29822,7 @@ function ɵɵqueryRefresh(queryList) {
     setCurrentQueryIndex(queryIndex + 1);
     /** @type {?} */
     const tQuery = getTQuery(lView[TVIEW], queryIndex);
-    if (queryList.dirty && (isCreationMode() === tQuery.metadata.isStatic)) {
+    if (queryList.dirty && (isCreationMode(lView) === tQuery.metadata.isStatic)) {
         if (tQuery.matches === null) {
             queryList.reset([]);
         }

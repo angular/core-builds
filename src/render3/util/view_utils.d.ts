@@ -78,6 +78,8 @@ export declare function getComponentViewByIndex(nodeIndex: number, hostView: LVi
  */
 export declare function readPatchedData(target: any): LView | LContext | null;
 export declare function readPatchedLView(target: any): LView | null;
+/** Checks whether a given view is in creation mode */
+export declare function isCreationMode(view: LView): boolean;
 /**
  * Returns a boolean for whether the view is attached to the change detection tree.
  *

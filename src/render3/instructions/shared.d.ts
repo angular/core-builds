@@ -30,10 +30,10 @@ export declare function setHostBindings(tView: TView, viewData: LView): void;
 /**
  * Creates a native element from a tag name, using a renderer.
  * @param name the tag name
- * @param overriddenRenderer Optional A renderer to override the default one
+ * @param renderer A renderer to use
  * @returns the element created
  */
-export declare function elementCreate(name: string, overriddenRenderer?: Renderer3): RElement;
+export declare function elementCreate(name: string, renderer: Renderer3, namespace: string | null): RElement;
 export declare function createLView<T>(parentLView: LView | null, tView: TView, context: T | null, flags: LViewFlags, host: RElement | null, tHostNode: TViewNode | TElementNode | null, rendererFactory?: RendererFactory3 | null, renderer?: Renderer3 | null, sanitizer?: Sanitizer | null, injector?: Injector | null): LView;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
@@ -65,13 +65,13 @@ export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode 
  */
 export declare function allocExpando(view: LView, numSlotsToAlloc: number): void;
 /**
- * Used for creating the LViewNode of a dynamic embedded view,
- * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
- * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
+ * Used for creating the LView of a dynamic embedded view, either through
+ * ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  */
 export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, injectorIndex: number): LView;
 /**
- * Used for rendering embedded views (e.g. dynamically created views)
+ * Used for rendering views in a LContainer (embedded views or root component views for dynamically
+ * created components).
  *
  * Dynamically created views must store/retrieve their TViews differently from component views
  * because their template functions are nested in the template functions of their hosts, creating

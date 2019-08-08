@@ -163,8 +163,6 @@ export declare function setTNodeAndViewData(tNode: TNode, view: LView): void;
 export declare function getIsParent(): boolean;
 export declare function setIsNotParent(): void;
 export declare function setIsParent(): void;
-/** Checks whether a given view is in creation mode */
-export declare function isCreationMode(view?: LView): boolean;
 export declare function getContextLView(): LView;
 export declare function getCheckNoChangesMode(): boolean;
 export declare function setCheckNoChangesMode(mode: boolean): void;
