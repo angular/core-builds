@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+69.sha-f8c27d4.with-local-changes
+ * @license Angular v9.0.0-next.0+71.sha-17e289c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17885,7 +17885,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.0+69.sha-f8c27d4.with-local-changes');
+var VERSION = new Version('9.0.0-next.0+71.sha-17e289c.with-local-changes');
 
 /**
  * @license
@@ -23067,11 +23067,15 @@ function unwrapValue$1(newValue) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Use in directives and components to emit custom events synchronously
- * or asynchronously, and register handlers for those events by subscribing
- * to an instance.
+ * Use in components with the `@Output` directive to emit custom events
+ * synchronously or asynchronously, and register handlers for those events
+ * by subscribing to an instance.
  *
  * @usageNotes
+ *
+ * Extends
+ * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
+ * for Angular by adding the `emit()` method.
  *
  * In the following example, a component defines two output properties
  * that create event emitters. When the title is clicked, the emitter
@@ -23110,6 +23114,7 @@ function unwrapValue$1(newValue) {
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
  *
+ * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
 var EventEmitter = /** @class */ (function (_super) {
@@ -26621,7 +26626,8 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
         this._config = config || DEFAULT_CONFIG;
     }
     SystemJsNgModuleLoader.prototype.load = function (path) {
-        return this.loadAndCompile(path);
+        var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     };
     SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
         var _this = this;
