@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.0+33.sha-a48376b.with-local-changes
+ * @license Angular v8.2.0+34.sha-cfaefa9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9417,9 +9417,7 @@ export declare function ɵcrt(values: {
 export declare type ɵCssSelectorList = CssSelector[];
 
 /**
- * The locale id that the application is currently using (for translations and ICU expressions).
- * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
- * but is now defined as a global value.
+ * The locale id that the application is using by default (for translations and ICU expressions).
  */
 export declare const ɵDEFAULT_LOCALE_ID = "en-US";
 
