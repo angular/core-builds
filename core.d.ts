@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.0+72.sha-4b8cdd4.with-local-changes
+ * @license Angular v9.0.0-next.1+9.sha-eb5412d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1890,11 +1890,11 @@ export declare interface DirectiveDecorator {
      *
      * @Annotation
      */
-    (obj: Directive): TypeDecorator;
+    (obj?: Directive): TypeDecorator;
     /**
      * See the `Directive` decorator.
      */
-    new (obj: Directive): Directive;
+    new (obj?: Directive): Directive;
 }
 
 declare interface DirectiveDefFeature {
@@ -4526,7 +4526,8 @@ declare const PARENT = 3;
 export declare interface Pipe {
     /**
      * The pipe name to use in template bindings.
-     *
+     * Typically uses [lowerCamelCase](guide/glossary#case-types)
+     * because the name cannot contain hyphens.
      */
     name: string;
     /**
@@ -4571,6 +4572,8 @@ export declare interface PipeDecorator {
      * A pipe must belong to an NgModule in order for it to be available
      * to a template. To make it a member of an NgModule,
      * list it in the `declarations` field of the `NgModule` metadata.
+     *
+     * @see [Style Guide: Pipe Names](guide/styleguide#02-09)
      *
      */
     (obj: Pipe): TypeDecorator;
