@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.1+4.sha-6ec91dd.with-local-changes
+ * @license Angular v8.2.1+6.sha-eccb60c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -50,6 +50,16 @@
         return __assign.apply(this, arguments);
     };
 
+    function __rest(s, e) {
+        var t = {};
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+            t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+                t[p[i]] = s[p[i]];
+        return t;
+    }
+
     function __decorate(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
         if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -63,6 +73,47 @@
 
     function __metadata(metadataKey, metadataValue) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+    }
+
+    function __awaiter(thisArg, _arguments, P, generator) {
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+
+    function __generator(thisArg, body) {
+        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+        function verb(n) { return function (v) { return step([n, v]); }; }
+        function step(op) {
+            if (f) throw new TypeError("Generator is already executing.");
+            while (_) try {
+                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+                if (y = 0, t) op = [op[0] & 2, t.value];
+                switch (op[0]) {
+                    case 0: case 1: t = op; break;
+                    case 4: _.label++; return { value: op[1], done: false };
+                    case 5: _.label++; y = op[1]; op = [0]; continue;
+                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                    default:
+                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                        if (t[2]) _.ops.pop();
+                        _.trys.pop(); continue;
+                }
+                op = body.call(thisArg, _);
+            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+        }
+    }
+
+    function __exportStar(m, exports) {
+        for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
     }
 
     function __values(o) {
@@ -97,6 +148,53 @@
         for (var ar = [], i = 0; i < arguments.length; i++)
             ar = ar.concat(__read(arguments[i]));
         return ar;
+    }
+
+    function __await(v) {
+        return this instanceof __await ? (this.v = v, this) : new __await(v);
+    }
+
+    function __asyncGenerator(thisArg, _arguments, generator) {
+        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        var g = generator.apply(thisArg, _arguments || []), i, q = [];
+        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+        function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+        function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+        function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+        function fulfill(value) { resume("next", value); }
+        function reject(value) { resume("throw", value); }
+        function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+    }
+
+    function __asyncDelegator(o) {
+        var i, p;
+        return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+        function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+    }
+
+    function __asyncValues(o) {
+        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        var m = o[Symbol.asyncIterator], i;
+        return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+        function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+        function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+    }
+
+    function __makeTemplateObject(cooked, raw) {
+        if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+        return cooked;
+    };
+
+    function __importStar(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+        result.default = mod;
+        return result;
+    }
+
+    function __importDefault(mod) {
+        return (mod && mod.__esModule) ? mod : { default: mod };
     }
 
     /**
@@ -971,6 +1069,11 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function assertNumber(actual, msg) {
+        if (typeof actual != 'number') {
+            throwError(msg);
+        }
+    }
     function assertEqual(actual, expected, msg) {
         if (actual != expected) {
             throwError(msg);
@@ -978,6 +1081,11 @@
     }
     function assertNotEqual(actual, expected, msg) {
         if (actual == expected) {
+            throwError(msg);
+        }
+    }
+    function assertSame(actual, expected, msg) {
+        if (actual !== expected) {
             throwError(msg);
         }
     }
@@ -993,6 +1101,11 @@
     }
     function assertGreaterThan(actual, expected, msg) {
         if (actual <= expected) {
+            throwError(msg);
+        }
+    }
+    function assertNotDefined(actual, msg) {
+        if (actual != null) {
             throwError(msg);
         }
     }
@@ -1605,6 +1718,9 @@
     var PREORDER_HOOK_FLAGS = 18;
     /** Size of LView's header. Necessary to adjust for it when setting slots.  */
     var HEADER_OFFSET = 19;
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd = 1;
 
     /**
      * @license
@@ -1639,6 +1755,9 @@
      * remove views from the DOM when they are no longer required.
      */
     var CONTAINER_HEADER_OFFSET = 9;
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$1 = 1;
 
     /**
      * @license
@@ -1702,6 +1821,11 @@
     function assertHasParent(tNode) {
         assertDefined(tNode, 'previousOrParentTNode should exist!');
         assertDefined(tNode.parent, 'previousOrParentTNode should have a parent');
+    }
+    function assertDataNext(lView, index, arr) {
+        if (arr == null)
+            arr = lView;
+        assertEqual(arr.length, index, "index " + index + " expected to be at the end of arr (length " + arr.length + ")");
     }
     function assertLContainerOrUndefined(value) {
         value && assertEqual(isLContainer(value), true, 'Expecting LContainer or undefined or null');
@@ -1852,6 +1976,9 @@
         return obj !== null && typeof obj == 'object' &&
             Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
     }
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$2 = 1;
 
     /**
      * @license
@@ -2253,6 +2380,34 @@
             value = value[HOST];
         }
         return value;
+    }
+    /**
+     * Returns `LView` or `null` if not found.
+     * @param value wrapped value of `RNode`, `LView`, `LContainer`
+     */
+    function unwrapLView(value) {
+        while (Array.isArray(value)) {
+            // This check is same as `isLView()` but we don't call at as we don't want to call
+            // `Array.isArray()` twice and give JITer more work for inlining.
+            if (typeof value[TYPE] === 'object')
+                return value;
+            value = value[HOST];
+        }
+        return null;
+    }
+    /**
+     * Returns `LContainer` or `null` if not found.
+     * @param value wrapped value of `RNode`, `LView`, `LContainer`
+     */
+    function unwrapLContainer(value) {
+        while (Array.isArray(value)) {
+            // This check is same as `isLContainer()` but we don't call at as we don't want to call
+            // `Array.isArray()` twice and give JITer more work for inlining.
+            if (value[TYPE] === true)
+                return value;
+            value = value[HOST];
+        }
+        return null;
     }
     /**
      * Retrieves an element value from the provided `viewData`, by unwrapping
@@ -3056,6 +3211,9 @@
         return 6 /* MapBindingsBindingsStartPosition */ +
             context[4 /* MapBindingsValuesCountPosition */];
     }
+    function isMapBased(prop) {
+        return prop === MAP_BASED_ENTRY_PROP_NAME;
+    }
     function hasValueChanged(a, b) {
         var compareValueA = Array.isArray(a) ? a[0 /* RawValuePosition */] : a;
         var compareValueB = Array.isArray(b) ? b[0 /* RawValuePosition */] : b;
@@ -3165,6 +3323,9 @@
     var domRendererFactory3 = {
         createRenderer: ɵ0$3
     };
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$3 = 1;
 
     /**
      * Assigns all attribute values to the provided element via the inferred renderer.
@@ -3241,6 +3402,15 @@
         // whether by running into an unsupported marker or if all the static values were
         // iterated over.
         return i;
+    }
+    function attrsStylingIndexOf(attrs, startIndex) {
+        for (var i = startIndex; i < attrs.length; i++) {
+            var val = attrs[i];
+            if (val === 1 /* Classes */ || val === 2 /* Styles */) {
+                return i;
+            }
+        }
+        return -1;
     }
     /**
      * Test whether the given value is a marker that indicates that the following
@@ -3952,6 +4122,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ERROR_TYPE = 'ngType';
     var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
     var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
     var ERROR_LOGGER = 'ngErrorLogger';
@@ -3969,6 +4140,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function getType(error) {
+        return error[ERROR_TYPE];
+    }
     function getDebugContext(error) {
         return error[ERROR_DEBUG_CONTEXT];
     }
@@ -4400,6 +4574,8 @@
      * This regular expression was taken from the Closure sanitization library.
      */
     var SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+    /* A pattern that matches safe srcset values */
+    var SAFE_SRCSET_PATTERN = /^(?:(?:https?|file):|[^&:/?#]*(?:[/?#]|$))/gi;
     /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
     var DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
     function _sanitizeUrl(url) {
@@ -5397,6 +5573,8 @@
     }
 
     // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$4 = 1;
 
     /**
      * @license
@@ -5405,6 +5583,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$5 = 1;
 
     /**
      * @license
@@ -5413,6 +5594,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var unusedValueToPlacateAjd = unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5;
     var NG_TEMPLATE_SELECTOR = 'ng-template';
     function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
         var nodeClassesLen = nodeClassAttrVal.length;
@@ -6193,6 +6375,7 @@
                 (nativeStyle && nativeStyle.removeProperty(prop));
         }
     };
+    var ɵ0$4 = setStyle;
     /**
      * Adds/removes the provided className value to the provided element.
      */
@@ -6215,6 +6398,7 @@
             }
         }
     };
+    var ɵ1$1 = setClass;
     /**
      * Iterates over all provided styling entries and renders them on the element.
      *
@@ -6299,6 +6483,9 @@
     var COMMENT_MARKER = {
         marker: 'comment'
     };
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$6 = 1;
 
     /**
      * @license
@@ -7515,12 +7702,12 @@
         setSelectedIndex(index);
     }
 
-    var ɵ0$4 = function () { return Promise.resolve(null); };
+    var ɵ0$5 = function () { return Promise.resolve(null); };
     /**
      * A permanent marker promise which signifies that the current CD tree is
      * clean.
      */
-    var _CLEAN_PROMISE = (ɵ0$4)();
+    var _CLEAN_PROMISE = (ɵ0$5)();
     /**
      * Refreshes the view, executing the following steps in that order:
      * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
@@ -8922,6 +9109,16 @@
     function detectChangesInRootView(lView) {
         tickRootContext(lView[CONTEXT]);
     }
+    /**
+     * Checks the change detector and its children, and throws if any changes are detected.
+     *
+     * This is used in development mode to verify that running change detection doesn't
+     * introduce other changes.
+     */
+    function checkNoChanges(component) {
+        var view = getComponentViewByInstance(component);
+        checkNoChangesInternal(view, component);
+    }
     function checkNoChangesInternal(view, context) {
         setCheckNoChangesMode(true);
         try {
@@ -9093,6 +9290,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd;
     function getLContainer(tNode, embeddedView) {
         ngDevMode && assertLView(embeddedView);
         var container = embeddedView[PARENT];
@@ -10645,6 +10843,7 @@
             args[_i] = arguments[_i];
         }
     };
+    var ɵ0$6 = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
     var SWITCH_CHANGE_DETECTOR_REF_FACTORY = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
 
     /**
@@ -11066,8 +11265,8 @@
             },
         });
     }
-    var ɵ0$5 = getClosureSafeProperty;
-    var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$5 });
+    var ɵ0$7 = getClosureSafeProperty;
+    var USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: ɵ0$7 });
     function isUseClassProvider(meta) {
         return meta.useClass !== undefined;
     }
@@ -11088,8 +11287,8 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ɵ0$6 = getClosureSafeProperty;
-    var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$6 });
+    var ɵ0$8 = getClosureSafeProperty;
+    var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$8 });
     var EMPTY_ARRAY$1 = [];
     function convertInjectableProviderToFactory(type, provider) {
         if (!provider) {
@@ -11139,14 +11338,14 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ɵ0$7 = function (type, meta) { return SWITCH_COMPILE_INJECTABLE(type, meta); };
+    var ɵ0$9 = function (type, meta) { return SWITCH_COMPILE_INJECTABLE(type, meta); };
     /**
      * Injectable decorator and metadata.
      *
      * @Annotation
      * @publicApi
      */
-    var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, ɵ0$7);
+    var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, ɵ0$9);
     /**
      * Supports @Injectable() in JIT mode for Render2.
      */
@@ -11686,11 +11885,13 @@
     var IDENT = function (value) {
         return value;
     };
+    var ɵ0$a = IDENT;
     var EMPTY = [];
     var CIRCULAR$1 = IDENT;
     var MULTI_PROVIDER_FN = function () {
         return Array.prototype.slice.call(arguments);
     };
+    var ɵ1$2 = MULTI_PROVIDER_FN;
     var NO_NEW_LINE$1 = 'ɵ';
     var StaticInjector = /** @class */ (function () {
         function StaticInjector(providers, parent, source) {
@@ -11733,7 +11934,9 @@
         else if (provider.useFactory) {
             fn = provider.useFactory;
         }
-        else if (provider.useExisting) ;
+        else if (provider.useExisting) {
+            // Just use IDENT
+        }
         else if (provider.useClass) {
             useNew = true;
             fn = resolveForwardRef(provider.useClass);
@@ -12843,7 +13046,7 @@
         }
         return Query;
     }());
-    var ɵ0$8 = function (selector, data) {
+    var ɵ0$b = function (selector, data) {
         if (data === void 0) { data = {}; }
         return (__assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
     };
@@ -12854,8 +13057,8 @@
      * @Annotation
      * @publicApi
      */
-    var ContentChildren = makePropDecorator('ContentChildren', ɵ0$8, Query);
-    var ɵ1$1 = function (selector, data) {
+    var ContentChildren = makePropDecorator('ContentChildren', ɵ0$b, Query);
+    var ɵ1$3 = function (selector, data) {
         if (data === void 0) { data = {}; }
         return (__assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
     };
@@ -12867,7 +13070,7 @@
      *
      * @publicApi
      */
-    var ContentChild = makePropDecorator('ContentChild', ɵ1$1, Query);
+    var ContentChild = makePropDecorator('ContentChild', ɵ1$3, Query);
     var ɵ2 = function (selector, data) {
         if (data === void 0) { data = {}; }
         return (__assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
@@ -12977,6 +13180,9 @@
             componentDefPendingResolution.add(type);
         }
     }
+    function isComponentDefPendingResolution(type) {
+        return componentDefPendingResolution.has(type);
+    }
     function componentNeedsResolution(component) {
         return !!((component.templateUrl && !component.hasOwnProperty('template')) ||
             component.styleUrls && component.styleUrls.length);
@@ -12985,6 +13191,11 @@
         var old = componentResourceResolutionQueue;
         componentResourceResolutionQueue = new Map();
         return old;
+    }
+    function restoreComponentResolutionQueue(queue) {
+        componentDefPendingResolution.clear();
+        queue.forEach(function (_, type) { return componentDefPendingResolution.add(type); });
+        componentResourceResolutionQueue = queue;
     }
     function isComponentResourceResolutionQueueEmpty() {
         return componentResourceResolutionQueue.size === 0;
@@ -13090,6 +13301,44 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function isListLikeIterable(obj) {
+        if (!isJsObject(obj))
+            return false;
+        return Array.isArray(obj) ||
+            (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+                getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+    }
+    function areIterablesEqual(a, b, comparator) {
+        var iterator1 = a[getSymbolIterator()]();
+        var iterator2 = b[getSymbolIterator()]();
+        while (true) {
+            var item1 = iterator1.next();
+            var item2 = iterator2.next();
+            if (item1.done && item2.done)
+                return true;
+            if (item1.done || item2.done)
+                return false;
+            if (!comparator(item1.value, item2.value))
+                return false;
+        }
+    }
+    function iterateListLike(obj, fn) {
+        if (Array.isArray(obj)) {
+            for (var i = 0; i < obj.length; i++) {
+                fn(obj[i]);
+            }
+        }
+        else {
+            var iterator = obj[getSymbolIterator()]();
+            var item = void 0;
+            while (!((item = iterator.next()).done)) {
+                fn(item.value);
+            }
+        }
+    }
+    function isJsObject(o) {
+        return o !== null && (typeof o === 'function' || typeof o === 'object');
+    }
 
     /**
      * @license
@@ -13102,6 +13351,23 @@
     function looseIdentical(a, b) {
         return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
     }
+    function devModeEqual(a, b) {
+        var isListLikeIterableA = isListLikeIterable(a);
+        var isListLikeIterableB = isListLikeIterable(b);
+        if (isListLikeIterableA && isListLikeIterableB) {
+            return areIterablesEqual(a, b, devModeEqual);
+        }
+        else {
+            var isAObject = a && (typeof a === 'object' || typeof a === 'function');
+            var isBObject = b && (typeof b === 'object' || typeof b === 'function');
+            if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+                return true;
+            }
+            else {
+                return looseIdentical(a, b);
+            }
+        }
+    }
 
     /**
      * @license
@@ -13110,11 +13376,11 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    function devModeEqual(a, b) {
-        var isListLikeIterableA = isListLikeIterable(a);
-        var isListLikeIterableB = isListLikeIterable(b);
+    function devModeEqual$1(a, b) {
+        var isListLikeIterableA = isListLikeIterable$1(a);
+        var isListLikeIterableB = isListLikeIterable$1(b);
         if (isListLikeIterableA && isListLikeIterableB) {
-            return areIterablesEqual(a, b, devModeEqual);
+            return areIterablesEqual$1(a, b, devModeEqual$1);
         }
         else {
             var isAObject = a && (typeof a === 'object' || typeof a === 'function');
@@ -13162,14 +13428,14 @@
         WrappedValue.isWrapped = function (value) { return value instanceof WrappedValue; };
         return WrappedValue;
     }());
-    function isListLikeIterable(obj) {
-        if (!isJsObject(obj))
+    function isListLikeIterable$1(obj) {
+        if (!isJsObject$1(obj))
             return false;
         return Array.isArray(obj) ||
             (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
                 getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
     }
-    function areIterablesEqual(a, b, comparator) {
+    function areIterablesEqual$1(a, b, comparator) {
         var iterator1 = a[getSymbolIterator()]();
         var iterator2 = b[getSymbolIterator()]();
         while (true) {
@@ -13183,7 +13449,7 @@
                 return false;
         }
     }
-    function iterateListLike(obj, fn) {
+    function iterateListLike$1(obj, fn) {
         if (Array.isArray(obj)) {
             for (var i = 0; i < obj.length; i++) {
                 fn(obj[i]);
@@ -13197,7 +13463,7 @@
             }
         }
     }
-    function isJsObject(o) {
+    function isJsObject$1(o) {
         return o !== null && (typeof o === 'function' || typeof o === 'object');
     }
 
@@ -13231,7 +13497,7 @@
                 // View engine didn't report undefined values as changed on the first checkNoChanges pass
                 // (before the change detection was run).
                 var oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
-                if (!devModeEqual(oldValueToCompare, value)) {
+                if (!devModeEqual$1(oldValueToCompare, value)) {
                     throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
                 }
             }
@@ -13942,6 +14208,23 @@
         var rootView = markViewDirty(getComponentViewByInstance(component));
         ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
         scheduleTick(rootView[CONTEXT], 1 /* DetectChanges */);
+    }
+    /**
+     * Used to perform change detection on the whole application.
+     *
+     * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
+     * executes lifecycle hooks and conditionally checks components based on their
+     * `ChangeDetectionStrategy` and dirtiness.
+     *
+     * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
+     * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
+     * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
+     * be changed when calling `renderComponent` and providing the `scheduler` option.
+     */
+    function tick(component) {
+        var rootView = getRootView(component);
+        var rootContext = rootView[CONTEXT];
+        tickRootContext(rootContext);
     }
 
     /**
@@ -17095,6 +17378,20 @@
     function getHostElement(directive) {
         return getLContext(directive).native;
     }
+    /**
+     * Retrieves the rendered text for a given component.
+     *
+     * This function retrieves the host element of a component and
+     * and then returns the `textContent` for that element. This implies
+     * that the text returned will include re-projected content of
+     * the component as well.
+     *
+     * @param component The component to return the content text for.
+     */
+    function getRenderedText(component) {
+        var hostElement = getHostElement(component);
+        return hostElement.textContent || '';
+    }
     function loadLContextFromNode(node) {
         if (!(node instanceof Node))
             throw new Error('Expecting instance of DOM Node');
@@ -17245,6 +17542,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var ɵ0$c = function (token, notFoundValue) {
+        throw new Error('NullInjector: Not found: ' + stringifyForError(token));
+    };
+    // TODO: A hack to not pull in the NullInjector from @angular/core.
+    var NULL_INJECTOR$1 = {
+        get: ɵ0$c
+    };
     /**
      * Bootstraps a Component into an existing host element and returns an instance
      * of the component.
@@ -17440,6 +17744,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var PRIVATE_PREFIX = '__ngOnChanges_';
     /**
      * The NgOnChangesFeature decorates a component with support for the ngOnChanges
      * lifecycle hook, so it should be included in any component that implements
@@ -18005,6 +18310,9 @@
         return error;
     }
     var ERROR_COMPONENT = 'ngComponent';
+    function getComponent$1(error) {
+        return error[ERROR_COMPONENT];
+    }
     var _NullComponentFactoryResolver = /** @class */ (function () {
         function _NullComponentFactoryResolver() {
         }
@@ -18254,7 +18562,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('8.2.1+4.sha-6ec91dd.with-local-changes');
+    var VERSION = new Version('8.2.1+6.sha-eccb60c.with-local-changes');
 
     /**
      * @license
@@ -18266,13 +18574,14 @@
     var DefaultIterableDifferFactory = /** @class */ (function () {
         function DefaultIterableDifferFactory() {
         }
-        DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable(obj); };
+        DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable$1(obj); };
         DefaultIterableDifferFactory.prototype.create = function (trackByFn) {
             return new DefaultIterableDiffer(trackByFn);
         };
         return DefaultIterableDifferFactory;
     }());
     var trackByIdentity = function (index, item) { return item; };
+    var ɵ0$d = trackByIdentity;
     /**
      * @deprecated v4.0.0 - Should not be part of public API.
      * @publicApi
@@ -18387,7 +18696,7 @@
         DefaultIterableDiffer.prototype.diff = function (collection) {
             if (collection == null)
                 collection = [];
-            if (!isListLikeIterable(collection)) {
+            if (!isListLikeIterable$1(collection)) {
                 throw new Error("Error trying to diff '" + stringify(collection) + "'. Only arrays and iterables are allowed");
             }
             if (this.check(collection)) {
@@ -18428,7 +18737,7 @@
             }
             else {
                 index = 0;
-                iterateListLike(collection, function (item) {
+                iterateListLike$1(collection, function (item) {
                     itemTrackBy = _this._trackByFn(index, item);
                     if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
                         record = _this._mismatch(record, item, itemTrackBy, index);
@@ -18940,7 +19249,7 @@
     var DefaultKeyValueDifferFactory = /** @class */ (function () {
         function DefaultKeyValueDifferFactory() {
         }
-        DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject(obj); };
+        DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject$1(obj); };
         DefaultKeyValueDifferFactory.prototype.create = function () { return new DefaultKeyValueDiffer(); };
         return DefaultKeyValueDifferFactory;
     }());
@@ -19000,7 +19309,7 @@
             if (!map) {
                 map = new Map();
             }
-            else if (!(map instanceof Map || isJsObject(map))) {
+            else if (!(map instanceof Map || isJsObject$1(map))) {
                 throw new Error("Error trying to diff '" + stringify(map) + "'. Only maps and objects are allowed");
             }
             return this.check(map) ? this : null;
@@ -19514,6 +19823,22 @@
         return false;
     }
     /**
+     * Node instance data.
+     *
+     * We have a separate type per NodeType to save memory
+     * (TextData | ElementData | ProviderData | PureExpressionData | QueryList<any>)
+     *
+     * To keep our code monomorphic,
+     * we prohibit using `NodeData` directly but enforce the use of accessors (`asElementData`, ...).
+     * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
+     * purposes.
+     */
+    var NodeData = /** @class */ (function () {
+        function NodeData() {
+        }
+        return NodeData;
+    }());
+    /**
      * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
      */
     function asTextData(view, index) {
@@ -19645,7 +19970,7 @@
     }
     function checkBindingNoChanges(view, def, bindingIdx, value) {
         var oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-        if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
+        if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual$1(oldValue, value)) {
             var bindingName = def.bindings[bindingIdx].name;
             throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), bindingName + ": " + oldValue, bindingName + ": " + value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
         }
@@ -21400,6 +21725,16 @@
     }(ComponentFactory));
     var componentFactoryResolver = new ComponentFactoryResolver$1();
     /**
+     * Creates a ComponentFactoryResolver and stores it on the injector. Or, if the
+     * ComponentFactoryResolver
+     * already exists, retrieves the existing ComponentFactoryResolver.
+     *
+     * @returns The ComponentFactoryResolver instance to use
+     */
+    function injectComponentFactoryResolver() {
+        return componentFactoryResolver;
+    }
+    /**
      * Represents an instance of a Component created via a {@link ComponentFactory}.
      *
      * `ComponentRef` provides access to the Component Instance as well other objects related to this
@@ -22832,6 +23167,9 @@
             imports.forEach(function (i) { return registerNgModuleType(i); });
         }
     }
+    function clearModulesForTest() {
+        modules.clear();
+    }
     function getRegisteredNgModuleType(id) {
         return modules.get(id);
     }
@@ -23692,6 +24030,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$7 = 1;
 
     /**
      * @license
@@ -23700,6 +24041,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$8 = 1;
 
     /**
      * @license
@@ -23708,6 +24052,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$8;
     var LQuery_ = /** @class */ (function () {
         function LQuery_(queryList) {
             this.queryList = queryList;
@@ -24270,7 +24615,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ɵ0$9 = function () { return ({
+    var ɵ0$e = function () { return ({
         'ɵɵattribute': ɵɵattribute,
         'ɵɵattributeInterpolate1': ɵɵattributeInterpolate1,
         'ɵɵattributeInterpolate2': ɵɵattributeInterpolate2,
@@ -24426,7 +24771,7 @@
      *
      * This should be kept up to date with the public exports of @angular/core.
      */
-    var angularCoreEnv = (ɵ0$9)();
+    var angularCoreEnv = (ɵ0$e)();
 
     /**
      * @license
@@ -25158,16 +25503,16 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ɵ0$a = function (dir) {
+    var ɵ0$f = function (dir) {
         if (dir === void 0) { dir = {}; }
         return dir;
-    }, ɵ1$2 = function (type, meta) { return SWITCH_COMPILE_DIRECTIVE(type, meta); };
+    }, ɵ1$4 = function (type, meta) { return SWITCH_COMPILE_DIRECTIVE(type, meta); };
     /**
      * Type of the Directive metadata.
      *
      * @publicApi
      */
-    var Directive = makeDecorator('Directive', ɵ0$a, undefined, undefined, ɵ1$2);
+    var Directive = makeDecorator('Directive', ɵ0$f, undefined, undefined, ɵ1$4);
     var ɵ2$1 = function (c) {
         if (c === void 0) { c = {}; }
         return (__assign({ changeDetection: exports.ChangeDetectionStrategy.Default }, c));
@@ -25255,7 +25600,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ɵ0$b = function (ngModule) { return ngModule; }, ɵ1$3 = 
+    var ɵ0$g = function (ngModule) { return ngModule; }, ɵ1$5 = 
     /**
      * Decorator that marks the following class as an NgModule, and supplies
      * configuration metadata for it.
@@ -25272,7 +25617,7 @@
      * @Annotation
      * @publicApi
      */
-    var NgModule = makeDecorator('NgModule', ɵ0$b, undefined, undefined, ɵ1$3);
+    var NgModule = makeDecorator('NgModule', ɵ0$g, undefined, undefined, ɵ1$5);
     function preR3NgModuleCompile(moduleType, metadata) {
         var imports = (metadata && metadata.imports) || [];
         if (metadata && metadata.exports) {
@@ -26519,6 +26864,11 @@
                 if (!exceptionHandler) {
                     throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
                 }
+                // If the `LOCALE_ID` provider is defined at bootstrap we set the value for runtime i18n (ivy)
+                if (ivyEnabled) {
+                    var localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
+                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                }
                 moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); });
                 ngZone.runOutsideAngular(function () { return ngZone.onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
                 return _callAndReportToErrorHandler(exceptionHandler, ngZone, function () {
@@ -27068,7 +27418,7 @@
             this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
-            var legacyOfflineMode = this._compiler instanceof Compiler;
+            var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
             return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         };
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
@@ -27889,6 +28239,9 @@
      * @publicApi
      */
     var getDebugNode = getDebugNode__PRE_R3__;
+    function getAllDebugNodes() {
+        return Array.from(_nativeNodeToDebugNode.values());
+    }
     function indexDebugNode(node) {
         _nativeNodeToDebugNode.set(node.nativeNode, node);
     }
@@ -30533,8 +30886,8 @@
     exports.ɵAPP_ID_RANDOM_PROVIDER = APP_ID_RANDOM_PROVIDER;
     exports.ɵdefaultIterableDiffers = defaultIterableDiffers;
     exports.ɵdefaultKeyValueDiffers = defaultKeyValueDiffers;
-    exports.ɵdevModeEqual = devModeEqual;
-    exports.ɵisListLikeIterable = isListLikeIterable;
+    exports.ɵdevModeEqual = devModeEqual$1;
+    exports.ɵisListLikeIterable = isListLikeIterable$1;
     exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
     exports.ɵConsole = Console;
     exports.ɵsetCurrentInjector = setCurrentInjector;

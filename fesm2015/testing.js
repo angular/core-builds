@@ -1,10 +1,10 @@
 /**
- * @license Angular v8.2.1+4.sha-6ec91dd.with-local-changes
+ * @license Angular v8.2.1+6.sha-eccb60c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵtransitiveScopesFor, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, ɵoverrideProvider, ɵivyEnabled, Optional, SkipSelf } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMPONENT_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵAPP_ROOT, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -437,6 +437,87 @@ class ComponentFixture {
         }
     }
 }
+if (false) {
+    /**
+     * The DebugElement associated with the root element of this component.
+     * @type {?}
+     */
+    ComponentFixture.prototype.debugElement;
+    /**
+     * The instance of the root component class.
+     * @type {?}
+     */
+    ComponentFixture.prototype.componentInstance;
+    /**
+     * The native element at the root of the component.
+     * @type {?}
+     */
+    ComponentFixture.prototype.nativeElement;
+    /**
+     * The ElementRef for the element at the root of the component.
+     * @type {?}
+     */
+    ComponentFixture.prototype.elementRef;
+    /**
+     * The ChangeDetectorRef for the component
+     * @type {?}
+     */
+    ComponentFixture.prototype.changeDetectorRef;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._renderer;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._isStable;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._isDestroyed;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._resolve;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._promise;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._onUnstableSubscription;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._onStableSubscription;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._onMicrotaskEmptySubscription;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._onErrorSubscription;
+    /** @type {?} */
+    ComponentFixture.prototype.componentRef;
+    /** @type {?} */
+    ComponentFixture.prototype.ngZone;
+    /**
+     * @type {?}
+     * @private
+     */
+    ComponentFixture.prototype._autoDetect;
+}
 /**
  * @param {?} fn
  * @return {?}
@@ -772,6 +853,23 @@ class AsyncTestCompleter {
      */
     get promise() { return this._promise; }
 }
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    AsyncTestCompleter.prototype._resolve;
+    /**
+     * @type {?}
+     * @private
+     */
+    AsyncTestCompleter.prototype._reject;
+    /**
+     * @type {?}
+     * @private
+     */
+    AsyncTestCompleter.prototype._promise;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -799,6 +897,138 @@ const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetec
  * @type {?}
  */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
+/**
+ * Static methods implemented by the `TestBedViewEngine` and `TestBedRender3`
+ *
+ * \@publicApi
+ * @record
+ */
+function TestBedStatic() { }
+if (false) {
+    /* Skipping unhandled member: new (...args: any[]): TestBed;*/
+    /**
+     * @param {?} ngModule
+     * @param {?} platform
+     * @param {?=} aotSummaries
+     * @return {?}
+     */
+    TestBedStatic.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) { };
+    /**
+     * Reset the providers for the test injector.
+     * @return {?}
+     */
+    TestBedStatic.prototype.resetTestEnvironment = function () { };
+    /**
+     * @return {?}
+     */
+    TestBedStatic.prototype.resetTestingModule = function () { };
+    /**
+     * Allows overriding default compiler providers and settings
+     * which are defined in test_injector.js
+     * @param {?} config
+     * @return {?}
+     */
+    TestBedStatic.prototype.configureCompiler = function (config) { };
+    /**
+     * Allows overriding default providers, directives, pipes, modules of the test injector,
+     * which are defined in test_injector.js
+     * @param {?} moduleDef
+     * @return {?}
+     */
+    TestBedStatic.prototype.configureTestingModule = function (moduleDef) { };
+    /**
+     * Compile components with a `templateUrl` for the test's NgModule.
+     * It is necessary to call this function
+     * as fetching urls is asynchronous.
+     * @return {?}
+     */
+    TestBedStatic.prototype.compileComponents = function () { };
+    /**
+     * @param {?} ngModule
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideModule = function (ngModule, override) { };
+    /**
+     * @param {?} component
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideComponent = function (component, override) { };
+    /**
+     * @param {?} directive
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideDirective = function (directive, override) { };
+    /**
+     * @param {?} pipe
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overridePipe = function (pipe, override) { };
+    /**
+     * @param {?} component
+     * @param {?} template
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideTemplate = function (component, template) { };
+    /**
+     * Overrides the template of the given component, compiling the template
+     * in the context of the TestingModule.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     * @param {?} component
+     * @param {?} template
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideTemplateUsingTestingModule = function (component, template) { };
+    /**
+     * Overwrites all providers for the given token with the given provider definition.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     * @param {?} token
+     * @param {?} provider
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
+    /**
+     * @param {?} token
+     * @param {?} provider
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
+    /**
+     * @param {?} token
+     * @param {?} provider
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
+    /**
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    TestBedStatic.prototype.get = function (token, notFoundValue, flags) { };
+    /**
+     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * This does not use the deprecated jsdoc tag on purpose
+     * because it renders all overloads as deprecated in TSLint
+     * due to https://github.com/palantir/tslint/issues/4522.
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    TestBedStatic.prototype.get = function (token, notFoundValue) { };
+    /**
+     * @template T
+     * @param {?} component
+     * @return {?}
+     */
+    TestBedStatic.prototype.createComponent = function (component) { };
+}
 
 /**
  * @fileoverview added by tsickle
@@ -927,10 +1157,29 @@ let componentResourceResolutionQueue = new Map();
 const componentDefPendingResolution = new Set();
 /**
  * @param {?} type
+ * @param {?} metadata
+ * @return {?}
+ */
+function maybeQueueResolutionOfComponentResources(type, metadata) {
+    if (componentNeedsResolution(metadata)) {
+        componentResourceResolutionQueue.set(type, metadata);
+        componentDefPendingResolution.add(type);
+    }
+}
+/**
+ * @param {?} type
  * @return {?}
  */
 function isComponentDefPendingResolution(type) {
     return componentDefPendingResolution.has(type);
+}
+/**
+ * @param {?} component
+ * @return {?}
+ */
+function componentNeedsResolution(component) {
+    return !!((component.templateUrl && !component.hasOwnProperty('template')) ||
+        component.styleUrls && component.styleUrls.length);
 }
 /**
  * @return {?}
@@ -954,6 +1203,12 @@ function restoreComponentResolutionQueue(queue) {
      */
     (_, type) => componentDefPendingResolution.add(type)));
     componentResourceResolutionQueue = queue;
+}
+/**
+ * @return {?}
+ */
+function isComponentResourceResolutionQueueEmpty() {
+    return componentResourceResolutionQueue.size === 0;
 }
 /**
  * @param {?} response
@@ -1013,6 +1268,13 @@ class MetadataOverrider {
         }
         return new metadataClass((/** @type {?} */ (props)));
     }
+}
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    MetadataOverrider.prototype._references;
 }
 /**
  * @param {?} metadata
@@ -1161,6 +1423,30 @@ function _valueProps(obj) {
 /** @type {?} */
 const reflection = new ɵReflectionCapabilities();
 /**
+ * Base interface to resolve `\@Component`, `\@Directive`, `\@Pipe` and `\@NgModule`.
+ * @record
+ * @template T
+ */
+function Resolver() { }
+if (false) {
+    /**
+     * @param {?} type
+     * @param {?} override
+     * @return {?}
+     */
+    Resolver.prototype.addOverride = function (type, override) { };
+    /**
+     * @param {?} overrides
+     * @return {?}
+     */
+    Resolver.prototype.setOverrides = function (overrides) { };
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    Resolver.prototype.resolve = function (type) { };
+}
+/**
  * Allows to override ivy metadata for tests (via the `TestBed`).
  * @abstract
  * @template T
@@ -1247,6 +1533,23 @@ class OverrideResolver {
         return resolved;
     }
 }
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    OverrideResolver.prototype.overrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    OverrideResolver.prototype.resolved;
+    /**
+     * @abstract
+     * @return {?}
+     */
+    OverrideResolver.prototype.type = function () { };
+}
 class DirectiveResolver extends OverrideResolver {
     /**
      * @return {?}
@@ -1290,6 +1593,18 @@ TestingModuleOverride[TestingModuleOverride.OVERRIDE_TEMPLATE] = 'OVERRIDE_TEMPL
 function isTestingModuleOverride(value) {
     return value === TestingModuleOverride.DECLARATION ||
         value === TestingModuleOverride.OVERRIDE_TEMPLATE;
+}
+/**
+ * @record
+ */
+function CleanupOperation() { }
+if (false) {
+    /** @type {?} */
+    CleanupOperation.prototype.field;
+    /** @type {?} */
+    CleanupOperation.prototype.def;
+    /** @type {?} */
+    CleanupOperation.prototype.original;
 }
 class R3TestBedCompiler {
     /**
@@ -2123,6 +2438,133 @@ class R3TestBedCompiler {
         }
     }
 }
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.originalComponentResolutionQueue;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.declarations;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.imports;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.providers;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.schemas;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.pendingComponents;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.pendingDirectives;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.pendingPipes;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.seenComponents;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.seenDirectives;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.existingComponentStyles;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.resolvers;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.componentToModuleScope;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.initialNgDefs;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.defCleanupOps;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype._injector;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.compilerProviders;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.providerOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.rootProviderOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.providerOverridesByToken;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.moduleProvidersOverridden;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.testModuleType;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.testModuleRef;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.platform;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.additionalModuleTypes;
+}
 /**
  * @return {?}
  */
@@ -2284,6 +2726,13 @@ class R3TestCompiler {
         const meta = this.testBed._getModuleResolver().resolve(moduleType);
         return meta && meta.id || undefined;
     }
+}
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestCompiler.prototype.testBed;
 }
 
 /**
@@ -2734,6 +3183,32 @@ class TestBedRender3 {
         this._activeFixtures = [];
     }
 }
+if (false) {
+    /** @type {?} */
+    TestBedRender3.prototype.platform;
+    /** @type {?} */
+    TestBedRender3.prototype.ngModule;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedRender3.prototype._compiler;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedRender3.prototype._testModuleRef;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedRender3.prototype._activeFixtures;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedRender3.prototype._globalCompilationChecked;
+}
 /** @type {?} */
 let testBed;
 /**
@@ -2829,6 +3304,14 @@ TestingCompiler.decorators = [
  * @abstract
  */
 class TestingCompilerFactory {
+}
+if (false) {
+    /**
+     * @abstract
+     * @param {?=} options
+     * @return {?}
+     */
+    TestingCompilerFactory.prototype.createTestingCompiler = function (options) { };
 }
 
 /**
@@ -3469,6 +3952,107 @@ class TestBedViewEngine {
         return fixture;
     }
 }
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._instantiated;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._compiler;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._moduleRef;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._moduleFactory;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._compilerOptions;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._moduleOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._componentOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._directiveOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._pipeOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._providers;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._declarations;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._imports;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._schemas;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._activeFixtures;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._testEnvAotSummaries;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._aotSummaries;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._templateOverrides;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._isRoot;
+    /**
+     * @type {?}
+     * @private
+     */
+    TestBedViewEngine.prototype._rootProviderOverrides;
+    /** @type {?} */
+    TestBedViewEngine.prototype.platform;
+    /** @type {?} */
+    TestBedViewEngine.prototype.ngModule;
+}
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -3598,6 +4182,13 @@ class InjectSetupWrapper {
             return inject(tokens, fn).call(this);
         });
     }
+}
+if (false) {
+    /**
+     * @type {?}
+     * @private
+     */
+    InjectSetupWrapper.prototype._moduleDef;
 }
 /**
  * @param {?} moduleDef
