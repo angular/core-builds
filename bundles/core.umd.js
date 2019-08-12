@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.1+23.sha-4ea3e7e.with-local-changes
+ * @license Angular v9.0.0-next.1+24.sha-914900a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2465,7 +2465,7 @@
         return view[TVIEW].data[index + HEADER_OFFSET];
     }
     /** Retrieves a value from any `LView` or `TData`. */
-    function loadInternal(view, index) {
+    function load(view, index) {
         ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
         return view[index + HEADER_OFFSET];
     }
@@ -14282,7 +14282,7 @@
     function ɵɵcontainerRefreshStart(index) {
         var lView = getLView();
         var tView = lView[TVIEW];
-        var previousOrParentTNode = loadInternal(tView.data, index);
+        var previousOrParentTNode = load(tView.data, index);
         ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
         setPreviousOrParentTNode(previousOrParentTNode, true);
         lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
@@ -14365,15 +14365,7 @@
      */
     function ɵɵreference(index) {
         var contextLView = getContextLView();
-        return loadInternal(contextLView, index);
-    }
-    /**
-     * Retrieves a value from current `viewData`.
-     *
-     * @codeGenApi
-     */
-    function ɵɵload(index) {
-        return loadInternal(getLView(), index);
+        return load(contextLView, index);
     }
 
     /**
@@ -18529,7 +18521,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.1+23.sha-4ea3e7e.with-local-changes');
+    var VERSION = new Version('9.0.0-next.1+24.sha-914900a.with-local-changes');
 
     /**
      * @license
@@ -22669,7 +22661,7 @@
         if (removedPhRNode) {
             nativeRemoveNode(viewData[RENDERER], removedPhRNode);
         }
-        var slotValue = ɵɵload(index);
+        var slotValue = load(viewData, index);
         if (isLContainer(slotValue)) {
             var lContainer = slotValue;
             if (removedPhTNode.type !== 0 /* Container */) {
@@ -23641,7 +23633,7 @@
      * @codeGenApi
      */
     function ɵɵpipeBind1(index, slotOffset, v1) {
-        var pipeInstance = ɵɵload(index);
+        var pipeInstance = load(getLView(), index);
         return unwrapValue$1(isPure(index) ? ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
             pipeInstance.transform(v1));
     }
@@ -23659,7 +23651,7 @@
      * @codeGenApi
      */
     function ɵɵpipeBind2(index, slotOffset, v1, v2) {
-        var pipeInstance = ɵɵload(index);
+        var pipeInstance = load(getLView(), index);
         return unwrapValue$1(isPure(index) ? ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
             pipeInstance.transform(v1, v2));
     }
@@ -23678,7 +23670,7 @@
      * @codeGenApi
      */
     function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
-        var pipeInstance = ɵɵload(index);
+        var pipeInstance = load(getLView(), index);
         return unwrapValue$1(isPure(index) ?
             ɵɵpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
             pipeInstance.transform(v1, v2, v3));
@@ -23699,7 +23691,7 @@
      * @codeGenApi
      */
     function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
-        var pipeInstance = ɵɵload(index);
+        var pipeInstance = load(getLView(), index);
         return unwrapValue$1(isPure(index) ?
             ɵɵpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
             pipeInstance.transform(v1, v2, v3, v4));
@@ -23717,7 +23709,7 @@
      * @codeGenApi
      */
     function ɵɵpipeBindV(index, slotOffset, values) {
-        var pipeInstance = ɵɵload(index);
+        var pipeInstance = load(getLView(), index);
         return unwrapValue$1(isPure(index) ? ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
             pipeInstance.transform.apply(pipeInstance, values));
     }
@@ -24630,7 +24622,6 @@
         'ɵɵgetCurrentView': ɵɵgetCurrentView,
         'ɵɵrestoreView': ɵɵrestoreView,
         'ɵɵlistener': ɵɵlistener,
-        'ɵɵload': ɵɵload,
         'ɵɵprojection': ɵɵprojection,
         'ɵɵupdateSyntheticHostBinding': ɵɵupdateSyntheticHostBinding,
         'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
@@ -30733,8 +30724,7 @@
     exports.ɵangular_packages_core_core_bd = getLView;
     exports.ɵangular_packages_core_core_be = getPreviousOrParentTNode;
     exports.ɵangular_packages_core_core_bf = nextContextImpl;
-    exports.ɵangular_packages_core_core_bo = getRootContext;
-    exports.ɵangular_packages_core_core_bn = loadInternal;
+    exports.ɵangular_packages_core_core_bn = getRootContext;
     exports.ɵangular_packages_core_core_h = createElementRef;
     exports.ɵangular_packages_core_core_i = createTemplateRef;
     exports.ɵangular_packages_core_core_bh = getUrlSanitizer;
@@ -31027,7 +31017,6 @@
     exports.ɵɵtemplate = ɵɵtemplate;
     exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
     exports.ɵstore = store;
-    exports.ɵɵload = ɵɵload;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵwhenRendered = whenRendered;
     exports.ɵɵi18n = ɵɵi18n;
