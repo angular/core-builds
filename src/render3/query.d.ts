@@ -38,12 +38,6 @@ export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], 
  */
 export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
 /**
- * Loads a QueryList corresponding to the current view query.
- *
- * @codeGenApi
- */
-export declare function ɵɵloadViewQuery<T>(): QueryList<T>;
-/**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
  *
@@ -70,8 +64,8 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: T
  */
 export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
 /**
- * Loads a QueryList corresponding to the current content query.
+ * Loads a QueryList corresponding to the current view or content query.
  *
  * @codeGenApi
  */
-export declare function ɵɵloadContentQuery<T>(): QueryList<T>;
+export declare function ɵɵloadQuery<T>(): QueryList<T>;

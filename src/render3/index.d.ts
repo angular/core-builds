@@ -23,7 +23,7 @@ export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { AttributeMarker } from './interfaces/node';
 export { setClassMetadata, } from './metadata';
 export { ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, } from './pipe';
-export { ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵloadViewQuery, ɵɵcontentQuery, ɵɵloadContentQuery, ɵɵstaticContentQuery } from './query';
+export { ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵloadQuery, ɵɵcontentQuery, ɵɵstaticContentQuery } from './query';
 export { ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, } from './pure_function';
 export { ɵɵtemplateRefExtractor, ɵɵinjectPipeChangeDetectorRef } from './view_engine_compatibility_prebound';
 export { ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody } from './util/misc_utils';
