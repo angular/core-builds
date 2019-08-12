@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.1+22.sha-6eb9c2f.with-local-changes
+ * @license Angular v9.0.0-next.1+23.sha-4ea3e7e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18529,7 +18529,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.1+22.sha-6eb9c2f.with-local-changes');
+    var VERSION = new Version('9.0.0-next.1+23.sha-4ea3e7e.with-local-changes');
 
     /**
      * @license
@@ -24448,14 +24448,6 @@
         createLQuery(lView);
     }
     /**
-     * Loads a QueryList corresponding to the current view query.
-     *
-     * @codeGenApi
-     */
-    function ɵɵloadViewQuery() {
-        return loadQueryInternal(getLView(), getCurrentQueryIndex());
-    }
-    /**
      * Registers a QueryList, associated with a content query, for later refresh (part of a view
      * refresh).
      *
@@ -24497,11 +24489,11 @@
         createLQuery(lView);
     }
     /**
-     * Loads a QueryList corresponding to the current content query.
+     * Loads a QueryList corresponding to the current view or content query.
      *
      * @codeGenApi
      */
-    function ɵɵloadContentQuery() {
+    function ɵɵloadQuery() {
         return loadQueryInternal(getLView(), getCurrentQueryIndex());
     }
     function loadQueryInternal(lView, queryIndex) {
@@ -24665,9 +24657,8 @@
         'ɵɵviewQuery': ɵɵviewQuery,
         'ɵɵstaticViewQuery': ɵɵstaticViewQuery,
         'ɵɵstaticContentQuery': ɵɵstaticContentQuery,
-        'ɵɵloadViewQuery': ɵɵloadViewQuery,
+        'ɵɵloadQuery': ɵɵloadQuery,
         'ɵɵcontentQuery': ɵɵcontentQuery,
-        'ɵɵloadContentQuery': ɵɵloadContentQuery,
         'ɵɵreference': ɵɵreference,
         'ɵɵelementHostAttrs': ɵɵelementHostAttrs,
         'ɵɵclassMap': ɵɵclassMap,
@@ -30980,9 +30971,8 @@
     exports.ɵɵviewQuery = ɵɵviewQuery;
     exports.ɵɵstaticViewQuery = ɵɵstaticViewQuery;
     exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
-    exports.ɵɵloadViewQuery = ɵɵloadViewQuery;
     exports.ɵɵcontentQuery = ɵɵcontentQuery;
-    exports.ɵɵloadContentQuery = ɵɵloadContentQuery;
+    exports.ɵɵloadQuery = ɵɵloadQuery;
     exports.ɵɵelementEnd = ɵɵelementEnd;
     exports.ɵɵhostProperty = ɵɵhostProperty;
     exports.ɵɵproperty = ɵɵproperty;

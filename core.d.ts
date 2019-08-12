@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.1+22.sha-6eb9c2f.with-local-changes
+ * @license Angular v9.0.0-next.1+23.sha-4ea3e7e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12187,18 +12187,11 @@ export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) =>
 export declare function ɵɵload<T>(index: number): T;
 
 /**
- * Loads a QueryList corresponding to the current content query.
+ * Loads a QueryList corresponding to the current view or content query.
  *
  * @codeGenApi
  */
-export declare function ɵɵloadContentQuery<T>(): QueryList<T>;
-
-/**
- * Loads a QueryList corresponding to the current view query.
- *
- * @codeGenApi
- */
-export declare function ɵɵloadViewQuery<T>(): QueryList<T>;
+export declare function ɵɵloadQuery<T>(): QueryList<T>;
 
 /**
  * Sets the namespace used to create elements to `null`, which forces element creation to use
