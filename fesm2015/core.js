@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.1+21.sha-7b94145.with-local-changes
+ * @license Angular v9.0.0-next.1+22.sha-6eb9c2f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20159,13 +20159,11 @@ function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
  */
 function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate1;
 }
@@ -20198,13 +20196,11 @@ function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, name
  */
 function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate2;
 }
@@ -20240,13 +20236,11 @@ function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitiz
  */
 function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate3;
 }
@@ -20284,13 +20278,11 @@ function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix,
  */
 function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate4;
 }
@@ -20330,13 +20322,11 @@ function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
  */
 function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate5;
 }
@@ -20378,13 +20368,11 @@ function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
  */
 function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate6;
 }
@@ -20480,13 +20468,11 @@ function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
  */
 function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolate8;
 }
@@ -20519,13 +20505,11 @@ function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
  */
 function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolated, lView, sanitizer, namespace);
+        elementAttributeInternal(getSelectedIndex(), attrName, interpolated, lView, sanitizer, namespace);
     }
     return ɵɵattributeInterpolateV;
 }
@@ -22430,11 +22414,9 @@ function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
  */
 function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation1(getLView(), prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate1;
 }
@@ -22470,11 +22452,9 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
  */
 function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation2(getLView(), prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate2;
 }
@@ -22513,11 +22493,9 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
  */
 function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation3(getLView(), prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate3;
 }
@@ -22558,11 +22536,9 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
  */
 function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation4(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate4;
 }
@@ -22605,11 +22581,9 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
  */
 function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation5(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate5;
 }
@@ -22654,11 +22628,9 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
  */
 function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation6(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate6;
 }
@@ -22705,11 +22677,9 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
  */
 function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation7(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate7;
 }
@@ -22758,11 +22728,9 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
  */
 function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolation8(getLView(), prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolate8;
 }
@@ -22798,11 +22766,9 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
  */
 function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const interpolatedValue = interpolationV(getLView(), values);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(index, propName, interpolatedValue, sanitizer);
+        elementPropertyInternal(getSelectedIndex(), propName, interpolatedValue, sanitizer);
     }
     return ɵɵpropertyInterpolateV;
 }
@@ -22910,13 +22876,11 @@ function ɵɵtextInterpolate(v0) {
  */
 function ɵɵtextInterpolate1(prefix, v0, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation1(lView, prefix, v0, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate1;
 }
@@ -22946,13 +22910,11 @@ function ɵɵtextInterpolate1(prefix, v0, suffix) {
  */
 function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate2;
 }
@@ -22985,13 +22947,11 @@ function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
  */
 function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate3;
 }
@@ -23026,13 +22986,11 @@ function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
  */
 function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate4;
 }
@@ -23069,13 +23027,11 @@ function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  */
 function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate5;
 }
@@ -23115,13 +23071,11 @@ function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix
  */
 function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate6;
 }
@@ -23162,13 +23116,11 @@ function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
  */
 function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate7;
 }
@@ -23211,13 +23163,11 @@ function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
  */
 function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolate8;
 }
@@ -23247,13 +23197,11 @@ function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5
  */
 function ɵɵtextInterpolateV(values) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
     /** @type {?} */
     const interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, index, (/** @type {?} */ (interpolated)));
+        textBindingInternal(lView, getSelectedIndex(), (/** @type {?} */ (interpolated)));
     }
     return ɵɵtextInterpolateV;
 }
@@ -26464,7 +26412,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.1+21.sha-7b94145.with-local-changes');
+const VERSION = new Version('9.0.0-next.1+22.sha-6eb9c2f.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
