@@ -11,9 +11,3 @@ export declare function store<T>(index: number, value: T): void;
  * @codeGenApi
  */
 export declare function ɵɵreference<T>(index: number): T;
-/**
- * Retrieves a value from current `viewData`.
- *
- * @codeGenApi
- */
-export declare function ɵɵload<T>(index: number): T;
