@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.1+23.sha-4ea3e7e.with-local-changes
+ * @license Angular v9.0.0-next.1+24.sha-914900a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8793,9 +8793,6 @@ export declare interface ɵangular_packages_core_core_bl extends Array<any> {
  */
 export declare function ɵangular_packages_core_core_bm(fn: () => void): string;
 
-/** Retrieves a value from any `LView` or `TData`. */
-export declare function ɵangular_packages_core_core_bn<T>(view: ɵangular_packages_core_core_bl | TData, index: number): T;
-
 /**
  * Returns the `RootContext` instance that is associated with
  * the application where the target is situated. It does this by walking the parent views until it
@@ -8803,7 +8800,7 @@ export declare function ɵangular_packages_core_core_bn<T>(view: ɵangular_packa
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_bo(viewOrComponent: ɵangular_packages_core_core_bl | {}): RootContext;
+export declare function ɵangular_packages_core_core_bn(viewOrComponent: ɵangular_packages_core_core_bl | {}): RootContext;
 
 export declare class ɵangular_packages_core_core_c implements Injector {
     get(token: any, notFoundValue?: any): any;
@@ -12178,13 +12175,6 @@ export declare function ɵɵinjectPipeChangeDetectorRef(flags?: InjectFlags): Ch
  * @codeGenApi
  */
 export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
-
-/**
- * Retrieves a value from current `viewData`.
- *
- * @codeGenApi
- */
-export declare function ɵɵload<T>(index: number): T;
 
 /**
  * Loads a QueryList corresponding to the current view or content query.
