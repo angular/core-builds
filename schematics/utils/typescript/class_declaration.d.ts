@@ -11,3 +11,5 @@ import * as ts from 'typescript';
 export declare function getBaseTypeIdentifiers(node: ts.ClassDeclaration): ts.Identifier[] | null;
 /** Gets the first found parent class declaration of a given node. */
 export declare function findParentClassDeclaration(node: ts.Node): ts.ClassDeclaration | null;
+/** Checks whether the given class declaration has an explicit constructor or not. */
+export declare function hasExplicitConstructor(node: ts.ClassDeclaration): boolean;

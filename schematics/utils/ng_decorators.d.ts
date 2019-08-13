@@ -12,6 +12,7 @@ export declare type CallExpressionDecorator = ts.Decorator & {
 };
 export interface NgDecorator {
     name: string;
+    moduleName: string;
     node: CallExpressionDecorator;
     importNode: ts.ImportDeclaration;
 }
