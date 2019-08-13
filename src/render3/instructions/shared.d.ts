@@ -18,13 +18,6 @@ export declare const enum BindingDirection {
     Input = 0,
     Output = 1
 }
-/**
- * Refreshes the view, executing the following steps in that order:
- * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
- * bindings, refreshes child components.
- * Note: view hooks are triggered later when leaving the view.
- */
-export declare function refreshDescendantViews(lView: LView): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LView): void;
 /**
@@ -70,19 +63,23 @@ export declare function allocExpando(view: LView, numSlotsToAlloc: number): void
  */
 export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, injectorIndex: number): LView;
 /**
- * Used for rendering views in a LContainer (embedded views or root component views for dynamically
- * created components).
- *
- * Dynamically created views must store/retrieve their TViews differently from component views
- * because their template functions are nested in the template functions of their hosts, creating
- * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor
- * inside
- * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
- * can't store TViews in the template function itself (as we do for comps). Instead, we store the
- * TView for dynamically created views on their host TNode, which only has one instance.
+ * Processes a view in the creation mode. This includes a number of steps in a specific order:
+ * - creating view query functions (if any);
+ * - executing a template function in the creation mode;
+ * - updating static queries (if any);
+ * - creating child components defined in a given view.
  */
-export declare function renderEmbeddedTemplate<T>(viewToRender: LView, tView: TView, context: T): void;
-export declare function renderComponentOrTemplate<T>(hostView: LView, context: T, templateFn?: ComponentTemplate<T>): void;
+export declare function renderView<T>(lView: LView, tView: TView, context: T): void;
+/**
+ * Processes a view in update mode. This includes a number of steps in a specific order:
+ * - executing a template function in update mode;
+ * - executing hooks;
+ * - refreshing queries;
+ * - setting host bindings;
+ * - refreshing child (embedded and component) views.
+ */
+export declare function refreshView<T>(lView: LView, tView: TView, templateFn: ComponentTemplate<{}> | null, context: T): void;
+export declare function renderComponentOrTemplate<T>(hostView: LView, templateFn: ComponentTemplate<{}> | null, context: T): void;
 export declare function executeContentQueries(tView: TView, tNode: TNode, lView: LView): void;
 /**
  * Creates directive instances and populates local refs.
@@ -204,12 +201,6 @@ export declare function elementAttributeInternal(index: number, name: string, va
  */
 export declare function createLContainer(hostNative: RElement | RComment | LView, currentView: LView, native: RComment, tNode: TNode, isForViewContainerRef?: boolean): LContainer;
 /**
- * Refreshes components by entering the component view and processing its bindings, queries, etc.
- *
- * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
- */
-export declare function componentRefresh(hostLView: LView, adjustedElementIndex: number): void;
-/**
  * Adds LView or LContainer to the end of the current view tree.
  *
  * This structure will be used to traverse through nested views to remove listeners
@@ -271,9 +262,6 @@ export declare function checkNoChangesInternal<T>(view: LView, context: T): void
  * @param lView The view which the change detection should be checked on.
  */
 export declare function checkNoChangesInRootView(lView: LView): void;
-/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck.
- */
-export declare function checkView<T>(hostView: LView, component: T): void;
 /**
  * Creates binding metadata for a particular binding and stores it in
  * TView.data. These are generated in order to support DebugElement.properties.

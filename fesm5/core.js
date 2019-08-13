@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+17.sha-4d96cf5.with-local-changes
+ * @license Angular v9.0.0-next.2+18.sha-b9dfe66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1858,248 +1858,6 @@ function typeName(type) {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Adds all directive lifecycle hooks from the given `DirectiveDef` to the given `TView`.
- *
- * Must be run *only* on the first template pass.
- *
- * Sets up the pre-order hooks on the provided `tView`,
- * see {@link HookData} for details about the data structure.
- *
- * @param directiveIndex The index of the directive in LView
- * @param directiveDef The definition containing the hooks to setup in tView
- * @param tView The current TView
- * @param nodeIndex The index of the node to which the directive is attached
- * @param initialPreOrderHooksLength the number of pre-order hooks already registered before the
- * current process, used to know if the node index has to be added to the array. If it is -1,
- * the node index is never added.
- * @param initialPreOrderCheckHooksLength same as previous for pre-order check hooks
- */
-function registerPreOrderHooks(directiveIndex, directiveDef, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength) {
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
-    var onChanges = directiveDef.onChanges, onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
-    if (initialPreOrderHooksLength >= 0 &&
-        (!tView.preOrderHooks || initialPreOrderHooksLength === tView.preOrderHooks.length) &&
-        (onChanges || onInit || doCheck)) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(nodeIndex);
-    }
-    if (initialPreOrderCheckHooksLength >= 0 &&
-        (!tView.preOrderCheckHooks ||
-            initialPreOrderCheckHooksLength === tView.preOrderCheckHooks.length) &&
-        (onChanges || doCheck)) {
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(nodeIndex);
-    }
-    if (onChanges) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, onChanges);
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, onChanges);
-    }
-    if (onInit) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(-directiveIndex, onInit);
-    }
-    if (doCheck) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, doCheck);
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, doCheck);
-    }
-}
-/**
- *
- * Loops through the directives on the provided `tNode` and queues hooks to be
- * run that are not initialization hooks.
- *
- * Should be executed during `elementEnd()` and similar to
- * preserve hook execution order. Content, view, and destroy hooks for projected
- * components and directives must be called *before* their hosts.
- *
- * Sets up the content, view, and destroy hooks on the provided `tView`,
- * see {@link HookData} for details about the data structure.
- *
- * NOTE: This does not set up `onChanges`, `onInit` or `doCheck`, those are set up
- * separately at `elementStart`.
- *
- * @param tView The current TView
- * @param tNode The TNode whose directives are to be searched for hooks to queue
- */
-function registerPostOrderHooks(tView, tNode) {
-    if (tView.firstTemplatePass) {
-        // It's necessary to loop through the directives at elementEnd() (rather than processing in
-        // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
-        // hooks for projected components and directives must be called *before* their hosts.
-        for (var i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
-            var directiveDef = tView.data[i];
-            if (directiveDef.afterContentInit) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
-            }
-            if (directiveDef.afterContentChecked) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
-                (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, directiveDef.afterContentChecked);
-            }
-            if (directiveDef.afterViewInit) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
-            }
-            if (directiveDef.afterViewChecked) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
-                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
-            }
-            if (directiveDef.onDestroy != null) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
-            }
-        }
-    }
-}
-/**
- * Executing hooks requires complex logic as we need to deal with 2 constraints.
- *
- * 1. Init hooks (ngOnInit, ngAfterContentInit, ngAfterViewInit) must all be executed once and only
- * once, across many change detection cycles. This must be true even if some hooks throw, or if
- * some recursively trigger a change detection cycle.
- * To solve that, it is required to track the state of the execution of these init hooks.
- * This is done by storing and maintaining flags in the view: the {@link InitPhaseState},
- * and the index within that phase. They can be seen as a cursor in the following structure:
- * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
- * They are are stored as flags in LView[FLAGS].
- *
- * 2. Pre-order hooks can be executed in batches, because of the select instruction.
- * To be able to pause and resume their execution, we also need some state about the hook's array
- * that is being processed:
- * - the index of the next hook to be executed
- * - the number of init hooks already found in the processed part of the  array
- * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
- */
-/**
- * Executes necessary hooks at the start of executing a template.
- *
- * Executes hooks that are to be run during the initialization of a directive such
- * as `onChanges`, `onInit`, and `doCheck`.
- *
- * @param lView The current view
- * @param tView Static data for the view containing the hooks to be executed
- * @param checkNoChangesMode Whether or not we're in checkNoChanges mode.
- * @param @param currentNodeIndex 2 cases depending the the value:
- * - undefined: execute hooks only from the saved index until the end of the array (pre-order case,
- * when flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- */
-function executePreOrderHooks(currentView, tView, checkNoChangesMode, currentNodeIndex) {
-    if (!checkNoChangesMode) {
-        executeHooks(currentView, tView.preOrderHooks, tView.preOrderCheckHooks, checkNoChangesMode, 0 /* OnInitHooksToBeRun */, currentNodeIndex !== undefined ? currentNodeIndex : null);
-    }
-}
-/**
- * Executes hooks against the given `LView` based off of whether or not
- * This is the first pass.
- *
- * @param currentView The view instance data to run the hooks against
- * @param firstPassHooks An array of hooks to run if we're in the first view pass
- * @param checkHooks An Array of hooks to run if we're not in the first view pass.
- * @param checkNoChangesMode Whether or not we're in no changes mode.
- * @param initPhaseState the current state of the init phase
- * @param currentNodeIndex 3 cases depending the the value:
- * - undefined: all hooks from the array should be executed (post-order case)
- * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
- * flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- */
-function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMode, initPhaseState, currentNodeIndex) {
-    if (checkNoChangesMode)
-        return;
-    if (checkHooks !== null || firstPassHooks !== null) {
-        var hooksToCall = (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhaseState ?
-            firstPassHooks :
-            checkHooks;
-        if (hooksToCall !== null) {
-            callHooks(currentView, hooksToCall, initPhaseState, currentNodeIndex);
-        }
-    }
-    // The init phase state must be always checked here as it may have been recursively updated
-    var flags = currentView[FLAGS];
-    if (currentNodeIndex == null && (flags & 3 /* InitPhaseStateMask */) === initPhaseState &&
-        initPhaseState !== 3 /* InitPhaseCompleted */) {
-        flags &= 1023 /* IndexWithinInitPhaseReset */;
-        flags += 1 /* InitPhaseStateIncrementer */;
-        currentView[FLAGS] = flags;
-    }
-}
-/**
- * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
- * the first LView pass
- *
- * @param currentView The current view
- * @param arr The array in which the hooks are found
- * @param initPhaseState the current state of the init phase
- * @param currentNodeIndex 3 cases depending the the value:
- * - undefined: all hooks from the array should be executed (post-order case)
- * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
- * flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- */
-function callHooks(currentView, arr, initPhase, currentNodeIndex) {
-    var startIndex = currentNodeIndex !== undefined ?
-        (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
-        0;
-    var nodeIndexLimit = currentNodeIndex != null ? currentNodeIndex : -1;
-    var lastNodeIndexFound = 0;
-    for (var i = startIndex; i < arr.length; i++) {
-        var hook = arr[i + 1];
-        if (typeof hook === 'number') {
-            lastNodeIndexFound = arr[i];
-            if (currentNodeIndex != null && lastNodeIndexFound >= currentNodeIndex) {
-                break;
-            }
-        }
-        else {
-            var isInitHook = arr[i] < 0;
-            if (isInitHook)
-                currentView[PREORDER_HOOK_FLAGS] += 65536 /* NumberOfInitHooksCalledIncrementer */;
-            if (lastNodeIndexFound < nodeIndexLimit || nodeIndexLimit == -1) {
-                callHook(currentView, initPhase, arr, i);
-                currentView[PREORDER_HOOK_FLAGS] =
-                    (currentView[PREORDER_HOOK_FLAGS] & 4294901760 /* NumberOfInitHooksCalledMask */) + i +
-                        2;
-            }
-            i++;
-        }
-    }
-}
-/**
- * Execute one hook against the current `LView`.
- *
- * @param currentView The current view
- * @param initPhaseState the current state of the init phase
- * @param arr The array in which the hooks are found
- * @param i The current index within the hook data array
- */
-function callHook(currentView, initPhase, arr, i) {
-    var isInitHook = arr[i] < 0;
-    var hook = arr[i + 1];
-    var directiveIndex = isInitHook ? -arr[i] : arr[i];
-    var directive = currentView[directiveIndex];
-    if (isInitHook) {
-        var indexWithintInitPhase = currentView[FLAGS] >> 10 /* IndexWithinInitPhaseShift */;
-        // The init phase state must be always checked here as it may have been recursively
-        // updated
-        if (indexWithintInitPhase <
-            (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
-            (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
-            currentView[FLAGS] += 1024 /* IndexWithinInitPhaseIncrementer */;
-            hook.call(directive);
-        }
-    }
-    else {
-        hook.call(directive);
-    }
-}
-
-/**
 * @license
 * Copyright Google Inc. All Rights Reserved.
 *
@@ -2180,178 +1938,6 @@ function deleteStylingStateFromStorage(element) {
 function resetAllStylingState() {
     resetStylingState();
     _stateStorage.clear();
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This property will be monkey-patched on elements, components and directives
- */
-var MONKEY_PATCH_KEY_NAME = '__ngContext__';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
- * in same location in `LView`. This is because we don't want to pre-allocate space for it
- * because the storage is sparse. This file contains utilities for dealing with such data types.
- *
- * How do we know what is stored at a given location in `LView`.
- * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
- * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
- *   - `typeof value[TYPE] === 'object'` => `LView`
- *      - This happens when we have a component at a given location
- *   - `typeof value[TYPE] === true` => `LContainer`
- *      - This happens when we have `LContainer` binding at a given location.
- *
- *
- * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
- */
-/**
- * Returns `RNode`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapRNode(value) {
-    while (Array.isArray(value)) {
-        value = value[HOST];
-    }
-    return value;
-}
-/**
- * Returns `LView` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapLView(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLView()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (typeof value[TYPE] === 'object')
-            return value;
-        value = value[HOST];
-    }
-    return null;
-}
-/**
- * Returns `LContainer` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapLContainer(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLContainer()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (value[TYPE] === true)
-            return value;
-        value = value[HOST];
-    }
-    return null;
-}
-/**
- * Retrieves an element value from the provided `viewData`, by unwrapping
- * from any containers, component views, or style contexts.
- */
-function getNativeByIndex(index, lView) {
-    return unwrapRNode(lView[index + HEADER_OFFSET]);
-}
-/**
- * Retrieve an `RNode` for a given `TNode` and `LView`.
- *
- * This function guarantees in dev mode to retrieve a non-null `RNode`.
- *
- * @param tNode
- * @param lView
- */
-function getNativeByTNode(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    ngDevMode && assertDataInRange(lView, tNode.index);
-    var node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && assertDomNode(node);
-    return node;
-}
-/**
- * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
- *
- * Some `TNode`s don't have associated `RNode`s. For example `Projection`
- *
- * @param tNode
- * @param lView
- */
-function getNativeByTNodeOrNull(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    var index = tNode.index;
-    var node = index == -1 ? null : unwrapRNode(lView[index]);
-    ngDevMode && node !== null && assertDomNode(node);
-    return node;
-}
-/**
- * A helper function that returns `true` if a given `TNode` has any matching directives.
- */
-function hasDirectives(tNode) {
-    return tNode.directiveEnd > tNode.directiveStart;
-}
-function getTNode(index, view) {
-    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
-    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
-    return view[TVIEW].data[index + HEADER_OFFSET];
-}
-/** Retrieves a value from any `LView` or `TData`. */
-function load(view, index) {
-    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
-}
-function getComponentViewByIndex(nodeIndex, hostView) {
-    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-    var slotValue = hostView[nodeIndex];
-    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
-    return lView;
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-function readPatchedData(target) {
-    ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME];
-}
-function readPatchedLView(target) {
-    var value = readPatchedData(target);
-    if (value) {
-        return Array.isArray(value) ? value : value.lView;
-    }
-    return null;
-}
-/** Checks whether a given view is in creation mode */
-function isCreationMode(view) {
-    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
-}
-/**
- * Returns a boolean for whether the view is attached to the change detection tree.
- *
- * Note: This determines whether a view should be checked, not whether it's inserted
- * into a container. For that, you'll want `viewAttachedToContainer` below.
- */
-function viewAttachedToChangeDetector(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
-}
-/** Returns a boolean for whether the view is attached to a container. */
-function viewAttachedToContainer(view) {
-    return isLContainer(view[PARENT]);
-}
-/**
- * Resets the pre-order hook flags of the view.
- * @param lView the LView on which the flags are reset
- */
-function resetPreOrderHookFlags(lView) {
-    lView[PREORDER_HOOK_FLAGS] = 0;
 }
 
 /**
@@ -2752,27 +2338,9 @@ function resetComponentState() {
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
  *
- * @param newView New state to become active
- * @param safeToRunHooks Whether the runtime is in a state where running lifecycle hooks is valid.
- * This is not always the case (for example, the application may have crashed and `leaveView` is
- * being executed while unwinding the call stack).
+ * @param newView New LView to become active
  */
-function leaveView(newView, safeToRunHooks) {
-    var tView = lView[TVIEW];
-    if (isCreationMode(lView)) {
-        lView[FLAGS] &= ~4 /* CreationMode */;
-    }
-    else {
-        try {
-            resetPreOrderHookFlags(lView);
-            safeToRunHooks && executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode, 2 /* AfterViewInitHooksToBeRun */, undefined);
-        }
-        finally {
-            // Views are clean and in update mode after being checked, so these bits are cleared
-            lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
-            lView[BINDING_INDEX] = tView.bindingStartIndex;
-        }
-    }
+function leaveView(newView) {
     enterView(newView, null);
 }
 var _selectedIndex = -1;
@@ -3299,6 +2867,179 @@ function getParentInjectorView(location, startView) {
         viewOffset--;
     }
     return parentView;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This property will be monkey-patched on elements, components and directives
+ */
+var MONKEY_PATCH_KEY_NAME = '__ngContext__';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
+ * in same location in `LView`. This is because we don't want to pre-allocate space for it
+ * because the storage is sparse. This file contains utilities for dealing with such data types.
+ *
+ * How do we know what is stored at a given location in `LView`.
+ * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
+ * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
+ *   - `typeof value[TYPE] === 'object'` => `LView`
+ *      - This happens when we have a component at a given location
+ *   - `typeof value[TYPE] === true` => `LContainer`
+ *      - This happens when we have `LContainer` binding at a given location.
+ *
+ *
+ * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
+ */
+/**
+ * Returns `RNode`.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
+function unwrapRNode(value) {
+    while (Array.isArray(value)) {
+        value = value[HOST];
+    }
+    return value;
+}
+/**
+ * Returns `LView` or `null` if not found.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
+function unwrapLView(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLView()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (typeof value[TYPE] === 'object')
+            return value;
+        value = value[HOST];
+    }
+    return null;
+}
+/**
+ * Returns `LContainer` or `null` if not found.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
+function unwrapLContainer(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLContainer()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (value[TYPE] === true)
+            return value;
+        value = value[HOST];
+    }
+    return null;
+}
+/**
+ * Retrieves an element value from the provided `viewData`, by unwrapping
+ * from any containers, component views, or style contexts.
+ */
+function getNativeByIndex(index, lView) {
+    return unwrapRNode(lView[index + HEADER_OFFSET]);
+}
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param tNode
+ * @param lView
+ */
+function getNativeByTNode(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    ngDevMode && assertDataInRange(lView, tNode.index);
+    var node = unwrapRNode(lView[tNode.index]);
+    ngDevMode && assertDomNode(node);
+    return node;
+}
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param tNode
+ * @param lView
+ */
+function getNativeByTNodeOrNull(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    var index = tNode.index;
+    var node = index == -1 ? null : unwrapRNode(lView[index]);
+    ngDevMode && node !== null && assertDomNode(node);
+    return node;
+}
+/**
+ * A helper function that returns `true` if a given `TNode` has any matching directives.
+ */
+function hasDirectives(tNode) {
+    return tNode.directiveEnd > tNode.directiveStart;
+}
+function getTNode(index, view) {
+    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
+    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
+    return view[TVIEW].data[index + HEADER_OFFSET];
+}
+/** Retrieves a value from any `LView` or `TData`. */
+function load(view, index) {
+    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+    return view[index + HEADER_OFFSET];
+}
+function getComponentViewByIndex(nodeIndex, hostView) {
+    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
+    ngDevMode && assertDataInRange(hostView, nodeIndex);
+    var slotValue = hostView[nodeIndex];
+    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
+    return lView;
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ */
+function readPatchedData(target) {
+    ngDevMode && assertDefined(target, 'Target expected');
+    return target[MONKEY_PATCH_KEY_NAME];
+}
+function readPatchedLView(target) {
+    var value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : value.lView;
+    }
+    return null;
+}
+/** Checks whether a given view is in creation mode */
+function isCreationMode(view) {
+    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/** Returns a boolean for whether the view is attached to a container. */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
+}
+/**
+ * Resets the pre-order hook flags of the view.
+ * @param lView the LView on which the flags are reset
+ */
+function resetPreOrderHookFlags(lView) {
+    lView[PREORDER_HOOK_FLAGS] = 0;
 }
 
 /**
@@ -5419,6 +5160,248 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
             " - only instances of Provider and Type are allowed, got: [" + providerDetail.join(', ') + "]";
     }
     throw new Error("Invalid provider for the NgModule '" + stringify(ngModuleType) + "'" + ngModuleDetail);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Adds all directive lifecycle hooks from the given `DirectiveDef` to the given `TView`.
+ *
+ * Must be run *only* on the first template pass.
+ *
+ * Sets up the pre-order hooks on the provided `tView`,
+ * see {@link HookData} for details about the data structure.
+ *
+ * @param directiveIndex The index of the directive in LView
+ * @param directiveDef The definition containing the hooks to setup in tView
+ * @param tView The current TView
+ * @param nodeIndex The index of the node to which the directive is attached
+ * @param initialPreOrderHooksLength the number of pre-order hooks already registered before the
+ * current process, used to know if the node index has to be added to the array. If it is -1,
+ * the node index is never added.
+ * @param initialPreOrderCheckHooksLength same as previous for pre-order check hooks
+ */
+function registerPreOrderHooks(directiveIndex, directiveDef, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength) {
+    ngDevMode &&
+        assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
+    var onChanges = directiveDef.onChanges, onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
+    if (initialPreOrderHooksLength >= 0 &&
+        (!tView.preOrderHooks || initialPreOrderHooksLength === tView.preOrderHooks.length) &&
+        (onChanges || onInit || doCheck)) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(nodeIndex);
+    }
+    if (initialPreOrderCheckHooksLength >= 0 &&
+        (!tView.preOrderCheckHooks ||
+            initialPreOrderCheckHooksLength === tView.preOrderCheckHooks.length) &&
+        (onChanges || doCheck)) {
+        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(nodeIndex);
+    }
+    if (onChanges) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, onChanges);
+        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, onChanges);
+    }
+    if (onInit) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(-directiveIndex, onInit);
+    }
+    if (doCheck) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, doCheck);
+        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, doCheck);
+    }
+}
+/**
+ *
+ * Loops through the directives on the provided `tNode` and queues hooks to be
+ * run that are not initialization hooks.
+ *
+ * Should be executed during `elementEnd()` and similar to
+ * preserve hook execution order. Content, view, and destroy hooks for projected
+ * components and directives must be called *before* their hosts.
+ *
+ * Sets up the content, view, and destroy hooks on the provided `tView`,
+ * see {@link HookData} for details about the data structure.
+ *
+ * NOTE: This does not set up `onChanges`, `onInit` or `doCheck`, those are set up
+ * separately at `elementStart`.
+ *
+ * @param tView The current TView
+ * @param tNode The TNode whose directives are to be searched for hooks to queue
+ */
+function registerPostOrderHooks(tView, tNode) {
+    if (tView.firstTemplatePass) {
+        // It's necessary to loop through the directives at elementEnd() (rather than processing in
+        // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
+        // hooks for projected components and directives must be called *before* their hosts.
+        for (var i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
+            var directiveDef = tView.data[i];
+            if (directiveDef.afterContentInit) {
+                (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
+            }
+            if (directiveDef.afterContentChecked) {
+                (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
+                (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, directiveDef.afterContentChecked);
+            }
+            if (directiveDef.afterViewInit) {
+                (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
+            }
+            if (directiveDef.afterViewChecked) {
+                (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
+                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
+            }
+            if (directiveDef.onDestroy != null) {
+                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
+            }
+        }
+    }
+}
+/**
+ * Executing hooks requires complex logic as we need to deal with 2 constraints.
+ *
+ * 1. Init hooks (ngOnInit, ngAfterContentInit, ngAfterViewInit) must all be executed once and only
+ * once, across many change detection cycles. This must be true even if some hooks throw, or if
+ * some recursively trigger a change detection cycle.
+ * To solve that, it is required to track the state of the execution of these init hooks.
+ * This is done by storing and maintaining flags in the view: the {@link InitPhaseState},
+ * and the index within that phase. They can be seen as a cursor in the following structure:
+ * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
+ * They are are stored as flags in LView[FLAGS].
+ *
+ * 2. Pre-order hooks can be executed in batches, because of the select instruction.
+ * To be able to pause and resume their execution, we also need some state about the hook's array
+ * that is being processed:
+ * - the index of the next hook to be executed
+ * - the number of init hooks already found in the processed part of the  array
+ * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
+ */
+/**
+ * Executes necessary hooks at the start of executing a template.
+ *
+ * Executes hooks that are to be run during the initialization of a directive such
+ * as `onChanges`, `onInit`, and `doCheck`.
+ *
+ * @param lView The current view
+ * @param tView Static data for the view containing the hooks to be executed
+ * @param checkNoChangesMode Whether or not we're in checkNoChanges mode.
+ * @param @param currentNodeIndex 2 cases depending the the value:
+ * - undefined: execute hooks only from the saved index until the end of the array (pre-order case,
+ * when flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ */
+function executePreOrderHooks(currentView, tView, checkNoChangesMode, currentNodeIndex) {
+    if (!checkNoChangesMode) {
+        executeHooks(currentView, tView.preOrderHooks, tView.preOrderCheckHooks, checkNoChangesMode, 0 /* OnInitHooksToBeRun */, currentNodeIndex !== undefined ? currentNodeIndex : null);
+    }
+}
+/**
+ * Executes hooks against the given `LView` based off of whether or not
+ * This is the first pass.
+ *
+ * @param currentView The view instance data to run the hooks against
+ * @param firstPassHooks An array of hooks to run if we're in the first view pass
+ * @param checkHooks An Array of hooks to run if we're not in the first view pass.
+ * @param checkNoChangesMode Whether or not we're in no changes mode.
+ * @param initPhaseState the current state of the init phase
+ * @param currentNodeIndex 3 cases depending the the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ */
+function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMode, initPhaseState, currentNodeIndex) {
+    if (checkNoChangesMode)
+        return;
+    if (checkHooks !== null || firstPassHooks !== null) {
+        var hooksToCall = (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhaseState ?
+            firstPassHooks :
+            checkHooks;
+        if (hooksToCall !== null) {
+            callHooks(currentView, hooksToCall, initPhaseState, currentNodeIndex);
+        }
+    }
+    // The init phase state must be always checked here as it may have been recursively updated
+    var flags = currentView[FLAGS];
+    if (currentNodeIndex == null && (flags & 3 /* InitPhaseStateMask */) === initPhaseState &&
+        initPhaseState !== 3 /* InitPhaseCompleted */) {
+        flags &= 1023 /* IndexWithinInitPhaseReset */;
+        flags += 1 /* InitPhaseStateIncrementer */;
+        currentView[FLAGS] = flags;
+    }
+}
+/**
+ * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
+ * the first LView pass
+ *
+ * @param currentView The current view
+ * @param arr The array in which the hooks are found
+ * @param initPhaseState the current state of the init phase
+ * @param currentNodeIndex 3 cases depending the the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ */
+function callHooks(currentView, arr, initPhase, currentNodeIndex) {
+    var startIndex = currentNodeIndex !== undefined ?
+        (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
+        0;
+    var nodeIndexLimit = currentNodeIndex != null ? currentNodeIndex : -1;
+    var lastNodeIndexFound = 0;
+    for (var i = startIndex; i < arr.length; i++) {
+        var hook = arr[i + 1];
+        if (typeof hook === 'number') {
+            lastNodeIndexFound = arr[i];
+            if (currentNodeIndex != null && lastNodeIndexFound >= currentNodeIndex) {
+                break;
+            }
+        }
+        else {
+            var isInitHook = arr[i] < 0;
+            if (isInitHook)
+                currentView[PREORDER_HOOK_FLAGS] += 65536 /* NumberOfInitHooksCalledIncrementer */;
+            if (lastNodeIndexFound < nodeIndexLimit || nodeIndexLimit == -1) {
+                callHook(currentView, initPhase, arr, i);
+                currentView[PREORDER_HOOK_FLAGS] =
+                    (currentView[PREORDER_HOOK_FLAGS] & 4294901760 /* NumberOfInitHooksCalledMask */) + i +
+                        2;
+            }
+            i++;
+        }
+    }
+}
+/**
+ * Execute one hook against the current `LView`.
+ *
+ * @param currentView The current view
+ * @param initPhaseState the current state of the init phase
+ * @param arr The array in which the hooks are found
+ * @param i The current index within the hook data array
+ */
+function callHook(currentView, initPhase, arr, i) {
+    var isInitHook = arr[i] < 0;
+    var hook = arr[i + 1];
+    var directiveIndex = isInitHook ? -arr[i] : arr[i];
+    var directive = currentView[directiveIndex];
+    if (isInitHook) {
+        var indexWithintInitPhase = currentView[FLAGS] >> 10 /* IndexWithinInitPhaseShift */;
+        // The init phase state must be always checked here as it may have been recursively
+        // updated
+        if (indexWithintInitPhase <
+            (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
+            (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
+            currentView[FLAGS] += 1024 /* IndexWithinInitPhaseIncrementer */;
+            hook.call(directive);
+        }
+    }
+    else {
+        hook.call(directive);
+    }
 }
 
 // Note: This hack is necessary so we don't erroneously get a circular dependency
@@ -7554,55 +7537,6 @@ function selectInternal(lView, index) {
  * clean.
  */
 var _CLEAN_PROMISE = (function () { return Promise.resolve(null); })();
-/**
- * Refreshes the view, executing the following steps in that order:
- * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
- * bindings, refreshes child components.
- * Note: view hooks are triggered later when leaving the view.
- */
-function refreshDescendantViews(lView) {
-    var tView = lView[TVIEW];
-    var creationMode = isCreationMode(lView);
-    if (!creationMode) {
-        // Resetting the bindingIndex of the current LView as the next steps may trigger change
-        // detection.
-        lView[BINDING_INDEX] = tView.bindingStartIndex;
-        var checkNoChangesMode = getCheckNoChangesMode();
-        executePreOrderHooks(lView, tView, checkNoChangesMode, undefined);
-        refreshDynamicEmbeddedViews(lView);
-        // Content query results must be refreshed before content hooks are called.
-        if (tView.contentQueries !== null) {
-            refreshContentQueries(tView, lView);
-        }
-        resetPreOrderHookFlags(lView);
-        executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */, undefined);
-        setHostBindings(tView, lView);
-    }
-    else {
-        // This needs to be set before children are processed to support recursive components.
-        // This must be set to false immediately after the first creation run because in an
-        // ngFor loop, all the views will be created together before update mode runs and turns
-        // off firstTemplatePass. If we don't set it here, instances will perform directive
-        // matching, etc again and again.
-        tView.firstTemplatePass = false;
-        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
-        // content queries are resolved during change detection (i.e. update mode), after embedded
-        // views are refreshed (see block above).
-        if (tView.staticContentQueries) {
-            refreshContentQueries(tView, lView);
-        }
-    }
-    // We must materialize query results before child components are processed
-    // in case a child component has projected a container. The LContainer needs
-    // to exist so the embedded views are properly attached by the container.
-    if (!creationMode || tView.staticViewQueries) {
-        executeViewQueryFn(2 /* Update */, tView, lView[CONTEXT]);
-    }
-    var components = tView.components;
-    if (components !== null) {
-        refreshChildComponents(lView, components);
-    }
-}
 /** Sets the host bindings for the current view. */
 function setHostBindings(tView, viewData) {
     var selectedIndex = getSelectedIndex();
@@ -7672,10 +7606,16 @@ function refreshContentQueries(tView, lView) {
         }
     }
 }
-/** Refreshes child components in the current view. */
+/** Refreshes child components in the current view (update mode). */
 function refreshChildComponents(hostLView, components) {
     for (var i = 0; i < components.length; i++) {
-        componentRefresh(hostLView, components[i]);
+        refreshComponent(hostLView, components[i]);
+    }
+}
+/** Renders child components in the current view (creation mode). */
+function renderChildComponents(hostLView, components) {
+    for (var i = 0; i < components.length; i++) {
+        renderComponent(hostLView, components[i]);
     }
 }
 /**
@@ -7806,66 +7746,122 @@ function createEmbeddedViewAndNode(tView, context, declarationView, injectorInde
     return lView;
 }
 /**
- * Used for rendering views in a LContainer (embedded views or root component views for dynamically
- * created components).
- *
- * Dynamically created views must store/retrieve their TViews differently from component views
- * because their template functions are nested in the template functions of their hosts, creating
- * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor
- * inside
- * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
- * can't store TViews in the template function itself (as we do for comps). Instead, we store the
- * TView for dynamically created views on their host TNode, which only has one instance.
+ * Processes a view in the creation mode. This includes a number of steps in a specific order:
+ * - creating view query functions (if any);
+ * - executing a template function in the creation mode;
+ * - updating static queries (if any);
+ * - creating child components defined in a given view.
  */
-function renderEmbeddedTemplate(viewToRender, tView, context) {
-    var _isParent = getIsParent();
-    var _previousOrParentTNode = getPreviousOrParentTNode();
-    var oldView;
-    // Will become true if the `try` block executes with no errors.
-    var safeToRunHooks = false;
+function renderView(lView, tView, context) {
+    ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
+    var oldView = enterView(lView, lView[T_HOST]);
     try {
-        oldView = enterView(viewToRender, viewToRender[T_HOST]);
-        resetPreOrderHookFlags(viewToRender);
+        var viewQuery = tView.viewQuery;
+        if (viewQuery !== null) {
+            executeViewQueryFn(1 /* Create */, viewQuery, context);
+        }
+        // Execute a template associated with this view, if it exists. A template function might not be
+        // defined for the root component views.
         var templateFn = tView.template;
         if (templateFn !== null) {
-            executeTemplate(viewToRender, templateFn, getRenderFlags(viewToRender), context);
+            executeTemplate(lView, templateFn, 1 /* Create */, context);
         }
-        refreshDescendantViews(viewToRender);
-        safeToRunHooks = true;
+        // This needs to be set before children are processed to support recursive components.
+        // This must be set to false immediately after the first creation run because in an
+        // ngFor loop, all the views will be created together before update mode runs and turns
+        // off firstTemplatePass. If we don't set it here, instances will perform directive
+        // matching, etc again and again.
+        if (tView.firstTemplatePass) {
+            tView.firstTemplatePass = false;
+        }
+        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
+        // content queries are resolved during change detection (i.e. update mode), after embedded
+        // views are refreshed (see block above).
+        if (tView.staticContentQueries) {
+            refreshContentQueries(tView, lView);
+        }
+        // We must materialize query results before child components are processed
+        // in case a child component has projected a container. The LContainer needs
+        // to exist so the embedded views are properly attached by the container.
+        if (tView.staticViewQueries) {
+            executeViewQueryFn(2 /* Update */, tView.viewQuery, context);
+        }
+        // Render child component views.
+        var components = tView.components;
+        if (components !== null) {
+            renderChildComponents(lView, components);
+        }
     }
     finally {
-        leaveView(oldView, safeToRunHooks);
-        setPreviousOrParentTNode(_previousOrParentTNode, _isParent);
+        lView[FLAGS] &= ~4 /* CreationMode */;
+        leaveView(oldView);
     }
 }
-function renderComponentOrTemplate(hostView, context, templateFn) {
+/**
+ * Processes a view in update mode. This includes a number of steps in a specific order:
+ * - executing a template function in update mode;
+ * - executing hooks;
+ * - refreshing queries;
+ * - setting host bindings;
+ * - refreshing child (embedded and component) views.
+ */
+function refreshView(lView, tView, templateFn, context) {
+    ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
+    var oldView = enterView(lView, lView[T_HOST]);
+    try {
+        resetPreOrderHookFlags(lView);
+        if (templateFn !== null) {
+            executeTemplate(lView, templateFn, 2 /* Update */, context);
+        }
+        // Resetting the bindingIndex of the current LView as the next steps may trigger change
+        // detection.
+        lView[BINDING_INDEX] = tView.bindingStartIndex;
+        var checkNoChangesMode = getCheckNoChangesMode();
+        executePreOrderHooks(lView, tView, checkNoChangesMode, undefined);
+        refreshDynamicEmbeddedViews(lView);
+        // Content query results must be refreshed before content hooks are called.
+        if (tView.contentQueries !== null) {
+            refreshContentQueries(tView, lView);
+        }
+        resetPreOrderHookFlags(lView);
+        executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */, undefined);
+        setHostBindings(tView, lView);
+        var viewQuery = tView.viewQuery;
+        if (viewQuery !== null) {
+            executeViewQueryFn(2 /* Update */, viewQuery, context);
+        }
+        // Refresh child component views.
+        var components = tView.components;
+        if (components !== null) {
+            refreshChildComponents(lView, components);
+        }
+        resetPreOrderHookFlags(lView);
+        executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode, 2 /* AfterViewInitHooksToBeRun */, undefined);
+    }
+    finally {
+        lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
+        lView[BINDING_INDEX] = tView.bindingStartIndex;
+        leaveView(oldView);
+    }
+}
+function renderComponentOrTemplate(hostView, templateFn, context) {
     var rendererFactory = hostView[RENDERER_FACTORY];
-    var oldView = enterView(hostView, hostView[T_HOST]);
     var normalExecutionPath = !getCheckNoChangesMode();
     var creationModeIsActive = isCreationMode(hostView);
-    // Will become true if the `try` block executes with no errors.
-    var safeToRunHooks = false;
     try {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
             rendererFactory.begin();
         }
+        var tView = hostView[TVIEW];
         if (creationModeIsActive) {
-            // creation mode pass
-            templateFn && executeTemplate(hostView, templateFn, 1 /* Create */, context);
-            refreshDescendantViews(hostView);
-            hostView[FLAGS] &= ~4 /* CreationMode */;
+            renderView(hostView, tView, context);
         }
-        // update mode pass
-        resetPreOrderHookFlags(hostView);
-        templateFn && executeTemplate(hostView, templateFn, 2 /* Update */, context);
-        refreshDescendantViews(hostView);
-        safeToRunHooks = true;
+        refreshView(hostView, tView, templateFn, context);
     }
     finally {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
             rendererFactory.end();
         }
-        leaveView(oldView, safeToRunHooks);
     }
 }
 function executeTemplate(lView, templateFn, rf, context) {
@@ -7883,14 +7879,6 @@ function executeTemplate(lView, templateFn, rf, context) {
     finally {
         setSelectedIndex(prevSelectedIndex);
     }
-}
-/**
- * This function returns the default configuration of rendering flags depending on when the
- * template is in creation mode or update mode. Update block and create block are
- * always run separately.
- */
-function getRenderFlags(view) {
-    return isCreationMode(view) ? 1 /* Create */ : 2 /* Update */;
 }
 //////////////////////////
 //// Element
@@ -8749,8 +8737,7 @@ function createLContainer(hostNative, currentView, native, tNode, isForViewConta
 }
 /**
  * Goes over dynamic embedded views (ones created through ViewContainerRef APIs) and refreshes
- * them
- * by executing an associated template function.
+ * them by executing an associated template function.
  */
 function refreshDynamicEmbeddedViews(lView) {
     var viewOrContainer = lView[CHILD_HEAD];
@@ -8760,10 +8747,9 @@ function refreshDynamicEmbeddedViews(lView) {
         if (isLContainer(viewOrContainer) && viewOrContainer[ACTIVE_INDEX] === -1) {
             for (var i = CONTAINER_HEADER_OFFSET; i < viewOrContainer.length; i++) {
                 var embeddedLView = viewOrContainer[i];
-                // The directives and pipes are not needed here as an existing view is only being
-                // refreshed.
-                ngDevMode && assertDefined(embeddedLView[TVIEW], 'TView must be allocated');
-                renderEmbeddedTemplate(embeddedLView, embeddedLView[TVIEW], embeddedLView[CONTEXT]);
+                var embeddedTView = embeddedLView[TVIEW];
+                ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
+                refreshView(embeddedLView, embeddedTView, embeddedTView.template, embeddedLView[CONTEXT]);
             }
         }
         viewOrContainer = viewOrContainer[NEXT];
@@ -8773,20 +8759,23 @@ function refreshDynamicEmbeddedViews(lView) {
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
- * @param adjustedElementIndex  Element index in LView[] (adjusted for HEADER_OFFSET)
+ * @param componentHostIdx  Element index in LView[] (adjusted for HEADER_OFFSET)
  */
-function componentRefresh(hostLView, adjustedElementIndex) {
-    ngDevMode && assertDataInRange(hostLView, adjustedElementIndex);
-    var componentView = getComponentViewByIndex(adjustedElementIndex, hostLView);
-    ngDevMode &&
-        assertNodeType(hostLView[TVIEW].data[adjustedElementIndex], 3 /* Element */);
-    // Only components in creation mode, attached CheckAlways
-    // components or attached, dirty OnPush components should be checked
-    if ((viewAttachedToChangeDetector(componentView) || isCreationMode(hostLView)) &&
+function refreshComponent(hostLView, componentHostIdx) {
+    ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
+    var componentView = getComponentViewByIndex(componentHostIdx, hostLView);
+    // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
+    if (viewAttachedToChangeDetector(componentView) &&
         componentView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
-        syncViewWithBlueprint(componentView);
-        checkView(componentView, componentView[CONTEXT]);
+        var tView = componentView[TVIEW];
+        refreshView(componentView, tView, tView.template, componentView[CONTEXT]);
     }
+}
+function renderComponent(hostLView, componentHostIdx) {
+    ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
+    var componentView = getComponentViewByIndex(componentHostIdx, hostLView);
+    syncViewWithBlueprint(componentView);
+    renderView(componentView, componentView[TVIEW], componentView[CONTEXT]);
 }
 /**
  * Syncs an LView instance with its blueprint if they have gotten out of sync.
@@ -8912,7 +8901,9 @@ function scheduleTick(rootContext, flags) {
 function tickRootContext(rootContext) {
     for (var i = 0; i < rootContext.components.length; i++) {
         var rootComponent = rootContext.components[i];
-        renderComponentOrTemplate(readPatchedLView(rootComponent), rootComponent);
+        var lView = readPatchedLView(rootComponent);
+        var tView = lView[TVIEW];
+        renderComponentOrTemplate(lView, tView.template, rootComponent);
     }
 }
 function detectChangesInternal(view, context) {
@@ -8920,10 +8911,8 @@ function detectChangesInternal(view, context) {
     if (rendererFactory.begin)
         rendererFactory.begin();
     try {
-        if (isCreationMode(view)) {
-            checkView(view, context); // creation mode pass
-        }
-        checkView(view, context); // update mode pass
+        var tView = view[TVIEW];
+        refreshView(view, tView, tView.template, context);
     }
     catch (error) {
         handleError(view, error);
@@ -8979,32 +8968,10 @@ function checkNoChangesInRootView(lView) {
         setCheckNoChangesMode(false);
     }
 }
-/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck.
- */
-function checkView(hostView, component) {
-    var hostTView = hostView[TVIEW];
-    var oldView = enterView(hostView, hostView[T_HOST]);
-    var templateFn = hostTView.template;
-    var creationMode = isCreationMode(hostView);
-    // Will become true if the `try` block executes with no errors.
-    var safeToRunHooks = false;
-    try {
-        resetPreOrderHookFlags(hostView);
-        creationMode && executeViewQueryFn(1 /* Create */, hostTView, component);
-        executeTemplate(hostView, templateFn, getRenderFlags(hostView), component);
-        refreshDescendantViews(hostView);
-        safeToRunHooks = true;
-    }
-    finally {
-        leaveView(oldView, safeToRunHooks);
-    }
-}
-function executeViewQueryFn(flags, tView, component) {
-    var viewQuery = tView.viewQuery;
-    if (viewQuery !== null) {
-        setCurrentQueryIndex(0);
-        viewQuery(flags, component);
-    }
+function executeViewQueryFn(flags, viewQueryFn, component) {
+    ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
+    setCurrentQueryIndex(0);
+    viewQueryFn(flags, component);
 }
 ///////////////////////////////
 //// Bindings & interpolations
@@ -10359,7 +10326,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
                 if (declarationViewLQueries !== null) {
                     lView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
                 }
-                renderEmbeddedTemplate(lView, embeddedTView, context);
+                renderView(lView, embeddedTView, context);
                 var viewRef = new ViewRef(lView, context, -1);
                 viewRef._tViewNode = lView[T_HOST];
                 return viewRef;
@@ -15057,19 +15024,16 @@ function scanForView(lContainer, startIdx, viewBlockId) {
  */
 function ɵɵembeddedViewEnd() {
     var lView = getLView();
+    var tView = lView[TVIEW];
     var viewHost = lView[T_HOST];
+    var context = lView[CONTEXT];
     if (isCreationMode(lView)) {
-        refreshDescendantViews(lView); // creation mode pass
-        lView[FLAGS] &= ~4 /* CreationMode */;
+        renderView(lView, tView, context); // creation mode pass
     }
-    resetPreOrderHookFlags(lView);
-    refreshDescendantViews(lView); // update mode pass
+    refreshView(lView, tView, tView.template, context); // update mode pass
     var lContainer = lView[PARENT];
     ngDevMode && assertLContainerOrUndefined(lContainer);
-    // It's always safe to run hooks here, as `leaveView` is not called during the 'finally' block
-    // of a try-catch-finally statement, so it can never be reached while unwinding the stack due to
-    // an error being thrown.
-    leaveView(lContainer[PARENT], /* safeToRunHooks */ true);
+    leaveView(lContainer[PARENT]);
     setPreviousOrParentTNode(viewHost, false);
 }
 
@@ -17341,7 +17305,7 @@ var NULL_INJECTOR$1 = {
  * @param componentType Component to bootstrap
  * @param options Optional parameters which control bootstrapping
  */
-function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts) {
+function renderComponent$1(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts) {
     if (opts === void 0) { opts = {}; }
     ngDevMode && publishDefaultGlobalUtils();
     ngDevMode && assertComponentType(componentType);
@@ -17360,24 +17324,22 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         16 /* CheckAlways */ | 512 /* IsRoot */;
     var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-    var rootView = createLView(null, createTView(-1, null, 1, 0, null, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
+    var rootTView = createTView(-1, null, 1, 0, null, null, null, null);
+    var rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
     var oldView = enterView(rootView, null);
     var component;
-    // Will become true if the `try` block executes with no errors.
-    var safeToRunHooks = false;
     try {
         if (rendererFactory.begin)
             rendererFactory.begin();
         var componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
         component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
-        refreshDescendantViews(rootView); // creation mode pass
-        rootView[FLAGS] &= ~4 /* CreationMode */;
-        resetPreOrderHookFlags(rootView);
-        refreshDescendantViews(rootView); // update mode pass
-        safeToRunHooks = true;
+        // create mode pass
+        renderView(rootView, rootTView, null);
+        // update mode pass
+        refreshView(rootView, rootTView, null, null);
     }
     finally {
-        leaveView(oldView, safeToRunHooks);
+        leaveView(oldView);
         if (rendererFactory.end)
             rendererFactory.end();
     }
@@ -18345,7 +18307,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.2+17.sha-4d96cf5.with-local-changes');
+var VERSION = new Version('9.0.0-next.2+18.sha-b9dfe66.with-local-changes');
 
 /**
  * @license
@@ -21460,13 +21422,12 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
                 hostRNode.setAttribute('ng-version', VERSION.full);
         }
         // Create the root view. Uses empty TView and ContentTemplate.
-        var rootLView = createLView(null, createTView(-1, null, 1, 0, null, null, null, null), rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
+        var rootTView = createTView(-1, null, 1, 0, null, null, null, null);
+        var rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
         // rootView is the parent when bootstrapping
         var oldLView = enterView(rootLView, null);
         var component;
         var tElementNode;
-        // Will become true if the `try` block executes with no errors.
-        var safeToRunHooks = false;
         try {
             var componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, renderer);
             tElementNode = getTNode(0, rootLView);
@@ -21481,11 +21442,10 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
             component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
-            refreshDescendantViews(rootLView);
-            safeToRunHooks = true;
+            renderView(rootLView, rootTView, null);
         }
         finally {
-            leaveView(oldLView, safeToRunHooks);
+            leaveView(oldLView);
         }
         var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
         if (!rootSelectorOrNode || isIsolated) {
@@ -22293,7 +22253,7 @@ function createDynamicNodeAtIndex(lView, index, type, native, name) {
     var tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, type, name, null);
     // We are creating a dynamic node, the previous tNode might not be pointing at this node.
     // We will link ourselves into the tree later with `appendI18nNode`.
-    if (previousOrParentTNode.next === tNode) {
+    if (previousOrParentTNode && previousOrParentTNode.next === tNode) {
         previousOrParentTNode.next = null;
     }
     return tNode;
@@ -30509,5 +30469,5 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵcontentQuery, ɵɵloadQuery, ɵɵelementEnd, ɵɵhostProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementContainer, ɵɵstyling, ɵɵstyleMap, ɵɵstyleSanitizer, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent$1 as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵcontentQuery, ɵɵloadQuery, ɵɵelementEnd, ɵɵhostProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementContainer, ɵɵstyling, ɵɵstyleMap, ɵɵstyleSanitizer, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
