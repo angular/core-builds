@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { SafeValue } from './bypass';
 /**
  * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
  * value) and returns a value that is safe to use in a browser environment.
@@ -41,5 +42,5 @@ export declare const enum StyleSanitizeMode {
  * If a value is provided then the sanitized version of that will be returned.
  */
 export interface StyleSanitizeFn {
-    (prop: string, value: string | null, mode?: StyleSanitizeMode): any;
+    (prop: string, value: string | SafeValue | null, mode?: StyleSanitizeMode): any;
 }

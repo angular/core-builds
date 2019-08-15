@@ -5,6 +5,7 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.io/license
 */
+import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { TAttributes, TNode } from '../interfaces/node';
 import { NO_CHANGE } from '../tokens';
@@ -70,8 +71,8 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | String | null, suffix?: string | null): void;
-export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | String | null, suffix?: string | null | undefined): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffix?: string | null): void;
+export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | SafeValue | null, suffix?: string | null | undefined): void;
 /**
  * Update a class binding on an element with the provided value.
  *

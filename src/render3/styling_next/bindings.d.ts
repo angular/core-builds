@@ -5,6 +5,7 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.io/license
 */
+import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ProceduralRenderer3, RElement, Renderer3 } from '../interfaces/renderer';
 import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext } from './interfaces';
@@ -48,7 +49,7 @@ export declare function updateClassBinding(context: TStylingContext, data: LStyl
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: String | string | number | null | undefined | StylingMapArray, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): boolean;
+export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): boolean;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+38.sha-40b2874.with-local-changes
+ * @license Angular v9.0.0-next.2+40.sha-3cf2005.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -808,7 +808,7 @@
     }
     function ɵɵinject(token, flags) {
         if (flags === void 0) { flags = exports.InjectFlags.Default; }
-        return (_injectImplementation || injectInjectorOnly)(token, flags);
+        return (_injectImplementation || injectInjectorOnly)(resolveForwardRef(token), flags);
     }
     /**
      * Injects a token from the currently active injector.
@@ -899,7 +899,7 @@
                 // Intentionally left behind: With dev tools open the debugger will stop here. There is no
                 // reason why correctly written application should cause this exception.
                 // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
-                // if(ngDevMode) debugger;
+                // if (ngDevMode) debugger;
                 var error = new Error("NullInjectorError: No provider for " + stringify(token) + "!");
                 error.name = 'NullInjectorError';
                 throw error;
@@ -4004,9 +4004,75 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var BRAND = '__SANITIZER_TRUSTED_BRAND__';
-    function allowSanitizationBypass(value, type) {
-        return (value instanceof String && value[BRAND] === type);
+    var SafeValueImpl = /** @class */ (function () {
+        function SafeValueImpl(changingThisBreaksApplicationSecurity) {
+            this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
+            // empty
+        }
+        SafeValueImpl.prototype.toString = function () {
+            return "SafeValue must use [property]=binding: " + this.changingThisBreaksApplicationSecurity +
+                " (see http://g.co/ng/security#xss)";
+        };
+        return SafeValueImpl;
+    }());
+    var SafeHtmlImpl = /** @class */ (function (_super) {
+        __extends(SafeHtmlImpl, _super);
+        function SafeHtmlImpl() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        SafeHtmlImpl.prototype.getTypeName = function () { return "HTML" /* Html */; };
+        return SafeHtmlImpl;
+    }(SafeValueImpl));
+    var SafeStyleImpl = /** @class */ (function (_super) {
+        __extends(SafeStyleImpl, _super);
+        function SafeStyleImpl() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        SafeStyleImpl.prototype.getTypeName = function () { return "Style" /* Style */; };
+        return SafeStyleImpl;
+    }(SafeValueImpl));
+    var SafeScriptImpl = /** @class */ (function (_super) {
+        __extends(SafeScriptImpl, _super);
+        function SafeScriptImpl() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        SafeScriptImpl.prototype.getTypeName = function () { return "Script" /* Script */; };
+        return SafeScriptImpl;
+    }(SafeValueImpl));
+    var SafeUrlImpl = /** @class */ (function (_super) {
+        __extends(SafeUrlImpl, _super);
+        function SafeUrlImpl() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        SafeUrlImpl.prototype.getTypeName = function () { return "URL" /* Url */; };
+        return SafeUrlImpl;
+    }(SafeValueImpl));
+    var SafeResourceUrlImpl = /** @class */ (function (_super) {
+        __extends(SafeResourceUrlImpl, _super);
+        function SafeResourceUrlImpl() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        SafeResourceUrlImpl.prototype.getTypeName = function () { return "ResourceURL" /* ResourceUrl */; };
+        return SafeResourceUrlImpl;
+    }(SafeValueImpl));
+    function unwrapSafeValue(value) {
+        return value instanceof SafeValueImpl ?
+            value.changingThisBreaksApplicationSecurity :
+            '';
+    }
+    function allowSanitizationBypassAndThrow(value, type) {
+        var actualType = getSanitizationBypassType(value);
+        if (actualType != null && actualType !== type) {
+            // Allow ResourceURLs in URL contexts, they are strictly more trusted.
+            if (actualType === "ResourceURL" /* ResourceUrl */ && type === "URL" /* Url */)
+                return true;
+            throw new Error("Required a safe " + type + ", got a " + actualType + " (see http://g.co/ng/security#xss)");
+        }
+        return actualType === type;
+    }
+    function getSanitizationBypassType(value) {
+        return value instanceof SafeValueImpl && value.getTypeName() ||
+            null;
     }
     /**
      * Mark `html` string as trusted.
@@ -4015,10 +4081,10 @@
      * recognizable to {@link htmlSanitizer} to be trusted implicitly.
      *
      * @param trustedHtml `html` string which needs to be implicitly trusted.
-     * @returns a `html` `String` which has been branded to be implicitly trusted.
+     * @returns a `html` which has been branded to be implicitly trusted.
      */
     function bypassSanitizationTrustHtml(trustedHtml) {
-        return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+        return new SafeHtmlImpl(trustedHtml);
     }
     /**
      * Mark `style` string as trusted.
@@ -4027,10 +4093,10 @@
      * recognizable to {@link styleSanitizer} to be trusted implicitly.
      *
      * @param trustedStyle `style` string which needs to be implicitly trusted.
-     * @returns a `style` `String` which has been branded to be implicitly trusted.
+     * @returns a `style` hich has been branded to be implicitly trusted.
      */
     function bypassSanitizationTrustStyle(trustedStyle) {
-        return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+        return new SafeStyleImpl(trustedStyle);
     }
     /**
      * Mark `script` string as trusted.
@@ -4039,10 +4105,10 @@
      * recognizable to {@link scriptSanitizer} to be trusted implicitly.
      *
      * @param trustedScript `script` string which needs to be implicitly trusted.
-     * @returns a `script` `String` which has been branded to be implicitly trusted.
+     * @returns a `script` which has been branded to be implicitly trusted.
      */
     function bypassSanitizationTrustScript(trustedScript) {
-        return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+        return new SafeScriptImpl(trustedScript);
     }
     /**
      * Mark `url` string as trusted.
@@ -4051,10 +4117,10 @@
      * recognizable to {@link urlSanitizer} to be trusted implicitly.
      *
      * @param trustedUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     * @returns a `url`  which has been branded to be implicitly trusted.
      */
     function bypassSanitizationTrustUrl(trustedUrl) {
-        return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+        return new SafeUrlImpl(trustedUrl);
     }
     /**
      * Mark `url` string as trusted.
@@ -4063,15 +4129,10 @@
      * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
      *
      * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
-     * @returns a `url` `String` which has been branded to be implicitly trusted.
+     * @returns a `url` which has been branded to be implicitly trusted.
      */
     function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-        return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-    }
-    function bypassSanitizationTrustString(trustedString, mode) {
-        var trusted = new String(trustedString);
-        trusted[BRAND] = mode;
-        return trusted;
+        return new SafeResourceUrlImpl(trustedResourceUrl);
     }
 
     /**
@@ -4619,16 +4680,6 @@
         SecurityContext[SecurityContext["URL"] = 4] = "URL";
         SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
     })(exports.SecurityContext || (exports.SecurityContext = {}));
-    /**
-     * Sanitizer is used by the views to sanitize potentially dangerous values.
-     *
-     * @publicApi
-     */
-    var Sanitizer = /** @class */ (function () {
-        function Sanitizer() {
-        }
-        return Sanitizer;
-    }());
 
     /**
      * @license
@@ -4749,8 +4800,8 @@
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
         }
-        if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
-            return unsafeHtml.toString();
+        if (allowSanitizationBypassAndThrow(unsafeHtml, "HTML" /* Html */)) {
+            return unwrapSafeValue(unsafeHtml);
         }
         return _sanitizeHtml(document, renderStringify(unsafeHtml));
     }
@@ -4774,8 +4825,8 @@
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
         }
-        if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
-            return unsafeStyle.toString();
+        if (allowSanitizationBypassAndThrow(unsafeStyle, "Style" /* Style */)) {
+            return unwrapSafeValue(unsafeStyle);
         }
         return _sanitizeStyle(renderStringify(unsafeStyle));
     }
@@ -4800,8 +4851,8 @@
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
         }
-        if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
-            return unsafeUrl.toString();
+        if (allowSanitizationBypassAndThrow(unsafeUrl, "URL" /* Url */)) {
+            return unwrapSafeValue(unsafeUrl);
         }
         return _sanitizeUrl(renderStringify(unsafeUrl));
     }
@@ -4821,8 +4872,8 @@
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
         }
-        if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
-            return unsafeResourceUrl.toString();
+        if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* ResourceUrl */)) {
+            return unwrapSafeValue(unsafeResourceUrl);
         }
         throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
     }
@@ -4843,8 +4894,8 @@
         if (sanitizer) {
             return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
         }
-        if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
-            return unsafeScript.toString();
+        if (allowSanitizationBypassAndThrow(unsafeScript, "Script" /* Script */)) {
+            return unwrapSafeValue(unsafeScript);
         }
         throw new Error('unsafe value used in a script context');
     }
@@ -14761,7 +14812,7 @@
                 resolvedValue = renderStringify(value) + suffix;
             }
             else {
-                // sanitization happens by dealing with a String value
+                // sanitization happens by dealing with a string value
                 // this means that the string value will be passed through
                 // into the style rendering later (which is where the value
                 // will be sanitized before it is applied)
@@ -18434,6 +18485,30 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Sanitizer is used by the views to sanitize potentially dangerous values.
+     *
+     * @publicApi
+     */
+    var Sanitizer = /** @class */ (function () {
+        function Sanitizer() {
+        }
+        /** @nocollapse */
+        Sanitizer.ngInjectableDef = ɵɵdefineInjectable({
+            token: Sanitizer,
+            providedIn: 'root',
+            factory: function () { return null; },
+        });
+        return Sanitizer;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * @description Represents the version of Angular
      *
      * @publicApi
@@ -18450,7 +18525,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.2+38.sha-40b2874.with-local-changes');
+    var VERSION = new Version('9.0.0-next.2+40.sha-3cf2005.with-local-changes');
 
     /**
      * @license
@@ -30728,6 +30803,9 @@
     exports.ɵgetLocalePluralCase = getLocalePluralCase;
     exports.ɵfindLocaleData = findLocaleData;
     exports.ɵLOCALE_DATA = LOCALE_DATA;
+    exports.ɵallowSanitizationBypassAndThrow = allowSanitizationBypassAndThrow;
+    exports.ɵgetSanitizationBypassType = getSanitizationBypassType;
+    exports.ɵunwrapSafeValue = unwrapSafeValue;
     exports.ɵɵattribute = ɵɵattribute;
     exports.ɵɵattributeInterpolate1 = ɵɵattributeInterpolate1;
     exports.ɵɵattributeInterpolate2 = ɵɵattributeInterpolate2;

@@ -7,7 +7,7 @@
  */
 import { Type } from '../core';
 import { Injector } from '../di/injector';
-import { Sanitizer } from '../sanitization/security';
+import { Sanitizer } from '../sanitization/sanitizer';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { PlayerHandler } from './interfaces/player';
 import { RElement, Renderer3, RendererFactory3 } from './interfaces/renderer';

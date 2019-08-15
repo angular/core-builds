@@ -1,10 +1,10 @@
 /**
- * @license Angular v9.0.0-next.2+38.sha-40b2874.with-local-changes
+ * @license Angular v9.0.0-next.2+40.sha-3cf2005.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { __spread, __values, __extends, __assign, __read } from 'tslib';
+import { __spread, __extends, __values, __assign, __read } from 'tslib';
 import { Subscription, Subject, Observable, merge as merge$1 } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -625,7 +625,7 @@ function injectInjectorOnly(token, flags) {
 }
 function ɵɵinject(token, flags) {
     if (flags === void 0) { flags = InjectFlags.Default; }
-    return (_injectImplementation || injectInjectorOnly)(token, flags);
+    return (_injectImplementation || injectInjectorOnly)(resolveForwardRef(token), flags);
 }
 /**
  * Injects a token from the currently active injector.
@@ -716,7 +716,7 @@ var NullInjector = /** @class */ (function () {
             // Intentionally left behind: With dev tools open the debugger will stop here. There is no
             // reason why correctly written application should cause this exception.
             // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
-            // if(ngDevMode) debugger;
+            // if (ngDevMode) debugger;
             var error = new Error("NullInjectorError: No provider for " + stringify(token) + "!");
             error.name = 'NullInjectorError';
             throw error;
@@ -3846,9 +3846,75 @@ var NO_ERRORS_SCHEMA = {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var BRAND = '__SANITIZER_TRUSTED_BRAND__';
-function allowSanitizationBypass(value, type) {
-    return (value instanceof String && value[BRAND] === type);
+var SafeValueImpl = /** @class */ (function () {
+    function SafeValueImpl(changingThisBreaksApplicationSecurity) {
+        this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
+        // empty
+    }
+    SafeValueImpl.prototype.toString = function () {
+        return "SafeValue must use [property]=binding: " + this.changingThisBreaksApplicationSecurity +
+            " (see http://g.co/ng/security#xss)";
+    };
+    return SafeValueImpl;
+}());
+var SafeHtmlImpl = /** @class */ (function (_super) {
+    __extends(SafeHtmlImpl, _super);
+    function SafeHtmlImpl() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SafeHtmlImpl.prototype.getTypeName = function () { return "HTML" /* Html */; };
+    return SafeHtmlImpl;
+}(SafeValueImpl));
+var SafeStyleImpl = /** @class */ (function (_super) {
+    __extends(SafeStyleImpl, _super);
+    function SafeStyleImpl() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SafeStyleImpl.prototype.getTypeName = function () { return "Style" /* Style */; };
+    return SafeStyleImpl;
+}(SafeValueImpl));
+var SafeScriptImpl = /** @class */ (function (_super) {
+    __extends(SafeScriptImpl, _super);
+    function SafeScriptImpl() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SafeScriptImpl.prototype.getTypeName = function () { return "Script" /* Script */; };
+    return SafeScriptImpl;
+}(SafeValueImpl));
+var SafeUrlImpl = /** @class */ (function (_super) {
+    __extends(SafeUrlImpl, _super);
+    function SafeUrlImpl() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SafeUrlImpl.prototype.getTypeName = function () { return "URL" /* Url */; };
+    return SafeUrlImpl;
+}(SafeValueImpl));
+var SafeResourceUrlImpl = /** @class */ (function (_super) {
+    __extends(SafeResourceUrlImpl, _super);
+    function SafeResourceUrlImpl() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SafeResourceUrlImpl.prototype.getTypeName = function () { return "ResourceURL" /* ResourceUrl */; };
+    return SafeResourceUrlImpl;
+}(SafeValueImpl));
+function unwrapSafeValue(value) {
+    return value instanceof SafeValueImpl ?
+        value.changingThisBreaksApplicationSecurity :
+        '';
+}
+function allowSanitizationBypassAndThrow(value, type) {
+    var actualType = getSanitizationBypassType(value);
+    if (actualType != null && actualType !== type) {
+        // Allow ResourceURLs in URL contexts, they are strictly more trusted.
+        if (actualType === "ResourceURL" /* ResourceUrl */ && type === "URL" /* Url */)
+            return true;
+        throw new Error("Required a safe " + type + ", got a " + actualType + " (see http://g.co/ng/security#xss)");
+    }
+    return actualType === type;
+}
+function getSanitizationBypassType(value) {
+    return value instanceof SafeValueImpl && value.getTypeName() ||
+        null;
 }
 /**
  * Mark `html` string as trusted.
@@ -3857,10 +3923,10 @@ function allowSanitizationBypass(value, type) {
  * recognizable to {@link htmlSanitizer} to be trusted implicitly.
  *
  * @param trustedHtml `html` string which needs to be implicitly trusted.
- * @returns a `html` `String` which has been branded to be implicitly trusted.
+ * @returns a `html` which has been branded to be implicitly trusted.
  */
 function bypassSanitizationTrustHtml(trustedHtml) {
-    return bypassSanitizationTrustString(trustedHtml, "Html" /* Html */);
+    return new SafeHtmlImpl(trustedHtml);
 }
 /**
  * Mark `style` string as trusted.
@@ -3869,10 +3935,10 @@ function bypassSanitizationTrustHtml(trustedHtml) {
  * recognizable to {@link styleSanitizer} to be trusted implicitly.
  *
  * @param trustedStyle `style` string which needs to be implicitly trusted.
- * @returns a `style` `String` which has been branded to be implicitly trusted.
+ * @returns a `style` hich has been branded to be implicitly trusted.
  */
 function bypassSanitizationTrustStyle(trustedStyle) {
-    return bypassSanitizationTrustString(trustedStyle, "Style" /* Style */);
+    return new SafeStyleImpl(trustedStyle);
 }
 /**
  * Mark `script` string as trusted.
@@ -3881,10 +3947,10 @@ function bypassSanitizationTrustStyle(trustedStyle) {
  * recognizable to {@link scriptSanitizer} to be trusted implicitly.
  *
  * @param trustedScript `script` string which needs to be implicitly trusted.
- * @returns a `script` `String` which has been branded to be implicitly trusted.
+ * @returns a `script` which has been branded to be implicitly trusted.
  */
 function bypassSanitizationTrustScript(trustedScript) {
-    return bypassSanitizationTrustString(trustedScript, "Script" /* Script */);
+    return new SafeScriptImpl(trustedScript);
 }
 /**
  * Mark `url` string as trusted.
@@ -3893,10 +3959,10 @@ function bypassSanitizationTrustScript(trustedScript) {
  * recognizable to {@link urlSanitizer} to be trusted implicitly.
  *
  * @param trustedUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
+ * @returns a `url`  which has been branded to be implicitly trusted.
  */
 function bypassSanitizationTrustUrl(trustedUrl) {
-    return bypassSanitizationTrustString(trustedUrl, "Url" /* Url */);
+    return new SafeUrlImpl(trustedUrl);
 }
 /**
  * Mark `url` string as trusted.
@@ -3905,15 +3971,10 @@ function bypassSanitizationTrustUrl(trustedUrl) {
  * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
  *
  * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
+ * @returns a `url` which has been branded to be implicitly trusted.
  */
 function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-    return bypassSanitizationTrustString(trustedResourceUrl, "ResourceUrl" /* ResourceUrl */);
-}
-function bypassSanitizationTrustString(trustedString, mode) {
-    var trusted = new String(trustedString);
-    trusted[BRAND] = mode;
-    return trusted;
+    return new SafeResourceUrlImpl(trustedResourceUrl);
 }
 
 /**
@@ -4471,16 +4532,6 @@ var SecurityContext;
     SecurityContext[SecurityContext["URL"] = 4] = "URL";
     SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
 })(SecurityContext || (SecurityContext = {}));
-/**
- * Sanitizer is used by the views to sanitize potentially dangerous values.
- *
- * @publicApi
- */
-var Sanitizer = /** @class */ (function () {
-    function Sanitizer() {
-    }
-    return Sanitizer;
-}());
 
 /**
  * @license
@@ -4601,8 +4652,8 @@ function ɵɵsanitizeHtml(unsafeHtml) {
     if (sanitizer) {
         return sanitizer.sanitize(SecurityContext.HTML, unsafeHtml) || '';
     }
-    if (allowSanitizationBypass(unsafeHtml, "Html" /* Html */)) {
-        return unsafeHtml.toString();
+    if (allowSanitizationBypassAndThrow(unsafeHtml, "HTML" /* Html */)) {
+        return unwrapSafeValue(unsafeHtml);
     }
     return _sanitizeHtml(document, renderStringify(unsafeHtml));
 }
@@ -4626,8 +4677,8 @@ function ɵɵsanitizeStyle(unsafeStyle) {
     if (sanitizer) {
         return sanitizer.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
     }
-    if (allowSanitizationBypass(unsafeStyle, "Style" /* Style */)) {
-        return unsafeStyle.toString();
+    if (allowSanitizationBypassAndThrow(unsafeStyle, "Style" /* Style */)) {
+        return unwrapSafeValue(unsafeStyle);
     }
     return _sanitizeStyle(renderStringify(unsafeStyle));
 }
@@ -4652,8 +4703,8 @@ function ɵɵsanitizeUrl(unsafeUrl) {
     if (sanitizer) {
         return sanitizer.sanitize(SecurityContext.URL, unsafeUrl) || '';
     }
-    if (allowSanitizationBypass(unsafeUrl, "Url" /* Url */)) {
-        return unsafeUrl.toString();
+    if (allowSanitizationBypassAndThrow(unsafeUrl, "URL" /* Url */)) {
+        return unwrapSafeValue(unsafeUrl);
     }
     return _sanitizeUrl(renderStringify(unsafeUrl));
 }
@@ -4673,8 +4724,8 @@ function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
     if (sanitizer) {
         return sanitizer.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
     }
-    if (allowSanitizationBypass(unsafeResourceUrl, "ResourceUrl" /* ResourceUrl */)) {
-        return unsafeResourceUrl.toString();
+    if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* ResourceUrl */)) {
+        return unwrapSafeValue(unsafeResourceUrl);
     }
     throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
 }
@@ -4695,8 +4746,8 @@ function ɵɵsanitizeScript(unsafeScript) {
     if (sanitizer) {
         return sanitizer.sanitize(SecurityContext.SCRIPT, unsafeScript) || '';
     }
-    if (allowSanitizationBypass(unsafeScript, "Script" /* Script */)) {
-        return unsafeScript.toString();
+    if (allowSanitizationBypassAndThrow(unsafeScript, "Script" /* Script */)) {
+        return unwrapSafeValue(unsafeScript);
     }
     throw new Error('unsafe value used in a script context');
 }
@@ -14613,7 +14664,7 @@ function resolveStylePropValue(value, suffix) {
             resolvedValue = renderStringify(value) + suffix;
         }
         else {
-            // sanitization happens by dealing with a String value
+            // sanitization happens by dealing with a string value
             // this means that the string value will be passed through
             // into the style rendering later (which is where the value
             // will be sanitized before it is applied)
@@ -18291,6 +18342,30 @@ var SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__POST_R3__;
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Sanitizer is used by the views to sanitize potentially dangerous values.
+ *
+ * @publicApi
+ */
+var Sanitizer = /** @class */ (function () {
+    function Sanitizer() {
+    }
+    /** @nocollapse */
+    Sanitizer.ngInjectableDef = ɵɵdefineInjectable({
+        token: Sanitizer,
+        providedIn: 'root',
+        factory: function () { return null; },
+    });
+    return Sanitizer;
+}());
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * @description Represents the version of Angular
  *
  * @publicApi
@@ -18307,7 +18382,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.2+38.sha-40b2874.with-local-changes');
+var VERSION = new Version('9.0.0-next.2+40.sha-3cf2005.with-local-changes');
 
 /**
  * @license
@@ -30469,5 +30544,5 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent$1 as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵcontentQuery, ɵɵloadQuery, ɵɵelementEnd, ɵɵhostProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementContainer, ɵɵstyling, ɵɵstyleMap, ɵɵstyleSanitizer, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS$1 as TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, SecurityContext, Sanitizer, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, APP_ROOT as ɵAPP_ROOT, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, getSanitizationBypassType as ɵgetSanitizationBypassType, unwrapSafeValue as ɵunwrapSafeValue, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent$1 as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵcontentQuery, ɵɵloadQuery, ɵɵelementEnd, ɵɵhostProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementContainer, ɵɵstyling, ɵɵstyleMap, ɵɵstyleSanitizer, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstylingApply, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵtextBinding, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, i18nConfigureLocalize as ɵi18nConfigureLocalize, ɵɵi18nLocalize, setLocaleId as ɵsetLocaleId, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMPONENT_DEF as ɵNG_COMPONENT_DEF, NG_DIRECTIVE_DEF as ɵNG_DIRECTIVE_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF, NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

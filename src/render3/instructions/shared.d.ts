@@ -7,7 +7,7 @@
  */
 import { Injector } from '../../di';
 import { SchemaMetadata } from '../../metadata/schema';
-import { Sanitizer } from '../../sanitization/security';
+import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
 import { LocalRefExtractor, PropertyAliasValue, PropertyAliases, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
