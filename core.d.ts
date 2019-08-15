@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+38.sha-40b2874.with-local-changes
+ * @license Angular v9.0.0-next.2+40.sha-3cf2005.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -483,17 +483,6 @@ declare interface BootstrapOptions {
      * - `noop` - Use `NoopNgZone` which does nothing.
      */
     ngZone?: NgZone | 'zone.js' | 'noop';
-}
-
-
-declare const BRAND = "__SANITIZER_TRUSTED_BRAND__";
-
-declare const enum BypassType {
-    Url = "Url",
-    Html = "Html",
-    ResourceUrl = "ResourceUrl",
-    Script = "Script",
-    Style = "Style"
 }
 
 
@@ -5871,6 +5860,8 @@ declare const SANITIZER = 13;
  */
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
+    /** @nocollapse */
+    static ngInjectableDef: never;
 }
 
 
@@ -6127,7 +6118,7 @@ export declare type StaticProvider = ValueProvider | ExistingProvider | StaticCl
  * If a value is provided then the sanitized version of that will be returned.
  */
 declare interface StyleSanitizeFn {
-    (prop: string, value: string | null, mode?: StyleSanitizeMode): any;
+    (prop: string, value: string | ɵSafeValue | null, mode?: StyleSanitizeMode): any;
 }
 
 /**
@@ -7051,61 +7042,6 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * @publicApi
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
-
-/**
- * A branded trusted string used with sanitization of `html` strings.
- *
- * See: {@link bypassSanitizationTrustHtml} and {@link htmlSanitizer}.
- */
-declare interface TrustedHtmlString extends TrustedString {
-    [BRAND]: BypassType.Html;
-}
-
-/**
- * A branded trusted string used with sanitization of `resourceUrl` strings.
- *
- * See: {@link bypassSanitizationTrustResourceUrl} and {@link resourceUrlSanitizer}.
- */
-declare interface TrustedResourceUrlString extends TrustedString {
-    [BRAND]: BypassType.ResourceUrl;
-}
-
-/**
- * A branded trusted string used with sanitization of `url` strings.
- *
- * See: {@link bypassSanitizationTrustScript} and {@link scriptSanitizer}.
- */
-declare interface TrustedScriptString extends TrustedString {
-    [BRAND]: BypassType.Script;
-}
-
-/**
- * A branded trusted string used with sanitization.
- *
- * See: {@link TrustedHtmlString}, {@link TrustedResourceUrlString}, {@link TrustedScriptString},
- * {@link TrustedStyleString}, {@link TrustedUrlString}
- */
-declare interface TrustedString extends String {
-    [BRAND]: BypassType;
-}
-
-/**
- * A branded trusted string used with sanitization of `style` strings.
- *
- * See: {@link bypassSanitizationTrustStyle} and {@link styleSanitizer}.
- */
-declare interface TrustedStyleString extends TrustedString {
-    [BRAND]: BypassType.Style;
-}
-
-/**
- * A branded trusted string used with sanitization of `url` strings.
- *
- * See: {@link bypassSanitizationTrustUrl} and {@link urlSanitizer}.
- */
-declare interface TrustedUrlString extends TrustedString {
-    [BRAND]: BypassType.Url;
-}
 
 /**
  * Tsickle has a bug where it creates an infinite loop for a function returning itself.
@@ -8519,7 +8455,6 @@ export declare const wtfStartTimeRange: (rangeType: string, action: string) => a
  */
 export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): string;
 
-
 /**
  * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
  * value) and returns a value that is safe to use in a browser environment.
@@ -8530,6 +8465,18 @@ export declare function ɵ_sanitizeStyle(value: string): string;
 export declare function ɵ_sanitizeUrl(url: string): string;
 
 export declare const ɵALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
+
+export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.Html): value is ɵSafeHtml;
+
+export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.ResourceUrl): value is ɵSafeResourceUrl;
+
+export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.Script): value is ɵSafeScript;
+
+export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.Style): value is ɵSafeStyle;
+
+export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.Url): value is ɵSafeUrl;
+
+export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType): boolean;
 
 export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn, templateFactory?: ViewDefinitionFactory): NodeDef;
 
@@ -9129,9 +9076,9 @@ export declare const enum ɵBindingFlags {
  * recognizable to {@link htmlSanitizer} to be trusted implicitly.
  *
  * @param trustedHtml `html` string which needs to be implicitly trusted.
- * @returns a `html` `String` which has been branded to be implicitly trusted.
+ * @returns a `html` which has been branded to be implicitly trusted.
  */
-export declare function ɵbypassSanitizationTrustHtml(trustedHtml: string): TrustedHtmlString;
+export declare function ɵbypassSanitizationTrustHtml(trustedHtml: string): ɵSafeHtml;
 
 /**
  * Mark `url` string as trusted.
@@ -9140,9 +9087,9 @@ export declare function ɵbypassSanitizationTrustHtml(trustedHtml: string): Trus
  * recognizable to {@link resourceUrlSanitizer} to be trusted implicitly.
  *
  * @param trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
+ * @returns a `url` which has been branded to be implicitly trusted.
  */
-export declare function ɵbypassSanitizationTrustResourceUrl(trustedResourceUrl: string): TrustedResourceUrlString;
+export declare function ɵbypassSanitizationTrustResourceUrl(trustedResourceUrl: string): ɵSafeResourceUrl;
 
 /**
  * Mark `script` string as trusted.
@@ -9151,9 +9098,9 @@ export declare function ɵbypassSanitizationTrustResourceUrl(trustedResourceUrl:
  * recognizable to {@link scriptSanitizer} to be trusted implicitly.
  *
  * @param trustedScript `script` string which needs to be implicitly trusted.
- * @returns a `script` `String` which has been branded to be implicitly trusted.
+ * @returns a `script` which has been branded to be implicitly trusted.
  */
-export declare function ɵbypassSanitizationTrustScript(trustedScript: string): TrustedScriptString;
+export declare function ɵbypassSanitizationTrustScript(trustedScript: string): ɵSafeScript;
 
 /**
  * Mark `style` string as trusted.
@@ -9162,9 +9109,9 @@ export declare function ɵbypassSanitizationTrustScript(trustedScript: string): 
  * recognizable to {@link styleSanitizer} to be trusted implicitly.
  *
  * @param trustedStyle `style` string which needs to be implicitly trusted.
- * @returns a `style` `String` which has been branded to be implicitly trusted.
+ * @returns a `style` hich has been branded to be implicitly trusted.
  */
-export declare function ɵbypassSanitizationTrustStyle(trustedStyle: string): TrustedStyleString;
+export declare function ɵbypassSanitizationTrustStyle(trustedStyle: string): ɵSafeStyle;
 
 /**
  * Mark `url` string as trusted.
@@ -9173,9 +9120,18 @@ export declare function ɵbypassSanitizationTrustStyle(trustedStyle: string): Tr
  * recognizable to {@link urlSanitizer} to be trusted implicitly.
  *
  * @param trustedUrl `url` string which needs to be implicitly trusted.
- * @returns a `url` `String` which has been branded to be implicitly trusted.
+ * @returns a `url`  which has been branded to be implicitly trusted.
  */
-export declare function ɵbypassSanitizationTrustUrl(trustedUrl: string): TrustedUrlString;
+export declare function ɵbypassSanitizationTrustUrl(trustedUrl: string): ɵSafeUrl;
+
+
+export declare const enum ɵBypassType {
+    Url = "URL",
+    Html = "HTML",
+    ResourceUrl = "ResourceURL",
+    Script = "Script",
+    Style = "Style"
+}
 
 export declare function ɵccf(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
     [propName: string]: string;
@@ -9621,6 +9577,8 @@ export declare function ɵgetLContext(target: any): ɵLContext | null;
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
 export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
+
+export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | null;
 
 export declare type ɵGetterFn = (obj: any) => any;
 
@@ -10289,6 +10247,54 @@ export declare function ɵresolveComponentResources(resourceResolver: (url: stri
 }>)): Promise<void>;
 
 /**
+ * Marker interface for a value that's safe to use as HTML.
+ *
+ * @publicApi
+ */
+export declare interface ɵSafeHtml extends ɵSafeValue {
+}
+
+/**
+ * Marker interface for a value that's safe to use as a URL to load executable code from.
+ *
+ * @publicApi
+ */
+export declare interface ɵSafeResourceUrl extends ɵSafeValue {
+}
+
+/**
+ * Marker interface for a value that's safe to use as JavaScript.
+ *
+ * @publicApi
+ */
+export declare interface ɵSafeScript extends ɵSafeValue {
+}
+
+/**
+ * Marker interface for a value that's safe to use as style (CSS).
+ *
+ * @publicApi
+ */
+export declare interface ɵSafeStyle extends ɵSafeValue {
+}
+
+/**
+ * Marker interface for a value that's safe to use as a URL linking to a document.
+ *
+ * @publicApi
+ */
+export declare interface ɵSafeUrl extends ɵSafeValue {
+}
+
+/**
+ * Marker interface for a value that's safe to use in a particular context.
+ *
+ * @publicApi
+ */
+export declare interface ɵSafeValue {
+}
+
+/**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
  * on the type.
  *
@@ -10356,6 +10362,8 @@ export declare function ɵted(checkIndex: number, ngContentIndex: number | null,
 export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: ɵNgModuleType) => void): ɵNgModuleTransitiveScopes;
 
 export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
+
+export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 
 export declare function ɵvid(flags: ɵViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn, updateRenderer?: null | ViewUpdateFn): ɵViewDefinition;
 
@@ -13273,7 +13281,7 @@ export declare function ɵɵstyleMap(styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | String | null, suffix?: string | null): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): void;
 
 /**
  *
