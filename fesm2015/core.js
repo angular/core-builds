@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+46.sha-964d726.with-local-changes
+ * @license Angular v9.0.0-next.2+47.sha-4c3b791.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4768,13 +4768,16 @@ function getNativeByTNode(tNode, lView) {
  * @return {?}
  */
 function getNativeByTNodeOrNull(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
     /** @type {?} */
     const index = tNode.index;
-    /** @type {?} */
-    const node = index == -1 ? null : unwrapRNode(lView[index]);
-    ngDevMode && node !== null && assertDomNode(node);
-    return node;
+    if (index !== -1) {
+        ngDevMode && assertTNodeForLView(tNode, lView);
+        /** @type {?} */
+        const node = unwrapRNode(lView[index]);
+        ngDevMode && node !== null && assertDomNode(node);
+        return node;
+    }
+    return null;
 }
 /**
  * A helper function that returns `true` if a given `TNode` has any matching directives.
@@ -12002,26 +12005,6 @@ function allocExpando(view, numSlotsToAlloc) {
 //// Render
 //////////////////////////
 /**
- * Used for creating the LView of a dynamic embedded view, either through
- * ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
- * @template T
- * @param {?} tView
- * @param {?} context
- * @param {?} declarationView
- * @param {?} injectorIndex
- * @return {?}
- */
-function createEmbeddedViewAndNode(tView, context, declarationView, injectorIndex) {
-    /** @type {?} */
-    const lView = createLView(declarationView, tView, context, 16 /* CheckAlways */, null, null);
-    lView[DECLARATION_VIEW] = declarationView;
-    assignTViewNodeToLView(tView, null, -1, lView);
-    if (tView.firstTemplatePass) {
-        (/** @type {?} */ (tView.node)).injectorIndex = injectorIndex;
-    }
-    return lView;
-}
-/**
  * Processes a view in the creation mode. This includes a number of steps in a specific order:
  * - creating view query functions (if any);
  * - executing a template function in the creation mode;
@@ -15284,7 +15267,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
                 /** @type {?} */
                 const embeddedTView = (/** @type {?} */ (this._declarationTContainer.tViews));
                 /** @type {?} */
-                const lView = createEmbeddedViewAndNode(embeddedTView, context, this._declarationView, this._declarationTContainer.injectorIndex);
+                const lView = createLView(this._declarationView, embeddedTView, context, 16 /* CheckAlways */, null, embeddedTView.node);
                 /** @type {?} */
                 const declarationLContainer = this._declarationView[this._declarationTContainer.index];
                 ngDevMode && assertLContainer(declarationLContainer);
@@ -20644,6 +20627,10 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
         resolveDirectives(tView, lView, tContainerNode, localRefs || null);
         /** @type {?} */
         const embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas);
+        /** @type {?} */
+        const embeddedTViewNode = (/** @type {?} */ (createTNode(tView, null, 2 /* View */, -1, null, null)));
+        embeddedTViewNode.injectorIndex = tContainerNode.injectorIndex;
+        embeddedTView.node = embeddedTViewNode;
         if (tView.queries !== null) {
             tView.queries.template(tView, tContainerNode);
             embeddedTView.queries = tView.queries.embeddedTView(tContainerNode);
@@ -26433,7 +26420,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.2+46.sha-964d726.with-local-changes');
+const VERSION = new Version('9.0.0-next.2+47.sha-4c3b791.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

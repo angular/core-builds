@@ -58,11 +58,6 @@ export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode 
  */
 export declare function allocExpando(view: LView, numSlotsToAlloc: number): void;
 /**
- * Used for creating the LView of a dynamic embedded view, either through
- * ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
- */
-export declare function createEmbeddedViewAndNode<T>(tView: TView, context: T, declarationView: LView, injectorIndex: number): LView;
-/**
  * Processes a view in the creation mode. This includes a number of steps in a specific order:
  * - creating view query functions (if any);
  * - executing a template function in the creation mode;
