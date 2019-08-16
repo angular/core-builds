@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+48.sha-ee48623.with-local-changes
+ * @license Angular v9.0.0-next.2+51.sha-71ada48.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24905,7 +24905,9 @@ function ɵɵInheritDefinitionFeature(definition) {
             /** @type {?} */
             const features = superDef.features;
             if (features) {
-                for (const feature of features) {
+                for (let i = 0; i < features.length; i++) {
+                    /** @type {?} */
+                    const feature = features[i];
                     if (feature && feature.ngInherit) {
                         ((/** @type {?} */ (feature)))(definition);
                     }
@@ -26439,7 +26441,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.2+48.sha-ee48623.with-local-changes');
+const VERSION = new Version('9.0.0-next.2+51.sha-71ada48.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -36268,8 +36270,8 @@ class TQueries_ {
      */
     elementStart(tView, tNode) {
         ngDevMode && assertFirstTemplatePass(tView, 'Queries should collect results on the first template pass only');
-        for (let query of this.queries) {
-            query.elementStart(tView, tNode);
+        for (let i = 0; i < this.queries.length; i++) {
+            this.queries[i].elementStart(tView, tNode);
         }
     }
     /**
@@ -36277,8 +36279,8 @@ class TQueries_ {
      * @return {?}
      */
     elementEnd(tNode) {
-        for (let query of this.queries) {
-            query.elementEnd(tNode);
+        for (let i = 0; i < this.queries.length; i++) {
+            this.queries[i].elementEnd(tNode);
         }
     }
     /**
@@ -36312,8 +36314,8 @@ class TQueries_ {
      */
     template(tView, tNode) {
         ngDevMode && assertFirstTemplatePass(tView, 'Queries should collect results on the first template pass only');
-        for (let query of this.queries) {
-            query.template(tView, tNode);
+        for (let i = 0; i < this.queries.length; i++) {
+            this.queries[i].template(tView, tNode);
         }
     }
     /**
@@ -36668,8 +36670,10 @@ function collectQueryResults(lView, queryIndex, result) {
                 // collect matches for views created from this declaration container and inserted into
                 // different containers
                 if (declarationLContainer[MOVED_VIEWS] !== null) {
-                    for (let embeddedLView of (/** @type {?} */ (declarationLContainer[MOVED_VIEWS]))) {
-                        collectQueryResults(embeddedLView, childQueryIndex, result);
+                    /** @type {?} */
+                    const embeddedLViews = (/** @type {?} */ (declarationLContainer[MOVED_VIEWS]));
+                    for (let i = 0; i < embeddedLViews.length; i++) {
+                        collectQueryResults(embeddedLViews[i], childQueryIndex, result);
                     }
                 }
             }

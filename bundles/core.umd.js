@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+48.sha-ee48623.with-local-changes
+ * @license Angular v9.0.0-next.2+51.sha-71ada48.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17800,7 +17800,6 @@
      * @codeGenApi
      */
     function ɵɵInheritDefinitionFeature(definition) {
-        var e_1, _a;
         var superType = getSuperType(definition.type);
         while (superType) {
             var superDef = undefined;
@@ -17861,20 +17860,11 @@
                 // Run parent features
                 var features = superDef.features;
                 if (features) {
-                    try {
-                        for (var features_1 = (e_1 = void 0, __values(features)), features_1_1 = features_1.next(); !features_1_1.done; features_1_1 = features_1.next()) {
-                            var feature = features_1_1.value;
-                            if (feature && feature.ngInherit) {
-                                feature(definition);
-                            }
+                    for (var i = 0; i < features.length; i++) {
+                        var feature = features[i];
+                        if (feature && feature.ngInherit) {
+                            feature(definition);
                         }
-                    }
-                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                    finally {
-                        try {
-                            if (features_1_1 && !features_1_1.done && (_a = features_1.return)) _a.call(features_1);
-                        }
-                        finally { if (e_1) throw e_1.error; }
                     }
                 }
             }
@@ -18551,7 +18541,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.2+48.sha-ee48623.with-local-changes');
+    var VERSION = new Version('9.0.0-next.2+51.sha-71ada48.with-local-changes');
 
     /**
      * @license
@@ -24098,36 +24088,14 @@
             this.queries = queries;
         }
         TQueries_.prototype.elementStart = function (tView, tNode) {
-            var e_1, _a;
             ngDevMode && assertFirstTemplatePass(tView, 'Queries should collect results on the first template pass only');
-            try {
-                for (var _b = __values(this.queries), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var query = _c.value;
-                    query.elementStart(tView, tNode);
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                }
-                finally { if (e_1) throw e_1.error; }
+            for (var i = 0; i < this.queries.length; i++) {
+                this.queries[i].elementStart(tView, tNode);
             }
         };
         TQueries_.prototype.elementEnd = function (tNode) {
-            var e_2, _a;
-            try {
-                for (var _b = __values(this.queries), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var query = _c.value;
-                    query.elementEnd(tNode);
-                }
-            }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                }
-                finally { if (e_2) throw e_2.error; }
+            for (var i = 0; i < this.queries.length; i++) {
+                this.queries[i].elementEnd(tNode);
             }
         };
         TQueries_.prototype.embeddedTView = function (tNode) {
@@ -24148,20 +24116,9 @@
             return queriesForTemplateRef !== null ? new TQueries_(queriesForTemplateRef) : null;
         };
         TQueries_.prototype.template = function (tView, tNode) {
-            var e_3, _a;
             ngDevMode && assertFirstTemplatePass(tView, 'Queries should collect results on the first template pass only');
-            try {
-                for (var _b = __values(this.queries), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var query = _c.value;
-                    query.template(tView, tNode);
-                }
-            }
-            catch (e_3_1) { e_3 = { error: e_3_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                }
-                finally { if (e_3) throw e_3.error; }
+            for (var i = 0; i < this.queries.length; i++) {
+                this.queries[i].template(tView, tNode);
             }
         };
         TQueries_.prototype.getByIndex = function (index) {
@@ -24360,7 +24317,6 @@
      * starting with a provided LView.
      */
     function collectQueryResults(lView, queryIndex, result) {
-        var e_4, _a;
         var tQuery = lView[TVIEW].queries.getByIndex(queryIndex);
         var tQueryMatches = tQuery.matches;
         if (tQueryMatches !== null) {
@@ -24386,18 +24342,9 @@
                     // collect matches for views created from this declaration container and inserted into
                     // different containers
                     if (declarationLContainer[MOVED_VIEWS] !== null) {
-                        try {
-                            for (var _b = (e_4 = void 0, __values(declarationLContainer[MOVED_VIEWS])), _c = _b.next(); !_c.done; _c = _b.next()) {
-                                var embeddedLView = _c.value;
-                                collectQueryResults(embeddedLView, childQueryIndex, result);
-                            }
-                        }
-                        catch (e_4_1) { e_4 = { error: e_4_1 }; }
-                        finally {
-                            try {
-                                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                            }
-                            finally { if (e_4) throw e_4.error; }
+                        var embeddedLViews = declarationLContainer[MOVED_VIEWS];
+                        for (var i_2 = 0; i_2 < embeddedLViews.length; i_2++) {
+                            collectQueryResults(embeddedLViews[i_2], childQueryIndex, result);
                         }
                     }
                 }
