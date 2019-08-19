@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+55.sha-e85ec23.with-local-changes
+ * @license Angular v9.0.0-next.2+58.sha-994264c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2006,6 +2006,8 @@
             return 'Projection';
         if (type == 0 /* Container */)
             return 'Container';
+        if (type == 5 /* IcuContainer */)
+            return 'IcuContainer';
         if (type == 2 /* View */)
             return 'View';
         if (type == 3 /* Element */)
@@ -7135,6 +7137,15 @@
             this.firstChild = firstChild;
             this.schemas = schemas;
         }
+        Object.defineProperty(TView.prototype, "template_", {
+            get: function () {
+                var buf = [];
+                processTNodeChildren(this.firstChild, buf);
+                return buf.join('');
+            },
+            enumerable: true,
+            configurable: true
+        });
         return TView;
     }());
     var TNodeConstructor = /** @class */ (function () {
@@ -7229,8 +7240,36 @@
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(TNode.prototype, "template_", {
+            get: function () {
+                var buf = [];
+                buf.push('<', this.tagName || this.type_);
+                if (this.attrs) {
+                    for (var i = 0; i < this.attrs.length;) {
+                        var attrName = this.attrs[i++];
+                        if (typeof attrName == 'number') {
+                            break;
+                        }
+                        var attrValue = this.attrs[i++];
+                        buf.push(' ', attrName, '="', attrValue, '"');
+                    }
+                }
+                buf.push('>');
+                processTNodeChildren(this.child, buf);
+                buf.push('</', this.tagName || this.type_, '>');
+                return buf.join('');
+            },
+            enumerable: true,
+            configurable: true
+        });
         return TNode;
     }());
+    function processTNodeChildren(tNode, buf) {
+        while (tNode) {
+            buf.push(tNode.template_);
+            tNode = tNode.next;
+        }
+    }
     var TViewData = ngDevMode && createNamedArrayType('TViewData');
     var TVIEWDATA_EMPTY; // can't initialize here or it will not be tree shaken, because `LView`
     // constructor could have side-effects.
@@ -7287,8 +7326,8 @@
                 return outerHTML;
             }
             else {
-                var innerHTML = node.innerHTML;
-                return outerHTML.split(innerHTML)[0] || null;
+                var innerHTML = '>' + node.innerHTML + '<';
+                return (outerHTML.split(innerHTML)[0]) + '>';
             }
         }
         else {
@@ -7331,6 +7370,11 @@
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(LViewDebug.prototype, "html", {
+            get: function () { return (this.nodes || []).map(function (node) { return toHtml(node.native, true); }).join(''); },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(LViewDebug.prototype, "context", {
             get: function () { return this._raw_lView[CONTEXT]; },
             enumerable: true,
@@ -7349,29 +7393,68 @@
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(LViewDebug.prototype, "__other__", {
-            /**
-             * Additional information which is hidden behind a property. The extra level of indirection is
-             * done so that the debug view would not be cluttered with properties which are only rarely
-             * relevant to the developer.
-             */
-            get: function () {
-                return {
-                    tView: this._raw_lView[TVIEW],
-                    cleanup: this._raw_lView[CLEANUP],
-                    injector: this._raw_lView[INJECTOR$1],
-                    rendererFactory: this._raw_lView[RENDERER_FACTORY],
-                    renderer: this._raw_lView[RENDERER],
-                    sanitizer: this._raw_lView[SANITIZER],
-                    childHead: toDebug(this._raw_lView[CHILD_HEAD]),
-                    next: toDebug(this._raw_lView[NEXT]),
-                    childTail: toDebug(this._raw_lView[CHILD_TAIL]),
-                    declarationView: toDebug(this._raw_lView[DECLARATION_VIEW]),
-                    queries: null,
-                    tHost: this._raw_lView[T_HOST],
-                    bindingIndex: this._raw_lView[BINDING_INDEX],
-                };
-            },
+        Object.defineProperty(LViewDebug.prototype, "tView", {
+            get: function () { return this._raw_lView[TVIEW]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "cleanup", {
+            get: function () { return this._raw_lView[CLEANUP]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "injector", {
+            get: function () { return this._raw_lView[INJECTOR$1]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "rendererFactory", {
+            get: function () { return this._raw_lView[RENDERER_FACTORY]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "renderer", {
+            get: function () { return this._raw_lView[RENDERER]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "sanitizer", {
+            get: function () { return this._raw_lView[SANITIZER]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "childHead", {
+            get: function () { return toDebug(this._raw_lView[CHILD_HEAD]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "next", {
+            get: function () { return toDebug(this._raw_lView[NEXT]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "childTail", {
+            get: function () { return toDebug(this._raw_lView[CHILD_TAIL]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "declarationView", {
+            get: function () { return toDebug(this._raw_lView[DECLARATION_VIEW]); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "queries", {
+            get: function () { return this._raw_lView[QUERIES]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "tHost", {
+            get: function () { return this._raw_lView[T_HOST]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "bindingIndex", {
+            get: function () { return this._raw_lView[BINDING_INDEX]; },
             enumerable: true,
             configurable: true
         });
@@ -7381,10 +7464,10 @@
              */
             get: function () {
                 var childViews = [];
-                var child = this.__other__.childHead;
+                var child = this.childHead;
                 while (child) {
                     childViews.push(child);
-                    child = child.__other__.next;
+                    child = child.next;
                 }
                 return childViews;
             },
@@ -7464,12 +7547,8 @@
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(LContainerDebug.prototype, "__other__", {
-            get: function () {
-                return {
-                    next: toDebug(this._raw_lContainer[NEXT]),
-                };
-            },
+        Object.defineProperty(LContainerDebug.prototype, "next", {
+            get: function () { return toDebug(this._raw_lContainer[NEXT]); },
             enumerable: true,
             configurable: true
         });
@@ -7875,7 +7954,6 @@
         if (index === 0 || !tView.firstChild) {
             tView.firstChild = tNode;
         }
-        // Now link ourselves into the tree.
         if (previousOrParentTNode) {
             if (isParent && previousOrParentTNode.child == null &&
                 (tNode.parent !== null || previousOrParentTNode.type === 2 /* View */)) {
@@ -9306,7 +9384,7 @@
      * NOTE: for performance reasons, the possible actions are inlined within the function instead of
      * being passed as an argument.
      */
-    function executeActionOnElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode) {
+    function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode) {
         // If this slot was allocated for a text node dynamically created by i18n, the text node itself
         // won't be created until i18nApply() in the update block, so this node should be skipped.
         // For more info, see "ICU expressions should work inside an ngTemplateOutlet inside an ngFor"
@@ -9315,8 +9393,7 @@
             var lContainer = void 0;
             var isComponent = false;
             // We are expecting an RNode, but in the case of a component or LContainer the `RNode` is
-            // wrapped
-            // in an array which needs to be unwrapped. We need to know if it is a component and if
+            // wrapped in an array which needs to be unwrapped. We need to know if it is a component and if
             // it has LContainer so that we can process all of those cases appropriately.
             if (isLContainer(lNodeToHandle)) {
                 lContainer = lNodeToHandle;
@@ -9328,18 +9405,26 @@
             }
             var rNode = unwrapRNode(lNodeToHandle);
             ngDevMode && assertDomNode(rNode);
-            if (action === 0 /* Insert */) {
+            if (action === 0 /* Create */ && parent !== null) {
+                if (beforeNode == null) {
+                    nativeAppendChild(renderer, parent, rNode);
+                }
+                else {
+                    nativeInsertBefore(renderer, parent, rNode, beforeNode || null);
+                }
+            }
+            else if (action === 1 /* Insert */ && parent !== null) {
                 nativeInsertBefore(renderer, parent, rNode, beforeNode || null);
             }
-            else if (action === 1 /* Detach */) {
+            else if (action === 2 /* Detach */) {
                 nativeRemoveNode(renderer, rNode, isComponent);
             }
-            else if (action === 2 /* Destroy */) {
+            else if (action === 3 /* Destroy */) {
                 ngDevMode && ngDevMode.rendererDestroyNode++;
                 renderer.destroyNode(rNode);
             }
             if (lContainer != null) {
-                executeActionOnContainer(renderer, action, lContainer, parent, beforeNode);
+                applyContainer(renderer, action, lContainer, parent, beforeNode);
             }
         }
     }
@@ -9352,8 +9437,8 @@
         ngDevMode && assertNodeType(lView[TVIEW].node, 2 /* View */);
         if (renderParent) {
             var renderer = lView[RENDERER];
-            var action = insertMode ? 0 /* Insert */ : 1 /* Detach */;
-            executeActionOnView(renderer, action, lView, renderParent, beforeNode);
+            var action = insertMode ? 1 /* Insert */ : 2 /* Detach */;
+            applyView(renderer, action, lView, renderParent, beforeNode);
         }
     }
     /**
@@ -9362,7 +9447,7 @@
      * @param lView the `LView` to be detached.
      */
     function renderDetachView(lView) {
-        executeActionOnView(lView[RENDERER], 1 /* Detach */, lView, null, null);
+        applyView(lView[RENDERER], 2 /* Detach */, lView, null, null);
     }
     /**
      * Traverses down and up the tree of views and containers to remove listeners and
@@ -9497,7 +9582,7 @@
                 lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
             }
             var removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
-            addRemoveViewFromContainer(viewToDetach, false);
+            addRemoveViewFromContainer(viewToDetach, false, null);
             // notify query that a view has been removed
             var lQueries = removedLView[QUERIES];
             if (lQueries !== null) {
@@ -9530,7 +9615,7 @@
         if (!(lView[FLAGS] & 256 /* Destroyed */)) {
             var renderer = lView[RENDERER];
             if (isProceduralRenderer(renderer) && renderer.destroyNode) {
-                executeActionOnView(renderer, 2 /* Destroy */, lView, null, null);
+                applyView(renderer, 3 /* Destroy */, lView, null, null);
             }
             destroyViewTree(lView);
         }
@@ -9673,11 +9758,15 @@
         }
         // Skip over element and ICU containers as those are represented by a comment node and
         // can't be used as a render parent.
-        var parent = getHighestElementOrICUContainer(tNode);
-        var renderParent = parent.parent;
-        // If the parent is null, then we are inserting across views: either into an embedded view or a
-        // component view.
-        if (renderParent == null) {
+        var parentTNode = tNode.parent;
+        while (parentTNode != null && (parentTNode.type === 4 /* ElementContainer */ ||
+            parentTNode.type === 5 /* IcuContainer */)) {
+            tNode = parentTNode;
+            parentTNode = tNode.parent;
+        }
+        // If the parent tNode is null, then we are inserting across views: either into an embedded view
+        // or a component view.
+        if (parentTNode == null) {
             var hostTNode = currentView[T_HOST];
             if (hostTNode.type === 2 /* View */) {
                 // We are inserting a root element of an embedded view We might delay insertion of children
@@ -9696,16 +9785,16 @@
             }
         }
         else {
-            var isIcuCase = parent && parent.type === 5 /* IcuContainer */;
+            var isIcuCase = tNode && tNode.type === 5 /* IcuContainer */;
             // If the parent of this node is an ICU container, then it is represented by comment node and we
-            // need to use it as an anchor. If it is projected then its direct parent node is the renderer.
-            if (isIcuCase && parent.flags & 2 /* isProjected */) {
-                return getNativeByTNode(parent, currentView).parentNode;
+            // need to use it as an anchor. If it is projected then it's direct parent node is the renderer.
+            if (isIcuCase && tNode.flags & 2 /* isProjected */) {
+                return getNativeByTNode(tNode, currentView).parentNode;
             }
-            ngDevMode && assertNodeType(renderParent, 3 /* Element */);
-            if (renderParent.flags & 1 /* isComponent */ && !isIcuCase) {
+            ngDevMode && assertNodeType(parentTNode, 3 /* Element */);
+            if (parentTNode.flags & 1 /* isComponent */) {
                 var tData = currentView[TVIEW].data;
-                var tNode_1 = tData[renderParent.index];
+                var tNode_1 = tData[parentTNode.index];
                 var encapsulation = tData[tNode_1.directiveStart].encapsulation;
                 // We've got a parent which is an element in the current view. We just need to verify if the
                 // parent element is not a component. Component's content nodes are not inserted immediately
@@ -9718,7 +9807,7 @@
                     return null;
                 }
             }
-            return getNativeByTNode(renderParent, currentView);
+            return getNativeByTNode(parentTNode, currentView);
         }
     }
     /**
@@ -9748,6 +9837,7 @@
     }
     function nativeAppendChild(renderer, parent, child) {
         ngDevMode && ngDevMode.rendererAppendChild++;
+        ngDevMode && assertDefined(parent, 'parent node must be defined');
         if (isProceduralRenderer(renderer)) {
             renderer.appendChild(parent, child);
         }
@@ -9793,6 +9883,8 @@
     function getNativeAnchorNode(parentTNode, lView) {
         if (parentTNode.type === 2 /* View */) {
             var lContainer = getLContainer(parentTNode, lView);
+            if (lContainer === null)
+                return null;
             var index = lContainer.indexOf(lView, CONTAINER_HEADER_OFFSET) - CONTAINER_HEADER_OFFSET;
             return getBeforeNodeForView(index, lContainer);
         }
@@ -9813,44 +9905,20 @@
      * @returns Whether or not the child was appended
      */
     function appendChild(childEl, childTNode, currentView) {
-        var e_1, _a;
         var renderParent = getRenderParent(childTNode, currentView);
         if (renderParent != null) {
             var renderer = currentView[RENDERER];
             var parentTNode = childTNode.parent || currentView[T_HOST];
             var anchorNode = getNativeAnchorNode(parentTNode, currentView);
             if (Array.isArray(childEl)) {
-                try {
-                    for (var childEl_1 = __values(childEl), childEl_1_1 = childEl_1.next(); !childEl_1_1.done; childEl_1_1 = childEl_1.next()) {
-                        var nativeNode = childEl_1_1.value;
-                        nativeAppendOrInsertBefore(renderer, renderParent, nativeNode, anchorNode);
-                    }
-                }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (childEl_1_1 && !childEl_1_1.done && (_a = childEl_1.return)) _a.call(childEl_1);
-                    }
-                    finally { if (e_1) throw e_1.error; }
+                for (var i = 0; i < childEl.length; i++) {
+                    nativeAppendOrInsertBefore(renderer, renderParent, childEl[i], anchorNode);
                 }
             }
             else {
                 nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
             }
         }
-    }
-    /**
-     * Gets the top-level element or an ICU container if those containers are nested.
-     *
-     * @param tNode The starting TNode for which we should skip element and ICU containers
-     * @returns The TNode of the highest level ICU container or element container
-     */
-    function getHighestElementOrICUContainer(tNode) {
-        while (tNode.parent != null && (tNode.parent.type === 4 /* ElementContainer */ ||
-            tNode.parent.type === 5 /* IcuContainer */)) {
-            tNode = tNode.parent;
-        }
-        return tNode;
     }
     function getBeforeNodeForView(viewIndexInContainer, lContainer) {
         var nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
@@ -9881,97 +9949,39 @@
         }
     }
     /**
-     * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
-     * stored on a component host level.
-     * @param lView A LView where nodes are inserted (target LView)
-     * @param tProjectionNode A projection node where previously re-distribution should be appended
-     * (target insertion place)
-     * @param selectorIndex A bucket from where nodes to project should be taken
-     * @param componentView A where projectable nodes were initially created (source view)
+     * Performs the operation of `action` on the node. Typically this involves inserting or removing
+     * nodes on the LView or projection boundary.
      */
-    function appendProjectedNodes(lView, tProjectionNode, selectorIndex, componentView) {
-        var projectedView = componentView[PARENT];
-        var componentNode = componentView[T_HOST];
-        var nodeToProject = componentNode.projection[selectorIndex];
-        if (Array.isArray(nodeToProject)) {
-            appendChild(nodeToProject, tProjectionNode, lView);
-        }
-        else {
-            while (nodeToProject) {
-                if (!(nodeToProject.flags & 32 /* isDetached */)) {
-                    if (nodeToProject.type === 1 /* Projection */) {
-                        appendProjectedNodes(lView, tProjectionNode, nodeToProject.projection, findComponentView(projectedView));
-                    }
-                    else {
-                        // This flag must be set now or we won't know that this node is projected
-                        // if the nodes are inserted into a container later.
-                        nodeToProject.flags |= 2 /* isProjected */;
-                        appendProjectedNode(nodeToProject, tProjectionNode, lView, projectedView);
-                    }
+    function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, isProjection) {
+        while (tNode != null) {
+            ngDevMode && assertTNodeForLView(tNode, lView);
+            ngDevMode && assertNodeOfPossibleTypes(tNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */, 1 /* Projection */, 1 /* Projection */, 5 /* IcuContainer */);
+            var rawSlotValue = lView[tNode.index];
+            var tNodeType = tNode.type;
+            if (isProjection) {
+                if (action === 0 /* Create */) {
+                    rawSlotValue && attachPatchData(unwrapRNode(rawSlotValue), lView);
+                    tNode.flags |= 2 /* isProjected */;
                 }
-                nodeToProject = nodeToProject.projectionNext;
             }
+            if ((tNode.flags & 32 /* isDetached */) !== 32 /* isDetached */) {
+                if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
+                    applyNodes(renderer, action, tNode.child, lView, renderParent, beforeNode, false);
+                    applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
+                }
+                else if (tNodeType === 1 /* Projection */) {
+                    applyProjectionRecursive(renderer, action, lView, tNode, renderParent, beforeNode);
+                }
+                else {
+                    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */);
+                    applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
+                }
+            }
+            tNode = isProjection ? tNode.projectionNext : tNode.next;
         }
     }
     /**
-     * Loops over all children of a TNode container and appends them to the DOM
-     *
-     * @param ngContainerChildTNode The first child of the TNode container
-     * @param tProjectionNode The projection (ng-content) TNode
-     * @param currentView Current LView
-     * @param projectionView Projection view (view above current)
-     */
-    function appendProjectedChildren(ngContainerChildTNode, tProjectionNode, currentView, projectionView) {
-        while (ngContainerChildTNode) {
-            appendProjectedNode(ngContainerChildTNode, tProjectionNode, currentView, projectionView);
-            ngContainerChildTNode = ngContainerChildTNode.next;
-        }
-    }
-    /**
-     * Appends a projected node to the DOM, or in the case of a projected container,
-     * appends the nodes from all of the container's active views to the DOM.
-     *
-     * @param projectedTNode The TNode to be projected
-     * @param tProjectionNode The projection (ng-content) TNode
-     * @param currentView Current LView
-     * @param projectionView Projection view (view above current)
-     */
-    function appendProjectedNode(projectedTNode, tProjectionNode, currentView, projectionView) {
-        var native = getNativeByTNode(projectedTNode, projectionView);
-        appendChild(native, tProjectionNode, currentView);
-        // the projected contents are processed while in the shadow view (which is the currentView)
-        // therefore we need to extract the view where the host element lives since it's the
-        // logical container of the content projected views
-        attachPatchData(native, projectionView);
-        var nodeOrContainer = projectionView[projectedTNode.index];
-        if (projectedTNode.type === 0 /* Container */) {
-            // The node we are adding is a container and we are adding it to an element which
-            // is not a component (no more re-projection).
-            // Alternatively a container is projected at the root of a component's template
-            // and can't be re-projected (as not content of any component).
-            // Assign the final projection location in those cases.
-            for (var i = CONTAINER_HEADER_OFFSET; i < nodeOrContainer.length; i++) {
-                addRemoveViewFromContainer(nodeOrContainer[i], true, nodeOrContainer[NATIVE]);
-            }
-        }
-        else if (projectedTNode.type === 5 /* IcuContainer */) {
-            // The node we are adding is an ICU container which is why we also need to project all the
-            // children nodes that might have been created previously and are linked to this anchor
-            var ngContainerChildTNode = projectedTNode.child;
-            appendProjectedChildren(ngContainerChildTNode, ngContainerChildTNode, projectionView, projectionView);
-        }
-        else {
-            if (projectedTNode.type === 4 /* ElementContainer */) {
-                appendProjectedChildren(projectedTNode.child, tProjectionNode, currentView, projectionView);
-            }
-            if (isLContainer(nodeOrContainer)) {
-                appendChild(nodeOrContainer[NATIVE], tProjectionNode, currentView);
-            }
-        }
-    }
-    /**
-     * `executeActionOnView` performs an operation on the view as specified in `action` (insert, detach,
-     * destroy)
+     * `applyView` performs operation on the view as specified in `action` (insert, detach, destroy)
      *
      * Inserting a view without projection or containers at top level is simple. Just iterate over the
      * root nodes of the View, and for each node perform the `action`.
@@ -9983,10 +9993,8 @@
      *               complication is that the nodes we are projecting can themselves have Containers
      *               or other Projections.
      *
-     * As you can see this is a very recursive problem. While the recursive implementation is not the
-     * most efficient one, trying to unroll the nodes non-recursively results in very complex code that
-     * is very hard (to maintain). We are sacrificing a bit of performance for readability using a
-     * recursive implementation.
+     * As you can see this is a very recursive problem. Yes recursion is not most efficient but the
+     * code is complicated enough that trying to implemented with recursion becomes unmaintainable.
      *
      * @param renderer Renderer to use
      * @param action action to perform (insert, detach, destroy)
@@ -9994,54 +10002,67 @@
      * @param renderParent parent DOM element for insertion/removal.
      * @param beforeNode Before which node the insertions should happen.
      */
-    function executeActionOnView(renderer, action, lView, renderParent, beforeNode) {
+    function applyView(renderer, action, lView, renderParent, beforeNode) {
         var tView = lView[TVIEW];
         ngDevMode && assertNodeType(tView.node, 2 /* View */);
         var viewRootTNode = tView.node.child;
-        while (viewRootTNode !== null) {
-            executeActionOnNode(renderer, action, lView, viewRootTNode, renderParent, beforeNode);
-            viewRootTNode = viewRootTNode.next;
-        }
+        applyNodes(renderer, action, viewRootTNode, lView, renderParent, beforeNode, false);
     }
     /**
-     * `executeActionOnProjection` performs an operation on the projection specified by `action`
-     * (insert, detach, destroy).
+     * `applyProjection` performs operation on the projection.
      *
      * Inserting a projection requires us to locate the projected nodes from the parent component. The
      * complication is that those nodes themselves could be re-projected from their parent component.
      *
-     * @param renderer Renderer to use
+     * @param lView The LView which needs to be inserted, detached, destroyed.
+     * @param tProjectionNode node to project
+     */
+    function applyProjection(lView, tProjectionNode) {
+        var renderer = lView[RENDERER];
+        var renderParent = getRenderParent(tProjectionNode, lView);
+        var parentTNode = tProjectionNode.parent || lView[T_HOST];
+        var beforeNode = getNativeAnchorNode(parentTNode, lView);
+        applyProjectionRecursive(renderer, 0 /* Create */, lView, tProjectionNode, renderParent, beforeNode);
+    }
+    /**
+     * `applyProjectionRecursive` performs operation on the projection specified by `action` (insert,
+     * detach, destroy)
+     *
+     * Inserting a projection requires us to locate the projected nodes from the parent component. The
+     * complication is that those nodes themselves could be re-projected from their parent component.
+     *
+     * @param renderer Render to use
      * @param action action to perform (insert, detach, destroy)
      * @param lView The LView which needs to be inserted, detached, destroyed.
-     * @param tProjectionNode projection TNode to process
+     * @param tProjectionNode node to project
      * @param renderParent parent DOM element for insertion/removal.
      * @param beforeNode Before which node the insertions should happen.
      */
-    function executeActionOnProjection(renderer, action, lView, tProjectionNode, renderParent, beforeNode) {
+    function applyProjectionRecursive(renderer, action, lView, tProjectionNode, renderParent, beforeNode) {
         var componentLView = findComponentView(lView);
         var componentNode = componentLView[T_HOST];
-        ngDevMode && assertDefined(componentNode.projection, 'Element nodes for which projection is processed must have projection defined.');
-        var nodeToProject = componentNode.projection[tProjectionNode.projection];
-        if (nodeToProject !== undefined) {
-            if (Array.isArray(nodeToProject)) {
-                for (var i = 0; i < nodeToProject.length; i++) {
-                    var rNode = nodeToProject[i];
-                    ngDevMode && assertDomNode(rNode);
-                    executeActionOnElementOrContainer(action, renderer, renderParent, rNode, beforeNode);
-                }
+        ngDevMode &&
+            assertEqual(typeof tProjectionNode.projection, 'number', 'expecting projection index');
+        var nodeToProjectOrRNodes = componentNode.projection[tProjectionNode.projection];
+        if (Array.isArray(nodeToProjectOrRNodes)) {
+            // This should not exist, it is a bit of a hack. When we bootstrap a top level node and we
+            // need to support passing projectable nodes, so we cheat and put them in the TNode
+            // of the Host TView. (Yes we put instance info at the T Level). We can get away with it
+            // because we know that that TView is not shared and therefore it will not be a problem.
+            // This should be refactored and cleaned up.
+            for (var i = 0; i < nodeToProjectOrRNodes.length; i++) {
+                var rNode = nodeToProjectOrRNodes[i];
+                applyToElementOrContainer(action, renderer, renderParent, rNode, beforeNode);
             }
-            else {
-                var projectionTNode = nodeToProject;
-                var projectedComponentLView = componentLView[PARENT];
-                while (projectionTNode !== null) {
-                    executeActionOnNode(renderer, action, projectedComponentLView, projectionTNode, renderParent, beforeNode);
-                    projectionTNode = projectionTNode.projectionNext;
-                }
-            }
+        }
+        else {
+            var nodeToProject = nodeToProjectOrRNodes;
+            var projectedComponentLView = componentLView[PARENT];
+            applyNodes(renderer, action, nodeToProject, projectedComponentLView, renderParent, beforeNode, true);
         }
     }
     /**
-     * `executeActionOnContainer` performs an operation on the container and its views as specified by
+     * `applyContainer` performs an operation on the container and its views as specified by
      * `action` (insert, detach, destroy)
      *
      * Inserting a Container is complicated by the fact that the container may have Views which
@@ -10053,7 +10074,7 @@
      * @param renderParent parent DOM element for insertion/removal.
      * @param beforeNode Before which node the insertions should happen.
      */
-    function executeActionOnContainer(renderer, action, lContainer, renderParent, beforeNode) {
+    function applyContainer(renderer, action, lContainer, renderParent, beforeNode) {
         ngDevMode && assertLContainer(lContainer);
         var anchor = lContainer[NATIVE]; // LContainer has its own before node.
         var native = unwrapRNode(lContainer);
@@ -10061,49 +10082,18 @@
         // Asking for a ViewContainerRef on an element will result in a creation of a separate anchor node
         // (comment in the DOM) that will be different from the LContainer's host node. In this particular
         // case we need to execute action on 2 nodes:
-        // - container's host node (this is done in the executeNodeAction)
+        // - container's host node (this is done in the executeActionOnElementOrContainer)
         // - container's host node (this is done here)
         if (anchor !== native) {
-            executeActionOnElementOrContainer(action, renderer, renderParent, anchor, beforeNode);
+            // This is very strange to me (Misko). I would expect that the native is same as anchor. I don't
+            // see a reason why they should be different, but they are.
+            //
+            // If they are we need to process the second anchor as well.
+            applyToElementOrContainer(action, renderer, renderParent, anchor, beforeNode);
         }
         for (var i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             var lView = lContainer[i];
-            executeActionOnView(renderer, action, lView, renderParent, anchor);
-        }
-    }
-    /**
-     * `executeActionOnElementContainerOrIcuContainer` performs an operation on the ng-container node
-     * and its child nodes as specified by the `action` (insert, detach, destroy).
-     *
-     * @param renderer Renderer to use
-     * @param action action to perform (insert, detach, destroy)
-     * @param lView The LView which needs to be inserted, detached, destroyed.
-     * @param tNode The TNode associated with the `ElementContainer` or `IcuContainer`.
-     * @param renderParent parent DOM element for insertion/removal.
-     * @param beforeNode Before which node the insertions should happen.
-     */
-    function executeActionOnElementContainerOrIcuContainer(renderer, action, lView, tNode, renderParent, beforeNode) {
-        var node = lView[tNode.index];
-        executeActionOnElementOrContainer(action, renderer, renderParent, node, beforeNode);
-        var childTNode = tNode.child;
-        while (childTNode) {
-            executeActionOnNode(renderer, action, lView, childTNode, renderParent, beforeNode);
-            childTNode = childTNode.next;
-        }
-    }
-    function executeActionOnNode(renderer, action, lView, tNode, renderParent, beforeNode) {
-        var nodeType = tNode.type;
-        if (!(tNode.flags & 32 /* isDetached */)) {
-            if (nodeType === 4 /* ElementContainer */ || nodeType === 5 /* IcuContainer */) {
-                executeActionOnElementContainerOrIcuContainer(renderer, action, lView, tNode, renderParent, beforeNode);
-            }
-            else if (nodeType === 1 /* Projection */) {
-                executeActionOnProjection(renderer, action, lView, tNode, renderParent, beforeNode);
-            }
-            else {
-                ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */);
-                executeActionOnElementOrContainer(action, renderer, renderParent, lView[tNode.index], beforeNode);
-            }
+            applyView(renderer, action, lView, renderParent, anchor);
         }
     }
 
@@ -15636,7 +15626,7 @@
         // We might need to delay the projection of nodes if they are in the middle of an i18n block
         if (!delayProjection) {
             // re-distribution of projectable nodes is stored on a component's view level
-            appendProjectedNodes(lView, tProjectionNode, selectorIndex, findComponentView(lView));
+            applyProjection(lView, tProjectionNode);
         }
     }
 
@@ -18508,7 +18498,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.2+55.sha-e85ec23.with-local-changes');
+    var VERSION = new Version('9.0.0-next.2+58.sha-994264c.with-local-changes');
 
     /**
      * @license
@@ -22259,7 +22249,7 @@
         };
         tView.data[index + HEADER_OFFSET] = tI18n;
     }
-    function appendI18nNode(tNode, parentTNode, previousTNode, viewData) {
+    function appendI18nNode(tNode, parentTNode, previousTNode, lView) {
         ngDevMode && ngDevMode.rendererMoveNode++;
         var nextNode = tNode.next;
         if (!previousTNode) {
@@ -22277,7 +22267,7 @@
         else {
             tNode.next = null;
         }
-        if (parentTNode !== viewData[T_HOST]) {
+        if (parentTNode !== lView[T_HOST]) {
             tNode.parent = parentTNode;
         }
         // If tNode was moved around, we might need to fix a broken link.
@@ -22290,15 +22280,14 @@
         }
         // If the placeholder to append is a projection, we need to move the projected nodes instead
         if (tNode.type === 1 /* Projection */) {
-            var tProjectionNode = tNode;
-            appendProjectedNodes(viewData, tProjectionNode, tProjectionNode.projection, findComponentView(viewData));
+            applyProjection(lView, tNode);
             return tNode;
         }
-        appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
-        var slotValue = viewData[tNode.index];
+        appendChild(getNativeByTNode(tNode, lView), tNode, lView);
+        var slotValue = lView[tNode.index];
         if (tNode.type !== 0 /* Container */ && isLContainer(slotValue)) {
             // Nodes that inject ViewContainerRef also have a comment node that should be moved
-            appendChild(slotValue[NATIVE], tNode, viewData);
+            appendChild(slotValue[NATIVE], tNode, lView);
         }
         return tNode;
     }
@@ -22436,7 +22425,7 @@
         // Remove deleted nodes
         for (var i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
             if (visitedNodes.indexOf(i) === -1) {
-                removeNode(i, viewData);
+                removeNode(i, viewData, /* markAsDetached */ true);
             }
         }
     }
@@ -22596,7 +22585,10 @@
                                             switch (removeOpCode & 7 /* MASK_OPCODE */) {
                                                 case 3 /* Remove */:
                                                     var nodeIndex_1 = removeOpCode >>> 3 /* SHIFT_REF */;
-                                                    removeNode(nodeIndex_1, viewData);
+                                                    // Remove DOM element, but do *not* mark TNode as detached, since we are
+                                                    // just switching ICU cases (while keeping the same TNode), so a DOM element
+                                                    // representing a new ICU case will be re-created.
+                                                    removeNode(nodeIndex_1, viewData, /* markAsDetached */ false);
                                                     break;
                                                 case 6 /* RemoveNestedIcu */:
                                                     var nestedIcuNodeIndex = removeCodes[k + 1] >>> 3 /* SHIFT_REF */;
@@ -22632,7 +22624,7 @@
             i += skipCodes;
         }
     }
-    function removeNode(index, viewData) {
+    function removeNode(index, viewData, markAsDetached) {
         var removedPhTNode = getTNode(index, viewData);
         var removedPhRNode = getNativeByIndex(index, viewData);
         if (removedPhRNode) {
@@ -22645,8 +22637,10 @@
                 nativeRemoveNode(viewData[RENDERER], lContainer[NATIVE]);
             }
         }
-        // Define this node as detached so that we don't risk projecting it
-        removedPhTNode.flags |= 32 /* isDetached */;
+        if (markAsDetached) {
+            // Define this node as detached to avoid projecting it later
+            removedPhTNode.flags |= 32 /* isDetached */;
+        }
         ngDevMode && ngDevMode.rendererRemoveNode++;
     }
     /**

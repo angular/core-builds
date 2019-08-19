@@ -57,6 +57,7 @@ export declare const TViewConstructor: {
         pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null;
         firstChild: ITNode | null;
         schemas: SchemaMetadata[] | null;
+        readonly template_: string;
     };
 };
 export declare const TNodeConstructor: {
@@ -87,6 +88,7 @@ export declare const TNodeConstructor: {
         classes: TStylingContext | null;
         readonly type_: string;
         readonly flags_: string;
+        readonly template_: string;
     };
 };
 /**
@@ -128,32 +130,26 @@ export declare class LViewDebug {
     };
     readonly parent: LViewDebug | LContainerDebug | null;
     readonly host: string | null;
+    readonly html: string;
     readonly context: {} | null;
     /**
      * The tree of nodes associated with the current `LView`. The nodes have been normalized into a
      * tree structure with relevant details pulled out for readability.
      */
     readonly nodes: DebugNode[] | null;
-    /**
-     * Additional information which is hidden behind a property. The extra level of indirection is
-     * done so that the debug view would not be cluttered with properties which are only rarely
-     * relevant to the developer.
-     */
-    readonly __other__: {
-        tView: ITView;
-        cleanup: any[] | null;
-        injector: import("@angular/core/src/core").Injector | null;
-        rendererFactory: import("@angular/core/src/render3/interfaces/renderer").RendererFactory3;
-        renderer: import("@angular/core/src/render3/interfaces/renderer").Renderer3;
-        sanitizer: import("@angular/core/src/core").Sanitizer | null;
-        childHead: LViewDebug | LContainerDebug | null;
-        next: LViewDebug | LContainerDebug | null;
-        childTail: LViewDebug | LContainerDebug | null;
-        declarationView: LViewDebug | null;
-        queries: null;
-        tHost: TElementNode | TViewNode | null;
-        bindingIndex: number;
-    };
+    readonly tView: ITView;
+    readonly cleanup: any[] | null;
+    readonly injector: import("@angular/core/src/core").Injector | null;
+    readonly rendererFactory: import("@angular/core/src/render3/interfaces/renderer").RendererFactory3;
+    readonly renderer: import("@angular/core/src/render3/interfaces/renderer").Renderer3;
+    readonly sanitizer: import("@angular/core/src/core").Sanitizer | null;
+    readonly childHead: LViewDebug | LContainerDebug | null;
+    readonly next: LViewDebug | LContainerDebug | null;
+    readonly childTail: LViewDebug | LContainerDebug | null;
+    readonly declarationView: LViewDebug | null;
+    readonly queries: import("@angular/core/src/render3/interfaces/query").LQueries | null;
+    readonly tHost: TElementNode | TViewNode | null;
+    readonly bindingIndex: number;
     /**
      * Normalized view of child views (and containers) attached at this location.
      */
@@ -183,9 +179,7 @@ export declare class LContainerDebug {
     readonly movedViews: LView[] | null;
     readonly host: RElement | RComment | LView;
     readonly native: RComment;
-    readonly __other__: {
-        next: LViewDebug | LContainerDebug | null;
-    };
+    readonly next: LViewDebug | LContainerDebug | null;
 }
 /**
  * Return an `LView` value if found.

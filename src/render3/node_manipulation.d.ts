@@ -10,6 +10,11 @@ import { TNode, TProjectionNode, TViewNode } from './interfaces/node';
 import { RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView } from './interfaces/view';
 export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
+/**
+ * Retrieves render parent for a given view.
+ * Might be null if a view is not yet attached to any container.
+ */
+export declare function getContainerRenderParent(tViewNode: TViewNode, view: LView): RElement | null;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.
@@ -23,7 +28,7 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
  * @param beforeNode The node before which elements should be added, if insert mode
  */
 export declare function addRemoveViewFromContainer(lView: LView, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(lView: LView, insertMode: false): void;
+export declare function addRemoveViewFromContainer(lView: LView, insertMode: false, beforeNode: null): void;
 /**
  * Detach a `LView` from the DOM by detaching its nodes.
  *
@@ -132,12 +137,12 @@ export declare function getBeforeNodeForView(viewIndexInContainer: number, lCont
  */
 export declare function nativeRemoveNode(renderer: Renderer3, rNode: RNode, isHostElement?: boolean): void;
 /**
- * Appends nodes to a target projection place. Nodes to insert were previously re-distribution and
- * stored on a component host level.
- * @param lView A LView where nodes are inserted (target LView)
- * @param tProjectionNode A projection node where previously re-distribution should be appended
- * (target insertion place)
- * @param selectorIndex A bucket from where nodes to project should be taken
- * @param componentView A where projectable nodes were initially created (source view)
+ * `applyProjection` performs operation on the projection.
+ *
+ * Inserting a projection requires us to locate the projected nodes from the parent component. The
+ * complication is that those nodes themselves could be re-projected from their parent component.
+ *
+ * @param lView The LView which needs to be inserted, detached, destroyed.
+ * @param tProjectionNode node to project
  */
-export declare function appendProjectedNodes(lView: LView, tProjectionNode: TProjectionNode, selectorIndex: number, componentView: LView): void;
+export declare function applyProjection(lView: LView, tProjectionNode: TProjectionNode): void;
