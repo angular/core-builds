@@ -27,7 +27,7 @@ export declare function compileComponent(type: Type<any>, metadata: Component): 
  * In the event that compilation is not immediate, `compileDirective` will return a `Promise` which
  * will resolve when compilation completes and the directive becomes usable.
  */
-export declare function compileDirective(type: Type<any>, directive: Directive): void;
+export declare function compileDirective(type: Type<any>, directive: Directive | null): void;
 export declare function extendsDirectlyFromObject(type: Type<any>): boolean;
 /**
  * Extract the `R3DirectiveMetadata` for a particular directive (either a `Directive` or a

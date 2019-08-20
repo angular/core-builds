@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+66.sha-f8b995d.with-local-changes
+ * @license Angular v9.0.0-next.2+68.sha-cfed0c0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26420,7 +26420,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.2+66.sha-f8b995d.with-local-changes');
+const VERSION = new Version('9.0.0-next.2+68.sha-cfed0c0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -37268,6 +37268,7 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     /** @type {?} */
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
+    declarations.forEach(verifyDirectivesHaveSelector);
     /** @type {?} */
     const combinedDeclarations = [
         ...declarations.map(resolveForwardRef),
@@ -37312,6 +37313,18 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
         const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
         if (!def) {
             errors.push(`Unexpected value '${stringifyForError(type)}' declared by the module '${stringifyForError(moduleType)}'. Please add a @Pipe/@Directive/@Component annotation.`);
+        }
+    }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    function verifyDirectivesHaveSelector(type) {
+        type = resolveForwardRef(type);
+        /** @type {?} */
+        const def = getDirectiveDef(type);
+        if (!getComponentDef(type) && def && def.selectors.length == 0) {
+            errors.push(`Directive ${stringifyForError(type)} has no selector, please add it!`);
         }
     }
     /**
@@ -37826,8 +37839,11 @@ function compileDirective(type, directive) {
                 const sourceMapUrl = `ng:///${name}/ngDirectiveDef.js`;
                 /** @type {?} */
                 const compiler = getCompilerFacade();
+                // `directive` can be null in the case of abstract directives as a base class
+                // that use `@Directive()` with no selector. In that case, pass empty object to the
+                // `directiveMetadata` function instead of null.
                 /** @type {?} */
-                const facade = directiveMetadata((/** @type {?} */ (type)), directive);
+                const facade = directiveMetadata((/** @type {?} */ (type)), directive || {});
                 facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name, sourceMapUrl);
                 if (facade.usesInheritance) {
                     addBaseDefToUndecoratedParents(type);
