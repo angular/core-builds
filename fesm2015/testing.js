@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+66.sha-f8b995d.with-local-changes
+ * @license Angular v9.0.0-next.2+68.sha-cfed0c0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1919,7 +1919,7 @@ class R3TestBedCompiler {
          */
         declaration => {
             /** @type {?} */
-            const metadata = (/** @type {?} */ (this.resolvers.directive.resolve(declaration)));
+            const metadata = this.resolvers.directive.resolve(declaration);
             this.maybeStoreNgDef(ɵNG_DIRECTIVE_DEF, declaration);
             ɵcompileDirective(declaration, metadata);
         }));

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+66.sha-f8b995d.with-local-changes
+ * @license Angular v9.0.0-next.2+68.sha-cfed0c0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9210,7 +9210,7 @@ export declare function ɵcompileComponent(type: Type<any>, metadata: Component)
  * In the event that compilation is not immediate, `compileDirective` will return a `Promise` which
  * will resolve when compilation completes and the directive becomes usable.
  */
-export declare function ɵcompileDirective(type: Type<any>, directive: Directive): void;
+export declare function ɵcompileDirective(type: Type<any>, directive: Directive | null): void;
 
 /**
  * Compiles a module in JIT mode.

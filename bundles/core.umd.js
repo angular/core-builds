@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+66.sha-f8b995d.with-local-changes
+ * @license Angular v9.0.0-next.2+68.sha-cfed0c0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18531,7 +18531,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.2+66.sha-f8b995d.with-local-changes');
+    var VERSION = new Version('9.0.0-next.2+68.sha-cfed0c0.with-local-changes');
 
     /**
      * @license
@@ -24841,6 +24841,7 @@
         });
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
+        declarations.forEach(verifyDirectivesHaveSelector);
         var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(function (decl) { return verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot); });
@@ -24867,6 +24868,13 @@
             var def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef(type);
             if (!def) {
                 errors.push("Unexpected value '" + stringifyForError(type) + "' declared by the module '" + stringifyForError(moduleType) + "'. Please add a @Pipe/@Directive/@Component annotation.");
+            }
+        }
+        function verifyDirectivesHaveSelector(type) {
+            type = resolveForwardRef(type);
+            var def = getDirectiveDef(type);
+            if (!getComponentDef(type) && def && def.selectors.length == 0) {
+                errors.push("Directive " + stringifyForError(type) + " has no selector, please add it!");
             }
         }
         function verifyExportsAreDeclaredOrReExported(type) {
@@ -25210,7 +25218,10 @@
                     var name_1 = type && type.name;
                     var sourceMapUrl = "ng:///" + name_1 + "/ngDirectiveDef.js";
                     var compiler = getCompilerFacade();
-                    var facade = directiveMetadata(type, directive);
+                    // `directive` can be null in the case of abstract directives as a base class
+                    // that use `@Directive()` with no selector. In that case, pass empty object to the
+                    // `directiveMetadata` function instead of null.
+                    var facade = directiveMetadata(type, directive || {});
                     facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name_1, sourceMapUrl);
                     if (facade.usesInheritance) {
                         addBaseDefToUndecoratedParents(type);
