@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+68.sha-cfed0c0.with-local-changes
+ * @license Angular v9.0.0-next.2+69.sha-3dbc4ab.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26439,7 +26439,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.2+68.sha-cfed0c0.with-local-changes');
+const VERSION = new Version('9.0.0-next.2+69.sha-3dbc4ab.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -41909,7 +41909,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
     /**
      * @return {?}
      */
-    get name() { return (/** @type {?} */ (this.nativeElement)).nodeName; }
+    get name() { return this.nativeNode.nodeName; }
     /**
      *  Gets a map of property names to property values for an element.
      *
