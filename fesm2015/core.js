@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+81.sha-daac386.with-local-changes
+ * @license Angular v9.0.0-next.2+86.sha-1062960.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7753,32 +7753,12 @@ function registerPostOrderHooks(tView, tNode) {
  * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
  */
 /**
- * Executes necessary hooks at the start of executing a template.
- *
- * Executes hooks that are to be run during the initialization of a directive such
- * as `onChanges`, `onInit`, and `doCheck`.
- *
- * @param {?} currentView
- * @param {?} tView Static data for the view containing the hooks to be executed
- * @param {?} checkNoChangesMode Whether or not we're in checkNoChanges mode.
- * @param {?} currentNodeIndex
- * @return {?}
- */
-function executePreOrderHooks(currentView, tView, checkNoChangesMode, currentNodeIndex) {
-    if (!checkNoChangesMode) {
-        executeHooks(currentView, tView.preOrderHooks, tView.preOrderCheckHooks, checkNoChangesMode, 0 /* OnInitHooksToBeRun */, currentNodeIndex !== undefined ? currentNodeIndex : null);
-    }
-}
-/**
- * Executes hooks against the given `LView` based off of whether or not
- * This is the first pass.
- *
- * @param {?} currentView The view instance data to run the hooks against
- * @param {?} firstPassHooks An array of hooks to run if we're in the first view pass
- * @param {?} checkHooks An Array of hooks to run if we're not in the first view pass.
- * @param {?} checkNoChangesMode Whether or not we're in no changes mode.
- * @param {?} initPhaseState the current state of the init phase
- * @param {?} currentNodeIndex 3 cases depending the the value:
+ * Executes pre-order check hooks ( OnChanges, DoChanges) given a view where all the init hooks were
+ * executed once. This is a light version of executeInitAndCheckPreOrderHooks where we can skip read
+ * / write of the init-hooks related flags.
+ * @param {?} lView The LView where hooks are defined
+ * @param {?} hooks Hooks to be run
+ * @param {?=} nodeIndex 3 cases depending on the value:
  * - undefined: all hooks from the array should be executed (post-order case)
  * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
  * flushing the remaining hooks)
@@ -7786,26 +7766,43 @@ function executePreOrderHooks(currentView, tView, checkNoChangesMode, currentNod
  * case, when executing select(number))
  * @return {?}
  */
-function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMode, initPhaseState, currentNodeIndex) {
-    if (checkNoChangesMode)
-        return;
-    if (checkHooks !== null || firstPassHooks !== null) {
-        /** @type {?} */
-        const hooksToCall = (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhaseState ?
-            firstPassHooks :
-            checkHooks;
-        if (hooksToCall !== null) {
-            callHooks(currentView, hooksToCall, initPhaseState, currentNodeIndex);
-        }
+function executeCheckHooks(lView, hooks, nodeIndex) {
+    callHooks(lView, hooks, 3 /* InitPhaseCompleted */, nodeIndex);
+}
+/**
+ * Executes post-order init and check hooks (one of AfterContentInit, AfterContentChecked,
+ * AfterViewInit, AfterViewChecked) given a view where there are pending init hooks to be executed.
+ * @param {?} lView The LView where hooks are defined
+ * @param {?} hooks Hooks to be run
+ * @param {?} initPhase A phase for which hooks should be run
+ * @param {?=} nodeIndex 3 cases depending on the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ * @return {?}
+ */
+function executeInitAndCheckHooks(lView, hooks, initPhase, nodeIndex) {
+    ngDevMode && assertNotEqual(initPhase, 3 /* InitPhaseCompleted */, 'Init pre-order hooks should not be called more than once');
+    if ((lView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
+        callHooks(lView, hooks, initPhase, nodeIndex);
     }
-    // The init phase state must be always checked here as it may have been recursively updated
+}
+/**
+ * @param {?} lView
+ * @param {?} initPhase
+ * @return {?}
+ */
+function incrementInitPhaseFlags(lView, initPhase) {
+    ngDevMode &&
+        assertNotEqual(initPhase, 3 /* InitPhaseCompleted */, 'Init hooks phase should not be incremented after all init hooks have been run.');
     /** @type {?} */
-    let flags = currentView[FLAGS];
-    if (currentNodeIndex == null && (flags & 3 /* InitPhaseStateMask */) === initPhaseState &&
-        initPhaseState !== 3 /* InitPhaseCompleted */) {
+    let flags = lView[FLAGS];
+    if ((flags & 3 /* InitPhaseStateMask */) === initPhase) {
         flags &= 1023 /* IndexWithinInitPhaseReset */;
         flags += 1 /* InitPhaseStateIncrementer */;
-        currentView[FLAGS] = flags;
+        lView[FLAGS] = flags;
     }
 }
 /**
@@ -7815,7 +7812,7 @@ function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMod
  * @param {?} currentView The current view
  * @param {?} arr The array in which the hooks are found
  * @param {?} initPhase
- * @param {?} currentNodeIndex 3 cases depending the the value:
+ * @param {?} currentNodeIndex 3 cases depending on the value:
  * - undefined: all hooks from the array should be executed (post-order case)
  * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
  * flushing the remaining hooks)
@@ -7824,6 +7821,7 @@ function executeHooks(currentView, firstPassHooks, checkHooks, checkNoChangesMod
  * @return {?}
  */
 function callHooks(currentView, arr, initPhase, currentNodeIndex) {
+    ngDevMode && assertEqual(getCheckNoChangesMode(), false, 'Hooks should never be run in the check no changes mode.');
     /** @type {?} */
     const startIndex = currentNodeIndex !== undefined ?
         (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
@@ -11778,21 +11776,37 @@ if (false) {
  * @return {?}
  */
 function ɵɵselect(index) {
-    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
-    ngDevMode &&
-        assertLessThan(index, getLView().length - HEADER_OFFSET, 'Should be within range for the view data');
-    /** @type {?} */
-    const lView = getLView();
-    selectInternal(lView, index);
+    selectInternal(getLView(), index, getCheckNoChangesMode());
 }
 /**
  * @param {?} lView
  * @param {?} index
+ * @param {?} checkNoChangesMode
  * @return {?}
  */
-function selectInternal(lView, index) {
+function selectInternal(lView, index, checkNoChangesMode) {
+    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
+    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     // Flush the initial hooks for elements in the view that have been added up to this point.
-    executePreOrderHooks(lView, lView[TVIEW], getCheckNoChangesMode(), index);
+    // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+    if (!checkNoChangesMode) {
+        /** @type {?} */
+        const hooksInitPhaseCompleted = (lView[FLAGS] & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
+        if (hooksInitPhaseCompleted) {
+            /** @type {?} */
+            const preOrderCheckHooks = lView[TVIEW].preOrderCheckHooks;
+            if (preOrderCheckHooks !== null) {
+                executeCheckHooks(lView, preOrderCheckHooks, index);
+            }
+        }
+        else {
+            /** @type {?} */
+            const preOrderHooks = lView[TVIEW].preOrderHooks;
+            if (preOrderHooks !== null) {
+                executeInitAndCheckHooks(lView, preOrderHooks, 0 /* OnInitHooksToBeRun */, index);
+            }
+        }
+    }
     // We must set the selected index *after* running the hooks, because hooks may have side-effects
     // that cause other template functions to run, thus updating the selected index, which is global
     // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
@@ -12175,7 +12189,9 @@ function renderView(lView, tView, context) {
 function refreshView(lView, tView, templateFn, context) {
     ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
     /** @type {?} */
-    let oldView = enterView(lView, lView[T_HOST]);
+    const oldView = enterView(lView, lView[T_HOST]);
+    /** @type {?} */
+    const flags = lView[FLAGS];
     try {
         resetPreOrderHookFlags(lView);
         if (templateFn !== null) {
@@ -12186,14 +12202,51 @@ function refreshView(lView, tView, templateFn, context) {
         lView[BINDING_INDEX] = tView.bindingStartIndex;
         /** @type {?} */
         const checkNoChangesMode = getCheckNoChangesMode();
-        executePreOrderHooks(lView, tView, checkNoChangesMode, undefined);
+        /** @type {?} */
+        const hooksInitPhaseCompleted = (flags & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
+        // execute pre-order hooks (OnInit, OnChanges, DoChanges)
+        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+        if (!checkNoChangesMode) {
+            if (hooksInitPhaseCompleted) {
+                /** @type {?} */
+                const preOrderCheckHooks = tView.preOrderCheckHooks;
+                if (preOrderCheckHooks !== null) {
+                    executeCheckHooks(lView, preOrderCheckHooks, null);
+                }
+            }
+            else {
+                /** @type {?} */
+                const preOrderHooks = tView.preOrderHooks;
+                if (preOrderHooks !== null) {
+                    executeInitAndCheckHooks(lView, preOrderHooks, 0 /* OnInitHooksToBeRun */, null);
+                }
+                incrementInitPhaseFlags(lView, 0 /* OnInitHooksToBeRun */);
+            }
+        }
         refreshDynamicEmbeddedViews(lView);
         // Content query results must be refreshed before content hooks are called.
         if (tView.contentQueries !== null) {
             refreshContentQueries(tView, lView);
         }
-        resetPreOrderHookFlags(lView);
-        executeHooks(lView, tView.contentHooks, tView.contentCheckHooks, checkNoChangesMode, 1 /* AfterContentInitHooksToBeRun */, undefined);
+        // execute content hooks (AfterContentInit, AfterContentChecked)
+        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+        if (!checkNoChangesMode) {
+            if (hooksInitPhaseCompleted) {
+                /** @type {?} */
+                const contentCheckHooks = tView.contentCheckHooks;
+                if (contentCheckHooks !== null) {
+                    executeCheckHooks(lView, contentCheckHooks);
+                }
+            }
+            else {
+                /** @type {?} */
+                const contentHooks = tView.contentHooks;
+                if (contentHooks !== null) {
+                    executeInitAndCheckHooks(lView, contentHooks, 1 /* AfterContentInitHooksToBeRun */);
+                }
+                incrementInitPhaseFlags(lView, 1 /* AfterContentInitHooksToBeRun */);
+            }
+        }
         setHostBindings(tView, lView);
         /** @type {?} */
         const viewQuery = tView.viewQuery;
@@ -12206,8 +12259,25 @@ function refreshView(lView, tView, templateFn, context) {
         if (components !== null) {
             refreshChildComponents(lView, components);
         }
-        resetPreOrderHookFlags(lView);
-        executeHooks(lView, tView.viewHooks, tView.viewCheckHooks, checkNoChangesMode, 2 /* AfterViewInitHooksToBeRun */, undefined);
+        // execute view hooks (AfterViewInit, AfterViewChecked)
+        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+        if (!checkNoChangesMode) {
+            if (hooksInitPhaseCompleted) {
+                /** @type {?} */
+                const viewCheckHooks = tView.viewCheckHooks;
+                if (viewCheckHooks !== null) {
+                    executeCheckHooks(lView, viewCheckHooks);
+                }
+            }
+            else {
+                /** @type {?} */
+                const viewHooks = tView.viewHooks;
+                if (viewHooks !== null) {
+                    executeInitAndCheckHooks(lView, viewHooks, 2 /* AfterViewInitHooksToBeRun */);
+                }
+                incrementInitPhaseFlags(lView, 2 /* AfterViewInitHooksToBeRun */);
+            }
+        }
     }
     finally {
         lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
@@ -12260,10 +12330,10 @@ function executeTemplate(lView, templateFn, rf, context) {
     const prevSelectedIndex = getSelectedIndex();
     try {
         setActiveHostElement(null);
-        if (rf & 2 /* Update */) {
+        if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
             // When we're updating, have an inherent ɵɵselect(0) so we don't have to generate that
             // instruction for most update blocks
-            selectInternal(lView, 0);
+            selectInternal(lView, 0, getCheckNoChangesMode());
         }
         templateFn(rf, context);
     }
@@ -20684,7 +20754,25 @@ function ɵɵcontainerRefreshStart(index) {
     lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
     // We need to execute init hooks here so ngOnInit hooks are called in top level views
     // before they are called in embedded views (for backwards compatibility).
-    executePreOrderHooks(lView, tView, getCheckNoChangesMode(), undefined);
+    if (!getCheckNoChangesMode()) {
+        /** @type {?} */
+        const hooksInitPhaseCompleted = (lView[FLAGS] & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
+        if (hooksInitPhaseCompleted) {
+            /** @type {?} */
+            const preOrderCheckHooks = tView.preOrderCheckHooks;
+            if (preOrderCheckHooks !== null) {
+                executeCheckHooks(lView, preOrderCheckHooks, null);
+            }
+        }
+        else {
+            /** @type {?} */
+            const preOrderHooks = tView.preOrderHooks;
+            if (preOrderHooks !== null) {
+                executeInitAndCheckHooks(lView, preOrderHooks, 0 /* OnInitHooksToBeRun */, null);
+            }
+            incrementInitPhaseFlags(lView, 0 /* OnInitHooksToBeRun */);
+        }
+    }
 }
 /**
  * Marks the end of the LContainer.
@@ -26446,7 +26534,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.2+81.sha-daac386.with-local-changes');
+const VERSION = new Version('9.0.0-next.2+86.sha-1062960.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
