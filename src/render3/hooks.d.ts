@@ -65,35 +65,31 @@ export declare function registerPostOrderHooks(tView: TView, tNode: TNode): void
  * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
  */
 /**
- * Executes necessary hooks at the start of executing a template.
- *
- * Executes hooks that are to be run during the initialization of a directive such
- * as `onChanges`, `onInit`, and `doCheck`.
- *
- * @param lView The current view
- * @param tView Static data for the view containing the hooks to be executed
- * @param checkNoChangesMode Whether or not we're in checkNoChanges mode.
- * @param @param currentNodeIndex 2 cases depending the the value:
- * - undefined: execute hooks only from the saved index until the end of the array (pre-order case,
- * when flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- */
-export declare function executePreOrderHooks(currentView: LView, tView: TView, checkNoChangesMode: boolean, currentNodeIndex: number | undefined): void;
-/**
- * Executes hooks against the given `LView` based off of whether or not
- * This is the first pass.
- *
- * @param currentView The view instance data to run the hooks against
- * @param firstPassHooks An array of hooks to run if we're in the first view pass
- * @param checkHooks An Array of hooks to run if we're not in the first view pass.
- * @param checkNoChangesMode Whether or not we're in no changes mode.
- * @param initPhaseState the current state of the init phase
- * @param currentNodeIndex 3 cases depending the the value:
+ * Executes pre-order check hooks ( OnChanges, DoChanges) given a view where all the init hooks were
+ * executed once. This is a light version of executeInitAndCheckPreOrderHooks where we can skip read
+ * / write of the init-hooks related flags.
+ * @param lView The LView where hooks are defined
+ * @param hooks Hooks to be run
+ * @param nodeIndex 3 cases depending on the value:
  * - undefined: all hooks from the array should be executed (post-order case)
  * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
  * flushing the remaining hooks)
  * - number: execute hooks only from the saved index until that node index exclusive (pre-order
  * case, when executing select(number))
  */
-export declare function executeHooks(currentView: LView, firstPassHooks: HookData | null, checkHooks: HookData | null, checkNoChangesMode: boolean, initPhaseState: InitPhaseState, currentNodeIndex: number | null | undefined): void;
+export declare function executeCheckHooks(lView: LView, hooks: HookData, nodeIndex?: number | null): void;
+/**
+ * Executes post-order init and check hooks (one of AfterContentInit, AfterContentChecked,
+ * AfterViewInit, AfterViewChecked) given a view where there are pending init hooks to be executed.
+ * @param lView The LView where hooks are defined
+ * @param hooks Hooks to be run
+ * @param initPhase A phase for which hooks should be run
+ * @param nodeIndex 3 cases depending on the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ */
+export declare function executeInitAndCheckHooks(lView: LView, hooks: HookData, initPhase: InitPhaseState, nodeIndex?: number | null): void;
+export declare function incrementInitPhaseFlags(lView: LView, initPhase: InitPhaseState): void;

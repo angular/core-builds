@@ -21,4 +21,4 @@ import { LView } from '../interfaces/view';
  * @codeGenApi
  */
 export declare function ɵɵselect(index: number): void;
-export declare function selectInternal(lView: LView, index: number): void;
+export declare function selectInternal(lView: LView, index: number, checkNoChangesMode: boolean): void;
