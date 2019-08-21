@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.2+74.sha-10ea3a9.with-local-changes
+ * @license Angular v9.0.0-next.2+76.sha-6477057.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1094,6 +1094,13 @@ function removeFromArray(arr, index) {
     else {
         return arr.splice(index, 1)[0];
     }
+}
+function newArray(size, value) {
+    const list = [];
+    for (let i = 0; i < size; i++) {
+        list.push(value);
+    }
+    return list;
 }
 
 /**
@@ -15812,10 +15819,10 @@ class ReflectionCapabilities {
     _zipTypesAndAnnotations(paramTypes, paramAnnotations) {
         let result;
         if (typeof paramTypes === 'undefined') {
-            result = new Array(paramAnnotations.length);
+            result = newArray(paramAnnotations.length);
         }
         else {
-            result = new Array(paramTypes.length);
+            result = newArray(paramTypes.length);
         }
         for (let i = 0; i < result.length; i++) {
             // TS outputs Object for parameters without types, while Traceur omits
@@ -15873,7 +15880,7 @@ class ReflectionCapabilities {
         // based on function.length.
         // Note: We know that this is a real constructor as we checked
         // the content of the constructor above.
-        return new Array(type.length).fill(undefined);
+        return newArray(type.length);
     }
     parameters(type) {
         // Note: only report metadata if we have at least one class decorator
@@ -16886,7 +16893,7 @@ function getUndecoratedInjectableFactory(token) {
     const paramLength = token.length;
     if (paramLength > 0) {
         /** @type {?} */
-        const args = new Array(paramLength).fill('?');
+        const args = newArray(paramLength, '?');
         throw new Error(`Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
     }
     // The constructor function appears to have no parameters.
@@ -18623,8 +18630,8 @@ class ReflectiveInjector_ {
         this.parent = _parent || null;
         /** @type {?} */
         const len = _providers.length;
-        this.keyIds = new Array(len);
-        this.objs = new Array(len);
+        this.keyIds = [];
+        this.objs = [];
         for (let i = 0; i < len; i++) {
             this.keyIds[i] = _providers[i].key.id;
             this.objs[i] = UNDEFINED;
@@ -18705,7 +18712,7 @@ class ReflectiveInjector_ {
     _instantiateProvider(provider) {
         if (provider.multiProvider) {
             /** @type {?} */
-            const res = new Array(provider.resolvedFactories.length);
+            const res = [];
             for (let i = 0; i < provider.resolvedFactories.length; ++i) {
                 res[i] = this._instantiate(provider, provider.resolvedFactories[i]);
             }
@@ -18898,7 +18905,7 @@ if (false) {
  */
 function _mapProviders(injector, fn) {
     /** @type {?} */
-    const res = new Array(injector._providers.length);
+    const res = [];
     for (let i = 0; i < injector._providers.length; ++i) {
         res[i] = fn(injector.getProviderAtIndex(i));
     }
@@ -22264,7 +22271,7 @@ function ɵɵprojectionDef(projectionSlots) {
         const numProjectionSlots = projectionSlots ? projectionSlots.length : 1;
         /** @type {?} */
         const projectionHeads = componentNode.projection =
-            new Array(numProjectionSlots).fill(null);
+            newArray(numProjectionSlots, (/** @type {?} */ ((/** @type {?} */ (null)))));
         /** @type {?} */
         const tails = projectionHeads.slice();
         /** @type {?} */
@@ -26420,7 +26427,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.2+74.sha-10ea3a9.with-local-changes');
+const VERSION = new Version('9.0.0-next.2+76.sha-6477057.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -30253,7 +30260,7 @@ function initNgModule(data) {
     /** @type {?} */
     const def = data._def;
     /** @type {?} */
-    const providers = data._providers = new Array(def.providers.length);
+    const providers = data._providers = newArray(def.providers.length);
     for (let i = 0; i < def.providers.length; i++) {
         /** @type {?} */
         const provDef = def.providers[i];
@@ -30396,7 +30403,7 @@ function _createClass(ngModule, ctor, deps) {
             return new ctor(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
         default:
             /** @type {?} */
-            const depValues = new Array(len);
+            const depValues = [];
             for (let i = 0; i < len; i++) {
                 depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
             }
@@ -30423,7 +30430,7 @@ function _callFactory(ngModule, factory, deps) {
             return factory(resolveNgModuleDep(ngModule, deps[0]), resolveNgModuleDep(ngModule, deps[1]), resolveNgModuleDep(ngModule, deps[2]));
         default:
             /** @type {?} */
-            const depValues = Array(len);
+            const depValues = [];
             for (let i = 0; i < len; i++) {
                 depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
             }
@@ -31922,9 +31929,9 @@ function createClass(view, elDef, allowPrivateServices, ctor, deps) {
             return new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
         default:
             /** @type {?} */
-            const depValues = new Array(len);
+            const depValues = [];
             for (let i = 0; i < len; i++) {
-                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
+                depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
             }
             return new ctor(...depValues);
     }
@@ -31951,9 +31958,9 @@ function callFactory(view, elDef, allowPrivateServices, factory, deps) {
             return factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
         default:
             /** @type {?} */
-            const depValues = Array(len);
+            const depValues = [];
             for (let i = 0; i < len; i++) {
-                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
+                depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
             }
             return factory(...depValues);
     }
@@ -36171,7 +36178,7 @@ class LQueries_ {
             /** @type {?} */
             const noOfInheritedQueries = tView.contentQueries !== null ? tView.contentQueries[0] : tQueries.length;
             /** @type {?} */
-            const viewLQueries = new Array(noOfInheritedQueries);
+            const viewLQueries = [];
             // An embedded view has queries propagated from a declaration view at the beginning of the
             // TQueries collection and up until a first content query declared in the embedded view. Only
             // propagated LQueries are created at this point (LQuery corresponding to declared content
@@ -36181,7 +36188,7 @@ class LQueries_ {
                 const tQuery = tQueries.getByIndex(i);
                 /** @type {?} */
                 const parentLQuery = this.queries[tQuery.indexInDeclarationView];
-                viewLQueries[i] = parentLQuery.clone();
+                viewLQueries.push(parentLQuery.clone());
             }
             return new LQueries_(viewLQueries);
         }
@@ -36587,7 +36594,7 @@ function materializeViewResults(lView, tQuery, queryIndex) {
         /** @type {?} */
         const tQueryMatches = (/** @type {?} */ (tQuery.matches));
         /** @type {?} */
-        const result = new Array(tQueryMatches.length / 2);
+        const result = [];
         for (let i = 0; i < tQueryMatches.length; i += 2) {
             /** @type {?} */
             const matchedNodeIdx = tQueryMatches[i];
@@ -36595,14 +36602,13 @@ function materializeViewResults(lView, tQuery, queryIndex) {
                 // we at the <ng-template> marker which might have results in views created based on this
                 // <ng-template> - those results will be in separate views though, so here we just leave
                 // null as a placeholder
-                result[i / 2] = null;
+                result.push(null);
             }
             else {
                 ngDevMode && assertDataInRange(tViewData, matchedNodeIdx);
                 /** @type {?} */
                 const tNode = (/** @type {?} */ (tViewData[matchedNodeIdx]));
-                result[i / 2] =
-                    createResultForNode(lView, tNode, tQueryMatches[i + 1], tQuery.metadata.read);
+                result.push(createResultForNode(lView, tNode, tQueryMatches[i + 1], tQuery.metadata.read));
             }
         }
         lQuery.matches = result;
@@ -42818,7 +42824,7 @@ function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childC
     }
     bindings = bindings || [];
     /** @type {?} */
-    const bindingDefs = new Array(bindings.length);
+    const bindingDefs = [];
     for (let i = 0; i < bindings.length; i++) {
         const [bindingFlags, namespaceAndName, suffixOrSecurityContext] = bindings[i];
         const [ns, name] = splitNamespace(namespaceAndName);
@@ -42840,7 +42846,7 @@ function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childC
     }
     outputs = outputs || [];
     /** @type {?} */
-    const outputDefs = new Array(outputs.length);
+    const outputDefs = [];
     for (let i = 0; i < outputs.length; i++) {
         const [target, eventName] = outputs[i];
         outputDefs[i] = {
@@ -43459,7 +43465,7 @@ function appendNgContent(view, renderHost, def) {
  */
 function purePipeDef(checkIndex, argCount) {
     // argCount + 1 to include the pipe as first arg
-    return _pureExpressionDef(128 /* TypePurePipe */, checkIndex, new Array(argCount + 1));
+    return _pureExpressionDef(128 /* TypePurePipe */, checkIndex, newArray(argCount + 1));
 }
 /**
  * @param {?} checkIndex
@@ -43467,7 +43473,7 @@ function purePipeDef(checkIndex, argCount) {
  * @return {?}
  */
 function pureArrayDef(checkIndex, argCount) {
-    return _pureExpressionDef(32 /* TypePureArray */, checkIndex, new Array(argCount));
+    return _pureExpressionDef(32 /* TypePureArray */, checkIndex, newArray(argCount));
 }
 /**
  * @param {?} checkIndex
@@ -43480,13 +43486,13 @@ function pureObjectDef(checkIndex, propToIndex) {
     /** @type {?} */
     const nbKeys = keys.length;
     /** @type {?} */
-    const propertyNames = new Array(nbKeys);
+    const propertyNames = [];
     for (let i = 0; i < nbKeys; i++) {
         /** @type {?} */
         const key = keys[i];
         /** @type {?} */
         const index = propToIndex[key];
-        propertyNames[index] = key;
+        propertyNames.push(key);
     }
     return _pureExpressionDef(64 /* TypePureObject */, checkIndex, propertyNames);
 }
@@ -43498,18 +43504,18 @@ function pureObjectDef(checkIndex, propToIndex) {
  */
 function _pureExpressionDef(flags, checkIndex, propertyNames) {
     /** @type {?} */
-    const bindings = new Array(propertyNames.length);
+    const bindings = [];
     for (let i = 0; i < propertyNames.length; i++) {
         /** @type {?} */
         const prop = propertyNames[i];
-        bindings[i] = {
+        bindings.push({
             flags: 8 /* TypeProperty */,
             name: prop,
             ns: null,
             nonMinifiedName: prop,
             securityContext: null,
             suffix: null
-        };
+        });
     }
     return {
         // will bet set by the view definition
@@ -43595,27 +43601,27 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
         let value;
         switch (def.flags & 201347067 /* Types */) {
             case 32 /* TypePureArray */:
-                value = new Array(bindings.length);
+                value = [];
                 if (bindLen > 0)
-                    value[0] = v0;
+                    value.push(v0);
                 if (bindLen > 1)
-                    value[1] = v1;
+                    value.push(v1);
                 if (bindLen > 2)
-                    value[2] = v2;
+                    value.push(v2);
                 if (bindLen > 3)
-                    value[3] = v3;
+                    value.push(v3);
                 if (bindLen > 4)
-                    value[4] = v4;
+                    value.push(v4);
                 if (bindLen > 5)
-                    value[5] = v5;
+                    value.push(v5);
                 if (bindLen > 6)
-                    value[6] = v6;
+                    value.push(v6);
                 if (bindLen > 7)
-                    value[7] = v7;
+                    value.push(v7);
                 if (bindLen > 8)
-                    value[8] = v8;
+                    value.push(v8);
                 if (bindLen > 9)
-                    value[9] = v9;
+                    value.push(v9);
                 break;
             case 64 /* TypePureObject */:
                 value = {};
@@ -43739,7 +43745,7 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
  */
 function textDef(checkIndex, ngContentIndex, staticText) {
     /** @type {?} */
-    const bindings = new Array(staticText.length - 1);
+    const bindings = [];
     for (let i = 1; i < staticText.length; i++) {
         bindings[i - 1] = {
             flags: 8 /* TypeProperty */,
