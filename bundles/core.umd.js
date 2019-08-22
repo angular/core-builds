@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.3+10.sha-0677cf0.with-local-changes
+ * @license Angular v9.0.0-next.3+12.sha-6b245a3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8086,12 +8086,12 @@
         var flags = lView[FLAGS];
         try {
             resetPreOrderHookFlags(lView);
-            if (templateFn !== null) {
-                executeTemplate(lView, templateFn, 2 /* Update */, context);
-            }
             // Resetting the bindingIndex of the current LView as the next steps may trigger change
             // detection.
             lView[BINDING_INDEX] = tView.bindingStartIndex;
+            if (templateFn !== null) {
+                executeTemplate(lView, templateFn, 2 /* Update */, context);
+            }
             var checkNoChangesMode = getCheckNoChangesMode();
             var hooksInitPhaseCompleted = (flags & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
             // execute pre-order hooks (OnInit, OnChanges, DoChanges)
@@ -18601,7 +18601,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.3+10.sha-0677cf0.with-local-changes');
+    var VERSION = new Version('9.0.0-next.3+12.sha-6b245a3.with-local-changes');
 
     /**
      * @license
