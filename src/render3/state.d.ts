@@ -171,30 +171,23 @@ export declare function setBindingRoot(value: number): void;
 export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;
 /**
- * Swap the current state with a new state.
+ * Swap the current lView with a new lView.
  *
- * For performance reasons we store the state in the top level of the module.
+ * For performance reasons we store the lView in the top level of the module.
  * This way we minimize the number of properties to read. Whenever a new view
- * is entered we have to store the state for later, and when the view is
+ * is entered we have to store the lView for later, and when the view is
  * exited the state has to be restored
  *
- * @param newView New state to become active
+ * @param newView New lView to become active
  * @param host Element to which the View is a child of
- * @returns the previous state;
+ * @returns the previously active lView;
  */
-export declare function enterView(newView: LView, hostTNode: TElementNode | TViewNode | null): LView;
+export declare function selectView(newView: LView, hostTNode: TElementNode | TViewNode | null): LView;
 export declare function nextContextImpl<T = any>(level?: number): T;
 /**
  * Resets the application state.
  */
 export declare function resetComponentState(): void;
-/**
- * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
- * the direction of traversal (up or down the view tree) a bit clearer.
- *
- * @param newView New LView to become active
- */
-export declare function leaveView(newView: LView): void;
 /**
  * Gets the most recent index passed to {@link select}
  *
