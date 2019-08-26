@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.3+41.sha-860b5d0.with-local-changes
+ * @license Angular v9.0.0-next.3+43.sha-e63a7b0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2299,24 +2299,20 @@ function setCurrentQueryIndex(value) {
     currentQueryIndex = value;
 }
 /**
- * Swap the current state with a new state.
+ * Swap the current lView with a new lView.
  *
- * For performance reasons we store the state in the top level of the module.
+ * For performance reasons we store the lView in the top level of the module.
  * This way we minimize the number of properties to read. Whenever a new view
- * is entered we have to store the state for later, and when the view is
+ * is entered we have to store the lView for later, and when the view is
  * exited the state has to be restored
  *
- * @param newView New state to become active
+ * @param newView New lView to become active
  * @param host Element to which the View is a child of
- * @returns the previous state;
+ * @returns the previously active lView;
  */
-function enterView(newView, hostTNode) {
+function selectView(newView, hostTNode) {
     ngDevMode && assertLViewOrUndefined(newView);
     var oldView = lView;
-    if (newView) {
-        var tView = newView[TVIEW];
-        bindingRootIndex = tView.bindingStartIndex;
-    }
     previousOrParentTNode = hostTNode;
     isParent = true;
     lView = contextLView = newView;
@@ -2345,15 +2341,6 @@ function resetComponentState() {
     bindingsEnabled = true;
     setCurrentStyleSanitizer(null);
     resetAllStylingState();
-}
-/**
- * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
- * the direction of traversal (up or down the view tree) a bit clearer.
- *
- * @param newView New LView to become active
- */
-function leaveView(newView) {
-    enterView(newView, null);
 }
 var _selectedIndex = -1;
 /**
@@ -7881,7 +7868,7 @@ function allocExpando(view, numSlotsToAlloc) {
  */
 function renderView(lView, tView, context) {
     ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
-    var oldView = enterView(lView, lView[T_HOST]);
+    var oldView = selectView(lView, lView[T_HOST]);
     try {
         var viewQuery = tView.viewQuery;
         if (viewQuery !== null) {
@@ -7921,7 +7908,7 @@ function renderView(lView, tView, context) {
     }
     finally {
         lView[FLAGS] &= ~4 /* CreationMode */;
-        leaveView(oldView);
+        selectView(oldView, null);
     }
 }
 /**
@@ -7934,13 +7921,11 @@ function renderView(lView, tView, context) {
  */
 function refreshView(lView, tView, templateFn, context) {
     ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
-    var oldView = enterView(lView, lView[T_HOST]);
+    var oldView = selectView(lView, lView[T_HOST]);
     var flags = lView[FLAGS];
     try {
         resetPreOrderHookFlags(lView);
-        // Resetting the bindingIndex of the current LView as the next steps may trigger change
-        // detection.
-        lView[BINDING_INDEX] = tView.bindingStartIndex;
+        setBindingRoot(lView[BINDING_INDEX] = tView.bindingStartIndex);
         if (templateFn !== null) {
             executeTemplate(lView, templateFn, 2 /* Update */, context);
         }
@@ -8015,8 +8000,7 @@ function refreshView(lView, tView, templateFn, context) {
     }
     finally {
         lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
-        lView[BINDING_INDEX] = tView.bindingStartIndex;
-        leaveView(oldView);
+        selectView(oldView, null);
     }
 }
 function renderComponentOrTemplate(hostView, templateFn, context) {
@@ -15075,7 +15059,7 @@ function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
     var viewToRender = scanForView(lContainer, lContainer[ACTIVE_INDEX], viewBlockId);
     if (viewToRender) {
         setIsParent();
-        enterView(viewToRender, viewToRender[TVIEW].node);
+        selectView(viewToRender, viewToRender[TVIEW].node);
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
@@ -15083,7 +15067,7 @@ function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
         var tParentNode = getIsParent() ? previousOrParentTNode :
             previousOrParentTNode && previousOrParentTNode.parent;
         assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
-        enterView(viewToRender, viewToRender[TVIEW].node);
+        selectView(viewToRender, viewToRender[TVIEW].node);
     }
     if (lContainer) {
         if (isCreationMode(viewToRender)) {
@@ -15162,7 +15146,7 @@ function ɵɵembeddedViewEnd() {
     refreshView(lView, tView, tView.template, context); // update mode pass
     var lContainer = lView[PARENT];
     ngDevMode && assertLContainerOrUndefined(lContainer);
-    leaveView(lContainer[PARENT]);
+    selectView(lContainer[PARENT], null);
     setPreviousOrParentTNode(viewHost, false);
 }
 
@@ -17463,7 +17447,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
     var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     var rootTView = createTView(-1, null, 1, 0, null, null, null, null);
     var rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
-    var oldView = enterView(rootView, null);
+    var oldView = selectView(rootView, null);
     var component;
     try {
         if (rendererFactory.begin)
@@ -17476,7 +17460,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
         refreshView(rootView, rootTView, null, null);
     }
     finally {
-        leaveView(oldView);
+        selectView(oldView, null);
         if (rendererFactory.end)
             rendererFactory.end();
     }
@@ -18458,7 +18442,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.3+41.sha-860b5d0.with-local-changes');
+var VERSION = new Version('9.0.0-next.3+43.sha-e63a7b0.with-local-changes');
 
 /**
  * @license
@@ -21584,7 +21568,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
         var rootTView = createTView(-1, null, 1, 0, null, null, null, null);
         var rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
         // rootView is the parent when bootstrapping
-        var oldLView = enterView(rootLView, null);
+        var oldLView = selectView(rootLView, null);
         var component;
         var tElementNode;
         try {
@@ -21604,7 +21588,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
             renderView(rootLView, rootTView, null);
         }
         finally {
-            leaveView(oldLView);
+            selectView(oldLView, null);
         }
         var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
         if (!rootSelectorOrNode || isIsolated) {
