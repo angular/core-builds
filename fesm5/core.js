@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.3+45.sha-3a4839c.with-local-changes
+ * @license Angular v9.0.0-next.3+46.sha-0874bf4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8372,7 +8372,7 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
             validateAgainstUnknownProperties(lView, element, propName, tNode);
             ngDevMode.rendererSetProperty++;
         }
-        savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
+        ngDevMode && savePropertyDebugData(tNode, lView, propName, lView[TVIEW].data, nativeOnly);
         var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
         // It is assumed that the sanitizer is only added when the compiler determines that the
         // property
@@ -13404,7 +13404,7 @@ function ɵɵproperty(propName, value, sanitizer) {
  */
 function bind(lView, value) {
     var bindingIndex = lView[BINDING_INDEX]++;
-    storeBindingMetadata(lView);
+    ngDevMode && storeBindingMetadata(lView);
     return bindingUpdated(lView, bindingIndex, value) ? value : NO_CHANGE;
 }
 
@@ -13488,7 +13488,7 @@ function interpolationV(lView, values) {
  */
 function interpolation1(lView, prefix, v0, suffix) {
     var different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
-    storeBindingMetadata(lView, prefix, suffix);
+    ngDevMode && storeBindingMetadata(lView, prefix, suffix);
     return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
 }
 /**
@@ -13498,10 +13498,12 @@ function interpolation2(lView, prefix, v0, i0, v1, suffix) {
     var bindingIndex = lView[BINDING_INDEX];
     var different = bindingUpdated2(lView, bindingIndex, v0, v1);
     lView[BINDING_INDEX] += 2;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        lView[TVIEW].data[bindingIndex] = i0;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            lView[TVIEW].data[bindingIndex] = i0;
+        }
     }
     return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
 }
@@ -13512,12 +13514,14 @@ function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
     var bindingIndex = lView[BINDING_INDEX];
     var different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
     lView[BINDING_INDEX] += 3;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        var tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+        }
     }
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix :
@@ -13530,13 +13534,15 @@ function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     var bindingIndex = lView[BINDING_INDEX];
     var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     lView[BINDING_INDEX] += 4;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        var tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+        }
     }
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
@@ -13551,14 +13557,16 @@ function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffi
     var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
     lView[BINDING_INDEX] += 5;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        var tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+        }
     }
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
@@ -13573,15 +13581,17 @@ function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
     var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
     lView[BINDING_INDEX] += 6;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        var tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-        tData[bindingIndex + 4] = i4;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+        }
     }
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
@@ -13596,16 +13606,18 @@ function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
     var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
     lView[BINDING_INDEX] += 7;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        var tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-        tData[bindingIndex + 4] = i4;
-        tData[bindingIndex + 5] = i5;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+            tData[bindingIndex + 5] = i5;
+        }
     }
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
@@ -13621,17 +13633,19 @@ function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
     var different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
     lView[BINDING_INDEX] += 8;
-    // Only set static strings the first time (data will be null subsequent runs).
-    var data = storeBindingMetadata(lView, prefix, suffix);
-    if (data) {
-        var tData = lView[TVIEW].data;
-        tData[bindingIndex] = i0;
-        tData[bindingIndex + 1] = i1;
-        tData[bindingIndex + 2] = i2;
-        tData[bindingIndex + 3] = i3;
-        tData[bindingIndex + 4] = i4;
-        tData[bindingIndex + 5] = i5;
-        tData[bindingIndex + 6] = i6;
+    if (ngDevMode) {
+        // Only set static strings the first time (data will be null subsequent runs).
+        var data = storeBindingMetadata(lView, prefix, suffix);
+        if (data) {
+            var tData = lView[TVIEW].data;
+            tData[bindingIndex] = i0;
+            tData[bindingIndex + 1] = i1;
+            tData[bindingIndex + 2] = i2;
+            tData[bindingIndex + 3] = i3;
+            tData[bindingIndex + 4] = i4;
+            tData[bindingIndex + 5] = i5;
+            tData[bindingIndex + 6] = i6;
+        }
     }
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
@@ -18409,7 +18423,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.3+45.sha-3a4839c.with-local-changes');
+var VERSION = new Version('9.0.0-next.3+46.sha-0874bf4.with-local-changes');
 
 /**
  * @license
