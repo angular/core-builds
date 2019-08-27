@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.3+20.sha-514271b.with-local-changes
+ * @license Angular v8.2.3+24.sha-8931239.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18419,7 +18419,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('8.2.3+20.sha-514271b.with-local-changes');
+var VERSION = new Version('8.2.3+24.sha-8931239.with-local-changes');
 
 /**
  * @license
