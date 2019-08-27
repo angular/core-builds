@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.3+53.sha-14feb56.with-local-changes
+ * @license Angular v9.0.0-next.3+55.sha-7c7fcd7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9446,9 +9446,10 @@ export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
      */
     readonly exportAs: string[] | null;
     /**
-     * Factory function used to create a new directive instance.
+     * Factory function used to create a new directive instance. Will be null initially.
+     * Populated when the factory is first requested by directive instantiation logic.
      */
-    factory: FactoryFn<T>;
+    factory: FactoryFn<T> | null;
     onChanges: (() => void) | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;
@@ -9470,6 +9471,7 @@ export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
  */
 export declare interface ɵDirectiveType<T> extends Type<T> {
     ngDirectiveDef: never;
+    ngFactoryDef: () => T;
 }
 
 /**
@@ -9944,6 +9946,8 @@ export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags,
  * See: {@link definePipe}
  */
 export declare interface ɵPipeDef<T> {
+    /** Token representing the pipe. */
+    type: Type<T>;
     /**
      * Pipe name.
      *
@@ -9951,9 +9955,10 @@ export declare interface ɵPipeDef<T> {
      */
     readonly name: string;
     /**
-     * Factory function used to create a new pipe instance.
+     * Factory function used to create a new pipe instance. Will be null initially.
+     * Populated when the factory is first requested by pipe instantiation logic.
      */
-    factory: FactoryFn<T>;
+    factory: FactoryFn<T> | null;
     /**
      * Whether or not the pipe is pure.
      *
@@ -11302,10 +11307,6 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
     /** The selectors that will be used to match nodes to this component. */
     selectors: ɵCssSelectorList;
     /**
-     * Factory method used to create an instance of directive.
-     */
-    factory: FactoryFn<T>;
-    /**
      * The number of nodes, local refs, and pipes in this component template.
      *
      * Used to calculate the length of this component's LView array, so we
@@ -11507,10 +11508,6 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
     /** The selectors that will be used to match nodes to this directive. */
     selectors: (string | SelectorFlags)[][];
     /**
-     * Factory method used to create an instance of directive.
-     */
-    factory: FactoryFn<T>;
-    /**
      * A map of input names.
      *
      * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
@@ -11684,8 +11681,6 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     name: string;
     /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
     type: Type<T>;
-    /** A factory for creating a pipe instance. */
-    factory: FactoryFn<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
 }): never;
@@ -11898,6 +11893,11 @@ export declare function ɵɵembeddedViewStart(viewBlockId: number, consts: numbe
  * @codeGenApi
  */
 export declare function ɵɵenableBindings(): void;
+
+/**
+ * @codeGenApi
+ */
+export declare type ɵɵFactoryDef<T> = () => T;
 
 /**
  * Returns the current OpaqueViewState instance.

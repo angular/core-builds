@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.3+53.sha-14feb56.with-local-changes
+ * @license Angular v9.0.0-next.3+55.sha-7c7fcd7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1212,6 +1212,7 @@ var NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
 var NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
 var NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
 var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
+var NG_FACTORY_DEF = getClosureSafeProperty({ ngFactoryDef: getClosureSafeProperty });
 /**
  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
  * the key and the directive's unique ID as the value. This allows us to map directives to their
@@ -1253,7 +1254,7 @@ function ɵɵdefineComponent(componentDefinition) {
         providersResolver: null,
         consts: componentDefinition.consts,
         vars: componentDefinition.vars,
-        factory: componentDefinition.factory,
+        factory: null,
         template: componentDefinition.template || null,
         ngContentSelectors: componentDefinition.ngContentSelectors,
         hostBindings: componentDefinition.hostBindings || null,
@@ -1302,14 +1303,6 @@ function ɵɵdefineComponent(componentDefinition) {
         def.pipeDefs = pipeTypes ?
             function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
             null;
-        // Add ngInjectableDef so components are reachable through the module injector by default
-        // (unless it has already been set by the @Injectable decorator). This is mostly to
-        // support injecting components in tests. In real application code, components should
-        // be retrieved through the node injector, so this isn't a problem.
-        if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
-            type[NG_INJECTABLE_DEF] =
-                ɵɵdefineInjectable({ token: type, factory: componentDefinition.factory });
-        }
     });
     return def;
 }
@@ -1506,8 +1499,9 @@ var ɵɵdefineDirective = ɵɵdefineComponent;
  */
 function ɵɵdefinePipe(pipeDef) {
     return {
+        type: pipeDef.type,
         name: pipeDef.name,
-        factory: pipeDef.factory,
+        factory: null,
         pure: pipeDef.pure !== false,
         onDestroy: pipeDef.type.prototype.ngOnDestroy || null
     };
@@ -1528,6 +1522,13 @@ function getPipeDef(type) {
 }
 function getBaseDef(type) {
     return type[NG_BASE_DEF] || null;
+}
+function getFactoryDef(type, throwNotFound) {
+    var factoryFn = type[NG_FACTORY_DEF] || null;
+    if (!factoryFn && throwNotFound === true && ngDevMode) {
+        throw new Error("Type " + stringify(type) + " does not have 'ngFactoryDef' property.");
+    }
+    return factoryFn;
 }
 function getNgModuleDef(type, throwNotFound) {
     var ngModuleDef = type[NG_MODULE_DEF] || null;
@@ -3664,12 +3665,10 @@ function ɵɵgetFactoryOf(type) {
             return factory ? factory() : null;
         });
     }
-    var def = getComponentDef(typeAny) || getDirectiveDef(typeAny) ||
-        getPipeDef(typeAny) || getInjectableDef(typeAny) || getInjectorDef(typeAny);
-    if (!def || def.factory === undefined) {
-        return null;
-    }
-    return def.factory;
+    // TODO(crisbeto): unify injectable factories with getFactory.
+    var def = getInjectableDef(typeAny) || getInjectorDef(typeAny);
+    var factory = def && def.factory || getFactoryDef(typeAny);
+    return factory || null;
 }
 /**
  * @codeGenApi
@@ -8504,7 +8503,7 @@ function instantiateRootComponent(tView, viewData, def) {
         if (def.providersResolver)
             def.providersResolver(def);
         generateExpandoInstructionBlock(tView, rootTNode, 1);
-        baseResolveDirective(tView, viewData, def, def.factory);
+        baseResolveDirective(tView, viewData, def);
     }
     var directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, rootTNode);
     postProcessBaseDirective(viewData, rootTNode, directive);
@@ -8541,7 +8540,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
         for (var i = 0; i < directives.length; i++) {
             var def = directives[i];
             var directiveDefIdx = tView.data.length;
-            baseResolveDirective(tView, lView, def, def.factory);
+            baseResolveDirective(tView, lView, def);
             saveNameToExportMap(tView.data.length - 1, def, exportsMap);
             if (def.contentQueries) {
                 tNode.flags |= 4 /* hasContentQuery */;
@@ -8739,8 +8738,9 @@ function initNodeFlags(tNode, index, numberOfDirectives) {
     tNode.directiveEnd = index + numberOfDirectives;
     tNode.providerIndexes = index;
 }
-function baseResolveDirective(tView, viewData, def, directiveFactory) {
+function baseResolveDirective(tView, viewData, def) {
     tView.data.push(def);
+    var directiveFactory = def.factory || (def.factory = getFactoryDef(def.type, true));
     var nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
     tView.blueprint.push(nodeInjectorFactory);
     viewData.push(nodeInjectorFactory);
@@ -11569,8 +11569,9 @@ var R3Injector = /** @class */ (function () {
 function injectableDefOrInjectorDefFactory(token) {
     // Most tokens will have an ngInjectableDef directly on them, which specifies a factory directly.
     var injectableDef = getInjectableDef(token);
-    if (injectableDef !== null) {
-        return injectableDef.factory;
+    var factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
+    if (factory !== null) {
+        return factory;
     }
     // If the token is an NgModule, it's also injectable but the factory is on its ngInjectorDef.
     var injectorDef = getInjectorDef(token);
@@ -18456,7 +18457,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.3+53.sha-14feb56.with-local-changes');
+var VERSION = new Version('9.0.0-next.3+55.sha-7c7fcd7.with-local-changes');
 
 /**
  * @license
@@ -23536,7 +23537,8 @@ function ɵɵpipe(index, pipeName) {
     else {
         pipeDef = tView.data[adjustedIndex];
     }
-    var pipeInstance = pipeDef.factory();
+    var pipeFactory = pipeDef.factory || (pipeDef.factory = getFactoryDef(pipeDef.type, true));
+    var pipeInstance = pipeFactory();
     store(index, pipeInstance);
     return pipeInstance;
 }
@@ -25080,29 +25082,27 @@ function isNgModule(value) {
  */
 function compileComponent(type, metadata) {
     var ngComponentDef = null;
+    var ngFactoryDef = null;
     // Metadata may have resources which need to be resolved.
     maybeQueueResolutionOfComponentResources(type, metadata);
+    Object.defineProperty(type, NG_FACTORY_DEF, {
+        get: function () {
+            if (ngFactoryDef === null) {
+                var compiler = getCompilerFacade();
+                var meta = getComponentMetadata(compiler, type, metadata);
+                ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/ngFactory.js", meta.metadata);
+            }
+            return ngFactoryDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
     Object.defineProperty(type, NG_COMPONENT_DEF, {
         get: function () {
-            var compiler = getCompilerFacade();
             if (ngComponentDef === null) {
-                if (componentNeedsResolution(metadata)) {
-                    var error_1 = ["Component '" + type.name + "' is not resolved:"];
-                    if (metadata.templateUrl) {
-                        error_1.push(" - templateUrl: " + metadata.templateUrl);
-                    }
-                    if (metadata.styleUrls && metadata.styleUrls.length) {
-                        error_1.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
-                    }
-                    error_1.push("Did you run and wait for 'resolveComponentResources()'?");
-                    throw new Error(error_1.join('\n'));
-                }
-                var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
-                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
-                if (meta.usesInheritance) {
-                    addBaseDefToUndecoratedParents(type);
-                }
-                ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
+                var compiler = getCompilerFacade();
+                var meta = getComponentMetadata(compiler, type, metadata);
+                ngComponentDef = compiler.compileComponent(angularCoreEnv, meta.templateUrl, meta.metadata);
                 // When NgModule decorator executed, we enqueued the module definition such that
                 // it would only dequeue and add itself as module scope to all of its declarations,
                 // but only if  if all of its declarations had resolved. This call runs the check
@@ -25128,6 +25128,25 @@ function compileComponent(type, metadata) {
     // components should be retrieved through the node injector, so this isn't a problem.
     compileInjectable(type);
 }
+function getComponentMetadata(compiler, type, metadata) {
+    if (componentNeedsResolution(metadata)) {
+        var error_1 = ["Component '" + type.name + "' is not resolved:"];
+        if (metadata.templateUrl) {
+            error_1.push(" - templateUrl: " + metadata.templateUrl);
+        }
+        if (metadata.styleUrls && metadata.styleUrls.length) {
+            error_1.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
+        }
+        error_1.push("Did you run and wait for 'resolveComponentResources()'?");
+        throw new Error(error_1.join('\n'));
+    }
+    var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
+    var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+    if (meta.usesInheritance) {
+        addBaseDefToUndecoratedParents(type);
+    }
+    return { metadata: meta, templateUrl: templateUrl };
+}
 function hasSelectorScope(component) {
     return component.ngSelectorScope !== undefined;
 }
@@ -25140,21 +25159,30 @@ function hasSelectorScope(component) {
  */
 function compileDirective(type, directive) {
     var ngDirectiveDef = null;
-    Object.defineProperty(type, NG_DIRECTIVE_DEF, {
+    var ngFactoryDef = null;
+    Object.defineProperty(type, NG_FACTORY_DEF, {
         get: function () {
-            if (ngDirectiveDef === null) {
-                var name_1 = type && type.name;
-                var sourceMapUrl = "ng:///" + name_1 + "/ngDirectiveDef.js";
-                var compiler = getCompilerFacade();
+            if (ngFactoryDef === null) {
                 // `directive` can be null in the case of abstract directives as a base class
                 // that use `@Directive()` with no selector. In that case, pass empty object to the
                 // `directiveMetadata` function instead of null.
-                var facade = directiveMetadata(type, directive || {});
-                facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name_1, sourceMapUrl);
-                if (facade.usesInheritance) {
-                    addBaseDefToUndecoratedParents(type);
-                }
-                ngDirectiveDef = compiler.compileDirective(angularCoreEnv, sourceMapUrl, facade);
+                var meta = getDirectiveMetadata(type, directive || {});
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/ngFactory.js", meta.metadata);
+            }
+            return ngFactoryDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
+    Object.defineProperty(type, NG_DIRECTIVE_DEF, {
+        get: function () {
+            if (ngDirectiveDef === null) {
+                // `directive` can be null in the case of abstract directives as a base class
+                // that use `@Directive()` with no selector. In that case, pass empty object to the
+                // `directiveMetadata` function instead of null.
+                var meta = getDirectiveMetadata(type, directive || {});
+                ngDirectiveDef =
+                    getCompilerFacade().compileDirective(angularCoreEnv, meta.sourceMapUrl, meta.metadata);
             }
             return ngDirectiveDef;
         },
@@ -25165,6 +25193,17 @@ function compileDirective(type, directive) {
     // This is mostly to support injecting directives in tests. In real application code,
     // directives should be retrieved through the node injector, so this isn't a problem.
     compileInjectable(type);
+}
+function getDirectiveMetadata(type, metadata) {
+    var name = type && type.name;
+    var sourceMapUrl = "ng:///" + name + "/ngDirectiveDef.js";
+    var compiler = getCompilerFacade();
+    var facade = directiveMetadata(type, metadata);
+    facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name, sourceMapUrl);
+    if (facade.usesInheritance) {
+        addBaseDefToUndecoratedParents(type);
+    }
+    return { metadata: facade, sourceMapUrl: sourceMapUrl };
 }
 function extendsDirectlyFromObject(type) {
     return Object.getPrototypeOf(type.prototype) === Object.prototype;
@@ -25218,8 +25257,8 @@ function compileBase(type, facade) {
     Object.defineProperty(type, NG_BASE_DEF, {
         get: function () {
             if (ngBaseDef === null) {
-                var name_2 = type && type.name;
-                var sourceMapUrl = "ng://" + name_2 + "/ngBaseDef.js";
+                var name_1 = type && type.name;
+                var sourceMapUrl = "ng://" + name_1 + "/ngBaseDef.js";
                 var compiler = getCompilerFacade();
                 ngBaseDef = compiler.compileBase(angularCoreEnv, sourceMapUrl, facade);
             }
@@ -25331,25 +25370,39 @@ function splitByComma(value) {
  */
 function compilePipe(type, meta) {
     var ngPipeDef = null;
+    var ngFactoryDef = null;
+    Object.defineProperty(type, NG_FACTORY_DEF, {
+        get: function () {
+            if (ngFactoryDef === null) {
+                var metadata = getPipeMetadata(type, meta);
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/ngFactory.js", metadata, true);
+            }
+            return ngFactoryDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
     Object.defineProperty(type, NG_PIPE_DEF, {
         get: function () {
             if (ngPipeDef === null) {
-                var typeName = type.name;
-                ngPipeDef =
-                    getCompilerFacade().compilePipe(angularCoreEnv, "ng:///" + typeName + "/ngPipeDef.js", {
-                        type: type,
-                        typeArgumentCount: 0,
-                        name: typeName,
-                        deps: reflectDependencies(type),
-                        pipeName: meta.name,
-                        pure: meta.pure !== undefined ? meta.pure : true
-                    });
+                var metadata = getPipeMetadata(type, meta);
+                ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, "ng:///" + metadata.name + "/ngPipeDef.js", metadata);
             }
             return ngPipeDef;
         },
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
+}
+function getPipeMetadata(type, meta) {
+    return {
+        type: type,
+        typeArgumentCount: 0,
+        name: type.name,
+        deps: reflectDependencies(type),
+        pipeName: meta.name,
+        pure: meta.pure !== undefined ? meta.pure : true
+    };
 }
 
 /**
