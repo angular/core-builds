@@ -37,10 +37,6 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
     /** The selectors that will be used to match nodes to this component. */
     selectors: CssSelectorList;
     /**
-     * Factory method used to create an instance of directive.
-     */
-    factory: FactoryFn<T>;
-    /**
      * The number of nodes, local refs, and pipes in this component template.
      *
      * Used to calculate the length of this component's LView array, so we
@@ -380,10 +376,6 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
     /** The selectors that will be used to match nodes to this directive. */
     selectors: (string | SelectorFlags)[][];
     /**
-     * Factory method used to create an instance of directive.
-     */
-    factory: FactoryFn<T>;
-    /**
      * A map of input names.
      *
      * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
@@ -485,8 +477,6 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     name: string;
     /** Pipe class reference. Needed to extract pipe lifecycle hooks. */
     type: Type<T>;
-    /** A factory for creating a pipe instance. */
-    factory: FactoryFn<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
 }): never;
@@ -499,6 +489,8 @@ export declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
 export declare function getDirectiveDef<T>(type: any): DirectiveDef<T> | null;
 export declare function getPipeDef<T>(type: any): PipeDef<T> | null;
 export declare function getBaseDef<T>(type: any): ɵɵBaseDef<T> | null;
+export declare function getFactoryDef<T>(type: any, throwNotFound: true): FactoryFn<T>;
+export declare function getFactoryDef<T>(type: any): FactoryFn<T> | null;
 export declare function getNgModuleDef<T>(type: any, throwNotFound: true): NgModuleDef<T>;
 export declare function getNgModuleDef<T>(type: any): NgModuleDef<T> | null;
 export declare function getNgLocaleIdDef(type: any): string | null;

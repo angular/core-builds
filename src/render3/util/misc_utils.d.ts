@@ -18,7 +18,7 @@ export declare function renderStringify(value: any): string;
  * used for error messages.
  */
 export declare function stringifyForError(value: any): string;
-export declare const defaultScheduler: typeof setTimeout | typeof requestAnimationFrame;
+export declare const defaultScheduler: typeof requestAnimationFrame | typeof setTimeout;
 /**
  *
  * @codeGenApi

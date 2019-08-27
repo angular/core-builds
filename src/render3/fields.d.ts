@@ -11,6 +11,7 @@ export declare const NG_PIPE_DEF: string;
 export declare const NG_MODULE_DEF: string;
 export declare const NG_LOCALE_ID_DEF: string;
 export declare const NG_BASE_DEF: string;
+export declare const NG_FACTORY_DEF: string;
 /**
  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
  * the key and the directive's unique ID as the value. This allows us to map directives to their
