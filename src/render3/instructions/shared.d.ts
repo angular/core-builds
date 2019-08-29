@@ -152,7 +152,7 @@ export declare function createTNode(tView: TView, tParent: TElementNode | TConta
  * @param direction whether to consider inputs or outputs
  * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
-export declare function generatePropertyAliases(tNode: TNode, direction: BindingDirection): PropertyAliases | null;
+export declare function generatePropertyAliases(tView: TView, tNode: TNode, direction: BindingDirection): PropertyAliases | null;
 export declare function elementPropertyInternal<T>(index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
 export declare function setNgReflectProperty(lView: LView, element: RElement | RComment, type: TNodeType, attrName: string, value: any): void;
 /**
@@ -275,7 +275,7 @@ export declare function checkNoChangesInRootView(lView: LView): void;
  */
 export declare function storeBindingMetadata(lView: LView, prefix?: string, suffix?: string): string | null;
 export declare const CLEAN_PROMISE: Promise<null>;
-export declare function initializeTNodeInputs(tNode: TNode): PropertyAliases | null;
+export declare function initializeTNodeInputs(tView: TView, tNode: TNode): PropertyAliases | null;
 export declare function getCleanup(view: LView): any[];
 /**
  * There are cases where the sub component's renderer needs to be included

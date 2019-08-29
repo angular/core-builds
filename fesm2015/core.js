@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+17.sha-97fc45f.with-local-changes
+ * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11978,7 +11978,7 @@ function getOrCreateTNode(tView, tHostNode, index, type, name, attrs) {
     const adjustedIndex = index + HEADER_OFFSET;
     /** @type {?} */
     const tNode = (/** @type {?} */ (tView.data[adjustedIndex])) ||
-        createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, index);
+        createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs);
     setPreviousOrParentTNode(tNode, true);
     return (/** @type {?} */ (tNode));
 }
@@ -11989,10 +11989,9 @@ function getOrCreateTNode(tView, tHostNode, index, type, name, attrs) {
  * @param {?} type
  * @param {?} name
  * @param {?} attrs
- * @param {?} index
  * @return {?}
  */
-function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, index) {
+function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs) {
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
@@ -12008,9 +12007,10 @@ function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, 
     /** @type {?} */
     const tNode = tView.data[adjustedIndex] =
         createTNode(tView, tParentNode, type, adjustedIndex, name, attrs);
-    // The first node is not always the one at index 0, in case of i18n, index 0 can be the
-    // instruction `i18nStart` and the first node has the index 1 or more
-    if (index === 0 || !tView.firstChild) {
+    // Assign a pointer to the first child node of a given view. The first node is not always the one
+    // at index 0, in case of i18n, index 0 can be the instruction `i18nStart` and the first node has
+    // the index 1 or more, so we can't just check node index.
+    if (tView.firstChild === null) {
         tView.firstChild = tNode;
     }
     if (previousOrParentTNode) {
@@ -12619,13 +12619,12 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *
+ * @param {?} tView
  * @param {?} tNode
  * @param {?} direction whether to consider inputs or outputs
  * @return {?} PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
-function generatePropertyAliases(tNode, direction) {
-    /** @type {?} */
-    const tView = getLView()[TVIEW];
+function generatePropertyAliases(tView, tNode, direction) {
     /** @type {?} */
     let propStore = null;
     /** @type {?} */
@@ -12693,7 +12692,7 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
     let inputData;
     /** @type {?} */
     let dataValue;
-    if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
+    if (!nativeOnly && (inputData = initializeTNodeInputs(lView[TVIEW], tNode)) &&
         (dataValue = inputData[propName])) {
         setInputsForProperty(lView, dataValue, value);
         if (isComponent(tNode))
@@ -13762,15 +13761,16 @@ function storeBindingMetadata(lView, prefix = '', suffix = '') {
 /** @type {?} */
 const CLEAN_PROMISE = _CLEAN_PROMISE;
 /**
+ * @param {?} tView
  * @param {?} tNode
  * @return {?}
  */
-function initializeTNodeInputs(tNode) {
+function initializeTNodeInputs(tView, tNode) {
     // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
     // yet been checked.
     if (tNode.inputs === undefined) {
         // mark inputs as checked
-        tNode.inputs = generatePropertyAliases(tNode, 0 /* Input */);
+        tNode.inputs = generatePropertyAliases(tView, tNode, 0 /* Input */);
     }
     return tNode.inputs;
 }
@@ -21532,7 +21532,7 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, tNode, localRefs || null);
         /** @type {?} */
-        const inputData = initializeTNodeInputs(tNode);
+        const inputData = initializeTNodeInputs(tView, tNode);
         if (inputData && inputData.hasOwnProperty('class')) {
             tNode.flags |= 8 /* hasClassInput */;
         }
@@ -22153,7 +22153,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
     if (tNode.outputs === undefined) {
         // if we create TNode here, inputs must be undefined so we know they still need to be
         // checked
-        tNode.outputs = generatePropertyAliases(tNode, 1 /* Output */);
+        tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
     }
     /** @type {?} */
     const outputs = tNode.outputs;
@@ -26507,7 +26507,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.4+17.sha-97fc45f.with-local-changes');
+const VERSION = new Version('9.0.0-next.4+21.sha-18ce58c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
