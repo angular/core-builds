@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+11.sha-60a056d.with-local-changes
+ * @license Angular v9.0.0-next.4+15.sha-a1e91b0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13685,11 +13685,11 @@ export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵan
  * Create static text node
  *
  * @param index Index of the node in the data array
- * @param value Value to write. This value will be stringified.
+ * @param value Static string value to write.
  *
  * @codeGenApi
  */
-export declare function ɵɵtext(index: number, value?: any): void;
+export declare function ɵɵtext(index: number, value?: string): void;
 
 /**
  * Create text node with binding

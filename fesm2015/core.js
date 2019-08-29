@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+11.sha-60a056d.with-local-changes
+ * @license Angular v9.0.0-next.4+15.sha-a1e91b0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7640,8 +7640,7 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
  * @return {?}
  */
 function registerPreOrderHooks(directiveIndex, directiveDef, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength) {
-    ngDevMode &&
-        assertEqual(tView.firstTemplatePass, true, 'Should only be called on first template pass');
+    ngDevMode && assertFirstTemplatePass(tView);
     const { onChanges, onInit, doCheck } = directiveDef;
     if (initialPreOrderHooksLength >= 0 &&
         (!tView.preOrderHooks || initialPreOrderHooksLength === tView.preOrderHooks.length) &&
@@ -7686,30 +7685,29 @@ function registerPreOrderHooks(directiveIndex, directiveDef, tView, nodeIndex, i
  * @return {?}
  */
 function registerPostOrderHooks(tView, tNode) {
-    if (tView.firstTemplatePass) {
-        // It's necessary to loop through the directives at elementEnd() (rather than processing in
-        // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
-        // hooks for projected components and directives must be called *before* their hosts.
-        for (let i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
-            /** @type {?} */
-            const directiveDef = (/** @type {?} */ (tView.data[i]));
-            if (directiveDef.afterContentInit) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
-            }
-            if (directiveDef.afterContentChecked) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
-                (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, directiveDef.afterContentChecked);
-            }
-            if (directiveDef.afterViewInit) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
-            }
-            if (directiveDef.afterViewChecked) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
-                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
-            }
-            if (directiveDef.onDestroy != null) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
-            }
+    ngDevMode && assertFirstTemplatePass(tView);
+    // It's necessary to loop through the directives at elementEnd() (rather than processing in
+    // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
+    // hooks for projected components and directives must be called *before* their hosts.
+    for (let i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
+        /** @type {?} */
+        const directiveDef = (/** @type {?} */ (tView.data[i]));
+        if (directiveDef.afterContentInit) {
+            (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
+        }
+        if (directiveDef.afterContentChecked) {
+            (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
+            (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, directiveDef.afterContentChecked);
+        }
+        if (directiveDef.afterViewInit) {
+            (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
+        }
+        if (directiveDef.afterViewChecked) {
+            (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
+            (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
+        }
+        if (directiveDef.onDestroy != null) {
+            (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
         }
     }
 }
@@ -13255,7 +13253,7 @@ function baseResolveDirective(tView, viewData, def) {
  */
 function addComponentLogic(lView, hostTNode, def) {
     /** @type {?} */
-    const native = getNativeByTNode(hostTNode, lView);
+    const native = (/** @type {?} */ (getNativeByTNode(hostTNode, lView)));
     /** @type {?} */
     const tView = getOrCreateTView(def);
     // Only component views should be added to the view tree directly. Embedded views are
@@ -13263,8 +13261,7 @@ function addComponentLogic(lView, hostTNode, def) {
     /** @type {?} */
     const rendererFactory = lView[RENDERER_FACTORY];
     /** @type {?} */
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[hostTNode.index], (/** @type {?} */ (hostTNode)), rendererFactory, rendererFactory.createRenderer((/** @type {?} */ (native)), def)));
-    componentView[T_HOST] = (/** @type {?} */ (hostTNode));
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, native, (/** @type {?} */ (hostTNode)), rendererFactory, rendererFactory.createRenderer(native, def)));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
@@ -14010,8 +14007,10 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
  * @return {?}
  */
 function createTextNode(value, renderer) {
-    return isProceduralRenderer(renderer) ? renderer.createText(renderStringify(value)) :
-        renderer.createTextNode(renderStringify(value));
+    ngDevMode && ngDevMode.rendererCreateTextNode++;
+    ngDevMode && ngDevMode.rendererSetText++;
+    return isProceduralRenderer(renderer) ? renderer.createText(value) :
+        renderer.createTextNode(value);
 }
 /**
  * @param {?} lView
@@ -20711,6 +20710,7 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, tContainerNode, localRefs || null);
+        registerPostOrderHooks(tView, tContainerNode);
         /** @type {?} */
         const embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas);
         /** @type {?} */
@@ -20724,7 +20724,6 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
     }
     createDirectivesAndLocals(tView, lView, tContainerNode, localRefExtractor);
     attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
-    registerPostOrderHooks(tView, tContainerNode);
     setIsNotParent();
 }
 /**
@@ -21590,11 +21589,12 @@ function ɵɵelementEnd() {
     const lView = getLView();
     /** @type {?} */
     const tView = lView[TVIEW];
-    registerPostOrderHooks(tView, previousOrParentTNode);
     decreaseElementDepthCount();
-    if (tView.firstTemplatePass && tView.queries !== null &&
-        isContentQueryHost(previousOrParentTNode)) {
-        (/** @type {?} */ (tView.queries)).elementEnd(previousOrParentTNode);
+    if (tView.firstTemplatePass) {
+        registerPostOrderHooks(tView, previousOrParentTNode);
+        if (isContentQueryHost(previousOrParentTNode)) {
+            (/** @type {?} */ (tView.queries)).elementEnd(previousOrParentTNode);
+        }
     }
     if (hasClassInput(tNode) && tNode.classes) {
         setDirectiveStylingInput(tNode.classes, lView, (/** @type {?} */ (tNode.inputs))['class']);
@@ -21787,10 +21787,11 @@ function ɵɵelementContainerEnd() {
         setPreviousOrParentTNode(previousOrParentTNode, false);
     }
     ngDevMode && assertNodeType(previousOrParentTNode, 4 /* ElementContainer */);
-    registerPostOrderHooks(tView, previousOrParentTNode);
-    if (tView.firstTemplatePass && tView.queries !== null &&
-        isContentQueryHost(previousOrParentTNode)) {
-        tView.queries.elementEnd(previousOrParentTNode);
+    if (tView.firstTemplatePass) {
+        registerPostOrderHooks(tView, previousOrParentTNode);
+        if (isContentQueryHost(previousOrParentTNode)) {
+            (/** @type {?} */ (tView.queries)).elementEnd(previousOrParentTNode);
+        }
     }
 }
 /**
@@ -22860,19 +22861,17 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
  *
  * \@codeGenApi
  * @param {?} index Index of the node in the data array
- * @param {?=} value Value to write. This value will be stringified.
+ * @param {?=} value Static string value to write.
  *
  * @return {?}
  */
-function ɵɵtext(index, value) {
+function ɵɵtext(index, value = '') {
     /** @type {?} */
     const lView = getLView();
     ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
-    ngDevMode && ngDevMode.rendererCreateTextNode++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
     const textNative = lView[index + HEADER_OFFSET] = createTextNode(value, lView[RENDERER]);
-    ngDevMode && ngDevMode.rendererSetText++;
     /** @type {?} */
     const tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 3 /* Element */, null, null);
     // Text nodes are self closing.
@@ -26527,7 +26526,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.4+11.sha-60a056d.with-local-changes');
+const VERSION = new Version('9.0.0-next.4+15.sha-a1e91b0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
