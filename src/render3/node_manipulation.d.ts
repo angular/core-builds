@@ -15,7 +15,7 @@ export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LC
  * Might be null if a view is not yet attached to any container.
  */
 export declare function getContainerRenderParent(tViewNode: TViewNode, view: LView): RElement | null;
-export declare function createTextNode(value: any, renderer: Renderer3): RText;
+export declare function createTextNode(value: string, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.
  *
