@@ -8,11 +8,11 @@
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/decorator_rewrite/convert_directive_metadata" />
 import { StaticSymbol } from '@angular/compiler';
 import * as ts from 'typescript';
+/** Error that will be thrown if an unexpected value needs to be converted. */
+export declare class UnexpectedMetadataValueError extends Error {
+}
 /**
  * Converts a directive metadata object into a TypeScript expression. Throws
  * if metadata cannot be cleanly converted.
  */
 export declare function convertDirectiveMetadataToExpression(metadata: any, resolveSymbolImport: (symbol: StaticSymbol) => string | null, createImport: (moduleName: string, name: string) => ts.Expression, convertProperty?: (key: string, value: any) => ts.Expression | null): ts.Expression;
-/** Error that will be thrown if a unexpected value needs to be converted. */
-export declare class UnexpectedMetadataValueError extends Error {
-}

@@ -50,6 +50,7 @@ export declare class UndecoratedClassesTransform {
     migrateDecoratedProviders(providers: ts.ClassDeclaration[]): TransformFailure[];
     private _migrateProviderBaseClass;
     private _migrateDirectiveBaseClass;
+    private _migrateDecoratedClassWithInheritedCtor;
     /**
      * Adds the abstract "@Directive()" decorator to the given class in case there
      * is no existing directive decorator.
@@ -82,11 +83,6 @@ export declare class UndecoratedClassesTransform {
      * null if the metadata could not be simplified/resolved.
      */
     private _constructDecoratorFromMetadata;
-    /**
-     * Whether the given identifier resolves to a class declaration that
-     * has metadata for a directive.
-     */
-    private _hasDirectiveMetadata;
     /**
      * Resolves the declaration metadata of a given static symbol. The metadata
      * is determined by resolving metadata for the static symbol.
