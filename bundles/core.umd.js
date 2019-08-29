@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+19.sha-d4703d9.with-local-changes
+ * @license Angular v9.0.0-next.4+17.sha-97fc45f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7927,11 +7927,11 @@
         // Keep this function short, so that the VM will inline it.
         var adjustedIndex = index + HEADER_OFFSET;
         var tNode = tView.data[adjustedIndex] ||
-            createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs);
+            createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, index);
         setPreviousOrParentTNode(tNode, true);
         return tNode;
     }
-    function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs) {
+    function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs, index) {
         var previousOrParentTNode = getPreviousOrParentTNode();
         var isParent = getIsParent();
         var parent = isParent ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
@@ -7941,10 +7941,9 @@
         var tParentNode = parentInSameView ? parent : null;
         var tNode = tView.data[adjustedIndex] =
             createTNode(tView, tParentNode, type, adjustedIndex, name, attrs);
-        // Assign a pointer to the first child node of a given view. The first node is not always the one
-        // at index 0, in case of i18n, index 0 can be the instruction `i18nStart` and the first node has
-        // the index 1 or more, so we can't just check node index.
-        if (tView.firstChild === null) {
+        // The first node is not always the one at index 0, in case of i18n, index 0 can be the
+        // instruction `i18nStart` and the first node has the index 1 or more
+        if (index === 0 || !tView.firstChild) {
             tView.firstChild = tNode;
         }
         if (previousOrParentTNode) {
@@ -8453,7 +8452,8 @@
      * @param direction whether to consider inputs or outputs
      * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
      */
-    function generatePropertyAliases(tView, tNode, direction) {
+    function generatePropertyAliases(tNode, direction) {
+        var tView = getLView()[TVIEW];
         var propStore = null;
         var start = tNode.directiveStart;
         var end = tNode.directiveEnd;
@@ -8496,7 +8496,7 @@
         var tNode = getTNode(index, lView);
         var inputData;
         var dataValue;
-        if (!nativeOnly && (inputData = initializeTNodeInputs(lView[TVIEW], tNode)) &&
+        if (!nativeOnly && (inputData = initializeTNodeInputs(tNode)) &&
             (dataValue = inputData[propName])) {
             setInputsForProperty(lView, dataValue, value);
             if (isComponent(tNode))
@@ -9305,12 +9305,12 @@
         return tData[lastBindingIndex] == null ? (tData[lastBindingIndex] = value) : null;
     }
     var CLEAN_PROMISE = _CLEAN_PROMISE;
-    function initializeTNodeInputs(tView, tNode) {
+    function initializeTNodeInputs(tNode) {
         // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
         // yet been checked.
         if (tNode.inputs === undefined) {
             // mark inputs as checked
-            tNode.inputs = generatePropertyAliases(tView, tNode, 0 /* Input */);
+            tNode.inputs = generatePropertyAliases(tNode, 0 /* Input */);
         }
         return tNode.inputs;
     }
@@ -14966,7 +14966,7 @@
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
             resolveDirectives(tView, lView, tNode, localRefs || null);
-            var inputData = initializeTNodeInputs(tView, tNode);
+            var inputData = initializeTNodeInputs(tNode);
             if (inputData && inputData.hasOwnProperty('class')) {
                 tNode.flags |= 8 /* hasClassInput */;
             }
@@ -15504,7 +15504,7 @@
         if (tNode.outputs === undefined) {
             // if we create TNode here, inputs must be undefined so we know they still need to be
             // checked
-            tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
+            tNode.outputs = generatePropertyAliases(tNode, 1 /* Output */);
         }
         var outputs = tNode.outputs;
         var props;
@@ -18600,7 +18600,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.4+19.sha-d4703d9.with-local-changes');
+    var VERSION = new Version('9.0.0-next.4+17.sha-97fc45f.with-local-changes');
 
     /**
      * @license
