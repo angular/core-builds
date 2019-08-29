@@ -9,10 +9,7 @@
 import { AotCompiler } from '@angular/compiler';
 import * as ts from 'typescript';
 /** Creates an NGC program that can be used to read and parse metadata for files. */
-export declare function createNgcProgram(createHost: (options: ts.CompilerOptions) => ts.CompilerHost, tsconfigPath: string | null, parseConfig?: () => {
-    rootNames: readonly string[];
-    options: ts.CompilerOptions;
-}): {
+export declare function createNgcProgram(createHost: (options: ts.CompilerOptions) => ts.CompilerHost, tsconfigPath: string): {
     host: ts.CompilerHost;
     ngcProgram: import("@angular/compiler-cli").Program;
     program: ts.Program;
