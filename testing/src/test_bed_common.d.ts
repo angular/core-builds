@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Component, Directive, InjectFlags, InjectionToken, NgModule, Pipe, PlatformRef, SchemaMetadata, Type } from '@angular/core';
+import { AbstractType, Component, Directive, InjectFlags, InjectionToken, NgModule, Pipe, PlatformRef, SchemaMetadata, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 import { TestBed } from './test_bed';
@@ -96,13 +96,11 @@ export interface TestBedStatic {
         useValue?: any;
         deps?: any[];
     }): TestBedStatic;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     * This does not use the deprecated jsdoc tag on purpose
-     * because it renders all overloads as deprecated in TSLint
-     * due to https://github.com/palantir/tslint/issues/4522.
-     */
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }

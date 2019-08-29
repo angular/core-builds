@@ -1,4 +1,3 @@
-import { NO_CHANGE } from '../tokens';
 /**
  * Create static text node
  *
@@ -8,12 +7,3 @@ import { NO_CHANGE } from '../tokens';
  * @codeGenApi
  */
 export declare function ɵɵtext(index: number, value?: string): void;
-/**
- * Create text node with binding
- * Bindings should be handled externally with the proper interpolation(1-8) method
- *
- * @param value Stringified value to write.
- *
- * @codeGenApi
- */
-export declare function ɵɵtextBinding<T>(value: T | NO_CHANGE): void;
