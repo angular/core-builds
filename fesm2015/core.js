@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+12.sha-581b837.with-local-changes
+ * @license Angular v9.0.0-next.4+11.sha-60a056d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13255,7 +13255,7 @@ function baseResolveDirective(tView, viewData, def) {
  */
 function addComponentLogic(lView, hostTNode, def) {
     /** @type {?} */
-    const native = (/** @type {?} */ (getNativeByTNode(hostTNode, lView)));
+    const native = getNativeByTNode(hostTNode, lView);
     /** @type {?} */
     const tView = getOrCreateTView(def);
     // Only component views should be added to the view tree directly. Embedded views are
@@ -13263,7 +13263,8 @@ function addComponentLogic(lView, hostTNode, def) {
     /** @type {?} */
     const rendererFactory = lView[RENDERER_FACTORY];
     /** @type {?} */
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, native, (/** @type {?} */ (hostTNode)), rendererFactory, rendererFactory.createRenderer(native, def)));
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[hostTNode.index], (/** @type {?} */ (hostTNode)), rendererFactory, rendererFactory.createRenderer((/** @type {?} */ (native)), def)));
+    componentView[T_HOST] = (/** @type {?} */ (hostTNode));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
@@ -26526,7 +26527,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.4+12.sha-581b837.with-local-changes');
+const VERSION = new Version('9.0.0-next.4+11.sha-60a056d.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
