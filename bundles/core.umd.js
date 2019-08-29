@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+12.sha-581b837.with-local-changes
+ * @license Angular v9.0.0-next.4+11.sha-60a056d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8891,7 +8891,8 @@
         // Only component views should be added to the view tree directly. Embedded views are
         // accessed through their containers because they may be removed / re-added later.
         var rendererFactory = lView[RENDERER_FACTORY];
-        var componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, native, hostTNode, rendererFactory, rendererFactory.createRenderer(native, def)));
+        var componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[hostTNode.index], hostTNode, rendererFactory, rendererFactory.createRenderer(native, def)));
+        componentView[T_HOST] = hostTNode;
         // Component view will always be created before any injected LContainers,
         // so this is a regular element, wrap it with the component view
         lView[hostTNode.index] = componentView;
@@ -18566,7 +18567,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.4+12.sha-581b837.with-local-changes');
+    var VERSION = new Version('9.0.0-next.4+11.sha-60a056d.with-local-changes');
 
     /**
      * @license
