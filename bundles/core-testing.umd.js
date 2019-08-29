@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
+ * @license Angular v9.0.0-next.4+30.sha-63dff9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2023,10 +2023,14 @@
             _getTestBedRender3().overrideProvider(token, provider);
             return TestBedRender3;
         };
+        TestBedRender3.inject = function (token, notFoundValue, flags) {
+            return _getTestBedRender3().inject(token, notFoundValue, flags);
+        };
+        /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
         TestBedRender3.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
             if (flags === void 0) { flags = core.InjectFlags.Default; }
-            return _getTestBedRender3().get(token, notFoundValue);
+            return _getTestBedRender3().inject(token, notFoundValue, flags);
         };
         TestBedRender3.createComponent = function (component) {
             return _getTestBedRender3().createComponent(component);
@@ -2090,18 +2094,22 @@
             this.compiler.configureTestingModule(moduleDef);
         };
         TestBedRender3.prototype.compileComponents = function () { return this.compiler.compileComponents(); };
-        TestBedRender3.prototype.get = function (token, notFoundValue, flags) {
-            if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
-            if (flags === void 0) { flags = core.InjectFlags.Default; }
+        TestBedRender3.prototype.inject = function (token, notFoundValue, flags) {
             if (token === TestBedRender3) {
                 return this;
             }
             var result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
             return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
         };
+        /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+        TestBedRender3.prototype.get = function (token, notFoundValue, flags) {
+            if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
+            if (flags === void 0) { flags = core.InjectFlags.Default; }
+            return this.inject(token, notFoundValue, flags);
+        };
         TestBedRender3.prototype.execute = function (tokens, fn, context) {
             var _this = this;
-            var params = tokens.map(function (t) { return _this.get(t); });
+            var params = tokens.map(function (t) { return _this.inject(t); });
             return fn.apply(context, params);
         };
         TestBedRender3.prototype.overrideModule = function (ngModule, override) {
@@ -2132,18 +2140,18 @@
         };
         TestBedRender3.prototype.createComponent = function (type) {
             var _this = this;
-            var testComponentRenderer = this.get(TestComponentRenderer);
+            var testComponentRenderer = this.inject(TestComponentRenderer);
             var rootElId = "root-ng-internal-isolated-" + _nextRootElementId++;
             testComponentRenderer.insertRootElement(rootElId);
             var componentDef = type.ngComponentDef;
             if (!componentDef) {
                 throw new Error("It looks like '" + core.ɵstringify(type) + "' has not been IVY compiled - it has no 'ngComponentDef' field");
             }
-            // TODO: Don't cast as `any`, proper type is boolean[]
-            var noNgZone = this.get(ComponentFixtureNoNgZone, false);
-            // TODO: Don't cast as `any`, proper type is boolean[]
-            var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-            var ngZone = noNgZone ? null : this.get(core.NgZone, null);
+            // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
+            var noNgZone = this.inject(ComponentFixtureNoNgZone, false);
+            // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
+            var autoDetect = this.inject(ComponentFixtureAutoDetect, false);
+            var ngZone = noNgZone ? null : this.inject(core.NgZone, null);
             var componentFactory = new core.ɵRender3ComponentFactory(componentDef);
             var initComponent = function () {
                 var componentRef = componentFactory.create(core.Injector.NULL, [], "#" + rootElId, _this.testModuleRef);
@@ -2412,10 +2420,14 @@
             _getTestBedViewEngine().overrideProvider(token, provider);
             return TestBedViewEngine;
         };
+        TestBedViewEngine.inject = function (token, notFoundValue, flags) {
+            return _getTestBedViewEngine().inject(token, notFoundValue, flags);
+        };
+        /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
         TestBedViewEngine.get = function (token, notFoundValue, flags) {
             if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
             if (flags === void 0) { flags = core.InjectFlags.Default; }
-            return _getTestBedViewEngine().get(token, notFoundValue, flags);
+            return _getTestBedViewEngine().inject(token, notFoundValue, flags);
         };
         TestBedViewEngine.createComponent = function (component) {
             return _getTestBedViewEngine().createComponent(component);
@@ -2624,9 +2636,7 @@
                     ("Make sure you are not using `inject` before `" + methodName + "`."));
             }
         };
-        TestBedViewEngine.prototype.get = function (token, notFoundValue, flags) {
-            if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
-            if (flags === void 0) { flags = core.InjectFlags.Default; }
+        TestBedViewEngine.prototype.inject = function (token, notFoundValue, flags) {
             this._initIfNeeded();
             if (token === TestBed) {
                 return this;
@@ -2636,10 +2646,16 @@
             var result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
             return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) : result;
         };
+        /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+        TestBedViewEngine.prototype.get = function (token, notFoundValue, flags) {
+            if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
+            if (flags === void 0) { flags = core.InjectFlags.Default; }
+            return this.inject(token, notFoundValue, flags);
+        };
         TestBedViewEngine.prototype.execute = function (tokens, fn, context) {
             var _this = this;
             this._initIfNeeded();
-            var params = tokens.map(function (t) { return _this.get(t); });
+            var params = tokens.map(function (t) { return _this.inject(t); });
             return fn.apply(context, params);
         };
         TestBedViewEngine.prototype.overrideModule = function (ngModule, override) {
@@ -2724,12 +2740,12 @@
             if (!componentFactory) {
                 throw new Error("Cannot create the component " + core.ɵstringify(component) + " as it was not imported into the testing module!");
             }
-            // TODO: Don't cast as `any`, proper type is boolean[]
-            var noNgZone = this.get(ComponentFixtureNoNgZone, false);
-            // TODO: Don't cast as `any`, proper type is boolean[]
-            var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-            var ngZone = noNgZone ? null : this.get(core.NgZone, null);
-            var testComponentRenderer = this.get(TestComponentRenderer);
+            // TODO: Don't cast as `InjectionToken<boolean>`, declared type is boolean[]
+            var noNgZone = this.inject(ComponentFixtureNoNgZone, false);
+            // TODO: Don't cast as `InjectionToken<boolean>`, declared type is boolean[]
+            var autoDetect = this.inject(ComponentFixtureAutoDetect, false);
+            var ngZone = noNgZone ? null : this.inject(core.NgZone, null);
+            var testComponentRenderer = this.inject(TestComponentRenderer);
             var rootElId = "root" + _nextRootElementId$1++;
             testComponentRenderer.insertRootElement(rootElId);
             var initComponent = function () {
@@ -2800,7 +2816,7 @@
                 // Return an async test method that returns a Promise if AsyncTestCompleter is one of
                 // the injected tokens.
                 return testBed.compileComponents().then(function () {
-                    var completer = testBed.get(AsyncTestCompleter);
+                    var completer = testBed.inject(AsyncTestCompleter);
                     testBed.execute(tokens, fn, _this);
                     return completer.promise;
                 });

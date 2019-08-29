@@ -1,9 +1,10 @@
 /**
- * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
+ * @license Angular v9.0.0-next.4+30.sha-63dff9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import { AbstractType } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { Compiler } from '@angular/core';
 import { CompilerOptions } from '@angular/core';
@@ -274,13 +275,11 @@ export declare interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     * This does not use the deprecated jsdoc tag on purpose
-     * because it renders all overloads as deprecated in TSLint
-     * due to https://github.com/palantir/tslint/issues/4522.
-     */
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -381,13 +380,11 @@ export declare interface TestBedStatic {
         useValue?: any;
         deps?: any[];
     }): TestBedStatic;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     * This does not use the deprecated jsdoc tag on purpose
-     * because it renders all overloads as deprecated in TSLint
-     * due to https://github.com/palantir/tslint/issues/4522.
-     */
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
@@ -444,7 +441,7 @@ export declare function withModule(moduleDef: TestModuleMetadata, fn: Function):
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
  */
-export declare class ɵangular_packages_core_testing_testing_a implements Injector, TestBed {
+export declare class ɵangular_packages_core_testing_testing_a implements TestBed {
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -505,9 +502,12 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
      * @suppress {duplicate}
      */
     static get(token: any, notFoundValue?: any): any;
@@ -559,10 +559,11 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
     private _initIfNeeded;
     private _createCompilerAndModule;
     private _assertNotInstantiated;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -594,7 +595,7 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
  */
-export declare class ɵangular_packages_core_testing_testing_b implements Injector, TestBed {
+export declare class ɵangular_packages_core_testing_testing_b implements TestBed {
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -649,10 +650,11 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     static resetTestingModule(): TestBedStatic;
@@ -689,10 +691,11 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;

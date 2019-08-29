@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
+ * @license Angular v9.0.0-next.4+30.sha-63dff9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3072,7 +3072,7 @@ export declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
      * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
      * @suppress {duplicate}
@@ -12795,7 +12795,7 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  *      }
  *      if (fs & RenderFlags.Update) {
  *        ɵɵselect(0);
- *        ɵɵtextBinding(ctx.greeter.greet());
+ *        ɵɵtextInterpolate(ctx.greeter.greet());
  *      }
  *    },
  *    features: [ProvidersFeature([GreeterDE])]
@@ -13690,16 +13690,6 @@ export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵan
  * @codeGenApi
  */
 export declare function ɵɵtext(index: number, value?: string): void;
-
-/**
- * Create text node with binding
- * Bindings should be handled externally with the proper interpolation(1-8) method
- *
- * @param value Stringified value to write.
- *
- * @codeGenApi
- */
-export declare function ɵɵtextBinding<T>(value: T | ɵNO_CHANGE): void;
 
 /**
  *

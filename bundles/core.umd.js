@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
+ * @license Angular v9.0.0-next.4+30.sha-63dff9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16171,22 +16171,6 @@
         setIsNotParent();
         appendChild(textNative, tNode, lView);
     }
-    /**
-     * Create text node with binding
-     * Bindings should be handled externally with the proper interpolation(1-8) method
-     *
-     * @param value Stringified value to write.
-     *
-     * @codeGenApi
-     */
-    function ɵɵtextBinding(value) {
-        var lView = getLView();
-        var index = getSelectedIndex();
-        var bound = bind(lView, value);
-        if (bound !== NO_CHANGE) {
-            textBindingInternal(lView, index, renderStringify(bound));
-        }
-    }
 
     /**
      * @license
@@ -18253,7 +18237,7 @@
      *      }
      *      if (fs & RenderFlags.Update) {
      *        ɵɵselect(0);
-     *        ɵɵtextBinding(ctx.greeter.greet());
+     *        ɵɵtextInterpolate(ctx.greeter.greet());
      *      }
      *    },
      *    features: [ProvidersFeature([GreeterDE])]
@@ -18600,7 +18584,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.4+21.sha-18ce58c.with-local-changes');
+    var VERSION = new Version('9.0.0-next.4+30.sha-63dff9c.with-local-changes');
 
     /**
      * @license
@@ -24718,7 +24702,6 @@
         'ɵɵselect': ɵɵselect,
         'ɵɵtemplate': ɵɵtemplate,
         'ɵɵtext': ɵɵtext,
-        'ɵɵtextBinding': ɵɵtextBinding,
         'ɵɵtextInterpolate': ɵɵtextInterpolate,
         'ɵɵtextInterpolate1': ɵɵtextInterpolate1,
         'ɵɵtextInterpolate2': ɵɵtextInterpolate2,
@@ -27231,7 +27214,7 @@
             }
             this.componentTypes.push(componentFactory.componentType);
             // Create a factory associated with the current module if it's not bound to some other
-            var ngModule = isBoundToModule(componentFactory) ? null : this._injector.get(NgModuleRef);
+            var ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef);
             var selectorOrNode = rootSelectorOrNode || componentFactory.selector;
             var compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
             compRef.onDestroy(function () { _this._unloadComponent(compRef); });
@@ -31127,7 +31110,6 @@
     exports.ɵɵclassProp = ɵɵclassProp;
     exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
     exports.ɵɵselect = ɵɵselect;
-    exports.ɵɵtextBinding = ɵɵtextBinding;
     exports.ɵɵtemplate = ɵɵtemplate;
     exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
     exports.ɵstore = store;

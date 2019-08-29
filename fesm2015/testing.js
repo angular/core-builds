@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
+ * @license Angular v9.0.0-next.4+30.sha-63dff9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1011,12 +1011,26 @@ if (false) {
      * @param {?=} flags
      * @return {?}
      */
+    TestBedStatic.prototype.inject = function (token, notFoundValue, flags) { };
+    /**
+     * @template T
+     * @param {?} token
+     * @param {?} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    TestBedStatic.prototype.inject = function (token, notFoundValue, flags) { };
+    /**
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
     TestBedStatic.prototype.get = function (token, notFoundValue, flags) { };
     /**
-     * deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     * This does not use the deprecated jsdoc tag on purpose
-     * because it renders all overloads as deprecated in TSLint
-     * due to https://github.com/palantir/tslint/issues/4522.
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
@@ -2886,13 +2900,24 @@ class TestBedRender3 {
         return (/** @type {?} */ ((/** @type {?} */ (TestBedRender3))));
     }
     /**
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    static inject(token, notFoundValue, flags) {
+        return _getTestBedRender3().inject(token, notFoundValue, flags);
+    }
+    /**
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
      * @param {?} token
      * @param {?=} notFoundValue
      * @param {?=} flags
      * @return {?}
      */
     static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        return _getTestBedRender3().get(token, notFoundValue);
+        return _getTestBedRender3().inject(token, notFoundValue, flags);
     }
     /**
      * @template T
@@ -2984,18 +3009,29 @@ class TestBedRender3 {
      */
     compileComponents() { return this.compiler.compileComponents(); }
     /**
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    inject(token, notFoundValue, flags) {
+        if ((/** @type {?} */ (token)) === TestBedRender3) {
+            return (/** @type {?} */ (this));
+        }
+        /** @type {?} */
+        const result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
+        return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
+    }
+    /**
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
      * @param {?} token
      * @param {?=} notFoundValue
      * @param {?=} flags
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        if (token === TestBedRender3) {
-            return this;
-        }
-        /** @type {?} */
-        const result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
-        return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
+        return this.inject(token, notFoundValue, flags);
     }
     /**
      * @param {?} tokens
@@ -3009,7 +3045,7 @@ class TestBedRender3 {
          * @param {?} t
          * @return {?}
          */
-        t => this.get(t)));
+        t => this.inject(t)));
         return fn.apply(context, params);
     }
     /**
@@ -3073,7 +3109,7 @@ class TestBedRender3 {
      */
     createComponent(type) {
         /** @type {?} */
-        const testComponentRenderer = this.get(TestComponentRenderer);
+        const testComponentRenderer = this.inject(TestComponentRenderer);
         /** @type {?} */
         const rootElId = `root-ng-internal-isolated-${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
@@ -3082,14 +3118,14 @@ class TestBedRender3 {
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ngComponentDef' field`);
         }
-        // TODO: Don't cast as `any`, proper type is boolean[]
+        // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         /** @type {?} */
-        const noNgZone = this.get((/** @type {?} */ (ComponentFixtureNoNgZone)), false);
-        // TODO: Don't cast as `any`, proper type is boolean[]
+        const noNgZone = this.inject((/** @type {?} */ (ComponentFixtureNoNgZone)), false);
+        // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         /** @type {?} */
-        const autoDetect = this.get((/** @type {?} */ (ComponentFixtureAutoDetect)), false);
+        const autoDetect = this.inject((/** @type {?} */ (ComponentFixtureAutoDetect)), false);
         /** @type {?} */
-        const ngZone = noNgZone ? null : this.get((/** @type {?} */ (NgZone)), null);
+        const ngZone = noNgZone ? null : this.inject(NgZone, null);
         /** @type {?} */
         const componentFactory = new ɵRender3ComponentFactory(componentDef);
         /** @type {?} */
@@ -3488,13 +3524,24 @@ class TestBedViewEngine {
         return (/** @type {?} */ ((/** @type {?} */ (TestBedViewEngine))));
     }
     /**
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    static inject(token, notFoundValue, flags) {
+        return _getTestBedViewEngine().inject(token, notFoundValue, flags);
+    }
+    /**
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
      * @param {?} token
      * @param {?=} notFoundValue
      * @param {?=} flags
      * @return {?}
      */
     static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        return _getTestBedViewEngine().get(token, notFoundValue, flags);
+        return _getTestBedViewEngine().inject(token, notFoundValue, flags);
     }
     /**
      * @template T
@@ -3758,21 +3805,32 @@ class TestBedViewEngine {
         }
     }
     /**
+     * @template T
      * @param {?} token
      * @param {?=} notFoundValue
      * @param {?=} flags
      * @return {?}
      */
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
+    inject(token, notFoundValue, flags) {
         this._initIfNeeded();
-        if (token === TestBed) {
-            return this;
+        if ((/** @type {?} */ (token)) === TestBed) {
+            return (/** @type {?} */ (this));
         }
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
         /** @type {?} */
         const result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
         return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) : result;
+    }
+    /**
+     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
+        return this.inject(token, notFoundValue, flags);
     }
     /**
      * @param {?} tokens
@@ -3787,7 +3845,7 @@ class TestBedViewEngine {
          * @param {?} t
          * @return {?}
          */
-        t => this.get(t)));
+        t => this.inject(t)));
         return fn.apply(context, params);
     }
     /**
@@ -3924,16 +3982,16 @@ class TestBedViewEngine {
         if (!componentFactory) {
             throw new Error(`Cannot create the component ${ɵstringify(component)} as it was not imported into the testing module!`);
         }
-        // TODO: Don't cast as `any`, proper type is boolean[]
+        // TODO: Don't cast as `InjectionToken<boolean>`, declared type is boolean[]
         /** @type {?} */
-        const noNgZone = this.get((/** @type {?} */ (ComponentFixtureNoNgZone)), false);
-        // TODO: Don't cast as `any`, proper type is boolean[]
+        const noNgZone = this.inject((/** @type {?} */ (ComponentFixtureNoNgZone)), false);
+        // TODO: Don't cast as `InjectionToken<boolean>`, declared type is boolean[]
         /** @type {?} */
-        const autoDetect = this.get((/** @type {?} */ (ComponentFixtureAutoDetect)), false);
+        const autoDetect = this.inject((/** @type {?} */ (ComponentFixtureAutoDetect)), false);
         /** @type {?} */
-        const ngZone = noNgZone ? null : this.get((/** @type {?} */ (NgZone)), null);
+        const ngZone = noNgZone ? null : this.inject(NgZone, null);
         /** @type {?} */
-        const testComponentRenderer = this.get(TestComponentRenderer);
+        const testComponentRenderer = this.inject(TestComponentRenderer);
         /** @type {?} */
         const rootElId = `root${_nextRootElementId$1++}`;
         testComponentRenderer.insertRootElement(rootElId);
@@ -4128,7 +4186,7 @@ function inject(tokens, fn) {
              */
             () => {
                 /** @type {?} */
-                const completer = testBed.get(AsyncTestCompleter);
+                const completer = testBed.inject(AsyncTestCompleter);
                 testBed.execute(tokens, fn, this);
                 return completer.promise;
             }));

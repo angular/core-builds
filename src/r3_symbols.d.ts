@@ -1,9 +1,21 @@
 /**
- * @license Angular v9.0.0-next.4+21.sha-18ce58c.with-local-changes
+ * @license Angular v9.0.0-next.4+30.sha-63dff9c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
+
+/**
+ * @description
+ *
+ * Represents an abstract class `T`, if applied to a concrete class it would stop being
+ * instantiatable.
+ *
+ * @publicApi
+ */
+declare interface AbstractType<T> extends Function {
+    prototype: T;
+}
 
 /**
  * Base class for Angular Views, provides change detection functionality.
@@ -527,7 +539,7 @@ declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
      * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
      * @suppress {duplicate}
