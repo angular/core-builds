@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+39.sha-3758978.with-local-changes
+ * @license Angular v9.0.0-next.4+44.sha-1537791.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -509,7 +509,7 @@ declare class InjectionToken<T> {
     protected _desc: string;
     readonly ngInjectableDef: never | undefined;
     constructor(_desc: string, options?: {
-        providedIn?: Type<any> | 'root' | null;
+        providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
     });
     toString(): string;
@@ -882,7 +882,7 @@ declare abstract class ViewRef extends ChangeDetectorRef {
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
-    providedIn?: Type<any> | 'root' | 'any' | null;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
 }): never;
 
@@ -973,7 +973,7 @@ export declare interface ɵɵInjectableDef<T> {
      * - `null`, does not belong to any injector. Must be explicitly listed in the injector
      *   `providers`.
      */
-    providedIn: InjectorType<any> | 'root' | 'any' | null;
+    providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | null;
     /**
      * The token to which this definition belongs.
      *

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+39.sha-3758978.with-local-changes
+ * @license Angular v9.0.0-next.4+44.sha-1537791.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2858,10 +2858,14 @@ export declare interface Injectable {
     /**
      * Determines which injectors will provide the injectable,
      * by either associating it with an @NgModule or other `InjectorType`,
-     * or by specifying that this injectable should be provided in the
-     * 'root' injector, which will be the application-level injector in most apps.
+     * or by specifying that this injectable should be provided in the:
+     * - 'root' injector, which will be the application-level injector in most apps.
+     * - 'platform' injector, which would be the special singleton platform injector shared by all
+     * applications on the page.
+     * - 'any` injector, which would be the injector which receives the resolution. (Note this only
+     * works on NgModule Injectors and not on Element Injector)
      */
-    providedIn?: Type<any> | 'root' | null;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
 }
 
 /**
@@ -2899,11 +2903,11 @@ export declare interface InjectableDecorator {
      */
     (): TypeDecorator;
     (options?: {
-        providedIn: Type<any> | 'root' | null;
+        providedIn: Type<any> | 'root' | 'platform' | 'any' | null;
     } & InjectableProvider): TypeDecorator;
     new (): Injectable;
     new (options?: {
-        providedIn: Type<any> | 'root' | null;
+        providedIn: Type<any> | 'root' | 'platform' | 'any' | null;
     } & InjectableProvider): Injectable;
 }
 
@@ -3032,7 +3036,7 @@ export declare class InjectionToken<T> {
     protected _desc: string;
     readonly ngInjectableDef: never | undefined;
     constructor(_desc: string, options?: {
-        providedIn?: Type<any> | 'root' | null;
+        providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
     });
     toString(): string;
@@ -3984,7 +3988,7 @@ declare interface NgModuleDefinition extends Definition<NgModuleDefinitionFactor
         [tokenKey: string]: NgModuleProviderDef;
     };
     modules: any[];
-    isRoot: boolean;
+    scope: 'root' | 'platform' | null;
 }
 
 declare interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {
@@ -5011,6 +5015,8 @@ declare class R3Injector {
     readonly parent: Injector;
     /**
      * Map of tokens to records which contain the instances of those tokens.
+     * - `null` value implies that we don't have the record. Used by tree-shakable injectors
+     * to prevent further searches.
      */
     private records;
     /**
@@ -5025,7 +5031,7 @@ declare class R3Injector {
      * Flag indicating this injector provides the APP_ROOT_SCOPE token, and thus counts as the
      * root scope.
      */
-    private readonly isRootInjector;
+    private readonly scope;
     readonly source: string | null;
     /**
      * Flag indicating that this injector was previously destroyed.
@@ -8927,13 +8933,6 @@ export declare const ɵAPP_ID_RANDOM_PROVIDER: {
     deps: any[];
 };
 
-/**
- * An internal token whose presence in an injector indicates that the injector should treat itself
- * as a root scoped injector when processing requests for unknown tokens which may indicate
- * they are provided in the root scope.
- */
-export declare const ɵAPP_ROOT: InjectionToken<boolean>;
-
 export declare const enum ɵArgumentType {
     Inline = 0,
     Dynamic = 1
@@ -9597,6 +9596,13 @@ export declare function ɵi18nConfigureLocalize(options?: I18nLocalizeOptions): 
 export declare function ɵinitServicesIfNeeded(): void;
 
 export declare function ɵINJECTOR_IMPL__POST_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): Injector;
+
+/**
+ * An internal token whose presence in an injector indicates that the injector should treat itself
+ * as a root scoped injector when processing requests for unknown tokens which may indicate
+ * they are provided in the root scope.
+ */
+export declare const ɵINJECTOR_SCOPE: InjectionToken<"root" | "platform" | null>;
 
 export declare function ɵinlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
 
@@ -11607,7 +11613,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
-    providedIn?: Type<any> | 'root' | 'any' | null;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
 }): never;
 
@@ -12119,7 +12125,7 @@ export declare interface ɵɵInjectableDef<T> {
      * - `null`, does not belong to any injector. Must be explicitly listed in the injector
      *   `providers`.
      */
-    providedIn: InjectorType<any> | 'root' | 'any' | null;
+    providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | null;
     /**
      * The token to which this definition belongs.
      *
