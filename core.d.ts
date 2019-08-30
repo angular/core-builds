@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+61.sha-260217a.with-local-changes
+ * @license Angular v9.0.0-next.4+69.sha-9a55eaf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2607,12 +2607,6 @@ export declare interface HostListenerDecorator {
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
-}
-
-declare interface I18nLocalizeOptions {
-    translations: {
-        [key: string]: string;
-    };
 }
 
 /**
@@ -9586,13 +9580,6 @@ export declare type ɵGetterFn = (obj: any) => any;
 
 export declare const ɵglobal: any;
 
-/**
- * Set the configuration for `i18nLocalize`.
- *
- * @deprecated this method is temporary & should not be used as it will be removed soon
- */
-export declare function ɵi18nConfigureLocalize(options?: I18nLocalizeOptions): void;
-
 export declare function ɵinitServicesIfNeeded(): void;
 
 export declare function ɵINJECTOR_IMPL__POST_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): Injector;
@@ -12009,20 +11996,6 @@ export declare function ɵɵi18nEnd(): void;
  * @codeGenApi
  */
 export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
-
-/**
- * A goog.getMsg-like function for users that do not use Closure.
- *
- * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
- * running outside of Closure Compiler. This method will not be needed once runtime translation
- * service support is introduced.
- *
- * @codeGenApi
- * @deprecated this method is temporary & should not be used as it will be removed soon
- */
-export declare function ɵɵi18nLocalize(input: string, placeholders?: {
-    [key: string]: string;
-}): string;
 
 /**
  * Handles message string post-processing for internationalization.
