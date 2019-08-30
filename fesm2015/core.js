@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+59.sha-60f9639.with-local-changes
+ * @license Angular v9.0.0-next.4+61.sha-260217a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26526,7 +26526,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.4+59.sha-60f9639.with-local-changes');
+const VERSION = new Version('9.0.0-next.4+61.sha-260217a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -42208,7 +42208,10 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
      */
     get properties() {
         /** @type {?} */
-        const context = (/** @type {?} */ (loadLContext(this.nativeNode)));
+        const context = loadLContext(this.nativeNode, false);
+        if (context == null) {
+            return {};
+        }
         /** @type {?} */
         const lView = context.lView;
         /** @type {?} */
@@ -42240,7 +42243,10 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             return attributes;
         }
         /** @type {?} */
-        const context = loadLContext(element);
+        const context = loadLContext(element, false);
+        if (context == null) {
+            return {};
+        }
         /** @type {?} */
         const lView = context.lView;
         /** @type {?} */
@@ -42405,27 +42411,27 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
  * @return {?}
  */
 function _getStylingDebugInfo(element, isClassBased) {
-    if (element) {
-        /** @type {?} */
-        const context = loadLContextFromNode(element);
-        /** @type {?} */
-        const lView = context.lView;
-        /** @type {?} */
-        const tData = lView[TVIEW].data;
-        /** @type {?} */
-        const tNode = (/** @type {?} */ (tData[context.nodeIndex]));
-        if (isClassBased) {
-            return isStylingContext(tNode.classes) ?
-                new NodeStylingDebug((/** @type {?} */ (tNode.classes)), lView, true).values :
-                stylingMapToStringMap(tNode.classes);
-        }
-        else {
-            return isStylingContext(tNode.styles) ?
-                new NodeStylingDebug((/** @type {?} */ (tNode.styles)), lView, false).values :
-                stylingMapToStringMap(tNode.styles);
-        }
+    /** @type {?} */
+    const context = loadLContext(element, false);
+    if (!context) {
+        return {};
     }
-    return {};
+    /** @type {?} */
+    const lView = context.lView;
+    /** @type {?} */
+    const tData = lView[TVIEW].data;
+    /** @type {?} */
+    const tNode = (/** @type {?} */ (tData[context.nodeIndex]));
+    if (isClassBased) {
+        return isStylingContext(tNode.classes) ?
+            new NodeStylingDebug((/** @type {?} */ (tNode.classes)), lView, true).values :
+            stylingMapToStringMap(tNode.classes);
+    }
+    else {
+        return isStylingContext(tNode.styles) ?
+            new NodeStylingDebug((/** @type {?} */ (tNode.styles)), lView, false).values :
+            stylingMapToStringMap(tNode.styles);
+    }
 }
 /**
  * @param {?} parentElement

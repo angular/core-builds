@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+59.sha-60f9639.with-local-changes
+ * @license Angular v9.0.0-next.4+61.sha-260217a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18438,7 +18438,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.4+59.sha-60f9639.with-local-changes');
+var VERSION = new Version('9.0.0-next.4+61.sha-260217a.with-local-changes');
 
 /**
  * @license
@@ -27693,7 +27693,10 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
          *  - attribute bindings (e.g. `[attr.role]="menu"`)
          */
         get: function () {
-            var context = loadLContext(this.nativeNode);
+            var context = loadLContext(this.nativeNode, false);
+            if (context == null) {
+                return {};
+            }
             var lView = context.lView;
             var tData = lView[TVIEW].data;
             var tNode = tData[context.nodeIndex];
@@ -27716,7 +27719,10 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
             if (!element) {
                 return attributes;
             }
-            var context = loadLContext(element);
+            var context = loadLContext(element, false);
+            if (context == null) {
+                return {};
+            }
             var lView = context.lView;
             var tNodeAttrs = lView[TVIEW].data[context.nodeIndex].attrs;
             var lowercaseTNodeAttrs = [];
@@ -27837,23 +27843,23 @@ var DebugElement__POST_R3__ = /** @class */ (function (_super) {
     return DebugElement__POST_R3__;
 }(DebugNode__POST_R3__));
 function _getStylingDebugInfo(element, isClassBased) {
-    if (element) {
-        var context = loadLContextFromNode(element);
-        var lView = context.lView;
-        var tData = lView[TVIEW].data;
-        var tNode = tData[context.nodeIndex];
-        if (isClassBased) {
-            return isStylingContext(tNode.classes) ?
-                new NodeStylingDebug(tNode.classes, lView, true).values :
-                stylingMapToStringMap(tNode.classes);
-        }
-        else {
-            return isStylingContext(tNode.styles) ?
-                new NodeStylingDebug(tNode.styles, lView, false).values :
-                stylingMapToStringMap(tNode.styles);
-        }
+    var context = loadLContext(element, false);
+    if (!context) {
+        return {};
     }
-    return {};
+    var lView = context.lView;
+    var tData = lView[TVIEW].data;
+    var tNode = tData[context.nodeIndex];
+    if (isClassBased) {
+        return isStylingContext(tNode.classes) ?
+            new NodeStylingDebug(tNode.classes, lView, true).values :
+            stylingMapToStringMap(tNode.classes);
+    }
+    else {
+        return isStylingContext(tNode.styles) ?
+            new NodeStylingDebug(tNode.styles, lView, false).values :
+            stylingMapToStringMap(tNode.styles);
+    }
 }
 function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
     var context = loadLContext(parentElement.nativeNode);
