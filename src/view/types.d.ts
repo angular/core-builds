@@ -42,7 +42,7 @@ export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory
         [tokenKey: string]: NgModuleProviderDef;
     };
     modules: any[];
-    isRoot: boolean;
+    scope: 'root' | 'platform' | null;
 }
 export interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {
 }

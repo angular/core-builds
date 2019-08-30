@@ -57,6 +57,7 @@ export declare abstract class Injector {
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;
     readonly source: string | null;
+    readonly scope: string | null;
     private _records;
     constructor(providers: StaticProvider[], parent?: Injector, source?: string | null);
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;

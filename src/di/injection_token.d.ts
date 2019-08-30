@@ -50,7 +50,7 @@ export declare class InjectionToken<T> {
     protected _desc: string;
     readonly ngInjectableDef: never | undefined;
     constructor(_desc: string, options?: {
-        providedIn?: Type<any> | 'root' | null;
+        providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
     });
     toString(): string;

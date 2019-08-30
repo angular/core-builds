@@ -11,4 +11,4 @@ import { InjectionToken } from './injection_token';
  * as a root scoped injector when processing requests for unknown tokens which may indicate
  * they are provided in the root scope.
  */
-export declare const APP_ROOT: InjectionToken<boolean>;
+export declare const INJECTOR_SCOPE: InjectionToken<"root" | "platform" | null>;

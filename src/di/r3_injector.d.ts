@@ -26,6 +26,8 @@ export declare class R3Injector {
     readonly parent: Injector;
     /**
      * Map of tokens to records which contain the instances of those tokens.
+     * - `null` value implies that we don't have the record. Used by tree-shakable injectors
+     * to prevent further searches.
      */
     private records;
     /**
@@ -40,7 +42,7 @@ export declare class R3Injector {
      * Flag indicating this injector provides the APP_ROOT_SCOPE token, and thus counts as the
      * root scope.
      */
-    private readonly isRootInjector;
+    private readonly scope;
     readonly source: string | null;
     /**
      * Flag indicating that this injector was previously destroyed.
