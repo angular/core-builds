@@ -139,30 +139,6 @@ export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
  * @codeGenApi
  */
 export declare function ɵɵi18nApply(index: number): void;
-export interface I18nLocalizeOptions {
-    translations: {
-        [key: string]: string;
-    };
-}
-/**
- * Set the configuration for `i18nLocalize`.
- *
- * @deprecated this method is temporary & should not be used as it will be removed soon
- */
-export declare function i18nConfigureLocalize(options?: I18nLocalizeOptions): void;
-/**
- * A goog.getMsg-like function for users that do not use Closure.
- *
- * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
- * running outside of Closure Compiler. This method will not be needed once runtime translation
- * service support is introduced.
- *
- * @codeGenApi
- * @deprecated this method is temporary & should not be used as it will be removed soon
- */
-export declare function ɵɵi18nLocalize(input: string, placeholders?: {
-    [key: string]: string;
-}): string;
 /**
  * Sets the locale id that will be used for translations and ICU expressions.
  * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+61.sha-260217a.with-local-changes
+ * @license Angular v9.0.0-next.4+70.sha-f5bec3f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18581,7 +18581,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.4+61.sha-260217a.with-local-changes');
+    var VERSION = new Version('9.0.0-next.4+70.sha-f5bec3f.with-local-changes');
 
     /**
      * @license
@@ -21958,13 +21958,6 @@
      */
     var DEFAULT_LOCALE_ID = 'en-US';
 
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var MARKER = "\uFFFD";
     var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
@@ -23077,38 +23070,6 @@
     var NGSP_UNICODE_REGEXP = /\uE500/g;
     function replaceNgsp(value) {
         return value.replace(NGSP_UNICODE_REGEXP, ' ');
-    }
-    var TRANSLATIONS = {};
-    /**
-     * Set the configuration for `i18nLocalize`.
-     *
-     * @deprecated this method is temporary & should not be used as it will be removed soon
-     */
-    function i18nConfigureLocalize(options) {
-        if (options === void 0) { options = {
-            translations: {}
-        }; }
-        TRANSLATIONS = options.translations;
-    }
-    var LOCALIZE_PH_REGEXP = /\{\$(.*?)\}/g;
-    /**
-     * A goog.getMsg-like function for users that do not use Closure.
-     *
-     * This method is required as a *temporary* measure to prevent i18n tests from being blocked while
-     * running outside of Closure Compiler. This method will not be needed once runtime translation
-     * service support is introduced.
-     *
-     * @codeGenApi
-     * @deprecated this method is temporary & should not be used as it will be removed soon
-     */
-    function ɵɵi18nLocalize(input, placeholders) {
-        if (typeof TRANSLATIONS[input] !== 'undefined') { // to account for empty string
-            input = TRANSLATIONS[input];
-        }
-        if (placeholders !== undefined && Object.keys(placeholders).length) {
-            return input.replace(LOCALIZE_PH_REGEXP, function (_, key) { return placeholders[key] || ''; });
-        }
-        return input;
     }
     /**
      * The locale id that the application is currently using (for translations and ICU expressions).
@@ -24716,7 +24677,6 @@
         'ɵɵi18nEnd': ɵɵi18nEnd,
         'ɵɵi18nApply': ɵɵi18nApply,
         'ɵɵi18nPostprocess': ɵɵi18nPostprocess,
-        'ɵɵi18nLocalize': ɵɵi18nLocalize,
         'ɵɵresolveWindow': ɵɵresolveWindow,
         'ɵɵresolveDocument': ɵɵresolveDocument,
         'ɵɵresolveBody': ɵɵresolveBody,
@@ -25856,7 +25816,7 @@
      *
      * @publicApi
      */
-    var TRANSLATIONS$1 = new InjectionToken('Translations');
+    var TRANSLATIONS = new InjectionToken('Translations');
     /**
      * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
      * `xlf` or `xlf2`.
@@ -30740,6 +30700,14 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    if (ngDevMode) {
+        // This helper is to give a reasonable error message to people upgrading to v9 that have not yet
+        // installed `@angular/localize` in their app.
+        // tslint:disable-next-line: no-toplevel-property-access
+        _global.$localize = _global.$localize || function () {
+            throw new Error('The global function `$localize` is missing. Please add `import \'@angular/localize\';` to your polyfills.ts file.');
+        };
+    }
 
     /**
      * @license
@@ -30783,7 +30751,7 @@
     exports.Testability = Testability;
     exports.TestabilityRegistry = TestabilityRegistry;
     exports.setTestabilityGetter = setTestabilityGetter;
-    exports.TRANSLATIONS = TRANSLATIONS$1;
+    exports.TRANSLATIONS = TRANSLATIONS;
     exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
     exports.LOCALE_ID = LOCALE_ID$1;
     exports.ApplicationModule = ApplicationModule;
@@ -31050,8 +31018,6 @@
     exports.ɵɵi18nEnd = ɵɵi18nEnd;
     exports.ɵɵi18nApply = ɵɵi18nApply;
     exports.ɵɵi18nPostprocess = ɵɵi18nPostprocess;
-    exports.ɵi18nConfigureLocalize = i18nConfigureLocalize;
-    exports.ɵɵi18nLocalize = ɵɵi18nLocalize;
     exports.ɵsetLocaleId = setLocaleId;
     exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵɵresolveWindow = ɵɵresolveWindow;
