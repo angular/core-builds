@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+85.sha-01e0f58.with-local-changes
+ * @license Angular v9.0.0-next.4+88.sha-7cc4225.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3588,6 +3588,24 @@ function getCurrentStyleSanitizer() {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// WARNING: interface has both a type and a value, skipping emit
+/**
+ * A special value which designates that a value has not changed.
+ * @type {?}
+ */
+const NO_CHANGE = (/** @type {?} */ ({}));
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
 /** @type {?} */
 const MAP_BASED_ENTRY_PROP_NAME = '--MAP--';
 /** @type {?} */
@@ -3800,6 +3818,8 @@ function isMapBased(prop) {
  * @return {?}
  */
 function hasValueChanged(a, b) {
+    if (b === NO_CHANGE)
+        return false;
     /** @type {?} */
     let compareValueA = Array.isArray(a) ? a[0 /* RawValuePosition */] : a;
     /** @type {?} */
@@ -8919,16 +8939,18 @@ function updateClassBinding(context, data, element, prop, bindingIndex, value, d
     const state = getStylingState(element, stateIsPersisted(context));
     /** @type {?} */
     const index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : state.classesIndex++;
-    /** @type {?} */
-    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, false);
-    if (updated || forceUpdate) {
-        // We flip the bit in the bitMask to reflect that the binding
-        // at the `index` slot has changed. This identifies to the flushing
-        // phase that the bindings for this particular CSS class need to be
-        // applied again because on or more of the bindings for the CSS
-        // class have changed.
-        state.classesBitMask |= 1 << index;
-        return true;
+    if (value !== NO_CHANGE) {
+        /** @type {?} */
+        const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, false);
+        if (updated || forceUpdate) {
+            // We flip the bit in the bitMask to reflect that the binding
+            // at the `index` slot has changed. This identifies to the flushing
+            // phase that the bindings for this particular CSS class need to be
+            // applied again because on or more of the bindings for the CSS
+            // class have changed.
+            state.classesBitMask |= 1 << index;
+            return true;
+        }
     }
     return false;
 }
@@ -8959,20 +8981,21 @@ function updateStyleBinding(context, data, element, prop, bindingIndex, value, s
     const state = getStylingState(element, stateIsPersisted(context));
     /** @type {?} */
     const index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : state.stylesIndex++;
-    /** @type {?} */
-    const sanitizationRequired = isMapBased ?
-        true :
-        (sanitizer ? sanitizer((/** @type {?} */ (prop)), null, 1 /* ValidateProperty */) : false);
-    /** @type {?} */
-    const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, sanitizationRequired);
-    if (updated || forceUpdate) {
-        // We flip the bit in the bitMask to reflect that the binding
-        // at the `index` slot has changed. This identifies to the flushing
-        // phase that the bindings for this particular property need to be
-        // applied again because on or more of the bindings for the CSS
-        // property have changed.
-        state.stylesBitMask |= 1 << index;
-        return true;
+    if (value !== NO_CHANGE) {
+        /** @type {?} */
+        const sanitizationRequired = isMapBased ||
+            (sanitizer ? sanitizer((/** @type {?} */ (prop)), null, 1 /* ValidateProperty */) : false);
+        /** @type {?} */
+        const updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, sanitizationRequired);
+        if (updated || forceUpdate) {
+            // We flip the bit in the bitMask to reflect that the binding
+            // at the `index` slot has changed. This identifies to the flushing
+            // phase that the bindings for this particular property need to be
+            // applied again because on or more of the bindings for the CSS
+            // property have changed.
+            state.stylesBitMask |= 1 << index;
+            return true;
+        }
     }
     return false;
 }
@@ -9626,24 +9649,6 @@ function updateInitialStylingOnContext(context, initialStyling) {
         }
     }
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// WARNING: interface has both a type and a value, skipping emit
-/**
- * A special value which designates that a value has not changed.
- * @type {?}
- */
-const NO_CHANGE = (/** @type {?} */ ({}));
 
 /**
  * @fileoverview added by tsickle
@@ -20959,18 +20964,16 @@ function _stylingProp(elementIndex, bindingIndex, prop, value, isClassBased, def
     /** @type {?} */
     const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
     /** @type {?} */
-    let updated = false;
-    if (value !== NO_CHANGE) {
-        if (isClassBased) {
-            updated = updateClassBinding(getClassesContext(tNode), lView, native, prop, bindingIndex, (/** @type {?} */ (value)), defer, false);
-        }
-        else {
-            /** @type {?} */
-            const sanitizer = getCurrentStyleSanitizer();
-            updated = updateStyleBinding(getStylesContext(tNode), lView, native, prop, bindingIndex, (/** @type {?} */ (value)), sanitizer, defer, false);
-        }
+    let valueHasChanged = false;
+    if (isClassBased) {
+        valueHasChanged = updateClassBinding(getClassesContext(tNode), lView, native, prop, bindingIndex, (/** @type {?} */ (value)), defer, false);
     }
-    return updated;
+    else {
+        /** @type {?} */
+        const sanitizer = getCurrentStyleSanitizer();
+        valueHasChanged = updateStyleBinding(getStylesContext(tNode), lView, native, prop, bindingIndex, (/** @type {?} */ (value)), sanitizer, defer, false);
+    }
+    return valueHasChanged;
 }
 /**
  * Update style bindings using an object literal on an element.
@@ -21101,25 +21104,22 @@ function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased, d
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    let valueHasChanged = false;
-    if (value !== NO_CHANGE) {
+    const tNode = getTNode(elementIndex, lView);
+    /** @type {?} */
+    const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
+    /** @type {?} */
+    const oldValue = lView[bindingIndex];
+    /** @type {?} */
+    const valueHasChanged = hasValueChanged(oldValue, value);
+    /** @type {?} */
+    const stylingMapArr = value === NO_CHANGE ? NO_CHANGE : normalizeIntoStylingMap(oldValue, value, !isClassBased);
+    if (isClassBased) {
+        updateClassBinding(context, lView, native, null, bindingIndex, stylingMapArr, defer, valueHasChanged);
+    }
+    else {
         /** @type {?} */
-        const tNode = getTNode(elementIndex, lView);
-        /** @type {?} */
-        const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
-        /** @type {?} */
-        const oldValue = lView[bindingIndex];
-        valueHasChanged = hasValueChanged(oldValue, value);
-        /** @type {?} */
-        const stylingMapArr = normalizeIntoStylingMap(oldValue, value, !isClassBased);
-        if (isClassBased) {
-            updateClassBinding(context, lView, native, null, bindingIndex, stylingMapArr, defer, valueHasChanged);
-        }
-        else {
-            /** @type {?} */
-            const sanitizer = getCurrentStyleSanitizer();
-            updateStyleBinding(context, lView, native, null, bindingIndex, stylingMapArr, sanitizer, defer, valueHasChanged);
-        }
+        const sanitizer = getCurrentStyleSanitizer();
+        updateStyleBinding(context, lView, native, null, bindingIndex, stylingMapArr, sanitizer, defer, valueHasChanged);
     }
     return valueHasChanged;
 }
@@ -26472,7 +26472,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.4+85.sha-01e0f58.with-local-changes');
+const VERSION = new Version('9.0.0-next.4+88.sha-7cc4225.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
