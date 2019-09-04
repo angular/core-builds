@@ -784,7 +784,7 @@ function removeNode(index, viewData, markAsDetached) {
     }
     if (markAsDetached) {
         // Define this node as detached to avoid projecting it later
-        removedPhTNode.flags |= 32 /* isDetached */;
+        removedPhTNode.flags |= 64 /* isDetached */;
     }
     ngDevMode && ngDevMode.rendererRemoveNode++;
 }
