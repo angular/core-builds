@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+81.sha-cfa09b8.with-local-changes
+ * @license Angular v9.0.0-next.4+82.sha-a383a5a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6569,17 +6569,12 @@ declare interface TNode {
      */
     directiveEnd: number;
     /**
-     * Stores the first index where property binding metadata is stored for
-     * this node.
+     * Stores indexes of property bindings. This field is only set in the ngDevMode and holds indexes
+     * of property bindings so TestBed can get bound property metadata for a given node.
      */
-    propertyMetadataStartIndex: number;
+    propertyBindings: number[] | null;
     /**
-     * Stores the exclusive final index where property binding metadata is
-     * stored for this node.
-     */
-    propertyMetadataEndIndex: number;
-    /**
-     * Stores if Node isComponent, isProjected, hasContentQuery, hasClassInput and hasStyleInput
+     * Stores if Node isComponent, isProjected, hasContentQuery, hasClassInput and hasStyleInput etc.
      */
     flags: TNodeFlags;
     /**
