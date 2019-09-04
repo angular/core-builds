@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+85.sha-01e0f58.with-local-changes
+ * @license Angular v9.0.0-next.4+88.sha-7cc4225.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2856,7 +2856,7 @@ export declare interface Injectable {
      * - 'root' injector, which will be the application-level injector in most apps.
      * - 'platform' injector, which would be the special singleton platform injector shared by all
      * applications on the page.
-     * - 'any` injector, which would be the injector which receives the resolution. (Note this only
+     * - 'any' injector, which would be the injector which receives the resolution. (Note this only
      * works on NgModule Injectors and not on Element Injector)
      */
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
