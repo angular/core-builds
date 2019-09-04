@@ -6,6 +6,7 @@
 * found in the LICENSE file at https://angular.io/license
 */
 import { TNode } from '../interfaces/node';
+import { NO_CHANGE } from '../tokens';
 import { StylingMapArray, TStylingContext } from './interfaces';
 /**
  * Creates a new instance of the `TStylingContext`.
@@ -48,7 +49,7 @@ export declare function stateIsPersisted(context: TStylingContext): boolean;
 export declare function markContextToPersistState(context: TStylingContext): void;
 export declare function getPropValuesStartPosition(context: TStylingContext): number;
 export declare function isMapBased(prop: string): boolean;
-export declare function hasValueChanged(a: StylingMapArray | number | String | string | null | boolean | undefined | {}, b: StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
+export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 /**
  * Determines whether the provided styling value is truthy or falsy.
  */
