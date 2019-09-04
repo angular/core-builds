@@ -8,7 +8,6 @@
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ProceduralRenderer3, RElement, Renderer3 } from '../interfaces/renderer';
-import { NO_CHANGE } from '../tokens';
 import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext } from './interfaces';
 /**
  * --------
@@ -39,7 +38,7 @@ export declare const DEFAULT_GUARD_MASK_VALUE = 1;
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateClassBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray | NO_CHANGE, deferRegistration: boolean, forceUpdate: boolean): boolean;
+export declare function updateClassBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray, deferRegistration: boolean, forceUpdate: boolean): boolean;
 /**
  * Visits a style-based binding and updates the new value (if changed).
  *
@@ -50,7 +49,7 @@ export declare function updateClassBinding(context: TStylingContext, data: LStyl
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): boolean;
+export declare function updateStyleBinding(context: TStylingContext, data: LStylingData, element: RElement, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray, sanitizer: StyleSanitizeFn | null, deferRegistration: boolean, forceUpdate: boolean): boolean;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *
