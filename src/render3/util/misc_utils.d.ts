@@ -65,11 +65,6 @@ export declare function ɵɵresolveBody(element: RElement & {
  */
 export declare const INTERPOLATION_DELIMITER = "\uFFFD";
 /**
- * Determines whether or not the given string is a property metadata string.
- * See storeBindingMetadata().
- */
-export declare function isPropMetadataString(str: string): boolean;
-/**
  * Unwrap a value which might be behind a closure (for forward declaration reasons).
  */
 export declare function maybeUnwrapFn<T>(value: T | (() => T)): T;

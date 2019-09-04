@@ -13,7 +13,7 @@ import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactor
 import { LocalRefExtractor, PropertyAliasValue, PropertyAliases, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
-import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TView } from '../interfaces/view';
+import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TData, TView } from '../interfaces/view';
 export declare const enum BindingDirection {
     Input = 0,
     Output = 1
@@ -258,22 +258,27 @@ export declare function checkNoChangesInternal<T>(view: LView, context: T): void
  */
 export declare function checkNoChangesInRootView(lView: LView): void;
 /**
- * Creates binding metadata for a particular binding and stores it in
- * TView.data. These are generated in order to support DebugElement.properties.
+ * Stores meta-data for a property binding to be used by TestBed's `DebugElement.properties`.
  *
- * Each binding / interpolation will have one (including attribute bindings)
- * because at the time of binding, we don't know to which instruction the binding
- * belongs. It is always stored in TView.data at the index of the last binding
- * value in LView (e.g. for interpolation8, it would be stored at the index of
- * the 8th value).
+ * In order to support TestBed's `DebugElement.properties` we need to save, for each binding:
+ * - a bound property name;
+ * - a static parts of interpolated strings;
  *
- * @param lView The LView that contains the current binding index.
- * @param prefix The static prefix string
- * @param suffix The static suffix string
+ * A given property metadata is saved at the binding's index in the `TView.data` (in other words, a
+ * property binding metadata will be stored in `TView.data` at the same index as a bound value in
+ * `LView`). Metadata are represented as `INTERPOLATION_DELIMITER`-delimited string with the
+ * following format:
+ * - `propertyName` for bound properties;
+ * - `propertyName�prefix�interpolation_static_part1�..interpolation_static_partN�suffix` for
+ * interpolated properties.
  *
- * @returns Newly created binding metadata string for this binding or null
+ * @param tData `TData` where meta-data will be saved;
+ * @param nodeIndex index of a `TNode` that is a target of the binding;
+ * @param propertyName bound property name;
+ * @param bindingIndex binding index in `LView`
+ * @param interpolationParts static interpolation parts (for property interpolations)
  */
-export declare function storeBindingMetadata(lView: LView, prefix?: string, suffix?: string): string | null;
+export declare function storePropertyBindingMetadata(tData: TData, nodeIndex: number, propertyName: string, bindingIndex: number, ...interpolationParts: string[]): void;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare function initializeTNodeInputs(tView: TView, tNode: TNode): PropertyAliases | null;
 export declare function getCleanup(view: LView): any[];
