@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+84.sha-f0bdf2a.with-local-changes
+ * @license Angular v9.0.0-next.4+89.sha-5d8eb74.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2412,6 +2412,16 @@ function getCurrentStyleSanitizer() {
     return _currentSanitizer;
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** A special value which designates that a value has not changed. */
+var NO_CHANGE = {};
+
 var MAP_BASED_ENTRY_PROP_NAME = '--MAP--';
 var TEMPLATE_DIRECTIVE_INDEX = 0;
 /**
@@ -2528,6 +2538,8 @@ function isMapBased(prop) {
     return prop === MAP_BASED_ENTRY_PROP_NAME;
 }
 function hasValueChanged(a, b) {
+    if (b === NO_CHANGE)
+        return false;
     var compareValueA = Array.isArray(a) ? a[0 /* RawValuePosition */] : a;
     var compareValueB = Array.isArray(b) ? b[0 /* RawValuePosition */] : b;
     // these are special cases for String based values (which are created as artifacts
@@ -5771,15 +5783,17 @@ function updateClassBinding(context, data, element, prop, bindingIndex, value, d
     var isMapBased = !prop;
     var state = getStylingState(element, stateIsPersisted(context));
     var index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : state.classesIndex++;
-    var updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, false);
-    if (updated || forceUpdate) {
-        // We flip the bit in the bitMask to reflect that the binding
-        // at the `index` slot has changed. This identifies to the flushing
-        // phase that the bindings for this particular CSS class need to be
-        // applied again because on or more of the bindings for the CSS
-        // class have changed.
-        state.classesBitMask |= 1 << index;
-        return true;
+    if (value !== NO_CHANGE) {
+        var updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, false);
+        if (updated || forceUpdate) {
+            // We flip the bit in the bitMask to reflect that the binding
+            // at the `index` slot has changed. This identifies to the flushing
+            // phase that the bindings for this particular CSS class need to be
+            // applied again because on or more of the bindings for the CSS
+            // class have changed.
+            state.classesBitMask |= 1 << index;
+            return true;
+        }
     }
     return false;
 }
@@ -5797,18 +5811,19 @@ function updateStyleBinding(context, data, element, prop, bindingIndex, value, s
     var isMapBased = !prop;
     var state = getStylingState(element, stateIsPersisted(context));
     var index = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : state.stylesIndex++;
-    var sanitizationRequired = isMapBased ?
-        true :
-        (sanitizer ? sanitizer(prop, null, 1 /* ValidateProperty */) : false);
-    var updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, sanitizationRequired);
-    if (updated || forceUpdate) {
-        // We flip the bit in the bitMask to reflect that the binding
-        // at the `index` slot has changed. This identifies to the flushing
-        // phase that the bindings for this particular property need to be
-        // applied again because on or more of the bindings for the CSS
-        // property have changed.
-        state.stylesBitMask |= 1 << index;
-        return true;
+    if (value !== NO_CHANGE) {
+        var sanitizationRequired = isMapBased ||
+            (sanitizer ? sanitizer(prop, null, 1 /* ValidateProperty */) : false);
+        var updated = updateBindingData(context, data, index, prop, bindingIndex, value, deferRegistration, forceUpdate, sanitizationRequired);
+        if (updated || forceUpdate) {
+            // We flip the bit in the bitMask to reflect that the binding
+            // at the `index` slot has changed. This identifies to the flushing
+            // phase that the bindings for this particular property need to be
+            // applied again because on or more of the bindings for the CSS
+            // property have changed.
+            state.stylesBitMask |= 1 << index;
+            return true;
+        }
     }
     return false;
 }
@@ -6309,16 +6324,6 @@ function updateInitialStylingOnContext(context, initialStyling) {
         }
     }
 }
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** A special value which designates that a value has not changed. */
-var NO_CHANGE = {};
 
 /**
  * @license
@@ -14367,17 +14372,15 @@ function _stylingProp(elementIndex, bindingIndex, prop, value, isClassBased, def
     var lView = getLView();
     var tNode = getTNode(elementIndex, lView);
     var native = getNativeByTNode(tNode, lView);
-    var updated = false;
-    if (value !== NO_CHANGE) {
-        if (isClassBased) {
-            updated = updateClassBinding(getClassesContext(tNode), lView, native, prop, bindingIndex, value, defer, false);
-        }
-        else {
-            var sanitizer = getCurrentStyleSanitizer();
-            updated = updateStyleBinding(getStylesContext(tNode), lView, native, prop, bindingIndex, value, sanitizer, defer, false);
-        }
+    var valueHasChanged = false;
+    if (isClassBased) {
+        valueHasChanged = updateClassBinding(getClassesContext(tNode), lView, native, prop, bindingIndex, value, defer, false);
     }
-    return updated;
+    else {
+        var sanitizer = getCurrentStyleSanitizer();
+        valueHasChanged = updateStyleBinding(getStylesContext(tNode), lView, native, prop, bindingIndex, value, sanitizer, defer, false);
+    }
+    return valueHasChanged;
 }
 /**
  * Update style bindings using an object literal on an element.
@@ -14479,20 +14482,17 @@ function classMapInternal(elementIndex, classes) {
 function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased, defer) {
     activateStylingMapFeature();
     var lView = getLView();
-    var valueHasChanged = false;
-    if (value !== NO_CHANGE) {
-        var tNode = getTNode(elementIndex, lView);
-        var native = getNativeByTNode(tNode, lView);
-        var oldValue = lView[bindingIndex];
-        valueHasChanged = hasValueChanged(oldValue, value);
-        var stylingMapArr = normalizeIntoStylingMap(oldValue, value, !isClassBased);
-        if (isClassBased) {
-            updateClassBinding(context, lView, native, null, bindingIndex, stylingMapArr, defer, valueHasChanged);
-        }
-        else {
-            var sanitizer = getCurrentStyleSanitizer();
-            updateStyleBinding(context, lView, native, null, bindingIndex, stylingMapArr, sanitizer, defer, valueHasChanged);
-        }
+    var tNode = getTNode(elementIndex, lView);
+    var native = getNativeByTNode(tNode, lView);
+    var oldValue = lView[bindingIndex];
+    var valueHasChanged = hasValueChanged(oldValue, value);
+    var stylingMapArr = value === NO_CHANGE ? NO_CHANGE : normalizeIntoStylingMap(oldValue, value, !isClassBased);
+    if (isClassBased) {
+        updateClassBinding(context, lView, native, null, bindingIndex, stylingMapArr, defer, valueHasChanged);
+    }
+    else {
+        var sanitizer = getCurrentStyleSanitizer();
+        updateStyleBinding(context, lView, native, null, bindingIndex, stylingMapArr, sanitizer, defer, valueHasChanged);
     }
     return valueHasChanged;
 }
@@ -18422,7 +18422,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.4+84.sha-f0bdf2a.with-local-changes');
+var VERSION = new Version('9.0.0-next.4+89.sha-5d8eb74.with-local-changes');
 
 /**
  * @license
