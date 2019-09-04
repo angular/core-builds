@@ -77,12 +77,14 @@ export declare function refreshView<T>(lView: LView, tView: TView, templateFn: C
 export declare function renderComponentOrTemplate<T>(hostView: LView, templateFn: ComponentTemplate<{}> | null, context: T): void;
 export declare function executeContentQueries(tView: TView, tNode: TNode, lView: LView): void;
 /**
- * Creates directive instances and populates local refs.
- *
- * @param localRefs Local refs of the node in question
- * @param localRefExtractor mapping function that extracts local ref value from TNode
+ * Creates directive instances.
  */
-export declare function createDirectivesAndLocals(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefExtractor?: LocalRefExtractor): void;
+export declare function createDirectivesInstances(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode): void;
+/**
+ * Takes a list of local names and indices and pushes the resolved local variable values
+ * to LView in the same order as they are loaded in the template with load().
+ */
+export declare function saveResolvedLocalsInData(viewData: LView, tNode: TNode, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Gets TView from a template function or creates a new TView
  * if it doesn't already exist.

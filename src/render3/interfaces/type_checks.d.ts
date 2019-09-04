@@ -21,6 +21,7 @@ export declare function isLView(value: RNode | LView | LContainer | {} | null): 
  */
 export declare function isLContainer(value: RNode | LView | LContainer | {} | null): value is LContainer;
 export declare function isContentQueryHost(tNode: TNode): boolean;
-export declare function isComponent(tNode: TNode): boolean;
+export declare function isComponentHost(tNode: TNode): boolean;
+export declare function isDirectiveHost(tNode: TNode): boolean;
 export declare function isComponentDef<T>(def: DirectiveDef<T>): def is ComponentDef<T>;
 export declare function isRootView(target: LView): boolean;

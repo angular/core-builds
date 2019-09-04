@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.4+82.sha-a383a5a.with-local-changes
+ * @license Angular v9.0.0-next.4+85.sha-01e0f58.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2450,14 +2450,21 @@ function isLContainer(value) {
  * @return {?}
  */
 function isContentQueryHost(tNode) {
-    return (tNode.flags & 4 /* hasContentQuery */) !== 0;
+    return (tNode.flags & 8 /* hasContentQuery */) !== 0;
 }
 /**
  * @param {?} tNode
  * @return {?}
  */
-function isComponent(tNode) {
-    return (tNode.flags & 1 /* isComponent */) === 1 /* isComponent */;
+function isComponentHost(tNode) {
+    return (tNode.flags & 2 /* isComponentHost */) === 2 /* isComponentHost */;
+}
+/**
+ * @param {?} tNode
+ * @return {?}
+ */
+function isDirectiveHost(tNode) {
+    return (tNode.flags & 1 /* isDirectiveHost */) === 1 /* isDirectiveHost */;
 }
 /**
  * @template T
@@ -3880,14 +3887,14 @@ function getInitialStylingValue(context) {
  * @return {?}
  */
 function hasClassInput(tNode) {
-    return (tNode.flags & 8 /* hasClassInput */) !== 0;
+    return (tNode.flags & 16 /* hasClassInput */) !== 0;
 }
 /**
  * @param {?} tNode
  * @return {?}
  */
 function hasStyleInput(tNode) {
-    return (tNode.flags & 16 /* hasStyleInput */) !== 0;
+    return (tNode.flags & 32 /* hasStyleInput */) !== 0;
 }
 /**
  * @param {?} map
@@ -5064,7 +5071,7 @@ function getOrCreateNodeInjectorForNode(tNode, hostView) {
         insertBloom(tView.data, tNode); // foundation for node bloom
         insertBloom(hostView, null); // foundation for cumulative bloom
         insertBloom(tView.blueprint, null);
-        ngDevMode && assertEqual(tNode.flags === 0 || tNode.flags === 1 /* isComponent */, true, 'expected tNode.flags to not be initialized');
+        ngDevMode && assertEqual(tNode.flags === 0 || tNode.flags === 2 /* isComponentHost */, true, 'expected tNode.flags to not be initialized');
     }
     /** @type {?} */
     const parentLoc = getParentInjectorLocation(tNode, hostView);
@@ -5406,7 +5413,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
         // - AND the injector set `includeViewProviders` to true (implying that the token can see
         // ViewProviders because it is the Component or a Service which itself was declared in
         // ViewProviders)
-        (isComponent(tNode) && includeViewProviders) :
+        (isComponentHost(tNode) && includeViewProviders) :
         // 2) `previousTView != null` which means that we are now walking across the parent nodes.
         // In such a case we are only allowed to look into the ViewProviders if:
         // - We just crossed from child View to Parent View `previousTView != currentTView`
@@ -7497,7 +7504,7 @@ function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
         return EMPTY_ARRAY;
     /** @type {?} */
     const directiveEndIndex = tNode.directiveEnd;
-    if (!includeComponents && tNode.flags & 1 /* isComponent */)
+    if (!includeComponents && tNode.flags & 2 /* isComponentHost */)
         directiveStartIndex++;
     return lView.slice(directiveStartIndex, directiveEndIndex);
 }
@@ -7511,7 +7518,7 @@ function getComponentAtNodeIndex(nodeIndex, lView) {
     const tNode = (/** @type {?} */ (lView[TVIEW].data[nodeIndex]));
     /** @type {?} */
     let directiveStartIndex = tNode.directiveStart;
-    return tNode.flags & 1 /* isComponent */ ? lView[directiveStartIndex] : null;
+    return tNode.flags & 2 /* isComponentHost */ ? lView[directiveStartIndex] : null;
 }
 /**
  * Returns a map of local references (local reference name => element or directive instance) that
@@ -7886,18 +7893,22 @@ const TNodeType = {
 };
 /** @enum {number} */
 const TNodeFlags = {
-    /** This bit is set if the node is a component */
-    isComponent: 1,
+    /** This bit is set if the node is a host for any directive (including a component) */
+    isDirectiveHost: 1,
+    /**
+     * This bit is set if the node is a host for a component. Setting this bit implies that the
+     * isDirectiveHost bit is set as well. */
+    isComponentHost: 2,
     /** This bit is set if the node has been projected */
-    isProjected: 2,
+    isProjected: 4,
     /** This bit is set if any directive on this node has content queries */
-    hasContentQuery: 4,
+    hasContentQuery: 8,
     /** This bit is set if the node has any "class" inputs */
-    hasClassInput: 8,
+    hasClassInput: 16,
     /** This bit is set if the node has any "style" inputs */
-    hasStyleInput: 16,
+    hasStyleInput: 32,
     /** This bit is set if the node has been detached by i18n */
-    isDetached: 32,
+    isDetached: 64,
 };
 /** @enum {number} */
 const TNodeProviderIndexes = {
@@ -11017,17 +11028,19 @@ const TNodeConstructor = class TNode {
     get flags_() {
         /** @type {?} */
         const flags = [];
-        if (this.flags & 8 /* hasClassInput */)
+        if (this.flags & 16 /* hasClassInput */)
             flags.push('TNodeFlags.hasClassInput');
-        if (this.flags & 4 /* hasContentQuery */)
+        if (this.flags & 8 /* hasContentQuery */)
             flags.push('TNodeFlags.hasContentQuery');
-        if (this.flags & 16 /* hasStyleInput */)
+        if (this.flags & 32 /* hasStyleInput */)
             flags.push('TNodeFlags.hasStyleInput');
-        if (this.flags & 1 /* isComponent */)
-            flags.push('TNodeFlags.isComponent');
-        if (this.flags & 32 /* isDetached */)
+        if (this.flags & 2 /* isComponentHost */)
+            flags.push('TNodeFlags.isComponentHost');
+        if (this.flags & 1 /* isDirectiveHost */)
+            flags.push('TNodeFlags.isDirectiveHost');
+        if (this.flags & 64 /* isDetached */)
             flags.push('TNodeFlags.isDetached');
-        if (this.flags & 2 /* isProjected */)
+        if (this.flags & 4 /* isProjected */)
             flags.push('TNodeFlags.isProjected');
         return flags.join('|');
     }
@@ -12315,20 +12328,17 @@ function executeContentQueries(tView, tNode, lView) {
     }
 }
 /**
- * Creates directive instances and populates local refs.
- *
+ * Creates directive instances.
  * @param {?} tView
  * @param {?} lView
  * @param {?} tNode
- * @param {?=} localRefExtractor mapping function that extracts local ref value from TNode
  * @return {?}
  */
-function createDirectivesAndLocals(tView, lView, tNode, localRefExtractor = getNativeByTNode) {
+function createDirectivesInstances(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
     instantiateAllDirectives(tView, lView, tNode);
     invokeDirectivesHostBindings(tView, lView, tNode);
-    saveResolvedLocalsInData(lView, tNode, localRefExtractor);
     setActiveHostElement(null);
 }
 /**
@@ -12336,10 +12346,10 @@ function createDirectivesAndLocals(tView, lView, tNode, localRefExtractor = getN
  * to LView in the same order as they are loaded in the template with load().
  * @param {?} viewData
  * @param {?} tNode
- * @param {?} localRefExtractor
+ * @param {?=} localRefExtractor
  * @return {?}
  */
-function saveResolvedLocalsInData(viewData, tNode, localRefExtractor) {
+function saveResolvedLocalsInData(viewData, tNode, localRefExtractor = getNativeByTNode) {
     /** @type {?} */
     const localNames = tNode.localNames;
     if (localNames) {
@@ -12677,7 +12687,7 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
     if (!nativeOnly && (inputData = initializeTNodeInputs(tView, tNode)) &&
         (dataValue = inputData[propName])) {
         setInputsForProperty(lView, dataValue, value);
-        if (isComponent(tNode))
+        if (isComponentHost(tNode))
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
         if (ngDevMode) {
             if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */) {
@@ -12895,7 +12905,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             baseResolveDirective(tView, lView, def);
             saveNameToExportMap((/** @type {?} */ (tView.data)).length - 1, def, exportsMap);
             if (def.contentQueries) {
-                tNode.flags |= 4 /* hasContentQuery */;
+                tNode.flags |= 8 /* hasContentQuery */;
             }
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
@@ -13080,7 +13090,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
                 matches || (matches = ngDevMode ? new (/** @type {?} */ (MatchesArray))() : []);
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
-                    if (tNode.flags & 1 /* isComponent */)
+                    if (tNode.flags & 2 /* isComponentHost */)
                         throwMultipleComponentError(tNode);
                     markAsComponentHost(tView, tNode);
                     // The component is always stored first with directives after.
@@ -13104,7 +13114,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
  */
 function markAsComponentHost(tView, hostTNode) {
     ngDevMode && assertFirstTemplatePass(tView);
-    hostTNode.flags = 1 /* isComponent */;
+    hostTNode.flags = 2 /* isComponentHost */;
     (tView.components || (tView.components = ngDevMode ? new (/** @type {?} */ (TViewComponents))() : [])).push(hostTNode.index);
 }
 /**
@@ -13161,10 +13171,10 @@ function saveNameToExportMap(index, def, exportsMap) {
 function initNodeFlags(tNode, index, numberOfDirectives) {
     /** @type {?} */
     const flags = tNode.flags;
-    ngDevMode && assertEqual(flags === 0 || flags === 1 /* isComponent */, true, 'expected node flags to not be initialized');
+    ngDevMode && assertEqual(flags === 0 || flags === 2 /* isComponentHost */, true, 'expected node flags to not be initialized');
     ngDevMode && assertNotEqual(numberOfDirectives, tNode.directiveEnd - tNode.directiveStart, 'Reached the max number of directives');
     // When the first directive is created on a node, save the index
-    tNode.flags = flags & 1 /* isComponent */;
+    tNode.flags = (flags & 2 /* isComponentHost */) | 1 /* isDirectiveHost */;
     tNode.directiveStart = index;
     tNode.directiveEnd = index + numberOfDirectives;
     tNode.providerIndexes = index;
@@ -14396,11 +14406,11 @@ function getRenderParent(tNode, currentView) {
         const isIcuCase = tNode && tNode.type === 5 /* IcuContainer */;
         // If the parent of this node is an ICU container, then it is represented by comment node and we
         // need to use it as an anchor. If it is projected then it's direct parent node is the renderer.
-        if (isIcuCase && tNode.flags & 2 /* isProjected */) {
+        if (isIcuCase && tNode.flags & 4 /* isProjected */) {
             return (/** @type {?} */ (getNativeByTNode(tNode, currentView).parentNode));
         }
         ngDevMode && assertNodeType(parentTNode, 3 /* Element */);
-        if (parentTNode.flags & 1 /* isComponent */) {
+        if (parentTNode.flags & 2 /* isComponentHost */) {
             /** @type {?} */
             const tData = currentView[TVIEW].data;
             /** @type {?} */
@@ -14633,10 +14643,10 @@ function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, is
         if (isProjection) {
             if (action === 0 /* Create */) {
                 rawSlotValue && attachPatchData(unwrapRNode(rawSlotValue), lView);
-                tNode.flags |= 2 /* isProjected */;
+                tNode.flags |= 4 /* isProjected */;
             }
         }
-        if ((tNode.flags & 32 /* isDetached */) !== 32 /* isDetached */) {
+        if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
             if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
                 applyNodes(renderer, action, tNode.child, lView, renderParent, beforeNode, false);
                 applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
@@ -15595,7 +15605,7 @@ function injectChangeDetectorRef(isPipe = false) {
  * @return {?} The ChangeDetectorRef to use
  */
 function createViewRef(hostTNode, hostView, isPipe) {
-    if (isComponent(hostTNode) && !isPipe) {
+    if (isComponentHost(hostTNode) && !isPipe) {
         /** @type {?} */
         const componentIndex = hostTNode.directiveStart;
         /** @type {?} */
@@ -20612,8 +20622,12 @@ function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs
             embeddedTView.queries = tView.queries.embeddedTView(tContainerNode);
         }
     }
-    createDirectivesAndLocals(tView, lView, tContainerNode, localRefExtractor);
-    attachPatchData(getNativeByTNode(tContainerNode, lView), lView);
+    if (isDirectiveHost(tContainerNode)) {
+        createDirectivesInstances(tView, lView, tContainerNode);
+    }
+    if (localRefs != null) {
+        saveResolvedLocalsInData(lView, tContainerNode, localRefExtractor);
+    }
     setIsNotParent();
 }
 /**
@@ -20707,6 +20721,7 @@ function containerInternal(lView, nodeIndex, tagName, attrs) {
     /** @type {?} */
     const lContainer = lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode);
     appendChild(comment, tNode, lView);
+    attachPatchData(getNativeByTNode(tNode, lView), lView);
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(lView, lContainer);
@@ -21442,17 +21457,22 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
         /** @type {?} */
         const inputData = initializeTNodeInputs(tView, tNode);
         if (inputData && inputData.hasOwnProperty('class')) {
-            tNode.flags |= 8 /* hasClassInput */;
+            tNode.flags |= 16 /* hasClassInput */;
         }
         if (inputData && inputData.hasOwnProperty('style')) {
-            tNode.flags |= 16 /* hasStyleInput */;
+            tNode.flags |= 32 /* hasStyleInput */;
         }
         if (tView.queries !== null) {
             tView.queries.elementStart(tView, tNode);
         }
     }
-    createDirectivesAndLocals(tView, lView, tNode);
-    executeContentQueries(tView, tNode, lView);
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(tView, lView, tNode);
+        executeContentQueries(tView, tNode, lView);
+    }
+    if (localRefs != null) {
+        saveResolvedLocalsInData(lView, tNode);
+    }
 }
 /**
  * Mark the end of the element.
@@ -21644,6 +21664,7 @@ function ɵɵelementContainerStart(index, attrs, localRefs) {
         registerInitialStylingOnTNode(tNode, (/** @type {?} */ (attrs)), 0);
     }
     appendChild(native, tNode, lView);
+    attachPatchData(native, lView);
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, tNode, localRefs || null);
@@ -21651,9 +21672,13 @@ function ɵɵelementContainerStart(index, attrs, localRefs) {
             tView.queries.elementStart(tView, tNode);
         }
     }
-    createDirectivesAndLocals(tView, lView, tNode);
-    attachPatchData(native, lView);
-    executeContentQueries(tView, tNode, lView);
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(tView, lView, tNode);
+        executeContentQueries(tView, tNode, lView);
+    }
+    if (localRefs != null) {
+        saveResolvedLocalsInData(lView, tNode);
+    }
 }
 /**
  * Mark the end of the <ng-container>.
@@ -22139,7 +22164,9 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         /** @type {?} */
-        const startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
+        const startView = tNode.flags & 2 /* isComponentHost */ ?
+            getComponentViewByIndex(tNode.index, lView) :
+            lView;
         // See interfaces/view.ts for more on LViewFlags.ManualOnPush
         if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
             markViewDirty(startView);
@@ -26445,7 +26472,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.4+82.sha-a383a5a.with-local-changes');
+const VERSION = new Version('9.0.0-next.4+85.sha-01e0f58.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33873,7 +33900,7 @@ function removeNode(index, viewData, markAsDetached) {
     }
     if (markAsDetached) {
         // Define this node as detached to avoid projecting it later
-        removedPhTNode.flags |= 32 /* isDetached */;
+        removedPhTNode.flags |= 64 /* isDetached */;
     }
     ngDevMode && ngDevMode.rendererRemoveNode++;
 }
@@ -42330,7 +42357,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // Case 1: the TNode is an element
         // The native node has to be checked.
         _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
-        if (isComponent(tNode)) {
+        if (isComponentHost(tNode)) {
             // If the element is the host of a component, then all nodes in its view have to be processed.
             // Note: the component's content (tNode.child) will be processed from the insertion points.
             /** @type {?} */
@@ -42402,7 +42429,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // To determine the next node to be processed, we need to use the next or the projectionNext
         // link, depending on whether the current node has been projected.
         /** @type {?} */
-        const nextTNode = (tNode.flags & 2 /* isProjected */) ? tNode.projectionNext : tNode.next;
+        const nextTNode = (tNode.flags & 4 /* isProjected */) ? tNode.projectionNext : tNode.next;
         if (nextTNode) {
             _queryNodeChildrenR3(nextTNode, lView, predicate, matches, elementsOnly, rootNativeNode);
         }
