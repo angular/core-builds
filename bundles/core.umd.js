@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+17.sha-a9ff48e.with-local-changes
+ * @license Angular v9.0.0-next.5+21.sha-4c3674f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15389,9 +15389,13 @@
                     existingListener = findExistingListener(lView, eventName, tNode.index);
                 }
                 if (existingListener !== null) {
-                    // Attach a new listener at the head of the coalesced listeners list.
-                    listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
-                    existingListener.__ngNextListenerFn__ = listenerFn;
+                    // Attach a new listener to coalesced listeners list, maintaining the order in which
+                    // listeners are registered. For performance reasons, we keep a reference to the last
+                    // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+                    // the entire set each time we need to add a new listener.
+                    var lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
+                    lastListenerFn.__ngNextListenerFn__ = listenerFn;
+                    existingListener.__ngLastListenerFn__ = listenerFn;
                     processOutputs = false;
                 }
                 else {
@@ -18569,7 +18573,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.5+17.sha-a9ff48e.with-local-changes');
+    var VERSION = new Version('9.0.0-next.5+21.sha-4c3674f.with-local-changes');
 
     /**
      * @license
