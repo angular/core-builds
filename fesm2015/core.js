@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+17.sha-a9ff48e.with-local-changes
+ * @license Angular v9.0.0-next.5+21.sha-4c3674f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22014,9 +22014,14 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
                 existingListener = findExistingListener(lView, eventName, tNode.index);
             }
             if (existingListener !== null) {
-                // Attach a new listener at the head of the coalesced listeners list.
-                ((/** @type {?} */ (listenerFn))).__ngNextListenerFn__ = ((/** @type {?} */ (existingListener))).__ngNextListenerFn__;
-                ((/** @type {?} */ (existingListener))).__ngNextListenerFn__ = listenerFn;
+                // Attach a new listener to coalesced listeners list, maintaining the order in which
+                // listeners are registered. For performance reasons, we keep a reference to the last
+                // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+                // the entire set each time we need to add a new listener.
+                /** @type {?} */
+                const lastListenerFn = ((/** @type {?} */ (existingListener))).__ngLastListenerFn__ || existingListener;
+                lastListenerFn.__ngNextListenerFn__ = listenerFn;
+                ((/** @type {?} */ (existingListener))).__ngLastListenerFn__ = listenerFn;
                 processOutputs = false;
             }
             else {
@@ -26466,7 +26471,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+17.sha-a9ff48e.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+21.sha-4c3674f.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
