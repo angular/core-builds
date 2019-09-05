@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+15.sha-5ab7cb4.with-local-changes
+ * @license Angular v9.0.0-next.5+14.sha-fed6b25.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2702,10 +2702,10 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * Assume
  * ```ts
  *   if (rf & RenderFlags.Update) {
- *    i18nExp(ctx.exp1); // If changed set mask bit 1
- *    i18nExp(ctx.exp2); // If changed set mask bit 2
- *    i18nExp(ctx.exp3); // If changed set mask bit 3
- *    i18nExp(ctx.exp4); // If changed set mask bit 4
+ *    i18nExp(bind(ctx.exp1)); // If changed set mask bit 1
+ *    i18nExp(bind(ctx.exp2)); // If changed set mask bit 2
+ *    i18nExp(bind(ctx.exp3)); // If changed set mask bit 3
+ *    i18nExp(bind(ctx.exp4)); // If changed set mask bit 4
  *    i18nApply(0);            // Apply all changes by executing the OpCodes.
  *  }
  * ```
