@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+14.sha-fed6b25.with-local-changes
+ * @license Angular v9.0.0-next.5+20.sha-497d6b1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9839,10 +9839,10 @@ const I18nUpdateOpCode = {
  * Assume
  * ```ts
  *   if (rf & RenderFlags.Update) {
- *    i18nExp(bind(ctx.exp1)); // If changed set mask bit 1
- *    i18nExp(bind(ctx.exp2)); // If changed set mask bit 2
- *    i18nExp(bind(ctx.exp3)); // If changed set mask bit 3
- *    i18nExp(bind(ctx.exp4)); // If changed set mask bit 4
+ *    i18nExp(ctx.exp1); // If changed set mask bit 1
+ *    i18nExp(ctx.exp2); // If changed set mask bit 2
+ *    i18nExp(ctx.exp3); // If changed set mask bit 3
+ *    i18nExp(ctx.exp4); // If changed set mask bit 4
  *    i18nApply(0);            // Apply all changes by executing the OpCodes.
  *  }
  * ```
@@ -14600,13 +14600,22 @@ function getBeforeNodeForView(viewIndexInContainer, lContainer) {
         const lView = (/** @type {?} */ (lContainer[nextViewIndex]));
         ngDevMode && assertDefined(lView[T_HOST], 'Missing Host TNode');
         /** @type {?} */
-        const tViewNodeChild = ((/** @type {?} */ (lView[T_HOST]))).child;
-        return tViewNodeChild !== null ? getNativeByTNodeOrNull(tViewNodeChild, lView) :
-            lContainer[NATIVE];
+        let tViewNodeChild = ((/** @type {?} */ (lView[T_HOST]))).child;
+        if (tViewNodeChild !== null) {
+            if (tViewNodeChild.type === 4 /* ElementContainer */ ||
+                tViewNodeChild.type === 5 /* IcuContainer */) {
+                /** @type {?} */
+                let currentChild = tViewNodeChild.child;
+                while (currentChild && (currentChild.type === 4 /* ElementContainer */ ||
+                    currentChild.type === 5 /* IcuContainer */)) {
+                    currentChild = currentChild.child;
+                }
+                tViewNodeChild = currentChild || tViewNodeChild;
+            }
+            return getNativeByTNodeOrNull(tViewNodeChild, lView);
+        }
     }
-    else {
-        return lContainer[NATIVE];
-    }
+    return lContainer[NATIVE];
 }
 /**
  * Removes a native node itself using a given renderer. To remove the node we are looking up its
@@ -19778,54 +19787,6 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Update a property on a selected element.
- *
- * Operates on the element selected by index via the {\@link select} instruction.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled
- *
- * \@codeGenApi
- * @template T
- * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param {?} value New value to write.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @return {?} This function returns itself so that it may be chained
- * (e.g. `property('name', ctx.name)('title', ctx.title)`)
- *
- */
-function ɵɵproperty(propName, value, sanitizer) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
-    if (bindingUpdated(lView, bindingIndex, value)) {
-        /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        elementPropertyInternal(nodeIndex, propName, value, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, bindingIndex);
-    }
-    return ɵɵproperty;
-}
-/**
- * Creates a single value binding.
- *
- * @template T
- * @param {?} lView Current view
- * @param {?} value Value to diff
- * @return {?}
- */
-function bind(lView, value) {
-    return bindingUpdated(lView, lView[BINDING_INDEX]++, value) ? value : NO_CHANGE;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * Updates the value of or removes a bound attribute on an Element.
  *
  * Used in the case of `[attr.title]="value"`
@@ -19841,13 +19802,9 @@ function bind(lView, value) {
  */
 function ɵɵattribute(name, value, sanitizer, namespace) {
     /** @type {?} */
-    const index = getSelectedIndex();
-    /** @type {?} */
     const lView = getLView();
-    /** @type {?} */
-    const bound = bind(lView, value);
-    if (bound !== NO_CHANGE) {
-        elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
+    if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
+        elementAttributeInternal(getSelectedIndex(), name, value, lView, sanitizer, namespace);
     }
     return ɵɵattribute;
 }
@@ -22057,9 +22014,14 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
                 existingListener = findExistingListener(lView, eventName, tNode.index);
             }
             if (existingListener !== null) {
-                // Attach a new listener at the head of the coalesced listeners list.
-                ((/** @type {?} */ (listenerFn))).__ngNextListenerFn__ = ((/** @type {?} */ (existingListener))).__ngNextListenerFn__;
-                ((/** @type {?} */ (existingListener))).__ngNextListenerFn__ = listenerFn;
+                // Attach a new listener to coalesced listeners list, maintaining the order in which
+                // listeners are registered. For performance reasons, we keep a reference to the last
+                // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+                // the entire set each time we need to add a new listener.
+                /** @type {?} */
+                const lastListenerFn = ((/** @type {?} */ (existingListener))).__ngLastListenerFn__ || existingListener;
+                lastListenerFn.__ngNextListenerFn__ = listenerFn;
+                ((/** @type {?} */ (existingListener))).__ngLastListenerFn__ = listenerFn;
                 processOutputs = false;
             }
             else {
@@ -22343,6 +22305,43 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(lView, tProjectionNode);
     }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {\@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value New value to write.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
+ * @return {?} This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ */
+function ɵɵproperty(propName, value, sanitizer) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX]++;
+    if (bindingUpdated(lView, bindingIndex, value)) {
+        /** @type {?} */
+        const nodeIndex = getSelectedIndex();
+        elementPropertyInternal(nodeIndex, propName, value, sanitizer);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, bindingIndex);
+    }
+    return ɵɵproperty;
 }
 
 /**
@@ -26472,7 +26471,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+14.sha-fed6b25.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+20.sha-497d6b1.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34026,9 +34025,7 @@ let shiftsCounter = 0;
 function ɵɵi18nExp(value) {
     /** @type {?} */
     const lView = getLView();
-    /** @type {?} */
-    const expression = bind(lView, value);
-    if (expression !== NO_CHANGE) {
+    if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
         changeMask = changeMask | (1 << shiftsCounter);
     }
     shiftsCounter++;
@@ -46250,7 +46247,9 @@ if (ngDevMode) {
      * @return {?}
      */
     function () {
-        throw new Error('The global function `$localize` is missing. Please add `import \'@angular/localize\';` to your polyfills.ts file.');
+        throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
+            'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
+            'Please add `import \'@angular/localize\';` to your polyfills.ts file.');
     });
 }
 
