@@ -1,6 +1,4 @@
 import { SanitizerFn } from '../interfaces/sanitization';
-import { LView } from '../interfaces/view';
-import { NO_CHANGE } from '../tokens';
 import { TsickleIssue1009 } from './shared';
 /**
  * Update a property on a selected element.
@@ -21,10 +19,3 @@ import { TsickleIssue1009 } from './shared';
  * @codeGenApi
  */
 export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
-/**
- * Creates a single value binding.
- *
- * @param lView Current view
- * @param value Value to diff
- */
-export declare function bind<T>(lView: LView, value: T): T | NO_CHANGE;
