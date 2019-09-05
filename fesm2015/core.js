@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+15.sha-5ab7cb4.with-local-changes
+ * @license Angular v9.0.0-next.5+14.sha-fed6b25.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9839,10 +9839,10 @@ const I18nUpdateOpCode = {
  * Assume
  * ```ts
  *   if (rf & RenderFlags.Update) {
- *    i18nExp(ctx.exp1); // If changed set mask bit 1
- *    i18nExp(ctx.exp2); // If changed set mask bit 2
- *    i18nExp(ctx.exp3); // If changed set mask bit 3
- *    i18nExp(ctx.exp4); // If changed set mask bit 4
+ *    i18nExp(bind(ctx.exp1)); // If changed set mask bit 1
+ *    i18nExp(bind(ctx.exp2)); // If changed set mask bit 2
+ *    i18nExp(bind(ctx.exp3)); // If changed set mask bit 3
+ *    i18nExp(bind(ctx.exp4)); // If changed set mask bit 4
  *    i18nApply(0);            // Apply all changes by executing the OpCodes.
  *  }
  * ```
@@ -19778,6 +19778,54 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {\@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled
+ *
+ * \@codeGenApi
+ * @template T
+ * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value New value to write.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
+ * @return {?} This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ */
+function ɵɵproperty(propName, value, sanitizer) {
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const bindingIndex = lView[BINDING_INDEX]++;
+    if (bindingUpdated(lView, bindingIndex, value)) {
+        /** @type {?} */
+        const nodeIndex = getSelectedIndex();
+        elementPropertyInternal(nodeIndex, propName, value, sanitizer);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, bindingIndex);
+    }
+    return ɵɵproperty;
+}
+/**
+ * Creates a single value binding.
+ *
+ * @template T
+ * @param {?} lView Current view
+ * @param {?} value Value to diff
+ * @return {?}
+ */
+function bind(lView, value) {
+    return bindingUpdated(lView, lView[BINDING_INDEX]++, value) ? value : NO_CHANGE;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * Updates the value of or removes a bound attribute on an Element.
  *
  * Used in the case of `[attr.title]="value"`
@@ -19793,9 +19841,13 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  */
 function ɵɵattribute(name, value, sanitizer, namespace) {
     /** @type {?} */
+    const index = getSelectedIndex();
+    /** @type {?} */
     const lView = getLView();
-    if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
-        elementAttributeInternal(getSelectedIndex(), name, value, lView, sanitizer, namespace);
+    /** @type {?} */
+    const bound = bind(lView, value);
+    if (bound !== NO_CHANGE) {
+        elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
     }
     return ɵɵattribute;
 }
@@ -22291,43 +22343,6 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(lView, tProjectionNode);
     }
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Update a property on a selected element.
- *
- * Operates on the element selected by index via the {\@link select} instruction.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `\@Inputs` don't have to be re-compiled
- *
- * \@codeGenApi
- * @template T
- * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param {?} value New value to write.
- * @param {?=} sanitizer An optional function used to sanitize the value.
- * @return {?} This function returns itself so that it may be chained
- * (e.g. `property('name', ctx.name)('title', ctx.title)`)
- *
- */
-function ɵɵproperty(propName, value, sanitizer) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
-    if (bindingUpdated(lView, bindingIndex, value)) {
-        /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        elementPropertyInternal(nodeIndex, propName, value, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, bindingIndex);
-    }
-    return ɵɵproperty;
 }
 
 /**
@@ -26457,7 +26472,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+15.sha-5ab7cb4.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+14.sha-fed6b25.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34011,7 +34026,9 @@ let shiftsCounter = 0;
 function ɵɵi18nExp(value) {
     /** @type {?} */
     const lView = getLView();
-    if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
+    /** @type {?} */
+    const expression = bind(lView, value);
+    if (expression !== NO_CHANGE) {
         changeMask = changeMask | (1 << shiftsCounter);
     }
     shiftsCounter++;
