@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+18.sha-098feec.with-local-changes
+ * @license Angular v9.0.0-next.5+16.sha-da42a76.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22014,14 +22014,9 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
                 existingListener = findExistingListener(lView, eventName, tNode.index);
             }
             if (existingListener !== null) {
-                // Attach a new listener to coalesced listeners list, maintaining the order in which
-                // listeners are registered. For performance reasons, we keep a reference to the last
-                // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-                // the entire set each time we need to add a new listener.
-                /** @type {?} */
-                const lastListenerFn = ((/** @type {?} */ (existingListener))).__ngLastListenerFn__ || existingListener;
-                lastListenerFn.__ngNextListenerFn__ = listenerFn;
-                ((/** @type {?} */ (existingListener))).__ngLastListenerFn__ = listenerFn;
+                // Attach a new listener at the head of the coalesced listeners list.
+                ((/** @type {?} */ (listenerFn))).__ngNextListenerFn__ = ((/** @type {?} */ (existingListener))).__ngNextListenerFn__;
+                ((/** @type {?} */ (existingListener))).__ngNextListenerFn__ = listenerFn;
                 processOutputs = false;
             }
             else {
@@ -26471,7 +26466,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+18.sha-098feec.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+16.sha-da42a76.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -46247,9 +46242,7 @@ if (ngDevMode) {
      * @return {?}
      */
     function () {
-        throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
-            'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
-            'Please add `import \'@angular/localize\';` to your polyfills.ts file.');
+        throw new Error('The global function `$localize` is missing. Please add `import \'@angular/localize\';` to your polyfills.ts file.');
     });
 }
 

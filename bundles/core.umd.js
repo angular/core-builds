@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+18.sha-098feec.with-local-changes
+ * @license Angular v9.0.0-next.5+16.sha-da42a76.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15357,13 +15357,9 @@
                     existingListener = findExistingListener(lView, eventName, tNode.index);
                 }
                 if (existingListener !== null) {
-                    // Attach a new listener to coalesced listeners list, maintaining the order in which
-                    // listeners are registered. For performance reasons, we keep a reference to the last
-                    // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-                    // the entire set each time we need to add a new listener.
-                    var lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
-                    lastListenerFn.__ngNextListenerFn__ = listenerFn;
-                    existingListener.__ngLastListenerFn__ = listenerFn;
+                    // Attach a new listener at the head of the coalesced listeners list.
+                    listenerFn.__ngNextListenerFn__ = existingListener.__ngNextListenerFn__;
+                    existingListener.__ngNextListenerFn__ = listenerFn;
                     processOutputs = false;
                 }
                 else {
@@ -18540,7 +18536,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.5+18.sha-098feec.with-local-changes');
+    var VERSION = new Version('9.0.0-next.5+16.sha-da42a76.with-local-changes');
 
     /**
      * @license
@@ -30614,9 +30610,7 @@
         // installed `@angular/localize` in their app.
         // tslint:disable-next-line: no-toplevel-property-access
         _global.$localize = _global.$localize || function () {
-            throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
-                'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
-                'Please add `import \'@angular/localize\';` to your polyfills.ts file.');
+            throw new Error('The global function `$localize` is missing. Please add `import \'@angular/localize\';` to your polyfills.ts file.');
         };
     }
 
