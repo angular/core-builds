@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+13.sha-7bbc352.with-local-changes
+ * @license Angular v9.0.0-next.5+15.sha-5ab7cb4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13572,44 +13572,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Update a property on a selected element.
-     *
-     * Operates on the element selected by index via the {@link select} instruction.
-     *
-     * If the property name also exists as an input property on one of the element's directives,
-     * the component property will be set instead of the element property. This check must
-     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
-     *
-     * @param propName Name of property. Because it is going to DOM, this is not subject to
-     *        renaming as part of minification.
-     * @param value New value to write.
-     * @param sanitizer An optional function used to sanitize the value.
-     * @returns This function returns itself so that it may be chained
-     * (e.g. `property('name', ctx.name)('title', ctx.title)`)
-     *
-     * @codeGenApi
-     */
-    function ɵɵproperty(propName, value, sanitizer) {
-        var lView = getLView();
-        var bindingIndex = lView[BINDING_INDEX]++;
-        if (bindingUpdated(lView, bindingIndex, value)) {
-            var nodeIndex = getSelectedIndex();
-            elementPropertyInternal(nodeIndex, propName, value, sanitizer);
-            ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, bindingIndex);
-        }
-        return ɵɵproperty;
-    }
-    /**
-     * Creates a single value binding.
-     *
-     * @param lView Current view
-     * @param value Value to diff
-     */
-    function bind(lView, value) {
-        return bindingUpdated(lView, lView[BINDING_INDEX]++, value) ? value : NO_CHANGE;
-    }
-
-    /**
      * Updates the value of or removes a bound attribute on an Element.
      *
      * Used in the case of `[attr.title]="value"`
@@ -13623,11 +13585,9 @@
      * @codeGenApi
      */
     function ɵɵattribute(name, value, sanitizer, namespace) {
-        var index = getSelectedIndex();
         var lView = getLView();
-        var bound = bind(lView, value);
-        if (bound !== NO_CHANGE) {
-            elementAttributeInternal(index, name, bound, lView, sanitizer, namespace);
+        if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
+            elementAttributeInternal(getSelectedIndex(), name, value, lView, sanitizer, namespace);
         }
         return ɵɵattribute;
     }
@@ -15677,6 +15637,42 @@
             // re-distribution of projectable nodes is stored on a component's view level
             applyProjection(lView, tProjectionNode);
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Update a property on a selected element.
+     *
+     * Operates on the element selected by index via the {@link select} instruction.
+     *
+     * If the property name also exists as an input property on one of the element's directives,
+     * the component property will be set instead of the element property. This check must
+     * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+     *
+     * @param propName Name of property. Because it is going to DOM, this is not subject to
+     *        renaming as part of minification.
+     * @param value New value to write.
+     * @param sanitizer An optional function used to sanitize the value.
+     * @returns This function returns itself so that it may be chained
+     * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+     *
+     * @codeGenApi
+     */
+    function ɵɵproperty(propName, value, sanitizer) {
+        var lView = getLView();
+        var bindingIndex = lView[BINDING_INDEX]++;
+        if (bindingUpdated(lView, bindingIndex, value)) {
+            var nodeIndex = getSelectedIndex();
+            elementPropertyInternal(nodeIndex, propName, value, sanitizer);
+            ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, bindingIndex);
+        }
+        return ɵɵproperty;
     }
 
     /**
@@ -18565,7 +18561,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.5+13.sha-7bbc352.with-local-changes');
+    var VERSION = new Version('9.0.0-next.5+15.sha-5ab7cb4.with-local-changes');
 
     /**
      * @license
@@ -22812,8 +22808,7 @@
      */
     function ɵɵi18nExp(value) {
         var lView = getLView();
-        var expression = bind(lView, value);
-        if (expression !== NO_CHANGE) {
+        if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
             changeMask = changeMask | (1 << shiftsCounter);
         }
         shiftsCounter++;
