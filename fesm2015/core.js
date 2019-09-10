@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+51.sha-664e001.with-local-changes
+ * @license Angular v9.0.0-next.5+54.sha-ded5724.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8554,8 +8554,11 @@ const NG_TEMPLATE_SELECTOR = 'ng-template';
 function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
     /** @type {?} */
     const nodeClassesLen = nodeClassAttrVal.length;
+    // we lowercase the class attribute value to be able to match
+    // selectors without case-sensitivity
+    // (selectors are already in lowercase when generated)
     /** @type {?} */
-    const matchIndex = (/** @type {?} */ (nodeClassAttrVal)).indexOf(cssClassToMatch);
+    const matchIndex = nodeClassAttrVal.toLowerCase().indexOf(cssClassToMatch);
     /** @type {?} */
     const matchEndIdx = matchIndex + cssClassToMatch.length;
     if (matchIndex === -1 // no match
@@ -8671,7 +8674,10 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
                 }
                 else {
                     ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                    nodeAttrValue = (/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]));
+                    // we lowercase the attribute value to be able to match
+                    // selectors without case-sensitivity
+                    // (selectors are already in lowercase when generated)
+                    nodeAttrValue = ((/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]))).toLowerCase();
                 }
                 /** @type {?} */
                 const compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
@@ -12279,6 +12285,10 @@ function renderComponentOrTemplate(hostView, templateFn, context) {
     const normalExecutionPath = !getCheckNoChangesMode();
     /** @type {?} */
     const creationModeIsActive = isCreationMode(hostView);
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const isParent = getIsParent();
     try {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
             rendererFactory.begin();
@@ -12294,6 +12304,7 @@ function renderComponentOrTemplate(hostView, templateFn, context) {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
             rendererFactory.end();
         }
+        setPreviousOrParentTNode(previousOrParentTNode, isParent);
     }
 }
 /**
@@ -13618,6 +13629,10 @@ function tickRootContext(rootContext) {
 function detectChangesInternal(view, context) {
     /** @type {?} */
     const rendererFactory = view[RENDERER_FACTORY];
+    /** @type {?} */
+    const previousOrParentTNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const isParent = getIsParent();
     if (rendererFactory.begin)
         rendererFactory.begin();
     try {
@@ -13632,6 +13647,7 @@ function detectChangesInternal(view, context) {
     finally {
         if (rendererFactory.end)
             rendererFactory.end();
+        setPreviousOrParentTNode(previousOrParentTNode, isParent);
     }
 }
 /**
@@ -26478,7 +26494,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+51.sha-664e001.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+54.sha-ded5724.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+51.sha-664e001.with-local-changes
+ * @license Angular v9.0.0-next.5+54.sha-ded5724.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5613,7 +5613,10 @@
     var NG_TEMPLATE_SELECTOR = 'ng-template';
     function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
         var nodeClassesLen = nodeClassAttrVal.length;
-        var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
+        // we lowercase the class attribute value to be able to match
+        // selectors without case-sensitivity
+        // (selectors are already in lowercase when generated)
+        var matchIndex = nodeClassAttrVal.toLowerCase().indexOf(cssClassToMatch);
         var matchEndIdx = matchIndex + cssClassToMatch.length;
         if (matchIndex === -1 // no match
             || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
@@ -5713,7 +5716,10 @@
                     }
                     else {
                         ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                        nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
+                        // we lowercase the attribute value to be able to match
+                        // selectors without case-sensitivity
+                        // (selectors are already in lowercase when generated)
+                        nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
                     }
                     var compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
                     if (compareAgainstClassName &&
@@ -8157,6 +8163,8 @@
         var rendererFactory = hostView[RENDERER_FACTORY];
         var normalExecutionPath = !getCheckNoChangesMode();
         var creationModeIsActive = isCreationMode(hostView);
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var isParent = getIsParent();
         try {
             if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
                 rendererFactory.begin();
@@ -8171,6 +8179,7 @@
             if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
                 rendererFactory.end();
             }
+            setPreviousOrParentTNode(previousOrParentTNode, isParent);
         }
     }
     function executeTemplate(lView, templateFn, rf, context) {
@@ -9182,6 +9191,8 @@
     }
     function detectChangesInternal(view, context) {
         var rendererFactory = view[RENDERER_FACTORY];
+        var previousOrParentTNode = getPreviousOrParentTNode();
+        var isParent = getIsParent();
         if (rendererFactory.begin)
             rendererFactory.begin();
         try {
@@ -9195,6 +9206,7 @@
         finally {
             if (rendererFactory.end)
                 rendererFactory.end();
+            setPreviousOrParentTNode(previousOrParentTNode, isParent);
         }
     }
     /**
@@ -18545,7 +18557,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.5+51.sha-664e001.with-local-changes');
+    var VERSION = new Version('9.0.0-next.5+54.sha-ded5724.with-local-changes');
 
     /**
      * @license
