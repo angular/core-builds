@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+49.sha-ea6a2e9.with-local-changes
+ * @license Angular v9.0.0-next.5+51.sha-664e001.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10414,6 +10414,31 @@ export declare const enum ɵViewFlags {
  */
 export declare function ɵwhenRendered(component: any): Promise<null>;
 
+/**
+ * Advances to an element for later binding instructions.
+ *
+ * Used in conjunction with instructions like {@link property} to act on elements with specified
+ * indices, for example those created with {@link element} or {@link elementStart}.
+ *
+ * ```ts
+ * (rf: RenderFlags, ctx: any) => {
+  *   if (rf & 1) {
+  *     text(0, 'Hello');
+  *     text(1, 'Goodbye')
+  *     element(2, 'div');
+  *   }
+  *   if (rf & 2) {
+  *     advance(2); // Advance twice to the <div>.
+  *     property('title', 'test');
+  *   }
+  *  }
+  * ```
+  * @param delta Number of elements to advance forwards by.
+  *
+  * @codeGenApi
+  */
+export declare function ɵɵadvance(delta: number): void;
+
 
 /**
  * Allocates the necessary amount of slots for host vars.
@@ -12772,7 +12797,6 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  *        ɵɵtext(0);
  *      }
  *      if (fs & RenderFlags.Update) {
- *        ɵɵselect(0);
  *        ɵɵtextInterpolate(ctx.greeter.greet());
  *      }
  *    },
@@ -13142,23 +13166,7 @@ export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string
 
 /**
  * Selects an element for later binding instructions.
- *
- * Used in conjunction with instructions like {@link property} to act on elements with specified
- * indices, for example those created with {@link element} or {@link elementStart}.
- *
- * ```ts
- * (rf: RenderFlags, ctx: any) => {
- *   if (rf & 1) {
- *     element(0, 'div');
- *   }
- *   if (rf & 2) {
- *     select(0); // Select the <div/> created above.
- *     property('title', 'test');
- *   }
- *  }
- * ```
- * @param index the index of the item to act on with the following instructions
- *
+ * @deprecated No longer being generated, but still used in unit tests.
  * @codeGenApi
  */
 export declare function ɵɵselect(index: number): void;
