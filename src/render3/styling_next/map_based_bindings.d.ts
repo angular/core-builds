@@ -1,4 +1,4 @@
-import { SyncStylingMapsFn } from './interfaces';
+import { StylingMapArray, SyncStylingMapsFn } from './interfaces';
 /**
  * --------
  *
@@ -7,10 +7,6 @@ import { SyncStylingMapsFn } from './interfaces';
  *
  * --------
  */
-/**
- * Enables support for map-based styling bindings (e.g. `[style]` and `[class]` bindings).
- */
-export declare function activateStylingMapFeature(): void;
 /**
  * Used to apply styling values presently within any map-based bindings on an element.
  *
@@ -41,7 +37,7 @@ export declare function activateStylingMapFeature(): void;
  * value is marked as dirty.
  *
  * Styling values are applied once CD exits the element (which happens when
- * the `advance(n)` instruction is called or the template function exits). When
+ * the `select(n)` instruction is called or the template function exits). When
  * this occurs, all prop-based bindings are applied. If a map-based binding is
  * present then a special flushing function (called a sync function) is made
  * available and it will be called each time a styling property is flushed.
@@ -92,3 +88,45 @@ export declare function activateStylingMapFeature(): void;
  * in merge sort).
  */
 export declare const syncStylingMap: SyncStylingMapsFn;
+/**
+ * Enables support for map-based styling bindings (e.g. `[style]` and `[class]` bindings).
+ */
+export declare function activateStylingMapFeature(): void;
+/**
+ * Used to convert a {key:value} map into a `StylingMapArray` array.
+ *
+ * This function will either generate a new `StylingMapArray` instance
+ * or it will patch the provided `newValues` map value into an
+ * existing `StylingMapArray` value (this only happens if `bindingValue`
+ * is an instance of `StylingMapArray`).
+ *
+ * If a new key/value map is provided with an old `StylingMapArray`
+ * value then all properties will be overwritten with their new
+ * values or with `null`. This means that the array will never
+ * shrink in size (but it will also not be created and thrown
+ * away whenever the {key:value} map entries change).
+ */
+export declare function normalizeIntoStylingMap(bindingValue: null | StylingMapArray, newValues: {
+    [key: string]: any;
+} | string | null | undefined, normalizeProps?: boolean): StylingMapArray;
+/**
+ * Inserts the provided item into the provided styling array at the right spot.
+ *
+ * The `StylingMapArray` type is a sorted key/value array of entries. This means
+ * that when a new entry is inserted it must be placed at the right spot in the
+ * array. This function figures out exactly where to place it.
+ */
+export declare function addItemToStylingMap(stylingMapArr: StylingMapArray, prop: string, value: string | boolean | null, allowOverwrite?: boolean): boolean;
+/**
+ * Converts the provided styling map array into a string.
+ *
+ * Classes => `one two three`
+ * Styles => `prop:value; prop2:value2`
+ */
+export declare function stylingMapToString(map: StylingMapArray, isClassBased: boolean): string;
+/**
+ * Converts the provided styling map array into a key value map.
+ */
+export declare function stylingMapToStringMap(map: StylingMapArray | null): {
+    [key: string]: any;
+};

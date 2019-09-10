@@ -57,30 +57,6 @@ export declare function ɵɵenableBindings(): void;
 export declare function ɵɵdisableBindings(): void;
 export declare function getLView(): LView;
 /**
- * Flags used for an active element during change detection.
- *
- * These flags are used within other instructions to inform cleanup or
- * exit operations to run when an element is being processed.
- *
- * Note that these flags are reset each time an element changes (whether it
- * happens when `advance()` is run or when change detection exits out of a template
- * function or when all host bindings are processed for an element).
- */
-export declare const enum ActiveElementFlags {
-    Initial = 0,
-    RunExitFn = 1,
-    ResetStylesOnExit = 2,
-    Size = 2
-}
-/**
- * Determines whether or not a flag is currently set for the active element.
- */
-export declare function hasActiveElementFlag(flag: ActiveElementFlags): boolean;
-/**
- * Sets a flag is for the active element.
- */
-export declare function setActiveElementFlag(flag: ActiveElementFlags): void;
-/**
  * Sets the active directive host element and resets the directive id value
  * (when the provided elementIndex value has changed).
  *
@@ -88,21 +64,6 @@ export declare function setActiveElementFlag(flag: ActiveElementFlags): void;
  *                     the directive/component instance lives
  */
 export declare function setActiveHostElement(elementIndex?: number | null): void;
-export declare function executeElementExitFn(): void;
-/**
- * Queues a function to be run once the element is "exited" in CD.
- *
- * Change detection will focus on an element either when the `advance()`
- * instruction is called or when the template or host bindings instruction
- * code is invoked. The element is then "exited" when the next element is
- * selected or when change detection for the template or host bindings is
- * complete. When this occurs (the element change operation) then an exit
- * function will be invoked if it has been set. This function can be used
- * to assign that exit function.
- *
- * @param fn
- */
-export declare function setElementExitFn(fn: Function): void;
 /**
  * Returns the current id value of the current directive.
  *
@@ -140,6 +101,50 @@ export declare function getActiveDirectiveId(): number;
  * different set of directives).
  */
 export declare function incrementActiveDirectiveId(): void;
+/**
+ * Set the current super class (reverse inheritance) position depth for a directive.
+ *
+ * For example we have two directives: Child and Other (but Child is a sub-class of Parent)
+ * <div child-dir other-dir></div>
+ *
+ * // increment
+ * parentInstance->hostBindings() (depth = 1)
+ * // decrement
+ * childInstance->hostBindings() (depth = 0)
+ * otherInstance->hostBindings() (depth = 0 b/c it's a different directive)
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ */
+export declare function adjustActiveDirectiveSuperClassDepthPosition(delta: number): void;
+/**
+ * Returns he current depth of the super/sub class inheritance chain.
+ *
+ * This will return how many inherited directive/component classes
+ * exist in the current chain.
+ *
+ * ```typescript
+ * @Directive({ selector: '[super-dir]' })
+ * class SuperDir {}
+ *
+ * @Directive({ selector: '[sub-dir]' })
+ * class SubDir extends SuperDir {}
+ *
+ * // if `<div sub-dir>` is used then the super class height is `1`
+ * // if `<div super-dir>` is used then the super class height is `0`
+ * ```
+ */
+export declare function getActiveDirectiveSuperClassHeight(): number;
+/**
+ * Returns the current super class (reverse inheritance) depth for a directive.
+ *
+ * This is designed to help instruction code distinguish different hostBindings
+ * calls from each other when a directive has extended from another directive.
+ * Normally using the directive id value is enough, but with the case
+ * of parent/sub-class directive inheritance more information is required.
+ *
+ * Note that this is only active when `hostBinding` functions are being processed.
+ */
+export declare function getActiveDirectiveSuperClassDepth(): number;
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
@@ -195,9 +200,6 @@ export declare function getSelectedIndex(): number;
  *
  * Used with {@link property} instruction (and more in the future) to identify the index in the
  * current `LView` to act on.
- *
- * (Note that if an "exit function" was set earlier (via `setElementExitFn()`) then that will be
- * run if and when the provided `index` value is different from the current selected index value.)
  */
 export declare function setSelectedIndex(index: number): void;
 /**
