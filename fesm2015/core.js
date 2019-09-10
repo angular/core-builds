@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+62.sha-7280710.with-local-changes
+ * @license Angular v9.0.0-next.5+63.sha-2124588.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16547,20 +16547,21 @@ class R3Injector {
          */
         this.onDestroy = new Set();
         this._destroyed = false;
-        // Start off by creating Records for every provider declared in every InjectorType
-        // included transitively in `def`.
         /** @type {?} */
         const dedupStack = [];
-        deepForEach([def], (/**
-         * @param {?} injectorDef
-         * @return {?}
-         */
-        injectorDef => this.processInjectorType(injectorDef, [], dedupStack)));
+        // Start off by creating Records for every provider declared in every InjectorType
+        // included transitively in additional providers then do the same for `def`. This order is
+        // important because `def` may include providers that override ones in additionalProviders.
         additionalProviders && deepForEach(additionalProviders, (/**
          * @param {?} provider
          * @return {?}
          */
         provider => this.processProvider(provider, def, additionalProviders)));
+        deepForEach([def], (/**
+         * @param {?} injectorDef
+         * @return {?}
+         */
+        injectorDef => this.processInjectorType(injectorDef, [], dedupStack)));
         // Make sure the INJECTOR token provides this injector.
         this.records.set(INJECTOR, makeRecord(undefined, this));
         // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
@@ -26513,7 +26514,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+62.sha-7280710.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+63.sha-2124588.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
