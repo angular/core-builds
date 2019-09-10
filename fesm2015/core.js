@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+54.sha-ded5724.with-local-changes
+ * @license Angular v9.0.0-next.5+52.sha-a1beba4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8559,11 +8559,8 @@ const NG_TEMPLATE_SELECTOR = 'ng-template';
 function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
     /** @type {?} */
     const nodeClassesLen = nodeClassAttrVal.length;
-    // we lowercase the class attribute value to be able to match
-    // selectors without case-sensitivity
-    // (selectors are already in lowercase when generated)
     /** @type {?} */
-    const matchIndex = nodeClassAttrVal.toLowerCase().indexOf(cssClassToMatch);
+    const matchIndex = (/** @type {?} */ (nodeClassAttrVal)).indexOf(cssClassToMatch);
     /** @type {?} */
     const matchEndIdx = matchIndex + cssClassToMatch.length;
     if (matchIndex === -1 // no match
@@ -8679,10 +8676,7 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
                 }
                 else {
                     ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                    // we lowercase the attribute value to be able to match
-                    // selectors without case-sensitivity
-                    // (selectors are already in lowercase when generated)
-                    nodeAttrValue = ((/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]))).toLowerCase();
+                    nodeAttrValue = (/** @type {?} */ (nodeAttrs[attrIndexInNode + 1]));
                 }
                 /** @type {?} */
                 const compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
@@ -26513,7 +26507,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.5+54.sha-ded5724.with-local-changes');
+const VERSION = new Version('9.0.0-next.5+52.sha-a1beba4.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.5+54.sha-ded5724.with-local-changes
+ * @license Angular v9.0.0-next.5+52.sha-a1beba4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5618,10 +5618,7 @@
     var NG_TEMPLATE_SELECTOR = 'ng-template';
     function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
         var nodeClassesLen = nodeClassAttrVal.length;
-        // we lowercase the class attribute value to be able to match
-        // selectors without case-sensitivity
-        // (selectors are already in lowercase when generated)
-        var matchIndex = nodeClassAttrVal.toLowerCase().indexOf(cssClassToMatch);
+        var matchIndex = nodeClassAttrVal.indexOf(cssClassToMatch);
         var matchEndIdx = matchIndex + cssClassToMatch.length;
         if (matchIndex === -1 // no match
             || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
@@ -5721,10 +5718,7 @@
                     }
                     else {
                         ngDevMode && assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* NamespaceURI */, 'We do not match directives on namespaced attributes');
-                        // we lowercase the attribute value to be able to match
-                        // selectors without case-sensitivity
-                        // (selectors are already in lowercase when generated)
-                        nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
+                        nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
                     }
                     var compareAgainstClassName = mode & 8 /* CLASS */ ? nodeAttrValue : null;
                     if (compareAgainstClassName &&
@@ -18590,7 +18584,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.5+54.sha-ded5724.with-local-changes');
+    var VERSION = new Version('9.0.0-next.5+52.sha-a1beba4.with-local-changes');
 
     /**
      * @license
