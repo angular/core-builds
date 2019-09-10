@@ -27,6 +27,7 @@ import { DirectiveDef } from '../interfaces/definition';
  *        ɵɵtext(0);
  *      }
  *      if (fs & RenderFlags.Update) {
+ *        ɵɵselect(0);
  *        ɵɵtextInterpolate(ctx.greeter.greet());
  *      }
  *    },
