@@ -22,7 +22,7 @@ export * from './next_context';
 export * from './projection';
 export * from './property';
 export * from './property_interpolation';
-export * from './select';
+export * from './advance';
 export * from '../styling_next/instructions';
 export * from './text';
 export * from './text_interpolation';
