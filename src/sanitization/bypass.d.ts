@@ -54,7 +54,7 @@ export interface SafeUrl extends SafeValue {
  */
 export interface SafeResourceUrl extends SafeValue {
 }
-export declare function unwrapSafeValue(value: string | SafeValue): string;
+export declare function unwrapSafeValue(value: SafeValue): string;
 export declare function allowSanitizationBypassAndThrow(value: any, type: BypassType.Html): value is SafeHtml;
 export declare function allowSanitizationBypassAndThrow(value: any, type: BypassType.ResourceUrl): value is SafeResourceUrl;
 export declare function allowSanitizationBypassAndThrow(value: any, type: BypassType.Script): value is SafeScript;
