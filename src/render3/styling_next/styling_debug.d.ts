@@ -36,22 +36,33 @@ export interface LStylingSummary {
 export interface DebugStyling {
     /** The associated TStylingContext instance */
     context: TStylingContext;
+    /** Which configuration flags are active (see `TStylingContextConfig`) */
+    config: {
+        hasMapBindings: boolean;
+        hasPropBindings: boolean;
+        hasCollisions: boolean;
+        hasTemplateBindings: boolean;
+        hasHostBindings: boolean;
+        templateBindingsLocked: boolean;
+        hostBindingsLocked: boolean;
+        allowDirectStyling: boolean;
+    };
     /**
      * A summarization of each style/class property
-     * present in the context.
+     * present in the context
      */
     summary: {
-        [key: string]: LStylingSummary;
+        [propertyName: string]: LStylingSummary;
     };
     /**
      * A key/value map of all styling properties and their
-     * runtime values.
+     * runtime values
      */
     values: {
-        [key: string]: string | number | null | boolean;
+        [propertyName: string]: string | number | null | boolean;
     };
     /**
-     * Overrides the sanitizer used to process styles.
+     * Overrides the sanitizer used to process styles
      */
     overrideSanitizer(sanitizer: StyleSanitizeFn | null): void;
 }
@@ -65,24 +76,29 @@ export interface TStylingTupleSummary {
     valuesCount: number;
     /**
      * The bit guard mask that is used to compare and protect against
-     * styling changes when and styling bindings update
+     * styling changes when any template style/class bindings update
      */
-    guardMask: number;
+    templateBitMask: number;
+    /**
+     * The bit guard mask that is used to compare and protect against
+     * styling changes when any host style/class bindings update
+     */
+    hostBindingsBitMask: number;
     /**
      * Whether or not the entry requires sanitization
      */
     sanitizationRequired: boolean;
     /**
-     * The default value that will be applied if any bindings are falsy.
+     * The default value that will be applied if any bindings are falsy
      */
     defaultValue: string | boolean | null;
     /**
-     * All bindingIndex sources that have been registered for this style.
+     * All bindingIndex sources that have been registered for this style
      */
     sources: (number | null | string)[];
 }
 /**
- * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context.
+ * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
  */
 export declare function attachStylingDebugObject(context: TStylingContext): TStylingContextDebug;
 /**
@@ -94,7 +110,8 @@ export declare function attachStylingDebugObject(context: TStylingContext): TSty
 declare class TStylingContextDebug {
     readonly context: TStylingContext;
     constructor(context: TStylingContext);
-    readonly isLocked: boolean;
+    readonly isTemplateLocked: boolean;
+    readonly isHostBindingsLocked: boolean;
     /**
      * Returns a detailed summary of each styling entry in the context.
      *
@@ -128,6 +145,16 @@ export declare class NodeStylingDebug implements DebugStyling {
      */
     readonly summary: {
         [key: string]: LStylingSummary;
+    };
+    readonly config: {
+        hasMapBindings: boolean;
+        hasPropBindings: boolean;
+        hasCollisions: boolean;
+        hasTemplateBindings: boolean;
+        hasHostBindings: boolean;
+        templateBindingsLocked: boolean;
+        hostBindingsLocked: boolean;
+        allowDirectStyling: boolean;
     };
     /**
      * Returns a key/value map of all the styles/classes that were last applied to the element.
