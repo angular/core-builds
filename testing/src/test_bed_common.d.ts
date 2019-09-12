@@ -98,9 +98,9 @@ export interface TestBedStatic {
     }): TestBedStatic;
     inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
     inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }

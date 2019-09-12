@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+13.sha-5356826.with-local-changes
+ * @license Angular v9.0.0-next.6+14.sha-a85eccd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1837,7 +1837,7 @@ var TestBedRender3 = /** @class */ (function () {
     TestBedRender3.inject = function (token, notFoundValue, flags) {
         return _getTestBedRender3().inject(token, notFoundValue, flags);
     };
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     TestBedRender3.get = function (token, notFoundValue, flags) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (flags === void 0) { flags = InjectFlags.Default; }
@@ -1912,7 +1912,7 @@ var TestBedRender3 = /** @class */ (function () {
         var result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
         return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
     };
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     TestBedRender3.prototype.get = function (token, notFoundValue, flags) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (flags === void 0) { flags = InjectFlags.Default; }
@@ -2229,7 +2229,7 @@ var TestBedViewEngine = /** @class */ (function () {
     TestBedViewEngine.inject = function (token, notFoundValue, flags) {
         return _getTestBedViewEngine().inject(token, notFoundValue, flags);
     };
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     TestBedViewEngine.get = function (token, notFoundValue, flags) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (flags === void 0) { flags = InjectFlags.Default; }
@@ -2452,7 +2452,7 @@ var TestBedViewEngine = /** @class */ (function () {
         var result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
         return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) : result;
     };
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     TestBedViewEngine.prototype.get = function (token, notFoundValue, flags) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (flags === void 0) { flags = InjectFlags.Default; }

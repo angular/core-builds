@@ -40,9 +40,9 @@ export interface TestBed {
     compileComponents(): Promise<any>;
     inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
     inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -140,10 +140,10 @@ export declare class TestBedViewEngine implements TestBed {
     }): TestBedStatic;
     static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
     static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
-     * TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject
+     * @deprecated from v9.0.0 use TestBed.inject
      * @suppress {duplicate}
      */
     static get(token: any, notFoundValue?: any): any;
@@ -197,9 +197,9 @@ export declare class TestBedViewEngine implements TestBed {
     private _assertNotInstantiated;
     inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
     inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /** TODO(goodwine): Mark as deprecated from v9.0.0 use TestBed.inject */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
