@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+34.sha-adeee0f.with-local-changes
+ * @license Angular v9.0.0-next.6+35.sha-ad178c5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8324,35 +8324,39 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
             classes: null,
         };
 }
-/**
- * Consolidates all inputs or outputs of all directives on this logical node.
- *
- * @param tNode
- * @param direction whether to consider inputs or outputs
- * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
- */
-function generatePropertyAliases(tView, tNode, direction) {
-    var propStore = null;
-    var start = tNode.directiveStart;
-    var end = tNode.directiveEnd;
-    if (end > start) {
-        var isInput = direction === 0 /* Input */;
-        var defs = tView.data;
-        for (var i = start; i < end; i++) {
-            var directiveDef = defs[i];
-            var propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
-            for (var publicName in propertyAliasMap) {
-                if (propertyAliasMap.hasOwnProperty(publicName)) {
-                    propStore = propStore || {};
-                    var internalName = propertyAliasMap[publicName];
-                    var hasProperty = propStore.hasOwnProperty(publicName);
-                    hasProperty ? propStore[publicName].push(i, publicName, internalName) :
-                        (propStore[publicName] = [i, publicName, internalName]);
-                }
+function generatePropertyAliases(inputAliasMap, directiveDefIdx, propStore) {
+    for (var publicName in inputAliasMap) {
+        if (inputAliasMap.hasOwnProperty(publicName)) {
+            propStore = propStore === null ? {} : propStore;
+            var internalName = inputAliasMap[publicName];
+            if (propStore.hasOwnProperty(publicName)) {
+                propStore[publicName].push(directiveDefIdx, publicName, internalName);
+            }
+            else {
+                (propStore[publicName] = [directiveDefIdx, publicName, internalName]);
             }
         }
     }
     return propStore;
+}
+/**
+ * Initializes data structures required to work with directive outputs and outputs.
+ * Initialization is done for all directives matched on a given TNode.
+ */
+function initializeInputAndOutputAliases(tView, tNode) {
+    ngDevMode && assertFirstTemplatePass(tView);
+    var start = tNode.directiveStart;
+    var end = tNode.directiveEnd;
+    var defs = tView.data;
+    var inputsStore = null;
+    var outputsStore = null;
+    for (var i = start; i < end; i++) {
+        var directiveDef = defs[i];
+        inputsStore = generatePropertyAliases(directiveDef.inputs, i, inputsStore);
+        outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
+    }
+    tNode.inputs = inputsStore;
+    tNode.outputs = outputsStore;
 }
 /**
  * Mapping between attributes names that don't correspond to their element property names.
@@ -8382,13 +8386,11 @@ function mapPropName(name) {
 function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     var lView = getLView();
-    var tView = lView[TVIEW];
     var element = getNativeByIndex(index, lView);
     var tNode = getTNode(index, lView);
-    var inputData;
+    var inputData = tNode.inputs;
     var dataValue;
-    if (!nativeOnly && (inputData = initializeTNodeInputs(tView, tNode)) &&
-        (dataValue = inputData[propName])) {
+    if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
         setInputsForProperty(lView, dataValue, value);
         if (isComponentHost(tNode))
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
@@ -8557,6 +8559,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
         }
+        initializeInputAndOutputAliases(tView, tNode);
     }
     if (exportsMap)
         cacheMatchingLocalNames(tNode, localRefs, exportsMap);
@@ -9190,15 +9193,6 @@ function storePropertyBindingMetadata(tData, nodeIndex, propertyName, bindingInd
     }
 }
 var CLEAN_PROMISE = _CLEAN_PROMISE;
-function initializeTNodeInputs(tView, tNode) {
-    // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
-    // yet been checked.
-    if (tNode.inputs === undefined) {
-        // mark inputs as checked
-        tNode.inputs = generatePropertyAliases(tView, tNode, 0 /* Input */);
-    }
-    return tNode.inputs;
-}
 function getCleanup(view) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new LCleanup() : []);
@@ -14740,12 +14734,14 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, tNode, localRefs || null);
-        var inputData = initializeTNodeInputs(tView, tNode);
-        if (inputData && inputData.hasOwnProperty('class')) {
-            tNode.flags |= 16 /* hasClassInput */;
-        }
-        if (inputData && inputData.hasOwnProperty('style')) {
-            tNode.flags |= 32 /* hasStyleInput */;
+        var inputData = tNode.inputs;
+        if (inputData != null) {
+            if (inputData.hasOwnProperty('class')) {
+                tNode.flags |= 16 /* hasClassInput */;
+            }
+            if (inputData.hasOwnProperty('style')) {
+                tNode.flags |= 32 /* hasStyleInput */;
+            }
         }
         if (tView.queries !== null) {
             tView.queries.elementStart(tView, tNode);
@@ -15292,32 +15288,25 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
         }
     }
     // subscribe to directive outputs
-    if (isTNodeDirectiveHost && processOutputs) {
-        var outputs = tNode.outputs;
-        if (outputs === undefined) {
-            // if we create TNode here, inputs must be undefined so we know they still need to be
-            // checked
-            outputs = tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
-        }
-        var props = void 0;
-        if (outputs !== null && (props = outputs[eventName])) {
-            var propsLength = props.length;
-            if (propsLength) {
-                var lCleanup = getCleanup(lView);
-                for (var i = 0; i < propsLength; i += 3) {
-                    var index = props[i];
-                    ngDevMode && assertDataInRange(lView, index);
-                    var minifiedName = props[i + 2];
-                    var directiveInstance = lView[index];
-                    var output = directiveInstance[minifiedName];
-                    if (ngDevMode && !isObservable(output)) {
-                        throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
-                    }
-                    var subscription = output.subscribe(listenerFn);
-                    var idx = lCleanup.length;
-                    lCleanup.push(listenerFn, subscription);
-                    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+    var outputs = tNode.outputs;
+    var props;
+    if (processOutputs && outputs != null && (props = outputs[eventName])) {
+        var propsLength = props.length;
+        if (propsLength) {
+            var lCleanup = getCleanup(lView);
+            for (var i = 0; i < propsLength; i += 3) {
+                var index = props[i];
+                ngDevMode && assertDataInRange(lView, index);
+                var minifiedName = props[i + 2];
+                var directiveInstance = lView[index];
+                var output = directiveInstance[minifiedName];
+                if (ngDevMode && !isObservable(output)) {
+                    throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
                 }
+                var subscription = output.subscribe(listenerFn);
+                var idx = lCleanup.length;
+                lCleanup.push(listenerFn, subscription);
+                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
             }
         }
     }
@@ -18452,7 +18441,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.6+34.sha-adeee0f.with-local-changes');
+var VERSION = new Version('9.0.0-next.6+35.sha-ad178c5.with-local-changes');
 
 /**
  * @license

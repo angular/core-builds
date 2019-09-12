@@ -10,14 +10,10 @@ import { SchemaMetadata } from '../../metadata/schema';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
-import { LocalRefExtractor, PropertyAliasValue, PropertyAliases, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
+import { LocalRefExtractor, PropertyAliasValue, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TData, TView } from '../interfaces/view';
-export declare const enum BindingDirection {
-    Input = 0,
-    Output = 1
-}
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(tView: TView, viewData: LView): void;
 /**
@@ -147,14 +143,6 @@ export declare type TsickleIssue1009 = any;
  * @returns the TNode object
  */
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
-/**
- * Consolidates all inputs or outputs of all directives on this logical node.
- *
- * @param tNode
- * @param direction whether to consider inputs or outputs
- * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
- */
-export declare function generatePropertyAliases(tView: TView, tNode: TNode, direction: BindingDirection): PropertyAliases | null;
 export declare function elementPropertyInternal<T>(index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
 export declare function setNgReflectProperty(lView: LView, element: RElement | RComment, type: TNodeType, attrName: string, value: any): void;
 /**
@@ -282,7 +270,6 @@ export declare function checkNoChangesInRootView(lView: LView): void;
  */
 export declare function storePropertyBindingMetadata(tData: TData, nodeIndex: number, propertyName: string, bindingIndex: number, ...interpolationParts: string[]): void;
 export declare const CLEAN_PROMISE: Promise<null>;
-export declare function initializeTNodeInputs(tView: TView, tNode: TNode): PropertyAliases | null;
 export declare function getCleanup(view: LView): any[];
 /**
  * There are cases where the sub component's renderer needs to be included

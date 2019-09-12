@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+34.sha-adeee0f.with-local-changes
+ * @license Angular v9.0.0-next.6+35.sha-ad178c5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11835,11 +11835,6 @@ const _CLEAN_PROMISE = ((/**
  * @return {?}
  */
 () => Promise.resolve(null)))();
-/** @enum {number} */
-const BindingDirection = {
-    Input: 0,
-    Output: 1,
-};
 /**
  * Sets the host bindings for the current view.
  * @param {?} tView
@@ -12654,44 +12649,54 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
         };
 }
 /**
- * Consolidates all inputs or outputs of all directives on this logical node.
- *
- * @param {?} tView
- * @param {?} tNode
- * @param {?} direction whether to consider inputs or outputs
- * @return {?} PropertyAliases|null aggregate of all properties if any, `null` otherwise
+ * @param {?} inputAliasMap
+ * @param {?} directiveDefIdx
+ * @param {?} propStore
+ * @return {?}
  */
-function generatePropertyAliases(tView, tNode, direction) {
-    /** @type {?} */
-    let propStore = null;
-    /** @type {?} */
-    const start = tNode.directiveStart;
-    /** @type {?} */
-    const end = tNode.directiveEnd;
-    if (end > start) {
-        /** @type {?} */
-        const isInput = direction === 0 /* Input */;
-        /** @type {?} */
-        const defs = tView.data;
-        for (let i = start; i < end; i++) {
+function generatePropertyAliases(inputAliasMap, directiveDefIdx, propStore) {
+    for (let publicName in inputAliasMap) {
+        if (inputAliasMap.hasOwnProperty(publicName)) {
+            propStore = propStore === null ? {} : propStore;
             /** @type {?} */
-            const directiveDef = (/** @type {?} */ (defs[i]));
-            /** @type {?} */
-            const propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
-            for (let publicName in propertyAliasMap) {
-                if (propertyAliasMap.hasOwnProperty(publicName)) {
-                    propStore = propStore || {};
-                    /** @type {?} */
-                    const internalName = propertyAliasMap[publicName];
-                    /** @type {?} */
-                    const hasProperty = propStore.hasOwnProperty(publicName);
-                    hasProperty ? propStore[publicName].push(i, publicName, internalName) :
-                        (propStore[publicName] = [i, publicName, internalName]);
-                }
+            const internalName = inputAliasMap[publicName];
+            if (propStore.hasOwnProperty(publicName)) {
+                propStore[publicName].push(directiveDefIdx, publicName, internalName);
+            }
+            else {
+                (propStore[publicName] = [directiveDefIdx, publicName, internalName]);
             }
         }
     }
     return propStore;
+}
+/**
+ * Initializes data structures required to work with directive outputs and outputs.
+ * Initialization is done for all directives matched on a given TNode.
+ * @param {?} tView
+ * @param {?} tNode
+ * @return {?}
+ */
+function initializeInputAndOutputAliases(tView, tNode) {
+    ngDevMode && assertFirstTemplatePass(tView);
+    /** @type {?} */
+    const start = tNode.directiveStart;
+    /** @type {?} */
+    const end = tNode.directiveEnd;
+    /** @type {?} */
+    const defs = tView.data;
+    /** @type {?} */
+    let inputsStore = null;
+    /** @type {?} */
+    let outputsStore = null;
+    for (let i = start; i < end; i++) {
+        /** @type {?} */
+        const directiveDef = (/** @type {?} */ (defs[i]));
+        inputsStore = generatePropertyAliases(directiveDef.inputs, i, inputsStore);
+        outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
+    }
+    tNode.inputs = inputsStore;
+    tNode.outputs = outputsStore;
 }
 /**
  * Mapping between attributes names that don't correspond to their element property names.
@@ -12735,17 +12740,14 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const tView = lView[TVIEW];
-    /** @type {?} */
     const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
     /** @type {?} */
     const tNode = getTNode(index, lView);
     /** @type {?} */
-    let inputData;
+    let inputData = tNode.inputs;
     /** @type {?} */
     let dataValue;
-    if (!nativeOnly && (inputData = initializeTNodeInputs(tView, tNode)) &&
-        (dataValue = inputData[propName])) {
+    if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
         setInputsForProperty(lView, dataValue, value);
         if (isComponentHost(tNode))
             markDirtyIfOnPush(lView, index + HEADER_OFFSET);
@@ -12966,6 +12968,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
         }
+        initializeInputAndOutputAliases(tView, tNode);
     }
     if (exportsMap)
         cacheMatchingLocalNames(tNode, localRefs, exportsMap);
@@ -13799,20 +13802,6 @@ function storePropertyBindingMetadata(tData, nodeIndex, propertyName, bindingInd
 }
 /** @type {?} */
 const CLEAN_PROMISE = _CLEAN_PROMISE;
-/**
- * @param {?} tView
- * @param {?} tNode
- * @return {?}
- */
-function initializeTNodeInputs(tView, tNode) {
-    // If tNode.inputs is undefined, a listener has created outputs, but inputs haven't
-    // yet been checked.
-    if (tNode.inputs === undefined) {
-        // mark inputs as checked
-        tNode.inputs = generatePropertyAliases(tView, tNode, 0 /* Input */);
-    }
-    return tNode.inputs;
-}
 /**
  * @param {?} view
  * @return {?}
@@ -21469,12 +21458,14 @@ function ɵɵelementStart(index, name, attrs, localRefs) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, tNode, localRefs || null);
         /** @type {?} */
-        const inputData = initializeTNodeInputs(tView, tNode);
-        if (inputData && inputData.hasOwnProperty('class')) {
-            tNode.flags |= 16 /* hasClassInput */;
-        }
-        if (inputData && inputData.hasOwnProperty('style')) {
-            tNode.flags |= 32 /* hasStyleInput */;
+        const inputData = tNode.inputs;
+        if (inputData != null) {
+            if (inputData.hasOwnProperty('class')) {
+                tNode.flags |= 16 /* hasClassInput */;
+            }
+            if (inputData.hasOwnProperty('style')) {
+                tNode.flags |= 32 /* hasStyleInput */;
+            }
         }
         if (tView.queries !== null) {
             tView.queries.elementStart(tView, tNode);
@@ -22110,42 +22101,35 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
         }
     }
     // subscribe to directive outputs
-    if (isTNodeDirectiveHost && processOutputs) {
+    /** @type {?} */
+    const outputs = tNode.outputs;
+    /** @type {?} */
+    let props;
+    if (processOutputs && outputs != null && (props = outputs[eventName])) {
         /** @type {?} */
-        let outputs = tNode.outputs;
-        if (outputs === undefined) {
-            // if we create TNode here, inputs must be undefined so we know they still need to be
-            // checked
-            outputs = tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
-        }
-        /** @type {?} */
-        let props;
-        if (outputs !== null && (props = outputs[eventName])) {
+        const propsLength = props.length;
+        if (propsLength) {
             /** @type {?} */
-            const propsLength = props.length;
-            if (propsLength) {
+            const lCleanup = getCleanup(lView);
+            for (let i = 0; i < propsLength; i += 3) {
                 /** @type {?} */
-                const lCleanup = getCleanup(lView);
-                for (let i = 0; i < propsLength; i += 3) {
-                    /** @type {?} */
-                    const index = (/** @type {?} */ (props[i]));
-                    ngDevMode && assertDataInRange(lView, index);
-                    /** @type {?} */
-                    const minifiedName = props[i + 2];
-                    /** @type {?} */
-                    const directiveInstance = lView[index];
-                    /** @type {?} */
-                    const output = directiveInstance[minifiedName];
-                    if (ngDevMode && !isObservable(output)) {
-                        throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
-                    }
-                    /** @type {?} */
-                    const subscription = output.subscribe(listenerFn);
-                    /** @type {?} */
-                    const idx = lCleanup.length;
-                    lCleanup.push(listenerFn, subscription);
-                    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+                const index = (/** @type {?} */ (props[i]));
+                ngDevMode && assertDataInRange(lView, index);
+                /** @type {?} */
+                const minifiedName = props[i + 2];
+                /** @type {?} */
+                const directiveInstance = lView[index];
+                /** @type {?} */
+                const output = directiveInstance[minifiedName];
+                if (ngDevMode && !isObservable(output)) {
+                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
                 }
+                /** @type {?} */
+                const subscription = output.subscribe(listenerFn);
+                /** @type {?} */
+                const idx = lCleanup.length;
+                lCleanup.push(listenerFn, subscription);
+                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
             }
         }
     }
@@ -26537,7 +26521,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.6+34.sha-adeee0f.with-local-changes');
+const VERSION = new Version('9.0.0-next.6+35.sha-ad178c5.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
