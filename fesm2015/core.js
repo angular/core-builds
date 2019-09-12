@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+21.sha-1771d6f.with-local-changes
+ * @license Angular v9.0.0-next.6+28.sha-73cb581.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4815,14 +4815,6 @@ function getNativeByTNodeOrNull(tNode, lView) {
         return node;
     }
     return null;
-}
-/**
- * A helper function that returns `true` if a given `TNode` has any matching directives.
- * @param {?} tNode
- * @return {?}
- */
-function hasDirectives(tNode) {
-    return tNode.directiveEnd > tNode.directiveStart;
 }
 /**
  * @param {?} index
@@ -21961,7 +21953,11 @@ function isObservable(obj) {
  * @return {?}
  */
 function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getPreviousOrParentTNode();
+    listenerInternal(lView, lView[RENDERER], tNode, eventName, listenerFn, useCapture, eventTargetResolver);
 }
 /**
  * Registers a synthetic host listener (e.g. `(\@foo.start)`) on a component.
@@ -21986,7 +21982,13 @@ function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetReso
  * @return {?}
  */
 function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture = false, eventTargetResolver) {
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+    /** @type {?} */
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getPreviousOrParentTNode();
+    /** @type {?} */
+    const renderer = loadComponentRenderer(tNode, lView);
+    listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
 }
 /**
  * A utility function that checks if a given element has already an event handler registered for an
@@ -22029,20 +22031,20 @@ function findExistingListener(lView, eventName, tNodeIdx) {
     return null;
 }
 /**
+ * @param {?} lView
+ * @param {?} renderer
+ * @param {?} tNode
  * @param {?} eventName
  * @param {?} listenerFn
  * @param {?=} useCapture
  * @param {?=} eventTargetResolver
- * @param {?=} loadRendererFn
  * @return {?}
  */
-function listenerInternal(eventName, listenerFn, useCapture = false, eventTargetResolver, loadRendererFn) {
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const tNode = getPreviousOrParentTNode();
+function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture = false, eventTargetResolver) {
     /** @type {?} */
     const tView = lView[TVIEW];
+    /** @type {?} */
+    const isTNodeDirectiveHost = isDirectiveHost(tNode);
     /** @type {?} */
     const firstTemplatePass = tView.firstTemplatePass;
     /** @type {?} */
@@ -22058,8 +22060,6 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
         const resolved = eventTargetResolver ? eventTargetResolver(native) : (/** @type {?} */ (EMPTY_OBJ));
         /** @type {?} */
         const target = resolved.target || native;
-        /** @type {?} */
-        const renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
         /** @type {?} */
         const lCleanup = getCleanup(lView);
         /** @type {?} */
@@ -22093,7 +22093,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
             // Also, we don't have to search for existing listeners is there are no directives
             // matching on a given node as we can't register multiple event handlers for the same event in
             // a template (this would mean having duplicate attributes).
-            if (!eventTargetResolver && hasDirectives(tNode)) {
+            if (!eventTargetResolver && isTNodeDirectiveHost) {
                 existingListener = findExistingListener(lView, eventName, tNode.index);
             }
             if (existingListener !== null) {
@@ -22128,40 +22128,42 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
         }
     }
     // subscribe to directive outputs
-    if (tNode.outputs === undefined) {
-        // if we create TNode here, inputs must be undefined so we know they still need to be
-        // checked
-        tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
-    }
-    /** @type {?} */
-    const outputs = tNode.outputs;
-    /** @type {?} */
-    let props;
-    if (processOutputs && outputs && (props = outputs[eventName])) {
+    if (isTNodeDirectiveHost && processOutputs) {
         /** @type {?} */
-        const propsLength = props.length;
-        if (propsLength) {
+        let outputs = tNode.outputs;
+        if (outputs === undefined) {
+            // if we create TNode here, inputs must be undefined so we know they still need to be
+            // checked
+            outputs = tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
+        }
+        /** @type {?} */
+        let props;
+        if (outputs !== null && (props = outputs[eventName])) {
             /** @type {?} */
-            const lCleanup = getCleanup(lView);
-            for (let i = 0; i < propsLength; i += 3) {
+            const propsLength = props.length;
+            if (propsLength) {
                 /** @type {?} */
-                const index = (/** @type {?} */ (props[i]));
-                ngDevMode && assertDataInRange(lView, index);
-                /** @type {?} */
-                const minifiedName = props[i + 2];
-                /** @type {?} */
-                const directiveInstance = lView[index];
-                /** @type {?} */
-                const output = directiveInstance[minifiedName];
-                if (ngDevMode && !isObservable(output)) {
-                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
+                const lCleanup = getCleanup(lView);
+                for (let i = 0; i < propsLength; i += 3) {
+                    /** @type {?} */
+                    const index = (/** @type {?} */ (props[i]));
+                    ngDevMode && assertDataInRange(lView, index);
+                    /** @type {?} */
+                    const minifiedName = props[i + 2];
+                    /** @type {?} */
+                    const directiveInstance = lView[index];
+                    /** @type {?} */
+                    const output = directiveInstance[minifiedName];
+                    if (ngDevMode && !isObservable(output)) {
+                        throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
+                    }
+                    /** @type {?} */
+                    const subscription = output.subscribe(listenerFn);
+                    /** @type {?} */
+                    const idx = lCleanup.length;
+                    lCleanup.push(listenerFn, subscription);
+                    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
                 }
-                /** @type {?} */
-                const subscription = output.subscribe(listenerFn);
-                /** @type {?} */
-                const idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
             }
         }
     }
@@ -26554,7 +26556,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.6+21.sha-1771d6f.with-local-changes');
+const VERSION = new Version('9.0.0-next.6+28.sha-73cb581.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -35122,8 +35124,11 @@ function getPipeDef$1(name, registry) {
  */
 function ɵɵpipeBind1(index, slotOffset, v1) {
     /** @type {?} */
-    const pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ? ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    const lView = getLView();
+    /** @type {?} */
+    const pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
+        ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1));
 }
 /**
@@ -35142,8 +35147,11 @@ function ɵɵpipeBind1(index, slotOffset, v1) {
  */
 function ɵɵpipeBind2(index, slotOffset, v1, v2) {
     /** @type {?} */
-    const pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ? ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    const lView = getLView();
+    /** @type {?} */
+    const pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
+        ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2));
 }
 /**
@@ -35163,8 +35171,10 @@ function ɵɵpipeBind2(index, slotOffset, v1, v2) {
  */
 function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
     /** @type {?} */
-    const pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ?
+    const lView = getLView();
+    /** @type {?} */
+    const pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
         ɵɵpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3));
 }
@@ -35186,8 +35196,10 @@ function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
  */
 function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
     /** @type {?} */
-    const pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ?
+    const lView = getLView();
+    /** @type {?} */
+    const pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
         ɵɵpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4));
 }
@@ -35206,30 +35218,33 @@ function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
  */
 function ɵɵpipeBindV(index, slotOffset, values) {
     /** @type {?} */
-    const pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ? ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    const lView = getLView();
+    /** @type {?} */
+    const pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
+        ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values));
 }
 /**
+ * @param {?} lView
  * @param {?} index
  * @return {?}
  */
-function isPure(index) {
-    return ((/** @type {?} */ (getLView()[TVIEW].data[index + HEADER_OFFSET]))).pure;
+function isPure(lView, index) {
+    return ((/** @type {?} */ (lView[TVIEW].data[index + HEADER_OFFSET]))).pure;
 }
 /**
  * Unwrap the output of a pipe transformation.
  * In order to trick change detection into considering that the new value is always different from
  * the old one, the old value is overwritten by NO_CHANGE.
  *
+ * @param {?} lView
  * @param {?} newValue the pipe transformation output.
  * @return {?}
  */
-function unwrapValue$1(newValue) {
+function unwrapValue$1(lView, newValue) {
     if (WrappedValue.isWrapped(newValue)) {
         newValue = WrappedValue.unwrap(newValue);
-        /** @type {?} */
-        const lView = getLView();
         // The NO_CHANGE value needs to be written at the index where the impacted binding value is
         // stored
         /** @type {?} */

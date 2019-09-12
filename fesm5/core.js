@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+21.sha-1771d6f.with-local-changes
+ * @license Angular v9.0.0-next.6+28.sha-73cb581.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3005,12 +3005,6 @@ function getNativeByTNodeOrNull(tNode, lView) {
         return node;
     }
     return null;
-}
-/**
- * A helper function that returns `true` if a given `TNode` has any matching directives.
- */
-function hasDirectives(tNode) {
-    return tNode.directiveEnd > tNode.directiveStart;
 }
 function getTNode(index, view) {
     ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
@@ -15196,7 +15190,9 @@ function isObservable(obj) {
  */
 function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
     if (useCapture === void 0) { useCapture = false; }
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+    var lView = getLView();
+    var tNode = getPreviousOrParentTNode();
+    listenerInternal(lView, lView[RENDERER], tNode, eventName, listenerFn, useCapture, eventTargetResolver);
 }
 /**
 * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
@@ -15221,7 +15217,10 @@ function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
 */
 function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
     if (useCapture === void 0) { useCapture = false; }
-    listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+    var lView = getLView();
+    var tNode = getPreviousOrParentTNode();
+    var renderer = loadComponentRenderer(tNode, lView);
+    listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
 }
 /**
  * A utility function that checks if a given element has already an event handler registered for an
@@ -15254,11 +15253,10 @@ function findExistingListener(lView, eventName, tNodeIdx) {
     }
     return null;
 }
-function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
+function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver) {
     if (useCapture === void 0) { useCapture = false; }
-    var lView = getLView();
-    var tNode = getPreviousOrParentTNode();
     var tView = lView[TVIEW];
+    var isTNodeDirectiveHost = isDirectiveHost(tNode);
     var firstTemplatePass = tView.firstTemplatePass;
     var tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
     ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
@@ -15268,7 +15266,6 @@ function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver
         var native = getNativeByTNode(tNode, lView);
         var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
         var target = resolved.target || native;
-        var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
         var lCleanup = getCleanup(lView);
         var lCleanupIndex = lCleanup.length;
         var idxOrTargetGetter = eventTargetResolver ?
@@ -15294,7 +15291,7 @@ function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver
             // Also, we don't have to search for existing listeners is there are no directives
             // matching on a given node as we can't register multiple event handlers for the same event in
             // a template (this would mean having duplicate attributes).
-            if (!eventTargetResolver && hasDirectives(tNode)) {
+            if (!eventTargetResolver && isTNodeDirectiveHost) {
                 existingListener = findExistingListener(lView, eventName, tNode.index);
             }
             if (existingListener !== null) {
@@ -15327,30 +15324,32 @@ function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver
         }
     }
     // subscribe to directive outputs
-    if (tNode.outputs === undefined) {
-        // if we create TNode here, inputs must be undefined so we know they still need to be
-        // checked
-        tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
-    }
-    var outputs = tNode.outputs;
-    var props;
-    if (processOutputs && outputs && (props = outputs[eventName])) {
-        var propsLength = props.length;
-        if (propsLength) {
-            var lCleanup = getCleanup(lView);
-            for (var i = 0; i < propsLength; i += 3) {
-                var index = props[i];
-                ngDevMode && assertDataInRange(lView, index);
-                var minifiedName = props[i + 2];
-                var directiveInstance = lView[index];
-                var output = directiveInstance[minifiedName];
-                if (ngDevMode && !isObservable(output)) {
-                    throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
+    if (isTNodeDirectiveHost && processOutputs) {
+        var outputs = tNode.outputs;
+        if (outputs === undefined) {
+            // if we create TNode here, inputs must be undefined so we know they still need to be
+            // checked
+            outputs = tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
+        }
+        var props = void 0;
+        if (outputs !== null && (props = outputs[eventName])) {
+            var propsLength = props.length;
+            if (propsLength) {
+                var lCleanup = getCleanup(lView);
+                for (var i = 0; i < propsLength; i += 3) {
+                    var index = props[i];
+                    ngDevMode && assertDataInRange(lView, index);
+                    var minifiedName = props[i + 2];
+                    var directiveInstance = lView[index];
+                    var output = directiveInstance[minifiedName];
+                    if (ngDevMode && !isObservable(output)) {
+                        throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
+                    }
+                    var subscription = output.subscribe(listenerFn);
+                    var idx = lCleanup.length;
+                    lCleanup.push(listenerFn, subscription);
+                    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
                 }
-                var subscription = output.subscribe(listenerFn);
-                var idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
             }
         }
     }
@@ -18486,7 +18485,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.6+21.sha-1771d6f.with-local-changes');
+var VERSION = new Version('9.0.0-next.6+28.sha-73cb581.with-local-changes');
 
 /**
  * @license
@@ -23566,8 +23565,10 @@ function getPipeDef$1(name, registry) {
  * @codeGenApi
  */
 function ɵɵpipeBind1(index, slotOffset, v1) {
-    var pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ? ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
+    var lView = getLView();
+    var pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
+        ɵɵpureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1));
 }
 /**
@@ -23584,8 +23585,10 @@ function ɵɵpipeBind1(index, slotOffset, v1) {
  * @codeGenApi
  */
 function ɵɵpipeBind2(index, slotOffset, v1, v2) {
-    var pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ? ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
+    var lView = getLView();
+    var pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
+        ɵɵpureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2));
 }
 /**
@@ -23603,8 +23606,9 @@ function ɵɵpipeBind2(index, slotOffset, v1, v2) {
  * @codeGenApi
  */
 function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
-    var pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ?
+    var lView = getLView();
+    var pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
         ɵɵpureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3));
 }
@@ -23624,8 +23628,9 @@ function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
  * @codeGenApi
  */
 function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
-    var pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ?
+    var lView = getLView();
+    var pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
         ɵɵpureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4));
 }
@@ -23642,12 +23647,14 @@ function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
  * @codeGenApi
  */
 function ɵɵpipeBindV(index, slotOffset, values) {
-    var pipeInstance = load(getLView(), index);
-    return unwrapValue$1(isPure(index) ? ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
+    var lView = getLView();
+    var pipeInstance = load(lView, index);
+    return unwrapValue$1(lView, isPure(lView, index) ?
+        ɵɵpureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values));
 }
-function isPure(index) {
-    return getLView()[TVIEW].data[index + HEADER_OFFSET].pure;
+function isPure(lView, index) {
+    return lView[TVIEW].data[index + HEADER_OFFSET].pure;
 }
 /**
  * Unwrap the output of a pipe transformation.
@@ -23656,10 +23663,9 @@ function isPure(index) {
  *
  * @param newValue the pipe transformation output.
  */
-function unwrapValue$1(newValue) {
+function unwrapValue$1(lView, newValue) {
     if (WrappedValue.isWrapped(newValue)) {
         newValue = WrappedValue.unwrap(newValue);
-        var lView = getLView();
         // The NO_CHANGE value needs to be written at the index where the impacted binding value is
         // stored
         var bindingToInvalidateIdx = lView[BINDING_INDEX];
