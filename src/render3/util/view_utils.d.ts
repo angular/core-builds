@@ -64,10 +64,6 @@ export declare function getNativeByTNode(tNode: TNode, lView: LView): RNode;
  * @param lView
  */
 export declare function getNativeByTNodeOrNull(tNode: TNode, lView: LView): RNode | null;
-/**
- * A helper function that returns `true` if a given `TNode` has any matching directives.
- */
-export declare function hasDirectives(tNode: TNode): boolean;
 export declare function getTNode(index: number, view: LView): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function load<T>(view: LView | TData, index: number): T;
