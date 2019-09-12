@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+19.sha-5cf5972.with-local-changes
+ * @license Angular v9.0.0-next.6+27.sha-527ce3b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3163,12 +3163,6 @@
             return node;
         }
         return null;
-    }
-    /**
-     * A helper function that returns `true` if a given `TNode` has any matching directives.
-     */
-    function hasDirectives(tNode) {
-        return tNode.directiveEnd > tNode.directiveStart;
     }
     function getTNode(index, view) {
         ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
@@ -15344,7 +15338,9 @@
      */
     function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
-        listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver);
+        var lView = getLView();
+        var tNode = getPreviousOrParentTNode();
+        listenerInternal(lView, lView[RENDERER], tNode, eventName, listenerFn, useCapture, eventTargetResolver);
     }
     /**
     * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
@@ -15369,7 +15365,10 @@
     */
     function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
-        listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadComponentRenderer);
+        var lView = getLView();
+        var tNode = getPreviousOrParentTNode();
+        var renderer = loadComponentRenderer(tNode, lView);
+        listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
     }
     /**
      * A utility function that checks if a given element has already an event handler registered for an
@@ -15402,11 +15401,10 @@
         }
         return null;
     }
-    function listenerInternal(eventName, listenerFn, useCapture, eventTargetResolver, loadRendererFn) {
+    function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
-        var lView = getLView();
-        var tNode = getPreviousOrParentTNode();
         var tView = lView[TVIEW];
+        var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstTemplatePass = tView.firstTemplatePass;
         var tCleanup = firstTemplatePass && (tView.cleanup || (tView.cleanup = []));
         ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
@@ -15416,7 +15414,6 @@
             var native = getNativeByTNode(tNode, lView);
             var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
             var target = resolved.target || native;
-            var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
             var lCleanup = getCleanup(lView);
             var lCleanupIndex = lCleanup.length;
             var idxOrTargetGetter = eventTargetResolver ?
@@ -15442,7 +15439,7 @@
                 // Also, we don't have to search for existing listeners is there are no directives
                 // matching on a given node as we can't register multiple event handlers for the same event in
                 // a template (this would mean having duplicate attributes).
-                if (!eventTargetResolver && hasDirectives(tNode)) {
+                if (!eventTargetResolver && isTNodeDirectiveHost) {
                     existingListener = findExistingListener(lView, eventName, tNode.index);
                 }
                 if (existingListener !== null) {
@@ -15475,30 +15472,32 @@
             }
         }
         // subscribe to directive outputs
-        if (tNode.outputs === undefined) {
-            // if we create TNode here, inputs must be undefined so we know they still need to be
-            // checked
-            tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
-        }
-        var outputs = tNode.outputs;
-        var props;
-        if (processOutputs && outputs && (props = outputs[eventName])) {
-            var propsLength = props.length;
-            if (propsLength) {
-                var lCleanup = getCleanup(lView);
-                for (var i = 0; i < propsLength; i += 3) {
-                    var index = props[i];
-                    ngDevMode && assertDataInRange(lView, index);
-                    var minifiedName = props[i + 2];
-                    var directiveInstance = lView[index];
-                    var output = directiveInstance[minifiedName];
-                    if (ngDevMode && !isObservable(output)) {
-                        throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
+        if (isTNodeDirectiveHost && processOutputs) {
+            var outputs = tNode.outputs;
+            if (outputs === undefined) {
+                // if we create TNode here, inputs must be undefined so we know they still need to be
+                // checked
+                outputs = tNode.outputs = generatePropertyAliases(tView, tNode, 1 /* Output */);
+            }
+            var props = void 0;
+            if (outputs !== null && (props = outputs[eventName])) {
+                var propsLength = props.length;
+                if (propsLength) {
+                    var lCleanup = getCleanup(lView);
+                    for (var i = 0; i < propsLength; i += 3) {
+                        var index = props[i];
+                        ngDevMode && assertDataInRange(lView, index);
+                        var minifiedName = props[i + 2];
+                        var directiveInstance = lView[index];
+                        var output = directiveInstance[minifiedName];
+                        if (ngDevMode && !isObservable(output)) {
+                            throw new Error("@Output " + minifiedName + " not initialized in '" + directiveInstance.constructor.name + "'.");
+                        }
+                        var subscription = output.subscribe(listenerFn);
+                        var idx = lCleanup.length;
+                        lCleanup.push(listenerFn, subscription);
+                        tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
                     }
-                    var subscription = output.subscribe(listenerFn);
-                    var idx = lCleanup.length;
-                    lCleanup.push(listenerFn, subscription);
-                    tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
                 }
             }
         }
@@ -18629,7 +18628,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.6+19.sha-5cf5972.with-local-changes');
+    var VERSION = new Version('9.0.0-next.6+27.sha-527ce3b.with-local-changes');
 
     /**
      * @license
