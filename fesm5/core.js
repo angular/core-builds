@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+15.sha-5f095a5.with-local-changes
+ * @license Angular v9.0.0-next.6+17.sha-fcdd068.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8370,17 +8370,29 @@ function generatePropertyAliases(tView, tNode, direction) {
 }
 /**
  * Mapping between attributes names that don't correspond to their element property names.
+ *
+ * Performance note: this function is written as a series of if checks (instead of, say, a property
+ * object lookup) for performance reasons - the series of `if` checks seems to be the fastest way of
+ * mapping property names. Do NOT change without benchmarking.
+ *
  * Note: this mapping has to be kept in sync with the equally named mapping in the template
  * type-checking machinery of ngtsc.
  */
-var ATTR_TO_PROP = {
-    'class': 'className',
-    'for': 'htmlFor',
-    'formaction': 'formAction',
-    'innerHtml': 'innerHTML',
-    'readonly': 'readOnly',
-    'tabindex': 'tabIndex',
-};
+function mapPropName(name) {
+    if (name === 'class')
+        return 'className';
+    if (name === 'for')
+        return 'htmlFor';
+    if (name === 'formaction')
+        return 'formAction';
+    if (name === 'innerHtml')
+        return 'innerHTML';
+    if (name === 'readonly')
+        return 'readOnly';
+    if (name === 'tabindex')
+        return 'tabIndex';
+    return name;
+}
 function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     var lView = getLView();
@@ -8412,7 +8424,7 @@ function elementPropertyInternal(index, propName, value, sanitizer, nativeOnly, 
         }
     }
     else if (tNode.type === 3 /* Element */) {
-        propName = ATTR_TO_PROP[propName] || propName;
+        propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
             if (!validateProperty(lView, element, propName, tNode)) {
@@ -18474,7 +18486,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.6+15.sha-5f095a5.with-local-changes');
+var VERSION = new Version('9.0.0-next.6+17.sha-fcdd068.with-local-changes');
 
 /**
  * @license
