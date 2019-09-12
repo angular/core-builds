@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+40.sha-e82f56b.with-local-changes
+ * @license Angular v9.0.0-next.6+41.sha-2bf5606.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18474,7 +18474,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.6+40.sha-e82f56b.with-local-changes');
+var VERSION = new Version('9.0.0-next.6+41.sha-2bf5606.with-local-changes');
 
 /**
  * @license
@@ -30624,7 +30624,7 @@ if (ngDevMode) {
     _global.$localize = _global.$localize || function () {
         throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
             'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
-            'Please add `import \'@angular/localize\';` to your polyfills.ts file.');
+            'Please add `import \'@angular/localize/init\';` to your polyfills.ts file.');
     };
 }
 
