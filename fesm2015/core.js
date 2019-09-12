@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+14.sha-a85eccd.with-local-changes
+ * @license Angular v9.0.0-next.6+15.sha-5f095a5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1172,72 +1172,6 @@ function assertDataInRange(arr, index) {
 }
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function ngDevModeResetPerfCounters() {
-    const locationString = typeof location !== 'undefined' ? location.toString() : '';
-    const newCounters = {
-        namedConstructors: locationString.indexOf('ngDevMode=namedConstructors') != -1,
-        firstTemplatePass: 0,
-        tNode: 0,
-        tView: 0,
-        rendererCreateTextNode: 0,
-        rendererSetText: 0,
-        rendererCreateElement: 0,
-        rendererAddEventListener: 0,
-        rendererSetAttribute: 0,
-        rendererRemoveAttribute: 0,
-        rendererSetProperty: 0,
-        rendererSetClassName: 0,
-        rendererAddClass: 0,
-        rendererRemoveClass: 0,
-        rendererSetStyle: 0,
-        rendererRemoveStyle: 0,
-        rendererDestroy: 0,
-        rendererDestroyNode: 0,
-        rendererMoveNode: 0,
-        rendererRemoveNode: 0,
-        rendererAppendChild: 0,
-        rendererInsertBefore: 0,
-        rendererCreateComment: 0,
-        styleMap: 0,
-        styleMapCacheMiss: 0,
-        classMap: 0,
-        classMapCacheMiss: 0,
-        styleProp: 0,
-        stylePropCacheMiss: 0,
-        classProp: 0,
-        classPropCacheMiss: 0,
-        flushStyling: 0,
-        classesApplied: 0,
-        stylesApplied: 0,
-        stylingWritePersistedState: 0,
-        stylingReadPersistedState: 0,
-    };
-    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-    const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
-    return newCounters;
-}
-/**
- * This checks to see if the `ngDevMode` has been set. If yes,
- * then we honor it, otherwise we default to dev mode with additional checks.
- *
- * The idea is that unless we are doing production build where we explicitly
- * set `ngDevMode == false` we should be helping the developer by providing
- * as much early warning and errors as possible.
- *
- * NOTE: changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
- */
-if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    ngDevModeResetPerfCounters();
-}
-
-/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -1385,6 +1319,93 @@ function noSideEffects(fn) {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function ngDevModeResetPerfCounters() {
+    const locationString = typeof location !== 'undefined' ? location.toString() : '';
+    const newCounters = {
+        namedConstructors: locationString.indexOf('ngDevMode=namedConstructors') != -1,
+        firstTemplatePass: 0,
+        tNode: 0,
+        tView: 0,
+        rendererCreateTextNode: 0,
+        rendererSetText: 0,
+        rendererCreateElement: 0,
+        rendererAddEventListener: 0,
+        rendererSetAttribute: 0,
+        rendererRemoveAttribute: 0,
+        rendererSetProperty: 0,
+        rendererSetClassName: 0,
+        rendererAddClass: 0,
+        rendererRemoveClass: 0,
+        rendererSetStyle: 0,
+        rendererRemoveStyle: 0,
+        rendererDestroy: 0,
+        rendererDestroyNode: 0,
+        rendererMoveNode: 0,
+        rendererRemoveNode: 0,
+        rendererAppendChild: 0,
+        rendererInsertBefore: 0,
+        rendererCreateComment: 0,
+        styleMap: 0,
+        styleMapCacheMiss: 0,
+        classMap: 0,
+        classMapCacheMiss: 0,
+        styleProp: 0,
+        stylePropCacheMiss: 0,
+        classProp: 0,
+        classPropCacheMiss: 0,
+        flushStyling: 0,
+        classesApplied: 0,
+        stylesApplied: 0,
+        stylingWritePersistedState: 0,
+        stylingReadPersistedState: 0,
+    };
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+    const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
+    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
+    return newCounters;
+}
+/**
+ * This function checks to see if the `ngDevMode` has been set. If yes,
+ * then we honor it, otherwise we default to dev mode with additional checks.
+ *
+ * The idea is that unless we are doing production build where we explicitly
+ * set `ngDevMode == false` we should be helping the developer by providing
+ * as much early warning and errors as possible.
+ *
+ * `ɵɵdefineComponent` is guaranteed to have been called before any component template functions
+ * (and thus Ivy instructions), so a single initialization there is sufficient to ensure ngDevMode
+ * is defined for the entire instruction set.
+ *
+ * When using checking `ngDevMode` on toplevel, always init it before referencing it
+ * (e.g. `((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode())`), otherwise you can
+ *  get a `ReferenceError` like in https://github.com/angular/angular/issues/31595.
+ *
+ * Details on possible values for `ngDevMode` can be found on its docstring.
+ *
+ * NOTE:
+ * - changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
+ */
+function initNgDevMode() {
+    // The below checks are to ensure that calling `initNgDevMode` multiple times does not
+    // reset the counters.
+    // If the `ngDevMode` is not an object, then it means we have not created the perf counters
+    // yet.
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        if (typeof ngDevMode !== 'object') {
+            ngDevModeResetPerfCounters();
+        }
+        return !!ngDevMode;
+    }
+    return false;
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -1399,7 +1420,7 @@ const EMPTY_OBJ = {};
 /** @type {?} */
 const EMPTY_ARRAY = [];
 // freezing the values prevents any code from accidentally inserting new values in
-if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
     // These property accesses can be ignored because ngDevMode will be set to false
     // when optimizing code and the whole if statement will be dropped.
     // tslint:disable-next-line:no-toplevel-property-access
@@ -1461,6 +1482,9 @@ let _renderCompCount = 0;
  * @return {?}
  */
 function ɵɵdefineComponent(componentDefinition) {
+    // Initialize ngDevMode. This must be the first statement in ɵɵdefineComponent.
+    // See the `initNgDevMode` docstring for more information.
+    (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
     /** @type {?} */
     const type = componentDefinition.type;
     /** @type {?} */
@@ -10870,6 +10894,8 @@ if (false) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/** @type {?} */
+const NG_DEV_MODE = ((typeof ngDevMode === 'undefined' || !!ngDevMode) && initNgDevMode());
 /*
  * This file contains conditionally attached classes which provide human readable (debug) level
  * information for `LView`, `LContainer` and other internal data structures. These data structures
@@ -10899,7 +10925,7 @@ if (false) {
  * ```
  */
 /** @type {?} */
-const LViewArray = ngDevMode && createNamedArrayType('LView');
+const LViewArray = NG_DEV_MODE && createNamedArrayType('LView') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
 let LVIEW_EMPTY;
 // can't initialize here or it will not be tree shaken, because `LView`
@@ -10913,7 +10939,7 @@ let LVIEW_EMPTY;
  */
 function cloneToLView(list) {
     if (LVIEW_EMPTY === undefined)
-        LVIEW_EMPTY = new (/** @type {?} */ (LViewArray))();
+        LVIEW_EMPTY = new LViewArray();
     return (/** @type {?} */ (LVIEW_EMPTY.concat(list)));
 }
 /**
@@ -11170,7 +11196,7 @@ function processTNodeChildren(tNode, buf) {
     }
 }
 /** @type {?} */
-const TViewData = ngDevMode && createNamedArrayType('TViewData');
+const TViewData = NG_DEV_MODE && createNamedArrayType('TViewData') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
 let TVIEWDATA_EMPTY;
 // can't initialize here or it will not be tree shaken, because `LView`
@@ -11184,25 +11210,25 @@ let TVIEWDATA_EMPTY;
  */
 function cloneToTViewData(list) {
     if (TVIEWDATA_EMPTY === undefined)
-        TVIEWDATA_EMPTY = new (/** @type {?} */ (TViewData))();
+        TVIEWDATA_EMPTY = new TViewData();
     return (/** @type {?} */ (TVIEWDATA_EMPTY.concat(list)));
 }
 /** @type {?} */
-const LViewBlueprint = ngDevMode && createNamedArrayType('LViewBlueprint');
+const LViewBlueprint = NG_DEV_MODE && createNamedArrayType('LViewBlueprint') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const MatchesArray = ngDevMode && createNamedArrayType('MatchesArray');
+const MatchesArray = NG_DEV_MODE && createNamedArrayType('MatchesArray') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const TViewComponents = ngDevMode && createNamedArrayType('TViewComponents');
+const TViewComponents = NG_DEV_MODE && createNamedArrayType('TViewComponents') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const TNodeLocalNames = ngDevMode && createNamedArrayType('TNodeLocalNames');
+const TNodeLocalNames = NG_DEV_MODE && createNamedArrayType('TNodeLocalNames') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const TNodeInitialInputs = ngDevMode && createNamedArrayType('TNodeInitialInputs');
+const TNodeInitialInputs = NG_DEV_MODE && createNamedArrayType('TNodeInitialInputs') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const TNodeInitialData = ngDevMode && createNamedArrayType('TNodeInitialData');
+const TNodeInitialData = NG_DEV_MODE && createNamedArrayType('TNodeInitialData') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const LCleanup = ngDevMode && createNamedArrayType('LCleanup');
+const LCleanup = NG_DEV_MODE && createNamedArrayType('LCleanup') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
-const TCleanup = ngDevMode && createNamedArrayType('TCleanup');
+const TCleanup = NG_DEV_MODE && createNamedArrayType('TCleanup') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /**
  * @param {?} lView
  * @return {?}
@@ -12495,7 +12521,7 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
  */
 function createViewBlueprint(bindingStartIndex, initialViewLength) {
     /** @type {?} */
-    const blueprint = ngDevMode ? new (/** @type {?} */ (LViewBlueprint))() : [];
+    const blueprint = ngDevMode ? new LViewBlueprint() : [];
     for (let i = 0; i < initialViewLength; i++) {
         blueprint.push(i < bindingStartIndex ? null : NO_CHANGE);
     }
@@ -13111,7 +13137,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
             /** @type {?} */
             const def = (/** @type {?} */ (registry[i]));
             if (isNodeMatchingSelectorList(tNode, (/** @type {?} */ (def.selectors)), /* isProjectionMode */ false)) {
-                matches || (matches = ngDevMode ? new (/** @type {?} */ (MatchesArray))() : []);
+                matches || (matches = ngDevMode ? new MatchesArray() : []);
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
                     if (tNode.flags & 2 /* isComponentHost */)
@@ -13139,7 +13165,7 @@ function findDirectiveMatches(tView, viewData, tNode) {
 function markAsComponentHost(tView, hostTNode) {
     ngDevMode && assertFirstTemplatePass(tView);
     hostTNode.flags = 2 /* isComponentHost */;
-    (tView.components || (tView.components = ngDevMode ? new (/** @type {?} */ (TViewComponents))() : [])).push(hostTNode.index);
+    (tView.components || (tView.components = ngDevMode ? new TViewComponents() : [])).push(hostTNode.index);
 }
 /**
  * Caches local names and their matching directive indices for query and template lookups.
@@ -13152,7 +13178,7 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
     if (localRefs) {
         /** @type {?} */
         const localNames = tNode.localNames =
-            ngDevMode ? new (/** @type {?} */ (TNodeLocalNames))() : [];
+            ngDevMode ? new TNodeLocalNames() : [];
         // Local names must be stored in tNode in the same order that localRefs are defined
         // in the template to ensure the data is loaded in the same slots as their refs
         // in the template (for template queries).
@@ -13339,7 +13365,7 @@ function setInputsFromAttrs(directiveIndex, instance, def, tNode) {
  */
 function generateInitialInputs(directiveIndex, inputs, tNode) {
     /** @type {?} */
-    const initialInputData = tNode.initialInputs || (tNode.initialInputs = ngDevMode ? new (/** @type {?} */ (TNodeInitialInputs))() : []);
+    const initialInputData = tNode.initialInputs || (tNode.initialInputs = ngDevMode ? new TNodeInitialInputs() : []);
     // Ensure that we don't create sparse arrays
     for (let i = initialInputData.length; i <= directiveIndex; i++) {
         initialInputData.push(null);
@@ -13371,7 +13397,7 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
         if (minifiedInputName !== undefined) {
             /** @type {?} */
             const inputsToStore = initialInputData[directiveIndex] ||
-                (initialInputData[directiveIndex] = ngDevMode ? new (/** @type {?} */ (TNodeInitialData))() : []);
+                (initialInputData[directiveIndex] = ngDevMode ? new TNodeInitialData() : []);
             inputsToStore.push((/** @type {?} */ (attrName)), minifiedInputName, (/** @type {?} */ (attrValue)));
         }
         i += 2;
@@ -13383,7 +13409,8 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
 //////////////////////////
 // Not sure why I need to do `any` here but TS complains later.
 /** @type {?} */
-const LContainerArray = ngDevMode && createNamedArrayType('LContainer');
+const LContainerArray = ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) &&
+    createNamedArrayType('LContainer');
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -13787,14 +13814,14 @@ function initializeTNodeInputs(tView, tNode) {
  */
 function getCleanup(view) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new (/** @type {?} */ (LCleanup))() : []);
+    return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new LCleanup() : []);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function getTViewCleanup(view) {
-    return view[TVIEW].cleanup || (view[TVIEW].cleanup = ngDevMode ? new (/** @type {?} */ (TCleanup))() : []);
+    return view[TVIEW].cleanup || (view[TVIEW].cleanup = ngDevMode ? new TCleanup() : []);
 }
 /**
  * There are cases where the sub component's renderer needs to be included
@@ -26495,7 +26522,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.6+14.sha-a85eccd.with-local-changes');
+const VERSION = new Version('9.0.0-next.6+15.sha-5f095a5.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -37781,6 +37808,9 @@ function isNgModule(value) {
  * @return {?}
  */
 function compileComponent(type, metadata) {
+    // Initialize ngDevMode. This must be the first statement in compileComponent.
+    // See the `initNgDevMode` docstring for more information.
+    (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
     /** @type {?} */
     /** @nocollapse */ let ngComponentDef = null;
     /** @type {?} */

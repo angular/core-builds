@@ -17,7 +17,7 @@ import { RComment, RElement, RNode } from '../interfaces/renderer';
 import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
 import { TStylingContext } from '../styling_next/interfaces';
 import { DebugStyling as DebugNewStyling } from '../styling_next/styling_debug';
-export declare const LViewArray: ArrayConstructor | null;
+export declare const LViewArray: ArrayConstructor;
 /**
  * This function clones a blueprint and creates LView.
  *
@@ -96,14 +96,14 @@ export declare const TNodeConstructor: {
  * Simple slice will keep the same type, and we need it to be TData
  */
 export declare function cloneToTViewData(list: any[]): TData;
-export declare const LViewBlueprint: ArrayConstructor | null;
-export declare const MatchesArray: ArrayConstructor | null;
-export declare const TViewComponents: ArrayConstructor | null;
-export declare const TNodeLocalNames: ArrayConstructor | null;
-export declare const TNodeInitialInputs: ArrayConstructor | null;
-export declare const TNodeInitialData: ArrayConstructor | null;
-export declare const LCleanup: ArrayConstructor | null;
-export declare const TCleanup: ArrayConstructor | null;
+export declare const LViewBlueprint: ArrayConstructor;
+export declare const MatchesArray: ArrayConstructor;
+export declare const TViewComponents: ArrayConstructor;
+export declare const TNodeLocalNames: ArrayConstructor;
+export declare const TNodeInitialInputs: ArrayConstructor;
+export declare const TNodeInitialData: ArrayConstructor;
+export declare const LCleanup: ArrayConstructor;
+export declare const TCleanup: ArrayConstructor;
 export declare function attachLViewDebug(lView: LView): void;
 export declare function attachLContainerDebug(lContainer: LContainer): void;
 export declare function toDebug(obj: LView): LViewDebug;
