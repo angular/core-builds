@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+48.sha-5328bb2.with-local-changes
+ * @license Angular v9.0.0-next.6+49.sha-bfb3995.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3024,7 +3024,7 @@ function getComponentViewByIndex(nodeIndex, hostView) {
  */
 function readPatchedData(target) {
     ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME];
+    return target[MONKEY_PATCH_KEY_NAME] || null;
 }
 function readPatchedLView(target) {
     var value = readPatchedData(target);
@@ -17088,7 +17088,11 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
  * @publicApi
  */
 function getComponent(element) {
-    var context = loadLContextFromNode(element);
+    if (!(element instanceof Node))
+        throw new Error('Expecting instance of DOM Node');
+    var context = loadLContext(element, false);
+    if (context === null)
+        return null;
     if (context.component === undefined) {
         context.component = getComponentAtNodeIndex(context.nodeIndex, context.lView);
     }
@@ -17115,7 +17119,11 @@ function getComponent(element) {
  * @publicApi
  */
 function getContext$1(element) {
-    var context = loadLContextFromNode(element);
+    if (!(element instanceof Node))
+        throw new Error('Expecting instance of DOM Node');
+    var context = loadLContext(element, false);
+    if (context === null)
+        return null;
     return context.lView[CONTEXT];
 }
 /**
@@ -17139,7 +17147,9 @@ function getContext$1(element) {
  * @publicApi
  */
 function getViewComponent(element) {
-    var context = loadLContext(element);
+    var context = loadLContext(element, false);
+    if (context === null)
+        return null;
     var lView = context.lView;
     var parent;
     ngDevMode && assertLView(lView);
@@ -17169,7 +17179,9 @@ function getRootComponents(target) {
  * @publicApi
  */
 function getInjector(target) {
-    var context = loadLContext(target);
+    var context = loadLContext(target, false);
+    if (context === null)
+        return Injector.NULL;
     var tNode = context.lView[TVIEW].data[context.nodeIndex];
     return new NodeInjector(tNode, context.lView);
 }
@@ -17181,7 +17193,7 @@ function getInjector(target) {
  */
 function getInjectionTokens(element) {
     var context = loadLContext(element, false);
-    if (!context)
+    if (context === null)
         return [];
     var lView = context.lView;
     var tView = lView[TVIEW];
@@ -17235,7 +17247,9 @@ function loadLContext(target, throwOnNotFound) {
  * @publicApi
  */
 function getLocalRefs(target) {
-    var context = loadLContext(target);
+    var context = loadLContext(target, false);
+    if (context === null)
+        return {};
     if (context.localRefs === undefined) {
         context.localRefs = discoverLocalRefs(context.lView, context.nodeIndex);
     }
@@ -17299,7 +17313,11 @@ function isBrowserEvents(listener) {
  * @publicApi
  */
 function getListeners(element) {
-    var lContext = loadLContextFromNode(element);
+    if (!(element instanceof Node))
+        throw new Error('Expecting instance of DOM Node');
+    var lContext = loadLContext(element, false);
+    if (lContext === null)
+        return [];
     var lView = lContext.lView;
     var tView = lView[TVIEW];
     var lCleanup = lView[CLEANUP];
@@ -18452,7 +18470,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.6+48.sha-5328bb2.with-local-changes');
+var VERSION = new Version('9.0.0-next.6+49.sha-bfb3995.with-local-changes');
 
 /**
  * @license
