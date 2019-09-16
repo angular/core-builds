@@ -19,27 +19,12 @@ import { NO_CHANGE } from '../tokens';
  * --------
  */
 /**
- * Temporary function to bridge styling functionality between this new
- * refactor (which is here inside of `styling_next/`) and the old
- * implementation (which lives inside of `styling/`).
- *
- * This function is executed during the creation block of an element.
- * Because the existing styling implementation issues a call to the
- * `styling()` instruction, this instruction will also get run. The
- * central idea here is that the directive index values are bound
- * into the context. The directive index is temporary and is only
- * required until the `select(n)` instruction is fully functional.
- *
- * @codeGenApi
- */
-export declare function ɵɵstyling(): void;
-/**
  * Sets the current style sanitizer function which will then be used
  * within all follow-up prop and map-based style binding instructions
  * for the given element.
  *
  * Note that once styling has been applied to the element (i.e. once
- * `select(n)` is executed or the hostBindings/template function exits)
+ * `advance(n)` is executed or the hostBindings/template function exits)
  * then the active `sanitizerFn` will be set to `null`. This means that
  * once styling is applied to another element then a another call to
  * `styleSanitizer` will need to be made.
@@ -67,11 +52,17 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  *        be ignored.
  *
  * Note that this will apply the provided style value to the host element if this function is called
- * within a host binding.
+ * within a host binding function.
  *
  * @codeGenApi
  */
 export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffix?: string | null): void;
+/**
+ * Internal function for applying a single style to an element.
+ *
+ * The reason why this function has been separated from `ɵɵstyleProp` is because
+ * it is also called from `ɵɵstylePropInterpolate`.
+ */
 export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | SafeValue | null, suffix?: string | null | undefined): void;
 /**
  * Update a class binding on an element with the provided value.
@@ -84,7 +75,7 @@ export declare function stylePropInternal(elementIndex: number, prop: string, va
  * @param value A true/false value which will turn the class on or off.
  *
  * Note that this will apply the provided class value to the host element if this function
- * is called within a host binding.
+ * is called within a host binding function.
  *
  * @codeGenApi
  */
@@ -132,23 +123,17 @@ export declare function ɵɵstyleMap(styles: {
 export declare function ɵɵclassMap(classes: {
     [className: string]: any;
 } | NO_CHANGE | string | null): void;
+/**
+ * Internal function for applying a class string or key/value map of classes to an element.
+ *
+ * The reason why this function has been separated from `ɵɵclassMap` is because
+ * it is also called from `ɵɵclassMapInterpolate`.
+ */
 export declare function classMapInternal(elementIndex: number, classes: {
     [className: string]: any;
 } | NO_CHANGE | string | null): void;
-/**
- * Flushes all styling code to the element.
- *
- * This function is designed to be called from the template and hostBindings
- * functions and may be called multiple times depending whether multiple
- * sources of styling exist. If called multiple times, only the last call
- * to `stlyingApply()` will render styling to the element.
- *
- * @codeGenApi
- */
-export declare function ɵɵstylingApply(): void;
 /**
  * Searches and assigns provided all static style/class entries (found in the `attrs` value)
  * and registers them in their respective styling contexts.
  */
 export declare function registerInitialStylingOnTNode(tNode: TNode, attrs: TAttributes, startIndex: number): boolean;
-export declare function getActiveDirectiveStylingIndex(): number;
