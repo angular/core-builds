@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+55.sha-1748aeb.with-local-changes
+ * @license Angular v9.0.0-next.6+56.sha-52a6da0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7184,7 +7184,7 @@ function createNamedArrayType(name) {
         try {
             // We need to do it this way so that TypeScript does not down-level the below code.
             const FunctionConstructor = createNamedArrayType.constructor;
-            return (new FunctionConstructor('Array', `return class ABC extends Array{}`))(Array);
+            return (new FunctionConstructor('Array', `return class ${name} extends Array{}`))(Array);
         }
         catch (e) {
             // If it does not work just give up and fall back to regular Array.
@@ -26550,7 +26550,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.6+55.sha-1748aeb.with-local-changes');
+const VERSION = new Version('9.0.0-next.6+56.sha-52a6da0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
