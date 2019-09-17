@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+71.sha-b741a1c.with-local-changes
+ * @license Angular v9.0.0-next.6+72.sha-a0d04c6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26714,7 +26714,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.6+71.sha-b741a1c.with-local-changes');
+const VERSION = new Version('9.0.0-next.6+72.sha-a0d04c6.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -40661,6 +40661,21 @@ function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
      */
     () => moduleFactory));
 }
+// the `window.ng` global utilities are only available in non-VE versions of
+// Angular. The function switch below will make sure that the code is not
+// included into Angular when PRE mode is active.
+/**
+ * @return {?}
+ */
+function publishDefaultGlobalUtils__PRE_R3__() { }
+/**
+ * @return {?}
+ */
+function publishDefaultGlobalUtils__POST_R3__() {
+    ngDevMode && publishDefaultGlobalUtils();
+}
+/** @type {?} */
+let publishDefaultGlobalUtils$1 = publishDefaultGlobalUtils__POST_R3__;
 /** @type {?} */
 let isBoundToModule = isBoundToModule__POST_R3__;
 /**
@@ -40715,6 +40730,7 @@ function createPlatform(injector) {
         !_platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
         throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
     }
+    publishDefaultGlobalUtils$1();
     _platform = injector.get(PlatformRef);
     /** @type {?} */
     const inits = injector.get(PLATFORM_INITIALIZER, null);

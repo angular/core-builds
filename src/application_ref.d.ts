@@ -15,6 +15,8 @@ import { ViewRef } from './linker/view_ref';
 import { NgZone } from './zone/ng_zone';
 import * as i0 from "./r3_symbols";
 export declare function compileNgModuleFactory__POST_R3__<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
+export declare function publishDefaultGlobalUtils__PRE_R3__(): void;
+export declare function publishDefaultGlobalUtils__POST_R3__(): void;
 export declare function isBoundToModule__PRE_R3__<C>(cf: ComponentFactory<C>): boolean;
 export declare function isBoundToModule__POST_R3__<C>(cf: ComponentFactory<C>): boolean;
 export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
