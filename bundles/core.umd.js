@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+75.sha-f1b1de9.with-local-changes
+ * @license Angular v9.0.0-next.6+77.sha-4726ac2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7644,21 +7644,7 @@
             var debugNodes = [];
             var tNodeCursor = tNode;
             while (tNodeCursor) {
-                var rawValue = lView[tNode.index];
-                var native = unwrapRNode(rawValue);
-                var componentLViewDebug = toDebug(readLViewValue(rawValue));
-                var styles = isStylingContext(tNode.styles) ?
-                    new NodeStylingDebug(tNode.styles, lView) :
-                    null;
-                var classes = isStylingContext(tNode.classes) ?
-                    new NodeStylingDebug(tNode.classes, lView, true) :
-                    null;
-                debugNodes.push({
-                    html: toHtml(native),
-                    native: native, styles: styles, classes: classes,
-                    nodes: toDebugNodes(tNode.child, lView),
-                    component: componentLViewDebug,
-                });
+                debugNodes.push(buildDebugNode(tNodeCursor, lView));
                 tNodeCursor = tNodeCursor.next;
             }
             return debugNodes;
@@ -7666,6 +7652,23 @@
         else {
             return null;
         }
+    }
+    function buildDebugNode(tNode, lView) {
+        var rawValue = lView[tNode.index];
+        var native = unwrapRNode(rawValue);
+        var componentLViewDebug = toDebug(readLViewValue(rawValue));
+        var styles = isStylingContext(tNode.styles) ?
+            new NodeStylingDebug(tNode.styles, lView) :
+            null;
+        var classes = isStylingContext(tNode.classes) ?
+            new NodeStylingDebug(tNode.classes, lView, true) :
+            null;
+        return {
+            html: toHtml(native),
+            native: native, styles: styles, classes: classes,
+            nodes: toDebugNodes(tNode.child, lView),
+            component: componentLViewDebug,
+        };
     }
     var LContainerDebug = /** @class */ (function () {
         function LContainerDebug(_raw_lContainer) {
@@ -17596,6 +17599,30 @@
     function isDirectiveDefHack(obj) {
         return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
     }
+    /**
+     * Returns the attached `DebugNode` instance for an element in the DOM.
+     *
+     * @param element DOM element which is owned by an existing component's view.
+     *
+     * @publicApi
+     */
+    function getDebugNode(element) {
+        var debugNode = null;
+        var lContext = loadLContextFromNode(element);
+        var lView = lContext.lView;
+        var nodeIndex = -1;
+        for (var i = HEADER_OFFSET; i < lView.length; i++) {
+            if (lView[i] === element) {
+                nodeIndex = i - HEADER_OFFSET;
+                break;
+            }
+        }
+        if (nodeIndex !== -1) {
+            var tNode = getTNode(nodeIndex, lView);
+            debugNode = buildDebugNode(tNode, lView);
+        }
+        return debugNode;
+    }
 
     /**
      * @license
@@ -17646,6 +17673,7 @@
             publishGlobalUtil('getInjector', getInjector);
             publishGlobalUtil('getRootComponents', getRootComponents);
             publishGlobalUtil('getDirectives', getDirectives);
+            publishGlobalUtil('getDebugNode', getDebugNode);
             publishGlobalUtil('markDirty', markDirty);
         }
     }
@@ -18685,7 +18713,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.6+75.sha-f1b1de9.with-local-changes');
+    var VERSION = new Version('9.0.0-next.6+77.sha-4726ac2.with-local-changes');
 
     /**
      * @license
@@ -28184,7 +28212,7 @@
      */
     function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode) {
         if (rootNativeNode !== nativeNode) {
-            var debugNode = getDebugNode(nativeNode);
+            var debugNode = getDebugNode$1(nativeNode);
             if (!debugNode) {
                 return;
             }
@@ -28214,7 +28242,7 @@
         var length = nodes.length;
         for (var i = 0; i < length; i++) {
             var node = nodes[i];
-            var debugNode = getDebugNode(node);
+            var debugNode = getDebugNode$1(node);
             if (debugNode) {
                 if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode) &&
                     matches.indexOf(debugNode) === -1) {
@@ -28297,7 +28325,7 @@
     /**
      * @publicApi
      */
-    var getDebugNode = getDebugNode__POST_R3__;
+    var getDebugNode$1 = getDebugNode__POST_R3__;
     function getAllDebugNodes() {
         return Array.from(_nativeNodeToDebugNode.values());
     }
@@ -30538,7 +30566,7 @@
         }
         DebugRenderer2.prototype.createDebugContext = function (nativeElement) { return this.debugContextFactory(nativeElement); };
         DebugRenderer2.prototype.destroyNode = function (node) {
-            var debugNode = getDebugNode(node);
+            var debugNode = getDebugNode$1(node);
             removeDebugNodeFromIndex(debugNode);
             if (debugNode instanceof DebugNode__PRE_R3__) {
                 debugNode.listeners.length = 0;
@@ -30575,25 +30603,25 @@
             return text;
         };
         DebugRenderer2.prototype.appendChild = function (parent, newChild) {
-            var debugEl = getDebugNode(parent);
-            var debugChildEl = getDebugNode(newChild);
+            var debugEl = getDebugNode$1(parent);
+            var debugChildEl = getDebugNode$1(newChild);
             if (debugEl && debugChildEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.addChild(debugChildEl);
             }
             this.delegate.appendChild(parent, newChild);
         };
         DebugRenderer2.prototype.insertBefore = function (parent, newChild, refChild) {
-            var debugEl = getDebugNode(parent);
-            var debugChildEl = getDebugNode(newChild);
-            var debugRefEl = getDebugNode(refChild);
+            var debugEl = getDebugNode$1(parent);
+            var debugChildEl = getDebugNode$1(newChild);
+            var debugRefEl = getDebugNode$1(refChild);
             if (debugEl && debugChildEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.insertBefore(debugRefEl, debugChildEl);
             }
             this.delegate.insertBefore(parent, newChild, refChild);
         };
         DebugRenderer2.prototype.removeChild = function (parent, oldChild) {
-            var debugEl = getDebugNode(parent);
-            var debugChildEl = getDebugNode(oldChild);
+            var debugEl = getDebugNode$1(parent);
+            var debugChildEl = getDebugNode$1(oldChild);
             if (debugEl && debugChildEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.removeChild(debugChildEl);
             }
@@ -30608,7 +30636,7 @@
             return el;
         };
         DebugRenderer2.prototype.setAttribute = function (el, name, value, namespace) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 var fullName = namespace ? namespace + ':' + name : name;
                 debugEl.attributes[fullName] = value;
@@ -30616,7 +30644,7 @@
             this.delegate.setAttribute(el, name, value, namespace);
         };
         DebugRenderer2.prototype.removeAttribute = function (el, name, namespace) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 var fullName = namespace ? namespace + ':' + name : name;
                 debugEl.attributes[fullName] = null;
@@ -30624,35 +30652,35 @@
             this.delegate.removeAttribute(el, name, namespace);
         };
         DebugRenderer2.prototype.addClass = function (el, name) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.classes[name] = true;
             }
             this.delegate.addClass(el, name);
         };
         DebugRenderer2.prototype.removeClass = function (el, name) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.classes[name] = false;
             }
             this.delegate.removeClass(el, name);
         };
         DebugRenderer2.prototype.setStyle = function (el, style, value, flags) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.styles[style] = value;
             }
             this.delegate.setStyle(el, style, value, flags);
         };
         DebugRenderer2.prototype.removeStyle = function (el, style, flags) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.styles[style] = null;
             }
             this.delegate.removeStyle(el, style, flags);
         };
         DebugRenderer2.prototype.setProperty = function (el, name, value) {
-            var debugEl = getDebugNode(el);
+            var debugEl = getDebugNode$1(el);
             if (debugEl && debugEl instanceof DebugElement__PRE_R3__) {
                 debugEl.properties[name] = value;
             }
@@ -30660,7 +30688,7 @@
         };
         DebugRenderer2.prototype.listen = function (target, eventName, callback) {
             if (typeof target !== 'string') {
-                var debugEl = getDebugNode(target);
+                var debugEl = getDebugNode$1(target);
                 if (debugEl) {
                     debugEl.listeners.push(new DebugEventListener(eventName, callback));
                 }
@@ -30821,7 +30849,7 @@
     exports.DebugEventListener = DebugEventListener;
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
-    exports.getDebugNode = getDebugNode;
+    exports.getDebugNode = getDebugNode$1;
     exports.Testability = Testability;
     exports.TestabilityRegistry = TestabilityRegistry;
     exports.setTestabilityGetter = setTestabilityGetter;

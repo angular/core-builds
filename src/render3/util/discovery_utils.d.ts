@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../../di/injector';
+import { DebugNode } from '../instructions/lview_debug';
 import { LContext } from '../interfaces/context';
 /**
  * Returns the component instance associated with a given DOM host element.
@@ -174,3 +175,11 @@ export declare function isBrowserEvents(listener: Listener): boolean;
  * @publicApi
  */
 export declare function getListeners(element: Element): Listener[];
+/**
+ * Returns the attached `DebugNode` instance for an element in the DOM.
+ *
+ * @param element DOM element which is owned by an existing component's view.
+ *
+ * @publicApi
+ */
+export declare function getDebugNode(element: Node): DebugNode | null;

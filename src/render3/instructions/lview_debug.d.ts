@@ -169,6 +169,7 @@ export interface DebugNode {
  * @param lView
  */
 export declare function toDebugNodes(tNode: TNode | null, lView: LView): DebugNode[] | null;
+export declare function buildDebugNode(tNode: TNode, lView: LView): DebugNode;
 export declare class LContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);
