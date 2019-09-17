@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.6+77.sha-4726ac2.with-local-changes
+ * @license Angular v9.0.0-next.6+80.sha-df1c456.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6406,47 +6406,73 @@ function setStylingMapsSyncFn(fn) {
  * Assigns a style value to a style property for the given element.
  */
 var setStyle = function (renderer, native, prop, value) {
-    // the reason why this may be `null` is either because
-    // it's a container element or it's a part of a test
-    // environment that doesn't have styling. In either
-    // case it's safe not to apply styling to the element.
-    var nativeStyle = native.style;
-    if (value) {
-        // opacity, z-index and flexbox all have number values
-        // and these need to be converted into strings so that
-        // they can be assigned properly.
-        value = value.toString();
-        ngDevMode && ngDevMode.rendererSetStyle++;
-        renderer && isProceduralRenderer(renderer) ?
-            renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase) :
-            (nativeStyle && nativeStyle.setProperty(prop, value));
-    }
-    else {
-        ngDevMode && ngDevMode.rendererRemoveStyle++;
-        renderer && isProceduralRenderer(renderer) ?
-            renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
-            (nativeStyle && nativeStyle.removeProperty(prop));
+    if (renderer !== null) {
+        if (value) {
+            // opacity, z-index and flexbox all have number values
+            // and these need to be converted into strings so that
+            // they can be assigned properly.
+            value = value.toString();
+            ngDevMode && ngDevMode.rendererSetStyle++;
+            if (isProceduralRenderer(renderer)) {
+                renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase);
+            }
+            else {
+                // The reason why native style may be `null` is either because
+                // it's a container element or it's a part of a test
+                // environment that doesn't have styling. In either
+                // case it's safe not to apply styling to the element.
+                var nativeStyle = native.style;
+                if (nativeStyle != null) {
+                    nativeStyle.setProperty(prop, value);
+                }
+            }
+        }
+        else {
+            ngDevMode && ngDevMode.rendererRemoveStyle++;
+            if (isProceduralRenderer(renderer)) {
+                renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase);
+            }
+            else {
+                var nativeStyle = native.style;
+                if (nativeStyle != null) {
+                    nativeStyle.removeProperty(prop);
+                }
+            }
+        }
     }
 };
 /**
  * Adds/removes the provided className value to the provided element.
  */
 var setClass = function (renderer, native, className, value) {
-    if (className !== '') {
-        // the reason why this may be `null` is either because
-        // it's a container element or it's a part of a test
-        // environment that doesn't have styling. In either
-        // case it's safe not to apply styling to the element.
-        var classList = native.classList;
+    if (renderer !== null && className !== '') {
         if (value) {
             ngDevMode && ngDevMode.rendererAddClass++;
-            renderer && isProceduralRenderer(renderer) ? renderer.addClass(native, className) :
-                (classList && classList.add(className));
+            if (isProceduralRenderer(renderer)) {
+                renderer.addClass(native, className);
+            }
+            else {
+                // the reason why classList may be `null` is either because
+                // it's a container element or it's a part of a test
+                // environment that doesn't have styling. In either
+                // case it's safe not to apply styling to the element.
+                var classList = native.classList;
+                if (classList != null) {
+                    classList.add(className);
+                }
+            }
         }
         else {
             ngDevMode && ngDevMode.rendererRemoveClass++;
-            renderer && isProceduralRenderer(renderer) ? renderer.removeClass(native, className) :
-                (classList && classList.remove(className));
+            if (isProceduralRenderer(renderer)) {
+                renderer.removeClass(native, className);
+            }
+            else {
+                var classList = native.classList;
+                if (classList != null) {
+                    classList.remove(className);
+                }
+            }
         }
     }
 };
@@ -18601,7 +18627,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.6+77.sha-4726ac2.with-local-changes');
+var VERSION = new Version('9.0.0-next.6+80.sha-df1c456.with-local-changes');
 
 /**
  * @license
