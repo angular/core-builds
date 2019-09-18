@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.7+5.sha-708ae4c.with-local-changes
+ * @license Angular v9.0.0-next.7+10.sha-0450f39.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7430,7 +7430,7 @@ declare const enum TStylingConfig {
  * For the algorithm to apply styling values efficiently, the
  * styling map entries must be applied in sync (property by property)
  * with prop-based bindings. (The map-based algorithm is described
- * more inside of the `render3/styling_next/map_based_bindings.ts` file.)
+ * more inside of the `render3/styling/map_based_bindings.ts` file.)
  *
  * ## Sanitization
  * Sanitization is used to prevent invalid style values from being applied to
