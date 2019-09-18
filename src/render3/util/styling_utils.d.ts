@@ -1,6 +1,13 @@
+/**
+* @license
+* Copyright Google Inc. All Rights Reserved.
+*
+* Use of this source code is governed by an MIT-style license that can be
+* found in the LICENSE file at https://angular.io/license
+*/
 import { TNode } from '../interfaces/node';
+import { LStylingData, StylingMapArray, TStylingConfig, TStylingContext, TStylingContextIndex } from '../interfaces/styling';
 import { NO_CHANGE } from '../tokens';
-import { LStylingData, StylingMapArray, TStylingConfig, TStylingContext, TStylingContextIndex } from './interfaces';
 export declare const MAP_BASED_ENTRY_PROP_NAME = "[MAP]";
 export declare const TEMPLATE_DIRECTIVE_INDEX = 0;
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.7+5.sha-708ae4c.with-local-changes
+ * @license Angular v9.0.0-next.7+10.sha-0450f39.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2478,6 +2478,246 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    // TODO: cleanup once the code is merged in angular/angular
+    var RendererStyleFlags3;
+    (function (RendererStyleFlags3) {
+        RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
+        RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
+    })(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
+    /** Returns whether the `renderer` is a `ProceduralRenderer3` */
+    function isProceduralRenderer(renderer) {
+        return !!(renderer.listen);
+    }
+    var domRendererFactory3 = {
+        createRenderer: function (hostElement, rendererType) { return document; }
+    };
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd$3 = 1;
+
+    /**
+     * Assigns all attribute values to the provided element via the inferred renderer.
+     *
+     * This function accepts two forms of attribute entries:
+     *
+     * default: (key, value):
+     *  attrs = [key1, value1, key2, value2]
+     *
+     * namespaced: (NAMESPACE_MARKER, uri, name, value)
+     *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+     *
+     * The `attrs` array can contain a mix of both the default and namespaced entries.
+     * The "default" values are set without a marker, but if the function comes across
+     * a marker value then it will attempt to set a namespaced value. If the marker is
+     * not of a namespaced value then the function will quit and return the index value
+     * where it stopped during the iteration of the attrs array.
+     *
+     * See [AttributeMarker] to understand what the namespace marker value is.
+     *
+     * Note that this instruction does not support assigning style and class values to
+     * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+     * are applied to an element.
+     * @param renderer The renderer to be used
+     * @param native The element that the attributes will be assigned to
+     * @param attrs The attribute array of values that will be assigned to the element
+     * @returns the index value that was last accessed in the attributes array
+     */
+    function setUpAttributes(renderer, native, attrs) {
+        var isProc = isProceduralRenderer(renderer);
+        var i = 0;
+        while (i < attrs.length) {
+            var value = attrs[i];
+            if (typeof value === 'number') {
+                // only namespaces are supported. Other value types (such as style/class
+                // entries) are not supported in this function.
+                if (value !== 0 /* NamespaceURI */) {
+                    break;
+                }
+                // we just landed on the marker value ... therefore
+                // we should skip to the next entry
+                i++;
+                var namespaceURI = attrs[i++];
+                var attrName = attrs[i++];
+                var attrVal = attrs[i++];
+                ngDevMode && ngDevMode.rendererSetAttribute++;
+                isProc ?
+                    renderer.setAttribute(native, attrName, attrVal, namespaceURI) :
+                    native.setAttributeNS(namespaceURI, attrName, attrVal);
+            }
+            else {
+                // attrName is string;
+                var attrName = value;
+                var attrVal = attrs[++i];
+                // Standard attributes
+                ngDevMode && ngDevMode.rendererSetAttribute++;
+                if (isAnimationProp(attrName)) {
+                    if (isProc) {
+                        renderer.setProperty(native, attrName, attrVal);
+                    }
+                }
+                else {
+                    isProc ?
+                        renderer
+                            .setAttribute(native, attrName, attrVal) :
+                        native.setAttribute(attrName, attrVal);
+                }
+                i++;
+            }
+        }
+        // another piece of code may iterate over the same attributes array. Therefore
+        // it may be helpful to return the exact spot where the attributes array exited
+        // whether by running into an unsupported marker or if all the static values were
+        // iterated over.
+        return i;
+    }
+    /**
+     * Test whether the given value is a marker that indicates that the following
+     * attribute values in a `TAttributes` array are only the names of attributes,
+     * and not name-value pairs.
+     * @param marker The attribute marker to test.
+     * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
+     */
+    function isNameOnlyAttributeMarker(marker) {
+        return marker === 3 /* Bindings */ || marker === 4 /* Template */ ||
+            marker === 6 /* I18n */;
+    }
+    var ANIMATION_PROP_PREFIX = '@';
+    function isAnimationProp(name) {
+        return name[0] === ANIMATION_PROP_PREFIX;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /// Parent Injector Utils ///////////////////////////////////////////////////////////////
+    function hasParentInjector(parentLocation) {
+        return parentLocation !== NO_PARENT_INJECTOR;
+    }
+    function getParentInjectorIndex(parentLocation) {
+        return parentLocation & 32767 /* InjectorIndexMask */;
+    }
+    function getParentInjectorViewOffset(parentLocation) {
+        return parentLocation >> 16 /* ViewOffsetShift */;
+    }
+    /**
+     * Unwraps a parent injector location number to find the view offset from the current injector,
+     * then walks up the declaration view tree until the view is found that contains the parent
+     * injector.
+     *
+     * @param location The location of the parent injector, which contains the view offset
+     * @param startView The LView instance from which to start walking up the view tree
+     * @returns The LView instance that contains the parent injector
+     */
+    function getParentInjectorView(location, startView) {
+        var viewOffset = getParentInjectorViewOffset(location);
+        var parentView = startView;
+        // For most cases, the parent injector can be found on the host node (e.g. for component
+        // or container), but we must keep the loop here to support the rarer case of deeply nested
+        // <ng-template> tags or inline views, where the parent injector might live many views
+        // above the child injector.
+        while (viewOffset > 0) {
+            parentView = parentView[DECLARATION_VIEW];
+            viewOffset--;
+        }
+        return parentView;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Used for stringify render output in Ivy.
+     * Important! This function is very performance-sensitive and we should
+     * be extra careful not to introduce megamorphic reads in it.
+     */
+    function renderStringify(value) {
+        if (typeof value === 'string')
+            return value;
+        if (value == null)
+            return '';
+        return '' + value;
+    }
+    /**
+     * Used to stringify a value so that it can be displayed in an error message.
+     * Important! This function contains a megamorphic read and should only be
+     * used for error messages.
+     */
+    function stringifyForError(value) {
+        if (typeof value === 'function')
+            return value.name || value.toString();
+        if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+            return value.type.name || value.type.toString();
+        }
+        return renderStringify(value);
+    }
+    var defaultScheduler = (function () {
+        return (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
+            setTimeout // everything else
+        ).bind(_global);
+    })();
+    /**
+     *
+     * @codeGenApi
+     */
+    function ɵɵresolveWindow(element) {
+        return { name: 'window', target: element.ownerDocument.defaultView };
+    }
+    /**
+     *
+     * @codeGenApi
+     */
+    function ɵɵresolveDocument(element) {
+        return { name: 'document', target: element.ownerDocument };
+    }
+    /**
+     *
+     * @codeGenApi
+     */
+    function ɵɵresolveBody(element) {
+        return { name: 'body', target: element.ownerDocument.body };
+    }
+    /**
+     * The special delimiter we use to separate property names, prefixes, and suffixes
+     * in property binding metadata. See storeBindingMetadata().
+     *
+     * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+     * because it is a very uncommon character that is unlikely to be part of a user's
+     * property names or interpolation strings. If it is in fact used in a property
+     * binding, DebugElement.properties will not return the correct value for that
+     * binding. However, there should be no runtime effect for real applications.
+     *
+     * This character is typically rendered as a question mark inside of a diamond.
+     * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+     *
+     */
+    var INTERPOLATION_DELIMITER = "\uFFFD";
+    /**
+     * Unwrap a value which might be behind a closure (for forward declaration reasons).
+     */
+    function maybeUnwrapFn(value) {
+        if (value instanceof Function) {
+            return value();
+        }
+        else {
+            return value;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /** A special value which designates that a value has not changed. */
     var NO_CHANGE = {};
 
@@ -2815,246 +3055,6 @@
             }
         }
         return stylingMapArr;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    // TODO: cleanup once the code is merged in angular/angular
-    var RendererStyleFlags3;
-    (function (RendererStyleFlags3) {
-        RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
-        RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
-    })(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
-    /** Returns whether the `renderer` is a `ProceduralRenderer3` */
-    function isProceduralRenderer(renderer) {
-        return !!(renderer.listen);
-    }
-    var domRendererFactory3 = {
-        createRenderer: function (hostElement, rendererType) { return document; }
-    };
-    // Note: This hack is necessary so we don't erroneously get a circular dependency
-    // failure based on types.
-    var unusedValueExportToPlacateAjd$3 = 1;
-
-    /**
-     * Assigns all attribute values to the provided element via the inferred renderer.
-     *
-     * This function accepts two forms of attribute entries:
-     *
-     * default: (key, value):
-     *  attrs = [key1, value1, key2, value2]
-     *
-     * namespaced: (NAMESPACE_MARKER, uri, name, value)
-     *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
-     *
-     * The `attrs` array can contain a mix of both the default and namespaced entries.
-     * The "default" values are set without a marker, but if the function comes across
-     * a marker value then it will attempt to set a namespaced value. If the marker is
-     * not of a namespaced value then the function will quit and return the index value
-     * where it stopped during the iteration of the attrs array.
-     *
-     * See [AttributeMarker] to understand what the namespace marker value is.
-     *
-     * Note that this instruction does not support assigning style and class values to
-     * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
-     * are applied to an element.
-     * @param renderer The renderer to be used
-     * @param native The element that the attributes will be assigned to
-     * @param attrs The attribute array of values that will be assigned to the element
-     * @returns the index value that was last accessed in the attributes array
-     */
-    function setUpAttributes(renderer, native, attrs) {
-        var isProc = isProceduralRenderer(renderer);
-        var i = 0;
-        while (i < attrs.length) {
-            var value = attrs[i];
-            if (typeof value === 'number') {
-                // only namespaces are supported. Other value types (such as style/class
-                // entries) are not supported in this function.
-                if (value !== 0 /* NamespaceURI */) {
-                    break;
-                }
-                // we just landed on the marker value ... therefore
-                // we should skip to the next entry
-                i++;
-                var namespaceURI = attrs[i++];
-                var attrName = attrs[i++];
-                var attrVal = attrs[i++];
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                isProc ?
-                    renderer.setAttribute(native, attrName, attrVal, namespaceURI) :
-                    native.setAttributeNS(namespaceURI, attrName, attrVal);
-            }
-            else {
-                // attrName is string;
-                var attrName = value;
-                var attrVal = attrs[++i];
-                // Standard attributes
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                if (isAnimationProp(attrName)) {
-                    if (isProc) {
-                        renderer.setProperty(native, attrName, attrVal);
-                    }
-                }
-                else {
-                    isProc ?
-                        renderer
-                            .setAttribute(native, attrName, attrVal) :
-                        native.setAttribute(attrName, attrVal);
-                }
-                i++;
-            }
-        }
-        // another piece of code may iterate over the same attributes array. Therefore
-        // it may be helpful to return the exact spot where the attributes array exited
-        // whether by running into an unsupported marker or if all the static values were
-        // iterated over.
-        return i;
-    }
-    /**
-     * Test whether the given value is a marker that indicates that the following
-     * attribute values in a `TAttributes` array are only the names of attributes,
-     * and not name-value pairs.
-     * @param marker The attribute marker to test.
-     * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
-     */
-    function isNameOnlyAttributeMarker(marker) {
-        return marker === 3 /* Bindings */ || marker === 4 /* Template */ ||
-            marker === 6 /* I18n */;
-    }
-    var ANIMATION_PROP_PREFIX = '@';
-    function isAnimationProp(name) {
-        return name[0] === ANIMATION_PROP_PREFIX;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /// Parent Injector Utils ///////////////////////////////////////////////////////////////
-    function hasParentInjector(parentLocation) {
-        return parentLocation !== NO_PARENT_INJECTOR;
-    }
-    function getParentInjectorIndex(parentLocation) {
-        return parentLocation & 32767 /* InjectorIndexMask */;
-    }
-    function getParentInjectorViewOffset(parentLocation) {
-        return parentLocation >> 16 /* ViewOffsetShift */;
-    }
-    /**
-     * Unwraps a parent injector location number to find the view offset from the current injector,
-     * then walks up the declaration view tree until the view is found that contains the parent
-     * injector.
-     *
-     * @param location The location of the parent injector, which contains the view offset
-     * @param startView The LView instance from which to start walking up the view tree
-     * @returns The LView instance that contains the parent injector
-     */
-    function getParentInjectorView(location, startView) {
-        var viewOffset = getParentInjectorViewOffset(location);
-        var parentView = startView;
-        // For most cases, the parent injector can be found on the host node (e.g. for component
-        // or container), but we must keep the loop here to support the rarer case of deeply nested
-        // <ng-template> tags or inline views, where the parent injector might live many views
-        // above the child injector.
-        while (viewOffset > 0) {
-            parentView = parentView[DECLARATION_VIEW];
-            viewOffset--;
-        }
-        return parentView;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Used for stringify render output in Ivy.
-     * Important! This function is very performance-sensitive and we should
-     * be extra careful not to introduce megamorphic reads in it.
-     */
-    function renderStringify(value) {
-        if (typeof value === 'string')
-            return value;
-        if (value == null)
-            return '';
-        return '' + value;
-    }
-    /**
-     * Used to stringify a value so that it can be displayed in an error message.
-     * Important! This function contains a megamorphic read and should only be
-     * used for error messages.
-     */
-    function stringifyForError(value) {
-        if (typeof value === 'function')
-            return value.name || value.toString();
-        if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-            return value.type.name || value.type.toString();
-        }
-        return renderStringify(value);
-    }
-    var defaultScheduler = (function () {
-        return (typeof requestAnimationFrame !== 'undefined' && requestAnimationFrame || // browser only
-            setTimeout // everything else
-        ).bind(_global);
-    })();
-    /**
-     *
-     * @codeGenApi
-     */
-    function ɵɵresolveWindow(element) {
-        return { name: 'window', target: element.ownerDocument.defaultView };
-    }
-    /**
-     *
-     * @codeGenApi
-     */
-    function ɵɵresolveDocument(element) {
-        return { name: 'document', target: element.ownerDocument };
-    }
-    /**
-     *
-     * @codeGenApi
-     */
-    function ɵɵresolveBody(element) {
-        return { name: 'body', target: element.ownerDocument.body };
-    }
-    /**
-     * The special delimiter we use to separate property names, prefixes, and suffixes
-     * in property binding metadata. See storeBindingMetadata().
-     *
-     * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
-     * because it is a very uncommon character that is unlikely to be part of a user's
-     * property names or interpolation strings. If it is in fact used in a property
-     * binding, DebugElement.properties will not return the correct value for that
-     * binding. However, there should be no runtime effect for real applications.
-     *
-     * This character is typically rendered as a question mark inside of a diamond.
-     * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
-     *
-     */
-    var INTERPOLATION_DELIMITER = "\uFFFD";
-    /**
-     * Unwrap a value which might be behind a closure (for forward declaration reasons).
-     */
-    function maybeUnwrapFn(value) {
-        if (value instanceof Function) {
-            return value();
-        }
-        else {
-            return value;
-        }
     }
 
     /**
@@ -6385,7 +6385,7 @@
      * map-based bindings up to sync with the application of prop-based
      * bindings.
      *
-     * Visit `styling_next/map_based_bindings.ts` to learn more about how the
+     * Visit `styling/map_based_bindings.ts` to learn more about how the
      * algorithm works for map-based styling bindings.
      *
      * Note that this function is not designed to be called in isolation (use
@@ -18739,7 +18739,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.7+5.sha-708ae4c.with-local-changes');
+    var VERSION = new Version('9.0.0-next.7+10.sha-0450f39.with-local-changes');
 
     /**
      * @license

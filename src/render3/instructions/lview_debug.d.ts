@@ -14,9 +14,9 @@ import { PropertyAliases, TContainerNode, TElementNode, TNode as ITNode, TNode, 
 import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
+import { TStylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
-import { TStylingContext } from '../styling_next/interfaces';
-import { DebugStyling as DebugNewStyling } from '../styling_next/styling_debug';
+import { DebugStyling as DebugNewStyling } from '../styling/styling_debug';
 export declare const LViewArray: ArrayConstructor;
 /**
  * This function clones a blueprint and creates LView.

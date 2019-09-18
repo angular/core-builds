@@ -1,4 +1,4 @@
-import { SyncStylingMapsFn } from './interfaces';
+import { SyncStylingMapsFn } from '../interfaces/styling';
 /**
  * --------
  *

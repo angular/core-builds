@@ -8,8 +8,8 @@
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ProceduralRenderer3, RElement, Renderer3 } from '../interfaces/renderer';
+import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext } from '../interfaces/styling';
 import { NO_CHANGE } from '../tokens';
-import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext } from './interfaces';
 /**
  * Visits a class-based binding and updates the new value (if changed).
  *
@@ -106,7 +106,7 @@ export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 |
  * map-based bindings up to sync with the application of prop-based
  * bindings.
  *
- * Visit `styling_next/map_based_bindings.ts` to learn more about how the
+ * Visit `styling/map_based_bindings.ts` to learn more about how the
  * algorithm works for map-based styling bindings.
  *
  * Note that this function is not designed to be called in isolation (use
