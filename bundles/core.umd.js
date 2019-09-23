@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.7+14.sha-353368c.with-local-changes
+ * @license Angular v9.0.0-next.7+15.sha-5651fa3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7670,7 +7670,7 @@
             var debugNodes = [];
             var tNodeCursor = tNode;
             while (tNodeCursor) {
-                debugNodes.push(buildDebugNode(tNodeCursor, lView));
+                debugNodes.push(buildDebugNode(tNodeCursor, lView, tNodeCursor.index));
                 tNodeCursor = tNodeCursor.next;
             }
             return debugNodes;
@@ -7679,8 +7679,8 @@
             return null;
         }
     }
-    function buildDebugNode(tNode, lView) {
-        var rawValue = lView[tNode.index];
+    function buildDebugNode(tNode, lView, nodeIndex) {
+        var rawValue = lView[nodeIndex];
         var native = unwrapRNode(rawValue);
         var componentLViewDebug = toDebug(readLViewValue(rawValue));
         var styles = isStylingContext(tNode.styles) ?
@@ -17636,16 +17636,14 @@
         var debugNode = null;
         var lContext = loadLContextFromNode(element);
         var lView = lContext.lView;
-        var nodeIndex = -1;
-        for (var i = HEADER_OFFSET; i < lView.length; i++) {
-            if (lView[i] === element) {
-                nodeIndex = i - HEADER_OFFSET;
-                break;
-            }
-        }
+        var nodeIndex = lContext.nodeIndex;
         if (nodeIndex !== -1) {
-            var tNode = getTNode(nodeIndex, lView);
-            debugNode = buildDebugNode(tNode, lView);
+            var valueInLView = lView[nodeIndex];
+            // this means that value in the lView is a component with its own
+            // data. In this situation the TNode is not accessed at the same spot.
+            var tNode = isLView(valueInLView) ? valueInLView[T_HOST] :
+                getTNode(nodeIndex - HEADER_OFFSET, lView);
+            debugNode = buildDebugNode(tNode, lView, nodeIndex);
         }
         return debugNode;
     }
@@ -18739,7 +18737,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.7+14.sha-353368c.with-local-changes');
+    var VERSION = new Version('9.0.0-next.7+15.sha-5651fa3.with-local-changes');
 
     /**
      * @license

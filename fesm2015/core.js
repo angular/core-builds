@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.7+14.sha-353368c.with-local-changes
+ * @license Angular v9.0.0-next.7+15.sha-5651fa3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11664,7 +11664,7 @@ function toDebugNodes(tNode, lView) {
         /** @type {?} */
         let tNodeCursor = tNode;
         while (tNodeCursor) {
-            debugNodes.push(buildDebugNode(tNodeCursor, lView));
+            debugNodes.push(buildDebugNode(tNodeCursor, lView, tNodeCursor.index));
             tNodeCursor = tNodeCursor.next;
         }
         return debugNodes;
@@ -11676,11 +11676,12 @@ function toDebugNodes(tNode, lView) {
 /**
  * @param {?} tNode
  * @param {?} lView
+ * @param {?} nodeIndex
  * @return {?}
  */
-function buildDebugNode(tNode, lView) {
+function buildDebugNode(tNode, lView, nodeIndex) {
     /** @type {?} */
-    const rawValue = lView[tNode.index];
+    const rawValue = lView[nodeIndex];
     /** @type {?} */
     const native = unwrapRNode(rawValue);
     /** @type {?} */
@@ -24658,17 +24659,16 @@ function getDebugNode(element) {
     /** @type {?} */
     const lView = lContext.lView;
     /** @type {?} */
-    let nodeIndex = -1;
-    for (let i = HEADER_OFFSET; i < lView.length; i++) {
-        if (lView[i] === element) {
-            nodeIndex = i - HEADER_OFFSET;
-            break;
-        }
-    }
+    const nodeIndex = lContext.nodeIndex;
     if (nodeIndex !== -1) {
         /** @type {?} */
-        const tNode = getTNode(nodeIndex, lView);
-        debugNode = buildDebugNode(tNode, lView);
+        const valueInLView = lView[nodeIndex];
+        // this means that value in the lView is a component with its own
+        // data. In this situation the TNode is not accessed at the same spot.
+        /** @type {?} */
+        const tNode = isLView(valueInLView) ? ((/** @type {?} */ (valueInLView[T_HOST]))) :
+            getTNode(nodeIndex - HEADER_OFFSET, lView);
+        debugNode = buildDebugNode(tNode, lView, nodeIndex);
     }
     return debugNode;
 }
@@ -26781,7 +26781,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.7+14.sha-353368c.with-local-changes');
+const VERSION = new Version('9.0.0-next.7+15.sha-5651fa3.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
