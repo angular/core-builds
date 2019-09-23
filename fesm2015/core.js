@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.7+15.sha-5651fa3.with-local-changes
+ * @license Angular v9.0.0-next.7+16.sha-52552b0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4366,13 +4366,6 @@ function getPropValuesStartPosition(context) {
     return startPosition;
 }
 /**
- * @param {?} prop
- * @return {?}
- */
-function isMapBased(prop) {
-    return prop === MAP_BASED_ENTRY_PROP_NAME;
-}
-/**
  * @param {?} a
  * @param {?} b
  * @return {?}
@@ -4381,17 +4374,9 @@ function hasValueChanged(a, b) {
     if (b === NO_CHANGE)
         return false;
     /** @type {?} */
-    let compareValueA = Array.isArray(a) ? a[0 /* RawValuePosition */] : a;
+    const compareValueA = Array.isArray(a) ? a[0 /* RawValuePosition */] : a;
     /** @type {?} */
-    let compareValueB = Array.isArray(b) ? b[0 /* RawValuePosition */] : b;
-    // these are special cases for String based values (which are created as artifacts
-    // when sanitization is bypassed on a particular value)
-    if (compareValueA instanceof String) {
-        compareValueA = compareValueA.toString();
-    }
-    if (compareValueB instanceof String) {
-        compareValueB = compareValueB.toString();
-    }
+    const compareValueB = Array.isArray(b) ? b[0 /* RawValuePosition */] : b;
     return !Object.is(compareValueA, compareValueB);
 }
 /**
@@ -26781,7 +26766,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.7+15.sha-5651fa3.with-local-changes');
+const VERSION = new Version('9.0.0-next.7+16.sha-52552b0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

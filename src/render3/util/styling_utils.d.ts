@@ -59,7 +59,6 @@ export declare function lockContext(context: TStylingContext, hostBindingsMode: 
 export declare function isContextLocked(context: TStylingContext, hostBindingsMode: boolean): boolean;
 export declare function getLockedConfig(hostBindingsMode: boolean): TStylingConfig.TemplateBindingsLocked | TStylingConfig.HostBindingsLocked;
 export declare function getPropValuesStartPosition(context: TStylingContext): TStylingContextIndex;
-export declare function isMapBased(prop: string): boolean;
 export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 /**
  * Determines whether the provided styling value is truthy or falsy.
