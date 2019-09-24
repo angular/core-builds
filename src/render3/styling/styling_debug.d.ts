@@ -17,62 +17,44 @@ import { LStylingData, TStylingContext } from '../interfaces/styling';
  * --------
  */
 /**
- * A debug/testing-oriented summary of a styling entry.
+ * A debug-friendly version of `TStylingContext`.
  *
- * A value such as this is generated as an artifact of the `DebugStyling`
- * summary.
+ * An instance of this is attached to `tStylingContext.debug` when `ngDevMode` is active.
  */
-export interface LStylingSummary {
-    /** The style/class property that the summary is attached to */
-    prop: string;
-    /** The last applied value for the style/class property */
-    value: string | boolean | null;
-    /** The binding index of the last applied style/class property */
-    bindingIndex: number | null;
-}
-/**
- * A debug/testing-oriented summary of all styling entries for a `DebugNode` instance.
- */
-export interface DebugStyling {
+export interface DebugStylingContext {
+    /** The configuration settings of the associated `TStylingContext` */
+    config: DebugStylingConfig;
     /** The associated TStylingContext instance */
     context: TStylingContext;
-    /** Which configuration flags are active (see `TStylingContextConfig`) */
-    config: {
-        hasMapBindings: boolean;
-        hasPropBindings: boolean;
-        hasCollisions: boolean;
-        hasTemplateBindings: boolean;
-        hasHostBindings: boolean;
-        templateBindingsLocked: boolean;
-        hostBindingsLocked: boolean;
-        allowDirectStyling: boolean;
+    /** The associated TStylingContext instance */
+    entries: {
+        [prop: string]: DebugStylingContextEntry;
     };
-    /**
-     * A summarization of each style/class property
-     * present in the context
-     */
-    summary: {
-        [propertyName: string]: LStylingSummary;
-    };
-    /**
-     * A key/value map of all styling properties and their
-     * runtime values
-     */
-    values: {
-        [propertyName: string]: string | number | null | boolean;
-    };
-    /**
-     * Overrides the sanitizer used to process styles
-     */
-    overrideSanitizer(sanitizer: StyleSanitizeFn | null): void;
+    /** A status report of all the sources within the context */
+    printSources(): void;
+    /** A status report of all the entire context as a table */
+    printTable(): void;
+}
+/**
+ * A debug/testing-oriented summary of `TStylingConfig`.
+ */
+export interface DebugStylingConfig {
+    hasMapBindings: boolean;
+    hasPropBindings: boolean;
+    hasCollisions: boolean;
+    hasTemplateBindings: boolean;
+    hasHostBindings: boolean;
+    templateBindingsLocked: boolean;
+    hostBindingsLocked: boolean;
+    allowDirectStyling: boolean;
 }
 /**
  * A debug/testing-oriented summary of all styling entries within a `TStylingContext`.
  */
-export interface TStylingTupleSummary {
-    /** The property (style or class property) that this tuple represents */
+export interface DebugStylingContextEntry {
+    /** The property (style or class property) that this entry represents */
     prop: string;
-    /** The total amount of styling entries a part of this tuple */
+    /** The total amount of styling entries a part of this entry */
     valuesCount: number;
     /**
      * The bit guard mask that is used to compare and protect against
@@ -98,28 +80,76 @@ export interface TStylingTupleSummary {
     sources: (number | null | string)[];
 }
 /**
+ * A debug/testing-oriented summary of all styling entries for a `DebugNode` instance.
+ */
+export interface DebugNodeStyling {
+    /** The associated debug context of the TStylingContext instance */
+    context: DebugStylingContext;
+    /**
+     * A summarization of each style/class property
+     * present in the context
+     */
+    summary: {
+        [propertyName: string]: DebugNodeStylingEntry;
+    };
+    /**
+     * A key/value map of all styling properties and their
+     * runtime values
+     */
+    values: {
+        [propertyName: string]: string | number | null | boolean;
+    };
+    /**
+     * Overrides the sanitizer used to process styles
+     */
+    overrideSanitizer(sanitizer: StyleSanitizeFn | null): void;
+}
+/**
+ * A debug/testing-oriented summary of a styling entry.
+ *
+ * A value such as this is generated as an artifact of the `DebugStyling`
+ * summary.
+ */
+export interface DebugNodeStylingEntry {
+    /** The style/class property that the summary is attached to */
+    prop: string;
+    /** The last applied value for the style/class property */
+    value: string | boolean | null;
+    /** The binding index of the last applied style/class property */
+    bindingIndex: number | null;
+}
+/**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
  */
-export declare function attachStylingDebugObject(context: TStylingContext): TStylingContextDebug;
+export declare function attachStylingDebugObject(context: TStylingContext, isClassBased: boolean): TStylingContextDebug;
 /**
  * A human-readable debug summary of the styling data present within `TStylingContext`.
  *
  * This class is designed to be used within testing code or when an
  * application has `ngDevMode` activated.
  */
-declare class TStylingContextDebug {
+declare class TStylingContextDebug implements DebugStylingContext {
     readonly context: TStylingContext;
-    constructor(context: TStylingContext);
-    readonly isTemplateLocked: boolean;
-    readonly isHostBindingsLocked: boolean;
+    private _isClassBased;
+    constructor(context: TStylingContext, _isClassBased: boolean);
+    readonly config: DebugStylingConfig;
     /**
      * Returns a detailed summary of each styling entry in the context.
      *
-     * See `TStylingTupleSummary`.
+     * See `DebugStylingContextEntry`.
      */
     readonly entries: {
-        [prop: string]: TStylingTupleSummary;
+        [prop: string]: DebugStylingContextEntry;
     };
+    /**
+     * Prints a detailed summary of each styling source grouped together with each binding index in
+     * the context.
+     */
+    printSources(): void;
+    /**
+     * Prints a detailed table of the entire styling context.
+     */
+    printTable(): void;
 }
 /**
  * A human-readable debug summary of the styling data present for a `DebugNode` instance.
@@ -127,12 +157,13 @@ declare class TStylingContextDebug {
  * This class is designed to be used within testing code or when an
  * application has `ngDevMode` activated.
  */
-export declare class NodeStylingDebug implements DebugStyling {
-    context: TStylingContext;
+export declare class NodeStylingDebug implements DebugNodeStyling {
     private _data;
-    private _isClassBased?;
+    private _isClassBased;
     private _sanitizer;
-    constructor(context: TStylingContext, _data: LStylingData, _isClassBased?: boolean | undefined);
+    private _debugContext;
+    constructor(context: TStylingContext | DebugStylingContext, _data: LStylingData, _isClassBased: boolean);
+    readonly context: DebugStylingContext;
     /**
      * Overrides the sanitizer used to process styles.
      */
@@ -144,7 +175,7 @@ export declare class NodeStylingDebug implements DebugStyling {
      * See `LStylingSummary`.
      */
     readonly summary: {
-        [key: string]: LStylingSummary;
+        [key: string]: DebugNodeStylingEntry;
     };
     readonly config: {
         hasMapBindings: boolean;
