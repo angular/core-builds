@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.7+18.sha-32f4544.with-local-changes
+ * @license Angular v9.0.0-next.7+19.sha-86fd571.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5911,7 +5911,7 @@ function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindi
         var doSetValuesAsStale = (getConfig(context) & 32 /* HasHostBindings */) &&
             !hostBindingsMode && (prop ? !value : true);
         if (doSetValuesAsStale) {
-            renderHostBindingsAsStale(context, data, prop, !prop);
+            renderHostBindingsAsStale(context, data, prop);
         }
     }
     return changed;
@@ -5927,24 +5927,28 @@ function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindi
  * is expected to be called each time a template binding becomes falsy or when a map-based template
  * binding changes.
  */
-function renderHostBindingsAsStale(context, data, prop, isMapBased) {
+function renderHostBindingsAsStale(context, data, prop) {
     var valuesCount = getValuesCount(context);
-    if (hasConfig(context, 1 /* HasPropBindings */)) {
+    if (prop !== null && hasConfig(context, 1 /* HasPropBindings */)) {
         var itemsPerRow = 4 /* BindingsStartOffset */ + valuesCount;
         var i = 3 /* ValuesStartPosition */;
+        var found = false;
         while (i < context.length) {
             if (getProp(context, i) === prop) {
+                found = true;
                 break;
             }
             i += itemsPerRow;
         }
-        var bindingsStart = i + 4 /* BindingsStartOffset */;
-        var valuesStart = bindingsStart + 1; // the first column is template bindings
-        var valuesEnd = bindingsStart + valuesCount - 1;
-        for (var i_1 = valuesStart; i_1 < valuesEnd; i_1++) {
-            var bindingIndex = context[i_1];
-            if (bindingIndex !== 0) {
-                setValue(data, bindingIndex, null);
+        if (found) {
+            var bindingsStart = i + 4 /* BindingsStartOffset */;
+            var valuesStart = bindingsStart + 1; // the first column is template bindings
+            var valuesEnd = bindingsStart + valuesCount - 1;
+            for (var i_1 = valuesStart; i_1 < valuesEnd; i_1++) {
+                var bindingIndex = context[i_1];
+                if (bindingIndex !== 0) {
+                    setValue(data, bindingIndex, null);
+                }
             }
         }
     }
@@ -6277,6 +6281,13 @@ function applyStylingViaContext(context, renderer, element, bindingData, bitMask
                     // determine whether or not to apply the target property or to skip it
                     var mode = mapsMode | (valueApplied ? 4 /* SkipTargetProp */ :
                         2 /* ApplyTargetProp */);
+                    // the first column in the context (when `j == 0`) is special-cased for
+                    // template bindings. If and when host bindings are being processed then
+                    // the first column will still be iterated over, but the values will only
+                    // be checked against (not applied). If and when this happens we need to
+                    // notify the map-based syncing code to know not to apply the values it
+                    // comes across in the very first map-based binding (which is also located
+                    // in column zero).
                     if (hostBindingsMode && j === 0) {
                         mode |= 16 /* CheckValuesOnly */;
                     }
@@ -6815,18 +6826,27 @@ function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, s
  *
  * - value is being applied:
  *   if the value is being applied from this current styling
- *   map then there is no need to apply it in a deeper map.
+ *   map then there is no need to apply it in a deeper map
+ *   (i.e. the `SkipTargetProp` flag is set)
  *
  * - value is being not applied:
  *   apply the value if it is found in a deeper map.
+ *   (i.e. the `SkipTargetProp` flag is unset)
  *
  * When these reasons are encountered the flags will for the
  * inner map mode will be configured.
  */
-function resolveInnerMapMode(currentMode, valueIsDefined, isExactMatch) {
+function resolveInnerMapMode(currentMode, valueIsDefined, isTargetPropMatched) {
     var innerMode = currentMode;
-    if (!valueIsDefined && !(currentMode & 4 /* SkipTargetProp */) &&
-        (isExactMatch || (currentMode & 1 /* ApplyAllValues */))) {
+    // the statements below figures out whether or not an inner styling map
+    // is allowed to apply its value or not. The main thing to keep note
+    // of is that if the target prop isn't matched then its expected that
+    // all values before it are allowed to be applied so long as "apply all values"
+    // is set to true.
+    var applyAllValues = currentMode & 1 /* ApplyAllValues */;
+    var applyTargetProp = currentMode & 2 /* ApplyTargetProp */;
+    var allowInnerApply = !valueIsDefined && (isTargetPropMatched ? applyTargetProp : applyAllValues);
+    if (allowInnerApply) {
         // case 1: set the mode to apply the targeted prop value if it
         // ends up being encountered in another map value
         innerMode |= 2 /* ApplyTargetProp */;
@@ -18697,7 +18717,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.7+18.sha-32f4544.with-local-changes');
+var VERSION = new Version('9.0.0-next.7+19.sha-86fd571.with-local-changes');
 
 /**
  * @license
