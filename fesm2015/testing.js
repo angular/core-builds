@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8.with-local-changes
+ * @license Angular v9.0.0-next.8+3.sha-c8be987.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2234,9 +2234,13 @@ class R3TestBedCompiler {
      * @return {?}
      */
     restoreOriginalState() {
-        for (const op of this.defCleanupOps) {
-            op.def[op.field] = op.original;
-        }
+        // Process cleanup ops in reverse order so the field's original value is restored correctly (in
+        // case there were multiple overrides for the same field).
+        forEachRight(this.defCleanupOps, (/**
+         * @param {?} op
+         * @return {?}
+         */
+        (op) => { op.def[op.field] = op.original; }));
         // Restore initial component/directive/pipe defs
         this.initialNgDefs.forEach((/**
          * @param {?} value
