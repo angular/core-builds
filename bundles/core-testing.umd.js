@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8+3.sha-c8be987.with-local-changes
+ * @license Angular v9.0.0-next.8+1.sha-fe54af9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1666,9 +1666,20 @@
             }
         };
         R3TestBedCompiler.prototype.restoreOriginalState = function () {
-            // Process cleanup ops in reverse order so the field's original value is restored correctly (in
-            // case there were multiple overrides for the same field).
-            forEachRight(this.defCleanupOps, function (op) { op.def[op.field] = op.original; });
+            var e_4, _a;
+            try {
+                for (var _b = __values(this.defCleanupOps), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var op = _c.value;
+                    op.def[op.field] = op.original;
+                }
+            }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_4) throw e_4.error; }
+            }
             // Restore initial component/directive/pipe defs
             this.initialNgDefs.forEach(function (value, type) {
                 var _a = __read(value, 2), prop = _a[0], descriptor = _a[1];
