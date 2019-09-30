@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8+27.sha-45c893d.with-local-changes
+ * @license Angular v9.0.0-next.8+29.sha-475e36a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2754,6 +2754,112 @@ if (false) {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function stringify(token) {
+    if (typeof token === 'string') {
+        return token;
+    }
+    if (token instanceof Array) {
+        return '[' + token.map(stringify).join(', ') + ']';
+    }
+    if (token == null) {
+        return '' + token;
+    }
+    if (token.overriddenName) {
+        return `${token.overriddenName}`;
+    }
+    if (token.name) {
+        return `${token.name}`;
+    }
+    const res = token.toString();
+    if (res == null) {
+        return '' + res;
+    }
+    const newLineIndex = res.indexOf('\n');
+    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Map of module-id to the corresponding NgModule.
+ * - In pre Ivy we track NgModuleFactory,
+ * - In post Ivy we track the NgModuleType
+ * @type {?}
+ */
+const modules = new Map();
+/**
+ * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+ * \@publicApi
+ * @param {?} id
+ * @param {?} factory
+ * @return {?}
+ */
+function registerModuleFactory(id, factory) {
+    /** @type {?} */
+    const existing = (/** @type {?} */ (modules.get(id)));
+    assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
+    modules.set(id, factory);
+}
+/**
+ * @param {?} id
+ * @param {?} type
+ * @param {?} incoming
+ * @return {?}
+ */
+function assertSameOrNotExisting(id, type, incoming) {
+    if (type && type !== incoming) {
+        throw new Error(`Duplicate module registered for ${id} - ${stringify(type)} vs ${stringify(type.name)}`);
+    }
+}
+/**
+ * @param {?} ngModuleType
+ * @return {?}
+ */
+function registerNgModuleType(ngModuleType) {
+    if (ngModuleType.ngModuleDef.id !== null) {
+        /** @type {?} */
+        const id = ngModuleType.ngModuleDef.id;
+        /** @type {?} */
+        const existing = (/** @type {?} */ (modules.get(id)));
+        assertSameOrNotExisting(id, existing, ngModuleType);
+        modules.set(id, ngModuleType);
+    }
+    /** @type {?} */
+    let imports = ngModuleType.ngModuleDef.imports;
+    if (imports instanceof Function) {
+        imports = imports();
+    }
+    if (imports) {
+        imports.forEach((/**
+         * @param {?} i
+         * @return {?}
+         */
+        i => registerNgModuleType((/** @type {?} */ (i)))));
+    }
+}
+/**
+ * @return {?}
+ */
+function clearModuleRegistry() {
+    modules.clear();
+}
+/**
+ * @param {?} id
+ * @return {?}
+ */
+function getRegisteredNgModuleType(id) {
+    return modules.get(id);
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -2979,6 +3085,7 @@ class TestBedRender3 {
      * @return {?}
      */
     resetTestingModule() {
+        clearModuleRegistry();
         this.checkGlobalCompilationFinished();
         ɵresetCompiledComponents();
         if (this._compiler !== null) {
