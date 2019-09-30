@@ -13,5 +13,5 @@ import { NgModuleFactory } from './ng_module_factory';
  */
 export declare function registerModuleFactory(id: string, factory: NgModuleFactory<any>): void;
 export declare function registerNgModuleType(ngModuleType: NgModuleType): void;
-export declare function clearModulesForTest(): void;
+export declare function clearModuleRegistry(): void;
 export declare function getRegisteredNgModuleType(id: string): NgModuleFactory<any> | NgModuleType<any> | undefined;

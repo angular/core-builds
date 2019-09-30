@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8+27.sha-45c893d.with-local-changes
+ * @license Angular v9.0.0-next.8+29.sha-475e36a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26789,7 +26789,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.8+27.sha-45c893d.with-local-changes');
+const VERSION = new Version('9.0.0-next.8+29.sha-475e36a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34741,7 +34741,7 @@ function registerNgModuleType(ngModuleType) {
 /**
  * @return {?}
  */
-function clearModulesForTest() {
+function clearModuleRegistry() {
     modules.clear();
 }
 /**
