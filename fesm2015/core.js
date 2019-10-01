@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8+29.sha-475e36a.with-local-changes
+ * @license Angular v9.0.0-next.8+31.sha-ffc34b3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26789,7 +26789,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.8+29.sha-475e36a.with-local-changes');
+const VERSION = new Version('9.0.0-next.8+31.sha-ffc34b3.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33558,13 +33558,15 @@ const parentIndexStack = [];
  */
 function ɵɵi18nStart(index, message, subTemplateIndex) {
     /** @type {?} */
-    const tView = getLView()[TVIEW];
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
     i18nIndexStack[++i18nIndexStackPointer] = index;
     // We need to delay projections until `i18nEnd`
     setDelayProjection(true);
     if (tView.firstTemplatePass && tView.data[index + HEADER_OFFSET] === null) {
-        i18nStartFirstPass(tView, index, message, subTemplateIndex);
+        i18nStartFirstPass(lView, tView, index, message, subTemplateIndex);
     }
 }
 // Count for the number of vars that will be allocated for each i18n block.
@@ -33574,25 +33576,23 @@ function ɵɵi18nStart(index, message, subTemplateIndex) {
 let i18nVarsCount;
 /**
  * See `i18nStart` above.
+ * @param {?} lView
  * @param {?} tView
  * @param {?} index
  * @param {?} message
  * @param {?=} subTemplateIndex
  * @return {?}
  */
-function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
-    /** @type {?} */
-    const viewData = getLView();
+function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
     /** @type {?} */
     const startIndex = tView.blueprint.length - HEADER_OFFSET;
     i18nVarsCount = 0;
     /** @type {?} */
     const previousOrParentTNode = getPreviousOrParentTNode();
     /** @type {?} */
-    const parentTNode = getIsParent() ? getPreviousOrParentTNode() :
-        previousOrParentTNode && previousOrParentTNode.parent;
+    const parentTNode = getIsParent() ? previousOrParentTNode : previousOrParentTNode && previousOrParentTNode.parent;
     /** @type {?} */
-    let parentIndex = parentTNode && parentTNode !== viewData[T_HOST] ? parentTNode.index - HEADER_OFFSET : index;
+    let parentIndex = parentTNode && parentTNode !== lView[T_HOST] ? parentTNode.index - HEADER_OFFSET : index;
     /** @type {?} */
     let parentIndexPointer = 0;
     parentIndexStack[parentIndexPointer] = parentIndex;
@@ -33682,10 +33682,10 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
         }
     }
     if (i18nVarsCount > 0) {
-        allocExpando(viewData, i18nVarsCount);
+        allocExpando(lView, i18nVarsCount);
     }
     ngDevMode &&
-        attachI18nOpCodesDebug(createOpCodes, updateOpCodes, icuExpressions.length ? icuExpressions : null, viewData);
+        attachI18nOpCodesDebug(createOpCodes, updateOpCodes, icuExpressions.length ? icuExpressions : null, lView);
     // NOTE: local var needed to properly assert the type of `TI18n`.
     /** @type {?} */
     const tI18n = {
@@ -33901,21 +33901,22 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
  */
 function ɵɵi18nEnd() {
     /** @type {?} */
-    const tView = getLView()[TVIEW];
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
-    i18nEndFirstPass(tView);
+    i18nEndFirstPass(lView, tView);
     // Stop delaying projections
     setDelayProjection(false);
 }
 /**
  * See `i18nEnd` above.
+ * @param {?} lView
  * @param {?} tView
  * @return {?}
  */
-function i18nEndFirstPass(tView) {
-    /** @type {?} */
-    const viewData = getLView();
-    ngDevMode && assertEqual(viewData[BINDING_INDEX], viewData[TVIEW].bindingStartIndex, 'i18nEnd should be called before any binding');
+function i18nEndFirstPass(lView, tView) {
+    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'i18nEnd should be called before any binding');
     /** @type {?} */
     const rootIndex = i18nIndexStack[i18nIndexStackPointer--];
     /** @type {?} */
@@ -33923,14 +33924,14 @@ function i18nEndFirstPass(tView) {
     ngDevMode && assertDefined(tI18n, `You should call i18nStart before i18nEnd`);
     // Find the last node that was added before `i18nEnd`
     /** @type {?} */
-    let lastCreatedNode = getPreviousOrParentTNode();
+    const lastCreatedNode = getPreviousOrParentTNode();
     // Read the instructions to insert/move/remove DOM elements
     /** @type {?} */
-    const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
+    const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, lView);
     // Remove deleted nodes
     for (let i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
         if (visitedNodes.indexOf(i) === -1) {
-            removeNode(i, viewData, /* markAsDetached */ true);
+            removeNode(i, lView, /* markAsDetached */ true);
         }
     }
 }
@@ -33960,13 +33961,12 @@ function createDynamicNodeAtIndex(lView, index, type, native, name) {
 /**
  * @param {?} index
  * @param {?} createOpCodes
- * @param {?} icus
- * @param {?} viewData
+ * @param {?} lView
  * @return {?}
  */
-function readCreateOpCodes(index, createOpCodes, icus, viewData) {
+function readCreateOpCodes(index, createOpCodes, lView) {
     /** @type {?} */
-    const renderer = getLView()[RENDERER];
+    const renderer = lView[RENDERER];
     /** @type {?} */
     let currentTNode = null;
     /** @type {?} */
@@ -33984,7 +33984,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
             ngDevMode && ngDevMode.rendererCreateTextNode++;
             previousTNode = currentTNode;
             currentTNode =
-                createDynamicNodeAtIndex(viewData, textNodeIndex, 3 /* Element */, textRNode, null);
+                createDynamicNodeAtIndex(lView, textNodeIndex, 3 /* Element */, textRNode, null);
             visitedNodes.push(textNodeIndex);
             setIsNotParent();
         }
@@ -33998,21 +33998,21 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     if (destinationNodeIndex === index) {
                         // If the destination node is `i18nStart`, we don't have a
                         // top-level node and we should use the host node instead
-                        destinationTNode = (/** @type {?} */ (viewData[T_HOST]));
+                        destinationTNode = (/** @type {?} */ (lView[T_HOST]));
                     }
                     else {
-                        destinationTNode = getTNode(destinationNodeIndex, viewData);
+                        destinationTNode = getTNode(destinationNodeIndex, lView);
                     }
                     ngDevMode &&
                         assertDefined((/** @type {?} */ (currentTNode)), `You need to create or select a node before you can insert it into the DOM`);
-                    previousTNode = appendI18nNode((/** @type {?} */ (currentTNode)), destinationTNode, previousTNode, viewData);
+                    previousTNode = appendI18nNode((/** @type {?} */ (currentTNode)), destinationTNode, previousTNode, lView);
                     break;
                 case 0 /* Select */:
                     /** @type {?} */
                     const nodeIndex = opCode >>> 3 /* SHIFT_REF */;
                     visitedNodes.push(nodeIndex);
                     previousTNode = currentTNode;
-                    currentTNode = getTNode(nodeIndex, viewData);
+                    currentTNode = getTNode(nodeIndex, lView);
                     if (currentTNode) {
                         setPreviousOrParentTNode(currentTNode, currentTNode.type === 3 /* Element */);
                     }
@@ -34020,7 +34020,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                 case 5 /* ElementEnd */:
                     /** @type {?} */
                     const elementIndex = opCode >>> 3 /* SHIFT_REF */;
-                    previousTNode = currentTNode = getTNode(elementIndex, viewData);
+                    previousTNode = currentTNode = getTNode(elementIndex, lView);
                     setPreviousOrParentTNode(currentTNode, false);
                     break;
                 case 4 /* Attr */:
@@ -34032,7 +34032,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
                     // This code is used for ICU expressions only, since we don't support
                     // directives/components in ICUs, we don't need to worry about inputs here
-                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, viewData);
+                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, lView);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -34050,9 +34050,9 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const commentRNode = renderer.createComment(commentValue);
                     ngDevMode && ngDevMode.rendererCreateComment++;
                     previousTNode = currentTNode;
-                    currentTNode = createDynamicNodeAtIndex(viewData, commentNodeIndex, 5 /* IcuContainer */, commentRNode, null);
+                    currentTNode = createDynamicNodeAtIndex(lView, commentNodeIndex, 5 /* IcuContainer */, commentRNode, null);
                     visitedNodes.push(commentNodeIndex);
-                    attachPatchData(commentRNode, viewData);
+                    attachPatchData(commentRNode, lView);
                     ((/** @type {?} */ (currentTNode))).activeCaseIndex = null;
                     // We will add the case nodes later, during the update phase
                     setIsNotParent();
@@ -34067,7 +34067,7 @@ function readCreateOpCodes(index, createOpCodes, icus, viewData) {
                     const elementRNode = renderer.createElement(tagNameValue);
                     ngDevMode && ngDevMode.rendererCreateElement++;
                     previousTNode = currentTNode;
-                    currentTNode = createDynamicNodeAtIndex(viewData, elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue);
+                    currentTNode = createDynamicNodeAtIndex(lView, elementNodeIndex, 3 /* Element */, elementRNode, tagNameValue);
                     visitedNodes.push(elementNodeIndex);
                     break;
                 default:
@@ -34175,7 +34175,7 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 const caseIndex = getCaseIndex(tIcu, value);
                                 icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
                                 // Add the nodes for the new case
-                                readCreateOpCodes(-1, tIcu.create[caseIndex], icus, viewData);
+                                readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
                                 caseCreated = true;
                                 break;
                             case 3 /* IcuUpdate */:
@@ -34263,18 +34263,21 @@ function ɵɵi18n(index, message, subTemplateIndex) {
  */
 function ɵɵi18nAttributes(index, values) {
     /** @type {?} */
-    const tView = getLView()[TVIEW];
+    const lView = getLView();
+    /** @type {?} */
+    const tView = lView[TVIEW];
     ngDevMode && assertDefined(tView, `tView should be defined`);
-    i18nAttributesFirstPass(tView, index, values);
+    i18nAttributesFirstPass(lView, tView, index, values);
 }
 /**
  * See `i18nAttributes` above.
+ * @param {?} lView
  * @param {?} tView
  * @param {?} index
  * @param {?} values
  * @return {?}
  */
-function i18nAttributesFirstPass(tView, index, values) {
+function i18nAttributesFirstPass(lView, tView, index, values) {
     /** @type {?} */
     const previousElement = getPreviousOrParentTNode();
     /** @type {?} */
@@ -34306,8 +34309,6 @@ function i18nAttributesFirstPass(tView, index, values) {
                     }
                 }
                 else {
-                    /** @type {?} */
-                    const lView = getLView();
                     elementAttributeInternal(previousElementIndex, attrName, value, lView);
                     // Check if that attribute is a directive input
                     /** @type {?} */
