@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8+36.sha-088435c.with-local-changes
+ * @license Angular v9.0.0-next.8+37.sha-72f3747.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8283,14 +8283,17 @@
                 }
             }
             setHostBindings(tView, lView);
-            var viewQuery = tView.viewQuery;
-            if (viewQuery !== null) {
-                executeViewQueryFn(2 /* Update */, viewQuery, context);
-            }
             // Refresh child component views.
             var components = tView.components;
             if (components !== null) {
                 refreshChildComponents(lView, components);
+            }
+            // View queries must execute after refreshing child components because a template in this view
+            // could be inserted in a child component. If the view query executes before child component
+            // refresh, the template might not yet be inserted.
+            var viewQuery = tView.viewQuery;
+            if (viewQuery !== null) {
+                executeViewQueryFn(2 /* Update */, viewQuery, context);
             }
             // execute view hooks (AfterViewInit, AfterViewChecked)
             // PERF WARNING: do NOT extract this to a separate function without running benchmarks
@@ -18777,7 +18780,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.8+36.sha-088435c.with-local-changes');
+    var VERSION = new Version('9.0.0-next.8+37.sha-72f3747.with-local-changes');
 
     /**
      * @license
