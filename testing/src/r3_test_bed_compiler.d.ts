@@ -12,6 +12,7 @@ export declare class R3TestBedCompiler {
     private platform;
     private additionalModuleTypes;
     private originalComponentResolutionQueue;
+    private originalRegisteredModules;
     private declarations;
     private imports;
     private providers;
