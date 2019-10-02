@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9.with-local-changes
+ * @license Angular v9.0.0-next.9+1.sha-4e35e34.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -934,6 +934,11 @@ export declare function ɵɵdefineNgModule<T>(def: {
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
 }): never;
+
+/**
+ * @codeGenApi
+ */
+export declare type ɵɵFactoryDef<T> = () => T;
 
 /**
  * Generated instruction: Injects a token from the currently active injector.
