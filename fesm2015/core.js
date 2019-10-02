@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.8+39.sha-66658c4.with-local-changes
+ * @license Angular v9.0.0-next.8+41.sha-63256b5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26809,7 +26809,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.8+39.sha-66658c4.with-local-changes');
+const VERSION = new Version('9.0.0-next.8+41.sha-63256b5.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34709,7 +34709,7 @@ function getLocaleId() {
  * - In post Ivy we track the NgModuleType
  * @type {?}
  */
-const modules = new Map();
+let modules = new Map();
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
  * \@publicApi
@@ -34763,8 +34763,21 @@ function registerNgModuleType(ngModuleType) {
 /**
  * @return {?}
  */
-function clearModuleRegistry() {
+function clearRegisteredModuleState() {
     modules.clear();
+}
+/**
+ * @return {?}
+ */
+function getRegisteredModulesState() {
+    return new Map(modules);
+}
+/**
+ * @param {?} moduleMap
+ * @return {?}
+ */
+function restoreRegisteredModulesState(moduleMap) {
+    modules = new Map(moduleMap);
 }
 /**
  * @param {?} id
