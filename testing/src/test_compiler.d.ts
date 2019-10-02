@@ -35,6 +35,7 @@ export declare class TestingCompiler extends Compiler {
      * This can be used for errors created by compileModule...
      */
     getComponentFromError(error: Error): Type<any> | null;
+    static ngFactoryDef: i0.ɵɵFactoryDef<TestingCompiler>;
     static ngInjectableDef: i0.ɵɵInjectableDef<TestingCompiler>;
 }
 /**
