@@ -94,7 +94,7 @@ export interface Query {
     read: any;
     isViewQuery: boolean;
     selector: any;
-    static: boolean;
+    static?: boolean;
 }
 /**
  * Base class for query metadata.
@@ -213,13 +213,13 @@ export interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
-        static: boolean;
+        static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
-        static: boolean;
+        static?: boolean;
     }): ContentChild;
 }
 /**
@@ -337,13 +337,13 @@ export interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
-        static: boolean;
+        static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
-        static: boolean;
+        static?: boolean;
     }): ViewChild;
 }
 /**
