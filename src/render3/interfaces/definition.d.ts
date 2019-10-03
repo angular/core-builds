@@ -65,7 +65,7 @@ export interface DirectiveType<T> extends Type<T> {
     ngDirectiveDef: never;
     ngFactoryDef: () => T;
 }
-export declare const enum DirectiveDefFlags {
+export declare enum DirectiveDefFlags {
     ContentQuery = 2
 }
 /**

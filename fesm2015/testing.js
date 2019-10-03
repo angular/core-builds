@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+18.sha-6f5f481.with-local-changes
+ * @license Angular v9.0.0-next.9+19.sha-5332b04.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3156,8 +3156,9 @@ class TestBedRender3 {
             return (/** @type {?} */ (this));
         }
         /** @type {?} */
-        const result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
-        return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) : result;
+        const result = this.testModuleRef.injector.get(token, (/** @type {?} */ (UNDEFINED)), flags);
+        return result === UNDEFINED ? (/** @type {?} */ (this.compiler.injector.get(token, notFoundValue, flags))) :
+            result;
     }
     /**
      * @deprecated from v9.0.0 use TestBed.inject
@@ -3969,7 +3970,8 @@ class TestBedViewEngine {
         // but the ng module can't inject things from the compiler and vice versa.
         /** @type {?} */
         const result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
-        return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) : result;
+        return result === UNDEFINED$1 ? (/** @type {?} */ (this._compiler.injector.get(token, notFoundValue, flags))) :
+            result;
     }
     /**
      * @deprecated from v9.0.0 use TestBed.inject
