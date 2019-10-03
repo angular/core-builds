@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.9+11.sha-e24393c.with-local-changes
+ * @license Angular v8.2.9+13.sha-2742649.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2225,10 +2225,6 @@ export declare class ErrorHandler {
  * @publicApi
  */
 export declare class EventEmitter<T extends any> extends Subject<T> {
-    /**
-     * Internal
-     */
-    __isAsync: boolean;
     /**
      * Creates an instance of this class that can
      * deliver events synchronously or asynchronously.
