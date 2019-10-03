@@ -59,10 +59,6 @@ import { Subject, Subscription } from 'rxjs';
  */
 export declare class EventEmitter<T extends any> extends Subject<T> {
     /**
-     * Internal
-     */
-    __isAsync: boolean;
-    /**
      * Creates an instance of this class that can
      * deliver events synchronously or asynchronously.
      *
