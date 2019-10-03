@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+18.sha-6f5f481.with-local-changes
+ * @license Angular v9.0.0-next.9+19.sha-5332b04.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15736,7 +15736,9 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 /** @type {?} */
                 const contextInjector = injector || this.parentInjector;
                 if (!ngModuleRef && ((/** @type {?} */ (componentFactory))).ngModule == null && contextInjector) {
-                    ngModuleRef = contextInjector.get(NgModuleRef, null);
+                    // FIXME: ngModuleRef is optional, so its type allows "undefined", whereas the code
+                    // below is passing null for the default/absent value.
+                    ngModuleRef = contextInjector.get(NgModuleRef, (/** @type {?} */ ((/** @type {?} */ (null)))));
                 }
                 /** @type {?} */
                 const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
@@ -25780,6 +25782,382 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @enum {number} */
+const RenderFlags = {
+    /* Whether to run the creation block (e.g. create elements and directives) */
+    Create: 1,
+    /* Whether to run the update block (e.g. refresh bindings) */
+    Update: 2,
+};
+/**
+ * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
+ * consumable for rendering.
+ * @record
+ * @template T
+ */
+function ComponentType() { }
+if (false) {
+    /** @type {?} */
+    ComponentType.prototype.ngComponentDef;
+}
+/**
+ * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
+ * consumable for rendering.
+ * @record
+ * @template T
+ */
+function DirectiveType() { }
+if (false) {
+    /** @type {?} */
+    DirectiveType.prototype.ngDirectiveDef;
+    /** @type {?} */
+    DirectiveType.prototype.ngFactoryDef;
+}
+/** @enum {number} */
+const DirectiveDefFlags = {
+    ContentQuery: 2,
+};
+DirectiveDefFlags[DirectiveDefFlags.ContentQuery] = 'ContentQuery';
+/**
+ * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
+ * consumable for rendering.
+ * @record
+ * @template T
+ */
+function PipeType() { }
+if (false) {
+    /** @type {?} */
+    PipeType.prototype.ngPipeDef;
+}
+/**
+ * Runtime information for classes that are inherited by components or directives
+ * that aren't defined as components or directives.
+ *
+ * This is an internal data structure used by the renderer to determine what inputs
+ * and outputs should be inherited.
+ *
+ * See: {\@link defineBase}
+ *
+ * \@codeGenApi
+ * @record
+ * @template T
+ */
+function ɵɵBaseDef() { }
+if (false) {
+    /**
+     * A dictionary mapping the inputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `\@Input('alias') propertyName: any;`).
+     * @type {?}
+     */
+    ɵɵBaseDef.prototype.inputs;
+    /**
+     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
+     * public or minified name.
+     * @type {?}
+     */
+    ɵɵBaseDef.prototype.declaredInputs;
+    /**
+     * A dictionary mapping the outputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `\@Output('alias') propertyName: any;`).
+     * @type {?}
+     */
+    ɵɵBaseDef.prototype.outputs;
+    /**
+     * Function to create and refresh content queries associated with a given directive.
+     * @type {?}
+     */
+    ɵɵBaseDef.prototype.contentQueries;
+    /**
+     * Query-related instructions for a directive. Note that while directives don't have a
+     * view and as such view queries won't necessarily do anything, there might be
+     * components that extend the directive.
+     * @type {?}
+     */
+    ɵɵBaseDef.prototype.viewQuery;
+    /**
+     * Refreshes host bindings on the associated directive.
+     * @type {?}
+     */
+    ɵɵBaseDef.prototype.hostBindings;
+}
+/**
+ * Runtime link information for Directives.
+ *
+ * This is internal data structure used by the render to link
+ * directives into templates.
+ *
+ * NOTE: Always use `defineDirective` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * @param Selector type metadata specifying the selector of the directive or component
+ *
+ * See: {\@link defineDirective}
+ * @record
+ * @template T
+ */
+function DirectiveDef() { }
+if (false) {
+    /**
+     * Token representing the directive. Used by DI.
+     * @type {?}
+     */
+    DirectiveDef.prototype.type;
+    /**
+     * Function that resolves providers and publishes them into the DI system.
+     * @type {?}
+     */
+    DirectiveDef.prototype.providersResolver;
+    /**
+     * The selectors that will be used to match nodes to this directive.
+     * @type {?}
+     */
+    DirectiveDef.prototype.selectors;
+    /**
+     * Name under which the directive is exported (for use with local references in template)
+     * @type {?}
+     */
+    DirectiveDef.prototype.exportAs;
+    /**
+     * Factory function used to create a new directive instance. Will be null initially.
+     * Populated when the factory is first requested by directive instantiation logic.
+     * @type {?}
+     */
+    DirectiveDef.prototype.factory;
+    /** @type {?} */
+    DirectiveDef.prototype.onChanges;
+    /** @type {?} */
+    DirectiveDef.prototype.onInit;
+    /** @type {?} */
+    DirectiveDef.prototype.doCheck;
+    /** @type {?} */
+    DirectiveDef.prototype.afterContentInit;
+    /** @type {?} */
+    DirectiveDef.prototype.afterContentChecked;
+    /** @type {?} */
+    DirectiveDef.prototype.afterViewInit;
+    /** @type {?} */
+    DirectiveDef.prototype.afterViewChecked;
+    /** @type {?} */
+    DirectiveDef.prototype.onDestroy;
+    /**
+     * The features applied to this directive
+     * @type {?}
+     */
+    DirectiveDef.prototype.features;
+    /** @type {?} */
+    DirectiveDef.prototype.setInput;
+}
+/**
+ * Runtime link information for Components.
+ *
+ * This is internal data structure used by the render to link
+ * components into templates.
+ *
+ * NOTE: Always use `defineComponent` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {\@link defineComponent}
+ * @record
+ * @template T
+ */
+function ComponentDef() { }
+if (false) {
+    /**
+     * Runtime unique component ID.
+     * @type {?}
+     */
+    ComponentDef.prototype.id;
+    /**
+     * The View template of the component.
+     * @type {?}
+     */
+    ComponentDef.prototype.template;
+    /**
+     * An array of `ngContent[selector]` values that were found in the template.
+     * @type {?|undefined}
+     */
+    ComponentDef.prototype.ngContentSelectors;
+    /**
+     * A set of styles that the component needs to be present for component to render correctly.
+     * @type {?}
+     */
+    ComponentDef.prototype.styles;
+    /**
+     * The number of nodes, local refs, and pipes in this component template.
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the binding start index.
+     * @type {?}
+     */
+    ComponentDef.prototype.consts;
+    /**
+     * The number of bindings in this component template (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     * @type {?}
+     */
+    ComponentDef.prototype.vars;
+    /**
+     * Query-related instructions for a component.
+     * @type {?}
+     */
+    ComponentDef.prototype.viewQuery;
+    /**
+     * The view encapsulation type, which determines how styles are applied to
+     * DOM elements. One of
+     * - `Emulated` (default): Emulate native scoping of styles.
+     * - `Native`: Use the native encapsulation mechanism of the renderer.
+     * - `ShadowDom`: Use modern [ShadowDOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     *   create a ShadowRoot for component's host element.
+     * - `None`: Do not provide any template or style encapsulation.
+     * @type {?}
+     */
+    ComponentDef.prototype.encapsulation;
+    /**
+     * Defines arbitrary developer-defined data to be stored on a renderer instance.
+     * This is useful for renderers that delegate to other renderers.
+     * @type {?}
+     */
+    ComponentDef.prototype.data;
+    /**
+     * Whether or not this component's ChangeDetectionStrategy is OnPush
+     * @type {?}
+     */
+    ComponentDef.prototype.onPush;
+    /**
+     * Registry of directives and components that may be found in this view.
+     *
+     * The property is either an array of `DirectiveDef`s or a function which returns the array of
+     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     * @type {?}
+     */
+    ComponentDef.prototype.directiveDefs;
+    /**
+     * Registry of pipes that may be found in this view.
+     *
+     * The property is either an array of `PipeDefs`s or a function which returns the array of
+     * `PipeDefs`s. The function is necessary to be able to support forward declarations.
+     * @type {?}
+     */
+    ComponentDef.prototype.pipeDefs;
+    /**
+     * The set of schemas that declare elements to be allowed in the component's template.
+     * @type {?}
+     */
+    ComponentDef.prototype.schemas;
+    /**
+     * Ivy runtime uses this place to store the computed tView for the component. This gets filled on
+     * the first run of component.
+     * @type {?}
+     */
+    ComponentDef.prototype.tView;
+    /**
+     * Used to store the result of `noSideEffects` function so that it is not removed by closure
+     * compiler. The property should never be read.
+     * @type {?|undefined}
+     */
+    ComponentDef.prototype._;
+}
+/**
+ * Runtime link information for Pipes.
+ *
+ * This is internal data structure used by the renderer to link
+ * pipes into templates.
+ *
+ * NOTE: Always use `definePipe` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {\@link definePipe}
+ * @record
+ * @template T
+ */
+function PipeDef() { }
+if (false) {
+    /**
+     * Token representing the pipe.
+     * @type {?}
+     */
+    PipeDef.prototype.type;
+    /**
+     * Pipe name.
+     *
+     * Used to resolve pipe in templates.
+     * @type {?}
+     */
+    PipeDef.prototype.name;
+    /**
+     * Factory function used to create a new pipe instance. Will be null initially.
+     * Populated when the factory is first requested by pipe instantiation logic.
+     * @type {?}
+     */
+    PipeDef.prototype.factory;
+    /**
+     * Whether or not the pipe is pure.
+     *
+     * Pure pipes result only depends on the pipe input and not on internal
+     * state of the pipe.
+     * @type {?}
+     */
+    PipeDef.prototype.pure;
+    /** @type {?} */
+    PipeDef.prototype.onDestroy;
+}
+/**
+ * @record
+ */
+function DirectiveDefFeature() { }
+if (false) {
+    /**
+     * Marks a feature as something that {\@link InheritDefinitionFeature} will execute
+     * during inheritance.
+     *
+     * NOTE: DO NOT SET IN ROOT OF MODULE! Doing so will result in tree-shakers/bundlers
+     * identifying the change as a side effect, and the feature will be included in
+     * every bundle.
+     * @type {?|undefined}
+     */
+    DirectiveDefFeature.prototype.ngInherit;
+    /* Skipping unhandled member: <T>(directiveDef: DirectiveDef<T>): void;*/
+}
+/**
+ * @record
+ */
+function ComponentDefFeature() { }
+if (false) {
+    /**
+     * Marks a feature as something that {\@link InheritDefinitionFeature} will execute
+     * during inheritance.
+     *
+     * NOTE: DO NOT SET IN ROOT OF MODULE! Doing so will result in tree-shakers/bundlers
+     * identifying the change as a side effect, and the feature will be included in
+     * every bundle.
+     * @type {?|undefined}
+     */
+    ComponentDefFeature.prototype.ngInherit;
+    /* Skipping unhandled member: <T>(componentDef: ComponentDef<T>): void;*/
+}
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+/** @type {?} */
+const unusedValueExportToPlacateAjd$7 = 1;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
@@ -26831,7 +27209,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.9+18.sha-6f5f481.with-local-changes');
+const VERSION = new Version('9.0.0-next.9+19.sha-5332b04.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -35913,381 +36291,6 @@ if (false) {
     /** @type {?} */
     QueryList.prototype.last;
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @enum {number} */
-const RenderFlags = {
-    /* Whether to run the creation block (e.g. create elements and directives) */
-    Create: 1,
-    /* Whether to run the update block (e.g. refresh bindings) */
-    Update: 2,
-};
-/**
- * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
- * consumable for rendering.
- * @record
- * @template T
- */
-function ComponentType() { }
-if (false) {
-    /** @type {?} */
-    ComponentType.prototype.ngComponentDef;
-}
-/**
- * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
- * consumable for rendering.
- * @record
- * @template T
- */
-function DirectiveType() { }
-if (false) {
-    /** @type {?} */
-    DirectiveType.prototype.ngDirectiveDef;
-    /** @type {?} */
-    DirectiveType.prototype.ngFactoryDef;
-}
-/** @enum {number} */
-const DirectiveDefFlags = {
-    ContentQuery: 2,
-};
-/**
- * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
- * consumable for rendering.
- * @record
- * @template T
- */
-function PipeType() { }
-if (false) {
-    /** @type {?} */
-    PipeType.prototype.ngPipeDef;
-}
-/**
- * Runtime information for classes that are inherited by components or directives
- * that aren't defined as components or directives.
- *
- * This is an internal data structure used by the renderer to determine what inputs
- * and outputs should be inherited.
- *
- * See: {\@link defineBase}
- *
- * \@codeGenApi
- * @record
- * @template T
- */
-function ɵɵBaseDef() { }
-if (false) {
-    /**
-     * A dictionary mapping the inputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `\@Input('alias') propertyName: any;`).
-     * @type {?}
-     */
-    ɵɵBaseDef.prototype.inputs;
-    /**
-     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
-     * public or minified name.
-     * @type {?}
-     */
-    ɵɵBaseDef.prototype.declaredInputs;
-    /**
-     * A dictionary mapping the outputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `\@Output('alias') propertyName: any;`).
-     * @type {?}
-     */
-    ɵɵBaseDef.prototype.outputs;
-    /**
-     * Function to create and refresh content queries associated with a given directive.
-     * @type {?}
-     */
-    ɵɵBaseDef.prototype.contentQueries;
-    /**
-     * Query-related instructions for a directive. Note that while directives don't have a
-     * view and as such view queries won't necessarily do anything, there might be
-     * components that extend the directive.
-     * @type {?}
-     */
-    ɵɵBaseDef.prototype.viewQuery;
-    /**
-     * Refreshes host bindings on the associated directive.
-     * @type {?}
-     */
-    ɵɵBaseDef.prototype.hostBindings;
-}
-/**
- * Runtime link information for Directives.
- *
- * This is internal data structure used by the render to link
- * directives into templates.
- *
- * NOTE: Always use `defineDirective` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * @param Selector type metadata specifying the selector of the directive or component
- *
- * See: {\@link defineDirective}
- * @record
- * @template T
- */
-function DirectiveDef() { }
-if (false) {
-    /**
-     * Token representing the directive. Used by DI.
-     * @type {?}
-     */
-    DirectiveDef.prototype.type;
-    /**
-     * Function that resolves providers and publishes them into the DI system.
-     * @type {?}
-     */
-    DirectiveDef.prototype.providersResolver;
-    /**
-     * The selectors that will be used to match nodes to this directive.
-     * @type {?}
-     */
-    DirectiveDef.prototype.selectors;
-    /**
-     * Name under which the directive is exported (for use with local references in template)
-     * @type {?}
-     */
-    DirectiveDef.prototype.exportAs;
-    /**
-     * Factory function used to create a new directive instance. Will be null initially.
-     * Populated when the factory is first requested by directive instantiation logic.
-     * @type {?}
-     */
-    DirectiveDef.prototype.factory;
-    /** @type {?} */
-    DirectiveDef.prototype.onChanges;
-    /** @type {?} */
-    DirectiveDef.prototype.onInit;
-    /** @type {?} */
-    DirectiveDef.prototype.doCheck;
-    /** @type {?} */
-    DirectiveDef.prototype.afterContentInit;
-    /** @type {?} */
-    DirectiveDef.prototype.afterContentChecked;
-    /** @type {?} */
-    DirectiveDef.prototype.afterViewInit;
-    /** @type {?} */
-    DirectiveDef.prototype.afterViewChecked;
-    /** @type {?} */
-    DirectiveDef.prototype.onDestroy;
-    /**
-     * The features applied to this directive
-     * @type {?}
-     */
-    DirectiveDef.prototype.features;
-    /** @type {?} */
-    DirectiveDef.prototype.setInput;
-}
-/**
- * Runtime link information for Components.
- *
- * This is internal data structure used by the render to link
- * components into templates.
- *
- * NOTE: Always use `defineComponent` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * See: {\@link defineComponent}
- * @record
- * @template T
- */
-function ComponentDef() { }
-if (false) {
-    /**
-     * Runtime unique component ID.
-     * @type {?}
-     */
-    ComponentDef.prototype.id;
-    /**
-     * The View template of the component.
-     * @type {?}
-     */
-    ComponentDef.prototype.template;
-    /**
-     * An array of `ngContent[selector]` values that were found in the template.
-     * @type {?|undefined}
-     */
-    ComponentDef.prototype.ngContentSelectors;
-    /**
-     * A set of styles that the component needs to be present for component to render correctly.
-     * @type {?}
-     */
-    ComponentDef.prototype.styles;
-    /**
-     * The number of nodes, local refs, and pipes in this component template.
-     *
-     * Used to calculate the length of the component's LView array, so we
-     * can pre-fill the array and set the binding start index.
-     * @type {?}
-     */
-    ComponentDef.prototype.consts;
-    /**
-     * The number of bindings in this component template (including pure fn bindings).
-     *
-     * Used to calculate the length of the component's LView array, so we
-     * can pre-fill the array and set the host binding start index.
-     * @type {?}
-     */
-    ComponentDef.prototype.vars;
-    /**
-     * Query-related instructions for a component.
-     * @type {?}
-     */
-    ComponentDef.prototype.viewQuery;
-    /**
-     * The view encapsulation type, which determines how styles are applied to
-     * DOM elements. One of
-     * - `Emulated` (default): Emulate native scoping of styles.
-     * - `Native`: Use the native encapsulation mechanism of the renderer.
-     * - `ShadowDom`: Use modern [ShadowDOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-     *   create a ShadowRoot for component's host element.
-     * - `None`: Do not provide any template or style encapsulation.
-     * @type {?}
-     */
-    ComponentDef.prototype.encapsulation;
-    /**
-     * Defines arbitrary developer-defined data to be stored on a renderer instance.
-     * This is useful for renderers that delegate to other renderers.
-     * @type {?}
-     */
-    ComponentDef.prototype.data;
-    /**
-     * Whether or not this component's ChangeDetectionStrategy is OnPush
-     * @type {?}
-     */
-    ComponentDef.prototype.onPush;
-    /**
-     * Registry of directives and components that may be found in this view.
-     *
-     * The property is either an array of `DirectiveDef`s or a function which returns the array of
-     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
-     * @type {?}
-     */
-    ComponentDef.prototype.directiveDefs;
-    /**
-     * Registry of pipes that may be found in this view.
-     *
-     * The property is either an array of `PipeDefs`s or a function which returns the array of
-     * `PipeDefs`s. The function is necessary to be able to support forward declarations.
-     * @type {?}
-     */
-    ComponentDef.prototype.pipeDefs;
-    /**
-     * The set of schemas that declare elements to be allowed in the component's template.
-     * @type {?}
-     */
-    ComponentDef.prototype.schemas;
-    /**
-     * Ivy runtime uses this place to store the computed tView for the component. This gets filled on
-     * the first run of component.
-     * @type {?}
-     */
-    ComponentDef.prototype.tView;
-    /**
-     * Used to store the result of `noSideEffects` function so that it is not removed by closure
-     * compiler. The property should never be read.
-     * @type {?|undefined}
-     */
-    ComponentDef.prototype._;
-}
-/**
- * Runtime link information for Pipes.
- *
- * This is internal data structure used by the renderer to link
- * pipes into templates.
- *
- * NOTE: Always use `definePipe` function to create this object,
- * never create the object directly since the shape of this object
- * can change between versions.
- *
- * See: {\@link definePipe}
- * @record
- * @template T
- */
-function PipeDef() { }
-if (false) {
-    /**
-     * Token representing the pipe.
-     * @type {?}
-     */
-    PipeDef.prototype.type;
-    /**
-     * Pipe name.
-     *
-     * Used to resolve pipe in templates.
-     * @type {?}
-     */
-    PipeDef.prototype.name;
-    /**
-     * Factory function used to create a new pipe instance. Will be null initially.
-     * Populated when the factory is first requested by pipe instantiation logic.
-     * @type {?}
-     */
-    PipeDef.prototype.factory;
-    /**
-     * Whether or not the pipe is pure.
-     *
-     * Pure pipes result only depends on the pipe input and not on internal
-     * state of the pipe.
-     * @type {?}
-     */
-    PipeDef.prototype.pure;
-    /** @type {?} */
-    PipeDef.prototype.onDestroy;
-}
-/**
- * @record
- */
-function DirectiveDefFeature() { }
-if (false) {
-    /**
-     * Marks a feature as something that {\@link InheritDefinitionFeature} will execute
-     * during inheritance.
-     *
-     * NOTE: DO NOT SET IN ROOT OF MODULE! Doing so will result in tree-shakers/bundlers
-     * identifying the change as a side effect, and the feature will be included in
-     * every bundle.
-     * @type {?|undefined}
-     */
-    DirectiveDefFeature.prototype.ngInherit;
-    /* Skipping unhandled member: <T>(directiveDef: DirectiveDef<T>): void;*/
-}
-/**
- * @record
- */
-function ComponentDefFeature() { }
-if (false) {
-    /**
-     * Marks a feature as something that {\@link InheritDefinitionFeature} will execute
-     * during inheritance.
-     *
-     * NOTE: DO NOT SET IN ROOT OF MODULE! Doing so will result in tree-shakers/bundlers
-     * identifying the change as a side effect, and the feature will be included in
-     * every bundle.
-     * @type {?|undefined}
-     */
-    ComponentDefFeature.prototype.ngInherit;
-    /* Skipping unhandled member: <T>(componentDef: ComponentDef<T>): void;*/
-}
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-/** @type {?} */
-const unusedValueExportToPlacateAjd$7 = 1;
 
 /**
  * @fileoverview added by tsickle
