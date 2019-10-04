@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+41.sha-53d13c3.with-local-changes
+ * @license Angular v9.0.0-next.9+44.sha-6004703.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3402,7 +3402,6 @@
             insertBloom(tView.data, tNode); // foundation for node bloom
             insertBloom(hostView, null); // foundation for cumulative bloom
             insertBloom(tView.blueprint, null);
-            ngDevMode && assertEqual(tNode.flags === 0 || tNode.flags === 2 /* isComponentHost */, true, 'expected tNode.flags to not be initialized');
         }
         var parentLoc = getParentInjectorLocation(tNode, hostView);
         var parentIndex = getParentInjectorIndex(parentLoc);
@@ -7426,11 +7425,13 @@
                     flags.push('TNodeFlags.hasContentQuery');
                 if (this.flags & 32 /* hasStyleInput */)
                     flags.push('TNodeFlags.hasStyleInput');
+                if (this.flags & 64 /* hasInitialStyling */)
+                    flags.push('TNodeFlags.hasInitialStyling');
                 if (this.flags & 2 /* isComponentHost */)
                     flags.push('TNodeFlags.isComponentHost');
                 if (this.flags & 1 /* isDirectiveHost */)
                     flags.push('TNodeFlags.isDirectiveHost');
-                if (this.flags & 64 /* isDetached */)
+                if (this.flags & 128 /* isDetached */)
                     flags.push('TNodeFlags.isDetached');
                 if (this.flags & 4 /* isProjected */)
                     flags.push('TNodeFlags.isProjected');
@@ -8648,6 +8649,14 @@
             inputsStore = generatePropertyAliases(directiveDef.inputs, i, inputsStore);
             outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
         }
+        if (inputsStore !== null) {
+            if (inputsStore.hasOwnProperty('class')) {
+                tNode.flags |= 16 /* hasClassInput */;
+            }
+            if (inputsStore.hasOwnProperty('style')) {
+                tNode.flags |= 32 /* hasStyleInput */;
+            }
+        }
         tNode.inputs = inputsStore;
         tNode.outputs = outputsStore;
     }
@@ -8989,7 +8998,7 @@
     */
     function markAsComponentHost(tView, hostTNode) {
         ngDevMode && assertFirstTemplatePass(tView);
-        hostTNode.flags = 2 /* isComponentHost */;
+        hostTNode.flags |= 2 /* isComponentHost */;
         (tView.components || (tView.components = ngDevMode ? new TViewComponents() : [])).push(hostTNode.index);
     }
     /** Caches local names and their matching directive indices for query and template lookups. */
@@ -9029,11 +9038,9 @@
      * @param index the initial index
      */
     function initNodeFlags(tNode, index, numberOfDirectives) {
-        var flags = tNode.flags;
-        ngDevMode && assertEqual(flags === 0 || flags === 2 /* isComponentHost */, true, 'expected node flags to not be initialized');
         ngDevMode && assertNotEqual(numberOfDirectives, tNode.directiveEnd - tNode.directiveStart, 'Reached the max number of directives');
+        tNode.flags |= 1 /* isDirectiveHost */;
         // When the first directive is created on a node, save the index
-        tNode.flags = (flags & 2 /* isComponentHost */) | 1 /* isDirectiveHost */;
         tNode.directiveStart = index;
         tNode.directiveEnd = index + numberOfDirectives;
         tNode.providerIndexes = index;
@@ -10179,7 +10186,7 @@
                     tNode.flags |= 4 /* isProjected */;
                 }
             }
-            if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
+            if ((tNode.flags & 128 /* isDetached */) !== 128 /* isDetached */) {
                 if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
                     applyNodes(renderer, action, tNode.child, lView, renderParent, beforeNode, false);
                     applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
@@ -14955,6 +14962,9 @@
             }
             updateRawValueOnContext(tNode.styles, stylingMapToString(styles, false));
         }
+        if (hasAdditionalInitialStyling) {
+            tNode.flags |= 64 /* hasInitialStyling */;
+        }
         return hasAdditionalInitialStyling;
     }
     function updateRawValueOnContext(context, value) {
@@ -15051,7 +15061,9 @@
                 registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
             }
         }
-        renderInitialStyling(renderer, native, tNode);
+        if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
+            renderInitialStyling(renderer, native, tNode);
+        }
         appendChild(native, tNode, lView);
         // any immediate children of a component or template container must be pre-emptively
         // monkey-patched with the component view data so that the element can be inspected
@@ -15067,15 +15079,6 @@
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
             resolveDirectives(tView, lView, tNode, localRefs || null);
-            var inputData = tNode.inputs;
-            if (inputData != null) {
-                if (inputData.hasOwnProperty('class')) {
-                    tNode.flags |= 16 /* hasClassInput */;
-                }
-                if (inputData.hasOwnProperty('style')) {
-                    tNode.flags |= 32 /* hasStyleInput */;
-                }
-            }
             if (tView.queries !== null) {
                 tView.queries.elementStart(tView, tNode);
             }
@@ -18810,7 +18813,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.9+41.sha-53d13c3.with-local-changes');
+    var VERSION = new Version('9.0.0-next.9+44.sha-6004703.with-local-changes');
 
     /**
      * @license
@@ -22952,7 +22955,7 @@
         }
         if (markAsDetached) {
             // Define this node as detached to avoid projecting it later
-            removedPhTNode.flags |= 64 /* isDetached */;
+            removedPhTNode.flags |= 128 /* isDetached */;
         }
         ngDevMode && ngDevMode.rendererRemoveNode++;
     }

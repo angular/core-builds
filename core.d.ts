@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+41.sha-53d13c3.with-local-changes
+ * @license Angular v9.0.0-next.9+44.sha-6004703.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6785,8 +6785,10 @@ declare const enum TNodeFlags {
     hasClassInput = 16,
     /** This bit is set if the node has any "style" inputs */
     hasStyleInput = 32,
+    /** This bit is set if the node has initial styling */
+    hasInitialStyling = 64,
     /** This bit is set if the node has been detached by i18n */
-    isDetached = 64
+    isDetached = 128
 }
 
 /**
