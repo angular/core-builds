@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+45.sha-01677b2.with-local-changes
+ * @license Angular v9.0.0-next.9+46.sha-3a53e2c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18782,7 +18782,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.9+45.sha-01677b2.with-local-changes');
+    var VERSION = new Version('9.0.0-next.9+46.sha-3a53e2c.with-local-changes');
 
     /**
      * @license
@@ -26581,10 +26581,16 @@
             this.onStable = new EventEmitter();
             this.onError = new EventEmitter();
         }
-        NoopNgZone.prototype.run = function (fn) { return fn(); };
-        NoopNgZone.prototype.runGuarded = function (fn) { return fn(); };
+        NoopNgZone.prototype.run = function (fn, applyThis, applyArgs) {
+            return fn.apply(applyThis, applyArgs);
+        };
+        NoopNgZone.prototype.runGuarded = function (fn, applyThis, applyArgs) {
+            return fn.apply(applyThis, applyArgs);
+        };
         NoopNgZone.prototype.runOutsideAngular = function (fn) { return fn(); };
-        NoopNgZone.prototype.runTask = function (fn) { return fn(); };
+        NoopNgZone.prototype.runTask = function (fn, applyThis, applyArgs, name) {
+            return fn.apply(applyThis, applyArgs);
+        };
         return NoopNgZone;
     }());
 

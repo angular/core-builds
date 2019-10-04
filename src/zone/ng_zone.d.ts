@@ -171,8 +171,8 @@ export declare class NoopNgZone implements NgZone {
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
     readonly onError: EventEmitter<any>;
-    run(fn: () => any): any;
-    runGuarded(fn: () => any): any;
-    runOutsideAngular(fn: () => any): any;
-    runTask<T>(fn: () => any): any;
+    run(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
+    runGuarded(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
+    runOutsideAngular(fn: (...args: any[]) => any): any;
+    runTask(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any, name?: string): any;
 }
