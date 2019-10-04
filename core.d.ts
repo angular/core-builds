@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+45.sha-01677b2.with-local-changes
+ * @license Angular v9.0.0-next.9+46.sha-3a53e2c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9992,10 +9992,10 @@ export declare class ɵNoopNgZone implements NgZone {
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
     readonly onError: EventEmitter<any>;
-    run(fn: () => any): any;
-    runGuarded(fn: () => any): any;
-    runOutsideAngular(fn: () => any): any;
-    runTask<T>(fn: () => any): any;
+    run(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
+    runGuarded(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
+    runOutsideAngular(fn: (...args: any[]) => any): any;
+    runTask(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any, name?: string): any;
 }
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
