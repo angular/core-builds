@@ -56,8 +56,10 @@ export declare const enum TNodeFlags {
     hasClassInput = 16,
     /** This bit is set if the node has any "style" inputs */
     hasStyleInput = 32,
+    /** This bit is set if the node has initial styling */
+    hasInitialStyling = 64,
     /** This bit is set if the node has been detached by i18n */
-    isDetached = 64
+    isDetached = 128
 }
 /**
  * Corresponds to the TNode.providerIndexes property.
