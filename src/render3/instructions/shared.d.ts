@@ -144,7 +144,7 @@ export declare type TsickleIssue1009 = any;
  */
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 export declare function elementPropertyInternal<T>(lView: LView, index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
-export declare function setNgReflectProperty(lView: LView, element: RElement | RComment, type: TNodeType, attrName: string, value: any): void;
+export declare function setNgReflectProperties(lView: LView, element: RElement | RComment, type: TNodeType, dataValue: PropertyAliasValue, value: any): void;
 /**
  * Instantiate a root component.
  */
