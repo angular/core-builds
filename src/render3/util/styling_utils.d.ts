@@ -63,7 +63,7 @@ export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number 
 /**
  * Determines whether the provided styling value is truthy or falsy.
  */
-export declare function isStylingValueDefined(value: any): boolean;
+export declare function isStylingValueDefined<T extends string | number | {} | null>(value: T): value is NonNullable<T>;
 export declare function concatString(a: string, b: string, separator?: string): string;
 export declare function hyphenate(value: string): string;
 /**
