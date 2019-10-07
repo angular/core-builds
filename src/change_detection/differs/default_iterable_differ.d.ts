@@ -40,7 +40,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     forEachMovedItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachRemovedItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachIdentityChange(fn: (record: IterableChangeRecord_<V>) => void): void;
-    diff(collection: NgIterable<V>): DefaultIterableDiffer<V> | null;
+    diff(collection: NgIterable<V> | null | undefined): DefaultIterableDiffer<V> | null;
     onDestroy(): void;
     check(collection: NgIterable<V>): boolean;
     readonly isDirty: boolean;
