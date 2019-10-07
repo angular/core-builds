@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+46.sha-3a53e2c.with-local-changes
+ * @license Angular v9.0.0-next.9+52.sha-d18289f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1220,12 +1220,7 @@ export declare interface ContentChildDecorator {
      * * **selector** - The directive type or the name used for querying.
      * * **read** - True to read a different token from the queried element.
      * * **static** - True to resolve query results before change detection runs,
-     * false to resolve after change detection.
-     *
-     * When `static` is not provided, uses the query results to determine the timing of query
-     * resolution. If any query results are inside a nested view (such as `*ngIf`), the query is
-     * resolved after change detection runs. Otherwise, it is resolved before change detection
-     * runs.
+     * false to resolve after change detection. Defaults to false.
      *
      * @usageNotes
      *
@@ -7887,12 +7882,9 @@ export declare interface ViewChildDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **read** - True to read a different token from the queried elements.
-     * * **static** - True to resolve query results before change detection runs
+     * * **static** - True to resolve query results before change detection runs,
+     * false to resolve after change detection. Defaults to false.
      *
-     * When `static` is not provided, uses query results to determine the timing of query
-     * resolution. If any query results are inside a nested view (such as `*ngIf`), the query is
-     * resolved after change detection runs. Otherwise, it is resolved before change detection
-     * runs.
      *
      * The following selectors are supported.
      *   * Any class with the `@Component` or `@Directive` decorator

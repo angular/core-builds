@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+46.sha-3a53e2c.with-local-changes
+ * @license Angular v9.0.0-next.9+52.sha-d18289f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24778,16 +24778,22 @@ function publishDefaultGlobalUtils() {
  * @return {?}
  */
 function publishGlobalUtil(name, fn) {
-    /** @type {?} */
-    const w = (/** @type {?} */ ((/** @type {?} */ (_global))));
-    ngDevMode && assertDefined(fn, 'function not defined');
-    if (w) {
+    if (typeof COMPILED === 'undefined' || !COMPILED) {
+        // Note: we can't export `ng` when using closure enhanced optimization as:
+        // - closure declares globals itself for minified names, which sometimes clobber our `ng` global
+        // - we can't declare a closure extern as the namespace `ng` is already used within Google
+        //   for typings for AngularJS (via `goog.provide('ng....')`).
         /** @type {?} */
-        let container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
-        if (!container) {
-            container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
+        const w = (/** @type {?} */ ((/** @type {?} */ (_global))));
+        ngDevMode && assertDefined(fn, 'function not defined');
+        if (w) {
+            /** @type {?} */
+            let container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
+            if (!container) {
+                container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
+            }
+            container[name] = fn;
         }
-        container[name] = fn;
     }
 }
 
@@ -27212,7 +27218,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.9+46.sha-3a53e2c.with-local-changes');
+const VERSION = new Version('9.0.0-next.9+52.sha-d18289f.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
