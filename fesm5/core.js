@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+46.sha-3a53e2c.with-local-changes
+ * @license Angular v9.0.0-next.9+52.sha-d18289f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17588,14 +17588,20 @@ function publishDefaultGlobalUtils() {
  * used from the browser console when an application is not in production.
  */
 function publishGlobalUtil(name, fn) {
-    var w = _global;
-    ngDevMode && assertDefined(fn, 'function not defined');
-    if (w) {
-        var container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
-        if (!container) {
-            container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
+    if (typeof COMPILED === 'undefined' || !COMPILED) {
+        // Note: we can't export `ng` when using closure enhanced optimization as:
+        // - closure declares globals itself for minified names, which sometimes clobber our `ng` global
+        // - we can't declare a closure extern as the namespace `ng` is already used within Google
+        //   for typings for AngularJS (via `goog.provide('ng....')`).
+        var w = _global;
+        ngDevMode && assertDefined(fn, 'function not defined');
+        if (w) {
+            var container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
+            if (!container) {
+                container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
+            }
+            container[name] = fn;
         }
-        container[name] = fn;
     }
 }
 
@@ -18639,7 +18645,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.9+46.sha-3a53e2c.with-local-changes');
+var VERSION = new Version('9.0.0-next.9+52.sha-d18289f.with-local-changes');
 
 /**
  * @license
