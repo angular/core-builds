@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+57.sha-c61e4d7.with-local-changes
+ * @license Angular v9.0.0-next.9+59.sha-fee28e2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6408,7 +6408,8 @@ function setStylingMapsSyncFn(fn) {
  */
 var setStyle = function (renderer, native, prop, value) {
     if (renderer !== null) {
-        if (value) {
+        // Use `isStylingValueDefined` to account for falsy values that should be bound like 0.
+        if (isStylingValueDefined(value)) {
             // opacity, z-index and flexbox all have number values
             // and these need to be converted into strings so that
             // they can be assigned properly.
@@ -18679,7 +18680,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.9+57.sha-c61e4d7.with-local-changes');
+var VERSION = new Version('9.0.0-next.9+59.sha-fee28e2.with-local-changes');
 
 /**
  * @license
