@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+58.sha-3efb060.with-local-changes
+ * @license Angular v9.0.0-next.9+61.sha-2089727.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1566,7 +1566,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     forEachMovedItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachRemovedItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachIdentityChange(fn: (record: IterableChangeRecord_<V>) => void): void;
-    diff(collection: NgIterable<V>): DefaultIterableDiffer<V> | null;
+    diff(collection: NgIterable<V> | null | undefined): DefaultIterableDiffer<V> | null;
     onDestroy(): void;
     check(collection: NgIterable<V>): boolean;
     readonly isDirty: boolean;
@@ -3302,7 +3302,7 @@ export declare interface IterableDiffer<V> {
      * @returns an object describing the difference. The return value is only valid until the next
      * `diff()` invocation.
      */
-    diff(object: NgIterable<V>): IterableChanges<V> | null;
+    diff(object: NgIterable<V> | undefined | null): IterableChanges<V> | null;
 }
 
 /**
