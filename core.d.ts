@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+64.sha-c507dda.with-local-changes
+ * @license Angular v9.0.0-next.9+65.sha-2265cb5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5357,50 +5357,7 @@ declare interface RElement extends RNode {
     setProperty?(name: string, value: any): void;
 }
 
-/**
- * @deprecated Use `RendererType2` (and `Renderer2`) instead.
- * @publicApi
- */
-export declare class RenderComponentType {
-    id: string;
-    templateUrl: string;
-    slotCount: number;
-    encapsulation: ViewEncapsulation;
-    styles: Array<string | any[]>;
-    animations: any;
-    constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: any);
-}
-
 declare const RENDERER = 12;
-
-/**
- * @deprecated Use the `Renderer2` instead.
- * @publicApi
- */
-export declare abstract class Renderer {
-    abstract selectRootElement(selectorOrNode: string | any, debugInfo?: ɵRenderDebugInfo): any;
-    abstract createElement(parentElement: any, name: string, debugInfo?: ɵRenderDebugInfo): any;
-    abstract createViewRoot(hostElement: any): any;
-    abstract createTemplateAnchor(parentElement: any, debugInfo?: ɵRenderDebugInfo): any;
-    abstract createText(parentElement: any, value: string, debugInfo?: ɵRenderDebugInfo): any;
-    abstract projectNodes(parentElement: any, nodes: any[]): void;
-    abstract attachViewAfter(node: any, viewRootNodes: any[]): void;
-    abstract detachView(viewRootNodes: any[]): void;
-    abstract destroyView(hostElement: any, viewAllNodes: any[]): void;
-    abstract listen(renderElement: any, name: string, callback: Function): Function;
-    abstract listenGlobal(target: string, name: string, callback: Function): Function;
-    abstract setElementProperty(renderElement: any, propertyName: string, propertyValue: any): void;
-    abstract setElementAttribute(renderElement: any, attributeName: string, attributeValue?: string): void;
-    /**
-     * Used only in debug mode to serialize property changes to dom nodes as attributes.
-     */
-    abstract setBindingDebugInfo(renderElement: any, propertyName: string, propertyValue: string): void;
-    abstract setElementClass(renderElement: any, className: string, isAdd: boolean): void;
-    abstract setElementStyle(renderElement: any, styleName: string, styleValue?: string): void;
-    abstract invokeElementMethod(renderElement: any, methodName: string, args?: any[]): void;
-    abstract setText(renderNode: any, text: string): void;
-    abstract animate(element: any, startingStyles: any, keyframes: any[], duration: number, delay: number, easing: string, previousPlayers?: any[]): any;
-}
 
 /**
  * Extend this base class to implement custom rendering. By default, Angular
@@ -5818,25 +5775,6 @@ declare interface RootData {
     rendererFactory: RendererFactory2;
     errorHandler: ErrorHandler;
     sanitizer: Sanitizer;
-}
-
-/**
- * Injectable service that provides a low-level interface for modifying the UI.
- *
- * Use this service to bypass Angular's templating and make custom UI changes that can't be
- * expressed declaratively. For example if you need to set a property or an attribute whose name is
- * not statically known, use {@link Renderer#setElementProperty setElementProperty} or
- * {@link Renderer#setElementAttribute setElementAttribute} respectively.
- *
- * If you are implementing a custom renderer, you must implement this interface.
- *
- * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
- *
- * @deprecated Use `RendererFactory2` instead.
- * @publicApi
- */
-export declare abstract class RootRenderer {
-    abstract renderComponent(componentType: RenderComponentType): Renderer;
 }
 
 declare interface RText extends RNode {
@@ -9549,17 +9487,6 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
     ngFactoryDef: () => T;
 }
 
-/**
- * @deprecated Use the `Renderer2` instead.
- */
-export declare interface ɵDirectRenderer {
-    remove(node: any): void;
-    appendChild(node: any, parent: any): void;
-    insertBefore(node: any, refNode: any): void;
-    nextSibling(node: any): any;
-    parentElement(node: any): any;
-}
-
 export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
 
 export declare const ɵEMPTY_ARRAY: any[];
@@ -10260,20 +10187,6 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
  * @param options Optional parameters which control bootstrapping
  */
 export declare function ɵrenderComponent<T>(componentType: ɵComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
-
-/**
- * @deprecated Debug info is handled internally in the view engine now.
- */
-export declare abstract class ɵRenderDebugInfo {
-    abstract readonly injector: Injector;
-    abstract readonly component: any;
-    abstract readonly providerTokens: any[];
-    abstract readonly references: {
-        [key: string]: any;
-    };
-    abstract readonly context: any;
-    abstract readonly source: string;
-}
 
 /**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
