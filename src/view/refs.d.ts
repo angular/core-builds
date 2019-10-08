@@ -13,7 +13,6 @@ import { ComponentFactory } from '../linker/component_factory';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { EmbeddedViewRef, InternalViewRef } from '../linker/view_ref';
-import { Renderer as RendererV1 } from '../render/api';
 import { ElementData, NgModuleDefinition, NodeDef, TemplateData, ViewContainerData, ViewData, ViewDefinitionFactory } from './types';
 export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
     [propName: string]: string;
@@ -44,5 +43,4 @@ export declare class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
 export declare function createTemplateData(view: ViewData, def: NodeDef): TemplateData;
 export declare function createInjector(view: ViewData, elDef: NodeDef): Injector;
 export declare function nodeValue(view: ViewData, index: number): any;
-export declare function createRendererV1(view: ViewData): RendererV1;
 export declare function createNgModuleRef(moduleType: Type<any>, parent: Injector, bootstrapComponents: Type<any>[], def: NgModuleDefinition): NgModuleRef<any>;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+64.sha-c507dda.with-local-changes
+ * @license Angular v9.0.0-next.9+65.sha-2265cb5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18642,59 +18642,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * @deprecated Use `RendererType2` (and `Renderer2`) instead.
-     * @publicApi
-     */
-    var RenderComponentType = /** @class */ (function () {
-        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
-            this.id = id;
-            this.templateUrl = templateUrl;
-            this.slotCount = slotCount;
-            this.encapsulation = encapsulation;
-            this.styles = styles;
-            this.animations = animations;
-        }
-        return RenderComponentType;
-    }());
-    /**
-     * @deprecated Debug info is handled internally in the view engine now.
-     */
-    var RenderDebugInfo = /** @class */ (function () {
-        function RenderDebugInfo() {
-        }
-        return RenderDebugInfo;
-    }());
-    /**
-     * @deprecated Use the `Renderer2` instead.
-     * @publicApi
-     */
-    var Renderer = /** @class */ (function () {
-        function Renderer() {
-        }
-        return Renderer;
-    }());
     var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
-    /**
-     * Injectable service that provides a low-level interface for modifying the UI.
-     *
-     * Use this service to bypass Angular's templating and make custom UI changes that can't be
-     * expressed declaratively. For example if you need to set a property or an attribute whose name is
-     * not statically known, use {@link Renderer#setElementProperty setElementProperty} or
-     * {@link Renderer#setElementAttribute setElementAttribute} respectively.
-     *
-     * If you are implementing a custom renderer, you must implement this interface.
-     *
-     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
-     *
-     * @deprecated Use `RendererFactory2` instead.
-     * @publicApi
-     */
-    var RootRenderer = /** @class */ (function () {
-        function RootRenderer() {
-        }
-        return RootRenderer;
-    }());
     /**
      * Creates and initializes a custom renderer that implements the `Renderer2` base class.
      *
@@ -18792,7 +18740,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.9+64.sha-c507dda.with-local-changes');
+    var VERSION = new Version('9.0.0-next.9+65.sha-2265cb5.with-local-changes');
 
     /**
      * @license
@@ -21144,105 +21092,6 @@
         }
         throw new Error("Illegal state: read nodeValue for node index " + index);
     }
-    function createRendererV1(view) {
-        return new RendererAdapter(view.renderer);
-    }
-    var RendererAdapter = /** @class */ (function () {
-        function RendererAdapter(delegate) {
-            this.delegate = delegate;
-        }
-        RendererAdapter.prototype.selectRootElement = function (selectorOrNode) {
-            return this.delegate.selectRootElement(selectorOrNode);
-        };
-        RendererAdapter.prototype.createElement = function (parent, namespaceAndName) {
-            var _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
-            var el = this.delegate.createElement(name, ns);
-            if (parent) {
-                this.delegate.appendChild(parent, el);
-            }
-            return el;
-        };
-        RendererAdapter.prototype.createViewRoot = function (hostElement) { return hostElement; };
-        RendererAdapter.prototype.createTemplateAnchor = function (parentElement) {
-            var comment = this.delegate.createComment('');
-            if (parentElement) {
-                this.delegate.appendChild(parentElement, comment);
-            }
-            return comment;
-        };
-        RendererAdapter.prototype.createText = function (parentElement, value) {
-            var node = this.delegate.createText(value);
-            if (parentElement) {
-                this.delegate.appendChild(parentElement, node);
-            }
-            return node;
-        };
-        RendererAdapter.prototype.projectNodes = function (parentElement, nodes) {
-            for (var i = 0; i < nodes.length; i++) {
-                this.delegate.appendChild(parentElement, nodes[i]);
-            }
-        };
-        RendererAdapter.prototype.attachViewAfter = function (node, viewRootNodes) {
-            var parentElement = this.delegate.parentNode(node);
-            var nextSibling = this.delegate.nextSibling(node);
-            for (var i = 0; i < viewRootNodes.length; i++) {
-                this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
-            }
-        };
-        RendererAdapter.prototype.detachView = function (viewRootNodes) {
-            for (var i = 0; i < viewRootNodes.length; i++) {
-                var node = viewRootNodes[i];
-                var parentElement = this.delegate.parentNode(node);
-                this.delegate.removeChild(parentElement, node);
-            }
-        };
-        RendererAdapter.prototype.destroyView = function (hostElement, viewAllNodes) {
-            for (var i = 0; i < viewAllNodes.length; i++) {
-                this.delegate.destroyNode(viewAllNodes[i]);
-            }
-        };
-        RendererAdapter.prototype.listen = function (renderElement, name, callback) {
-            return this.delegate.listen(renderElement, name, callback);
-        };
-        RendererAdapter.prototype.listenGlobal = function (target, name, callback) {
-            return this.delegate.listen(target, name, callback);
-        };
-        RendererAdapter.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) {
-            this.delegate.setProperty(renderElement, propertyName, propertyValue);
-        };
-        RendererAdapter.prototype.setElementAttribute = function (renderElement, namespaceAndName, attributeValue) {
-            var _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
-            if (attributeValue != null) {
-                this.delegate.setAttribute(renderElement, name, attributeValue, ns);
-            }
-            else {
-                this.delegate.removeAttribute(renderElement, name, ns);
-            }
-        };
-        RendererAdapter.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
-        RendererAdapter.prototype.setElementClass = function (renderElement, className, isAdd) {
-            if (isAdd) {
-                this.delegate.addClass(renderElement, className);
-            }
-            else {
-                this.delegate.removeClass(renderElement, className);
-            }
-        };
-        RendererAdapter.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
-            if (styleValue != null) {
-                this.delegate.setStyle(renderElement, styleName, styleValue);
-            }
-            else {
-                this.delegate.removeStyle(renderElement, styleName);
-            }
-        };
-        RendererAdapter.prototype.invokeElementMethod = function (renderElement, methodName, args) {
-            renderElement[methodName].apply(renderElement, args);
-        };
-        RendererAdapter.prototype.setText = function (renderNode, text) { this.delegate.setValue(renderNode, text); };
-        RendererAdapter.prototype.animate = function () { throw new Error('Renderer.animate is no longer supported!'); };
-        return RendererAdapter;
-    }());
     function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
         return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
     }
@@ -21298,7 +21147,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var RendererV1TokenKey = tokenKey(Renderer);
     var Renderer2TokenKey = tokenKey(Renderer2);
     var ElementRefTokenKey = tokenKey(ElementRef);
     var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
@@ -21583,10 +21431,6 @@
         while (searchView) {
             if (elDef) {
                 switch (tokenKey) {
-                    case RendererV1TokenKey: {
-                        var compView = findCompView(searchView, elDef, allowPrivateServices);
-                        return createRendererV1(compView);
-                    }
                     case Renderer2TokenKey: {
                         var compView = findCompView(searchView, elDef, allowPrivateServices);
                         return compView.renderer;
@@ -31006,11 +30850,8 @@
     exports.Host = Host;
     exports.NgZone = NgZone;
     exports.ɵNoopNgZone = NoopNgZone;
-    exports.RenderComponentType = RenderComponentType;
-    exports.Renderer = Renderer;
     exports.Renderer2 = Renderer2;
     exports.RendererFactory2 = RendererFactory2;
-    exports.RootRenderer = RootRenderer;
     exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;
     exports.CompilerFactory = CompilerFactory;
@@ -31055,7 +30896,6 @@
     exports.ɵclearResolutionOfComponentResourcesQueue = clearResolutionOfComponentResourcesQueue;
     exports.ɵresolveComponentResources = resolveComponentResources;
     exports.ɵReflectionCapabilities = ReflectionCapabilities;
-    exports.ɵRenderDebugInfo = RenderDebugInfo;
     exports.ɵ_sanitizeHtml = _sanitizeHtml;
     exports.ɵ_sanitizeStyle = _sanitizeStyle;
     exports.ɵ_sanitizeUrl = _sanitizeUrl;
