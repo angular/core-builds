@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+73.sha-ed71141.with-local-changes
+ * @license Angular v9.0.0-next.9+75.sha-9f0c549.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3940,14 +3940,15 @@ function isNameOnlyAttributeMarker(marker) {
     return marker === 3 /* Bindings */ || marker === 4 /* Template */ ||
         marker === 6 /* I18n */;
 }
-/** @type {?} */
-const ANIMATION_PROP_PREFIX = '@';
 /**
  * @param {?} name
  * @return {?}
  */
 function isAnimationProp(name) {
-    return name[0] === ANIMATION_PROP_PREFIX;
+    // Perf note: accessing charCodeAt to check for the first character of a string is faster as
+    // compared to accessing a character at index 0 (ex. name[0]). The main reason for this is that
+    // charCodeAt doesn't allocate memory to return a substring.
+    return name.charCodeAt(0) === 64; // @
 }
 
 /**
@@ -13128,8 +13129,7 @@ function validateProperty(hostView, element, propName, tNode) {
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
     return matchingSchemas(hostView, tNode.tagName) || propName in element ||
-        propName[0] === ANIMATION_PROP_PREFIX || typeof Node !== 'function' ||
-        !(element instanceof Node);
+        isAnimationProp(propName) || typeof Node !== 'function' || !(element instanceof Node);
 }
 /**
  * @param {?} hostView
@@ -26924,7 +26924,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.9+73.sha-ed71141.with-local-changes');
+const VERSION = new Version('9.0.0-next.9+75.sha-9f0c549.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

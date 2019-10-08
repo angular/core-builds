@@ -44,5 +44,4 @@ export declare function setUpAttributes(renderer: Renderer3, native: RElement, a
  * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
  */
 export declare function isNameOnlyAttributeMarker(marker: string | AttributeMarker | CssSelector): boolean;
-export declare const ANIMATION_PROP_PREFIX = "@";
 export declare function isAnimationProp(name: string): boolean;
