@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+76.sha-b2b917d.with-local-changes
+ * @license Angular v9.0.0-next.9+81.sha-305f368.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1274,10 +1274,11 @@ function ɵɵdefineComponent(componentDefinition) {
     var def = {
         type: type,
         providersResolver: null,
-        consts: componentDefinition.consts,
+        decls: componentDefinition.decls,
         vars: componentDefinition.vars,
         factory: null,
         template: componentDefinition.template || null,
+        consts: componentDefinition.consts || null,
         ngContentSelectors: componentDefinition.ngContentSelectors,
         hostBindings: componentDefinition.hostBindings || null,
         contentQueries: componentDefinition.contentQueries || null,
@@ -7161,7 +7162,8 @@ var TViewConstructor = /** @class */ (function () {
     directiveRegistry, //
     pipeRegistry, //
     firstChild, //
-    schemas) {
+    schemas, //
+    consts) {
         this.id = id;
         this.blueprint = blueprint;
         this.template = template;
@@ -7189,6 +7191,7 @@ var TViewConstructor = /** @class */ (function () {
         this.pipeRegistry = pipeRegistry;
         this.firstChild = firstChild;
         this.schemas = schemas;
+        this.consts = consts;
     }
     Object.defineProperty(TView.prototype, "template_", {
         get: function () {
@@ -8269,22 +8272,23 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor) {
  * @returns TView
  */
 function getOrCreateTView(def) {
-    return def.tView || (def.tView = createTView(-1, def.template, def.consts, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas));
+    return def.tView || (def.tView = createTView(-1, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts));
 }
 /**
  * Creates a TView instance
  *
  * @param viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
  * @param templateFn Template function
- * @param consts The number of nodes, local refs, and pipes in this template
+ * @param decls The number of nodes, local refs, and pipes in this template
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
  * @param viewQuery View queries for this view
  * @param schemas Schemas for this view
+ * @param consts Constants for this view
  */
-function createTView(viewIndex, templateFn, consts, vars, directives, pipes, viewQuery, schemas) {
+function createTView(viewIndex, templateFn, decls, vars, directives, pipes, viewQuery, schemas, consts) {
     ngDevMode && ngDevMode.tView++;
-    var bindingStartIndex = HEADER_OFFSET + consts;
+    var bindingStartIndex = HEADER_OFFSET + decls;
     // This length does not yet contain host bindings from child directives because at this point,
     // we don't know which directives are active on this template. As soon as a directive is matched
     // that has a host binding, we will update the blueprint with that def's hostVars count.
@@ -8319,7 +8323,8 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
             directives, // directiveRegistry: DirectiveDefList|null,
         typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
         null, // firstChild: TNode|null,
-        schemas) :
+        schemas, // schemas: SchemaMetadata[]|null,
+        consts) : // consts: TAttributes[]
         {
             id: viewIndex,
             blueprint: blueprint,
@@ -8348,6 +8353,7 @@ function createTView(viewIndex, templateFn, consts, vars, directives, pipes, vie
             pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
             firstChild: null,
             schemas: schemas,
+            consts: consts,
         };
 }
 function createViewBlueprint(bindingStartIndex, initialViewLength) {
@@ -14256,26 +14262,27 @@ function ɵɵcontainer(index) {
  *
  * @param index The index of the container in the data array
  * @param templateFn Inline template
- * @param consts The number of nodes, local refs, and pipes for this template
+ * @param decls The number of nodes, local refs, and pipes for this template
  * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
- * @param attrs The attrs attached to the container, if applicable
+ * @param constsIndex Index of template in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  *
  * @codeGenApi
  */
-function ɵɵtemplate(index, templateFn, consts, vars, tagName, attrs, localRefs, localRefExtractor) {
+function ɵɵtemplate(index, templateFn, decls, vars, tagName, constsIndex, localRefs, localRefExtractor) {
     var lView = getLView();
     var tView = lView[TVIEW];
+    var tViewConsts = tView.consts;
     // TODO: consider a separate node type for templates
-    var tContainerNode = containerInternal(lView, index, tagName || null, attrs || null);
+    var tContainerNode = containerInternal(lView, index, tagName || null, tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex]);
     if (tView.firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
         resolveDirectives(tView, lView, tContainerNode, localRefs || null);
         registerPostOrderHooks(tView, tContainerNode);
-        var embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas);
+        var embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
         var embeddedTViewNode = createTNode(tView, null, 2 /* View */, -1, null, null);
         embeddedTViewNode.injectorIndex = tContainerNode.injectorIndex;
         embeddedTView.node = embeddedTViewNode;
@@ -14893,8 +14900,7 @@ function isHostStyling() {
  *
  * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
- *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
+ * @param constsIndex Index of the element in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
@@ -14903,19 +14909,21 @@ function isHostStyling() {
  *
  * @codeGenApi
  */
-function ɵɵelementStart(index, name, attrs, localRefs) {
+function ɵɵelementStart(index, name, constsIndex, localRefs) {
     var lView = getLView();
     var tView = lView[TVIEW];
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings ');
+    var tViewConsts = tView.consts;
+    var consts = tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex];
+    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     var renderer = lView[RENDERER];
     var native = lView[index + HEADER_OFFSET] = elementCreate(name, renderer, getNamespace());
-    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs || null);
-    if (attrs != null) {
-        var lastAttrIndex = setUpAttributes(renderer, native, attrs);
+    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, consts);
+    if (consts != null) {
+        var lastAttrIndex = setUpAttributes(renderer, native, consts);
         if (tView.firstTemplatePass) {
-            registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
+            registerInitialStylingOnTNode(tNode, consts, lastAttrIndex);
         }
     }
     if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
@@ -14987,14 +14995,13 @@ function ɵɵelementEnd() {
  *
  * @param index Index of the element in the data array
  * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
- *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
+ * @param constsIndex Index of the element in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * @codeGenApi
  */
-function ɵɵelement(index, name, attrs, localRefs) {
-    ɵɵelementStart(index, name, attrs, localRefs);
+function ɵɵelement(index, name, constsIndex, localRefs) {
+    ɵɵelementStart(index, name, constsIndex, localRefs);
     ɵɵelementEnd();
 }
 /**
@@ -15087,7 +15094,7 @@ function setDirectiveStylingInput(context, lView, stylingInputs) {
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
  * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
+ * @param constsIndex Index of the container in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
@@ -15096,21 +15103,23 @@ function setDirectiveStylingInput(context, lView, stylingInputs) {
  *
  * @codeGenApi
  */
-function ɵɵelementContainerStart(index, attrs, localRefs) {
+function ɵɵelementContainerStart(index, constsIndex, localRefs) {
     var lView = getLView();
     var tView = lView[TVIEW];
     var renderer = lView[RENDERER];
     var tagName = 'ng-container';
+    var tViewConsts = tView.consts;
+    var consts = tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex];
     ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateComment++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     var native = lView[index + HEADER_OFFSET] = renderer.createComment(ngDevMode ? tagName : '');
     ngDevMode && assertDataInRange(lView, index - 1);
-    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 4 /* ElementContainer */, tagName, attrs || null);
-    if (attrs && tView.firstTemplatePass) {
+    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 4 /* ElementContainer */, tagName, consts);
+    if (consts && tView.firstTemplatePass) {
         // While ng-container doesn't necessarily support styling, we use the style context to identify
         // and execute directives on the ng-container.
-        registerInitialStylingOnTNode(tNode, attrs, 0);
+        registerInitialStylingOnTNode(tNode, consts, 0);
     }
     appendChild(native, tNode, lView);
     attachPatchData(native, lView);
@@ -15159,13 +15168,13 @@ function ɵɵelementContainerEnd() {
  * and {@link elementContainerEnd}
  *
  * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
+ * @param constsIndex Index of the container in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * @codeGenApi
  */
-function ɵɵelementContainer(index, attrs, localRefs) {
-    ɵɵelementContainerStart(index, attrs, localRefs);
+function ɵɵelementContainer(index, constsIndex, localRefs) {
+    ɵɵelementContainerStart(index, constsIndex, localRefs);
     ɵɵelementContainerEnd();
 }
 
@@ -15184,7 +15193,7 @@ function ɵɵelementContainer(index, attrs, localRefs) {
  *
  * @codeGenApi
  */
-function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
+function ɵɵembeddedViewStart(viewBlockId, decls, vars) {
     var lView = getLView();
     var previousOrParentTNode = getPreviousOrParentTNode();
     // The previous node can be a view node if we are processing an inline for loop
@@ -15200,7 +15209,7 @@ function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, consts, vars, containerTNode), null, 16 /* CheckAlways */, null, null);
+        viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, decls, vars, containerTNode), null, 16 /* CheckAlways */, null, null);
         var tParentNode = getIsParent() ? previousOrParentTNode :
             previousOrParentTNode && previousOrParentTNode.parent;
         assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
@@ -15224,19 +15233,19 @@ function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
  * it with the same index (since it's in the same template).
  *
  * @param viewIndex The index of the TView in TNode.tViews
- * @param consts The number of nodes, local refs, and pipes in this template
+ * @param decls The number of nodes, local refs, and pipes in this template
  * @param vars The number of bindings and pure function bindings in this template
  * @param container The parent container in which to look for the view's static data
  * @returns TView
  */
-function getOrCreateEmbeddedTView(viewIndex, consts, vars, parent) {
+function getOrCreateEmbeddedTView(viewIndex, decls, vars, parent) {
     var tView = getLView()[TVIEW];
     ngDevMode && assertNodeType(parent, 0 /* Container */);
     var containerTViews = parent.tViews;
     ngDevMode && assertDefined(containerTViews, 'TView expected');
     ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
     if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-        containerTViews[viewIndex] = createTView(viewIndex, null, consts, vars, tView.directiveRegistry, tView.pipeRegistry, null, null);
+        containerTViews[viewIndex] = createTView(viewIndex, null, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, null, tView.consts);
     }
     return containerTViews[viewIndex];
 }
@@ -17686,7 +17695,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
         16 /* CheckAlways */ | 512 /* IsRoot */;
     var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-    var rootTView = createTView(-1, null, 1, 0, null, null, null, null);
+    var rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
     var rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
     var oldView = selectView(rootView, null);
     var component;
@@ -18307,7 +18316,7 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
  *     type: ComponentWithProviders,
  *     selectors: [['component-with-providers']],
  *    factory: () => new ComponentWithProviders(directiveInject(GreeterDE as any)),
- *    consts: 1,
+ *    decls: 1,
  *    vars: 1,
  *    template: function(fs: RenderFlags, ctx: ComponentWithProviders) {
  *      if (fs & RenderFlags.Create) {
@@ -18629,7 +18638,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.9+76.sha-b2b917d.with-local-changes');
+var VERSION = new Version('9.0.0-next.9+81.sha-305f368.with-local-changes');
 
 /**
  * @license
@@ -21649,7 +21658,7 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
                 hostRNode.setAttribute('ng-version', VERSION.full);
         }
         // Create the root view. Uses empty TView and ContentTemplate.
-        var rootTView = createTView(-1, null, 1, 0, null, null, null, null);
+        var rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
         var rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
         // rootView is the parent when bootstrapping
         var oldLView = selectView(rootLView, null);
@@ -23286,7 +23295,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
 /**
  * Bindings for pure functions are stored after regular bindings.
  *
- * |------consts------|---------vars---------|                 |----- hostVars (dir1) ------|
+ * |-------decls------|---------vars---------|                 |----- hostVars (dir1) ------|
  * ------------------------------------------------------------------------------------------
  * | nodes/refs/pipes | bindings | fn slots  | injector | dir1 | host bindings | host slots |
  * ------------------------------------------------------------------------------------------

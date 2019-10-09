@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.9+76.sha-b2b917d.with-local-changes
+ * @license Angular v9.0.0-next.9+81.sha-305f368.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7496,7 +7496,7 @@ declare interface TView {
     /**
      * The index where the "expando" section of `LView` begins. The expando
      * section contains injectors, directive instances, and host binding values.
-     * Unlike the "consts" and "vars" sections of `LView`, the length of this
+     * Unlike the "decls" and "vars" sections of `LView`, the length of this
      * section cannot be calculated at compile-time because directives are matched
      * at runtime to preserve locality.
      *
@@ -7652,6 +7652,11 @@ declare interface TView {
      * Set of schemas that declare elements to be allowed inside the view.
      */
     schemas: SchemaMetadata[] | null;
+    /**
+     * Array of attributes for all of the elements in the view. Used
+     * for directive matching and attribute bindings.
+     */
+    consts: TAttributes[] | null;
 }
 
 /** Static data for a view  */
@@ -9273,6 +9278,8 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * The View template of the component.
      */
     readonly template: ComponentTemplate<T>;
+    /** Constants associated with the component's view. */
+    readonly consts: TAttributes[] | null;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -9287,7 +9294,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * Used to calculate the length of the component's LView array, so we
      * can pre-fill the array and set the binding start index.
      */
-    readonly consts: number;
+    readonly decls: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
@@ -11325,7 +11332,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * Used to calculate the length of this component's LView array, so we
      * can pre-fill the array and set the binding start index.
      */
-    consts: number;
+    decls: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
@@ -11436,6 +11443,8 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      *
      */
     template: ComponentTemplate<T>;
+    /** Constants for the nodes in the component's view. */
+    consts?: TAttributes[];
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11761,25 +11770,24 @@ export declare function ɵɵdisableBindings(): void;
  *
  * @param index Index of the element in the data array
  * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
- *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
+ * @param constsIndex Index of the element in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelement(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
 
 /**
  * Creates an empty logical container using {@link elementContainerStart}
  * and {@link elementContainerEnd}
  *
  * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
+ * @param constsIndex Index of the container in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainer(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainer(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
 
 /**
  * Mark the end of the <ng-container>.
@@ -11793,7 +11801,7 @@ export declare function ɵɵelementContainerEnd(): void;
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
  * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
+ * @param constsIndex Index of the container in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
@@ -11802,7 +11810,7 @@ export declare function ɵɵelementContainerEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
 
 /**
  * Mark the end of the element.
@@ -11857,8 +11865,7 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
- * @param attrs Statically bound set of attributes, classes, and styles to be written into the DOM
- *              element on creation. Use [AttributeMarker] to denote the meaning of this array.
+ * @param constsIndex Index of the element in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
@@ -11867,7 +11874,7 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementStart(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
 
 /**
  * Marks the end of an embedded view.
@@ -11884,7 +11891,7 @@ export declare function ɵɵembeddedViewEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵembeddedViewStart(viewBlockId: number, consts: number, vars: number): ɵRenderFlags;
+export declare function ɵɵembeddedViewStart(viewBlockId: number, decls: number, vars: number): ɵRenderFlags;
 
 /**
  * Enables directive matching on elements.
@@ -12786,7 +12793,7 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  *     type: ComponentWithProviders,
  *     selectors: [['component-with-providers']],
  *    factory: () => new ComponentWithProviders(directiveInject(GreeterDE as any)),
- *    consts: 1,
+ *    decls: 1,
  *    vars: 1,
  *    template: function(fs: RenderFlags, ctx: ComponentWithProviders) {
  *      if (fs & RenderFlags.Create) {
@@ -12811,7 +12818,7 @@ export declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProvi
 /**
  * Bindings for pure functions are stored after regular bindings.
  *
- * |------consts------|---------vars---------|                 |----- hostVars (dir1) ------|
+ * |-------decls------|---------vars---------|                 |----- hostVars (dir1) ------|
  * ------------------------------------------------------------------------------------------
  * | nodes/refs/pipes | bindings | fn slots  | injector | dir1 | host bindings | host slots |
  * ------------------------------------------------------------------------------------------
@@ -13615,17 +13622,17 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  *
  * @param index The index of the container in the data array
  * @param templateFn Inline template
- * @param consts The number of nodes, local refs, and pipes for this template
+ * @param decls The number of nodes, local refs, and pipes for this template
  * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
- * @param attrs The attrs attached to the container, if applicable
+ * @param constsIndex Index of template in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, constsIndex?: number | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
