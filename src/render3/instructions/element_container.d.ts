@@ -1,10 +1,9 @@
-import { TAttributes } from '../interfaces/node';
 /**
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
  * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
+ * @param constsIndex Index of the container in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
@@ -13,7 +12,7 @@ import { TAttributes } from '../interfaces/node';
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerStart(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
 /**
  * Mark the end of the <ng-container>.
  *
@@ -25,9 +24,9 @@ export declare function ɵɵelementContainerEnd(): void;
  * and {@link elementContainerEnd}
  *
  * @param index Index of the element in the LView array
- * @param attrs Set of attributes to be used when matching directives.
+ * @param constsIndex Index of the container in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainer(index: number, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainer(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;

@@ -1,5 +1,5 @@
 import { ComponentTemplate } from '../interfaces/definition';
-import { LocalRefExtractor, TAttributes } from '../interfaces/node';
+import { LocalRefExtractor } from '../interfaces/node';
 /**
  * Creates an LContainer for inline views, e.g.
  *
@@ -21,17 +21,17 @@ export declare function ɵɵcontainer(index: number): void;
  *
  * @param index The index of the container in the data array
  * @param templateFn Inline template
- * @param consts The number of nodes, local refs, and pipes for this template
+ * @param decls The number of nodes, local refs, and pipes for this template
  * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
- * @param attrs The attrs attached to the container, if applicable
+ * @param constsIndex Index of template in the `consts` array.
  * @param localRefs A set of local reference bindings on the element.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, consts: number, vars: number, tagName?: string | null, attrs?: TAttributes | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, constsIndex?: number | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Sets a container up to receive views.
  *

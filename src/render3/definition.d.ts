@@ -11,6 +11,7 @@ import { NgModuleDef } from '../metadata/ng_module';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
 import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction, ɵɵBaseDef } from './interfaces/definition';
+import { TAttributes } from './interfaces/node';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -41,7 +42,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * Used to calculate the length of this component's LView array, so we
      * can pre-fill the array and set the binding start index.
      */
-    consts: number;
+    decls: number;
     /**
      * The number of bindings in this component template (including pure fn bindings).
      *
@@ -152,6 +153,8 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      *
      */
     template: ComponentTemplate<T>;
+    /** Constants for the nodes in the component's view. */
+    consts?: TAttributes[];
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
