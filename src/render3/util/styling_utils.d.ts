@@ -29,7 +29,7 @@ export declare const DEFAULT_GUARD_MASK_VALUE = 1;
  * tNode for styles and for classes. This function allocates a new instance of a
  * `TStylingContext` with the initial values (see `interfaces.ts` for more info).
  */
-export declare function allocTStylingContext(initialStyling: StylingMapArray | null, hasDirectives: boolean): TStylingContext;
+export declare function allocTStylingContext(initialStyling?: StylingMapArray | null): TStylingContext;
 export declare function allocStylingMapArray(): StylingMapArray;
 export declare function getConfig(context: TStylingContext): TStylingConfig;
 export declare function hasConfig(context: TStylingContext, flag: TStylingConfig): boolean;
@@ -37,10 +37,9 @@ export declare function hasConfig(context: TStylingContext, flag: TStylingConfig
  * Determines whether or not to apply styles/classes directly or via context resolution.
  *
  * There are three cases that are matched here:
- * 1. there are no directives present AND ngDevMode is falsy
- * 2. context is locked for template or host bindings (depending on `hostBindingsMode`)
- * 3. There are no collisions (i.e. properties with more than one binding) across multiple
- *    sources (i.e. template + directive, directive + directive, directive + component)
+ * 1. context is locked for template or host bindings (depending on `hostBindingsMode`)
+ * 2. There are no collisions (i.e. properties with more than one binding)
+ * 3. There are only "prop" or "map" bindings present, but not both
  */
 export declare function allowDirectStyling(context: TStylingContext, hostBindingsMode: boolean): boolean;
 export declare function setConfig(context: TStylingContext, value: TStylingConfig): void;
@@ -58,7 +57,7 @@ export declare function setValue(data: LStylingData, bindingIndex: number, value
 export declare function getValue<T = any>(data: LStylingData, bindingIndex: number): T | null;
 export declare function lockContext(context: TStylingContext, hostBindingsMode: boolean): void;
 export declare function isContextLocked(context: TStylingContext, hostBindingsMode: boolean): boolean;
-export declare function getLockedConfig(hostBindingsMode: boolean): TStylingConfig;
+export declare function getLockedConfig(hostBindingsMode: boolean): TStylingConfig.TemplateBindingsLocked | TStylingConfig.HostBindingsLocked;
 export declare function getPropValuesStartPosition(context: TStylingContext): TStylingContextIndex;
 export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 /**
