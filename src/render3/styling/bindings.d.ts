@@ -121,11 +121,22 @@ export declare function applyStylingViaContext(context: TStylingContext, rendere
  * automatically. This function is intended to be used for performance reasons in the
  * event that there is no need to apply styling via context resolution.
  *
- * See `allowDirectStylingApply`.
+ * This function has three different cases that can occur (for each item in the map):
+ *
+ * - Case 1: Attempt to apply the current value in the map to the element (if it's `non null`).
+ *
+ * - Case 2: If a map value fails to be applied then the algorithm will find a matching entry in
+ *           the initial values present in the context and attempt to apply that.
+ *
+ * - Default Case: If the initial value cannot be applied then a default value of `null` will be
+ *                 applied (which will remove the style/class value from the element).
+ *
+ * See `allowDirectStylingApply` to learn the logic used to determine whether any style/class
+ * bindings can be directly applied.
  *
  * @returns whether or not the styling map was applied to the element.
  */
-export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, map: StylingMapArray, applyFn: ApplyStylingFn, sanitizer?: StyleSanitizeFn | null, forceUpdate?: boolean): boolean;
+export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, map: StylingMapArray, isClassBased: boolean, applyFn: ApplyStylingFn, sanitizer?: StyleSanitizeFn | null, forceUpdate?: boolean): boolean;
 /**
  * Applies the provided styling prop/value to the element directly (without context resolution).
  *
@@ -133,11 +144,30 @@ export declare function applyStylingMapDirectly(renderer: any, context: TStyling
  * automatically. This function is intended to be used for performance reasons in the
  * event that there is no need to apply styling via context resolution.
  *
- * See `allowDirectStylingApply`.
+ * This function has four different cases that can occur:
+ *
+ * - Case 1: Apply the provided prop/value (style or class) entry to the element
+ *           (if it is `non null`).
+ *
+ * - Case 2: If value does not get applied (because its `null` or `undefined`) then the algorithm
+ *           will check to see if a styling map value was applied to the element as well just
+ *           before this (via `styleMap` or `classMap`). If and when a map is present then the
+  *          algorithm will find the matching property in the map and apply its value.
+  *
+ * - Case 3: If a map value fails to be applied then the algorithm will check to see if there
+ *           are any initial values present and attempt to apply a matching value based on
+ *           the target prop.
+ *
+ * - Default Case: If a matching initial value cannot be applied then a default value
+ *                 of `null` will be applied (which will remove the style/class value
+ *                 from the element).
+ *
+ * See `allowDirectStylingApply` to learn the logic used to determine whether any style/class
+ * bindings can be directly applied.
  *
  * @returns whether or not the prop/value styling was applied to the element.
  */
-export declare function applyStylingValueDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, prop: string, value: any, applyFn: ApplyStylingFn, sanitizer?: StyleSanitizeFn | null): boolean;
+export declare function applyStylingValueDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, prop: string, value: any, isClassBased: boolean, applyFn: ApplyStylingFn, sanitizer?: StyleSanitizeFn | null): boolean;
 export declare function getStylingMapsSyncFn(): SyncStylingMapsFn | null;
 export declare function setStylingMapsSyncFn(fn: SyncStylingMapsFn): void;
 /**

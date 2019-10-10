@@ -337,6 +337,23 @@ export declare const enum TStylingConfig {
      */
     Initial = 0,
     /**
+     * Whether or not there are any directives on this element.
+     *
+     * This is used so that certain performance optimizations can
+     * take place (e.g. direct style/class binding application).
+     *
+     * Note that the presence of this flag doesn't guarantee the
+     * presence of host-level style or class bindings within any
+     * of the active directives on the element.
+     *
+     * Examples include:
+     * 1. `<div dir-one>`
+     * 2. `<div dir-one [dir-two]="x">`
+     * 3. `<comp>`
+     * 4. `<comp dir-one>`
+     */
+    HasDirectives = 1,
+    /**
      * Whether or not there are prop-based bindings present.
      *
      * Examples include:
@@ -345,7 +362,7 @@ export declare const enum TStylingConfig {
      * 3. `@HostBinding('style.prop') x`
      * 4. `@HostBinding('class.prop') x`
      */
-    HasPropBindings = 1,
+    HasPropBindings = 2,
     /**
      * Whether or not there are map-based bindings present.
      *
@@ -355,7 +372,7 @@ export declare const enum TStylingConfig {
      * 3. `@HostBinding('style') x`
      * 4. `@HostBinding('class') x`
      */
-    HasMapBindings = 2,
+    HasMapBindings = 4,
     /**
      * Whether or not there are map-based and prop-based bindings present.
      *
@@ -365,7 +382,7 @@ export declare const enum TStylingConfig {
      * 3. `<div [style]="x" dir-that-sets-some-prop>`
      * 4. `<div [class]="x" dir-that-sets-some-class>`
      */
-    HasPropAndMapBindings = 3,
+    HasPropAndMapBindings = 6,
     /**
      * Whether or not there are two or more sources for a single property in the context.
      *
@@ -374,7 +391,7 @@ export declare const enum TStylingConfig {
      * 2. map + prop: `<div [style]="x" [style.prop]>`
      * 3. map + map: `<div [style]="x" dir-that-sets-style>`
      */
-    HasCollisions = 4,
+    HasCollisions = 8,
     /**
      * Whether or not the context contains initial styling values.
      *
@@ -384,7 +401,7 @@ export declare const enum TStylingConfig {
      * 3. `@Directive({ host: { 'style': 'width:200px' } })`
      * 4. `@Directive({ host: { 'class': 'one two three' } })`
      */
-    HasInitialStyling = 8,
+    HasInitialStyling = 16,
     /**
      * Whether or not the context contains one or more template bindings.
      *
@@ -394,7 +411,7 @@ export declare const enum TStylingConfig {
      * 3. `<div [class]="x">`
      * 4. `<div [class.name]="x">`
      */
-    HasTemplateBindings = 16,
+    HasTemplateBindings = 32,
     /**
      * Whether or not the context contains one or more host bindings.
      *
@@ -404,7 +421,7 @@ export declare const enum TStylingConfig {
      * 3. `@HostBinding('class') x`
      * 4. `@HostBinding('class.name') x`
      */
-    HasHostBindings = 32,
+    HasHostBindings = 64,
     /**
      * Whether or not the template bindings are allowed to be registered in the context.
      *
@@ -414,7 +431,7 @@ export declare const enum TStylingConfig {
      *
      * Note that this is only set once.
      */
-    TemplateBindingsLocked = 64,
+    TemplateBindingsLocked = 128,
     /**
      * Whether or not the host bindings are allowed to be registered in the context.
      *
@@ -424,11 +441,11 @@ export declare const enum TStylingConfig {
      *
      * Note that this is only set once.
      */
-    HostBindingsLocked = 128,
+    HostBindingsLocked = 256,
     /** A Mask of all the configurations */
-    Mask = 255,
+    Mask = 511,
     /** Total amount of configuration bits used */
-    TotalBits = 8
+    TotalBits = 9
 }
 /**
  * An index of position and offset values used to navigate the `TStylingContext`.
