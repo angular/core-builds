@@ -76,7 +76,7 @@ export declare function hyphenate(value: string): string;
  * `StylingMapArray` on the `tNode.classes` or `tNode.styles` values).
  */
 export declare function getStylingMapArray(value: TStylingContext | StylingMapArray | null): StylingMapArray | null;
-export declare function isStylingContext(value: TStylingContext | StylingMapArray | null): boolean;
+export declare function isStylingContext(value: any): boolean;
 export declare function isStylingMapArray(value: TStylingContext | StylingMapArray | null): boolean;
 export declare function getInitialStylingValue(context: TStylingContext | StylingMapArray | null): string;
 export declare function hasClassInput(tNode: TNode): boolean;

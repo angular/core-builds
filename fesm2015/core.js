@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+19.sha-5ede5b7.with-local-changes
+ * @license Angular v9.0.0-next.10+25.sha-df78d7c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10919,108 +10919,150 @@ function setCurrentSyncCursor(mapIndex, indexValue) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * A debug-friendly version of `TStylingContext`.
+ *
+ * An instance of this is attached to `tStylingContext.debug` when `ngDevMode` is active.
+ * @record
+ */
+function DebugStylingContext() { }
+if (false) {
+    /**
+     * The configuration settings of the associated `TStylingContext`
+     * @type {?}
+     */
+    DebugStylingContext.prototype.config;
+    /**
+     * The associated TStylingContext instance
+     * @type {?}
+     */
+    DebugStylingContext.prototype.context;
+    /**
+     * The associated TStylingContext instance
+     * @type {?}
+     */
+    DebugStylingContext.prototype.entries;
+}
+/**
+ * A debug/testing-oriented summary of `TStylingConfig`.
+ * @record
+ */
+function DebugStylingConfig() { }
+if (false) {
+    /** @type {?} */
+    DebugStylingConfig.prototype.hasMapBindings;
+    /** @type {?} */
+    DebugStylingConfig.prototype.hasPropBindings;
+    /** @type {?} */
+    DebugStylingConfig.prototype.hasCollisions;
+    /** @type {?} */
+    DebugStylingConfig.prototype.hasTemplateBindings;
+    /** @type {?} */
+    DebugStylingConfig.prototype.hasHostBindings;
+    /** @type {?} */
+    DebugStylingConfig.prototype.templateBindingsLocked;
+    /** @type {?} */
+    DebugStylingConfig.prototype.hostBindingsLocked;
+    /** @type {?} */
+    DebugStylingConfig.prototype.allowDirectStyling;
+}
+/**
+ * A debug/testing-oriented summary of all styling entries within a `TStylingContext`.
+ * @record
+ */
+function DebugStylingContextEntry() { }
+if (false) {
+    /**
+     * The property (style or class property) that this tuple represents
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.prop;
+    /**
+     * The total amount of styling entries a part of this tuple
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.valuesCount;
+    /**
+     * The bit guard mask that is used to compare and protect against
+     * styling changes when any template style/class bindings update
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.templateBitMask;
+    /**
+     * The bit guard mask that is used to compare and protect against
+     * styling changes when any host style/class bindings update
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.hostBindingsBitMask;
+    /**
+     * Whether or not the entry requires sanitization
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.sanitizationRequired;
+    /**
+     * The default value that will be applied if any bindings are falsy
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.defaultValue;
+    /**
+     * All bindingIndex sources that have been registered for this style
+     * @type {?}
+     */
+    DebugStylingContextEntry.prototype.sources;
+}
+/**
+ * A debug/testing-oriented summary of all styling entries for a `DebugNode` instance.
+ * @record
+ */
+function DebugNodeStyling() { }
+if (false) {
+    /**
+     * The associated debug context of the TStylingContext instance
+     * @type {?}
+     */
+    DebugNodeStyling.prototype.context;
+    /**
+     * A summarization of each style/class property
+     * present in the context
+     * @type {?}
+     */
+    DebugNodeStyling.prototype.summary;
+    /**
+     * A key/value map of all styling properties and their
+     * runtime values
+     * @type {?}
+     */
+    DebugNodeStyling.prototype.values;
+    /**
+     * Overrides the sanitizer used to process styles
+     * @param {?} sanitizer
+     * @return {?}
+     */
+    DebugNodeStyling.prototype.overrideSanitizer = function (sanitizer) { };
+}
+/**
  * A debug/testing-oriented summary of a styling entry.
  *
  * A value such as this is generated as an artifact of the `DebugStyling`
  * summary.
  * @record
  */
-function LStylingSummary() { }
+function DebugNodeStylingEntry() { }
 if (false) {
     /**
      * The style/class property that the summary is attached to
      * @type {?}
      */
-    LStylingSummary.prototype.prop;
+    DebugNodeStylingEntry.prototype.prop;
     /**
      * The last applied value for the style/class property
      * @type {?}
      */
-    LStylingSummary.prototype.value;
+    DebugNodeStylingEntry.prototype.value;
     /**
      * The binding index of the last applied style/class property
      * @type {?}
      */
-    LStylingSummary.prototype.bindingIndex;
-}
-/**
- * A debug/testing-oriented summary of all styling entries for a `DebugNode` instance.
- * @record
- */
-function DebugStyling() { }
-if (false) {
-    /**
-     * The associated TStylingContext instance
-     * @type {?}
-     */
-    DebugStyling.prototype.context;
-    /**
-     * Which configuration flags are active (see `TStylingContextConfig`)
-     * @type {?}
-     */
-    DebugStyling.prototype.config;
-    /**
-     * A summarization of each style/class property
-     * present in the context
-     * @type {?}
-     */
-    DebugStyling.prototype.summary;
-    /**
-     * A key/value map of all styling properties and their
-     * runtime values
-     * @type {?}
-     */
-    DebugStyling.prototype.values;
-    /**
-     * Overrides the sanitizer used to process styles
-     * @param {?} sanitizer
-     * @return {?}
-     */
-    DebugStyling.prototype.overrideSanitizer = function (sanitizer) { };
-}
-/**
- * A debug/testing-oriented summary of all styling entries within a `TStylingContext`.
- * @record
- */
-function TStylingTupleSummary() { }
-if (false) {
-    /**
-     * The property (style or class property) that this tuple represents
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.prop;
-    /**
-     * The total amount of styling entries a part of this tuple
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.valuesCount;
-    /**
-     * The bit guard mask that is used to compare and protect against
-     * styling changes when any template style/class bindings update
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.templateBitMask;
-    /**
-     * The bit guard mask that is used to compare and protect against
-     * styling changes when any host style/class bindings update
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.hostBindingsBitMask;
-    /**
-     * Whether or not the entry requires sanitization
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.sanitizationRequired;
-    /**
-     * The default value that will be applied if any bindings are falsy
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.defaultValue;
-    /**
-     * All bindingIndex sources that have been registered for this style
-     * @type {?}
-     */
-    TStylingTupleSummary.prototype.sources;
+    DebugNodeStylingEntry.prototype.bindingIndex;
 }
 /**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
@@ -11049,11 +11091,7 @@ class TStylingContextDebug {
     /**
      * @return {?}
      */
-    get isTemplateLocked() { return isContextLocked(this.context, true); }
-    /**
-     * @return {?}
-     */
-    get isHostBindingsLocked() { return isContextLocked(this.context, false); }
+    get config() { return buildConfig(this.context); }
     /**
      * Returns a detailed summary of each styling entry in the context.
      *
@@ -11122,11 +11160,17 @@ class NodeStylingDebug {
      * @param {?=} _isClassBased
      */
     constructor(context, _data, _isClassBased) {
-        this.context = context;
         this._data = _data;
         this._isClassBased = _isClassBased;
         this._sanitizer = null;
+        this._debugContext = isStylingContext(context) ?
+            new TStylingContextDebug((/** @type {?} */ (context))) :
+            ((/** @type {?} */ (context)));
     }
+    /**
+     * @return {?}
+     */
+    get context() { return this._debugContext; }
     /**
      * Overrides the sanitizer used to process styles.
      * @param {?} sanitizer
@@ -11157,34 +11201,7 @@ class NodeStylingDebug {
     /**
      * @return {?}
      */
-    get config() {
-        /** @type {?} */
-        const hasMapBindings = hasConfig(this.context, 4 /* HasMapBindings */);
-        /** @type {?} */
-        const hasPropBindings = hasConfig(this.context, 2 /* HasPropBindings */);
-        /** @type {?} */
-        const hasCollisions = hasConfig(this.context, 8 /* HasCollisions */);
-        /** @type {?} */
-        const hasTemplateBindings = hasConfig(this.context, 32 /* HasTemplateBindings */);
-        /** @type {?} */
-        const hasHostBindings = hasConfig(this.context, 64 /* HasHostBindings */);
-        /** @type {?} */
-        const templateBindingsLocked = hasConfig(this.context, 128 /* TemplateBindingsLocked */);
-        /** @type {?} */
-        const hostBindingsLocked = hasConfig(this.context, 256 /* HostBindingsLocked */);
-        /** @type {?} */
-        const allowDirectStyling$1 = allowDirectStyling(this.context, false) || allowDirectStyling(this.context, true);
-        return {
-            hasMapBindings,
-            hasPropBindings,
-            hasCollisions,
-            hasTemplateBindings,
-            hasHostBindings,
-            templateBindingsLocked,
-            hostBindingsLocked,
-            allowDirectStyling: allowDirectStyling$1,
-        };
-    }
+    get config() { return buildConfig(this.context.context); }
     /**
      * Returns a key/value map of all the styles/classes that were last applied to the element.
      * @return {?}
@@ -11212,7 +11229,7 @@ class NodeStylingDebug {
         /** @type {?} */
         const mockElement = (/** @type {?} */ ({}));
         /** @type {?} */
-        const hasMaps = hasConfig(this.context, 4 /* HasMapBindings */);
+        const hasMaps = hasConfig(this.context.context, 4 /* HasMapBindings */);
         if (hasMaps) {
             activateStylingMapFeature();
         }
@@ -11229,9 +11246,9 @@ class NodeStylingDebug {
         /** @type {?} */
         const sanitizer = this._isClassBased ? null : (this._sanitizer || getCurrentStyleSanitizer());
         // run the template bindings
-        applyStylingViaContext(this.context, null, mockElement, this._data, true, mapFn, sanitizer, false);
+        applyStylingViaContext(this.context.context, null, mockElement, this._data, true, mapFn, sanitizer, false);
         // and also the host bindings
-        applyStylingViaContext(this.context, null, mockElement, this._data, true, mapFn, sanitizer, true);
+        applyStylingViaContext(this.context.context, null, mockElement, this._data, true, mapFn, sanitizer, true);
     }
 }
 if (false) {
@@ -11240,8 +11257,11 @@ if (false) {
      * @private
      */
     NodeStylingDebug.prototype._sanitizer;
-    /** @type {?} */
-    NodeStylingDebug.prototype.context;
+    /**
+     * @type {?}
+     * @private
+     */
+    NodeStylingDebug.prototype._debugContext;
     /**
      * @type {?}
      * @private
@@ -11252,6 +11272,38 @@ if (false) {
      * @private
      */
     NodeStylingDebug.prototype._isClassBased;
+}
+/**
+ * @param {?} context
+ * @return {?}
+ */
+function buildConfig(context) {
+    /** @type {?} */
+    const hasMapBindings = hasConfig(context, 4 /* HasMapBindings */);
+    /** @type {?} */
+    const hasPropBindings = hasConfig(context, 2 /* HasPropBindings */);
+    /** @type {?} */
+    const hasCollisions = hasConfig(context, 8 /* HasCollisions */);
+    /** @type {?} */
+    const hasTemplateBindings = hasConfig(context, 32 /* HasTemplateBindings */);
+    /** @type {?} */
+    const hasHostBindings = hasConfig(context, 64 /* HasHostBindings */);
+    /** @type {?} */
+    const templateBindingsLocked = hasConfig(context, 128 /* TemplateBindingsLocked */);
+    /** @type {?} */
+    const hostBindingsLocked = hasConfig(context, 256 /* HostBindingsLocked */);
+    /** @type {?} */
+    const allowDirectStyling$1 = allowDirectStyling(context, false) || allowDirectStyling(context, true);
+    return {
+        hasMapBindings,
+        hasPropBindings,
+        hasCollisions,
+        hasTemplateBindings,
+        hasHostBindings,
+        templateBindingsLocked,
+        hostBindingsLocked,
+        allowDirectStyling: allowDirectStyling$1,
+    };
 }
 
 /**
@@ -27098,7 +27150,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+19.sha-5ede5b7.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+25.sha-df78d7c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

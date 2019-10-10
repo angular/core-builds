@@ -16,7 +16,7 @@ import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
 import { TStylingContext } from '../interfaces/styling';
 import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
-import { DebugStyling as DebugNewStyling } from '../styling/styling_debug';
+import { DebugNodeStyling } from '../styling/styling_debug';
 export declare const LViewArray: ArrayConstructor;
 /**
  * This function clones a blueprint and creates LView.
@@ -158,8 +158,8 @@ export declare class LViewDebug {
 export interface DebugNode {
     html: string | null;
     native: Node;
-    styles: DebugNewStyling | null;
-    classes: DebugNewStyling | null;
+    styles: DebugNodeStyling | null;
+    classes: DebugNodeStyling | null;
     nodes: DebugNode[] | null;
     component: LViewDebug | null;
 }
