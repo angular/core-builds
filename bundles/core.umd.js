@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+27.sha-1ae77da.with-local-changes
+ * @license Angular v9.0.0-next.10+28.sha-6ab5f36.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2556,8 +2556,7 @@
                 }
                 else {
                     isProc ?
-                        renderer
-                            .setAttribute(native, attrName, attrVal) :
+                        renderer.setAttribute(native, attrName, attrVal) :
                         native.setAttribute(attrName, attrVal);
                 }
                 i++;
@@ -4095,8 +4094,7 @@
         return SafeResourceUrlImpl;
     }(SafeValueImpl));
     function unwrapSafeValue(value) {
-        return value instanceof SafeValueImpl ?
-            value.changingThisBreaksApplicationSecurity :
+        return value instanceof SafeValueImpl ? value.changingThisBreaksApplicationSecurity :
             value;
     }
     function allowSanitizationBypassAndThrow(value, type) {
@@ -4110,8 +4108,7 @@
         return actualType === type;
     }
     function getSanitizationBypassType(value) {
-        return value instanceof SafeValueImpl && value.getTypeName() ||
-            null;
+        return value instanceof SafeValueImpl && value.getTypeName() || null;
     }
     /**
      * Mark `html` string as trusted.
@@ -18860,7 +18857,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.10+27.sha-1ae77da.with-local-changes');
+    var VERSION = new Version('9.0.0-next.10+28.sha-6ab5f36.with-local-changes');
 
     /**
      * @license
