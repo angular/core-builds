@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+16.sha-8d111da.with-local-changes
+ * @license Angular v9.0.0-next.10+2.sha-a3ef3e1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2856,7 +2856,9 @@ if (false) {
  * @return {?}
  */
 function isFactory(obj) {
-    return obj instanceof NodeInjectorFactory;
+    // See: https://jsperf.com/instanceof-vs-getprototypeof
+    return obj !== null && typeof obj == 'object' &&
+        Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -26965,7 +26967,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+16.sha-8d111da.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+2.sha-a3ef3e1.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
