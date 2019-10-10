@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+27.sha-1ae77da.with-local-changes
+ * @license Angular v9.0.0-next.10+28.sha-6ab5f36.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3925,9 +3925,8 @@ function setUpAttributes(renderer, native, attrs) {
             }
             else {
                 isProc ?
-                    ((/** @type {?} */ (renderer)))
-                        .setAttribute(native, (/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal))) :
-                    native.setAttribute((/** @type {?} */ (attrName)), (/** @type {?} */ (attrVal)));
+                    ((/** @type {?} */ (renderer))).setAttribute(native, attrName, (/** @type {?} */ (attrVal))) :
+                    native.setAttribute(attrName, (/** @type {?} */ (attrVal)));
             }
             i++;
         }
@@ -4710,7 +4709,7 @@ function normalizeIntoStylingMap(bindingValue, newValues, normalizeProps) {
     if (props) {
         for (let i = 0; i < props.length; i++) {
             /** @type {?} */
-            const prop = (/** @type {?} */ (props[i]));
+            const prop = props[i];
             /** @type {?} */
             const newProp = normalizeProps ? hyphenate(prop) : prop;
             /** @type {?} */
@@ -6115,9 +6114,8 @@ class SafeResourceUrlImpl extends SafeValueImpl {
  * @return {?}
  */
 function unwrapSafeValue(value) {
-    return value instanceof SafeValueImpl ?
-        ((/** @type {?} */ (value))).changingThisBreaksApplicationSecurity :
-        ((/** @type {?} */ (value)));
+    return value instanceof SafeValueImpl ? value.changingThisBreaksApplicationSecurity :
+        (/** @type {?} */ (value));
 }
 /**
  * @param {?} value
@@ -6140,8 +6138,7 @@ function allowSanitizationBypassAndThrow(value, type) {
  * @return {?}
  */
 function getSanitizationBypassType(value) {
-    return value instanceof SafeValueImpl && (/** @type {?} */ (((/** @type {?} */ (value))).getTypeName())) ||
-        null;
+    return value instanceof SafeValueImpl && (/** @type {?} */ (value.getTypeName())) || null;
 }
 /**
  * Mark `html` string as trusted.
@@ -8718,7 +8715,7 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
         const current = selector[i];
         if (typeof current === 'number') {
             // If we finish processing a :not selector and it hasn't failed, return false
-            if (!skipToNextSelector && !isPositive(mode) && !isPositive((/** @type {?} */ (current)))) {
+            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
                 return false;
             }
             // If we are skipping to the next :not() and this mode flag is positive,
@@ -27167,7 +27164,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+27.sha-1ae77da.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+28.sha-6ab5f36.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -36545,7 +36542,7 @@ class TQuery_ {
     matchTNode(tView, tNode) {
         if (Array.isArray(this.metadata.predicate)) {
             /** @type {?} */
-            const localNames = (/** @type {?} */ (this.metadata.predicate));
+            const localNames = this.metadata.predicate;
             for (let i = 0; i < localNames.length; i++) {
                 this.matchTNodeWithReadOption(tView, tNode, getIdxOfMatchingSelector(tNode, localNames[i]));
             }

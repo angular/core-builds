@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+27.sha-1ae77da.with-local-changes
+ * @license Angular v9.0.0-next.10+28.sha-6ab5f36.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -70,7 +70,7 @@ function asyncFallback(fn) {
              */
             (err) => {
                 if (typeof err === 'string') {
-                    return done.fail(new Error((/** @type {?} */ (err))));
+                    return done.fail(new Error(err));
                 }
                 else {
                     done.fail(err);
