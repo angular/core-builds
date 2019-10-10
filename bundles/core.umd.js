@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+19.sha-5ede5b7.with-local-changes
+ * @license Angular v9.0.0-next.10+25.sha-df78d7c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7183,13 +7183,8 @@
         function TStylingContextDebug(context) {
             this.context = context;
         }
-        Object.defineProperty(TStylingContextDebug.prototype, "isTemplateLocked", {
-            get: function () { return isContextLocked(this.context, true); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TStylingContextDebug.prototype, "isHostBindingsLocked", {
-            get: function () { return isContextLocked(this.context, false); },
+        Object.defineProperty(TStylingContextDebug.prototype, "config", {
+            get: function () { return buildConfig(this.context); },
             enumerable: true,
             configurable: true
         });
@@ -7243,11 +7238,18 @@
      */
     var NodeStylingDebug = /** @class */ (function () {
         function NodeStylingDebug(context, _data, _isClassBased) {
-            this.context = context;
             this._data = _data;
             this._isClassBased = _isClassBased;
             this._sanitizer = null;
+            this._debugContext = isStylingContext(context) ?
+                new TStylingContextDebug(context) :
+                context;
         }
+        Object.defineProperty(NodeStylingDebug.prototype, "context", {
+            get: function () { return this._debugContext; },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Overrides the sanitizer used to process styles.
          */
@@ -7270,26 +7272,7 @@
             configurable: true
         });
         Object.defineProperty(NodeStylingDebug.prototype, "config", {
-            get: function () {
-                var hasMapBindings = hasConfig(this.context, 4 /* HasMapBindings */);
-                var hasPropBindings = hasConfig(this.context, 2 /* HasPropBindings */);
-                var hasCollisions = hasConfig(this.context, 8 /* HasCollisions */);
-                var hasTemplateBindings = hasConfig(this.context, 32 /* HasTemplateBindings */);
-                var hasHostBindings = hasConfig(this.context, 64 /* HasHostBindings */);
-                var templateBindingsLocked = hasConfig(this.context, 128 /* TemplateBindingsLocked */);
-                var hostBindingsLocked = hasConfig(this.context, 256 /* HostBindingsLocked */);
-                var allowDirectStyling$1 = allowDirectStyling(this.context, false) || allowDirectStyling(this.context, true);
-                return {
-                    hasMapBindings: hasMapBindings,
-                    hasPropBindings: hasPropBindings,
-                    hasCollisions: hasCollisions,
-                    hasTemplateBindings: hasTemplateBindings,
-                    hasHostBindings: hasHostBindings,
-                    templateBindingsLocked: templateBindingsLocked,
-                    hostBindingsLocked: hostBindingsLocked,
-                    allowDirectStyling: allowDirectStyling$1,
-                };
-            },
+            get: function () { return buildConfig(this.context.context); },
             enumerable: true,
             configurable: true
         });
@@ -7310,19 +7293,39 @@
             // element is only used when the styling algorithm attempts to
             // style the value (and we mock out the stylingApplyFn anyway).
             var mockElement = {};
-            var hasMaps = hasConfig(this.context, 4 /* HasMapBindings */);
+            var hasMaps = hasConfig(this.context.context, 4 /* HasMapBindings */);
             if (hasMaps) {
                 activateStylingMapFeature();
             }
             var mapFn = function (renderer, element, prop, value, bindingIndex) { return fn(prop, value, bindingIndex || null); };
             var sanitizer = this._isClassBased ? null : (this._sanitizer || getCurrentStyleSanitizer());
             // run the template bindings
-            applyStylingViaContext(this.context, null, mockElement, this._data, true, mapFn, sanitizer, false);
+            applyStylingViaContext(this.context.context, null, mockElement, this._data, true, mapFn, sanitizer, false);
             // and also the host bindings
-            applyStylingViaContext(this.context, null, mockElement, this._data, true, mapFn, sanitizer, true);
+            applyStylingViaContext(this.context.context, null, mockElement, this._data, true, mapFn, sanitizer, true);
         };
         return NodeStylingDebug;
     }());
+    function buildConfig(context) {
+        var hasMapBindings = hasConfig(context, 4 /* HasMapBindings */);
+        var hasPropBindings = hasConfig(context, 2 /* HasPropBindings */);
+        var hasCollisions = hasConfig(context, 8 /* HasCollisions */);
+        var hasTemplateBindings = hasConfig(context, 32 /* HasTemplateBindings */);
+        var hasHostBindings = hasConfig(context, 64 /* HasHostBindings */);
+        var templateBindingsLocked = hasConfig(context, 128 /* TemplateBindingsLocked */);
+        var hostBindingsLocked = hasConfig(context, 256 /* HostBindingsLocked */);
+        var allowDirectStyling$1 = allowDirectStyling(context, false) || allowDirectStyling(context, true);
+        return {
+            hasMapBindings: hasMapBindings,
+            hasPropBindings: hasPropBindings,
+            hasCollisions: hasCollisions,
+            hasTemplateBindings: hasTemplateBindings,
+            hasHostBindings: hasHostBindings,
+            templateBindingsLocked: templateBindingsLocked,
+            hostBindingsLocked: hostBindingsLocked,
+            allowDirectStyling: allowDirectStyling$1,
+        };
+    }
 
     /**
      * @license
@@ -18888,7 +18891,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.10+19.sha-5ede5b7.with-local-changes');
+    var VERSION = new Version('9.0.0-next.10+25.sha-df78d7c.with-local-changes');
 
     /**
      * @license
