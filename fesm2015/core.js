@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+14.sha-3001716.with-local-changes
+ * @license Angular v9.0.0-next.10+21.sha-728cd84.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2853,9 +2853,7 @@ if (false) {
  * @return {?}
  */
 function isFactory(obj) {
-    // See: https://jsperf.com/instanceof-vs-getprototypeof
-    return obj !== null && typeof obj == 'object' &&
-        Object.getPrototypeOf(obj) == NodeInjectorFactory.prototype;
+    return obj instanceof NodeInjectorFactory;
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -4161,13 +4159,22 @@ const DEFAULT_GUARD_MASK_VALUE = 0b1;
  * an element. Because it is a T-level data-structure, it is only created once per
  * tNode for styles and for classes. This function allocates a new instance of a
  * `TStylingContext` with the initial values (see `interfaces.ts` for more info).
- * @param {?=} initialStyling
+ * @param {?} initialStyling
+ * @param {?} hasDirectives
  * @return {?}
  */
-function allocTStylingContext(initialStyling) {
+function allocTStylingContext(initialStyling, hasDirectives) {
     initialStyling = initialStyling || allocStylingMapArray();
+    /** @type {?} */
+    let config = 0 /* Initial */;
+    if (hasDirectives) {
+        config |= 1 /* HasDirectives */;
+    }
+    if (initialStyling.length > 1 /* ValuesStartPosition */) {
+        config |= 16 /* HasInitialStyling */;
+    }
     return [
-        0 /* Initial */,
+        config,
         DEFAULT_TOTAL_SOURCES,
         initialStyling,
     ];
@@ -4197,19 +4204,41 @@ function hasConfig(context, flag) {
  * Determines whether or not to apply styles/classes directly or via context resolution.
  *
  * There are three cases that are matched here:
- * 1. context is locked for template or host bindings (depending on `hostBindingsMode`)
- * 2. There are no collisions (i.e. properties with more than one binding)
- * 3. There are only "prop" or "map" bindings present, but not both
+ * 1. there are no directives present AND ngDevMode is falsy
+ * 2. context is locked for template or host bindings (depending on `hostBindingsMode`)
+ * 3. There are no collisions (i.e. properties with more than one binding) across multiple
+ *    sources (i.e. template + directive, directive + directive, directive + component)
  * @param {?} context
  * @param {?} hostBindingsMode
  * @return {?}
  */
 function allowDirectStyling(context, hostBindingsMode) {
     /** @type {?} */
+    let allow = false;
+    /** @type {?} */
     const config = getConfig(context);
-    return ((config & getLockedConfig(hostBindingsMode)) !== 0) &&
-        ((config & 4 /* HasCollisions */) === 0) &&
-        ((config & 3 /* HasPropAndMapBindings */) !== 3 /* HasPropAndMapBindings */);
+    /** @type {?} */
+    const contextIsLocked = (config & getLockedConfig(hostBindingsMode)) !== 0;
+    /** @type {?} */
+    const hasNoDirectives = (config & 1 /* HasDirectives */) === 0;
+    // if no directives are present then we do not need populate a context at all. This
+    // is because duplicate prop bindings cannot be registered through the template. If
+    // and when this happens we can safely apply the value directly without context
+    // resolution...
+    if (hasNoDirectives) {
+        // `ngDevMode` is required to be checked here because tests/debugging rely on the context being
+        // populated. If things are in production mode then there is no need to build a context
+        // therefore the direct apply can be allowed (even on the first update).
+        allow = ngDevMode ? contextIsLocked : true;
+    }
+    else if (contextIsLocked) {
+        /** @type {?} */
+        const hasNoCollisions = (config & 8 /* HasCollisions */) === 0;
+        /** @type {?} */
+        const hasOnlyMapsOrOnlyProps = (config & 6 /* HasPropAndMapBindings */) !== 6 /* HasPropAndMapBindings */;
+        allow = hasNoCollisions && hasOnlyMapsOrOnlyProps;
+    }
+    return allow;
 }
 /**
  * @param {?} context
@@ -4358,8 +4387,8 @@ function isContextLocked(context, hostBindingsMode) {
  * @return {?}
  */
 function getLockedConfig(hostBindingsMode) {
-    return hostBindingsMode ? 128 /* HostBindingsLocked */ :
-        64 /* TemplateBindingsLocked */;
+    return hostBindingsMode ? 256 /* HostBindingsLocked */ :
+        128 /* TemplateBindingsLocked */;
 }
 /**
  * @param {?} context
@@ -4368,7 +4397,7 @@ function getLockedConfig(hostBindingsMode) {
 function getPropValuesStartPosition(context) {
     /** @type {?} */
     let startPosition = 3 /* ValuesStartPosition */;
-    if (hasConfig(context, 2 /* HasMapBindings */)) {
+    if (hasConfig(context, 4 /* HasMapBindings */)) {
         startPosition += 4 /* BindingsStartOffset */ + getValuesCount(context);
     }
     return startPosition;
@@ -8978,6 +9007,26 @@ if (false) {
      * @type {?}
      */
     StylingState.prototype.stylesIndex;
+    /**
+     * The last class map that was applied (i.e. `[class]="x"`).
+     *
+     * Note that this property is only populated when direct class values are applied
+     * (i.e. context resolution is not used).
+     *
+     * See `allowDirectStyling` for more info.
+     * @type {?}
+     */
+    StylingState.prototype.lastDirectClassMap;
+    /**
+     * The last style map that was applied (i.e. `[style]="x"`)
+     *
+     * Note that this property is only populated when direct style values are applied
+     * (i.e. context resolution is not used).
+     *
+     * See `allowDirectStyling` for more info.
+     * @type {?}
+     */
+    StylingState.prototype.lastDirectStyleMap;
 }
 // these values will get filled in the very first time this is accessed...
 /** @type {?} */
@@ -8989,6 +9038,8 @@ const _state = {
     classesIndex: -1,
     stylesBitMask: -1,
     stylesIndex: -1,
+    lastDirectClassMap: null,
+    lastDirectStyleMap: null,
 };
 /** @type {?} */
 const BIT_MASK_START_VALUE = 0;
@@ -9022,6 +9073,8 @@ function getStylingState(element, directiveIndex) {
         _state.classesIndex = INDEX_START_VALUE;
         _state.stylesBitMask = BIT_MASK_START_VALUE;
         _state.stylesIndex = INDEX_START_VALUE;
+        _state.lastDirectClassMap = null;
+        _state.lastDirectStyleMap = null;
     }
     else if (_state.directiveIndex !== directiveIndex) {
         _state.directiveIndex = directiveIndex;
@@ -9166,15 +9219,14 @@ function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindi
         // are run in the update phase, and, as a result, are no more
         // styling instructions that are run in the creation phase).
         registerBinding(context, counterIndex, sourceIndex, prop, bindingIndex, sanitizationRequired);
-        patchConfig(context, hostBindingsMode ? 32 /* HasHostBindings */ : 16 /* HasTemplateBindings */);
-        patchConfig(context, prop ? 1 /* HasPropBindings */ : 2 /* HasMapBindings */);
+        patchConfig(context, hostBindingsMode ? 64 /* HasHostBindings */ : 32 /* HasTemplateBindings */);
     }
     /** @type {?} */
     const changed = forceUpdate || hasValueChanged(data[bindingIndex], value);
     if (changed) {
         setValue(data, bindingIndex, value);
         /** @type {?} */
-        const doSetValuesAsStale = (getConfig(context) & 32 /* HasHostBindings */) &&
+        const doSetValuesAsStale = (getConfig(context) & 64 /* HasHostBindings */) &&
             !hostBindingsMode && (prop ? !value : true);
         if (doSetValuesAsStale) {
             renderHostBindingsAsStale(context, data, prop);
@@ -9200,7 +9252,7 @@ function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindi
 function renderHostBindingsAsStale(context, data, prop) {
     /** @type {?} */
     const valuesCount = getValuesCount(context);
-    if (prop !== null && hasConfig(context, 1 /* HasPropBindings */)) {
+    if (prop !== null && hasConfig(context, 2 /* HasPropBindings */)) {
         /** @type {?} */
         const itemsPerRow = 4 /* BindingsStartOffset */ + valuesCount;
         /** @type {?} */
@@ -9231,7 +9283,7 @@ function renderHostBindingsAsStale(context, data, prop) {
             }
         }
     }
-    if (hasConfig(context, 2 /* HasMapBindings */)) {
+    if (hasConfig(context, 4 /* HasMapBindings */)) {
         /** @type {?} */
         const bindingsStart = 3 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */;
         /** @type {?} */
@@ -9313,7 +9365,7 @@ function registerBinding(context, countId, sourceIndex, prop, bindingValue, sani
                 allocateNewContextEntry(context, i, prop, sanitizationRequired);
             }
             else if (isBindingIndexValue) {
-                patchConfig(context, 4 /* HasCollisions */);
+                patchConfig(context, 8 /* HasCollisions */);
             }
             addBindingIntoContext(context, i, bindingValue, countId, sourceIndex);
             found = true;
@@ -9546,7 +9598,7 @@ function updateInitialStylingOnContext(context, initialStyling) {
         }
     }
     if (hasInitialStyling) {
-        patchConfig(context, 8 /* HasInitialStyling */);
+        patchConfig(context, 16 /* HasInitialStyling */);
     }
 }
 /**
@@ -9592,7 +9644,7 @@ function applyStylingViaContext(context, renderer, element, bindingData, bitMask
     let stylingMapsSyncFn = null;
     /** @type {?} */
     let applyAllValues = false;
-    if (hasConfig(context, 2 /* HasMapBindings */)) {
+    if (hasConfig(context, 4 /* HasMapBindings */)) {
         stylingMapsSyncFn = getStylingMapsSyncFn();
         /** @type {?} */
         const mapsGuardMask = getGuardMask(context, 3 /* ValuesStartPosition */, hostBindingsMode);
@@ -9688,7 +9740,18 @@ function applyStylingViaContext(context, renderer, element, bindingData, bitMask
  * automatically. This function is intended to be used for performance reasons in the
  * event that there is no need to apply styling via context resolution.
  *
- * See `allowDirectStylingApply`.
+ * This function has three different cases that can occur (for each item in the map):
+ *
+ * - Case 1: Attempt to apply the current value in the map to the element (if it's `non null`).
+ *
+ * - Case 2: If a map value fails to be applied then the algorithm will find a matching entry in
+ *           the initial values present in the context and attempt to apply that.
+ *
+ * - Default Case: If the initial value cannot be applied then a default value of `null` will be
+ *                 applied (which will remove the style/class value from the element).
+ *
+ * See `allowDirectStylingApply` to learn the logic used to determine whether any style/class
+ * bindings can be directly applied.
  *
  * @param {?} renderer
  * @param {?} context
@@ -9696,20 +9759,41 @@ function applyStylingViaContext(context, renderer, element, bindingData, bitMask
  * @param {?} data
  * @param {?} bindingIndex
  * @param {?} map
+ * @param {?} isClassBased
  * @param {?} applyFn
  * @param {?=} sanitizer
  * @param {?=} forceUpdate
  * @return {?} whether or not the styling map was applied to the element.
  */
-function applyStylingMapDirectly(renderer, context, element, data, bindingIndex, map, applyFn, sanitizer, forceUpdate) {
+function applyStylingMapDirectly(renderer, context, element, data, bindingIndex, map, isClassBased, applyFn, sanitizer, forceUpdate) {
     if (forceUpdate || hasValueChanged(data[bindingIndex], map)) {
         setValue(data, bindingIndex, map);
+        /** @type {?} */
+        const initialStyles = hasConfig(context, 16 /* HasInitialStyling */) ? getStylingMapArray(context) : null;
         for (let i = 1 /* ValuesStartPosition */; i < map.length; i += 2 /* TupleSize */) {
             /** @type {?} */
             const prop = getMapProp(map, i);
             /** @type {?} */
             const value = getMapValue(map, i);
-            applyStylingValue(renderer, context, element, prop, value, applyFn, bindingIndex, sanitizer);
+            // case 1: apply the map value (if it exists)
+            /** @type {?} */
+            let applied = applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer);
+            // case 2: apply the initial value (if it exists)
+            if (!applied && initialStyles) {
+                applied = findAndApplyMapValue(renderer, element, applyFn, initialStyles, prop, bindingIndex, sanitizer);
+            }
+            // default case: apply `null` to remove the value
+            if (!applied) {
+                applyFn(renderer, element, prop, null, bindingIndex);
+            }
+        }
+        /** @type {?} */
+        const state = getStylingState(element, TEMPLATE_DIRECTIVE_INDEX);
+        if (isClassBased) {
+            state.lastDirectClassMap = map;
+        }
+        else {
+            state.lastDirectStyleMap = map;
         }
         return true;
     }
@@ -9722,7 +9806,26 @@ function applyStylingMapDirectly(renderer, context, element, data, bindingIndex,
  * automatically. This function is intended to be used for performance reasons in the
  * event that there is no need to apply styling via context resolution.
  *
- * See `allowDirectStylingApply`.
+ * This function has four different cases that can occur:
+ *
+ * - Case 1: Apply the provided prop/value (style or class) entry to the element
+ *           (if it is `non null`).
+ *
+ * - Case 2: If value does not get applied (because its `null` or `undefined`) then the algorithm
+ *           will check to see if a styling map value was applied to the element as well just
+ *           before this (via `styleMap` or `classMap`). If and when a map is present then the
+ *          algorithm will find the matching property in the map and apply its value.
+ *
+ * - Case 3: If a map value fails to be applied then the algorithm will check to see if there
+ *           are any initial values present and attempt to apply a matching value based on
+ *           the target prop.
+ *
+ * - Default Case: If a matching initial value cannot be applied then a default value
+ *                 of `null` will be applied (which will remove the style/class value
+ *                 from the element).
+ *
+ * See `allowDirectStylingApply` to learn the logic used to determine whether any style/class
+ * bindings can be directly applied.
  *
  * @param {?} renderer
  * @param {?} context
@@ -9731,21 +9834,44 @@ function applyStylingMapDirectly(renderer, context, element, data, bindingIndex,
  * @param {?} bindingIndex
  * @param {?} prop
  * @param {?} value
+ * @param {?} isClassBased
  * @param {?} applyFn
  * @param {?=} sanitizer
  * @return {?} whether or not the prop/value styling was applied to the element.
  */
-function applyStylingValueDirectly(renderer, context, element, data, bindingIndex, prop, value, applyFn, sanitizer) {
+function applyStylingValueDirectly(renderer, context, element, data, bindingIndex, prop, value, isClassBased, applyFn, sanitizer) {
+    /** @type {?} */
+    let applied = false;
     if (hasValueChanged(data[bindingIndex], value)) {
         setValue(data, bindingIndex, value);
-        applyStylingValue(renderer, context, element, prop, value, applyFn, bindingIndex, sanitizer);
-        return true;
+        // case 1: apply the provided value (if it exists)
+        applied = applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer);
+        // case 2: find the matching property in a styling map and apply the detected value
+        if (!applied && hasConfig(context, 4 /* HasMapBindings */)) {
+            /** @type {?} */
+            const state = getStylingState(element, TEMPLATE_DIRECTIVE_INDEX);
+            /** @type {?} */
+            const map = isClassBased ? state.lastDirectClassMap : state.lastDirectStyleMap;
+            applied = map ?
+                findAndApplyMapValue(renderer, element, applyFn, map, prop, bindingIndex, sanitizer) :
+                false;
+        }
+        // case 3: apply the initial value (if it exists)
+        if (!applied && hasConfig(context, 16 /* HasInitialStyling */)) {
+            /** @type {?} */
+            const map = getStylingMapArray(context);
+            applied =
+                map ? findAndApplyMapValue(renderer, element, applyFn, map, prop, bindingIndex) : false;
+        }
+        // default case: apply `null` to remove the value
+        if (!applied) {
+            applyFn(renderer, element, prop, null, bindingIndex);
+        }
     }
-    return false;
+    return applied;
 }
 /**
  * @param {?} renderer
- * @param {?} context
  * @param {?} element
  * @param {?} prop
  * @param {?} value
@@ -9754,36 +9880,44 @@ function applyStylingValueDirectly(renderer, context, element, data, bindingInde
  * @param {?=} sanitizer
  * @return {?}
  */
-function applyStylingValue(renderer, context, element, prop, value, applyFn, bindingIndex, sanitizer) {
+function applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer) {
     /** @type {?} */
     let valueToApply = unwrapSafeValue(value);
     if (isStylingValueDefined(valueToApply)) {
         valueToApply =
             sanitizer ? sanitizer(prop, value, 2 /* SanitizeOnly */) : valueToApply;
+        applyFn(renderer, element, prop, valueToApply, bindingIndex);
+        return true;
     }
-    else if (hasConfig(context, 8 /* HasInitialStyling */)) {
-        /** @type {?} */
-        const initialStyles = getStylingMapArray(context);
-        if (initialStyles) {
-            valueToApply = findInitialStylingValue(initialStyles, prop);
-        }
-    }
-    applyFn(renderer, element, prop, valueToApply, bindingIndex);
+    return false;
 }
 /**
+ * @param {?} renderer
+ * @param {?} element
+ * @param {?} applyFn
  * @param {?} map
  * @param {?} prop
+ * @param {?} bindingIndex
+ * @param {?=} sanitizer
  * @return {?}
  */
-function findInitialStylingValue(map, prop) {
+function findAndApplyMapValue(renderer, element, applyFn, map, prop, bindingIndex, sanitizer) {
     for (let i = 1 /* ValuesStartPosition */; i < map.length; i += 2 /* TupleSize */) {
         /** @type {?} */
         const p = getMapProp(map, i);
-        if (p >= prop) {
-            return p === prop ? getMapValue(map, i) : null;
+        if (p === prop) {
+            /** @type {?} */
+            let valueToApply = getMapValue(map, i);
+            valueToApply =
+                sanitizer ? sanitizer(prop, valueToApply, 2 /* SanitizeOnly */) : valueToApply;
+            applyFn(renderer, element, prop, valueToApply, bindingIndex);
+            return true;
+        }
+        if (p > prop) {
+            break;
         }
     }
-    return null;
+    return false;
 }
 /**
  * @param {?} value
@@ -11025,19 +11159,19 @@ class NodeStylingDebug {
      */
     get config() {
         /** @type {?} */
-        const hasMapBindings = hasConfig(this.context, 2 /* HasMapBindings */);
+        const hasMapBindings = hasConfig(this.context, 4 /* HasMapBindings */);
         /** @type {?} */
-        const hasPropBindings = hasConfig(this.context, 1 /* HasPropBindings */);
+        const hasPropBindings = hasConfig(this.context, 2 /* HasPropBindings */);
         /** @type {?} */
-        const hasCollisions = hasConfig(this.context, 4 /* HasCollisions */);
+        const hasCollisions = hasConfig(this.context, 8 /* HasCollisions */);
         /** @type {?} */
-        const hasTemplateBindings = hasConfig(this.context, 16 /* HasTemplateBindings */);
+        const hasTemplateBindings = hasConfig(this.context, 32 /* HasTemplateBindings */);
         /** @type {?} */
-        const hasHostBindings = hasConfig(this.context, 32 /* HasHostBindings */);
+        const hasHostBindings = hasConfig(this.context, 64 /* HasHostBindings */);
         /** @type {?} */
-        const templateBindingsLocked = hasConfig(this.context, 64 /* TemplateBindingsLocked */);
+        const templateBindingsLocked = hasConfig(this.context, 128 /* TemplateBindingsLocked */);
         /** @type {?} */
-        const hostBindingsLocked = hasConfig(this.context, 128 /* HostBindingsLocked */);
+        const hostBindingsLocked = hasConfig(this.context, 256 /* HostBindingsLocked */);
         /** @type {?} */
         const allowDirectStyling$1 = allowDirectStyling(this.context, false) || allowDirectStyling(this.context, true);
         return {
@@ -11078,7 +11212,7 @@ class NodeStylingDebug {
         /** @type {?} */
         const mockElement = (/** @type {?} */ ({}));
         /** @type {?} */
-        const hasMaps = hasConfig(this.context, 2 /* HasMapBindings */);
+        const hasMaps = hasConfig(this.context, 4 /* HasMapBindings */);
         if (hasMaps) {
             activateStylingMapFeature();
         }
@@ -21270,12 +21404,18 @@ function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
     const context = isClassBased ? getClassesContext(tNode) : getStylesContext(tNode);
     /** @type {?} */
     const sanitizer = isClassBased ? null : getCurrentStyleSanitizer();
+    // we check for this in the instruction code so that the context can be notified
+    // about prop or map bindings so that the direct apply check can decide earlier
+    // if it allows for context resolution to be bypassed.
+    if (!isContextLocked(context, hostBindingsMode)) {
+        patchConfig(context, 2 /* HasPropBindings */);
+    }
     // Direct Apply Case: bypass context resolution and apply the
     // style/class value directly to the element
     if (allowDirectStyling(context, hostBindingsMode)) {
         /** @type {?} */
         const renderer = getRenderer(tNode, lView);
-        updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased ? setClass : setStyle, sanitizer);
+        updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, isClassBased ? setClass : setStyle, sanitizer);
     }
     else {
         // Context Resolution (or first update) Case: save the value
@@ -21433,6 +21573,12 @@ function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
     const hostBindingsMode = isHostStyling();
     /** @type {?} */
     const sanitizer = getCurrentStyleSanitizer();
+    // we check for this in the instruction code so that the context can be notified
+    // about prop or map bindings so that the direct apply check can decide earlier
+    // if it allows for context resolution to be bypassed.
+    if (!isContextLocked(context, hostBindingsMode)) {
+        patchConfig(context, 4 /* HasMapBindings */);
+    }
     /** @type {?} */
     const valueHasChanged = hasValueChanged(oldValue, value);
     /** @type {?} */
@@ -21442,7 +21588,7 @@ function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
     if (allowDirectStyling(context, hostBindingsMode)) {
         /** @type {?} */
         const renderer = getRenderer(tNode, lView);
-        updated = applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, (/** @type {?} */ (stylingMapArr)), isClassBased ? setClass : setStyle, sanitizer, valueHasChanged);
+        updated = applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, (/** @type {?} */ (stylingMapArr)), isClassBased, isClassBased ? setClass : setStyle, sanitizer, valueHasChanged);
     }
     else {
         updated = valueHasChanged;
@@ -21654,7 +21800,9 @@ function getContext(tNode, isClassBased) {
     /** @type {?} */
     let context = isClassBased ? tNode.classes : tNode.styles;
     if (!isStylingContext(context)) {
-        context = allocTStylingContext((/** @type {?} */ (context)));
+        /** @type {?} */
+        const hasDirectives = isDirectiveHost(tNode);
+        context = allocTStylingContext((/** @type {?} */ (context)), hasDirectives);
         if (ngDevMode) {
             attachStylingDebugObject((/** @type {?} */ (context)));
         }
@@ -26950,7 +27098,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+14.sha-3001716.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+21.sha-728cd84.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
