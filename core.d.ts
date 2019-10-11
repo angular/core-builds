@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+37.sha-15e3b5f.with-local-changes
+ * @license Angular v9.0.0-next.10+41.sha-d4d0723.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6721,7 +6721,13 @@ declare const enum TNodeFlags {
     /** This bit is set if the node has initial styling */
     hasInitialStyling = 64,
     /** This bit is set if the node has been detached by i18n */
-    isDetached = 128
+    isDetached = 128,
+    /**
+     * This bit is set if the node has directives with host bindings. This flags allows us to guard
+     * host-binding logic and invoke it only on nodes that actually have directives with host
+     * bindings.
+     */
+    hasHostBindings = 256
 }
 
 /**
