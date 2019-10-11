@@ -59,7 +59,13 @@ export declare const enum TNodeFlags {
     /** This bit is set if the node has initial styling */
     hasInitialStyling = 64,
     /** This bit is set if the node has been detached by i18n */
-    isDetached = 128
+    isDetached = 128,
+    /**
+     * This bit is set if the node has directives with host bindings. This flags allows us to guard
+     * host-binding logic and invoke it only on nodes that actually have directives with host
+     * bindings.
+     */
+    hasHostBindings = 256
 }
 /**
  * Corresponds to the TNode.providerIndexes property.

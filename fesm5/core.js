@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+37.sha-15e3b5f.with-local-changes
+ * @license Angular v9.0.0-next.10+41.sha-d4d0723.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3265,12 +3265,12 @@ function getOrCreateNodeInjectorForNode(tNode, hostView) {
         insertBloom(tView.blueprint, null);
     }
     var parentLoc = getParentInjectorLocation(tNode, hostView);
-    var parentIndex = getParentInjectorIndex(parentLoc);
-    var parentLView = getParentInjectorView(parentLoc, hostView);
     var injectorIndex = tNode.injectorIndex;
     // If a parent injector can't be found, its location is set to -1.
     // In that case, we don't need to set up a cumulative bloom
     if (hasParentInjector(parentLoc)) {
+        var parentIndex = getParentInjectorIndex(parentLoc);
+        var parentLView = getParentInjectorView(parentLoc, hostView);
         var parentData = parentLView[TVIEW].data;
         // Creates a cumulative bloom filter that merges the parent's bloom filter
         // and its own cumulative bloom (which contains tokens for all ancestors)
@@ -7374,6 +7374,8 @@ var TNodeConstructor = /** @class */ (function () {
                 flags.push('TNodeFlags.hasStyleInput');
             if (this.flags & 64 /* hasInitialStyling */)
                 flags.push('TNodeFlags.hasInitialStyling');
+            if (this.flags & 256 /* hasHostBindings */)
+                flags.push('TNodeFlags.hasHostBindings');
             if (this.flags & 2 /* isComponentHost */)
                 flags.push('TNodeFlags.isComponentHost');
             if (this.flags & 1 /* isDirectiveHost */)
@@ -8331,7 +8333,9 @@ function createDirectivesInstances(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
     instantiateAllDirectives(tView, lView, tNode);
-    invokeDirectivesHostBindings(tView, lView, tNode);
+    if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
+        invokeDirectivesHostBindings(tView, lView, tNode);
+    }
     setActiveHostElement(null);
 }
 /**
@@ -8804,9 +8808,10 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             var directiveDefIdx = tView.data.length;
             baseResolveDirective(tView, lView, def);
             saveNameToExportMap(tView.data.length - 1, def, exportsMap);
-            if (def.contentQueries) {
+            if (def.contentQueries !== null)
                 tNode.flags |= 8 /* hasContentQuery */;
-            }
+            if (def.hostBindings !== null)
+                tNode.flags |= 256 /* hasHostBindings */;
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
@@ -8822,7 +8827,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
 function instantiateAllDirectives(tView, lView, tNode) {
     var start = tNode.directiveStart;
     var end = tNode.directiveEnd;
-    if (!tView.firstTemplatePass && start < end) {
+    if (!tView.firstTemplatePass) {
         getOrCreateNodeInjectorForNode(tNode, lView);
     }
     for (var i = start; i < end; i++) {
@@ -9052,13 +9057,13 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode) {
         initialInputData = generateInitialInputs(directiveIndex, def.inputs, tNode);
     }
     var initialInputs = initialInputData[directiveIndex];
-    if (initialInputs) {
+    if (initialInputs !== null) {
         var setInput = def.setInput;
         for (var i = 0; i < initialInputs.length;) {
             var publicName = initialInputs[i++];
             var privateName = initialInputs[i++];
             var value = initialInputs[i++];
-            if (setInput) {
+            if (setInput !== null) {
                 def.setInput(instance, value, publicName, privateName);
             }
             else {
@@ -18714,7 +18719,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.10+37.sha-15e3b5f.with-local-changes');
+var VERSION = new Version('9.0.0-next.10+41.sha-d4d0723.with-local-changes');
 
 /**
  * @license

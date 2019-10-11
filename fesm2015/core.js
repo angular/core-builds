@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+37.sha-15e3b5f.with-local-changes
+ * @license Angular v9.0.0-next.10+41.sha-d4d0723.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5186,14 +5186,14 @@ function getOrCreateNodeInjectorForNode(tNode, hostView) {
     /** @type {?} */
     const parentLoc = getParentInjectorLocation(tNode, hostView);
     /** @type {?} */
-    const parentIndex = getParentInjectorIndex(parentLoc);
-    /** @type {?} */
-    const parentLView = getParentInjectorView(parentLoc, hostView);
-    /** @type {?} */
     const injectorIndex = tNode.injectorIndex;
     // If a parent injector can't be found, its location is set to -1.
     // In that case, we don't need to set up a cumulative bloom
     if (hasParentInjector(parentLoc)) {
+        /** @type {?} */
+        const parentIndex = getParentInjectorIndex(parentLoc);
+        /** @type {?} */
+        const parentLView = getParentInjectorView(parentLoc, hostView);
         /** @type {?} */
         const parentData = (/** @type {?} */ (parentLView[TVIEW].data));
         // Creates a cumulative bloom filter that merges the parent's bloom filter
@@ -8020,6 +8020,12 @@ const TNodeFlags = {
     hasInitialStyling: 64,
     /** This bit is set if the node has been detached by i18n */
     isDetached: 128,
+    /**
+     * This bit is set if the node has directives with host bindings. This flags allows us to guard
+     * host-binding logic and invoke it only on nodes that actually have directives with host
+     * bindings.
+     */
+    hasHostBindings: 256,
 };
 /** @enum {number} */
 const TNodeProviderIndexes = {
@@ -11567,6 +11573,8 @@ const TNodeConstructor = class TNode {
             flags.push('TNodeFlags.hasStyleInput');
         if (this.flags & 64 /* hasInitialStyling */)
             flags.push('TNodeFlags.hasInitialStyling');
+        if (this.flags & 256 /* hasHostBindings */)
+            flags.push('TNodeFlags.hasHostBindings');
         if (this.flags & 2 /* isComponentHost */)
             flags.push('TNodeFlags.isComponentHost');
         if (this.flags & 1 /* isDirectiveHost */)
@@ -12823,7 +12831,9 @@ function createDirectivesInstances(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
     instantiateAllDirectives(tView, lView, tNode);
-    invokeDirectivesHostBindings(tView, lView, tNode);
+    if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
+        invokeDirectivesHostBindings(tView, lView, tNode);
+    }
     setActiveHostElement(null);
 }
 /**
@@ -13424,9 +13434,10 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             const directiveDefIdx = tView.data.length;
             baseResolveDirective(tView, lView, def);
             saveNameToExportMap((/** @type {?} */ (tView.data)).length - 1, def, exportsMap);
-            if (def.contentQueries) {
+            if (def.contentQueries !== null)
                 tNode.flags |= 8 /* hasContentQuery */;
-            }
+            if (def.hostBindings !== null)
+                tNode.flags |= 256 /* hasHostBindings */;
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
@@ -13448,7 +13459,7 @@ function instantiateAllDirectives(tView, lView, tNode) {
     const start = tNode.directiveStart;
     /** @type {?} */
     const end = tNode.directiveEnd;
-    if (!tView.firstTemplatePass && start < end) {
+    if (!tView.firstTemplatePass) {
         getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView);
     }
     for (let i = start; i < end; i++) {
@@ -13787,7 +13798,7 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode) {
     }
     /** @type {?} */
     const initialInputs = initialInputData[directiveIndex];
-    if (initialInputs) {
+    if (initialInputs !== null) {
         /** @type {?} */
         const setInput = def.setInput;
         for (let i = 0; i < initialInputs.length;) {
@@ -13797,7 +13808,7 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode) {
             const privateName = initialInputs[i++];
             /** @type {?} */
             const value = initialInputs[i++];
-            if (setInput) {
+            if (setInput !== null) {
                 (/** @type {?} */ (def.setInput))(instance, value, publicName, privateName);
             }
             else {
@@ -27147,7 +27158,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+37.sha-15e3b5f.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+41.sha-d4d0723.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
