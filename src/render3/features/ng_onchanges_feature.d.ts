@@ -19,7 +19,7 @@ import { DirectiveDefFeature } from '../interfaces/definition';
  * Example usage:
  *
  * ```
- * static ngComponentDef = defineComponent({
+ * static ɵcmp = defineComponent({
  *   ...
  *   inputs: {name: 'publicName'},
  *   features: [NgOnChangesFeature()]

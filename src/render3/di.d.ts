@@ -69,7 +69,7 @@ export declare function diPublicInInjector(injectorIndex: number, tView: TView, 
  *
  * Then factory method generated is:
  * ```
- * MyComponent.ngComponentDef = defineComponent({
+ * MyComponent.ɵcmp = defineComponent({
  *   factory: () => new MyComponent(injectAttribute('title'))
  *   ...
  * })
