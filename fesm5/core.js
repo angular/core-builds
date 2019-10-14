@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+66.sha-cd7b199.with-local-changes
+ * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -500,7 +500,7 @@ var NG_PIPE_DEF = getClosureSafeProperty({ ngPipeDef: getClosureSafeProperty });
 var NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
 var NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
 var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
-var NG_FACTORY_DEF = getClosureSafeProperty({ ngFactoryDef: getClosureSafeProperty });
+var NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
 /**
  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
  * the key and the directive's unique ID as the value. This allows us to map directives to their
@@ -1549,7 +1549,7 @@ function getBaseDef(type) {
 function getFactoryDef(type, throwNotFound) {
     var hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
     if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
-        throw new Error("Type " + stringify(type) + " does not have 'ngFactoryDef' property.");
+        throw new Error("Type " + stringify(type) + " does not have '\u0275fac' property.");
     }
     return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
 }
@@ -11394,14 +11394,15 @@ function compileInjectable(type, srcMeta) {
             get: function () {
                 if (ngFactoryDef === null) {
                     var metadata = getInjectableMetadata(type, srcMeta);
-                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/ngFactoryDef.js", {
-                        name: metadata.name,
-                        type: metadata.type,
-                        typeArgumentCount: metadata.typeArgumentCount,
-                        deps: reflectDependencies(type),
-                        injectFn: 'inject',
-                        isPipe: false
-                    });
+                    ngFactoryDef =
+                        getCompilerFacade().compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
+                            name: metadata.name,
+                            type: metadata.type,
+                            typeArgumentCount: metadata.typeArgumentCount,
+                            deps: reflectDependencies(type),
+                            injectFn: 'inject',
+                            isPipe: false
+                        });
                 }
                 return ngFactoryDef;
             },
@@ -18750,7 +18751,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.10+66.sha-cd7b199.with-local-changes');
+var VERSION = new Version('9.0.0-next.10+73.sha-f433d66.with-local-changes');
 
 /**
  * @license
@@ -25332,7 +25333,7 @@ function addDirectiveFactoryDef(type, metadata) {
         get: function () {
             if (ngFactoryDef === null) {
                 var meta = getDirectiveMetadata(type, metadata);
-                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/ngFactoryDef.js", __assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
             }
             return ngFactoryDef;
         },
@@ -25510,7 +25511,7 @@ function compilePipe(type, meta) {
         get: function () {
             if (ngFactoryDef === null) {
                 var metadata = getPipeMetadata(type, meta);
-                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/ngFactoryDef.js", __assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
             }
             return ngFactoryDef;
         },

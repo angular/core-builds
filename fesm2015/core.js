@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+66.sha-cd7b199.with-local-changes
+ * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -564,7 +564,7 @@ const NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeP
 /** @type {?} */
 const NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
 /** @type {?} */
-const NG_FACTORY_DEF = getClosureSafeProperty({ ngFactoryDef: getClosureSafeProperty });
+const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
 // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
 /**
  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
@@ -1860,7 +1860,7 @@ function getFactoryDef(type, throwNotFound) {
     /** @type {?} */
     const hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
     if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
-        throw new Error(`Type ${stringify(type)} does not have 'ngFactoryDef' property.`);
+        throw new Error(`Type ${stringify(type)} does not have 'ɵfac' property.`);
     }
     return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
 }
@@ -16705,7 +16705,7 @@ function compileInjectable(type, srcMeta) {
     /** @type {?} */
     /** @nocollapse */ let ngInjectableDef = null;
     /** @type {?} */
-    /** @nocollapse */ let ngFactoryDef = null;
+    let ngFactoryDef = null;
     // if NG_INJECTABLE_DEF is already defined on this class then don't overwrite it
     if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
         Object.defineProperty(type, NG_INJECTABLE_DEF, {
@@ -16730,14 +16730,15 @@ function compileInjectable(type, srcMeta) {
                 if (ngFactoryDef === null) {
                     /** @type {?} */
                     const metadata = getInjectableMetadata(type, srcMeta);
-                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreDiEnv, `ng:///${type.name}/ngFactoryDef.js`, {
-                        name: metadata.name,
-                        type: metadata.type,
-                        typeArgumentCount: metadata.typeArgumentCount,
-                        deps: reflectDependencies(type),
-                        injectFn: 'inject',
-                        isPipe: false
-                    });
+                    ngFactoryDef =
+                        getCompilerFacade().compileFactory(angularCoreDiEnv, `ng:///${type.name}/ɵfac.js`, {
+                            name: metadata.name,
+                            type: metadata.type,
+                            typeArgumentCount: metadata.typeArgumentCount,
+                            deps: reflectDependencies(type),
+                            injectFn: 'inject',
+                            isPipe: false
+                        });
                 }
                 return ngFactoryDef;
             }),
@@ -26062,7 +26063,7 @@ if (false) {
     /** @type {?} */
     DirectiveType.prototype.ɵdir;
     /** @type {?} */
-    DirectiveType.prototype.ngFactoryDef;
+    DirectiveType.prototype.ɵfac;
 }
 /** @enum {number} */
 const DirectiveDefFlags = {
@@ -27175,7 +27176,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+66.sha-cd7b199.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+73.sha-f433d66.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -38024,7 +38025,7 @@ function getDirectiveMetadata(type, metadata) {
  */
 function addDirectiveFactoryDef(type, metadata) {
     /** @type {?} */
-    /** @nocollapse */ let ngFactoryDef = null;
+    let ngFactoryDef = null;
     Object.defineProperty(type, NG_FACTORY_DEF, {
         get: (/**
          * @return {?}
@@ -38033,7 +38034,7 @@ function addDirectiveFactoryDef(type, metadata) {
             if (ngFactoryDef === null) {
                 /** @type {?} */
                 const meta = getDirectiveMetadata(type, metadata);
-                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, `ng:///${type.name}/ngFactoryDef.js`, Object.assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, `ng:///${type.name}/ɵfac.js`, Object.assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
             }
             return ngFactoryDef;
         }),
@@ -38295,7 +38296,7 @@ function compilePipe(type, meta) {
     /** @type {?} */
     /** @nocollapse */ let ngPipeDef = null;
     /** @type {?} */
-    /** @nocollapse */ let ngFactoryDef = null;
+    let ngFactoryDef = null;
     Object.defineProperty(type, NG_FACTORY_DEF, {
         get: (/**
          * @return {?}
@@ -38304,7 +38305,7 @@ function compilePipe(type, meta) {
             if (ngFactoryDef === null) {
                 /** @type {?} */
                 const metadata = getPipeMetadata(type, meta);
-                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, `ng:///${metadata.name}/ngFactoryDef.js`, Object.assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, `ng:///${metadata.name}/ɵfac.js`, Object.assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
             }
             return ngFactoryDef;
         }),

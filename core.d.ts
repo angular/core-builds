@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+66.sha-cd7b199.with-local-changes
+ * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9514,7 +9514,7 @@ export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
  */
 export declare interface ɵDirectiveType<T> extends Type<T> {
     ɵdir: never;
-    ngFactoryDef: () => T;
+    ɵfac: () => T;
 }
 
 export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
