@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/missing-injectable/transform" />
 import * as ts from 'typescript';
-import { ResolvedNgModule } from './module_collector';
+import { ResolvedDirective, ResolvedNgModule } from './definition_collector';
 import { UpdateRecorder } from './update_recorder';
 export interface AnalysisFailure {
     node: ts.Node;
@@ -23,13 +23,28 @@ export declare class MissingInjectableTransform {
     private visitedProviderClasses;
     constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
     recordChanges(): void;
+    /**
+     * Migrates all specified NgModule's by walking through referenced providers
+     * and decorating them with "@Injectable" if needed.
+     */
+    migrateModules(modules: ResolvedNgModule[]): AnalysisFailure[];
+    /**
+     * Migrates all specified directives by walking through referenced providers
+     * and decorating them with "@Injectable" if needed.
+     */
+    migrateDirectives(directives: ResolvedDirective[]): AnalysisFailure[];
     /** Migrates a given NgModule by walking through the referenced providers. */
     migrateModule(module: ResolvedNgModule): AnalysisFailure[];
+    /**
+     * Migrates a given directive by walking through defined providers. This method
+     * also handles components with "viewProviders" defined.
+     */
+    migrateDirective(directive: ResolvedDirective): AnalysisFailure[];
     /**
      * Migrates a given provider class if it is not decorated with
      * any Angular decorator.
      */
-    migrateProviderClass(node: ts.ClassDeclaration, module: ResolvedNgModule): void;
+    migrateProviderClass(node: ts.ClassDeclaration, context: ResolvedNgModule | ResolvedDirective): void;
     /**
      * Visits the given resolved value of a provider. Providers can be nested in
      * arrays and we need to recursively walk through the providers to be able to
