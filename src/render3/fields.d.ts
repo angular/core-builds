@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 export declare const NG_COMP_DEF: string;
-export declare const NG_DIRECTIVE_DEF: string;
+export declare const NG_DIR_DEF: string;
 export declare const NG_PIPE_DEF: string;
 export declare const NG_MODULE_DEF: string;
 export declare const NG_LOCALE_ID_DEF: string;

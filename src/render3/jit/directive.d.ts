@@ -22,7 +22,7 @@ import { Component, Directive } from '../../metadata/directives';
 export declare function compileComponent(type: Type<any>, metadata: Component): void;
 /**
  * Compile an Angular directive according to its decorator metadata, and patch the resulting
- * ngDirectiveDef onto the component type.
+ * directive def onto the component type.
  *
  * In the event that compilation is not immediate, `compileDirective` will return a `Promise` which
  * will resolve when compilation completes and the directive becomes usable.

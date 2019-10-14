@@ -19,7 +19,7 @@ import { Type } from '../../interface/type';
  * class SomeDirective {
  *   constructor(directive: DirectiveA) {}
  *
- *   static ngDirectiveDef = ɵɵdefineDirective({
+ *   static ɵdir = ɵɵdefineDirective({
  *     type: SomeDirective,
  *     factory: () => new SomeDirective(ɵɵdirectiveInject(DirectiveA))
  *   });

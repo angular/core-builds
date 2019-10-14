@@ -1,10 +1,10 @@
 /**
- * @license Angular v9.0.0-next.10+44.sha-d8249d1.with-local-changes
+ * @license Angular v9.0.0-next.10+46.sha-84ba1f0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIRECTIVE_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -2057,7 +2057,7 @@ class R3TestBedCompiler {
         declaration => {
             /** @type {?} */
             const metadata = this.resolvers.directive.resolve(declaration);
-            this.maybeStoreNgDef(ɵNG_DIRECTIVE_DEF, declaration);
+            this.maybeStoreNgDef(ɵNG_DIR_DEF, declaration);
             ɵcompileDirective(declaration, metadata);
         }));
         this.pendingDirectives.clear();
@@ -2132,7 +2132,7 @@ class R3TestBedCompiler {
             }
         }));
         this.seenComponents.forEach(maybeApplyOverrides(ɵNG_COMP_DEF));
-        this.seenDirectives.forEach(maybeApplyOverrides(ɵNG_DIRECTIVE_DEF));
+        this.seenDirectives.forEach(maybeApplyOverrides(ɵNG_DIR_DEF));
         this.seenComponents.clear();
         this.seenDirectives.clear();
     }
@@ -2260,7 +2260,7 @@ class R3TestBedCompiler {
         /** @type {?} */
         const directive = this.resolvers.directive.resolve(type);
         if (directive) {
-            if (!type.hasOwnProperty(ɵNG_DIRECTIVE_DEF)) {
+            if (!type.hasOwnProperty(ɵNG_DIR_DEF)) {
                 this.pendingDirectives.add(type);
             }
             this.seenDirectives.add(type);
