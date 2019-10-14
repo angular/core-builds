@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+66.sha-cd7b199.with-local-changes
+ * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3477,8 +3477,8 @@ class TestingCompiler extends Compiler {
 TestingCompiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */ TestingCompiler.ngFactoryDef = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
-/** @nocollapse */ TestingCompiler.ngInjectableDef = ɵɵdefineInjectable({ token: TestingCompiler, factory: function (t) { return TestingCompiler.ngFactoryDef(t); }, providedIn: null });
+/** @nocollapse */ TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
+/** @nocollapse */ TestingCompiler.ngInjectableDef = ɵɵdefineInjectable({ token: TestingCompiler, factory: function (t) { return TestingCompiler.ɵfac(t); }, providedIn: null });
 const ɵTestingCompiler_BaseFactory = ɵɵgetInheritedFactory(TestingCompiler);
 /*@__PURE__*/ ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable

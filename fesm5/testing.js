@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+66.sha-cd7b199.with-local-changes
+ * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2169,8 +2169,8 @@ var TestingCompiler = /** @class */ (function (_super) {
      * This can be used for errors created by compileModule...
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
-    TestingCompiler.ngFactoryDef = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
-    TestingCompiler.ngInjectableDef = ɵɵdefineInjectable({ token: TestingCompiler, factory: function (t) { return TestingCompiler.ngFactoryDef(t); }, providedIn: null });
+    TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
+    TestingCompiler.ngInjectableDef = ɵɵdefineInjectable({ token: TestingCompiler, factory: function (t) { return TestingCompiler.ɵfac(t); }, providedIn: null });
     return TestingCompiler;
 }(Compiler));
 var ɵTestingCompiler_BaseFactory = ɵɵgetInheritedFactory(TestingCompiler);

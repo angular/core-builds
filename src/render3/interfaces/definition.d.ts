@@ -64,7 +64,7 @@ export interface ComponentType<T> extends Type<T> {
  */
 export interface DirectiveType<T> extends Type<T> {
     ɵdir: never;
-    ngFactoryDef: () => T;
+    ɵfac: () => T;
 }
 export declare enum DirectiveDefFlags {
     ContentQuery = 2

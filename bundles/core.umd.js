@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+66.sha-cd7b199.with-local-changes
+ * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -681,7 +681,7 @@
     var NG_MODULE_DEF = getClosureSafeProperty({ ngModuleDef: getClosureSafeProperty });
     var NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
     var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
-    var NG_FACTORY_DEF = getClosureSafeProperty({ ngFactoryDef: getClosureSafeProperty });
+    var NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
     /**
      * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
      * the key and the directive's unique ID as the value. This allows us to map directives to their
@@ -1704,7 +1704,7 @@
     function getFactoryDef(type, throwNotFound) {
         var hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
         if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
-            throw new Error("Type " + stringify(type) + " does not have 'ngFactoryDef' property.");
+            throw new Error("Type " + stringify(type) + " does not have '\u0275fac' property.");
         }
         return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
     }
@@ -11535,14 +11535,15 @@
                 get: function () {
                     if (ngFactoryDef === null) {
                         var metadata = getInjectableMetadata(type, srcMeta);
-                        ngFactoryDef = getCompilerFacade().compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/ngFactoryDef.js", {
-                            name: metadata.name,
-                            type: metadata.type,
-                            typeArgumentCount: metadata.typeArgumentCount,
-                            deps: reflectDependencies(type),
-                            injectFn: 'inject',
-                            isPipe: false
-                        });
+                        ngFactoryDef =
+                            getCompilerFacade().compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
+                                name: metadata.name,
+                                type: metadata.type,
+                                typeArgumentCount: metadata.typeArgumentCount,
+                                deps: reflectDependencies(type),
+                                injectFn: 'inject',
+                                isPipe: false
+                            });
                     }
                     return ngFactoryDef;
                 },
@@ -18862,7 +18863,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.10+66.sha-cd7b199.with-local-changes');
+    var VERSION = new Version('9.0.0-next.10+73.sha-f433d66.with-local-changes');
 
     /**
      * @license
@@ -25431,7 +25432,7 @@
             get: function () {
                 if (ngFactoryDef === null) {
                     var meta = getDirectiveMetadata(type, metadata);
-                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/ngFactoryDef.js", __assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
+                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
                 }
                 return ngFactoryDef;
             },
@@ -25609,7 +25610,7 @@
             get: function () {
                 if (ngFactoryDef === null) {
                     var metadata = getPipeMetadata(type, meta);
-                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/ngFactoryDef.js", __assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
+                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
                 }
                 return ngFactoryDef;
             },
@@ -25829,8 +25830,8 @@
             }
             this.initialized = true;
         };
-        ApplicationInitStatus.ngFactoryDef = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
-        ApplicationInitStatus.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: function (t) { return ApplicationInitStatus.ngFactoryDef(t); }, providedIn: null });
+        ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
+        ApplicationInitStatus.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: function (t) { return ApplicationInitStatus.ɵfac(t); }, providedIn: null });
         return ApplicationInitStatus;
     }());
     /*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
@@ -25919,8 +25920,8 @@
             // tslint:disable-next-line:no-console
             console.warn(message);
         };
-        Console.ngFactoryDef = function Console_Factory(t) { return new (t || Console)(); };
-        Console.ngInjectableDef = ɵɵdefineInjectable({ token: Console, factory: function (t) { return Console.ngFactoryDef(t); }, providedIn: null });
+        Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
+        Console.ngInjectableDef = ɵɵdefineInjectable({ token: Console, factory: function (t) { return Console.ɵfac(t); }, providedIn: null });
         return Console;
     }());
     /*@__PURE__*/ setClassMetadata(Console, [{
@@ -26114,8 +26115,8 @@
          * Returns the id for a given NgModule, if one is defined and known to the compiler.
          */
         Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-        Compiler.ngFactoryDef = function Compiler_Factory(t) { return new (t || Compiler)(); };
-        Compiler.ngInjectableDef = ɵɵdefineInjectable({ token: Compiler, factory: function (t) { return Compiler.ngFactoryDef(t); }, providedIn: null });
+        Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
+        Compiler.ngInjectableDef = ɵɵdefineInjectable({ token: Compiler, factory: function (t) { return Compiler.ɵfac(t); }, providedIn: null });
         return Compiler;
     }());
     /*@__PURE__*/ setClassMetadata(Compiler, [{
@@ -26744,8 +26745,8 @@
             // TODO(juliemr): implement.
             return [];
         };
-        Testability.ngFactoryDef = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
-        Testability.ngInjectableDef = ɵɵdefineInjectable({ token: Testability, factory: function (t) { return Testability.ngFactoryDef(t); }, providedIn: null });
+        Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
+        Testability.ngInjectableDef = ɵɵdefineInjectable({ token: Testability, factory: function (t) { return Testability.ɵfac(t); }, providedIn: null });
         return Testability;
     }());
     /*@__PURE__*/ setClassMetadata(Testability, [{
@@ -26801,8 +26802,8 @@
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
-        TestabilityRegistry.ngFactoryDef = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-        TestabilityRegistry.ngInjectableDef = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: function (t) { return TestabilityRegistry.ngFactoryDef(t); }, providedIn: null });
+        TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
+        TestabilityRegistry.ngInjectableDef = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: function (t) { return TestabilityRegistry.ɵfac(t); }, providedIn: null });
         return TestabilityRegistry;
     }());
     /*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
@@ -27103,8 +27104,8 @@
             enumerable: true,
             configurable: true
         });
-        PlatformRef.ngFactoryDef = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
-        PlatformRef.ngInjectableDef = ɵɵdefineInjectable({ token: PlatformRef, factory: function (t) { return PlatformRef.ngFactoryDef(t); }, providedIn: null });
+        PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
+        PlatformRef.ngInjectableDef = ɵɵdefineInjectable({ token: PlatformRef, factory: function (t) { return PlatformRef.ɵfac(t); }, providedIn: null });
         return PlatformRef;
     }());
     /*@__PURE__*/ setClassMetadata(PlatformRef, [{
@@ -27456,8 +27457,8 @@
         });
         /** @internal */
         ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-        ApplicationRef.ngFactoryDef = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
-        ApplicationRef.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationRef, factory: function (t) { return ApplicationRef.ngFactoryDef(t); }, providedIn: null });
+        ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
+        ApplicationRef.ngInjectableDef = ɵɵdefineInjectable({ token: ApplicationRef, factory: function (t) { return ApplicationRef.ɵfac(t); }, providedIn: null });
         return ApplicationRef;
     }());
     /*@__PURE__*/ setClassMetadata(ApplicationRef, [{
@@ -27589,8 +27590,8 @@
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        SystemJsNgModuleLoader.ngFactoryDef = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
-        SystemJsNgModuleLoader.ngInjectableDef = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: function (t) { return SystemJsNgModuleLoader.ngFactoryDef(t); }, providedIn: null });
+        SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
+        SystemJsNgModuleLoader.ngInjectableDef = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: function (t) { return SystemJsNgModuleLoader.ɵfac(t); }, providedIn: null });
         return SystemJsNgModuleLoader;
     }());
     /*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{

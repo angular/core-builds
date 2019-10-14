@@ -146,7 +146,7 @@ export declare class PlatformRef {
      */
     destroy(): void;
     readonly destroyed: boolean;
-    static ngFactoryDef: i0.ɵɵFactoryDef<PlatformRef>;
+    static ɵfac: i0.ɵɵFactoryDef<PlatformRef>;
     static ngInjectableDef: i0.ɵɵInjectableDef<PlatformRef>;
 }
 /**
@@ -313,6 +313,6 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     readonly viewCount: number;
-    static ngFactoryDef: i0.ɵɵFactoryDef<ApplicationRef>;
+    static ɵfac: i0.ɵɵFactoryDef<ApplicationRef>;
     static ngInjectableDef: i0.ɵɵInjectableDef<ApplicationRef>;
 }
