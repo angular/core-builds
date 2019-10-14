@@ -70,11 +70,11 @@ export declare enum DirectiveDefFlags {
     ContentQuery = 2
 }
 /**
- * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
+ * A subclass of `Type` which has a static `ɵpipe`:`PipeDef` field making it
  * consumable for rendering.
  */
 export interface PipeType<T> extends Type<T> {
-    ngPipeDef: never;
+    ɵpipe: never;
 }
 /**
  * @codeGenApi

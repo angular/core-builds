@@ -1,10 +1,10 @@
 /**
- * @license Angular v9.0.0-next.10+73.sha-f433d66.with-local-changes
+ * @license Angular v9.0.0-next.10+75.sha-fc93daf.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MODULE_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MOD_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __read, __extends, __spread, __awaiter, __generator, __values, __decorate } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -709,13 +709,13 @@ function assertSameOrNotExisting(id, type, incoming) {
     }
 }
 function registerNgModuleType(ngModuleType) {
-    if (ngModuleType.ngModuleDef.id !== null) {
-        var id = ngModuleType.ngModuleDef.id;
+    if (ngModuleType.ɵmod.id !== null) {
+        var id = ngModuleType.ɵmod.id;
         var existing = modules.get(id);
         assertSameOrNotExisting(id, existing, ngModuleType);
         modules.set(id, ngModuleType);
     }
-    var imports = ngModuleType.ngModuleDef.imports;
+    var imports = ngModuleType.ɵmod.imports;
     if (imports instanceof Function) {
         imports = imports();
     }
@@ -1179,7 +1179,7 @@ var R3TestBedCompiler = /** @class */ (function () {
             throw new Error(ngModule.name + " is not an @NgModule or is missing metadata");
         }
         this.recompileNgModule(ngModule);
-        // At this point, the module has a valid .ngModuleDef, but the override may have introduced
+        // At this point, the module has a valid module def (ɵmod), but the override may have introduced
         // new declarations or imported modules. Ingest any possible new types and add them to the
         // current queue.
         this.queueTypesFromModulesArray([ngModule]);
@@ -1326,7 +1326,7 @@ var R3TestBedCompiler = /** @class */ (function () {
      */
     R3TestBedCompiler.prototype._getComponentFactories = function (moduleType) {
         var _this = this;
-        return maybeUnwrapFn(moduleType.ngModuleDef.declarations).reduce(function (factories, declaration) {
+        return maybeUnwrapFn(moduleType.ɵmod.declarations).reduce(function (factories, declaration) {
             var componentDef = declaration.ɵcmp;
             componentDef && factories.push(new ɵRender3ComponentFactory(componentDef, _this.testModuleRef));
             return factories;
@@ -1411,7 +1411,7 @@ var R3TestBedCompiler = /** @class */ (function () {
                 injectorDef.providers = this.getOverriddenProviders(providers);
             }
             // Apply provider overrides to imported modules recursively
-            var moduleDef = moduleType[ɵNG_MODULE_DEF];
+            var moduleDef = moduleType[ɵNG_MOD_DEF];
             try {
                 for (var _b = __values(moduleDef.imports), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var importType = _c.value;
@@ -1458,7 +1458,7 @@ var R3TestBedCompiler = /** @class */ (function () {
             throw new Error("Unable to resolve metadata for NgModule: " + ngModule.name);
         }
         // Cache the initial ngModuleDef as it will be overwritten.
-        this.maybeStoreNgDef(ɵNG_MODULE_DEF, ngModule);
+        this.maybeStoreNgDef(ɵNG_MOD_DEF, ngModule);
         this.maybeStoreNgDef(ɵNG_INJECTOR_DEF, ngModule);
         ɵcompileNgModuleDefs(ngModule, metadata);
     };
@@ -1516,7 +1516,7 @@ var R3TestBedCompiler = /** @class */ (function () {
                     this.queueTypesFromModulesArray(value);
                 }
                 else if (hasNgModuleDef(value)) {
-                    var def = value.ngModuleDef;
+                    var def = value.ɵmod;
                     // Look through declarations, imports, and exports, and queue everything found there.
                     this.queueTypeArray(maybeUnwrapFn(def.declarations), value);
                     this.queueTypesFromModulesArray(maybeUnwrapFn(def.imports));
@@ -1730,7 +1730,7 @@ function initResolvers() {
     };
 }
 function hasNgModuleDef(value) {
-    return value.hasOwnProperty('ngModuleDef');
+    return value.hasOwnProperty('ɵmod');
 }
 function maybeUnwrapFn(maybeFn) {
     return maybeFn instanceof Function ? maybeFn() : maybeFn;

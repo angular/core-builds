@@ -13,7 +13,7 @@ export { NgModuleDef as ɵNgModuleDef, ɵɵNgModuleDefWithMeta, NgModuleTransiti
 export { ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, } from './sanitization/sanitization';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, } from './sanitization/bypass';
 export { getLContext as ɵgetLContext } from './render3/context_discovery';
-export { NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MODULE_DEF as ɵNG_MODULE_DEF, NG_BASE_DEF as ɵNG_BASE_DEF } from './render3/fields';
+export { NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_BASE_DEF as ɵNG_BASE_DEF } from './render3/fields';
 export { NG_INJECTABLE_DEF as ɵNG_INJECTABLE_DEF, NG_INJECTOR_DEF as ɵNG_INJECTOR_DEF, } from './di/interface/defs';
 export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayState as ɵPlayState, PlayerHandler as ɵPlayerHandler, } from './render3/interfaces/player';
 export { LContext as ɵLContext, } from './render3/interfaces/context';
