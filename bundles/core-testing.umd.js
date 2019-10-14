@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+44.sha-d8249d1.with-local-changes
+ * @license Angular v9.0.0-next.10+46.sha-84ba1f0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1534,7 +1534,7 @@
             this.pendingComponents.clear();
             this.pendingDirectives.forEach(function (declaration) {
                 var metadata = _this.resolvers.directive.resolve(declaration);
-                _this.maybeStoreNgDef(core.ɵNG_DIRECTIVE_DEF, declaration);
+                _this.maybeStoreNgDef(core.ɵNG_DIR_DEF, declaration);
                 core.ɵcompileDirective(declaration, metadata);
             });
             this.pendingDirectives.clear();
@@ -1574,7 +1574,7 @@
                 }
             }; };
             this.seenComponents.forEach(maybeApplyOverrides(core.ɵNG_COMP_DEF));
-            this.seenDirectives.forEach(maybeApplyOverrides(core.ɵNG_DIRECTIVE_DEF));
+            this.seenDirectives.forEach(maybeApplyOverrides(core.ɵNG_DIR_DEF));
             this.seenComponents.clear();
             this.seenDirectives.clear();
         };
@@ -1684,7 +1684,7 @@
             }
             var directive = this.resolvers.directive.resolve(type);
             if (directive) {
-                if (!type.hasOwnProperty(core.ɵNG_DIRECTIVE_DEF)) {
+                if (!type.hasOwnProperty(core.ɵNG_DIR_DEF)) {
                     this.pendingDirectives.add(type);
                 }
                 this.seenDirectives.add(type);
