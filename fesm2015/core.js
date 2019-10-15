@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+77.sha-64aae3a.with-local-changes
+ * @license Angular v9.0.0-next.10+80.sha-72494c4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -408,7 +408,7 @@ function stringify(token) {
     if (typeof token === 'string') {
         return token;
     }
-    if (token instanceof Array) {
+    if (Array.isArray(token)) {
         return '[' + token.map(stringify).join(', ') + ']';
     }
     if (token == null) {
@@ -913,7 +913,7 @@ function formatError(text, obj, injectorErrorName, source = null) {
     text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
     /** @type {?} */
     let context = stringify(obj);
-    if (obj instanceof Array) {
+    if (Array.isArray(obj)) {
         context = obj.map(stringify).join(' -> ');
     }
     else if (typeof obj === 'object') {
@@ -17956,7 +17956,7 @@ function recursivelyProcessProviders(records, provider) {
     let scope = null;
     if (provider) {
         provider = resolveForwardRef(provider);
-        if (provider instanceof Array) {
+        if (Array.isArray(provider)) {
             // if we have an array recurse into the array
             for (let i = 0; i < provider.length; i++) {
                 scope = recursivelyProcessProviders(records, provider[i]) || scope;
@@ -18123,7 +18123,7 @@ function computeDeps(provider) {
             let options = 6 /* Default */;
             /** @type {?} */
             let token = resolveForwardRef(providerDeps[i]);
-            if (token instanceof Array) {
+            if (Array.isArray(token)) {
                 for (let j = 0, annotations = token; j < annotations.length; j++) {
                     /** @type {?} */
                     const annotation = annotations[j];
@@ -18857,7 +18857,7 @@ function _normalizeProviders(providers, res) {
         else if (b && typeof b == 'object' && ((/** @type {?} */ (b))).provide !== undefined) {
             res.push((/** @type {?} */ (b)));
         }
-        else if (b instanceof Array) {
+        else if (Array.isArray(b)) {
             _normalizeProviders(b, res);
         }
         else {
@@ -27159,7 +27159,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.10+77.sha-64aae3a.with-local-changes');
+const VERSION = new Version('9.0.0-next.10+80.sha-72494c4.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+77.sha-64aae3a.with-local-changes
+ * @license Angular v9.0.0-next.10+80.sha-72494c4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -850,7 +850,7 @@
         if (typeof token === 'string') {
             return token;
         }
-        if (token instanceof Array) {
+        if (Array.isArray(token)) {
             return '[' + token.map(stringify).join(', ') + ']';
         }
         if (token == null) {
@@ -1080,7 +1080,7 @@
         var removeObjects = new Set();
         var _loop_1 = function (prop) {
             var removeValue = remove[prop];
-            if (removeValue instanceof Array) {
+            if (Array.isArray(removeValue)) {
                 removeValue.forEach(function (value) { removeObjects.add(_propHashKey(prop, value, references)); });
             }
             else {
@@ -1092,7 +1092,7 @@
         }
         var _loop_2 = function (prop) {
             var propValue = metadata[prop];
-            if (propValue instanceof Array) {
+            if (Array.isArray(propValue)) {
                 metadata[prop] = propValue.filter(function (value) { return !removeObjects.has(_propHashKey(prop, value, references)); });
             }
             else {
@@ -1109,7 +1109,7 @@
         for (var prop in add) {
             var addValue = add[prop];
             var propValue = metadata[prop];
-            if (propValue != null && propValue instanceof Array) {
+            if (propValue != null && Array.isArray(propValue)) {
                 metadata[prop] = propValue.concat(addValue);
             }
             else {

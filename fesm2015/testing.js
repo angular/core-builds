@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+77.sha-64aae3a.with-local-changes
+ * @license Angular v9.0.0-next.10+80.sha-72494c4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1055,7 +1055,7 @@ function stringify(token) {
     if (typeof token === 'string') {
         return token;
     }
-    if (token instanceof Array) {
+    if (Array.isArray(token)) {
         return '[' + token.map(stringify).join(', ') + ']';
     }
     if (token == null) {
@@ -1421,7 +1421,7 @@ function removeMetadata(metadata, remove, references) {
     for (const prop in remove) {
         /** @type {?} */
         const removeValue = remove[prop];
-        if (removeValue instanceof Array) {
+        if (Array.isArray(removeValue)) {
             removeValue.forEach((/**
              * @param {?} value
              * @return {?}
@@ -1435,7 +1435,7 @@ function removeMetadata(metadata, remove, references) {
     for (const prop in metadata) {
         /** @type {?} */
         const propValue = metadata[prop];
-        if (propValue instanceof Array) {
+        if (Array.isArray(propValue)) {
             metadata[prop] = propValue.filter((/**
              * @param {?} value
              * @return {?}
@@ -1460,7 +1460,7 @@ function addMetadata(metadata, add) {
         const addValue = add[prop];
         /** @type {?} */
         const propValue = metadata[prop];
-        if (propValue != null && propValue instanceof Array) {
+        if (propValue != null && Array.isArray(propValue)) {
             metadata[prop] = propValue.concat(addValue);
         }
         else {
