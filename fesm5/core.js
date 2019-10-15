@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+93.sha-ec6a9f2.with-local-changes
+ * @license Angular v9.0.0-next.10+94.sha-11e04b1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3012,7 +3012,7 @@ function getNativeByTNode(tNode, lView) {
     ngDevMode && assertTNodeForLView(tNode, lView);
     ngDevMode && assertDataInRange(lView, tNode.index);
     var node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && assertDomNode(node);
+    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
     return node;
 }
 /**
@@ -3028,7 +3028,7 @@ function getNativeByTNodeOrNull(tNode, lView) {
     if (index !== -1) {
         ngDevMode && assertTNodeForLView(tNode, lView);
         var node = unwrapRNode(lView[index]);
-        ngDevMode && node !== null && assertDomNode(node);
+        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
         return node;
     }
     return null;
@@ -9152,8 +9152,8 @@ var LContainerArray = ((typeof ngDevMode === 'undefined' || ngDevMode) && initNg
  * @returns LContainer
  */
 function createLContainer(hostNative, currentView, native, tNode, isForViewContainerRef) {
-    ngDevMode && assertDomNode(native);
     ngDevMode && assertLView(currentView);
+    ngDevMode && !isProceduralRenderer(currentView[RENDERER]) && assertDomNode(native);
     // https://jsperf.com/array-literal-vs-new-array-really
     var lContainer = new (ngDevMode ? LContainerArray : Array)(hostNative, // host native
     true, // Boolean `true` in this position signifies that this is an `LContainer`
@@ -9582,7 +9582,7 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             lNodeToHandle = lNodeToHandle[HOST];
         }
         var rNode = unwrapRNode(lNodeToHandle);
-        ngDevMode && assertDomNode(rNode);
+        ngDevMode && !isProceduralRenderer(renderer) && assertDomNode(rNode);
         if (action === 0 /* Create */ && parent !== null) {
             if (beforeNode == null) {
                 nativeAppendChild(renderer, parent, rNode);
@@ -18769,7 +18769,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.10+93.sha-ec6a9f2.with-local-changes');
+var VERSION = new Version('9.0.0-next.10+94.sha-11e04b1.with-local-changes');
 
 /**
  * @license
