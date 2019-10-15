@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+77.sha-64aae3a.with-local-changes
+ * @license Angular v9.0.0-next.10+80.sha-72494c4.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -371,7 +371,7 @@ function stringify(token) {
     if (typeof token === 'string') {
         return token;
     }
-    if (token instanceof Array) {
+    if (Array.isArray(token)) {
         return '[' + token.map(stringify).join(', ') + ']';
     }
     if (token == null) {
@@ -764,7 +764,7 @@ function formatError(text, obj, injectorErrorName, source) {
     if (source === void 0) { source = null; }
     text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
     var context = stringify(obj);
-    if (obj instanceof Array) {
+    if (Array.isArray(obj)) {
         context = obj.map(stringify).join(' -> ');
     }
     else if (typeof obj === 'object') {
@@ -12166,7 +12166,7 @@ function recursivelyProcessProviders(records, provider) {
     var scope = null;
     if (provider) {
         provider = resolveForwardRef(provider);
-        if (provider instanceof Array) {
+        if (Array.isArray(provider)) {
             // if we have an array recurse into the array
             for (var i = 0; i < provider.length; i++) {
                 scope = recursivelyProcessProviders(records, provider[i]) || scope;
@@ -12294,7 +12294,7 @@ function computeDeps(provider) {
         for (var i = 0; i < providerDeps.length; i++) {
             var options = 6 /* Default */;
             var token = resolveForwardRef(providerDeps[i]);
-            if (token instanceof Array) {
+            if (Array.isArray(token)) {
                 for (var j = 0, annotations = token; j < annotations.length; j++) {
                     var annotation = annotations[j];
                     if (annotation instanceof Optional || annotation == Optional) {
@@ -12814,7 +12814,7 @@ function _normalizeProviders(providers, res) {
         else if (b && typeof b == 'object' && b.provide !== undefined) {
             res.push(b);
         }
-        else if (b instanceof Array) {
+        else if (Array.isArray(b)) {
             _normalizeProviders(b, res);
         }
         else {
@@ -18751,7 +18751,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.10+77.sha-64aae3a.with-local-changes');
+var VERSION = new Version('9.0.0-next.10+80.sha-72494c4.with-local-changes');
 
 /**
  * @license
