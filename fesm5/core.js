@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.10+84.sha-8b0cb2f.with-local-changes
+ * @license Angular v9.0.0-next.10+93.sha-ec6a9f2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2310,6 +2310,9 @@ function getNamespace() {
 var _currentSanitizer;
 function setCurrentStyleSanitizer(sanitizer) {
     _currentSanitizer = sanitizer;
+}
+function resetCurrentStyleSanitizer() {
+    setCurrentStyleSanitizer(null);
 }
 function getCurrentStyleSanitizer() {
     return _currentSanitizer;
@@ -6458,7 +6461,7 @@ function applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex
     var valueToApply = unwrapSafeValue(value);
     if (isStylingValueDefined(valueToApply)) {
         valueToApply =
-            sanitizer ? sanitizer(prop, value, 2 /* SanitizeOnly */) : valueToApply;
+            sanitizer ? sanitizer(prop, value, 3 /* ValidateAndSanitize */) : valueToApply;
         applyFn(renderer, element, prop, valueToApply, bindingIndex);
         return true;
     }
@@ -6469,8 +6472,9 @@ function findAndApplyMapValue(renderer, element, applyFn, map, prop, bindingInde
         var p = getMapProp(map, i);
         if (p === prop) {
             var valueToApply = getMapValue(map, i);
-            valueToApply =
-                sanitizer ? sanitizer(prop, valueToApply, 2 /* SanitizeOnly */) : valueToApply;
+            valueToApply = sanitizer ?
+                sanitizer(prop, valueToApply, 3 /* ValidateAndSanitize */) :
+                valueToApply;
             applyFn(renderer, element, prop, valueToApply, bindingIndex);
             return true;
         }
@@ -14667,8 +14671,15 @@ function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
     // Direct Apply Case: bypass context resolution and apply the
     // style/class value directly to the element
     if (allowDirectStyling(context, hostBindingsMode)) {
+        var sanitizerToUse = isClassBased ? null : sanitizer;
         var renderer = getRenderer(tNode, lView);
-        updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, isClassBased ? setClass : setStyle, sanitizer);
+        updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, isClassBased ? setClass : setStyle, sanitizerToUse);
+        if (sanitizerToUse) {
+            // it's important we remove the current style sanitizer once the
+            // element exits, otherwise it will be used by the next styling
+            // instructions for the next element.
+            setElementExitFn(resetCurrentStyleSanitizer);
+        }
     }
     else {
         // Context Resolution (or first update) Case: save the value
@@ -14806,8 +14817,15 @@ function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
     // Direct Apply Case: bypass context resolution and apply the
     // style/class map values directly to the element
     if (allowDirectStyling(context, hostBindingsMode)) {
+        var sanitizerToUse = isClassBased ? null : sanitizer;
         var renderer = getRenderer(tNode, lView);
-        updated = applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, stylingMapArr, isClassBased, isClassBased ? setClass : setStyle, sanitizer, valueHasChanged);
+        updated = applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, stylingMapArr, isClassBased, isClassBased ? setClass : setStyle, sanitizerToUse, valueHasChanged);
+        if (sanitizerToUse) {
+            // it's important we remove the current style sanitizer once the
+            // element exits, otherwise it will be used by the next styling
+            // instructions for the next element.
+            setElementExitFn(resetCurrentStyleSanitizer);
+        }
     }
     else {
         updated = valueHasChanged;
@@ -14895,7 +14913,7 @@ function stylingApply() {
     var classesContext = isStylingContext(tNode.classes) ? tNode.classes : null;
     var stylesContext = isStylingContext(tNode.styles) ? tNode.styles : null;
     flushStyling(renderer, lView, classesContext, stylesContext, native, directiveIndex, sanitizer);
-    setCurrentStyleSanitizer(null);
+    resetCurrentStyleSanitizer();
 }
 function getRenderer(tNode, lView) {
     return tNode.type === 3 /* Element */ ? lView[RENDERER] : null;
@@ -18751,7 +18769,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.10+84.sha-8b0cb2f.with-local-changes');
+var VERSION = new Version('9.0.0-next.10+93.sha-ec6a9f2.with-local-changes');
 
 /**
  * @license
