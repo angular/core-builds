@@ -225,4 +225,5 @@ export declare function ɵɵnamespaceHTML(): void;
 export declare function namespaceHTMLInternal(): void;
 export declare function getNamespace(): string | null;
 export declare function setCurrentStyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
+export declare function resetCurrentStyleSanitizer(): void;
 export declare function getCurrentStyleSanitizer(): StyleSanitizeFn | null;
