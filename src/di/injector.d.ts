@@ -52,7 +52,7 @@ export declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
 }
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;

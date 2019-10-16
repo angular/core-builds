@@ -9,6 +9,6 @@ import { Type } from '../../interface/type';
 import { Injectable } from '../injectable';
 /**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
- * `ngInjectableDef` onto the injectable type.
+ * injectable def (`ɵprov`) onto the injectable type.
  */
 export declare function compileInjectable(type: Type<any>, srcMeta?: Injectable): void;

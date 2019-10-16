@@ -120,7 +120,7 @@ export interface IterableDifferFactory {
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
     /**
      * @deprecated v4.0.0 - Should be private
      */

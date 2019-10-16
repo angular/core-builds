@@ -36,7 +36,7 @@ export declare class TestingCompiler extends Compiler {
      */
     getComponentFromError(error: Error): Type<any> | null;
     static ɵfac: i0.ɵɵFactoryDef<TestingCompiler>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<TestingCompiler>;
+    static ɵprov: i0.ɵɵInjectableDef<TestingCompiler>;
 }
 /**
  * A factory for creating a Compiler

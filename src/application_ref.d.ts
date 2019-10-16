@@ -167,7 +167,7 @@ export declare class PlatformRef {
     destroy(): void;
     readonly destroyed: boolean;
     static ɵfac: i0.ɵɵFactoryDef<PlatformRef>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<PlatformRef>;
+    static ɵprov: i0.ɵɵInjectableDef<PlatformRef>;
 }
 /**
  * A reference to an Angular application running on a page.
@@ -334,5 +334,5 @@ export declare class ApplicationRef {
      */
     readonly viewCount: number;
     static ɵfac: i0.ɵɵFactoryDef<ApplicationRef>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<ApplicationRef>;
+    static ɵprov: i0.ɵɵInjectableDef<ApplicationRef>;
 }

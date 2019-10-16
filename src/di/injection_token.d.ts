@@ -48,7 +48,7 @@ import { Type } from '../interface/type';
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ngInjectableDef: never | undefined;
+    readonly ɵprov: never | undefined;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -56,5 +56,5 @@ export declare class InjectionToken<T> {
     toString(): string;
 }
 export interface InjectableDefToken<T> extends InjectionToken<T> {
-    ngInjectableDef: never;
+    ɵprov: never;
 }

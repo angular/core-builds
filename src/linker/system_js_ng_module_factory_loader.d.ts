@@ -34,5 +34,5 @@ export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     private loadAndCompile;
     private loadFactory;
     static ɵfac: i0.ɵɵFactoryDef<SystemJsNgModuleLoader>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<SystemJsNgModuleLoader>;
+    static ɵprov: i0.ɵɵInjectableDef<SystemJsNgModuleLoader>;
 }

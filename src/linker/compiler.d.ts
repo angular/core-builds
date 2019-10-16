@@ -62,7 +62,7 @@ export declare class Compiler {
      */
     getModuleId(moduleType: Type<any>): string | undefined;
     static ɵfac: i0.ɵɵFactoryDef<Compiler>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<Compiler>;
+    static ɵprov: i0.ɵɵInjectableDef<Compiler>;
 }
 /**
  * Options for creating a compiler

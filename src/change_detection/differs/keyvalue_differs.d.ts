@@ -102,7 +102,7 @@ export interface KeyValueDifferFactory {
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
     /**
      * @deprecated v4.0.0 - Should be private.
      */

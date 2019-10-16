@@ -14,5 +14,5 @@ import { SecurityContext } from './security';
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
 }

@@ -3,5 +3,5 @@ export declare class Console {
     log(message: string): void;
     warn(message: string): void;
     static ɵfac: i0.ɵɵFactoryDef<Console>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<Console>;
+    static ɵprov: i0.ɵɵInjectableDef<Console>;
 }

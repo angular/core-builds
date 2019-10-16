@@ -75,7 +75,7 @@ export interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ngInjectableDef: never;
+    ɵprov: never;
 }
 /**
  * A type which has an `InjectorDef` static field.
@@ -88,7 +88,7 @@ export interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ngInjectorDef: never;
+    ɵinj: never;
 }
 /**
  * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
@@ -106,7 +106,7 @@ export interface InjectorTypeWithProviders<T> {
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
  * in which injectors (if any) it will be available.
  *
- * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+ * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
  *
  * Options:
@@ -132,7 +132,7 @@ export declare const defineInjectable: typeof ɵɵdefineInjectable;
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
- * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * This should be assigned to a static injector def (`ɵinj`) field on a type, which will then be an
  * `InjectorType`.
  *
  * Options:
@@ -141,7 +141,7 @@ export declare const defineInjectable: typeof ɵɵdefineInjectable;
  *   create the type must be provided. If that factory function needs to inject arguments, it can
  *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
- *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
  * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
  *   whose providers will also be added to the injector. Locally provided types will override
@@ -155,26 +155,28 @@ export declare function ɵɵdefineInjector(options: {
     imports?: any[];
 }): never;
 /**
- * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
- * value.
+ * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
+ * inherited value.
  *
- * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
+ * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
 export declare function getInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
 /**
- * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
+ * Read the injectable def (`ɵprov`) for `type` or read the `ɵprov` from one of its ancestors.
  *
- * @param type A type which may have `ngInjectableDef`, via inheritance.
+ * @param type A type which may have `ɵprov`, via inheritance.
  *
  * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
- * `ngInjectableDef` on an ancestor only.
+ * `ɵprov` on an ancestor only.
  */
 export declare function getInheritedInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
 /**
- * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
+ * Read the injector def type in a way which is immune to accidentally reading inherited value.
  *
- * @param type type which may have `ngInjectorDef`
+ * @param type type which may have an injector def (`ɵinj`)
  */
 export declare function getInjectorDef<T>(type: any): ɵɵInjectorDef<T> | null;
+export declare const NG_PROV_DEF: string;
+export declare const NG_INJ_DEF: string;
 export declare const NG_INJECTABLE_DEF: string;
 export declare const NG_INJECTOR_DEF: string;

@@ -81,7 +81,7 @@ export declare class Testability implements PublicTestability {
      */
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
     static ɵfac: i0.ɵɵFactoryDef<Testability>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<Testability>;
+    static ɵprov: i0.ɵɵInjectableDef<Testability>;
 }
 /**
  * A global registry of {@link Testability} instances for specific elements.
@@ -125,7 +125,7 @@ export declare class TestabilityRegistry {
      */
     findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
     static ɵfac: i0.ɵɵFactoryDef<TestabilityRegistry>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<TestabilityRegistry>;
+    static ɵprov: i0.ɵɵInjectableDef<TestabilityRegistry>;
 }
 /**
  * Adapter interface for retrieving the `Testability` service associated for a

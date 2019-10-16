@@ -20,5 +20,5 @@ export declare class ApplicationInitStatus {
     readonly done = false;
     constructor(appInits: (() => any)[]);
     static ɵfac: i0.ɵɵFactoryDef<ApplicationInitStatus>;
-    static ngInjectableDef: i0.ɵɵInjectableDef<ApplicationInitStatus>;
+    static ɵprov: i0.ɵɵInjectableDef<ApplicationInitStatus>;
 }

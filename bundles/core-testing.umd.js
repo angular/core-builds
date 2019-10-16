@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+8.sha-3e14c2d.with-local-changes
+ * @license Angular v9.0.0-next.11+10.sha-86104b8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1584,7 +1584,7 @@
                 return;
             }
             this.moduleProvidersOverridden.add(moduleType);
-            var injectorDef = moduleType[i0.ɵNG_INJECTOR_DEF];
+            var injectorDef = moduleType[i0.ɵNG_INJ_DEF];
             if (this.providerOverridesByToken.size > 0) {
                 // Extract the list of providers from ModuleWithProviders, so we can define the final list of
                 // providers that might have overrides.
@@ -1595,8 +1595,8 @@
                 }));
                 var providers = __spread(providersFromModules, injectorDef.providers);
                 if (this.hasProviderOverrides(providers)) {
-                    this.maybeStoreNgDef(i0.ɵNG_INJECTOR_DEF, moduleType);
-                    this.storeFieldOfDefOnType(moduleType, i0.ɵNG_INJECTOR_DEF, 'providers');
+                    this.maybeStoreNgDef(i0.ɵNG_INJ_DEF, moduleType);
+                    this.storeFieldOfDefOnType(moduleType, i0.ɵNG_INJ_DEF, 'providers');
                     injectorDef.providers = this.getOverriddenProviders(providers);
                 }
                 // Apply provider overrides to imported modules recursively
@@ -1648,7 +1648,7 @@
             }
             // Cache the initial ngModuleDef as it will be overwritten.
             this.maybeStoreNgDef(i0.ɵNG_MOD_DEF, ngModule);
-            this.maybeStoreNgDef(i0.ɵNG_INJECTOR_DEF, ngModule);
+            this.maybeStoreNgDef(i0.ɵNG_INJ_DEF, ngModule);
             i0.ɵcompileNgModuleDefs(ngModule, metadata);
         };
         R3TestBedCompiler.prototype.queueType = function (type, moduleType) {
@@ -2359,7 +2359,7 @@
          */
         TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
         TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
-        TestingCompiler.ngInjectableDef = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: function (t) { return TestingCompiler.ɵfac(t); }, providedIn: null });
+        TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: function (t) { return TestingCompiler.ɵfac(t); }, providedIn: null });
         return TestingCompiler;
     }(i0.Compiler));
     var ɵTestingCompiler_BaseFactory = i0.ɵɵgetInheritedFactory(TestingCompiler);
