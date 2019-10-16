@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+8.sha-3e14c2d.with-local-changes
+ * @license Angular v9.0.0-next.11+10.sha-86104b8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -446,7 +446,7 @@
      * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
      * in which injectors (if any) it will be available.
      *
-     * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+     * This should be assigned to a static `ɵprov` field on a type, which will then be an
      * `InjectableType`.
      *
      * Options:
@@ -473,7 +473,7 @@
     /**
      * Construct an `InjectorDef` which configures an injector.
      *
-     * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+     * This should be assigned to a static injector def (`ɵinj`) field on a type, which will then be an
      * `InjectorType`.
      *
      * Options:
@@ -482,7 +482,7 @@
      *   create the type must be provided. If that factory function needs to inject arguments, it can
      *   use the `inject` function.
      * * `providers`: an optional array of providers to add to the injector. Each provider must
-     *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+     *   either have a factory or point to a type which has a `ɵprov` static property (the
      *   type must be an `InjectableType`).
      * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
      *   whose providers will also be added to the injector. Locally provided types will override
@@ -496,50 +496,56 @@
         };
     }
     /**
-     * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
-     * value.
+     * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
+     * inherited value.
      *
-     * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
+     * @param type A type which may have its own (non-inherited) `ɵprov`.
      */
     function getInjectableDef(type) {
-        var def = type[NG_INJECTABLE_DEF];
+        var def = (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
         // The definition read above may come from a base class. `hasOwnProperty` is not sufficient to
         // distinguish this case, as in older browsers (e.g. IE10) static property inheritance is
         // implemented by copying the properties.
         //
-        // Instead, the ngInjectableDef's token is compared to the type, and if they don't match then the
+        // Instead, the ɵprov's token is compared to the type, and if they don't match then the
         // property was not defined directly on the type itself, and was likely inherited. The definition
         // is only returned if the type matches the def.token.
         return def && def.token === type ? def : null;
     }
     /**
-     * Read the `ngInjectableDef` for `type` or read the `ngInjectableDef` from one of its ancestors.
+     * Read the injectable def (`ɵprov`) for `type` or read the `ɵprov` from one of its ancestors.
      *
-     * @param type A type which may have `ngInjectableDef`, via inheritance.
+     * @param type A type which may have `ɵprov`, via inheritance.
      *
      * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
-     * `ngInjectableDef` on an ancestor only.
+     * `ɵprov` on an ancestor only.
      */
     function getInheritedInjectableDef(type) {
-        if (type && type[NG_INJECTABLE_DEF]) {
+        var def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
+        if (def) {
             // TODO(FW-1307): Re-add ngDevMode when closure can handle it
             // ngDevMode &&
             console.warn("DEPRECATED: DI is instantiating a token \"" + type.name + "\" that inherits its @Injectable decorator but does not provide one itself.\n" +
                 ("This will become an error in v10. Please add @Injectable() to the \"" + type.name + "\" class."));
-            return type[NG_INJECTABLE_DEF];
+            return def;
         }
         else {
             return null;
         }
     }
     /**
-     * Read the `ngInjectorDef` type in a way which is immune to accidentally reading inherited value.
+     * Read the injector def type in a way which is immune to accidentally reading inherited value.
      *
-     * @param type type which may have `ngInjectorDef`
+     * @param type type which may have an injector def (`ɵinj`)
      */
     function getInjectorDef(type) {
-        return type && type.hasOwnProperty(NG_INJECTOR_DEF) ? type[NG_INJECTOR_DEF] : null;
+        return type && (type.hasOwnProperty(NG_INJ_DEF) || type.hasOwnProperty(NG_INJECTOR_DEF)) ?
+            type[NG_INJ_DEF] :
+            null;
     }
+    var NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
+    var NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
+    // We need to keep these around so we can read off old defs if new defs are unavailable
     var NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
     var NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
 
@@ -744,7 +750,7 @@
             this._desc = _desc;
             /** @internal */
             this.ngMetadataName = 'InjectionToken';
-            this.ngInjectableDef = undefined;
+            this.ɵprov = undefined;
             if (typeof options == 'number') {
                 // This is a special hack to assign __NG_ELEMENT_ID__ to this instance.
                 // __NG_ELEMENT_ID__ is Used by Ivy to determine bloom filter id.
@@ -752,7 +758,7 @@
                 this.__NG_ELEMENT_ID__ = options;
             }
             else if (options !== undefined) {
-                this.ngInjectableDef = ɵɵdefineInjectable({
+                this.ɵprov = ɵɵdefineInjectable({
                     token: this,
                     providedIn: options.providedIn || 'root',
                     factory: options.factory,
@@ -11516,17 +11522,17 @@
      */
     /**
      * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
-     * `ngInjectableDef` onto the injectable type.
+     * injectable def (`ɵprov`) onto the injectable type.
      */
     function compileInjectable(type, srcMeta) {
         var ngInjectableDef = null;
         var ngFactoryDef = null;
-        // if NG_INJECTABLE_DEF is already defined on this class then don't overwrite it
-        if (!type.hasOwnProperty(NG_INJECTABLE_DEF)) {
-            Object.defineProperty(type, NG_INJECTABLE_DEF, {
+        // if NG_PROV_DEF is already defined on this class then don't overwrite it
+        if (!type.hasOwnProperty(NG_PROV_DEF)) {
+            Object.defineProperty(type, NG_PROV_DEF, {
                 get: function () {
                     if (ngInjectableDef === null) {
-                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/ngInjectableDef.js", getInjectableMetadata(type, srcMeta));
+                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, srcMeta));
                     }
                     return ngInjectableDef;
                 },
@@ -11672,7 +11678,7 @@
      */
     function render2CompileInjectable(injectableType, options) {
         if (options && options.providedIn !== undefined && !getInjectableDef(injectableType)) {
-            injectableType.ngInjectableDef = ɵɵdefineInjectable({
+            injectableType.ɵprov = ɵɵdefineInjectable({
                 token: injectableType,
                 providedIn: options.providedIn,
                 factory: convertInjectableProviderToFactory(injectableType, options),
@@ -11816,11 +11822,11 @@
                     // SkipSelf isn't set, check if the record belongs to this injector.
                     var record = this.records.get(token);
                     if (record === undefined) {
-                        // No record, but maybe the token is scoped to this injector. Look for an ngInjectableDef
-                        // with a scope matching this injector.
+                        // No record, but maybe the token is scoped to this injector. Look for an injectable
+                        // def with a scope matching this injector.
                         var def = couldBeInjectableType(token) && getInjectableDef(token);
                         if (def && this.injectableDefInScope(def)) {
-                            // Found an ngInjectableDef and it's scoped to this injector. Pretend as if it was here
+                            // Found an injectable def and it's scoped to this injector. Pretend as if it was here
                             // all along.
                             record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
                         }
@@ -11890,10 +11896,10 @@
             defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
             if (!defOrWrappedDef)
                 return false;
-            // Either the defOrWrappedDef is an InjectorType (with ngInjectorDef) or an
+            // Either the defOrWrappedDef is an InjectorType (with injector def) or an
             // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
             // read, so care is taken to only do the read once.
-            // First attempt to read the ngInjectorDef.
+            // First attempt to read the injector def (`ɵinj`).
             var def = getInjectorDef(defOrWrappedDef);
             // If that's not present, then attempt to read ngModule from the InjectorDefTypeWithProviders.
             var ngModule = (def == null) && defOrWrappedDef.ngModule || undefined;
@@ -12029,21 +12035,22 @@
         return R3Injector;
     }());
     function injectableDefOrInjectorDefFactory(token) {
-        // Most tokens will have an ngInjectableDef directly on them, which specifies a factory directly.
+        // Most tokens will have an injectable def directly on them, which specifies a factory directly.
         var injectableDef = getInjectableDef(token);
         var factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
         if (factory !== null) {
             return factory;
         }
-        // If the token is an NgModule, it's also injectable but the factory is on its ngInjectorDef.
+        // If the token is an NgModule, it's also injectable but the factory is on its injector def
+        // (`ɵinj`)
         var injectorDef = getInjectorDef(token);
         if (injectorDef !== null) {
             return injectorDef.factory;
         }
-        // InjectionTokens should have an ngInjectableDef and thus should be handled above.
+        // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
         // If it's missing that, it's an error.
         if (token instanceof InjectionToken) {
-            throw new Error("Token " + stringify(token) + " is missing an ngInjectableDef definition.");
+            throw new Error("Token " + stringify(token) + " is missing a \u0275prov definition.");
         }
         // Undecorated types can sometimes be created if they have no constructor arguments.
         if (token instanceof Function) {
@@ -12060,8 +12067,8 @@
             throw new Error("Can't resolve all parameters for " + stringify(token) + ": (" + args.join(', ') + ").");
         }
         // The constructor function appears to have no parameters.
-        // This might be because it inherits from a super-class. In which case, use an ngInjectableDef
-        // from an ancestor if there is one.
+        // This might be because it inherits from a super-class. In which case, use an injectable
+        // def from an ancestor if there is one.
         // Otherwise this really is a simple class with no dependencies, so return a factory that
         // just instantiates the zero-arg constructor.
         var inheritedInjectableDef = getInheritedInjectableDef(token);
@@ -12204,7 +12211,7 @@
         Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
         Injector.NULL = new NullInjector();
         /** @nocollapse */
-        Injector.ngInjectableDef = ɵɵdefineInjectable({
+        Injector.ɵprov = ɵɵdefineInjectable({
             token: Injector,
             providedIn: 'any',
             factory: function () { return ɵɵinject(INJECTOR); },
@@ -18872,7 +18879,7 @@
         function Sanitizer() {
         }
         /** @nocollapse */
-        Sanitizer.ngInjectableDef = ɵɵdefineInjectable({
+        Sanitizer.ɵprov = ɵɵdefineInjectable({
             token: Sanitizer,
             providedIn: 'root',
             factory: function () { return null; },
@@ -18904,7 +18911,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.11+8.sha-3e14c2d.with-local-changes');
+    var VERSION = new Version('9.0.0-next.11+10.sha-86104b8.with-local-changes');
 
     /**
      * @license
@@ -19906,7 +19913,7 @@
             }
         };
         /** @nocollapse */
-        IterableDiffers.ngInjectableDef = ɵɵdefineInjectable({
+        IterableDiffers.ɵprov = ɵɵdefineInjectable({
             token: IterableDiffers,
             providedIn: 'root',
             factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
@@ -19983,7 +19990,7 @@
             throw new Error("Cannot find a differ supporting object '" + kv + "'");
         };
         /** @nocollapse */
-        KeyValueDiffers.ngInjectableDef = ɵɵdefineInjectable({
+        KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
             token: KeyValueDiffers,
             providedIn: 'root',
             factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
@@ -24988,7 +24995,7 @@
         enqueueModuleForDelayedScoping(moduleType, ngModule);
     }
     /**
-     * Compiles and adds the `ɵmod` and `ngInjectorDef` properties to the module class.
+     * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
      *
      * It's possible to compile a module via this API which will allow duplicate declarations in its
      * root.
@@ -25027,7 +25034,7 @@
             }
         });
         var ngInjectorDef = null;
-        Object.defineProperty(moduleType, NG_INJECTOR_DEF, {
+        Object.defineProperty(moduleType, NG_INJ_DEF, {
             get: function () {
                 if (ngInjectorDef === null) {
                     ngDevMode && verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot);
@@ -25041,7 +25048,7 @@
                             (ngModule.exports || EMPTY_ARRAY$4).map(resolveForwardRef),
                         ],
                     };
-                    ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng:///" + moduleType.name + "/ngInjectorDef.js", meta);
+                    ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275inj.js", meta);
                 }
                 return ngInjectorDef;
             },
@@ -25817,7 +25824,7 @@
         if (metadata && metadata.exports) {
             imports = __spread(imports, [metadata.exports]);
         }
-        moduleType.ngInjectorDef = ɵɵdefineInjector({
+        moduleType.ɵinj = ɵɵdefineInjector({
             factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
             providers: metadata && metadata.providers,
             imports: imports,
@@ -31392,8 +31399,8 @@
     exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
     exports.ɵNG_MOD_DEF = NG_MOD_DEF;
     exports.ɵNG_BASE_DEF = NG_BASE_DEF;
-    exports.ɵNG_INJECTABLE_DEF = NG_INJECTABLE_DEF;
-    exports.ɵNG_INJECTOR_DEF = NG_INJECTOR_DEF;
+    exports.ɵNG_PROV_DEF = NG_PROV_DEF;
+    exports.ɵNG_INJ_DEF = NG_INJ_DEF;
     exports.ɵcompileNgModuleFactory__POST_R3__ = compileNgModuleFactory__POST_R3__;
     exports.ɵisBoundToModule__POST_R3__ = isBoundToModule__POST_R3__;
     exports.ɵSWITCH_COMPILE_COMPONENT__POST_R3__ = SWITCH_COMPILE_COMPONENT__POST_R3__;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+8.sha-3e14c2d.with-local-changes
+ * @license Angular v9.0.0-next.11+10.sha-86104b8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -694,7 +694,7 @@ declare interface COMMENT_MARKER {
 
 /**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
- * `ngInjectableDef` onto the injectable type.
+ * injectable def (`ɵprov`) onto the injectable type.
  */
 declare function compileInjectable(type: Type<any>, srcMeta?: Injectable): void;
 
@@ -2936,7 +2936,7 @@ export declare interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ngInjectableDef: never;
+    ɵprov: never;
 }
 
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
@@ -3040,7 +3040,7 @@ export declare enum InjectFlags {
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ngInjectableDef: never | undefined;
+    readonly ɵprov: never | undefined;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -3098,7 +3098,7 @@ export declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
 }
 
 declare const INJECTOR_2 = 10;
@@ -3114,7 +3114,7 @@ export declare interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ngInjectorDef: never;
+    ɵinj: never;
 }
 
 /**
@@ -3342,7 +3342,7 @@ export declare interface IterableDifferFactory {
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
     /**
      * @deprecated v4.0.0 - Should be private
      */
@@ -3473,7 +3473,7 @@ export declare interface KeyValueDifferFactory {
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
     /**
      * @deprecated v4.0.0 - Should be private.
      */
@@ -5815,7 +5815,7 @@ declare const SANITIZER = 13;
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
 }
 
 
@@ -9285,7 +9285,7 @@ export declare function ɵcompileDirective(type: Type<any>, directive: Directive
 export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 
 /**
- * Compiles and adds the `ɵmod` and `ngInjectorDef` properties to the module class.
+ * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -9595,10 +9595,10 @@ export declare function ɵgetDirectives(target: {}): Array<{}>;
 export declare function ɵgetHostElement<T>(directive: T): Element;
 
 /**
- * Read the `ngInjectableDef` for `type` in a way which is immune to accidentally reading inherited
- * value.
+ * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
+ * inherited value.
  *
- * @param type A type which may have its own (non-inherited) `ngInjectableDef`.
+ * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
 export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
 
@@ -9823,13 +9823,13 @@ export declare const ɵNG_DIR_DEF: string;
  */
 export declare const ɵNG_ELEMENT_ID: string;
 
-export declare const ɵNG_INJECTABLE_DEF: string;
-
-export declare const ɵNG_INJECTOR_DEF: string;
+export declare const ɵNG_INJ_DEF: string;
 
 export declare const ɵNG_MOD_DEF: string;
 
 export declare const ɵNG_PIPE_DEF: string;
+
+export declare const ɵNG_PROV_DEF: string;
 
 /**
  * Runtime link information for NgModules.
@@ -11665,7 +11665,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
  * in which injectors (if any) it will be available.
  *
- * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+ * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
  *
  * Options:
@@ -11686,7 +11686,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
- * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * This should be assigned to a static injector def (`ɵinj`) field on a type, which will then be an
  * `InjectorType`.
  *
  * Options:
@@ -11695,7 +11695,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *   create the type must be provided. If that factory function needs to inject arguments, it can
  *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
- *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
  * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
  *   whose providers will also be added to the injector. Locally provided types will override

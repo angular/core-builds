@@ -1,10 +1,10 @@
 /**
- * @license Angular v9.0.0-next.11+8.sha-3e14c2d.with-local-changes
+ * @license Angular v9.0.0-next.11+10.sha-86104b8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJECTOR_DEF, ɵNG_MOD_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -2147,7 +2147,7 @@ class R3TestBedCompiler {
         }
         this.moduleProvidersOverridden.add(moduleType);
         /** @type {?} */
-        const injectorDef = ((/** @type {?} */ (moduleType)))[ɵNG_INJECTOR_DEF];
+        const injectorDef = ((/** @type {?} */ (moduleType)))[ɵNG_INJ_DEF];
         if (this.providerOverridesByToken.size > 0) {
             // Extract the list of providers from ModuleWithProviders, so we can define the final list of
             // providers that might have overrides.
@@ -2162,8 +2162,8 @@ class R3TestBedCompiler {
             /** @type {?} */
             const providers = [...providersFromModules, ...injectorDef.providers];
             if (this.hasProviderOverrides(providers)) {
-                this.maybeStoreNgDef(ɵNG_INJECTOR_DEF, moduleType);
-                this.storeFieldOfDefOnType(moduleType, ɵNG_INJECTOR_DEF, 'providers');
+                this.maybeStoreNgDef(ɵNG_INJ_DEF, moduleType);
+                this.storeFieldOfDefOnType(moduleType, ɵNG_INJ_DEF, 'providers');
                 injectorDef.providers = this.getOverriddenProviders(providers);
             }
             // Apply provider overrides to imported modules recursively
@@ -2216,7 +2216,7 @@ class R3TestBedCompiler {
         }
         // Cache the initial ngModuleDef as it will be overwritten.
         this.maybeStoreNgDef(ɵNG_MOD_DEF, ngModule);
-        this.maybeStoreNgDef(ɵNG_INJECTOR_DEF, ngModule);
+        this.maybeStoreNgDef(ɵNG_INJ_DEF, ngModule);
         ɵcompileNgModuleDefs((/** @type {?} */ (ngModule)), metadata);
     }
     /**

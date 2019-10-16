@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+8.sha-3e14c2d.with-local-changes
+ * @license Angular v9.0.0-next.11+10.sha-86104b8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -507,7 +507,7 @@ declare enum InjectFlags {
  */
 declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ngInjectableDef: never | undefined;
+    readonly ɵprov: never | undefined;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -555,7 +555,7 @@ declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
 }
 
 /**
@@ -569,7 +569,7 @@ declare interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ngInjectorDef: never;
+    ɵinj: never;
 }
 
 /**
@@ -868,7 +868,7 @@ declare abstract class ViewRef extends ChangeDetectorRef {
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
  * in which injectors (if any) it will be available.
  *
- * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+ * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
  *
  * Options:
@@ -889,7 +889,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
- * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * This should be assigned to a static injector def (`ɵinj`) field on a type, which will then be an
  * `InjectorType`.
  *
  * Options:
@@ -898,7 +898,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *   create the type must be provided. If that factory function needs to inject arguments, it can
  *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
- *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
  * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
  *   whose providers will also be added to the injector. Locally provided types will override
