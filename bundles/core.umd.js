@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+5.sha-4c63e6b.with-local-changes
+ * @license Angular v9.0.0-next.11+8.sha-3e14c2d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8494,7 +8494,6 @@
         if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
             invokeDirectivesHostBindings(tView, lView, tNode);
         }
-        setActiveHostElement(null);
     }
     /**
      * Takes a list of local names and indices and pushes the resolved local variable values
@@ -8753,11 +8752,15 @@
         var start = tNode.directiveStart;
         var end = tNode.directiveEnd;
         var defs = tView.data;
+        var tNodeAttrs = tNode.attrs;
+        var inputsFromAttrs = ngDevMode ? new TNodeInitialInputs() : [];
         var inputsStore = null;
         var outputsStore = null;
         for (var i = start; i < end; i++) {
             var directiveDef = defs[i];
-            inputsStore = generatePropertyAliases(directiveDef.inputs, i, inputsStore);
+            var directiveInputs = directiveDef.inputs;
+            inputsFromAttrs.push(tNodeAttrs !== null ? generateInitialInputs(directiveInputs, tNodeAttrs) : null);
+            inputsStore = generatePropertyAliases(directiveInputs, i, inputsStore);
             outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
         }
         if (inputsStore !== null) {
@@ -8768,6 +8771,7 @@
                 tNode.flags |= 32 /* hasStyleInput */;
             }
         }
+        tNode.initialInputs = inputsFromAttrs;
         tNode.inputs = inputsStore;
         tNode.outputs = outputsStore;
     }
@@ -8944,7 +8948,7 @@
             return;
         var directives = findDirectiveMatches(tView, lView, tNode);
         var exportsMap = localRefs ? { '': -1 } : null;
-        if (directives) {
+        if (directives !== null) {
             initNodeFlags(tNode, tView.data.length, directives.length);
             // When the same token is provided by several directives on the same node, some rules apply in
             // the viewEngine:
@@ -8994,7 +8998,7 @@
                 addComponentLogic(lView, tNode, def);
             }
             var directive = getNodeInjectable(tView.data, lView, i, tNode);
-            postProcessDirective(lView, tNode, directive, def, i);
+            postProcessDirective(lView, tNode, directive, def, i - start);
         }
     }
     function invokeDirectivesHostBindings(tView, viewData, tNode) {
@@ -9003,7 +9007,6 @@
         var expando = tView.expandoInstructions;
         var firstTemplatePass = tView.firstTemplatePass;
         var elementIndex = tNode.index - HEADER_OFFSET;
-        var selectedIndex = getSelectedIndex();
         try {
             setActiveHostElement(elementIndex);
             for (var i = start; i < end; i++) {
@@ -9021,7 +9024,7 @@
             }
         }
         finally {
-            setActiveHostElement(selectedIndex);
+            setActiveHostElement(null);
         }
     }
     function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstTemplatePass) {
@@ -9056,7 +9059,7 @@
      */
     function postProcessDirective(lView, hostTNode, directive, def, directiveDefIdx) {
         postProcessBaseDirective(lView, hostTNode, directive);
-        if (hostTNode.attrs !== null) {
+        if (hostTNode.initialInputs !== null) {
             setInputsFromAttrs(lView, directiveDefIdx, directive, def, hostTNode);
         }
         if (isComponentDef(def)) {
@@ -9211,9 +9214,6 @@
      */
     function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode) {
         var initialInputData = tNode.initialInputs;
-        if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
-            initialInputData = generateInitialInputs(directiveIndex, def.inputs, tNode);
-        }
         var initialInputs = initialInputData[directiveIndex];
         if (initialInputs !== null) {
             var setInput = def.setInput;
@@ -9245,17 +9245,11 @@
      *
      * <my-component name="Bess"></my-component>
      *
-     * @param directiveIndex Index to store the initial input data
      * @param inputs The list of inputs from the directive def
-     * @param tNode The static data on this node
+     * @param attrs The static attrs on this node
      */
-    function generateInitialInputs(directiveIndex, inputs, tNode) {
-        var initialInputData = tNode.initialInputs || (tNode.initialInputs = ngDevMode ? new TNodeInitialInputs() : []);
-        // Ensure that we don't create sparse arrays
-        for (var i_1 = initialInputData.length; i_1 <= directiveIndex; i_1++) {
-            initialInputData.push(null);
-        }
-        var attrs = tNode.attrs;
+    function generateInitialInputs(inputs, attrs) {
+        var inputsToStore = null;
         var i = 0;
         while (i < attrs.length) {
             var attrName = attrs[i];
@@ -9272,16 +9266,14 @@
             // If we hit any other attribute markers, we're done anyway. None of those are valid inputs.
             if (typeof attrName === 'number')
                 break;
-            var minifiedInputName = inputs[attrName];
-            var attrValue = attrs[i + 1];
-            if (minifiedInputName !== undefined) {
-                var inputsToStore = initialInputData[directiveIndex] ||
-                    (initialInputData[directiveIndex] = ngDevMode ? new TNodeInitialData() : []);
-                inputsToStore.push(attrName, minifiedInputName, attrValue);
+            if (inputs.hasOwnProperty(attrName)) {
+                if (inputsToStore === null)
+                    inputsToStore = [];
+                inputsToStore.push(attrName, inputs[attrName], attrs[i + 1]);
             }
             i += 2;
         }
-        return initialInputData;
+        return inputsToStore;
     }
     //////////////////////////
     //// ViewContainer & View
@@ -18912,7 +18904,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.11+5.sha-4c63e6b.with-local-changes');
+    var VERSION = new Version('9.0.0-next.11+8.sha-3e14c2d.with-local-changes');
 
     /**
      * @license
@@ -26338,6 +26330,31 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function getNativeRequestAnimationFrame() {
+        var nativeRequestAnimationFrame = _global['requestAnimationFrame'];
+        var nativeCancelAnimationFrame = _global['cancelAnimationFrame'];
+        if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+            // use unpatched version of requestAnimationFrame(native delegate) if possible
+            // to avoid another Change detection
+            var unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+            if (unpatchedRequestAnimationFrame) {
+                nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+            }
+            var unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+            if (unpatchedCancelAnimationFrame) {
+                nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
+            }
+        }
+        return { nativeRequestAnimationFrame: nativeRequestAnimationFrame, nativeCancelAnimationFrame: nativeCancelAnimationFrame };
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * An injectable service for executing work inside or outside of the Angular zone.
      *
@@ -26414,9 +26431,12 @@
      */
     var NgZone = /** @class */ (function () {
         function NgZone(_a) {
-            var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;
-            this.hasPendingMicrotasks = false;
+            var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b, _c = _a.shouldCoalesceEventChangeDetection, shouldCoalesceEventChangeDetection = _c === void 0 ? false : _c;
+            this.hasPendingZoneMicrotasks = false;
+            this.lastRequestAnimationFrameId = -1;
+            this.shouldCoalesceEventChangeDetection = true;
             this.hasPendingMacrotasks = false;
+            this.hasPendingMicrotasks = false;
             /**
              * Whether there are no outstanding microtasks or macrotasks.
              */
@@ -26457,6 +26477,7 @@
             if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
                 self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
             }
+            self.shouldCoalesceEventChangeDetection = shouldCoalesceEventChangeDetection;
             forkInnerZoneWithAngularBehavior(self);
         }
         NgZone.isInAngularZone = function () { return Zone.current.get('isAngularZone') === true; };
@@ -26534,6 +26555,7 @@
     }());
     function noop$1() { }
     var EMPTY_PAYLOAD = {};
+    var nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
     function checkStable(zone) {
         if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
             try {
@@ -26553,16 +26575,33 @@
             }
         }
     }
+    function delayChangeDetectionForEvents(zone) {
+        if (zone.lastRequestAnimationFrameId !== -1) {
+            return;
+        }
+        zone.lastRequestAnimationFrameId = nativeRequestAnimationFrame.call(_global, function () {
+            zone.lastRequestAnimationFrameId = -1;
+            updateMicroTaskStatus(zone);
+            checkStable(zone);
+        });
+        updateMicroTaskStatus(zone);
+    }
     function forkInnerZoneWithAngularBehavior(zone) {
+        var delayChangeDetectionForEventsDelegate = function () { delayChangeDetectionForEvents(zone); };
+        var maybeDelayChangeDetection = !!zone.shouldCoalesceEventChangeDetection &&
+            nativeRequestAnimationFrame && delayChangeDetectionForEventsDelegate;
         zone._inner = zone._inner.fork({
             name: 'angular',
-            properties: { 'isAngularZone': true },
+            properties: { 'isAngularZone': true, 'maybeDelayChangeDetection': maybeDelayChangeDetection },
             onInvokeTask: function (delegate, current, target, task, applyThis, applyArgs) {
                 try {
                     onEnter(zone);
                     return delegate.invokeTask(target, task, applyThis, applyArgs);
                 }
                 finally {
+                    if (maybeDelayChangeDetection && task.type === 'eventTask') {
+                        maybeDelayChangeDetection();
+                    }
                     onLeave(zone);
                 }
             },
@@ -26581,7 +26620,8 @@
                     // We are only interested in hasTask events which originate from our zone
                     // (A child hasTask event is not interesting to us)
                     if (hasTaskState.change == 'microTask') {
-                        zone.hasPendingMicrotasks = hasTaskState.microTask;
+                        zone._hasPendingMicrotasks = hasTaskState.microTask;
+                        updateMicroTaskStatus(zone);
                         checkStable(zone);
                     }
                     else if (hasTaskState.change == 'macroTask') {
@@ -26595,6 +26635,15 @@
                 return false;
             }
         });
+    }
+    function updateMicroTaskStatus(zone) {
+        if (zone._hasPendingMicrotasks ||
+            (zone.shouldCoalesceEventChangeDetection && zone.lastRequestAnimationFrameId !== -1)) {
+            zone.hasPendingMicrotasks = true;
+        }
+        else {
+            zone.hasPendingMicrotasks = false;
+        }
     }
     function onEnter(zone) {
         zone._nesting++;
@@ -26613,6 +26662,8 @@
      */
     var NoopNgZone = /** @class */ (function () {
         function NoopNgZone() {
+            this.hasPendingZoneMicrotasks = false;
+            this.lastRequestAnimationFrameId = -1;
             this.hasPendingMicrotasks = false;
             this.hasPendingMacrotasks = false;
             this.isStable = true;
@@ -26620,6 +26671,7 @@
             this.onMicrotaskEmpty = new EventEmitter();
             this.onStable = new EventEmitter();
             this.onError = new EventEmitter();
+            this.shouldCoalesceEventChangeDetection = false;
         }
         NoopNgZone.prototype.run = function (fn, applyThis, applyArgs) {
             return fn.apply(applyThis, applyArgs);
@@ -27073,7 +27125,8 @@
             // So we create a mini parent injector that just contains the new NgZone and
             // pass that as parent to the NgModuleFactory.
             var ngZoneOption = options ? options.ngZone : undefined;
-            var ngZone = getNgZone(ngZoneOption);
+            var ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
+            var ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
             var providers = [{ provide: NgZone, useValue: ngZone }];
             // Attention: Don't use ApplicationRef.run here,
             // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
@@ -27173,14 +27226,16 @@
         ], PlatformRef);
         return PlatformRef;
     }());
-    function getNgZone(ngZoneOption) {
+    function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
         var ngZone;
         if (ngZoneOption === 'noop') {
             ngZone = new NoopNgZone();
         }
         else {
-            ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) ||
-                new NgZone({ enableLongStackTrace: isDevMode() });
+            ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) || new NgZone({
+                enableLongStackTrace: isDevMode(),
+                shouldCoalesceEventChangeDetection: ngZoneEventCoalescing
+            });
         }
         return ngZone;
     }
