@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+43.sha-9d54679.with-local-changes
+ * @license Angular v9.0.0-next.11+44.sha-f45c431.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6196,8 +6196,11 @@ declare const enum StyleSanitizeMode {
  * of the key/value array that was used to populate the property/
  * value entries that take place in the remainder of the array.
  */
-declare interface StylingMapArray extends Array<{} | string | number | null> {
-    [StylingMapArrayIndex.RawValuePosition]: {} | string | null;
+declare interface StylingMapArray extends Array<{} | string | number | null | undefined> {
+    /**
+     * The last raw value used to generate the entries in the map.
+     */
+    [StylingMapArrayIndex.RawValuePosition]: {} | string | number | null | undefined;
 }
 
 /**
