@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+39.sha-bb53b65.with-local-changes
+ * @license Angular v9.0.0-next.11+41.sha-1a8bd22.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -502,7 +502,7 @@ var NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
 var NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
 var NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
 var NG_MOD_DEF = getClosureSafeProperty({ ɵmod: getClosureSafeProperty });
-var NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
+var NG_LOC_ID_DEF = getClosureSafeProperty({ ɵloc: getClosureSafeProperty });
 var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
 var NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
 /**
@@ -1564,7 +1564,7 @@ function getNgModuleDef(type, throwNotFound) {
     return ngModuleDef;
 }
 function getNgLocaleIdDef(type) {
-    return type[NG_LOCALE_ID_DEF] || null;
+    return type[NG_LOC_ID_DEF] || null;
 }
 
 /**
@@ -18799,7 +18799,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.11+39.sha-bb53b65.with-local-changes');
+var VERSION = new Version('9.0.0-next.11+41.sha-1a8bd22.with-local-changes');
 
 /**
  * @license

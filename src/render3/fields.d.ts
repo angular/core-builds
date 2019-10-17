@@ -9,7 +9,7 @@ export declare const NG_COMP_DEF: string;
 export declare const NG_DIR_DEF: string;
 export declare const NG_PIPE_DEF: string;
 export declare const NG_MOD_DEF: string;
-export declare const NG_LOCALE_ID_DEF: string;
+export declare const NG_LOC_ID_DEF: string;
 export declare const NG_BASE_DEF: string;
 export declare const NG_FACTORY_DEF: string;
 /**
