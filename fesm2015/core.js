@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+38.sha-43487f6.with-local-changes
+ * @license Angular v9.0.0-next.11+40.sha-78214e7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2919,72 +2919,190 @@ function typeName(type) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * Store the element depth count. This is used to identify the root elements of the template
- * so that we can than attach `LView` to only those elements.
- * @type {?}
+ * All implicit instruction state is stored here.
+ *
+ * It is useful to have a single object where all of the state is stored as a mental model
+ * (rather it being spread across many different variables.)
+ *
+ * PERF NOTE: Turns out that writing to a true global variable is slower than
+ * having an intermediate object with properties.
+ * @record
  */
-let elementDepthCount;
+function InstructionState() { }
+if (false) {
+    /**
+     * State of the current view being processed.
+     *
+     * An array of nodes (text, element, container, etc), pipes, their bindings, and
+     * any local variables that need to be stored between invocations.
+     * @type {?}
+     */
+    InstructionState.prototype.lView;
+    /**
+     * Used to set the parent property when nodes are created and track query results.
+     *
+     * This is used in conjection with `isParent`.
+     * @type {?}
+     */
+    InstructionState.prototype.previousOrParentTNode;
+    /**
+     * If `isParent` is:
+     *  - `true`: then `previousOrParentTNode` points to a parent node.
+     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
+     * @type {?}
+     */
+    InstructionState.prototype.isParent;
+    /**
+     * Index of currently selected element in LView.
+     *
+     * Used by binding instructions. Updated as part of advance instruction.
+     * @type {?}
+     */
+    InstructionState.prototype.selectedIndex;
+    /**
+     * The last viewData retrieved by nextContext().
+     * Allows building nextContext() and reference() calls.
+     *
+     * e.g. const inner = x().$implicit; const outer = x().$implicit;
+     * @type {?}
+     */
+    InstructionState.prototype.contextLView;
+    /**
+     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
+     *
+     * Necessary to support ChangeDetectorRef.checkNoChanges().
+     * @type {?}
+     */
+    InstructionState.prototype.checkNoChangesMode;
+    /**
+     * Store the element depth count. This is used to identify the root elements of the template
+     * so that we can then attach `LView` to only those elements.
+     * @type {?}
+     */
+    InstructionState.prototype.elementDepthCount;
+    /**
+     * Stores whether directives should be matched to elements.
+     *
+     * When template contains `ngNonBindable` then we need to prevent the runtime form matching
+     * directives on children of that element.
+     *
+     * Example:
+     * ```
+     * <my-comp my-directive>
+     *   Should match component / directive.
+     * </my-comp>
+     * <div ngNonBindable>
+     *   <my-comp my-directive>
+     *     Should not match component / directive because we are in ngNonBindable.
+     *   </my-comp>
+     * </div>
+     * ```
+     * @type {?}
+     */
+    InstructionState.prototype.bindingsEnabled;
+    /**
+     * Current namespace to be used when creating elements
+     * @type {?}
+     */
+    InstructionState.prototype.currentNamespace;
+    /**
+     * Current sanitizer
+     * @type {?}
+     */
+    InstructionState.prototype.currentSanitizer;
+    /**
+     * Used when processing host bindings.
+     * @type {?}
+     */
+    InstructionState.prototype.currentDirectiveDef;
+    /**
+     * Used as the starting directive id value.
+     *
+     * All subsequent directives are incremented from this value onwards.
+     * The reason why this value is `1` instead of `0` is because the `0`
+     * value is reserved for the template.
+     * @type {?}
+     */
+    InstructionState.prototype.activeDirectiveId;
+    /**
+     * The root index from which pure function instructions should calculate their binding
+     * indices. In component views, this is TView.bindingStartIndex. In a host binding
+     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
+     * @type {?}
+     */
+    InstructionState.prototype.bindingRootIndex;
+    /**
+     * Current index of a View or Content Query which needs to be processed next.
+     * We iterate over the list of Queries and increment current query index at every step.
+     * @type {?}
+     */
+    InstructionState.prototype.currentQueryIndex;
+    /**
+     * Function to be called when the element is exited.
+     *
+     * NOTE: The function is here for tree shakable purposes since it is only needed by styling.
+     * @type {?}
+     */
+    InstructionState.prototype.elementExitFn;
+}
+/** @type {?} */
+const instructionState = {
+    previousOrParentTNode: (/** @type {?} */ (null)),
+    isParent: (/** @type {?} */ (null)),
+    lView: (/** @type {?} */ (null)),
+    // tslint:disable-next-line: no-toplevel-property-access
+    selectedIndex: -1 << 1 /* Size */,
+    contextLView: (/** @type {?} */ (null)),
+    checkNoChangesMode: false,
+    elementDepthCount: 0,
+    bindingsEnabled: true,
+    currentNamespace: null,
+    currentSanitizer: null,
+    currentDirectiveDef: null,
+    activeDirectiveId: 0,
+    bindingRootIndex: -1,
+    currentQueryIndex: 0,
+    elementExitFn: null,
+};
 /**
  * @return {?}
  */
 function getElementDepthCount() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return elementDepthCount;
+    return instructionState.elementDepthCount;
 }
 /**
  * @return {?}
  */
 function increaseElementDepthCount() {
-    elementDepthCount++;
+    instructionState.elementDepthCount++;
 }
 /**
  * @return {?}
  */
 function decreaseElementDepthCount() {
-    elementDepthCount--;
+    instructionState.elementDepthCount--;
 }
-/** @type {?} */
-let currentDirectiveDef = null;
 /**
  * @return {?}
  */
 function getCurrentDirectiveDef() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentDirectiveDef;
+    return instructionState.currentDirectiveDef;
 }
 /**
  * @param {?} def
  * @return {?}
  */
 function setCurrentDirectiveDef(def) {
-    currentDirectiveDef = def;
+    instructionState.currentDirectiveDef = def;
 }
-/**
- * Stores whether directives should be matched to elements.
- *
- * When template contains `ngNonBindable` than we need to prevent the runtime form matching
- * directives on children of that element.
- *
- * Example:
- * ```
- * <my-comp my-directive>
- *   Should match component / directive.
- * </my-comp>
- * <div ngNonBindable>
- *   <my-comp my-directive>
- *     Should not match component / directive because we are in ngNonBindable.
- *   </my-comp>
- * </div>
- * ```
- * @type {?}
- */
-let bindingsEnabled;
 /**
  * @return {?}
  */
 function getBindingsEnabled() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return bindingsEnabled;
+    return instructionState.bindingsEnabled;
 }
 /**
  * Enables directive matching on elements.
@@ -3007,7 +3125,7 @@ function getBindingsEnabled() {
  * @return {?}
  */
 function ɵɵenableBindings() {
-    bindingsEnabled = true;
+    instructionState.bindingsEnabled = true;
 }
 /**
  * Disables directive matching on element.
@@ -3030,23 +3148,14 @@ function ɵɵenableBindings() {
  * @return {?}
  */
 function ɵɵdisableBindings() {
-    bindingsEnabled = false;
+    instructionState.bindingsEnabled = false;
 }
 /**
  * @return {?}
  */
 function getLView() {
-    return lView;
+    return instructionState.lView;
 }
-/**
- * Used as the starting directive id value.
- *
- * All subsequent directives are incremented from this value onwards.
- * The reason why this value is `1` instead of `0` is because the `0`
- * value is reserved for the template.
- * @type {?}
- */
-let activeDirectiveId = 0;
 /** @enum {number} */
 const ActiveElementFlags = {
     Initial: 0,
@@ -3059,7 +3168,7 @@ const ActiveElementFlags = {
  * @return {?}
  */
 function hasActiveElementFlag(flag) {
-    return (_selectedIndex & flag) === flag;
+    return (instructionState.selectedIndex & flag) === flag;
 }
 /**
  * Sets a flag is for the active element.
@@ -3067,7 +3176,7 @@ function hasActiveElementFlag(flag) {
  * @return {?}
  */
 function setActiveElementFlag(flag) {
-    _selectedIndex |= flag;
+    instructionState.selectedIndex |= flag;
 }
 /**
  * Sets the active directive host element and resets the directive id value
@@ -3083,19 +3192,17 @@ function setActiveHostElement(elementIndex = null) {
             executeElementExitFn();
         }
         setSelectedIndex(elementIndex === null ? -1 : elementIndex);
-        activeDirectiveId = 0;
+        instructionState.activeDirectiveId = 0;
     }
 }
-/** @type {?} */
-let _elementExitFn = null;
 /**
  * @return {?}
  */
 function executeElementExitFn() {
-    (/** @type {?} */ (_elementExitFn))();
+    (/** @type {?} */ (instructionState.elementExitFn))();
     // TODO (matsko|misko): remove this unassignment once the state management of
     //                      global variables are better managed.
-    _selectedIndex &= ~1 /* RunExitFn */;
+    instructionState.selectedIndex &= ~1 /* RunExitFn */;
 }
 /**
  * Queues a function to be run once the element is "exited" in CD.
@@ -3113,7 +3220,11 @@ function executeElementExitFn() {
  */
 function setElementExitFn(fn) {
     setActiveElementFlag(1 /* RunExitFn */);
-    _elementExitFn = fn;
+    if (instructionState.elementExitFn == null) {
+        instructionState.elementExitFn = fn;
+    }
+    ngDevMode &&
+        assertEqual(instructionState.elementExitFn, fn, 'Expecting to always get the same function');
 }
 /**
  * Returns the current id value of the current directive.
@@ -3132,7 +3243,7 @@ function setElementExitFn(fn) {
  * @return {?}
  */
 function getActiveDirectiveId() {
-    return activeDirectiveId;
+    return instructionState.activeDirectiveId;
 }
 /**
  * Increments the current directive id value.
@@ -3161,7 +3272,7 @@ function incrementActiveDirectiveId() {
     // directive uniqueId is not set anywhere--it is just incremented between
     // each hostBindings call and is useful for helping instruction code
     // uniquely determine which directive is currently active when executed.
-    activeDirectiveId += 1;
+    instructionState.activeDirectiveId += 1;
 }
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -3176,19 +3287,14 @@ function incrementActiveDirectiveId() {
  * @return {?}
  */
 function ɵɵrestoreView(viewToRestore) {
-    contextLView = (/** @type {?} */ ((/** @type {?} */ (viewToRestore))));
+    instructionState.contextLView = (/** @type {?} */ ((/** @type {?} */ (viewToRestore))));
 }
-/**
- * Used to set the parent property when nodes are created and track query results.
- * @type {?}
- */
-let previousOrParentTNode;
 /**
  * @return {?}
  */
 function getPreviousOrParentTNode() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return previousOrParentTNode;
+    return instructionState.previousOrParentTNode;
 }
 /**
  * @param {?} tNode
@@ -3196,8 +3302,8 @@ function getPreviousOrParentTNode() {
  * @return {?}
  */
 function setPreviousOrParentTNode(tNode, _isParent) {
-    previousOrParentTNode = tNode;
-    isParent = _isParent;
+    instructionState.previousOrParentTNode = tNode;
+    instructionState.isParent = _isParent;
 }
 /**
  * @param {?} tNode
@@ -3206,119 +3312,76 @@ function setPreviousOrParentTNode(tNode, _isParent) {
  */
 function setTNodeAndViewData(tNode, view) {
     ngDevMode && assertLViewOrUndefined(view);
-    previousOrParentTNode = tNode;
-    lView = view;
+    instructionState.previousOrParentTNode = tNode;
+    instructionState.lView = view;
 }
-/**
- * If `isParent` is:
- *  - `true`: then `previousOrParentTNode` points to a parent node.
- *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
- * @type {?}
- */
-let isParent;
 /**
  * @return {?}
  */
 function getIsParent() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return isParent;
+    return instructionState.isParent;
 }
 /**
  * @return {?}
  */
 function setIsNotParent() {
-    isParent = false;
+    instructionState.isParent = false;
 }
 /**
  * @return {?}
  */
 function setIsParent() {
-    isParent = true;
+    instructionState.isParent = true;
 }
-/**
- * State of the current view being processed.
- *
- * An array of nodes (text, element, container, etc), pipes, their bindings, and
- * any local variables that need to be stored between invocations.
- * @type {?}
- */
-let lView;
-/**
- * The last viewData retrieved by nextContext().
- * Allows building nextContext() and reference() calls.
- *
- * e.g. const inner = x().$implicit; const outer = x().$implicit;
- * @type {?}
- */
-let contextLView = (/** @type {?} */ (null));
 /**
  * @return {?}
  */
 function getContextLView() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return contextLView;
+    return instructionState.contextLView;
 }
-/**
- * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
- *
- * Necessary to support ChangeDetectorRef.checkNoChanges().
- * @type {?}
- */
-let checkNoChangesMode = false;
 /**
  * @return {?}
  */
 function getCheckNoChangesMode() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return checkNoChangesMode;
+    return instructionState.checkNoChangesMode;
 }
 /**
  * @param {?} mode
  * @return {?}
  */
 function setCheckNoChangesMode(mode) {
-    checkNoChangesMode = mode;
+    instructionState.checkNoChangesMode = mode;
 }
-/**
- * The root index from which pure function instructions should calculate their binding
- * indices. In component views, this is TView.bindingStartIndex. In a host binding
- * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
- * @type {?}
- */
-let bindingRootIndex = -1;
 // top level variables should not be exported for performance reasons (PERF_NOTES.md)
 /**
  * @return {?}
  */
 function getBindingRoot() {
-    return bindingRootIndex;
+    return instructionState.bindingRootIndex;
 }
 /**
  * @param {?} value
  * @return {?}
  */
 function setBindingRoot(value) {
-    bindingRootIndex = value;
+    instructionState.bindingRootIndex = value;
 }
-/**
- * Current index of a View or Content Query which needs to be processed next.
- * We iterate over the list of Queries and increment current query index at every step.
- * @type {?}
- */
-let currentQueryIndex = 0;
 /**
  * @return {?}
  */
 function getCurrentQueryIndex() {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentQueryIndex;
+    return instructionState.currentQueryIndex;
 }
 /**
  * @param {?} value
  * @return {?}
  */
 function setCurrentQueryIndex(value) {
-    currentQueryIndex = value;
+    instructionState.currentQueryIndex = value;
 }
 /**
  * Swap the current lView with a new lView.
@@ -3338,10 +3401,10 @@ function selectView(newView, hostTNode) {
     }
     ngDevMode && assertLViewOrUndefined(newView);
     /** @type {?} */
-    const oldView = lView;
-    previousOrParentTNode = (/** @type {?} */ (hostTNode));
-    isParent = true;
-    lView = contextLView = newView;
+    const oldView = instructionState.lView;
+    instructionState.previousOrParentTNode = (/** @type {?} */ (hostTNode));
+    instructionState.isParent = true;
+    instructionState.lView = instructionState.contextLView = newView;
     return oldView;
 }
 /**
@@ -3350,8 +3413,8 @@ function selectView(newView, hostTNode) {
  * @return {?}
  */
 function nextContextImpl(level = 1) {
-    contextLView = walkUpViews(level, (/** @type {?} */ (contextLView)));
-    return (/** @type {?} */ (contextLView[CONTEXT]));
+    instructionState.contextLView = walkUpViews(level, (/** @type {?} */ (instructionState.contextLView)));
+    return (/** @type {?} */ (instructionState.contextLView[CONTEXT]));
 }
 /**
  * @param {?} nestingLevel
@@ -3371,15 +3434,12 @@ function walkUpViews(nestingLevel, currentView) {
  * @return {?}
  */
 function resetComponentState() {
-    isParent = false;
-    previousOrParentTNode = (/** @type {?} */ (null));
-    elementDepthCount = 0;
-    bindingsEnabled = true;
+    instructionState.isParent = false;
+    instructionState.previousOrParentTNode = (/** @type {?} */ (null));
+    instructionState.elementDepthCount = 0;
+    instructionState.bindingsEnabled = true;
     setCurrentStyleSanitizer(null);
 }
-/* tslint:disable */
-/** @type {?} */
-let _selectedIndex = -1 << 1 /* Size */;
 /**
  * Gets the most recent index passed to {\@link select}
  *
@@ -3388,7 +3448,7 @@ let _selectedIndex = -1 << 1 /* Size */;
  * @return {?}
  */
 function getSelectedIndex() {
-    return _selectedIndex >> 1 /* Size */;
+    return instructionState.selectedIndex >> 1 /* Size */;
 }
 /**
  * Sets the most recent index passed to {\@link select}
@@ -3402,10 +3462,8 @@ function getSelectedIndex() {
  * @return {?}
  */
 function setSelectedIndex(index) {
-    _selectedIndex = index << 1 /* Size */;
+    instructionState.selectedIndex = index << 1 /* Size */;
 }
-/** @type {?} */
-let _currentNamespace = null;
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
  *
@@ -3413,7 +3471,7 @@ let _currentNamespace = null;
  * @return {?}
  */
 function ɵɵnamespaceSVG() {
-    _currentNamespace = 'http://www.w3.org/2000/svg';
+    instructionState.currentNamespace = 'http://www.w3.org/2000/svg';
 }
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
@@ -3422,7 +3480,7 @@ function ɵɵnamespaceSVG() {
  * @return {?}
  */
 function ɵɵnamespaceMathML() {
-    _currentNamespace = 'http://www.w3.org/1998/MathML/';
+    instructionState.currentNamespace = 'http://www.w3.org/1998/MathML/';
 }
 /**
  * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -3440,22 +3498,20 @@ function ɵɵnamespaceHTML() {
  * @return {?}
  */
 function namespaceHTMLInternal() {
-    _currentNamespace = null;
+    instructionState.currentNamespace = null;
 }
 /**
  * @return {?}
  */
 function getNamespace() {
-    return _currentNamespace;
+    return instructionState.currentNamespace;
 }
-/** @type {?} */
-let _currentSanitizer;
 /**
  * @param {?} sanitizer
  * @return {?}
  */
 function setCurrentStyleSanitizer(sanitizer) {
-    _currentSanitizer = sanitizer;
+    instructionState.currentSanitizer = sanitizer;
 }
 /**
  * @return {?}
@@ -3467,7 +3523,7 @@ function resetCurrentStyleSanitizer() {
  * @return {?}
  */
 function getCurrentStyleSanitizer() {
-    return _currentSanitizer;
+    return instructionState.currentSanitizer;
 }
 
 /**
@@ -21693,7 +21749,7 @@ function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
             // it's important we remove the current style sanitizer once the
             // element exits, otherwise it will be used by the next styling
             // instructions for the next element.
-            setElementExitFn(resetCurrentStyleSanitizer);
+            setElementExitFn(stylingApply);
         }
     }
     else {
@@ -21874,7 +21930,7 @@ function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
             // it's important we remove the current style sanitizer once the
             // element exits, otherwise it will be used by the next styling
             // instructions for the next element.
-            setElementExitFn(resetCurrentStyleSanitizer);
+            setElementExitFn(stylingApply);
         }
     }
     else {
@@ -27387,7 +27443,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.11+38.sha-43487f6.with-local-changes');
+const VERSION = new Version('9.0.0-next.11+40.sha-78214e7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

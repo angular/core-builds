@@ -9,6 +9,117 @@ import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { ComponentDef, DirectiveDef } from './interfaces/definition';
 import { TElementNode, TNode, TViewNode } from './interfaces/node';
 import { LView, OpaqueViewState } from './interfaces/view';
+/**
+ * All implicit instruction state is stored here.
+ *
+ * It is useful to have a single object where all of the state is stored as a mental model
+ * (rather it being spread across many different variables.)
+ *
+ * PERF NOTE: Turns out that writing to a true global variable is slower than
+ * having an intermediate object with properties.
+ */
+interface InstructionState {
+    /**
+     * State of the current view being processed.
+     *
+     * An array of nodes (text, element, container, etc), pipes, their bindings, and
+     * any local variables that need to be stored between invocations.
+     */
+    lView: LView;
+    /**
+     * Used to set the parent property when nodes are created and track query results.
+     *
+     * This is used in conjection with `isParent`.
+     */
+    previousOrParentTNode: TNode;
+    /**
+     * If `isParent` is:
+     *  - `true`: then `previousOrParentTNode` points to a parent node.
+     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
+     */
+    isParent: boolean;
+    /**
+     * Index of currently selected element in LView.
+     *
+     * Used by binding instructions. Updated as part of advance instruction.
+     */
+    selectedIndex: number;
+    /**
+     * The last viewData retrieved by nextContext().
+     * Allows building nextContext() and reference() calls.
+     *
+     * e.g. const inner = x().$implicit; const outer = x().$implicit;
+     */
+    contextLView: LView;
+    /**
+     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
+     *
+     * Necessary to support ChangeDetectorRef.checkNoChanges().
+     */
+    checkNoChangesMode: boolean;
+    /**
+     * Store the element depth count. This is used to identify the root elements of the template
+     * so that we can then attach `LView` to only those elements.
+     */
+    elementDepthCount: number;
+    /**
+     * Stores whether directives should be matched to elements.
+     *
+     * When template contains `ngNonBindable` then we need to prevent the runtime form matching
+     * directives on children of that element.
+     *
+     * Example:
+     * ```
+     * <my-comp my-directive>
+     *   Should match component / directive.
+     * </my-comp>
+     * <div ngNonBindable>
+     *   <my-comp my-directive>
+     *     Should not match component / directive because we are in ngNonBindable.
+     *   </my-comp>
+     * </div>
+     * ```
+     */
+    bindingsEnabled: boolean;
+    /**
+     * Current namespace to be used when creating elements
+     */
+    currentNamespace: string | null;
+    /**
+     * Current sanitizer
+     */
+    currentSanitizer: StyleSanitizeFn | null;
+    /**
+     * Used when processing host bindings.
+     */
+    currentDirectiveDef: DirectiveDef<any> | ComponentDef<any> | null;
+    /**
+     * Used as the starting directive id value.
+     *
+     * All subsequent directives are incremented from this value onwards.
+     * The reason why this value is `1` instead of `0` is because the `0`
+     * value is reserved for the template.
+     */
+    activeDirectiveId: number;
+    /**
+     * The root index from which pure function instructions should calculate their binding
+     * indices. In component views, this is TView.bindingStartIndex. In a host binding
+     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
+     */
+    bindingRootIndex: number;
+    /**
+     * Current index of a View or Content Query which needs to be processed next.
+     * We iterate over the list of Queries and increment current query index at every step.
+     */
+    currentQueryIndex: number;
+    /**
+     * Function to be called when the element is exited.
+     *
+     * NOTE: The function is here for tree shakable purposes since it is only needed by styling.
+     */
+    elementExitFn: (() => void) | null;
+}
+export declare const instructionState: InstructionState;
 export declare function getElementDepthCount(): number;
 export declare function increaseElementDepthCount(): void;
 export declare function decreaseElementDepthCount(): void;
@@ -101,7 +212,7 @@ export declare function executeElementExitFn(): void;
  *
  * @param fn
  */
-export declare function setElementExitFn(fn: Function): void;
+export declare function setElementExitFn(fn: () => void): void;
 /**
  * Returns the current id value of the current directive.
  *
@@ -227,3 +338,4 @@ export declare function getNamespace(): string | null;
 export declare function setCurrentStyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 export declare function resetCurrentStyleSanitizer(): void;
 export declare function getCurrentStyleSanitizer(): StyleSanitizeFn | null;
+export {};

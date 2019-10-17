@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+38.sha-43487f6.with-local-changes
+ * @license Angular v9.0.0-next.11+40.sha-78214e7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2062,51 +2062,44 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Store the element depth count. This is used to identify the root elements of the template
-     * so that we can than attach `LView` to only those elements.
-     */
-    var elementDepthCount;
+    var instructionState = {
+        previousOrParentTNode: null,
+        isParent: null,
+        lView: null,
+        // tslint:disable-next-line: no-toplevel-property-access
+        selectedIndex: -1 << 1 /* Size */,
+        contextLView: null,
+        checkNoChangesMode: false,
+        elementDepthCount: 0,
+        bindingsEnabled: true,
+        currentNamespace: null,
+        currentSanitizer: null,
+        currentDirectiveDef: null,
+        activeDirectiveId: 0,
+        bindingRootIndex: -1,
+        currentQueryIndex: 0,
+        elementExitFn: null,
+    };
     function getElementDepthCount() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return elementDepthCount;
+        return instructionState.elementDepthCount;
     }
     function increaseElementDepthCount() {
-        elementDepthCount++;
+        instructionState.elementDepthCount++;
     }
     function decreaseElementDepthCount() {
-        elementDepthCount--;
+        instructionState.elementDepthCount--;
     }
-    var currentDirectiveDef = null;
     function getCurrentDirectiveDef() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return currentDirectiveDef;
+        return instructionState.currentDirectiveDef;
     }
     function setCurrentDirectiveDef(def) {
-        currentDirectiveDef = def;
+        instructionState.currentDirectiveDef = def;
     }
-    /**
-     * Stores whether directives should be matched to elements.
-     *
-     * When template contains `ngNonBindable` than we need to prevent the runtime form matching
-     * directives on children of that element.
-     *
-     * Example:
-     * ```
-     * <my-comp my-directive>
-     *   Should match component / directive.
-     * </my-comp>
-     * <div ngNonBindable>
-     *   <my-comp my-directive>
-     *     Should not match component / directive because we are in ngNonBindable.
-     *   </my-comp>
-     * </div>
-     * ```
-     */
-    var bindingsEnabled;
     function getBindingsEnabled() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return bindingsEnabled;
+        return instructionState.bindingsEnabled;
     }
     /**
      * Enables directive matching on elements.
@@ -2128,7 +2121,7 @@
      * @codeGenApi
      */
     function ɵɵenableBindings() {
-        bindingsEnabled = true;
+        instructionState.bindingsEnabled = true;
     }
     /**
      * Disables directive matching on element.
@@ -2150,30 +2143,22 @@
      * @codeGenApi
      */
     function ɵɵdisableBindings() {
-        bindingsEnabled = false;
+        instructionState.bindingsEnabled = false;
     }
     function getLView() {
-        return lView;
+        return instructionState.lView;
     }
-    /**
-     * Used as the starting directive id value.
-     *
-     * All subsequent directives are incremented from this value onwards.
-     * The reason why this value is `1` instead of `0` is because the `0`
-     * value is reserved for the template.
-     */
-    var activeDirectiveId = 0;
     /**
      * Determines whether or not a flag is currently set for the active element.
      */
     function hasActiveElementFlag(flag) {
-        return (_selectedIndex & flag) === flag;
+        return (instructionState.selectedIndex & flag) === flag;
     }
     /**
      * Sets a flag is for the active element.
      */
     function setActiveElementFlag(flag) {
-        _selectedIndex |= flag;
+        instructionState.selectedIndex |= flag;
     }
     /**
      * Sets the active directive host element and resets the directive id value
@@ -2189,15 +2174,14 @@
                 executeElementExitFn();
             }
             setSelectedIndex(elementIndex === null ? -1 : elementIndex);
-            activeDirectiveId = 0;
+            instructionState.activeDirectiveId = 0;
         }
     }
-    var _elementExitFn = null;
     function executeElementExitFn() {
-        _elementExitFn();
+        instructionState.elementExitFn();
         // TODO (matsko|misko): remove this unassignment once the state management of
         //                      global variables are better managed.
-        _selectedIndex &= ~1 /* RunExitFn */;
+        instructionState.selectedIndex &= ~1 /* RunExitFn */;
     }
     /**
      * Queues a function to be run once the element is "exited" in CD.
@@ -2214,7 +2198,11 @@
      */
     function setElementExitFn(fn) {
         setActiveElementFlag(1 /* RunExitFn */);
-        _elementExitFn = fn;
+        if (instructionState.elementExitFn == null) {
+            instructionState.elementExitFn = fn;
+        }
+        ngDevMode &&
+            assertEqual(instructionState.elementExitFn, fn, 'Expecting to always get the same function');
     }
     /**
      * Returns the current id value of the current directive.
@@ -2232,7 +2220,7 @@
      * different set of directives).
      */
     function getActiveDirectiveId() {
-        return activeDirectiveId;
+        return instructionState.activeDirectiveId;
     }
     /**
      * Increments the current directive id value.
@@ -2260,7 +2248,7 @@
         // directive uniqueId is not set anywhere--it is just incremented between
         // each hostBindings call and is useful for helping instruction code
         // uniquely determine which directive is currently active when executed.
-        activeDirectiveId += 1;
+        instructionState.activeDirectiveId += 1;
     }
     /**
      * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -2274,94 +2262,55 @@
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
-        contextLView = viewToRestore;
+        instructionState.contextLView = viewToRestore;
     }
-    /** Used to set the parent property when nodes are created and track query results. */
-    var previousOrParentTNode;
     function getPreviousOrParentTNode() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return previousOrParentTNode;
+        return instructionState.previousOrParentTNode;
     }
     function setPreviousOrParentTNode(tNode, _isParent) {
-        previousOrParentTNode = tNode;
-        isParent = _isParent;
+        instructionState.previousOrParentTNode = tNode;
+        instructionState.isParent = _isParent;
     }
     function setTNodeAndViewData(tNode, view) {
         ngDevMode && assertLViewOrUndefined(view);
-        previousOrParentTNode = tNode;
-        lView = view;
+        instructionState.previousOrParentTNode = tNode;
+        instructionState.lView = view;
     }
-    /**
-     * If `isParent` is:
-     *  - `true`: then `previousOrParentTNode` points to a parent node.
-     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
-     */
-    var isParent;
     function getIsParent() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return isParent;
+        return instructionState.isParent;
     }
     function setIsNotParent() {
-        isParent = false;
+        instructionState.isParent = false;
     }
     function setIsParent() {
-        isParent = true;
+        instructionState.isParent = true;
     }
-    /**
-     * State of the current view being processed.
-     *
-     * An array of nodes (text, element, container, etc), pipes, their bindings, and
-     * any local variables that need to be stored between invocations.
-     */
-    var lView;
-    /**
-     * The last viewData retrieved by nextContext().
-     * Allows building nextContext() and reference() calls.
-     *
-     * e.g. const inner = x().$implicit; const outer = x().$implicit;
-     */
-    var contextLView = null;
     function getContextLView() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return contextLView;
+        return instructionState.contextLView;
     }
-    /**
-     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
-     *
-     * Necessary to support ChangeDetectorRef.checkNoChanges().
-     */
-    var checkNoChangesMode = false;
     function getCheckNoChangesMode() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return checkNoChangesMode;
+        return instructionState.checkNoChangesMode;
     }
     function setCheckNoChangesMode(mode) {
-        checkNoChangesMode = mode;
+        instructionState.checkNoChangesMode = mode;
     }
-    /**
-     * The root index from which pure function instructions should calculate their binding
-     * indices. In component views, this is TView.bindingStartIndex. In a host binding
-     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
-     */
-    var bindingRootIndex = -1;
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     function getBindingRoot() {
-        return bindingRootIndex;
+        return instructionState.bindingRootIndex;
     }
     function setBindingRoot(value) {
-        bindingRootIndex = value;
+        instructionState.bindingRootIndex = value;
     }
-    /**
-     * Current index of a View or Content Query which needs to be processed next.
-     * We iterate over the list of Queries and increment current query index at every step.
-     */
-    var currentQueryIndex = 0;
     function getCurrentQueryIndex() {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return currentQueryIndex;
+        return instructionState.currentQueryIndex;
     }
     function setCurrentQueryIndex(value) {
-        currentQueryIndex = value;
+        instructionState.currentQueryIndex = value;
     }
     /**
      * Swap the current lView with a new lView.
@@ -2380,16 +2329,16 @@
             executeElementExitFn();
         }
         ngDevMode && assertLViewOrUndefined(newView);
-        var oldView = lView;
-        previousOrParentTNode = hostTNode;
-        isParent = true;
-        lView = contextLView = newView;
+        var oldView = instructionState.lView;
+        instructionState.previousOrParentTNode = hostTNode;
+        instructionState.isParent = true;
+        instructionState.lView = instructionState.contextLView = newView;
         return oldView;
     }
     function nextContextImpl(level) {
         if (level === void 0) { level = 1; }
-        contextLView = walkUpViews(level, contextLView);
-        return contextLView[CONTEXT];
+        instructionState.contextLView = walkUpViews(level, instructionState.contextLView);
+        return instructionState.contextLView[CONTEXT];
     }
     function walkUpViews(nestingLevel, currentView) {
         while (nestingLevel > 0) {
@@ -2403,14 +2352,12 @@
      * Resets the application state.
      */
     function resetComponentState() {
-        isParent = false;
-        previousOrParentTNode = null;
-        elementDepthCount = 0;
-        bindingsEnabled = true;
+        instructionState.isParent = false;
+        instructionState.previousOrParentTNode = null;
+        instructionState.elementDepthCount = 0;
+        instructionState.bindingsEnabled = true;
         setCurrentStyleSanitizer(null);
     }
-    /* tslint:disable */
-    var _selectedIndex = -1 << 1 /* Size */;
     /**
      * Gets the most recent index passed to {@link select}
      *
@@ -2418,7 +2365,7 @@
      * current `LView` to act on.
      */
     function getSelectedIndex() {
-        return _selectedIndex >> 1 /* Size */;
+        return instructionState.selectedIndex >> 1 /* Size */;
     }
     /**
      * Sets the most recent index passed to {@link select}
@@ -2430,16 +2377,15 @@
      * run if and when the provided `index` value is different from the current selected index value.)
      */
     function setSelectedIndex(index) {
-        _selectedIndex = index << 1 /* Size */;
+        instructionState.selectedIndex = index << 1 /* Size */;
     }
-    var _currentNamespace = null;
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
      *
      * @codeGenApi
      */
     function ɵɵnamespaceSVG() {
-        _currentNamespace = 'http://www.w3.org/2000/svg';
+        instructionState.currentNamespace = 'http://www.w3.org/2000/svg';
     }
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
@@ -2447,7 +2393,7 @@
      * @codeGenApi
      */
     function ɵɵnamespaceMathML() {
-        _currentNamespace = 'http://www.w3.org/1998/MathML/';
+        instructionState.currentNamespace = 'http://www.w3.org/1998/MathML/';
     }
     /**
      * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -2463,20 +2409,19 @@
      * `createElement` rather than `createElementNS`.
      */
     function namespaceHTMLInternal() {
-        _currentNamespace = null;
+        instructionState.currentNamespace = null;
     }
     function getNamespace() {
-        return _currentNamespace;
+        return instructionState.currentNamespace;
     }
-    var _currentSanitizer;
     function setCurrentStyleSanitizer(sanitizer) {
-        _currentSanitizer = sanitizer;
+        instructionState.currentSanitizer = sanitizer;
     }
     function resetCurrentStyleSanitizer() {
         setCurrentStyleSanitizer(null);
     }
     function getCurrentStyleSanitizer() {
-        return _currentSanitizer;
+        return instructionState.currentSanitizer;
     }
 
     /**
@@ -14911,7 +14856,7 @@
                 // it's important we remove the current style sanitizer once the
                 // element exits, otherwise it will be used by the next styling
                 // instructions for the next element.
-                setElementExitFn(resetCurrentStyleSanitizer);
+                setElementExitFn(stylingApply);
             }
         }
         else {
@@ -15057,7 +15002,7 @@
                 // it's important we remove the current style sanitizer once the
                 // element exits, otherwise it will be used by the next styling
                 // instructions for the next element.
-                setElementExitFn(resetCurrentStyleSanitizer);
+                setElementExitFn(stylingApply);
             }
         }
         else {
@@ -18997,7 +18942,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.11+38.sha-43487f6.with-local-changes');
+    var VERSION = new Version('9.0.0-next.11+40.sha-78214e7.with-local-changes');
 
     /**
      * @license
