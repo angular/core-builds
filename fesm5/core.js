@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+18.sha-e9ee685.with-local-changes
+ * @license Angular v9.0.0-next.11+19.sha-724707c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7027,8 +7027,8 @@ function setCurrentSyncCursor(mapIndex, indexValue) {
 /**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
  */
-function attachStylingDebugObject(context) {
-    var debug = new TStylingContextDebug(context);
+function attachStylingDebugObject(context, isClassBased) {
+    var debug = new TStylingContextDebug(context, isClassBased);
     attachDebugObject(context, debug);
     return debug;
 }
@@ -7039,8 +7039,9 @@ function attachStylingDebugObject(context) {
  * application has `ngDevMode` activated.
  */
 var TStylingContextDebug = /** @class */ (function () {
-    function TStylingContextDebug(context) {
+    function TStylingContextDebug(context, _isClassBased) {
         this.context = context;
+        this._isClassBased = _isClassBased;
     }
     Object.defineProperty(TStylingContextDebug.prototype, "config", {
         get: function () { return buildConfig(this.context); },
@@ -7051,7 +7052,7 @@ var TStylingContextDebug = /** @class */ (function () {
         /**
          * Returns a detailed summary of each styling entry in the context.
          *
-         * See `TStylingTupleSummary`.
+         * See `DebugStylingContextEntry`.
          */
         get: function () {
             var context = this.context;
@@ -7087,8 +7088,118 @@ var TStylingContextDebug = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    /**
+     * Prints a detailed summary of each styling source grouped together with each binding index in
+     * the context.
+     */
+    TStylingContextDebug.prototype.printSources = function () {
+        var output = '\n';
+        var context = this.context;
+        var prefix = this._isClassBased ? 'class' : 'style';
+        var bindingsBySource = [];
+        var totalColumns = getValuesCount(context);
+        var itemsPerRow = 4 /* BindingsStartOffset */ + totalColumns;
+        for (var i = 0; i < totalColumns; i++) {
+            var isDefaultColumn = i === totalColumns - 1;
+            var hostBindingsMode = i !== TEMPLATE_DIRECTIVE_INDEX;
+            var type = getTypeFromColumn(i, totalColumns);
+            var entries = [];
+            var j = 3 /* ValuesStartPosition */;
+            while (j < context.length) {
+                var value = getBindingValue(context, j, i);
+                if (isDefaultColumn || value > 0) {
+                    var bitMask = getGuardMask(context, j, hostBindingsMode);
+                    var bindingIndex = isDefaultColumn ? -1 : value;
+                    var prop = getProp(context, j);
+                    var isMapBased = prop === MAP_BASED_ENTRY_PROP_NAME;
+                    var binding = "" + prefix + (isMapBased ? '' : '.' + prop);
+                    entries.push({ binding: binding, value: value, bindingIndex: bindingIndex, bitMask: bitMask });
+                }
+                j += itemsPerRow;
+            }
+            bindingsBySource.push({ type: type, entries: entries.sort(function (a, b) { return a.bindingIndex - b.bindingIndex; }) });
+        }
+        bindingsBySource.forEach(function (entry) {
+            output += "[" + entry.type.toUpperCase() + "]\n";
+            output += repeat('-', entry.type.length + 2) + '\n';
+            var tab = '  ';
+            entry.entries.forEach(function (entry) {
+                var isDefault = typeof entry.value !== 'number';
+                var value = entry.value;
+                if (!isDefault || value !== null) {
+                    output += tab + "[" + entry.binding + "] = `" + value + "`";
+                    output += '\n';
+                }
+            });
+            output += '\n';
+        });
+        /* tslint:disable */
+        console.log(output);
+    };
+    /**
+     * Prints a detailed table of the entire styling context.
+     */
+    TStylingContextDebug.prototype.printTable = function () {
+        // IE (not Edge) is the only browser that doesn't support this feature. Because
+        // these debugging tools are not apart of the core of Angular (they are just
+        // extra tools) we can skip-out on older browsers.
+        if (!console.table) {
+            throw new Error('This feature is not supported in your browser');
+        }
+        var context = this.context;
+        var table = [];
+        var totalColumns = getValuesCount(context);
+        var itemsPerRow = 4 /* BindingsStartOffset */ + totalColumns;
+        var totalProps = Math.floor(context.length / itemsPerRow);
+        var i = 3 /* ValuesStartPosition */;
+        while (i < context.length) {
+            var prop = getProp(context, i);
+            var isMapBased = prop === MAP_BASED_ENTRY_PROP_NAME;
+            var entry = {
+                prop: prop,
+                'tpl mask': generateBitString(getGuardMask(context, i, false), isMapBased, totalProps),
+                'host mask': generateBitString(getGuardMask(context, i, true), isMapBased, totalProps),
+            };
+            for (var j = 0; j < totalColumns; j++) {
+                var key = getTypeFromColumn(j, totalColumns);
+                var value = getBindingValue(context, i, j);
+                entry[key] = value;
+            }
+            i += itemsPerRow;
+            table.push(entry);
+        }
+        /* tslint:disable */
+        console.table(table);
+    };
     return TStylingContextDebug;
 }());
+function generateBitString(value, isMapBased, totalProps) {
+    if (isMapBased || value > 1) {
+        return "0b" + leftPad(value.toString(2), totalProps, '0');
+    }
+    return null;
+}
+function leftPad(value, max, pad) {
+    return repeat(pad, max - value.length) + value;
+}
+function getTypeFromColumn(index, totalColumns) {
+    if (index === TEMPLATE_DIRECTIVE_INDEX) {
+        return 'template';
+    }
+    else if (index === totalColumns - 1) {
+        return 'defaults';
+    }
+    else {
+        return "dir #" + index;
+    }
+}
+function repeat(c, times) {
+    var s = '';
+    for (var i = 0; i < times; i++) {
+        s += c;
+    }
+    return s;
+}
 /**
  * A human-readable debug summary of the styling data present for a `DebugNode` instance.
  *
@@ -7101,7 +7212,7 @@ var NodeStylingDebug = /** @class */ (function () {
         this._isClassBased = _isClassBased;
         this._sanitizer = null;
         this._debugContext = isStylingContext(context) ?
-            new TStylingContextDebug(context) :
+            new TStylingContextDebug(context, _isClassBased) :
             context;
     }
     Object.defineProperty(NodeStylingDebug.prototype, "context", {
@@ -7665,7 +7776,7 @@ function buildDebugNode(tNode, lView, nodeIndex) {
     var native = unwrapRNode(rawValue);
     var componentLViewDebug = toDebug(readLViewValue(rawValue));
     var styles = isStylingContext(tNode.styles) ?
-        new NodeStylingDebug(tNode.styles, lView) :
+        new NodeStylingDebug(tNode.styles, lView, false) :
         null;
     var classes = isStylingContext(tNode.classes) ?
         new NodeStylingDebug(tNode.classes, lView, true) :
@@ -14979,7 +15090,7 @@ function getContext(tNode, isClassBased) {
         var hasDirectives = isDirectiveHost(tNode);
         context = allocTStylingContext(context, hasDirectives);
         if (ngDevMode) {
-            attachStylingDebugObject(context);
+            attachStylingDebugObject(context, isClassBased);
         }
         if (isClassBased) {
             tNode.classes = context;
@@ -18768,7 +18879,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.11+18.sha-e9ee685.with-local-changes');
+var VERSION = new Version('9.0.0-next.11+19.sha-724707c.with-local-changes');
 
 /**
  * @license
