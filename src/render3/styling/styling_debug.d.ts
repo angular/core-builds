@@ -30,6 +30,10 @@ export interface DebugStylingContext {
     entries: {
         [prop: string]: DebugStylingContextEntry;
     };
+    /** A status report of all the sources within the context */
+    printSources(): void;
+    /** A status report of all the entire context as a table */
+    printTable(): void;
 }
 /**
  * A debug/testing-oriented summary of `TStylingConfig`.
@@ -48,9 +52,9 @@ export interface DebugStylingConfig {
  * A debug/testing-oriented summary of all styling entries within a `TStylingContext`.
  */
 export interface DebugStylingContextEntry {
-    /** The property (style or class property) that this tuple represents */
+    /** The property (style or class property) that this entry represents */
     prop: string;
-    /** The total amount of styling entries a part of this tuple */
+    /** The total amount of styling entries a part of this entry */
     valuesCount: number;
     /**
      * The bit guard mask that is used to compare and protect against
@@ -117,7 +121,7 @@ export interface DebugNodeStylingEntry {
 /**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
  */
-export declare function attachStylingDebugObject(context: TStylingContext): TStylingContextDebug;
+export declare function attachStylingDebugObject(context: TStylingContext, isClassBased: boolean): TStylingContextDebug;
 /**
  * A human-readable debug summary of the styling data present within `TStylingContext`.
  *
@@ -126,16 +130,26 @@ export declare function attachStylingDebugObject(context: TStylingContext): TSty
  */
 declare class TStylingContextDebug implements DebugStylingContext {
     readonly context: TStylingContext;
-    constructor(context: TStylingContext);
+    private _isClassBased;
+    constructor(context: TStylingContext, _isClassBased: boolean);
     readonly config: DebugStylingConfig;
     /**
      * Returns a detailed summary of each styling entry in the context.
      *
-     * See `TStylingTupleSummary`.
+     * See `DebugStylingContextEntry`.
      */
     readonly entries: {
         [prop: string]: DebugStylingContextEntry;
     };
+    /**
+     * Prints a detailed summary of each styling source grouped together with each binding index in
+     * the context.
+     */
+    printSources(): void;
+    /**
+     * Prints a detailed table of the entire styling context.
+     */
+    printTable(): void;
 }
 /**
  * A human-readable debug summary of the styling data present for a `DebugNode` instance.
@@ -145,10 +159,10 @@ declare class TStylingContextDebug implements DebugStylingContext {
  */
 export declare class NodeStylingDebug implements DebugNodeStyling {
     private _data;
-    private _isClassBased?;
+    private _isClassBased;
     private _sanitizer;
     private _debugContext;
-    constructor(context: TStylingContext | DebugStylingContext, _data: LStylingData, _isClassBased?: boolean | undefined);
+    constructor(context: TStylingContext | DebugStylingContext, _data: LStylingData, _isClassBased: boolean);
     readonly context: DebugStylingContext;
     /**
      * Overrides the sanitizer used to process styles.
