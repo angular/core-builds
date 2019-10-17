@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+39.sha-bb53b65.with-local-changes
+ * @license Angular v9.0.0-next.11+41.sha-1a8bd22.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -566,7 +566,7 @@ const NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
 /** @type {?} */
 const NG_MOD_DEF = getClosureSafeProperty({ ɵmod: getClosureSafeProperty });
 /** @type {?} */
-const NG_LOCALE_ID_DEF = getClosureSafeProperty({ ngLocaleIdDef: getClosureSafeProperty });
+const NG_LOC_ID_DEF = getClosureSafeProperty({ ɵloc: getClosureSafeProperty });
 /** @type {?} */
 const NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
 /** @type {?} */
@@ -1889,7 +1889,7 @@ function getNgModuleDef(type, throwNotFound) {
  * @return {?}
  */
 function getNgLocaleIdDef(type) {
-    return ((/** @type {?} */ (type)))[NG_LOCALE_ID_DEF] || null;
+    return ((/** @type {?} */ (type)))[NG_LOC_ID_DEF] || null;
 }
 
 /**
@@ -27460,7 +27460,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.11+39.sha-bb53b65.with-local-changes');
+const VERSION = new Version('9.0.0-next.11+41.sha-1a8bd22.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
