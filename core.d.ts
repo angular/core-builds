@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+23.sha-d192a7b.with-local-changes
+ * @license Angular v9.0.0-next.11+24.sha-082aed6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -483,26 +483,6 @@ declare interface BootstrapOptions {
      * - `noop` - Use `NoopNgZone` which does nothing.
      */
     ngZone?: NgZone | 'zone.js' | 'noop';
-    /**
-     * Optionally specify coalescing event change detections or not.
-     * Consider the following case.
-     *
-     * <div (click)="doSomething()">
-     *   <button (click)="doSomethingElse()"></button>
-     * </div>
-     *
-     * When button is clicked, because of the event bubbling, both
-     * event handlers will be called and 2 change detections will be
-     * triggered. We can colesce such kind of events to only trigger
-     * change detection only once.
-     *
-     * By default, this option will be false. So the events will not be
-     * colesced and the change detection will be triggered multiple times.
-     * And if this option be set to true, the change detection will be
-     * triggered async by scheduling a animation frame. So in the case above,
-     * the change detection will only be trigged once.
-     */
-    ngZoneEventCoalescing?: boolean;
 }
 
 
@@ -4145,11 +4125,8 @@ export declare class NgProbeToken {
  * @publicApi
  */
 export declare class NgZone {
-    readonly hasPendingZoneMicrotasks: boolean;
-    readonly lastRequestAnimationFrameId: number;
-    readonly shouldCoalesceEventChangeDetection: boolean;
-    readonly hasPendingMacrotasks: boolean;
     readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      */
@@ -4174,9 +4151,8 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
+    constructor({ enableLongStackTrace }: {
         enableLongStackTrace?: boolean | undefined;
-        shouldCoalesceEventChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;
@@ -9958,8 +9934,6 @@ export declare const enum ɵNodeFlags {
  * to framework to perform rendering.
  */
 export declare class ɵNoopNgZone implements NgZone {
-    readonly hasPendingZoneMicrotasks: boolean;
-    readonly lastRequestAnimationFrameId = -1;
     readonly hasPendingMicrotasks: boolean;
     readonly hasPendingMacrotasks: boolean;
     readonly isStable: boolean;
@@ -9967,7 +9941,6 @@ export declare class ɵNoopNgZone implements NgZone {
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
     readonly onError: EventEmitter<any>;
-    readonly shouldCoalesceEventChangeDetection: boolean;
     run(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
     runGuarded(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
     runOutsideAngular(fn: (...args: any[]) => any): any;
