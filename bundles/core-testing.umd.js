@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+23.sha-d192a7b.with-local-changes
+ * @license Angular v9.0.0-next.11+24.sha-082aed6.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2644,7 +2644,7 @@
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            var ngZone = new i0.NgZone({ enableLongStackTrace: true, shouldCoalesceEventChangeDetection: false });
+            var ngZone = new i0.NgZone({ enableLongStackTrace: true });
             var providers = [{ provide: i0.NgZone, useValue: ngZone }];
             var ngZoneInjector = i0.Injector.create({
                 providers: providers,

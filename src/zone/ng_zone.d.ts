@@ -81,11 +81,8 @@ import { EventEmitter } from '../event_emitter';
  * @publicApi
  */
 export declare class NgZone {
-    readonly hasPendingZoneMicrotasks: boolean;
-    readonly lastRequestAnimationFrameId: number;
-    readonly shouldCoalesceEventChangeDetection: boolean;
-    readonly hasPendingMacrotasks: boolean;
     readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      */
@@ -110,9 +107,8 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
+    constructor({ enableLongStackTrace }: {
         enableLongStackTrace?: boolean | undefined;
-        shouldCoalesceEventChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;
@@ -168,8 +164,6 @@ export declare class NgZone {
  * to framework to perform rendering.
  */
 export declare class NoopNgZone implements NgZone {
-    readonly hasPendingZoneMicrotasks: boolean;
-    readonly lastRequestAnimationFrameId = -1;
     readonly hasPendingMicrotasks: boolean;
     readonly hasPendingMacrotasks: boolean;
     readonly isStable: boolean;
@@ -177,7 +171,6 @@ export declare class NoopNgZone implements NgZone {
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
     readonly onError: EventEmitter<any>;
-    readonly shouldCoalesceEventChangeDetection: boolean;
     run(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
     runGuarded(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
     runOutsideAngular(fn: (...args: any[]) => any): any;
