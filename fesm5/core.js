@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+36.sha-08cb2fa.with-local-changes
+ * @license Angular v9.0.0-next.11+37.sha-6f203c9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2924,6 +2924,11 @@ function normalizeIntoStylingMap(bindingValue, newValues, normalizeProps) {
         }
     }
     return stylingMapArr;
+}
+// TODO (matsko|AndrewKushnir): refactor this once we figure out how to generate separate
+// `input('class') + classMap()` instructions.
+function selectClassBasedInputName(inputs) {
+    return inputs.hasOwnProperty('class') ? 'class' : 'className';
 }
 
 /**
@@ -8733,7 +8738,7 @@ function initializeInputAndOutputAliases(tView, tNode) {
         outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
     }
     if (inputsStore !== null) {
-        if (inputsStore.hasOwnProperty('class')) {
+        if (inputsStore.hasOwnProperty('class') || inputsStore.hasOwnProperty('className')) {
             tNode.flags |= 16 /* hasClassInput */;
         }
         if (inputsStore.hasOwnProperty('style')) {
@@ -14974,7 +14979,7 @@ function updateDirectiveInputValue(context, lView, tNode, bindingIndex, newValue
         // directive input(s) in the event that it is falsy during the
         // first update pass.
         if (newValue || isContextLocked(context, false)) {
-            var inputName = isClassBased ? 'class' : 'style';
+            var inputName = isClassBased ? selectClassBasedInputName(tNode.inputs) : 'style';
             var inputs = tNode.inputs[inputName];
             var initialValue = getInitialStylingValue(context);
             var value = normalizeStylingDirectiveInputValue(initialValue, newValue, isClassBased);
@@ -15225,7 +15230,8 @@ function ɵɵelementEnd() {
         }
     }
     if (hasClassInput(tNode)) {
-        setDirectiveStylingInput(tNode.classes, lView, tNode.inputs['class']);
+        var inputName = selectClassBasedInputName(tNode.inputs);
+        setDirectiveStylingInput(tNode.classes, lView, tNode.inputs[inputName]);
     }
     if (hasStyleInput(tNode)) {
         setDirectiveStylingInput(tNode.styles, lView, tNode.inputs['style']);
@@ -18879,7 +18885,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.11+36.sha-08cb2fa.with-local-changes');
+var VERSION = new Version('9.0.0-next.11+37.sha-6f203c9.with-local-changes');
 
 /**
  * @license
