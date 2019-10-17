@@ -5,7 +5,7 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.io/license
 */
-import { TNode } from '../interfaces/node';
+import { PropertyAliases, TNode } from '../interfaces/node';
 import { LStylingData, StylingMapArray, TStylingConfig, TStylingContext, TStylingContextIndex } from '../interfaces/styling';
 import { NO_CHANGE } from '../tokens';
 export declare const MAP_BASED_ENTRY_PROP_NAME = "[MAP]";
@@ -130,3 +130,4 @@ export declare function addItemToStylingMap(stylingMapArr: StylingMapArray, prop
 export declare function normalizeIntoStylingMap(bindingValue: null | StylingMapArray, newValues: {
     [key: string]: any;
 } | string | null | undefined, normalizeProps?: boolean): StylingMapArray;
+export declare function selectClassBasedInputName(inputs: PropertyAliases): string;
