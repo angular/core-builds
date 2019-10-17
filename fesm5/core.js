@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+43.sha-9d54679.with-local-changes
+ * @license Angular v9.0.0-next.11+44.sha-f45c431.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2545,7 +2545,7 @@ var DEFAULT_GUARD_MASK_VALUE = 1;
  * `TStylingContext` with the initial values (see `interfaces.ts` for more info).
  */
 function allocTStylingContext(initialStyling, hasDirectives) {
-    initialStyling = initialStyling || allocStylingMapArray();
+    initialStyling = initialStyling || allocStylingMapArray(null);
     var config = 0 /* Initial */;
     if (hasDirectives) {
         config |= 1 /* HasDirectives */;
@@ -2559,8 +2559,8 @@ function allocTStylingContext(initialStyling, hasDirectives) {
         initialStyling,
     ];
 }
-function allocStylingMapArray() {
-    return [''];
+function allocStylingMapArray(value) {
+    return [value];
 }
 function getConfig(context) {
     return context[0 /* ConfigPosition */];
@@ -2646,7 +2646,7 @@ function setValue(data, bindingIndex, value) {
     data[bindingIndex] = value;
 }
 function getValue(data, bindingIndex) {
-    return bindingIndex > 0 ? data[bindingIndex] : null;
+    return bindingIndex !== 0 ? data[bindingIndex] : null;
 }
 function lockContext(context, hostBindingsMode) {
     patchConfig(context, getLockedConfig(hostBindingsMode));
@@ -2832,8 +2832,8 @@ function addItemToStylingMap(stylingMapArr, prop, value, allowOverwrite) {
  * away whenever the `{key:value}` map entries change).
  */
 function normalizeIntoStylingMap(bindingValue, newValues, normalizeProps) {
-    var stylingMapArr = Array.isArray(bindingValue) ? bindingValue : [null];
-    stylingMapArr[0 /* RawValuePosition */] = newValues || null;
+    var stylingMapArr = Array.isArray(bindingValue) ? bindingValue : allocStylingMapArray(null);
+    stylingMapArr[0 /* RawValuePosition */] = newValues;
     // because the new values may not include all the properties
     // that the old ones had, all values are set to `null` before
     // the new values are applied. This way, when flushed, the
@@ -14698,6 +14698,16 @@ function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
     if (!isContextLocked(context, hostBindingsMode)) {
         patchConfig(context, 2 /* HasPropBindings */);
     }
+    // [style.prop] and [class.name] bindings do not use `bind()` and will
+    // therefore manage accessing and updating the new value in the lView directly.
+    // For this reason, the checkNoChanges situation must also be handled here
+    // as well.
+    if (ngDevMode && getCheckNoChangesMode()) {
+        var oldValue = getValue(lView, bindingIndex);
+        if (hasValueChanged(oldValue, value)) {
+            throwErrorIfNoChangesMode(false, oldValue, value);
+        }
+    }
     // Direct Apply Case: bypass context resolution and apply the
     // style/class value directly to the element
     if (allowDirectStyling(context, hostBindingsMode)) {
@@ -14762,7 +14772,7 @@ function ɵɵstyleMap(styles) {
         updateDirectiveInputValue(context, lView, tNode, bindingIndex, styles, false);
         styles = NO_CHANGE;
     }
-    var updated = _stylingMap(index, context, bindingIndex, styles, false);
+    var updated = stylingMap(index, context, bindingIndex, styles, false);
     if (ngDevMode) {
         ngDevMode.styleMap++;
         if (updated) {
@@ -14813,7 +14823,7 @@ function classMapInternal(elementIndex, classes) {
         updateDirectiveInputValue(context, lView, tNode, bindingIndex, classes, true);
         classes = NO_CHANGE;
     }
-    var updated = _stylingMap(elementIndex, context, bindingIndex, classes, true);
+    var updated = stylingMap(elementIndex, context, bindingIndex, classes, true);
     if (ngDevMode) {
         ngDevMode.classMap++;
         if (updated) {
@@ -14827,22 +14837,29 @@ function classMapInternal(elementIndex, classes) {
  * When this function is called it will activate support for `[style]` and
  * `[class]` bindings in Angular.
  */
-function _stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
+function stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
     var updated = false;
     var lView = getLView();
     var directiveIndex = getActiveDirectiveId();
     var tNode = getTNode(elementIndex, lView);
     var native = getNativeByTNode(tNode, lView);
-    var oldValue = lView[bindingIndex];
+    var oldValue = getValue(lView, bindingIndex);
     var hostBindingsMode = isHostStyling();
     var sanitizer = getCurrentStyleSanitizer();
+    var valueHasChanged = hasValueChanged(oldValue, value);
+    // [style] and [class] bindings do not use `bind()` and will therefore
+    // manage accessing and updating the new value in the lView directly.
+    // For this reason, the checkNoChanges situation must also be handled here
+    // as well.
+    if (ngDevMode && valueHasChanged && getCheckNoChangesMode()) {
+        throwErrorIfNoChangesMode(false, oldValue, value);
+    }
     // we check for this in the instruction code so that the context can be notified
     // about prop or map bindings so that the direct apply check can decide earlier
     // if it allows for context resolution to be bypassed.
     if (!isContextLocked(context, hostBindingsMode)) {
         patchConfig(context, 4 /* HasMapBindings */);
     }
-    var valueHasChanged = hasValueChanged(oldValue, value);
     var stylingMapArr = value === NO_CHANGE ? NO_CHANGE : normalizeIntoStylingMap(oldValue, value, !isClassBased);
     // Direct Apply Case: bypass context resolution and apply the
     // style/class map values directly to the element
@@ -14963,13 +14980,13 @@ function registerInitialStylingOnTNode(tNode, attrs, startIndex) {
             mode = attr;
         }
         else if (mode == 1 /* Classes */) {
-            classes = classes || allocStylingMapArray();
+            classes = classes || allocStylingMapArray(null);
             addItemToStylingMap(classes, attr, true);
             hasAdditionalInitialStyling = true;
         }
         else if (mode == 2 /* Styles */) {
             var value = attrs[++i];
-            styles = styles || allocStylingMapArray();
+            styles = styles || allocStylingMapArray(null);
             addItemToStylingMap(styles, attr, value);
             hasAdditionalInitialStyling = true;
         }
@@ -18799,7 +18816,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.11+43.sha-9d54679.with-local-changes');
+var VERSION = new Version('9.0.0-next.11+44.sha-f45c431.with-local-changes');
 
 /**
  * @license

@@ -30,7 +30,7 @@ export declare const DEFAULT_GUARD_MASK_VALUE = 1;
  * `TStylingContext` with the initial values (see `interfaces.ts` for more info).
  */
 export declare function allocTStylingContext(initialStyling: StylingMapArray | null, hasDirectives: boolean): TStylingContext;
-export declare function allocStylingMapArray(): StylingMapArray;
+export declare function allocStylingMapArray(value: {} | string | null): StylingMapArray;
 export declare function getConfig(context: TStylingContext): TStylingConfig;
 export declare function hasConfig(context: TStylingContext, flag: TStylingConfig): boolean;
 /**
@@ -64,7 +64,7 @@ export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number 
 /**
  * Determines whether the provided styling value is truthy or falsy.
  */
-export declare function isStylingValueDefined<T extends string | number | {} | null>(value: T): value is NonNullable<T>;
+export declare function isStylingValueDefined<T extends string | number | {} | null | undefined>(value: T): value is NonNullable<T>;
 export declare function concatString(a: string, b: string, separator?: string): string;
 export declare function hyphenate(value: string): string;
 /**
