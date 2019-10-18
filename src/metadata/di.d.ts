@@ -42,6 +42,7 @@ import { Type } from '../interface/type';
  * ```
  *
  * @publicApi
+ * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
  */
 export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 /**
