@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12.with-local-changes
+ * @license Angular v9.0.0-next.12+1.sha-1799f62.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -168,6 +168,7 @@ export declare interface AfterViewInit {
  * ```
  *
  * @publicApi
+ * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
  */
 export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 
@@ -834,6 +835,7 @@ export declare interface Component extends Directive {
      * this component. For each component listed here,
      * Angular creates a {@link ComponentFactory} and stores it in the
      * {@link ComponentFactoryResolver}.
+     * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
      */
     entryComponents?: Array<Type<any> | any[]>;
     /**
@@ -4026,6 +4028,7 @@ export declare interface NgModule {
      * using one of the imperative techniques, such as `ViewContainerRef.createComponent()`.
      *
      * @see [Entry Components](guide/entry-components)
+     * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
      */
     entryComponents?: Array<Type<any> | any[]>;
     /**
