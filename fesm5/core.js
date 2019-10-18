@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+59.sha-117ca7c.with-local-changes
+ * @license Angular v9.0.0-next.11+62.sha-a0d16dc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10854,9 +10854,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
                 var contextInjector = injector || this.parentInjector;
                 if (!ngModuleRef && componentFactory.ngModule == null && contextInjector) {
-                    // FIXME: ngModuleRef is optional, so its type allows "undefined", whereas the code
-                    // below is passing null for the default/absent value.
-                    ngModuleRef = contextInjector.get(NgModuleRef, null);
+                    ngModuleRef = contextInjector.get(NgModuleRef, null) || undefined;
                 }
                 var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
                 this.insert(componentRef.hostView, index);
@@ -18571,21 +18569,6 @@ function ɵɵProvidersFeature(providers, viewProviders) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var DirectiveDefFlags;
-(function (DirectiveDefFlags) {
-    DirectiveDefFlags[DirectiveDefFlags["ContentQuery"] = 2] = "ContentQuery";
-})(DirectiveDefFlags || (DirectiveDefFlags = {}));
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-var unusedValueExportToPlacateAjd$7 = 1;
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
@@ -18855,7 +18838,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.11+59.sha-117ca7c.with-local-changes');
+var VERSION = new Version('9.0.0-next.11+62.sha-a0d16dc.with-local-changes');
 
 /**
  * @license
@@ -23493,7 +23476,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
             // decorator that's also been downleveled.
             if (clazz.propDecorators !== undefined &&
                 (!parentConstructor || parentConstructor.propDecorators !== clazz.propDecorators)) {
-                clazz.propDecorators = __assign({}, clazz.propDecorators, propDecorators);
+                clazz.propDecorators = __assign(__assign({}, clazz.propDecorators), propDecorators);
             }
             else {
                 clazz.propDecorators = propDecorators;
@@ -24194,6 +24177,17 @@ var QueryList = /** @class */ (function () {
     };
     return QueryList;
 }());
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+var unusedValueExportToPlacateAjd$7 = 1;
 
 /**
  * @license
@@ -25365,7 +25359,7 @@ function compileComponent(type, metadata) {
                     throw new Error(error_1.join('\n'));
                 }
                 var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
-                var meta = __assign({}, directiveMetadata(type, metadata), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                var meta = __assign(__assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 if (meta.usesInheritance) {
                     addBaseDefToUndecoratedParents(type);
                 }
@@ -25437,7 +25431,7 @@ function addDirectiveFactoryDef(type, metadata) {
         get: function () {
             if (ngFactoryDef === null) {
                 var meta = getDirectiveMetadata(type, metadata);
-                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign({}, meta.metadata, { injectFn: 'directiveInject', isPipe: false }));
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign(__assign({}, meta.metadata), { injectFn: 'directiveInject', isPipe: false }));
             }
             return ngFactoryDef;
         },
@@ -25615,7 +25609,7 @@ function compilePipe(type, meta) {
         get: function () {
             if (ngFactoryDef === null) {
                 var metadata = getPipeMetadata(type, meta);
-                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign({}, metadata, { injectFn: 'directiveInject', isPipe: true }));
+                ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign(__assign({}, metadata), { injectFn: 'directiveInject', isPipe: true }));
             }
             return ngFactoryDef;
         },
@@ -27178,7 +27172,7 @@ function optionsReducer(dst, objs) {
         dst = objs.reduce(optionsReducer, dst);
     }
     else {
-        dst = __assign({}, dst, objs);
+        dst = __assign(__assign({}, dst), objs);
     }
     return dst;
 }

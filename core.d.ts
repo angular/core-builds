@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+59.sha-117ca7c.with-local-changes
+ * @license Angular v9.0.0-next.11+62.sha-a0d16dc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11722,7 +11722,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      * This allows the render to re-construct the minified and non-minified names
      * of properties.
      */
-    outputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    outputs?: { [P_1 in keyof T]?: string | undefined; } | undefined;
     /**
      * A list of optional features to apply.
      *

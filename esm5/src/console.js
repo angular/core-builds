@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as tslib_1 from "tslib";
+import { __decorate } from "tslib";
 import { Injectable } from './di';
 var Console = /** @class */ (function () {
     function Console() {
@@ -19,7 +19,7 @@ var Console = /** @class */ (function () {
         // tslint:disable-next-line:no-console
         console.warn(message);
     };
-    Console = tslib_1.__decorate([
+    Console = __decorate([
         Injectable()
     ], Console);
     return Console;
