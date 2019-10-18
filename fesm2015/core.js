@@ -1,5 +1,5 @@
 /**
- * @license Angular v8.2.11+6.sha-f13e40d.with-local-changes
+ * @license Angular v8.2.11+8.sha-19ada81.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6315,6 +6315,7 @@ function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
  * @return {?}
  */
 function bypassSanitizationTrustString(trustedString, mode) {
+    // tslint:disable-next-line
     /** @type {?} */
     const trusted = (/** @type {?} */ (new String(trustedString)));
     trusted[BRAND] = mode;
@@ -26487,7 +26488,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('8.2.11+6.sha-f13e40d.with-local-changes');
+const VERSION = new Version('8.2.11+8.sha-19ada81.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
