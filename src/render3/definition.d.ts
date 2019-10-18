@@ -431,7 +431,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      * This allows the render to re-construct the minified and non-minified names
      * of properties.
      */
-    outputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    outputs?: { [P_1 in keyof T]?: string | undefined; } | undefined;
     /**
      * A list of optional features to apply.
      *

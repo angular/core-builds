@@ -66,9 +66,6 @@ export interface DirectiveType<T> extends Type<T> {
     ɵdir: never;
     ɵfac: () => T;
 }
-export declare enum DirectiveDefFlags {
-    ContentQuery = 2
-}
 /**
  * A subclass of `Type` which has a static `ɵpipe`:`PipeDef` field making it
  * consumable for rendering.

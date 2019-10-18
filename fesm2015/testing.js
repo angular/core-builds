@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+59.sha-117ca7c.with-local-changes
+ * @license Angular v9.0.0-next.11+62.sha-a0d16dc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1926,7 +1926,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     compileComponents() {
-        return __awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestBedCompiler} */ function* () {
             this.clearComponentResolutionQueue();
             // Run compilers for all queued types.
             /** @type {?} */
@@ -1996,7 +1996,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     _compileNgModuleAsync(moduleType) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestBedCompiler} */ function* () {
             if (this.originalRegisteredModules === null) {
                 this.originalRegisteredModules = getRegisteredModulesState();
             }
@@ -2827,7 +2827,7 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAsync(moduleType) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestCompiler} */ function* () {
             yield this.testBed._compileNgModuleAsync(moduleType);
             return new ɵNgModuleFactory(moduleType);
         });
@@ -2850,7 +2850,7 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAndAllComponentsAsync(moduleType) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestCompiler} */ function* () {
             /** @type {?} */
             const ngModuleFactory = yield this.compileModuleAsync(moduleType);
             /** @type {?} */
@@ -2891,8 +2891,6 @@ if (false) {
  */
 /** @type {?} */
 let _nextRootElementId = 0;
-/** @type {?} */
-const UNDEFINED = Symbol('UNDEFINED');
 /**
  * \@description
  * Configures and initializes environment for unit testing and provides methods for
@@ -3156,7 +3154,9 @@ class TestBedRender3 {
             return (/** @type {?} */ (this));
         }
         /** @type {?} */
-        const result = this.testModuleRef.injector.get(token, (/** @type {?} */ (UNDEFINED)), flags);
+        const UNDEFINED = {};
+        /** @type {?} */
+        const result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
         return result === UNDEFINED ? (/** @type {?} */ (this.compiler.injector.get(token, notFoundValue, flags))) :
             result;
     }
@@ -3504,8 +3504,6 @@ if (false) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/** @type {?} */
-const UNDEFINED$1 = new Object();
 /** @type {?} */
 let _nextRootElementId$1 = 0;
 // WARNING: interface has both a type and a value, skipping emit
@@ -3969,8 +3967,10 @@ class TestBedViewEngine {
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
         /** @type {?} */
-        const result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
-        return result === UNDEFINED$1 ? (/** @type {?} */ (this._compiler.injector.get(token, notFoundValue, flags))) :
+        const UNDEFINED = {};
+        /** @type {?} */
+        const result = this._moduleRef.injector.get(token, UNDEFINED, flags);
+        return result === UNDEFINED ? (/** @type {?} */ (this._compiler.injector.get(token, notFoundValue, flags))) :
             result;
     }
     /**

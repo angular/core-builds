@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.11+59.sha-117ca7c.with-local-changes
+ * @license Angular v9.0.0-next.11+62.sha-a0d16dc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1820,7 +1820,6 @@ var R3TestCompiler = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 var _nextRootElementId = 0;
-var UNDEFINED = Symbol('UNDEFINED');
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
@@ -1992,6 +1991,7 @@ var TestBedRender3 = /** @class */ (function () {
         if (token === TestBedRender3) {
             return this;
         }
+        var UNDEFINED = {};
         var result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
         return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) :
             result;
@@ -2195,7 +2195,6 @@ var TestingCompilerFactory = /** @class */ (function () {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var UNDEFINED$1 = new Object();
 var _nextRootElementId$1 = 0;
 /**
  * @description
@@ -2534,8 +2533,9 @@ var TestBedViewEngine = /** @class */ (function () {
         }
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
-        var result = this._moduleRef.injector.get(token, UNDEFINED$1, flags);
-        return result === UNDEFINED$1 ? this._compiler.injector.get(token, notFoundValue, flags) :
+        var UNDEFINED = {};
+        var result = this._moduleRef.injector.get(token, UNDEFINED, flags);
+        return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue, flags) :
             result;
     };
     /** @deprecated from v9.0.0 use TestBed.inject */
