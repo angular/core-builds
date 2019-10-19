@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+4.sha-f289411.with-local-changes
+ * @license Angular v9.0.0-next.12+6.sha-29bc3a7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16234,7 +16234,14 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 /** @type {?} */
                 const contextInjector = injector || this.parentInjector;
                 if (!ngModuleRef && ((/** @type {?} */ (componentFactory))).ngModule == null && contextInjector) {
-                    ngModuleRef = contextInjector.get(NgModuleRef, null) || undefined;
+                    // DO NOT REFACTOR. The code here used to have a `value || undefined` expression
+                    // which seems to cause internal google apps to fail. This is documented in the
+                    // following internal bug issue: go/b/142967802
+                    /** @type {?} */
+                    const result = contextInjector.get(NgModuleRef, null);
+                    if (result) {
+                        ngModuleRef = result;
+                    }
                 }
                 /** @type {?} */
                 const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
@@ -27092,7 +27099,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.12+4.sha-f289411.with-local-changes');
+const VERSION = new Version('9.0.0-next.12+6.sha-29bc3a7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
