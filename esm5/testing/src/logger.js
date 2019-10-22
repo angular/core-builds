@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as tslib_1 from "tslib";
+import { __decorate, __metadata } from "tslib";
 import { Injectable } from '@angular/core';
 var Log = /** @class */ (function () {
     function Log() {
@@ -25,9 +25,9 @@ var Log = /** @class */ (function () {
     };
     Log.prototype.clear = function () { this.logItems = []; };
     Log.prototype.result = function () { return this.logItems.join('; '); };
-    Log = tslib_1.__decorate([
+    Log = __decorate([
         Injectable(),
-        tslib_1.__metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [])
     ], Log);
     return Log;
 }());

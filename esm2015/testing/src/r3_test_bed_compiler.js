@@ -2,7 +2,7 @@
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-import * as tslib_1 from "tslib";
+import { __awaiter } from "tslib";
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -229,7 +229,7 @@ export class R3TestBedCompiler {
      * @return {?}
      */
     compileComponents() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestBedCompiler} */ function* () {
             this.clearComponentResolutionQueue();
             // Run compilers for all queued types.
             /** @type {?} */
@@ -299,7 +299,7 @@ export class R3TestBedCompiler {
      * @return {?}
      */
     _compileNgModuleAsync(moduleType) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestBedCompiler} */ function* () {
             if (this.originalRegisteredModules === null) {
                 this.originalRegisteredModules = getRegisteredModulesState();
             }
@@ -1130,7 +1130,7 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAsync(moduleType) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestCompiler} */ function* () {
             yield this.testBed._compileNgModuleAsync(moduleType);
             return new R3NgModuleFactory(moduleType);
         });
@@ -1153,7 +1153,7 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAndAllComponentsAsync(moduleType) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, /** @this {!R3TestCompiler} */ function* () {
             /** @type {?} */
             const ngModuleFactory = yield this.compileModuleAsync(moduleType);
             /** @type {?} */
