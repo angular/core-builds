@@ -67,7 +67,7 @@ export declare function getNativeByTNodeOrNull(tNode: TNode, lView: LView): RNod
 export declare function getTNode(index: number, view: LView): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function load<T>(view: LView | TData, index: number): T;
-export declare function getComponentViewByIndex(nodeIndex: number, hostView: LView): LView;
+export declare function getComponentLViewByIndex(nodeIndex: number, hostView: LView): LView;
 /**
  * Returns the monkey-patch value data present on the target (which could be
  * a component, directive or a DOM node).

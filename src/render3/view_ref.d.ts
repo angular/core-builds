@@ -13,12 +13,36 @@ import { LView } from './interfaces/view';
 export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
 }
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
-    private _context;
-    private _componentIndex;
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    private _cdRefInjectingView?;
     private _appRef;
     private _viewContainerRef;
     readonly rootNodes: any[];
-    constructor(_lView: LView, _context: T | null, _componentIndex: number);
+    constructor(
+    /**
+     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
+     *
+     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
+     * component.
+     *
+     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
+     * view.
+     *
+     * @internal
+     */
+    _lView: LView, 
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    _cdRefInjectingView?: LView | undefined);
     readonly context: T;
     readonly destroyed: boolean;
     destroy(): void;
@@ -201,5 +225,4 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
     attachToViewContainerRef(vcRef: viewEngine_ViewContainerRef): void;
     detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
-    private _lookUpContext;
 }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+46.sha-7f7dc7c.with-local-changes
+ * @license Angular v9.0.0-next.12+49.sha-1b8b04c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4990,7 +4990,7 @@ function load(view, index) {
  * @param {?} hostView
  * @return {?}
  */
-function getComponentViewByIndex(nodeIndex, hostView) {
+function getComponentLViewByIndex(nodeIndex, hostView) {
     // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
     ngDevMode && assertDataInRange(hostView, nodeIndex);
     /** @type {?} */
@@ -7533,7 +7533,7 @@ function getComponentViewByInstance(componentInstance) {
     if (Array.isArray(lView)) {
         /** @type {?} */
         const nodeIndex = findViaComponent(lView, componentInstance);
-        view = getComponentViewByIndex(nodeIndex, lView);
+        view = getComponentLViewByIndex(nodeIndex, lView);
         /** @type {?} */
         const context = createLContext(lView, nodeIndex, (/** @type {?} */ (view[HOST])));
         context.component = componentInstance;
@@ -7543,7 +7543,7 @@ function getComponentViewByInstance(componentInstance) {
     else {
         /** @type {?} */
         const context = (/** @type {?} */ ((/** @type {?} */ (lView))));
-        view = getComponentViewByIndex(context.nodeIndex, context.lView);
+        view = getComponentLViewByIndex(context.nodeIndex, context.lView);
     }
     return view;
 }
@@ -7626,7 +7626,7 @@ function findViaComponent(lView, componentInstance) {
             /** @type {?} */
             const elementComponentIndex = componentIndices[i];
             /** @type {?} */
-            const componentView = getComponentViewByIndex(elementComponentIndex, lView);
+            const componentView = getComponentLViewByIndex(elementComponentIndex, lView);
             if (componentView[CONTEXT] === componentInstance) {
                 return elementComponentIndex;
             }
@@ -7634,7 +7634,7 @@ function findViaComponent(lView, componentInstance) {
     }
     else {
         /** @type {?} */
-        const rootComponentView = getComponentViewByIndex(HEADER_OFFSET, lView);
+        const rootComponentView = getComponentLViewByIndex(HEADER_OFFSET, lView);
         /** @type {?} */
         const rootComponent = rootComponentView[CONTEXT];
         if (rootComponent === componentInstance) {
@@ -13552,7 +13552,7 @@ function elementPropertyInternal(lView, index, propName, value, sanitizer, nativ
 function markDirtyIfOnPush(lView, viewIndex) {
     ngDevMode && assertLView(lView);
     /** @type {?} */
-    const childComponentLView = getComponentViewByIndex(viewIndex, lView);
+    const childComponentLView = getComponentLViewByIndex(viewIndex, lView);
     if (!(childComponentLView[FLAGS] & 16 /* CheckAlways */)) {
         childComponentLView[FLAGS] |= 64 /* Dirty */;
     }
@@ -13866,7 +13866,7 @@ function postProcessDirective(lView, hostTNode, directive, def, directiveDefIdx)
     }
     if (isComponentDef(def)) {
         /** @type {?} */
-        const componentView = getComponentViewByIndex(hostTNode.index, lView);
+        const componentView = getComponentLViewByIndex(hostTNode.index, lView);
         componentView[CONTEXT] = directive;
     }
 }
@@ -14225,7 +14225,7 @@ function refreshDynamicEmbeddedViews(lView) {
 function refreshComponent(hostLView, componentHostIdx) {
     ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
     /** @type {?} */
-    const componentView = getComponentViewByIndex(componentHostIdx, hostLView);
+    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
     // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
     if (viewAttachedToChangeDetector(componentView) &&
         componentView[FLAGS] & (16 /* CheckAlways */ | 64 /* Dirty */)) {
@@ -14242,7 +14242,7 @@ function refreshComponent(hostLView, componentHostIdx) {
 function renderComponent(hostLView, componentHostIdx) {
     ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
     /** @type {?} */
-    const componentView = getComponentViewByIndex(componentHostIdx, hostLView);
+    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
     syncViewWithBlueprint(componentView);
     renderView(componentView, componentView[TVIEW], componentView[CONTEXT]);
 }
@@ -15656,19 +15656,17 @@ function viewEngine_ChangeDetectorRef_interface() { }
 class ViewRef {
     /**
      * @param {?} _lView
-     * @param {?} _context
-     * @param {?} _componentIndex
+     * @param {?=} _cdRefInjectingView
      */
-    constructor(_lView, _context, _componentIndex) {
-        this._context = _context;
-        this._componentIndex = _componentIndex;
+    constructor(_lView, _cdRefInjectingView) {
+        this._lView = _lView;
+        this._cdRefInjectingView = _cdRefInjectingView;
         this._appRef = null;
         this._viewContainerRef = null;
         /**
          * \@internal
          */
         this._tViewNode = null;
-        this._lView = _lView;
     }
     /**
      * @return {?}
@@ -15684,7 +15682,7 @@ class ViewRef {
     /**
      * @return {?}
      */
-    get context() { return this._context ? this._context : this._lookUpContext(); }
+    get context() { return (/** @type {?} */ (this._lView[CONTEXT])); }
     /**
      * @return {?}
      */
@@ -15748,7 +15746,7 @@ class ViewRef {
      * ```
      * @return {?}
      */
-    markForCheck() { markViewDirty(this._lView); }
+    markForCheck() { markViewDirty(this._cdRefInjectingView || this._lView); }
     /**
      * Detaches the view from the change detection tree.
      *
@@ -15918,13 +15916,6 @@ class ViewRef {
         }
         this._appRef = appRef;
     }
-    /**
-     * @private
-     * @return {?}
-     */
-    _lookUpContext() {
-        return this._context = (/** @type {?} */ ((/** @type {?} */ (getLViewParent(this._lView)))[this._componentIndex]));
-    }
 }
 if (false) {
     /**
@@ -15943,20 +15934,27 @@ if (false) {
      */
     ViewRef.prototype._tViewNode;
     /**
+     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
+     *
+     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
+     * component.
+     *
+     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
+     * view.
+     *
      * \@internal
      * @type {?}
      */
     ViewRef.prototype._lView;
     /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      * @type {?}
      * @private
      */
-    ViewRef.prototype._context;
-    /**
-     * @type {?}
-     * @private
-     */
-    ViewRef.prototype._componentIndex;
+    ViewRef.prototype._cdRefInjectingView;
 }
 /**
  * \@internal
@@ -15967,7 +15965,7 @@ class RootViewRef extends ViewRef {
      * @param {?} _view
      */
     constructor(_view) {
-        super(_view, null, -1);
+        super(_view);
         this._view = _view;
     }
     /**
@@ -16111,7 +16109,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
                 }
                 renderView(lView, embeddedTView, context);
                 /** @type {?} */
-                const viewRef = new ViewRef(lView, context, -1);
+                const viewRef = new ViewRef(lView);
                 viewRef._tViewNode = (/** @type {?} */ (lView[T_HOST]));
                 return viewRef;
             }
@@ -16323,7 +16321,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 const view = detachView(this._lContainer, adjustedIdx);
                 /** @type {?} */
                 const wasDetached = view && removeFromArray((/** @type {?} */ (this._lContainer[VIEW_REFS])), adjustedIdx) != null;
-                return wasDetached ? new ViewRef((/** @type {?} */ (view)), (/** @type {?} */ (view))[CONTEXT], -1) : null;
+                return wasDetached ? new ViewRef((/** @type {?} */ (view))) : null;
             }
             /**
              * @private
@@ -16408,24 +16406,30 @@ function injectChangeDetectorRef(isPipe = false) {
 /**
  * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
  *
- * @param {?} hostTNode The node that is requesting a ChangeDetectorRef
- * @param {?} hostView The view to which the node belongs
+ * @param {?} tNode The node that is requesting a ChangeDetectorRef
+ * @param {?} lView The view to which the node belongs
  * @param {?} isPipe Whether the view is being injected into a pipe.
  * @return {?} The ChangeDetectorRef to use
  */
-function createViewRef(hostTNode, hostView, isPipe) {
-    if (isComponentHost(hostTNode) && !isPipe) {
+function createViewRef(tNode, lView, isPipe) {
+    // `isComponentView` will be true for Component and Directives (but not for Pipes).
+    // See https://github.com/angular/angular/pull/33072 for proper fix
+    /** @type {?} */
+    const isComponentView = !isPipe && isComponentHost(tNode);
+    if (isComponentView) {
+        // The LView represents the location where the component is declared.
+        // Instead we want the LView for the component View and so we need to look it up.
         /** @type {?} */
-        const componentIndex = hostTNode.directiveStart;
-        /** @type {?} */
-        const componentView = getComponentViewByIndex(hostTNode.index, hostView);
-        return new ViewRef(componentView, null, componentIndex);
+        const componentView = getComponentLViewByIndex(tNode.index, lView);
+        return new ViewRef(componentView, componentView);
     }
-    else if (hostTNode.type === 3 /* Element */ || hostTNode.type === 0 /* Container */ ||
-        hostTNode.type === 4 /* ElementContainer */) {
+    else if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */ ||
+        tNode.type === 4 /* ElementContainer */) {
+        // The LView represents the location where the injection is requested from.
+        // We need to locate the containing LView (in case where the `lView` is an embedded view)
         /** @type {?} */
-        const hostComponentView = findComponentView(hostView);
-        return new ViewRef(hostComponentView, hostComponentView[CONTEXT], -1);
+        const hostComponentView = findComponentView(lView);
+        return new ViewRef(hostComponentView, lView);
     }
     return (/** @type {?} */ (null));
 }
@@ -16456,7 +16460,7 @@ function injectRenderer2() {
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     /** @type {?} */
-    const nodeAtIndex = getComponentViewByIndex(tNode.index, lView);
+    const nodeAtIndex = getComponentLViewByIndex(tNode.index, lView);
     return getOrCreateRenderer2(isLView(nodeAtIndex) ? nodeAtIndex : lView);
 }
 
@@ -23006,7 +23010,7 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         // must also mark the component view itself dirty (i.e. the view that it owns).
         /** @type {?} */
         const startView = tNode.flags & 2 /* isComponentHost */ ?
-            getComponentViewByIndex(tNode.index, lView) :
+            getComponentLViewByIndex(tNode.index, lView) :
             lView;
         // See interfaces/view.ts for more on LViewFlags.ManualOnPush
         if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
@@ -27099,7 +27103,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.12+46.sha-7f7dc7c.with-local-changes');
+const VERSION = new Version('9.0.0-next.12+49.sha-1b8b04c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -42865,7 +42869,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
             // If the element is the host of a component, then all nodes in its view have to be processed.
             // Note: the component's content (tNode.child) will be processed from the insertion points.
             /** @type {?} */
-            const componentView = getComponentViewByIndex(tNode.index, lView);
+            const componentView = getComponentLViewByIndex(tNode.index, lView);
             if (componentView && componentView[TVIEW].firstChild) {
                 _queryNodeChildrenR3((/** @type {?} */ (componentView[TVIEW].firstChild)), componentView, predicate, matches, elementsOnly, rootNativeNode);
             }
