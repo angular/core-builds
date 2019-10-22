@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+50.sha-b3d6d50.with-local-changes
+ * @license Angular v9.0.0-next.12+51.sha-398ff1e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27103,7 +27103,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.12+50.sha-b3d6d50.with-local-changes');
+const VERSION = new Version('9.0.0-next.12+51.sha-398ff1e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -38929,6 +38929,9 @@ if (false) {
  *
  * @param T the module type. In Ivy applications, this must be explicitly
  * provided.
+ *
+ * Note that using ModuleWithProviders without a generic type is deprecated.
+ * The generic will become required in a future version of Angular.
  *
  * \@publicApi
  * @record

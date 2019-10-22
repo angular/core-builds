@@ -76,6 +76,9 @@ export interface NgModuleDef<T> {
  * @param T the module type. In Ivy applications, this must be explicitly
  * provided.
  *
+ * Note that using ModuleWithProviders without a generic type is deprecated.
+ * The generic will become required in a future version of Angular.
+ *
  * @publicApi
  */
 export interface ModuleWithProviders<T = any /** TODO(alxhub): remove default when callers pass explicit type param */> {
