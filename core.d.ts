@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+46.sha-7f7dc7c.with-local-changes
+ * @license Angular v9.0.0-next.12+49.sha-1b8b04c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8281,12 +8281,36 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
 }
 
 declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewEngine_ChangeDetectorRef_interface {
-    private _context;
-    private _componentIndex;
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    private _cdRefInjectingView?;
     private _appRef;
     private _viewContainerRef;
     readonly rootNodes: any[];
-    constructor(_lView: ɵangular_packages_core_core_bm, _context: T | null, _componentIndex: number);
+    constructor(
+    /**
+     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
+     *
+     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
+     * component.
+     *
+     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
+     * view.
+     *
+     * @internal
+     */
+    _lView: ɵangular_packages_core_core_bm, 
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    _cdRefInjectingView?: ɵangular_packages_core_core_bm | undefined);
     readonly context: T;
     readonly destroyed: boolean;
     destroy(): void;
@@ -8469,7 +8493,6 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
     attachToViewContainerRef(vcRef: ViewContainerRef): void;
     detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
-    private _lookUpContext;
 }
 
 /**
