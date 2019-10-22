@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+50.sha-dfff5fe.with-local-changes
+ * @license Angular v9.0.0-next.12+52.sha-b4e7df5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3844,6 +3844,9 @@ export declare class ModuleWithComponentFactories<T> {
  *
  * @param T the module type. In Ivy applications, this must be explicitly
  * provided.
+ *
+ * Note that using ModuleWithProviders without a generic type is deprecated.
+ * The generic will become required in a future version of Angular.
  *
  * @publicApi
  */
