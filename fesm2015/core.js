@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+1.sha-c79d6ec.with-local-changes
+ * @license Angular v9.0.0-next.13+2.sha-d40ee6a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4766,10 +4766,8 @@ function normalizeIntoStylingMap(bindingValue, newValues, normalizeProps) {
     /** @type {?} */
     let allValuesTrue = false;
     if (typeof newValues === 'string') { // [class] bindings allow string values
-        if (newValues.length) {
-            props = newValues.split(/\s+/);
-            allValuesTrue = true;
-        }
+        props = splitOnWhitespace(newValues);
+        allValuesTrue = props !== null;
     }
     else {
         props = newValues ? Object.keys(newValues) : null;
@@ -4787,6 +4785,43 @@ function normalizeIntoStylingMap(bindingValue, newValues, normalizeProps) {
         }
     }
     return stylingMapArr;
+}
+/**
+ * @param {?} text
+ * @return {?}
+ */
+function splitOnWhitespace(text) {
+    /** @type {?} */
+    let array = null;
+    /** @type {?} */
+    let length = text.length;
+    /** @type {?} */
+    let start = 0;
+    /** @type {?} */
+    let foundChar = false;
+    for (let i = 0; i < length; i++) {
+        /** @type {?} */
+        const char = text.charCodeAt(i);
+        if (char <= 32 /*' '*/) {
+            if (foundChar) {
+                if (array === null)
+                    array = [];
+                array.push(text.substring(start, i));
+                foundChar = false;
+            }
+            start = i + 1;
+        }
+        else {
+            foundChar = true;
+        }
+    }
+    if (foundChar) {
+        if (array === null)
+            array = [];
+        array.push(text.substring(start, length));
+        foundChar = false;
+    }
+    return array;
 }
 // TODO (matsko|AndrewKushnir): refactor this once we figure out how to generate separate
 // `input('class') + classMap()` instructions.
@@ -27120,7 +27155,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.13+1.sha-c79d6ec.with-local-changes');
+const VERSION = new Version('9.0.0-next.13+2.sha-d40ee6a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
