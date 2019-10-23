@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+52.sha-af2e4ac.with-local-changes
+ * @license Angular v9.0.0-next.12+52.sha-36fca76.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27120,7 +27120,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.12+52.sha-af2e4ac.with-local-changes');
+const VERSION = new Version('9.0.0-next.12+52.sha-36fca76.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
