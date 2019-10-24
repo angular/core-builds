@@ -130,4 +130,5 @@ export declare function addItemToStylingMap(stylingMapArr: StylingMapArray, prop
 export declare function normalizeIntoStylingMap(bindingValue: null | StylingMapArray, newValues: {
     [key: string]: any;
 } | string | null | undefined, normalizeProps?: boolean): StylingMapArray;
+export declare function splitOnWhitespace(text: string): string[] | null;
 export declare function selectClassBasedInputName(inputs: PropertyAliases): string;
