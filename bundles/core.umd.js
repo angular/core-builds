@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+69.sha-72aaaea.with-local-changes
+ * @license Angular v9.0.0-next.13+4.sha-d49f589.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3019,10 +3019,8 @@
         var map;
         var allValuesTrue = false;
         if (typeof newValues === 'string') { // [class] bindings allow string values
-            if (newValues.length) {
-                props = newValues.split(/\s+/);
-                allValuesTrue = true;
-            }
+            props = splitOnWhitespace(newValues);
+            allValuesTrue = props !== null;
         }
         else {
             props = newValues ? Object.keys(newValues) : null;
@@ -3037,6 +3035,34 @@
             }
         }
         return stylingMapArr;
+    }
+    function splitOnWhitespace(text) {
+        var array = null;
+        var length = text.length;
+        var start = 0;
+        var foundChar = false;
+        for (var i = 0; i < length; i++) {
+            var char = text.charCodeAt(i);
+            if (char <= 32 /*' '*/) {
+                if (foundChar) {
+                    if (array === null)
+                        array = [];
+                    array.push(text.substring(start, i));
+                    foundChar = false;
+                }
+                start = i + 1;
+            }
+            else {
+                foundChar = true;
+            }
+        }
+        if (foundChar) {
+            if (array === null)
+                array = [];
+            array.push(text.substring(start, length));
+            foundChar = false;
+        }
+        return array;
     }
     // TODO (matsko|AndrewKushnir): refactor this once we figure out how to generate separate
     // `input('class') + classMap()` instructions.
@@ -19019,7 +19045,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.12+69.sha-72aaaea.with-local-changes');
+    var VERSION = new Version('9.0.0-next.13+4.sha-d49f589.with-local-changes');
 
     /**
      * @license
