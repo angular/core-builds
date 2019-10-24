@@ -114,7 +114,7 @@ export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView,
 * cached `injectable`. Otherwise if it detects that the value is still a factory it
 * instantiates the `injectable` and caches the value.
 */
-export declare function getNodeInjectable(tData: TData, lData: LView, index: number, tNode: TElementNode): any;
+export declare function getNodeInjectable(tData: TData, lView: LView, index: number, tNode: TElementNode): any;
 /**
  * Returns the bit in an injector's bloom filter that should be used to determine whether or not
  * the directive might be provided by the injector.

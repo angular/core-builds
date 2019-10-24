@@ -253,7 +253,7 @@ export declare const enum InitPhaseState {
     AfterViewInitHooksToBeRun = 2,
     InitPhaseCompleted = 3
 }
-/** More flags associated with an LView (saved in LView[FLAGS_MORE]) */
+/** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 export declare const enum PreOrderHookFlags {
     /** The index of the next pre-order hook to be called in the hooks array, on the first 16
        bits */

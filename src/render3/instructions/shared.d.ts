@@ -230,13 +230,6 @@ export declare function detectChangesInternal<T>(view: LView, context: T): void;
  * @param lView The view which the change detection should be performed on.
  */
 export declare function detectChangesInRootView(lView: LView): void;
-/**
- * Checks the change detector and its children, and throws if any changes are detected.
- *
- * This is used in development mode to verify that running change detection doesn't
- * introduce other changes.
- */
-export declare function checkNoChanges<T>(component: T): void;
 export declare function checkNoChangesInternal<T>(view: LView, context: T): void;
 /**
  * Checks the change detector on a root view and its components, and throws if any changes are

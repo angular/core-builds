@@ -7,18 +7,24 @@
  */
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { ComponentDef, DirectiveDef } from './interfaces/definition';
-import { TElementNode, TNode, TViewNode } from './interfaces/node';
+import { TNode } from './interfaces/node';
 import { LView, OpaqueViewState } from './interfaces/view';
 /**
- * All implicit instruction state is stored here.
  *
- * It is useful to have a single object where all of the state is stored as a mental model
- * (rather it being spread across many different variables.)
- *
- * PERF NOTE: Turns out that writing to a true global variable is slower than
- * having an intermediate object with properties.
  */
-interface InstructionState {
+interface LFrame {
+    /**
+     * Parent LFrame.
+     *
+     * This is needed when `leaveView` is called to restore the previous state.
+     */
+    parent: LFrame;
+    /**
+     * Child LFrame.
+     *
+     * This is used to cache existing LFrames to relieve the memory pressure.
+     */
+    child: LFrame | null;
     /**
      * State of the current view being processed.
      *
@@ -52,35 +58,12 @@ interface InstructionState {
      */
     contextLView: LView;
     /**
-     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
-     *
-     * Necessary to support ChangeDetectorRef.checkNoChanges().
-     */
-    checkNoChangesMode: boolean;
-    /**
      * Store the element depth count. This is used to identify the root elements of the template
-     * so that we can then attach `LView` to only those elements.
+     * so that we can then attach patch data `LView` to only those elements. We know that those
+     * are the only places where the patch data could change, this way we will save on number
+     * of places where tha patching occurs.
      */
     elementDepthCount: number;
-    /**
-     * Stores whether directives should be matched to elements.
-     *
-     * When template contains `ngNonBindable` then we need to prevent the runtime form matching
-     * directives on children of that element.
-     *
-     * Example:
-     * ```
-     * <my-comp my-directive>
-     *   Should match component / directive.
-     * </my-comp>
-     * <div ngNonBindable>
-     *   <my-comp my-directive>
-     *     Should not match component / directive because we are in ngNonBindable.
-     *   </my-comp>
-     * </div>
-     * ```
-     */
-    bindingsEnabled: boolean;
     /**
      * Current namespace to be used when creating elements
      */
@@ -112,6 +95,48 @@ interface InstructionState {
      * We iterate over the list of Queries and increment current query index at every step.
      */
     currentQueryIndex: number;
+}
+/**
+ * All implicit instruction state is stored here.
+ *
+ * It is useful to have a single object where all of the state is stored as a mental model
+ * (rather it being spread across many different variables.)
+ *
+ * PERF NOTE: Turns out that writing to a true global variable is slower than
+ * having an intermediate object with properties.
+ */
+interface InstructionState {
+    /**
+     * Current `LFrame`
+     *
+     * `null` if we have not called `enterView`
+     */
+    lFrame: LFrame;
+    /**
+     * Stores whether directives should be matched to elements.
+     *
+     * When template contains `ngNonBindable` then we need to prevent the runtime from matching
+     * directives on children of that element.
+     *
+     * Example:
+     * ```
+     * <my-comp my-directive>
+     *   Should match component / directive.
+     * </my-comp>
+     * <div ngNonBindable>
+     *   <my-comp my-directive>
+     *     Should not match component / directive because we are in ngNonBindable.
+     *   </my-comp>
+     * </div>
+     * ```
+     */
+    bindingsEnabled: boolean;
+    /**
+     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
+     *
+     * Necessary to support ChangeDetectorRef.checkNoChanges().
+     */
+    checkNoChangesMode: boolean;
     /**
      * Function to be called when the element is exited.
      *
@@ -166,6 +191,12 @@ export declare function ɵɵenableBindings(): void;
  * @codeGenApi
  */
 export declare function ɵɵdisableBindings(): void;
+/**
+ * Return the current LView.
+ *
+ * The return value can be `null` if the method is called outside of template. This can happen if
+ * directive is instantiated by module injector (rather than by node injector.)
+ */
 export declare function getLView(): LView;
 /**
  * Flags used for an active element during change detection.
@@ -186,10 +217,6 @@ export declare const enum ActiveElementFlags {
  * Determines whether or not a flag is currently set for the active element.
  */
 export declare function hasActiveElementFlag(flag: ActiveElementFlags): boolean;
-/**
- * Sets a flag is for the active element.
- */
-export declare function setActiveElementFlag(flag: ActiveElementFlags): void;
 /**
  * Sets the active directive host element and resets the directive id value
  * (when the provided elementIndex value has changed).
@@ -264,7 +291,6 @@ export declare function incrementActiveDirectiveId(): void;
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentTNode(): TNode;
 export declare function setPreviousOrParentTNode(tNode: TNode, _isParent: boolean): void;
-export declare function setTNodeAndViewData(tNode: TNode, view: LView): void;
 export declare function getIsParent(): boolean;
 export declare function setIsNotParent(): void;
 export declare function setIsParent(): void;
@@ -276,6 +302,18 @@ export declare function setBindingRoot(value: number): void;
 export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;
 /**
+ * This is a light weight version of the `enterView` which is needed by the DI system.
+ * @param newView
+ * @param tNode
+ */
+export declare function enterDI(newView: LView, tNode: TNode): void;
+/**
+ * This is a light weight version of the `leaveView` which is needed by the DI system.
+ *
+ * Because the implementation is same it is only an alias
+ */
+export declare const leaveDI: typeof leaveView;
+/**
  * Swap the current lView with a new lView.
  *
  * For performance reasons we store the lView in the top level of the module.
@@ -284,15 +322,13 @@ export declare function setCurrentQueryIndex(value: number): void;
  * exited the state has to be restored
  *
  * @param newView New lView to become active
- * @param host Element to which the View is a child of
+ * @param tNode Element to which the View is a child of
  * @returns the previously active lView;
  */
-export declare function selectView(newView: LView, hostTNode: TElementNode | TViewNode | null): LView;
+export declare function enterView(newView: LView, tNode: TNode | null): void;
+export declare function leaveViewProcessExit(): void;
+export declare function leaveView(): void;
 export declare function nextContextImpl<T = any>(level?: number): T;
-/**
- * Resets the application state.
- */
-export declare function resetComponentState(): void;
 /**
  * Gets the most recent index passed to {@link select}
  *
