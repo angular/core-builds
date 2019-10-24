@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+10.sha-efbbae5.with-local-changes
+ * @license Angular v9.0.0-next.13+15.sha-f76b370.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27155,7 +27155,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.13+10.sha-efbbae5.with-local-changes');
+const VERSION = new Version('9.0.0-next.13+15.sha-f76b370.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -43160,22 +43160,39 @@ function _keyValueDiffersFactory() {
  * @return {?}
  */
 function _localeFactory(locale) {
-    if (locale) {
-        if (ivyEnabled) {
-            setLocaleId(locale);
-        }
-        return locale;
+    locale = locale || getGlobalLocale();
+    if (ivyEnabled) {
+        setLocaleId(locale);
     }
-    // Use `goog.LOCALE` as default value for `LOCALE_ID` token for Closure Compiler.
-    // Note: default `goog.LOCALE` value is `en`, when Angular used `en-US`. In order to preserve
-    // backwards compatibility, we use Angular default value over Closure Compiler's one.
+    return locale;
+}
+/**
+ * Work out the locale from the potential global properties.
+ *
+ * * Closure Compiler: use `goog.LOCALE`.
+ * * Ivy enabled: use `$localize.locale`
+ * @return {?}
+ */
+function getGlobalLocale() {
     if (ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
-        if (ivyEnabled) {
-            setLocaleId(goog.LOCALE);
-        }
+        // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
+        // * In order to preserve backwards compatibility, we use Angular default value over
+        //   Closure Compiler's one.
         return goog.LOCALE;
     }
-    return DEFAULT_LOCALE_ID;
+    else {
+        // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
+        // COMPILE-TIME INLINER.
+        //
+        // * During compile time inlining of translations the expression will be replaced
+        //   with a string literal that is the current locale. Other forms of this expression are not
+        //   guaranteed to be replaced.
+        //
+        // * During runtime translation evaluation, the developer is required to set `$localize.locale`
+        //   if required, or just to provide their own `LOCALE_ID` provider.
+        return (ivyEnabled && typeof $localize !== 'undefined' && $localize.locale) ||
+            DEFAULT_LOCALE_ID;
+    }
 }
 /**
  * A built-in [dependency injection token](guide/glossary#di-token)
