@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+17.sha-63f0ded.with-local-changes
+ * @license Angular v9.0.0-next.13+19.sha-a42057d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19045,7 +19045,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.13+17.sha-63f0ded.with-local-changes');
+    var VERSION = new Version('9.0.0-next.13+19.sha-a42057d.with-local-changes');
 
     /**
      * @license
@@ -25656,7 +25656,7 @@
             name: type.name,
             type: type,
             typeArgumentCount: 0,
-            selector: metadata.selector,
+            selector: metadata.selector !== undefined ? metadata.selector : null,
             deps: reflectDependencies(type),
             host: metadata.host || EMPTY_OBJ,
             propMetadata: propMetadata,
