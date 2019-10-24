@@ -7,6 +7,13 @@ export declare function _iterableDiffersFactory(): IterableDiffers;
 export declare function _keyValueDiffersFactory(): KeyValueDiffers;
 export declare function _localeFactory(locale?: string): string;
 /**
+ * Work out the locale from the potential global properties.
+ *
+ * * Closure Compiler: use `goog.LOCALE`.
+ * * Ivy enabled: use `$localize.locale`
+ */
+export declare function getGlobalLocale(): string;
+/**
  * A built-in [dependency injection token](guide/glossary#di-token)
  * that is used to configure the root injector for bootstrapping.
  */
