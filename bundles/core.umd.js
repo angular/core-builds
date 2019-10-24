@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+24.sha-d883007.with-local-changes
+ * @license Angular v9.0.0-next.13+27.sha-09a2bb8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2076,42 +2076,27 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var instructionState = {
-        previousOrParentTNode: null,
-        isParent: null,
-        lView: null,
-        // tslint:disable-next-line: no-toplevel-property-access
-        selectedIndex: -1 << 1 /* Size */,
-        contextLView: null,
-        checkNoChangesMode: false,
-        elementDepthCount: 0,
+        lFrame: createLFrame(null),
         bindingsEnabled: true,
-        currentNamespace: null,
-        currentSanitizer: null,
-        currentDirectiveDef: null,
-        activeDirectiveId: 0,
-        bindingRootIndex: -1,
-        currentQueryIndex: 0,
         elementExitFn: null,
+        checkNoChangesMode: false,
     };
     function getElementDepthCount() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.elementDepthCount;
+        return instructionState.lFrame.elementDepthCount;
     }
     function increaseElementDepthCount() {
-        instructionState.elementDepthCount++;
+        instructionState.lFrame.elementDepthCount++;
     }
     function decreaseElementDepthCount() {
-        instructionState.elementDepthCount--;
+        instructionState.lFrame.elementDepthCount--;
     }
     function getCurrentDirectiveDef() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.currentDirectiveDef;
+        return instructionState.lFrame.currentDirectiveDef;
     }
     function setCurrentDirectiveDef(def) {
-        instructionState.currentDirectiveDef = def;
+        instructionState.lFrame.currentDirectiveDef = def;
     }
     function getBindingsEnabled() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return instructionState.bindingsEnabled;
     }
     /**
@@ -2158,20 +2143,28 @@
     function ɵɵdisableBindings() {
         instructionState.bindingsEnabled = false;
     }
+    /**
+     * Return the current LView.
+     *
+     * The return value can be `null` if the method is called outside of template. This can happen if
+     * directive is instantiated by module injector (rather than by node injector.)
+     */
     function getLView() {
-        return instructionState.lView;
+        // TODO(misko): the return value should be `LView|null` but doing so breaks a lot of code.
+        var lFrame = instructionState.lFrame;
+        return lFrame === null ? null : lFrame.lView;
     }
     /**
      * Determines whether or not a flag is currently set for the active element.
      */
     function hasActiveElementFlag(flag) {
-        return (instructionState.selectedIndex & flag) === flag;
+        return (instructionState.lFrame.selectedIndex & flag) === flag;
     }
     /**
      * Sets a flag is for the active element.
      */
     function setActiveElementFlag(flag) {
-        instructionState.selectedIndex |= flag;
+        instructionState.lFrame.selectedIndex |= flag;
     }
     /**
      * Sets the active directive host element and resets the directive id value
@@ -2182,19 +2175,15 @@
      */
     function setActiveHostElement(elementIndex) {
         if (elementIndex === void 0) { elementIndex = null; }
-        if (getSelectedIndex() !== elementIndex) {
-            if (hasActiveElementFlag(1 /* RunExitFn */)) {
-                executeElementExitFn();
-            }
-            setSelectedIndex(elementIndex === null ? -1 : elementIndex);
-            instructionState.activeDirectiveId = 0;
+        if (hasActiveElementFlag(1 /* RunExitFn */)) {
+            executeElementExitFn();
         }
+        setSelectedIndex(elementIndex === null ? -1 : elementIndex);
+        instructionState.lFrame.activeDirectiveId = 0;
     }
     function executeElementExitFn() {
         instructionState.elementExitFn();
-        // TODO (matsko|misko): remove this unassignment once the state management of
-        //                      global variables are better managed.
-        instructionState.selectedIndex &= ~1 /* RunExitFn */;
+        instructionState.lFrame.selectedIndex &= ~1 /* RunExitFn */;
     }
     /**
      * Queues a function to be run once the element is "exited" in CD.
@@ -2233,7 +2222,7 @@
      * different set of directives).
      */
     function getActiveDirectiveId() {
-        return instructionState.activeDirectiveId;
+        return instructionState.lFrame.activeDirectiveId;
     }
     /**
      * Increments the current directive id value.
@@ -2261,7 +2250,7 @@
         // directive uniqueId is not set anywhere--it is just incremented between
         // each hostBindings call and is useful for helping instruction code
         // uniquely determine which directive is currently active when executed.
-        instructionState.activeDirectiveId += 1;
+        instructionState.lFrame.activeDirectiveId += 1;
     }
     /**
      * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -2275,37 +2264,28 @@
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
-        instructionState.contextLView = viewToRestore;
+        instructionState.lFrame.contextLView = viewToRestore;
     }
     function getPreviousOrParentTNode() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.previousOrParentTNode;
+        return instructionState.lFrame.previousOrParentTNode;
     }
     function setPreviousOrParentTNode(tNode, _isParent) {
-        instructionState.previousOrParentTNode = tNode;
-        instructionState.isParent = _isParent;
-    }
-    function setTNodeAndViewData(tNode, view) {
-        ngDevMode && assertLViewOrUndefined(view);
-        instructionState.previousOrParentTNode = tNode;
-        instructionState.lView = view;
+        instructionState.lFrame.previousOrParentTNode = tNode;
+        instructionState.lFrame.isParent = _isParent;
     }
     function getIsParent() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.isParent;
+        return instructionState.lFrame.isParent;
     }
     function setIsNotParent() {
-        instructionState.isParent = false;
+        instructionState.lFrame.isParent = false;
     }
     function setIsParent() {
-        instructionState.isParent = true;
+        instructionState.lFrame.isParent = true;
     }
     function getContextLView() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.contextLView;
+        return instructionState.lFrame.contextLView;
     }
     function getCheckNoChangesMode() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return instructionState.checkNoChangesMode;
     }
     function setCheckNoChangesMode(mode) {
@@ -2313,18 +2293,55 @@
     }
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     function getBindingRoot() {
-        return instructionState.bindingRootIndex;
+        var lFrame = instructionState.lFrame;
+        var index = lFrame.bindingRootIndex;
+        if (index === -1) {
+            var lView = lFrame.lView;
+            index = lFrame.bindingRootIndex = lView[BINDING_INDEX] = lView[TVIEW].bindingStartIndex;
+        }
+        return index;
     }
     function setBindingRoot(value) {
-        instructionState.bindingRootIndex = value;
+        instructionState.lFrame.bindingRootIndex = value;
     }
     function getCurrentQueryIndex() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.currentQueryIndex;
+        return instructionState.lFrame.currentQueryIndex;
     }
     function setCurrentQueryIndex(value) {
-        instructionState.currentQueryIndex = value;
+        instructionState.lFrame.currentQueryIndex = value;
     }
+    /**
+     * This is a light weight version of the `enterView` which is needed by the DI system.
+     * @param newView
+     * @param tNode
+     */
+    function enterDI(newView, tNode) {
+        ngDevMode && assertLViewOrUndefined(newView);
+        var newLFrame = allocLFrame();
+        instructionState.lFrame = newLFrame;
+        newLFrame.previousOrParentTNode = tNode;
+        newLFrame.lView = newView;
+        if (ngDevMode) {
+            // resetting for safety in dev mode only.
+            newLFrame.isParent = DEV_MODE_VALUE;
+            newLFrame.selectedIndex = DEV_MODE_VALUE;
+            newLFrame.contextLView = DEV_MODE_VALUE;
+            newLFrame.elementDepthCount = DEV_MODE_VALUE;
+            newLFrame.currentNamespace = DEV_MODE_VALUE;
+            newLFrame.currentSanitizer = DEV_MODE_VALUE;
+            newLFrame.currentDirectiveDef = DEV_MODE_VALUE;
+            newLFrame.activeDirectiveId = DEV_MODE_VALUE;
+            newLFrame.bindingRootIndex = DEV_MODE_VALUE;
+            newLFrame.currentQueryIndex = DEV_MODE_VALUE;
+        }
+    }
+    var DEV_MODE_VALUE = 'Value indicating that DI is trying to read value which it should not need to know about.';
+    /**
+     * This is a light weight version of the `leaveView` which is needed by the DI system.
+     *
+     * Because the implementation is same it is only an alias
+     */
+    var leaveDI = leaveView;
     /**
      * Swap the current lView with a new lView.
      *
@@ -2334,24 +2351,68 @@
      * exited the state has to be restored
      *
      * @param newView New lView to become active
-     * @param host Element to which the View is a child of
+     * @param tNode Element to which the View is a child of
      * @returns the previously active lView;
      */
-    function selectView(newView, hostTNode) {
+    function enterView(newView, tNode) {
+        ngDevMode && assertLViewOrUndefined(newView);
+        var newLFrame = allocLFrame();
+        instructionState.lFrame = newLFrame;
+        newLFrame.previousOrParentTNode = tNode;
+        newLFrame.isParent = true;
+        newLFrame.lView = newView;
+        newLFrame.selectedIndex = 0;
+        newLFrame.contextLView = newView;
+        newLFrame.elementDepthCount = 0;
+        newLFrame.currentNamespace = null;
+        newLFrame.currentSanitizer = null;
+        newLFrame.currentDirectiveDef = null;
+        newLFrame.activeDirectiveId = 0;
+        newLFrame.bindingRootIndex = -1;
+        newLFrame.currentQueryIndex = 0;
+    }
+    /**
+     * Allocates next free LFrame. This function tries to reuse the `LFrame`s to lower memory pressure.
+     */
+    function allocLFrame() {
+        var currentLFrame = instructionState.lFrame;
+        var childLFrame = currentLFrame === null ? null : currentLFrame.child;
+        var newLFrame = childLFrame === null ? createLFrame(currentLFrame) : childLFrame;
+        return newLFrame;
+    }
+    function createLFrame(parent) {
+        var lFrame = {
+            previousOrParentTNode: null,
+            isParent: true,
+            lView: null,
+            selectedIndex: 0,
+            contextLView: null,
+            elementDepthCount: 0,
+            currentNamespace: null,
+            currentSanitizer: null,
+            currentDirectiveDef: null,
+            activeDirectiveId: 0,
+            bindingRootIndex: -1,
+            currentQueryIndex: 0,
+            parent: parent,
+            child: null,
+        };
+        parent !== null && (parent.child = lFrame); // link the new LFrame for reuse.
+        return lFrame;
+    }
+    function leaveViewProcessExit() {
         if (hasActiveElementFlag(1 /* RunExitFn */)) {
             executeElementExitFn();
         }
-        ngDevMode && assertLViewOrUndefined(newView);
-        var oldView = instructionState.lView;
-        instructionState.previousOrParentTNode = hostTNode;
-        instructionState.isParent = true;
-        instructionState.lView = instructionState.contextLView = newView;
-        return oldView;
+        leaveView();
+    }
+    function leaveView() {
+        instructionState.lFrame = instructionState.lFrame.parent;
     }
     function nextContextImpl(level) {
         if (level === void 0) { level = 1; }
-        instructionState.contextLView = walkUpViews(level, instructionState.contextLView);
-        return instructionState.contextLView[CONTEXT];
+        instructionState.lFrame.contextLView = walkUpViews(level, instructionState.lFrame.contextLView);
+        return instructionState.lFrame.contextLView[CONTEXT];
     }
     function walkUpViews(nestingLevel, currentView) {
         while (nestingLevel > 0) {
@@ -2362,23 +2423,13 @@
         return currentView;
     }
     /**
-     * Resets the application state.
-     */
-    function resetComponentState() {
-        instructionState.isParent = false;
-        instructionState.previousOrParentTNode = null;
-        instructionState.elementDepthCount = 0;
-        instructionState.bindingsEnabled = true;
-        setCurrentStyleSanitizer(null);
-    }
-    /**
      * Gets the most recent index passed to {@link select}
      *
      * Used with {@link property} instruction (and more in the future) to identify the index in the
      * current `LView` to act on.
      */
     function getSelectedIndex() {
-        return instructionState.selectedIndex >> 1 /* Size */;
+        return instructionState.lFrame.selectedIndex >> 1 /* Size */;
     }
     /**
      * Sets the most recent index passed to {@link select}
@@ -2390,7 +2441,7 @@
      * run if and when the provided `index` value is different from the current selected index value.)
      */
     function setSelectedIndex(index) {
-        instructionState.selectedIndex = index << 1 /* Size */;
+        instructionState.lFrame.selectedIndex = index << 1 /* Size */;
     }
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
@@ -2398,7 +2449,7 @@
      * @codeGenApi
      */
     function ɵɵnamespaceSVG() {
-        instructionState.currentNamespace = 'http://www.w3.org/2000/svg';
+        instructionState.lFrame.currentNamespace = 'http://www.w3.org/2000/svg';
     }
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
@@ -2406,7 +2457,7 @@
      * @codeGenApi
      */
     function ɵɵnamespaceMathML() {
-        instructionState.currentNamespace = 'http://www.w3.org/1998/MathML/';
+        instructionState.lFrame.currentNamespace = 'http://www.w3.org/1998/MathML/';
     }
     /**
      * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -2422,19 +2473,22 @@
      * `createElement` rather than `createElementNS`.
      */
     function namespaceHTMLInternal() {
-        instructionState.currentNamespace = null;
+        instructionState.lFrame.currentNamespace = null;
     }
     function getNamespace() {
-        return instructionState.currentNamespace;
+        return instructionState.lFrame.currentNamespace;
     }
     function setCurrentStyleSanitizer(sanitizer) {
-        instructionState.currentSanitizer = sanitizer;
+        instructionState.lFrame.currentSanitizer = sanitizer;
     }
     function resetCurrentStyleSanitizer() {
         setCurrentStyleSanitizer(null);
     }
     function getCurrentStyleSanitizer() {
-        return instructionState.currentSanitizer;
+        // TODO(misko): This should throw when there is no LView, but it turns out we can get here from
+        // `NodeStyleDebug` hence we return `null`. This should be fixed
+        var lFrame = instructionState.lFrame;
+        return lFrame === null ? null : lFrame.currentSanitizer;
     }
 
     /**
@@ -3588,9 +3642,7 @@
             // If the ID stored here is a function, this is a special object like ElementRef or TemplateRef
             // so just call the factory function to create it.
             if (typeof bloomHash === 'function') {
-                var savePreviousOrParentTNode = getPreviousOrParentTNode();
-                var saveLView = getLView();
-                setTNodeAndViewData(tNode, lView);
+                enterDI(lView, tNode);
                 try {
                     var value = bloomHash();
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
@@ -3601,7 +3653,7 @@
                     }
                 }
                 finally {
-                    setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
+                    leaveDI();
                 }
             }
             else if (typeof bloomHash == 'number') {
@@ -3768,8 +3820,8 @@
     * cached `injectable`. Otherwise if it detects that the value is still a factory it
     * instantiates the `injectable` and caches the value.
     */
-    function getNodeInjectable(tData, lData, index, tNode) {
-        var value = lData[index];
+    function getNodeInjectable(tData, lView, index, tNode) {
+        var value = lView[index];
         if (isFactory(value)) {
             var factory = value;
             if (factory.resolving) {
@@ -3781,18 +3833,16 @@
             if (factory.injectImpl) {
                 previousInjectImplementation = setInjectImplementation(factory.injectImpl);
             }
-            var savePreviousOrParentTNode = getPreviousOrParentTNode();
-            var saveLView = getLView();
-            setTNodeAndViewData(tNode, lData);
+            enterDI(lView, tNode);
             try {
-                value = lData[index] = factory.factory(undefined, tData, lData, tNode);
+                value = lView[index] = factory.factory(undefined, tData, lView, tNode);
             }
             finally {
                 if (factory.injectImpl)
                     setInjectImplementation(previousInjectImplementation);
                 setIncludeViewProviders(previousIncludeViewProviders);
                 factory.resolving = false;
-                setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
+                leaveDI();
             }
         }
         return value;
@@ -8400,7 +8450,7 @@
      */
     function renderView(lView, tView, context) {
         ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
-        var oldView = selectView(lView, lView[T_HOST]);
+        enterView(lView, lView[T_HOST]);
         try {
             var viewQuery = tView.viewQuery;
             if (viewQuery !== null) {
@@ -8440,7 +8490,7 @@
         }
         finally {
             lView[FLAGS] &= ~4 /* CreationMode */;
-            selectView(oldView, null);
+            leaveView();
         }
     }
     /**
@@ -8453,7 +8503,7 @@
      */
     function refreshView(lView, tView, templateFn, context) {
         ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
-        var oldView = selectView(lView, lView[T_HOST]);
+        enterView(lView, lView[T_HOST]);
         var flags = lView[FLAGS];
         try {
             resetPreOrderHookFlags(lView);
@@ -8535,15 +8585,13 @@
         }
         finally {
             lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
-            selectView(oldView, null);
+            leaveViewProcessExit();
         }
     }
     function renderComponentOrTemplate(hostView, templateFn, context) {
         var rendererFactory = hostView[RENDERER_FACTORY];
         var normalExecutionPath = !getCheckNoChangesMode();
         var creationModeIsActive = isCreationMode(hostView);
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var isParent = getIsParent();
         try {
             if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
                 rendererFactory.begin();
@@ -8558,11 +8606,9 @@
             if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
                 rendererFactory.end();
             }
-            setPreviousOrParentTNode(previousOrParentTNode, isParent);
         }
     }
     function executeTemplate(lView, templateFn, rf, context) {
-        namespaceHTMLInternal();
         var prevSelectedIndex = getSelectedIndex();
         try {
             setActiveHostElement(null);
@@ -9591,8 +9637,6 @@
     }
     function detectChangesInternal(view, context) {
         var rendererFactory = view[RENDERER_FACTORY];
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var isParent = getIsParent();
         if (rendererFactory.begin)
             rendererFactory.begin();
         try {
@@ -9606,7 +9650,6 @@
         finally {
             if (rendererFactory.end)
                 rendererFactory.end();
-            setPreviousOrParentTNode(previousOrParentTNode, isParent);
         }
     }
     /**
@@ -9616,16 +9659,6 @@
      */
     function detectChangesInRootView(lView) {
         tickRootContext(lView[CONTEXT]);
-    }
-    /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
-     */
-    function checkNoChanges(component) {
-        var view = getComponentViewByInstance(component);
-        checkNoChangesInternal(view, component);
     }
     function checkNoChangesInternal(view, context) {
         setCheckNoChangesMode(true);
@@ -15632,7 +15665,7 @@
         var viewToRender = scanForView(lContainer, lContainer[ACTIVE_INDEX], viewBlockId);
         if (viewToRender) {
             setIsParent();
-            selectView(viewToRender, viewToRender[TVIEW].node);
+            enterView(viewToRender, viewToRender[TVIEW].node);
         }
         else {
             // When we create a new LView, we always reset the state of the instructions.
@@ -15640,7 +15673,7 @@
             var tParentNode = getIsParent() ? previousOrParentTNode :
                 previousOrParentTNode && previousOrParentTNode.parent;
             assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
-            selectView(viewToRender, viewToRender[TVIEW].node);
+            enterView(viewToRender, viewToRender[TVIEW].node);
         }
         if (lContainer) {
             if (isCreationMode(viewToRender)) {
@@ -15719,7 +15752,7 @@
         refreshView(lView, tView, tView.template, context); // update mode pass
         var lContainer = lView[PARENT];
         ngDevMode && assertLContainerOrUndefined(lContainer);
-        selectView(lContainer[PARENT], null);
+        leaveViewProcessExit();
         setPreviousOrParentTNode(viewHost, false);
     }
 
@@ -15940,7 +15973,7 @@
             }
         }
     }
-    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+    function executeListenerWithErrorHandling(lView, tNode, listenerFn, e) {
         try {
             // Only explicitly returning false from a listener should preventDefault
             return listenerFn(e) !== false;
@@ -15978,13 +16011,13 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            var result = executeListenerWithErrorHandling(lView, tNode, listenerFn, e);
             // A just-invoked listener function might have coalesced listeners so we need to check for
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
                 // We should prevent default if any of the listeners explicitly return false
-                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+                result = executeListenerWithErrorHandling(lView, tNode, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -18107,9 +18140,6 @@
         if (opts === void 0) { opts = {}; }
         ngDevMode && publishDefaultGlobalUtils();
         ngDevMode && assertComponentType(componentType);
-        // this is preemptively set to avoid having test and debug code accidentally
-        // read data from a previous application state...
-        setActiveHostElement(null);
         var rendererFactory = opts.rendererFactory || domRendererFactory3;
         var sanitizer = opts.sanitizer || null;
         var componentDef = getComponentDef(componentType);
@@ -18124,7 +18154,7 @@
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
         var rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
         var rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
-        var oldView = selectView(rootView, null);
+        enterView(rootView, null);
         var component;
         try {
             if (rendererFactory.begin)
@@ -18137,7 +18167,7 @@
             refreshView(rootView, rootTView, null, null);
         }
         finally {
-            selectView(oldView, null);
+            leaveView();
             if (rendererFactory.end)
                 rendererFactory.end();
         }
@@ -18155,7 +18185,6 @@
      * @returns Component view created
      */
     function createRootComponentView(rNode, def, rootView, rendererFactory, renderer, sanitizer) {
-        resetComponentState();
         var tView = rootView[TVIEW];
         ngDevMode && assertDataInRange(rootView, 0 + HEADER_OFFSET);
         rootView[0 + HEADER_OFFSET] = rNode;
@@ -19045,7 +19074,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.13+24.sha-d883007.with-local-changes');
+    var VERSION = new Version('9.0.0-next.13+27.sha-09a2bb8.with-local-changes');
 
     /**
      * @license
@@ -22042,9 +22071,6 @@
             var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
             var sanitizer = rootViewInjector.get(Sanitizer, null);
-            // Ensure that the namespace for the root node is correct,
-            // otherwise the browser might not render out the element properly.
-            namespaceHTMLInternal();
             var hostRNode = rootSelectorOrNode ?
                 locateHostElement(rendererFactory, rootSelectorOrNode) :
                 elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
@@ -22068,7 +22094,11 @@
             var rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
             var rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
             // rootView is the parent when bootstrapping
-            var oldLView = selectView(rootLView, null);
+            // TODO(misko): it looks like we are entering view here but we don't really need to as
+            // `renderView` does that. However as the code is written it is needed because
+            // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
+            // issues would allow us to drop this.
+            enterView(rootLView, null);
             var component;
             var tElementNode;
             try {
@@ -22088,7 +22118,7 @@
                 renderView(rootLView, rootTView, null);
             }
             finally {
-                selectView(oldLView, null);
+                leaveView();
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
             if (!rootSelectorOrNode || isIsolated) {

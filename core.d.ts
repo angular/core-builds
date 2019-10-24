@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+24.sha-d883007.with-local-changes
+ * @license Angular v9.0.0-next.13+27.sha-09a2bb8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3212,52 +3212,15 @@ export declare interface InputDecorator {
  */
 declare interface InstructionState {
     /**
-     * State of the current view being processed.
+     * Current `LFrame`
      *
-     * An array of nodes (text, element, container, etc), pipes, their bindings, and
-     * any local variables that need to be stored between invocations.
+     * `null` if we have not called `enterView`
      */
-    lView: ɵangular_packages_core_core_bm;
-    /**
-     * Used to set the parent property when nodes are created and track query results.
-     *
-     * This is used in conjection with `isParent`.
-     */
-    previousOrParentTNode: TNode;
-    /**
-     * If `isParent` is:
-     *  - `true`: then `previousOrParentTNode` points to a parent node.
-     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
-     */
-    isParent: boolean;
-    /**
-     * Index of currently selected element in LView.
-     *
-     * Used by binding instructions. Updated as part of advance instruction.
-     */
-    selectedIndex: number;
-    /**
-     * The last viewData retrieved by nextContext().
-     * Allows building nextContext() and reference() calls.
-     *
-     * e.g. const inner = x().$implicit; const outer = x().$implicit;
-     */
-    contextLView: ɵangular_packages_core_core_bm;
-    /**
-     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
-     *
-     * Necessary to support ChangeDetectorRef.checkNoChanges().
-     */
-    checkNoChangesMode: boolean;
-    /**
-     * Store the element depth count. This is used to identify the root elements of the template
-     * so that we can then attach `LView` to only those elements.
-     */
-    elementDepthCount: number;
+    lFrame: LFrame;
     /**
      * Stores whether directives should be matched to elements.
      *
-     * When template contains `ngNonBindable` then we need to prevent the runtime form matching
+     * When template contains `ngNonBindable` then we need to prevent the runtime from matching
      * directives on children of that element.
      *
      * Example:
@@ -3274,36 +3237,11 @@ declare interface InstructionState {
      */
     bindingsEnabled: boolean;
     /**
-     * Current namespace to be used when creating elements
-     */
-    currentNamespace: string | null;
-    /**
-     * Current sanitizer
-     */
-    currentSanitizer: StyleSanitizeFn | null;
-    /**
-     * Used when processing host bindings.
-     */
-    currentDirectiveDef: ɵDirectiveDef<any> | ɵComponentDef<any> | null;
-    /**
-     * Used as the starting directive id value.
+     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
      *
-     * All subsequent directives are incremented from this value onwards.
-     * The reason why this value is `1` instead of `0` is because the `0`
-     * value is reserved for the template.
+     * Necessary to support ChangeDetectorRef.checkNoChanges().
      */
-    activeDirectiveId: number;
-    /**
-     * The root index from which pure function instructions should calculate their binding
-     * indices. In component views, this is TView.bindingStartIndex. In a host binding
-     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
-     */
-    bindingRootIndex: number;
-    /**
-     * Current index of a View or Content Query which needs to be processed next.
-     * We iterate over the list of Queries and increment current query index at every step.
-     */
-    currentQueryIndex: number;
+    checkNoChangesMode: boolean;
     /**
      * Function to be called when the element is exited.
      *
@@ -3654,6 +3592,94 @@ declare interface LContainer extends Array<any> {
      * This is lazily initialized by `ViewContainerRef` when the first view is inserted.
      */
     [VIEW_REFS]: ViewRef[] | null;
+}
+
+/**
+ *
+ */
+declare interface LFrame {
+    /**
+     * Parent LFrame.
+     *
+     * This is needed when `leaveView` is called to restore the previous state.
+     */
+    parent: LFrame;
+    /**
+     * Child LFrame.
+     *
+     * This is used to cache existing LFrames to relieve the memory pressure.
+     */
+    child: LFrame | null;
+    /**
+     * State of the current view being processed.
+     *
+     * An array of nodes (text, element, container, etc), pipes, their bindings, and
+     * any local variables that need to be stored between invocations.
+     */
+    lView: ɵangular_packages_core_core_bm;
+    /**
+     * Used to set the parent property when nodes are created and track query results.
+     *
+     * This is used in conjection with `isParent`.
+     */
+    previousOrParentTNode: TNode;
+    /**
+     * If `isParent` is:
+     *  - `true`: then `previousOrParentTNode` points to a parent node.
+     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
+     */
+    isParent: boolean;
+    /**
+     * Index of currently selected element in LView.
+     *
+     * Used by binding instructions. Updated as part of advance instruction.
+     */
+    selectedIndex: number;
+    /**
+     * The last viewData retrieved by nextContext().
+     * Allows building nextContext() and reference() calls.
+     *
+     * e.g. const inner = x().$implicit; const outer = x().$implicit;
+     */
+    contextLView: ɵangular_packages_core_core_bm;
+    /**
+     * Store the element depth count. This is used to identify the root elements of the template
+     * so that we can then attach patch data `LView` to only those elements. We know that those
+     * are the only places where the patch data could change, this way we will save on number
+     * of places where tha patching occurs.
+     */
+    elementDepthCount: number;
+    /**
+     * Current namespace to be used when creating elements
+     */
+    currentNamespace: string | null;
+    /**
+     * Current sanitizer
+     */
+    currentSanitizer: StyleSanitizeFn | null;
+    /**
+     * Used when processing host bindings.
+     */
+    currentDirectiveDef: ɵDirectiveDef<any> | ɵComponentDef<any> | null;
+    /**
+     * Used as the starting directive id value.
+     *
+     * All subsequent directives are incremented from this value onwards.
+     * The reason why this value is `1` instead of `0` is because the `0`
+     * value is reserved for the template.
+     */
+    activeDirectiveId: number;
+    /**
+     * The root index from which pure function instructions should calculate their binding
+     * indices. In component views, this is TView.bindingStartIndex. In a host binding
+     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
+     */
+    bindingRootIndex: number;
+    /**
+     * Current index of a View or Content Query which needs to be processed next.
+     * We iterate over the list of Queries and increment current query index at every step.
+     */
+    currentQueryIndex: number;
 }
 
 /**
@@ -4862,7 +4888,7 @@ export declare interface Predicate<T> {
 
 declare const PREORDER_HOOK_FLAGS = 18;
 
-/** More flags associated with an LView (saved in LView[FLAGS_MORE]) */
+/** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
     /** The index of the next pre-order hook to be called in the hooks array, on the first 16
        bits */
@@ -8734,6 +8760,12 @@ export declare function ɵangular_packages_core_core_bc(tNode: TNode, attrNameTo
 
 export declare const ɵangular_packages_core_core_bd: InstructionState;
 
+/**
+ * Return the current LView.
+ *
+ * The return value can be `null` if the method is called outside of template. This can happen if
+ * directive is instantiated by module injector (rather than by node injector.)
+ */
 export declare function ɵangular_packages_core_core_be(): ɵangular_packages_core_core_bm;
 
 export declare function ɵangular_packages_core_core_bf(): TNode;
