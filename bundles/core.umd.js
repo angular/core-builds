@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+52.sha-314e93f.with-local-changes
+ * @license Angular v9.0.0-next.14+1.sha-8e20bfa.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -667,6 +667,14 @@
         R3ResolvedDependencyType[R3ResolvedDependencyType["Attribute"] = 1] = "Attribute";
         R3ResolvedDependencyType[R3ResolvedDependencyType["ChangeDetectorRef"] = 2] = "ChangeDetectorRef";
     })(R3ResolvedDependencyType || (R3ResolvedDependencyType = {}));
+    var R3FactoryTarget;
+    (function (R3FactoryTarget) {
+        R3FactoryTarget[R3FactoryTarget["Directive"] = 0] = "Directive";
+        R3FactoryTarget[R3FactoryTarget["Component"] = 1] = "Component";
+        R3FactoryTarget[R3FactoryTarget["Injectable"] = 2] = "Injectable";
+        R3FactoryTarget[R3FactoryTarget["Pipe"] = 3] = "Pipe";
+        R3FactoryTarget[R3FactoryTarget["NgModule"] = 4] = "NgModule";
+    })(R3FactoryTarget || (R3FactoryTarget = {}));
 
     /**
      * @license
@@ -698,7 +706,6 @@
     var NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
     var NG_MOD_DEF = getClosureSafeProperty({ ɵmod: getClosureSafeProperty });
     var NG_LOC_ID_DEF = getClosureSafeProperty({ ɵloc: getClosureSafeProperty });
-    var NG_BASE_DEF = getClosureSafeProperty({ ngBaseDef: getClosureSafeProperty });
     var NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
     /**
      * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
@@ -1635,33 +1642,6 @@
         return newLookup;
     }
     /**
-     * Create a base definition
-     *
-     * # Example
-     * ```ts
-     * class ShouldBeInherited {
-     *   static ngBaseDef = ɵɵdefineBase({
-     *      ...
-     *   })
-     * }
-     * ```
-     *
-     * @param baseDefinition The base definition parameters
-     *
-     * @codeGenApi
-     */
-    function ɵɵdefineBase(baseDefinition) {
-        var declaredInputs = {};
-        return {
-            inputs: invertObject(baseDefinition.inputs, declaredInputs),
-            declaredInputs: declaredInputs,
-            outputs: invertObject(baseDefinition.outputs),
-            viewQuery: baseDefinition.viewQuery || null,
-            contentQueries: baseDefinition.contentQueries || null,
-            hostBindings: baseDefinition.hostBindings || null
-        };
-    }
-    /**
      * Create a directive definition object.
      *
      * # Example
@@ -1716,9 +1696,6 @@
     }
     function getPipeDef(type) {
         return type[NG_PIPE_DEF] || null;
-    }
-    function getBaseDef(type) {
-        return type[NG_BASE_DEF] || null;
     }
     function getFactoryDef(type, throwNotFound) {
         var hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
@@ -2972,6 +2949,8 @@
         return classes || '';
     }
     function forceStylesAsString(styles, hyphenateProps) {
+        if (typeof styles == 'string')
+            return styles;
         var str = '';
         if (styles) {
             var props = Object.keys(styles);
@@ -6611,21 +6590,8 @@
                 }
             }
             if (writeToAttrDirectly) {
-                var valueToApply = void 0;
-                if (isClassBased) {
-                    valueToApply = typeof value === 'string' ? value : objectToClassName(value);
-                    if (initialValue !== null) {
-                        valueToApply = concatString(initialValue, valueToApply, ' ');
-                    }
-                    setClassName(renderer, element, valueToApply);
-                }
-                else {
-                    valueToApply = forceStylesAsString(value, true);
-                    if (initialValue !== null) {
-                        valueToApply = initialValue + ';' + valueToApply;
-                    }
-                    setStyleAttr(renderer, element, valueToApply);
-                }
+                var initialValue_1 = hasInitial && !bindingValueContainsInitial ? getInitialStylingValue(context) : null;
+                var valueToApply = writeStylingValueDirectly(renderer, element, value, isClassBased, initialValue_1);
                 setValue(data, cachedValueIndex, valueToApply || null);
             }
             else {
@@ -6655,6 +6621,24 @@
                 }
             }
         }
+    }
+    function writeStylingValueDirectly(renderer, element, value, isClassBased, initialValue) {
+        var valueToApply;
+        if (isClassBased) {
+            valueToApply = typeof value === 'string' ? value : objectToClassName(value);
+            if (initialValue !== null) {
+                valueToApply = concatString(initialValue, valueToApply, ' ');
+            }
+            setClassName(renderer, element, valueToApply);
+        }
+        else {
+            valueToApply = forceStylesAsString(value, true);
+            if (initialValue !== null) {
+                valueToApply = initialValue + ';' + valueToApply;
+            }
+            setStyleAttr(renderer, element, valueToApply);
+        }
+        return valueToApply;
     }
     /**
      * Applies the provided styling prop/value to the element directly (without context resolution).
@@ -10031,9 +10015,25 @@
      * applied once the element is instantiated. This function applies each of the static
      * style and class entries to the element.
      */
-    function renderInitialStyling(renderer, native, tNode) {
-        renderStylingMap(renderer, native, tNode.classes, true);
-        renderStylingMap(renderer, native, tNode.styles, false);
+    function renderInitialStyling(renderer, native, tNode, append) {
+        if (tNode.classes !== null) {
+            if (append) {
+                renderStylingMap(renderer, native, tNode.classes, true);
+            }
+            else {
+                var classes = getInitialStylingValue(tNode.classes);
+                writeStylingValueDirectly(renderer, native, classes, true, null);
+            }
+        }
+        if (tNode.styles !== null) {
+            if (append) {
+                renderStylingMap(renderer, native, tNode.styles, false);
+            }
+            else {
+                var styles = getInitialStylingValue(tNode.styles);
+                writeStylingValueDirectly(renderer, native, styles, false, null);
+            }
+        }
     }
 
     /**
@@ -11931,15 +11931,15 @@
                 get: function () {
                     if (ngFactoryDef === null) {
                         var metadata = getInjectableMetadata(type, srcMeta);
-                        ngFactoryDef =
-                            getCompilerFacade().compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
-                                name: metadata.name,
-                                type: metadata.type,
-                                typeArgumentCount: metadata.typeArgumentCount,
-                                deps: reflectDependencies(type),
-                                injectFn: 'inject',
-                                isPipe: false
-                            });
+                        var compiler = getCompilerFacade();
+                        ngFactoryDef = compiler.compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
+                            name: metadata.name,
+                            type: metadata.type,
+                            typeArgumentCount: metadata.typeArgumentCount,
+                            deps: reflectDependencies(type),
+                            injectFn: 'inject',
+                            target: compiler.R3FactoryTarget.Pipe
+                        });
                     }
                     return ngFactoryDef;
                 },
@@ -15075,6 +15075,22 @@
     function ɵɵinjectAttribute(attrNameToInject) {
         return injectAttributeImpl(getPreviousOrParentTNode(), attrNameToInject);
     }
+    /**
+     * Throws an error indicating that a factory function could not be generated by the compiler for a
+     * particular class.
+     *
+     * This instruction allows the actual error message to be optimized away when ngDevMode is turned
+     * off, saving bytes of generated code while still providing a good experience in dev mode.
+     *
+     * The name of the class is not mentioned here, but will be in the generated factory function name
+     * and thus in the stack trace.
+     *
+     * @codeGenApi
+     */
+    function ɵɵinvalidFactory() {
+        var msg = ngDevMode ? "This constructor was not compatible with Dependency Injection." : 'invalid';
+        throw new Error(msg);
+    }
 
     /**
      * --------
@@ -15608,7 +15624,7 @@
             }
         }
         if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
-            renderInitialStyling(renderer, native, tNode);
+            renderInitialStyling(renderer, native, tNode, false);
         }
         appendChild(native, tNode, lView);
         // any immediate children of a component or template container must be pre-emptively
@@ -15748,7 +15764,7 @@
                 // attribute values to the element.
                 if (stylingNeedsToBeRendered) {
                     var renderer = lView[RENDERER];
-                    renderInitialStyling(renderer, native, tNode);
+                    renderInitialStyling(renderer, native, tNode, true);
                 }
             }
         }
@@ -18505,116 +18521,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Represents a basic change from a previous to a new value for a single
-     * property on a directive instance. Passed as a value in a
-     * {@link SimpleChanges} object to the `ngOnChanges` hook.
-     *
-     * @see `OnChanges`
-     *
-     * @publicApi
-     */
-    var SimpleChange = /** @class */ (function () {
-        function SimpleChange(previousValue, currentValue, firstChange) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-            this.firstChange = firstChange;
-        }
-        /**
-         * Check whether the new value is the first value assigned.
-         */
-        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
-        return SimpleChange;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var PRIVATE_PREFIX = '__ngOnChanges_';
-    /**
-     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
-     * lifecycle hook, so it should be included in any component that implements
-     * that hook.
-     *
-     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
-     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
-     * inherited properties will not be propagated to the ngOnChanges lifecycle
-     * hook.
-     *
-     * Example usage:
-     *
-     * ```
-     * static ɵcmp = defineComponent({
-     *   ...
-     *   inputs: {name: 'publicName'},
-     *   features: [NgOnChangesFeature()]
-     * });
-     * ```
-     *
-     * @codeGenApi
-     */
-    function ɵɵNgOnChangesFeature() {
-        // This option ensures that the ngOnChanges lifecycle hook will be inherited
-        // from superclasses (in InheritDefinitionFeature).
-        NgOnChangesFeatureImpl.ngInherit = true;
-        return NgOnChangesFeatureImpl;
-    }
-    function NgOnChangesFeatureImpl(definition) {
-        if (definition.type.prototype.ngOnChanges) {
-            definition.setInput = ngOnChangesSetInput;
-            definition.onChanges = wrapOnChanges();
-        }
-    }
-    function wrapOnChanges() {
-        return function wrapOnChangesHook_inPreviousChangesStorage() {
-            var simpleChangesStore = getSimpleChangesStore(this);
-            var current = simpleChangesStore && simpleChangesStore.current;
-            if (current) {
-                var previous = simpleChangesStore.previous;
-                if (previous === EMPTY_OBJ) {
-                    simpleChangesStore.previous = current;
-                }
-                else {
-                    // New changes are copied to the previous store, so that we don't lose history for inputs
-                    // which were not changed this time
-                    for (var key in current) {
-                        previous[key] = current[key];
-                    }
-                }
-                simpleChangesStore.current = null;
-                this.ngOnChanges(current);
-            }
-        };
-    }
-    function ngOnChangesSetInput(instance, value, publicName, privateName) {
-        var simpleChangesStore = getSimpleChangesStore(instance) ||
-            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
-        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
-        var previous = simpleChangesStore.previous;
-        var declaredName = this.declaredInputs[publicName];
-        var previousChange = previous[declaredName];
-        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
-        instance[privateName] = value;
-    }
-    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
-    function getSimpleChangesStore(instance) {
-        return instance[SIMPLE_CHANGES_STORE] || null;
-    }
-    function setSimpleChangesStore(instance, store) {
-        return instance[SIMPLE_CHANGES_STORE] = store;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function getSuperType(type) {
         return Object.getPrototypeOf(type.prototype).constructor;
     }
@@ -18639,27 +18545,13 @@
                 // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
                 superDef = superType.ɵdir;
             }
-            var baseDef = superType.ngBaseDef;
-            // Some fields in the definition may be empty, if there were no values to put in them that
-            // would've justified object creation. Unwrap them if necessary.
-            if (baseDef || superDef) {
+            if (superDef) {
+                // Some fields in the definition may be empty, if there were no values to put in them that
+                // would've justified object creation. Unwrap them if necessary.
                 var writeableDef = definition;
                 writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
                 writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
                 writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
-            }
-            if (baseDef) {
-                var baseViewQuery = baseDef.viewQuery;
-                var baseContentQueries = baseDef.contentQueries;
-                var baseHostBindings = baseDef.hostBindings;
-                baseHostBindings && inheritHostBindings(definition, baseHostBindings);
-                baseViewQuery && inheritViewQuery(definition, baseViewQuery);
-                baseContentQueries && inheritContentQueries(definition, baseContentQueries);
-                fillProperties(definition.inputs, baseDef.inputs);
-                fillProperties(definition.declaredInputs, baseDef.declaredInputs);
-                fillProperties(definition.outputs, baseDef.outputs);
-            }
-            if (superDef) {
                 // Merge hostBindings
                 var superHostBindings = superDef.hostBindings;
                 superHostBindings && inheritHostBindings(definition, superHostBindings);
@@ -18690,25 +18582,6 @@
                         if (feature && feature.ngInherit) {
                             feature(definition);
                         }
-                    }
-                }
-            }
-            else {
-                // Even if we don't have a definition, check the type for the hooks and use those if need be
-                var superPrototype = superType.prototype;
-                if (superPrototype) {
-                    definition.afterContentChecked =
-                        definition.afterContentChecked || superPrototype.ngAfterContentChecked;
-                    definition.afterContentInit =
-                        definition.afterContentInit || superPrototype.ngAfterContentInit;
-                    definition.afterViewChecked =
-                        definition.afterViewChecked || superPrototype.ngAfterViewChecked;
-                    definition.afterViewInit = definition.afterViewInit || superPrototype.ngAfterViewInit;
-                    definition.doCheck = definition.doCheck || superPrototype.ngDoCheck;
-                    definition.onDestroy = definition.onDestroy || superPrototype.ngOnDestroy;
-                    definition.onInit = definition.onInit || superPrototype.ngOnInit;
-                    if (superPrototype.ngOnChanges) {
-                        ɵɵNgOnChangesFeature()(definition);
                     }
                 }
             }
@@ -18865,6 +18738,116 @@
                 finally { if (e_2) throw e_2.error; }
             }
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a basic change from a previous to a new value for a single
+     * property on a directive instance. Passed as a value in a
+     * {@link SimpleChanges} object to the `ngOnChanges` hook.
+     *
+     * @see `OnChanges`
+     *
+     * @publicApi
+     */
+    var SimpleChange = /** @class */ (function () {
+        function SimpleChange(previousValue, currentValue, firstChange) {
+            this.previousValue = previousValue;
+            this.currentValue = currentValue;
+            this.firstChange = firstChange;
+        }
+        /**
+         * Check whether the new value is the first value assigned.
+         */
+        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+        return SimpleChange;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var PRIVATE_PREFIX = '__ngOnChanges_';
+    /**
+     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+     * lifecycle hook, so it should be included in any component that implements
+     * that hook.
+     *
+     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
+     * inherited properties will not be propagated to the ngOnChanges lifecycle
+     * hook.
+     *
+     * Example usage:
+     *
+     * ```
+     * static ɵcmp = defineComponent({
+     *   ...
+     *   inputs: {name: 'publicName'},
+     *   features: [NgOnChangesFeature()]
+     * });
+     * ```
+     *
+     * @codeGenApi
+     */
+    function ɵɵNgOnChangesFeature() {
+        // This option ensures that the ngOnChanges lifecycle hook will be inherited
+        // from superclasses (in InheritDefinitionFeature).
+        NgOnChangesFeatureImpl.ngInherit = true;
+        return NgOnChangesFeatureImpl;
+    }
+    function NgOnChangesFeatureImpl(definition) {
+        if (definition.type.prototype.ngOnChanges) {
+            definition.setInput = ngOnChangesSetInput;
+            definition.onChanges = wrapOnChanges();
+        }
+    }
+    function wrapOnChanges() {
+        return function wrapOnChangesHook_inPreviousChangesStorage() {
+            var simpleChangesStore = getSimpleChangesStore(this);
+            var current = simpleChangesStore && simpleChangesStore.current;
+            if (current) {
+                var previous = simpleChangesStore.previous;
+                if (previous === EMPTY_OBJ) {
+                    simpleChangesStore.previous = current;
+                }
+                else {
+                    // New changes are copied to the previous store, so that we don't lose history for inputs
+                    // which were not changed this time
+                    for (var key in current) {
+                        previous[key] = current[key];
+                    }
+                }
+                simpleChangesStore.current = null;
+                this.ngOnChanges(current);
+            }
+        };
+    }
+    function ngOnChangesSetInput(instance, value, publicName, privateName) {
+        var simpleChangesStore = getSimpleChangesStore(instance) ||
+            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
+        var previous = simpleChangesStore.previous;
+        var declaredName = this.declaredInputs[publicName];
+        var previousChange = previous[declaredName];
+        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+        instance[privateName] = value;
+    }
+    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
+    function getSimpleChangesStore(instance) {
+        return instance[SIMPLE_CHANGES_STORE] || null;
+    }
+    function setSimpleChangesStore(instance, store) {
+        return instance[SIMPLE_CHANGES_STORE] = store;
     }
 
     /**
@@ -19395,7 +19378,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.13+52.sha-314e93f.with-local-changes');
+    var VERSION = new Version('9.0.0-next.14+1.sha-8e20bfa.with-local-changes');
 
     /**
      * @license
@@ -25283,7 +25266,6 @@
         'ɵɵattributeInterpolate7': ɵɵattributeInterpolate7,
         'ɵɵattributeInterpolate8': ɵɵattributeInterpolate8,
         'ɵɵattributeInterpolateV': ɵɵattributeInterpolateV,
-        'ɵɵdefineBase': ɵɵdefineBase,
         'ɵɵdefineComponent': ɵɵdefineComponent,
         'ɵɵdefineDirective': ɵɵdefineDirective,
         'ɵɵdefineInjectable': ɵɵdefineInjectable,
@@ -25295,6 +25277,7 @@
         'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
         'ɵɵinject': ɵɵinject,
         'ɵɵinjectAttribute': ɵɵinjectAttribute,
+        'ɵɵinvalidFactory': ɵɵinvalidFactory,
         'ɵɵinjectPipeChangeDetectorRef': ɵɵinjectPipeChangeDetectorRef,
         'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
         'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
@@ -25916,7 +25899,7 @@
                     var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
                     var meta = __assign(__assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     if (meta.usesInheritance) {
-                        addBaseDefToUndecoratedParents(type);
+                        addDirectiveDefToUndecoratedParents(type);
                     }
                     ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                     // When NgModule decorator executed, we enqueued the module definition such that
@@ -25976,7 +25959,7 @@
         var facade = directiveMetadata(type, metadata);
         facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name, sourceMapUrl);
         if (facade.usesInheritance) {
-            addBaseDefToUndecoratedParents(type);
+            addDirectiveDefToUndecoratedParents(type);
         }
         return { metadata: facade, sourceMapUrl: sourceMapUrl };
     }
@@ -25986,7 +25969,8 @@
             get: function () {
                 if (ngFactoryDef === null) {
                     var meta = getDirectiveMetadata(type, metadata);
-                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign(__assign({}, meta.metadata), { injectFn: 'directiveInject', isPipe: false }));
+                    var compiler = getCompilerFacade();
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign(__assign({}, meta.metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Directive }));
                 }
                 return ngFactoryDef;
             },
@@ -26015,7 +25999,7 @@
             inputs: metadata.inputs || EMPTY_ARRAY,
             outputs: metadata.outputs || EMPTY_ARRAY,
             queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
-            lifecycle: { usesOnChanges: type.prototype.hasOwnProperty('ngOnChanges') },
+            lifecycle: { usesOnChanges: usesLifecycleHook(type, 'ngOnChanges') },
             typeSourceSpan: null,
             usesInheritance: !extendsDirectlyFromObject(type),
             exportAs: extractExportAs(metadata.exportAs),
@@ -26024,73 +26008,21 @@
         };
     }
     /**
-     * Adds an `ngBaseDef` to all parent classes of a type that don't have an Angular decorator.
+     * Adds a directive definition to all parent classes of a type that don't have an Angular decorator.
      */
-    function addBaseDefToUndecoratedParents(type) {
+    function addDirectiveDefToUndecoratedParents(type) {
         var objPrototype = Object.prototype;
         var parent = Object.getPrototypeOf(type);
         // Go up the prototype until we hit `Object`.
         while (parent && parent !== objPrototype) {
             // Since inheritance works if the class was annotated already, we only need to add
-            // the base def if there are no annotations and the base def hasn't been created already.
-            if (!getDirectiveDef(parent) && !getComponentDef(parent) && !getBaseDef(parent)) {
-                var facade = extractBaseDefMetadata(parent);
-                facade && compileBase(parent, facade);
+            // the def if there are no annotations and the def hasn't been created already.
+            if (!getDirectiveDef(parent) && !getComponentDef(parent) &&
+                shouldAddAbstractDirective(parent)) {
+                compileDirective(parent, null);
             }
             parent = Object.getPrototypeOf(parent);
         }
-    }
-    /** Compiles the base metadata into a base definition. */
-    function compileBase(type, facade) {
-        var ngBaseDef = null;
-        Object.defineProperty(type, NG_BASE_DEF, {
-            get: function () {
-                if (ngBaseDef === null) {
-                    var name_1 = type && type.name;
-                    var sourceMapUrl = "ng://" + name_1 + "/ngBaseDef.js";
-                    var compiler = getCompilerFacade();
-                    ngBaseDef = compiler.compileBase(angularCoreEnv, sourceMapUrl, facade);
-                }
-                return ngBaseDef;
-            },
-            // Make the property configurable in dev mode to allow overriding in tests
-            configurable: !!ngDevMode,
-        });
-    }
-    /** Extracts the metadata necessary to construct an `ngBaseDef` from a class. */
-    function extractBaseDefMetadata(type) {
-        var propMetadata = getReflect().ownPropMetadata(type);
-        var viewQueries = extractQueriesMetadata(type, propMetadata, isViewQuery);
-        var queries = extractQueriesMetadata(type, propMetadata, isContentQuery);
-        var inputs;
-        var outputs;
-        // We only need to know whether there are any HostListener or HostBinding
-        // decorators present, the parsing logic is in the compiler already.
-        var hasHostDecorators = false;
-        var _loop_1 = function (field) {
-            propMetadata[field].forEach(function (ann) {
-                var metadataName = ann.ngMetadataName;
-                if (metadataName === 'Input') {
-                    inputs = inputs || {};
-                    inputs[field] = ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
-                }
-                else if (metadataName === 'Output') {
-                    outputs = outputs || {};
-                    outputs[field] = ann.bindingPropertyName || field;
-                }
-                else if (metadataName === 'HostBinding' || metadataName === 'HostListener') {
-                    hasHostDecorators = true;
-                }
-            });
-        };
-        for (var field in propMetadata) {
-            _loop_1(field);
-        }
-        // Only generate the base def if there's any info inside it.
-        if (inputs || outputs || viewQueries.length || queries.length || hasHostDecorators) {
-            return { name: type.name, type: type, inputs: inputs, outputs: outputs, viewQueries: viewQueries, queries: queries, propMetadata: propMetadata };
-        }
-        return null;
     }
     function convertToR3QueryPredicate(selector) {
         return typeof selector === 'string' ? splitByComma(selector) : resolveForwardRef(selector);
@@ -26107,7 +26039,7 @@
     }
     function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
         var queriesMeta = [];
-        var _loop_2 = function (field) {
+        var _loop_1 = function (field) {
             if (propMetadata.hasOwnProperty(field)) {
                 var annotations_1 = propMetadata[field];
                 annotations_1.forEach(function (ann) {
@@ -26116,7 +26048,7 @@
                             throw new Error("Can't construct a query for the property \"" + field + "\" of " +
                                 ("\"" + stringifyForError(type) + "\" since the query selector wasn't defined."));
                         }
-                        if (annotations_1.some(isInputAnn)) {
+                        if (annotations_1.some(isInputAnnotation)) {
                             throw new Error("Cannot combine @Input decorators with query decorators");
                         }
                         queriesMeta.push(convertToR3QueryMetadata(field, ann));
@@ -26125,15 +26057,12 @@
             }
         };
         for (var field in propMetadata) {
-            _loop_2(field);
+            _loop_1(field);
         }
         return queriesMeta;
     }
     function extractExportAs(exportAs) {
-        if (exportAs === undefined) {
-            return null;
-        }
-        return exportAs.split(',').map(function (part) { return part.trim(); });
+        return exportAs === undefined ? null : splitByComma(exportAs);
     }
     function isContentQuery(value) {
         var name = value.ngMetadataName;
@@ -26143,11 +26072,38 @@
         var name = value.ngMetadataName;
         return name === 'ViewChild' || name === 'ViewChildren';
     }
-    function isInputAnn(value) {
+    function isInputAnnotation(value) {
         return value.ngMetadataName === 'Input';
     }
     function splitByComma(value) {
         return value.split(',').map(function (piece) { return piece.trim(); });
+    }
+    function usesLifecycleHook(type, name) {
+        var prototype = type.prototype;
+        return prototype && prototype.hasOwnProperty(name);
+    }
+    var LIFECYCLE_HOOKS = [
+        'ngOnChanges', 'ngOnInit', 'ngOnDestroy', 'ngDoCheck', 'ngAfterViewInit', 'ngAfterViewChecked',
+        'ngAfterContentInit', 'ngAfterContentChecked'
+    ];
+    function shouldAddAbstractDirective(type) {
+        if (LIFECYCLE_HOOKS.some(function (hookName) { return usesLifecycleHook(type, hookName); })) {
+            return true;
+        }
+        var propMetadata = getReflect().ownPropMetadata(type);
+        for (var field in propMetadata) {
+            var annotations = propMetadata[field];
+            for (var i = 0; i < annotations.length; i++) {
+                var current = annotations[i];
+                var metadataName = current.ngMetadataName;
+                if (isInputAnnotation(current) || isContentQuery(current) || isViewQuery(current) ||
+                    metadataName === 'Output' || metadataName === 'HostBinding' ||
+                    metadataName === 'HostListener') {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -26164,7 +26120,8 @@
             get: function () {
                 if (ngFactoryDef === null) {
                     var metadata = getPipeMetadata(type, meta);
-                    ngFactoryDef = getCompilerFacade().compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign(__assign({}, metadata), { injectFn: 'directiveInject', isPipe: true }));
+                    var compiler = getCompilerFacade();
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign(__assign({}, metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Pipe }));
                 }
                 return ngFactoryDef;
             },
@@ -31662,7 +31619,6 @@
     exports.ɵɵattributeInterpolate7 = ɵɵattributeInterpolate7;
     exports.ɵɵattributeInterpolate8 = ɵɵattributeInterpolate8;
     exports.ɵɵattributeInterpolateV = ɵɵattributeInterpolateV;
-    exports.ɵɵdefineBase = ɵɵdefineBase;
     exports.ɵɵdefineComponent = ɵɵdefineComponent;
     exports.ɵɵdefineDirective = ɵɵdefineDirective;
     exports.ɵɵdefinePipe = ɵɵdefinePipe;
@@ -31674,6 +31630,7 @@
     exports.ɵɵdirectiveInject = ɵɵdirectiveInject;
     exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
     exports.ɵɵinjectPipeChangeDetectorRef = ɵɵinjectPipeChangeDetectorRef;
+    exports.ɵɵinvalidFactory = ɵɵinvalidFactory;
     exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
     exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
     exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
@@ -31829,7 +31786,6 @@
     exports.ɵNG_DIR_DEF = NG_DIR_DEF;
     exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
     exports.ɵNG_MOD_DEF = NG_MOD_DEF;
-    exports.ɵNG_BASE_DEF = NG_BASE_DEF;
     exports.ɵNG_PROV_DEF = NG_PROV_DEF;
     exports.ɵNG_INJ_DEF = NG_INJ_DEF;
     exports.ɵcompileNgModuleFactory__POST_R3__ = compileNgModuleFactory__POST_R3__;
