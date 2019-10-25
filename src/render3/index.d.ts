@@ -7,6 +7,7 @@
  */
 import { LifecycleHooksFeature, renderComponent, whenRendered } from './component';
 import { ɵɵdefineBase, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵsetComponentScope, ɵɵsetNgModuleScope } from './definition';
+import { ɵɵCopyDefinitionFeature } from './features/copy_definition_feature';
 import { ɵɵInheritDefinitionFeature } from './features/inherit_definition_feature';
 import { ɵɵNgOnChangesFeature } from './features/ng_onchanges_feature';
 import { ɵɵProvidersFeature } from './features/providers_feature';
@@ -27,5 +28,5 @@ export { ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵloadQuery, ɵ
 export { ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, } from './pure_function';
 export { ɵɵtemplateRefExtractor, ɵɵinjectPipeChangeDetectorRef } from './view_engine_compatibility_prebound';
 export { ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody } from './util/misc_utils';
-export { ɵɵBaseDef, ComponentDef, ɵɵComponentDefWithMeta, ɵɵFactoryDef, ComponentTemplate, ComponentType, DirectiveDef, ɵɵDirectiveDefWithMeta, DirectiveType, ɵɵNgOnChangesFeature, ɵɵInheritDefinitionFeature, ɵɵProvidersFeature, PipeDef, ɵɵPipeDefWithMeta, LifecycleHooksFeature, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefineBase, ɵɵdefinePipe, getHostElement, getComponent, getDirectives, getRenderedText, renderComponent, ɵɵsetComponentScope, ɵɵsetNgModuleScope, whenRendered, };
+export { ɵɵBaseDef, ComponentDef, ɵɵComponentDefWithMeta, ɵɵFactoryDef, ComponentTemplate, ComponentType, DirectiveDef, ɵɵDirectiveDefWithMeta, DirectiveType, ɵɵNgOnChangesFeature, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵProvidersFeature, PipeDef, ɵɵPipeDefWithMeta, LifecycleHooksFeature, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefineBase, ɵɵdefinePipe, getHostElement, getComponent, getDirectives, getRenderedText, renderComponent, ɵɵsetComponentScope, ɵɵsetNgModuleScope, whenRendered, };
 export { NO_CHANGE } from './tokens';
