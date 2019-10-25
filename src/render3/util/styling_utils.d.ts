@@ -90,7 +90,7 @@ export declare function forceClassesAsString(classes: string | {
 } | null | undefined): string;
 export declare function forceStylesAsString(styles: {
     [key: string]: any;
-} | null | undefined, hyphenateProps: boolean): string;
+} | string | null | undefined, hyphenateProps: boolean): string;
 export declare function isHostStylingActive(directiveOrSourceId: number): boolean;
 /**
  * Converts the provided styling map array into a string.

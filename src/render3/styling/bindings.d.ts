@@ -139,6 +139,9 @@ export declare function applyStylingViaContext(context: TStylingContext, rendere
 export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, value: {
     [key: string]: any;
 } | string | null, isClassBased: boolean, sanitizer?: StyleSanitizeFn | null, forceUpdate?: boolean, bindingValueContainsInitial?: boolean): void;
+export declare function writeStylingValueDirectly(renderer: any, element: RElement, value: {
+    [key: string]: any;
+} | string | null, isClassBased: boolean, initialValue: string | null): string;
 /**
  * Applies the provided styling prop/value to the element directly (without context resolution).
  *

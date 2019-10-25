@@ -294,4 +294,4 @@ export declare function textBindingInternal(lView: LView, index: number, value: 
  * applied once the element is instantiated. This function applies each of the static
  * style and class entries to the element.
  */
-export declare function renderInitialStyling(renderer: Renderer3, native: RElement, tNode: TNode): void;
+export declare function renderInitialStyling(renderer: Renderer3, native: RElement, tNode: TNode, append: boolean): void;
