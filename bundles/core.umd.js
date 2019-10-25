@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+4.sha-3dff266.with-local-changes
+ * @license Angular v9.0.0-next.13+36.sha-b131f5b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2076,42 +2076,27 @@
      * found in the LICENSE file at https://angular.io/license
      */
     var instructionState = {
-        previousOrParentTNode: null,
-        isParent: null,
-        lView: null,
-        // tslint:disable-next-line: no-toplevel-property-access
-        selectedIndex: -1 << 1 /* Size */,
-        contextLView: null,
-        checkNoChangesMode: false,
-        elementDepthCount: 0,
+        lFrame: createLFrame(null),
         bindingsEnabled: true,
-        currentNamespace: null,
-        currentSanitizer: null,
-        currentDirectiveDef: null,
-        activeDirectiveId: 0,
-        bindingRootIndex: -1,
-        currentQueryIndex: 0,
         elementExitFn: null,
+        checkNoChangesMode: false,
     };
     function getElementDepthCount() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.elementDepthCount;
+        return instructionState.lFrame.elementDepthCount;
     }
     function increaseElementDepthCount() {
-        instructionState.elementDepthCount++;
+        instructionState.lFrame.elementDepthCount++;
     }
     function decreaseElementDepthCount() {
-        instructionState.elementDepthCount--;
+        instructionState.lFrame.elementDepthCount--;
     }
     function getCurrentDirectiveDef() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.currentDirectiveDef;
+        return instructionState.lFrame.currentDirectiveDef;
     }
     function setCurrentDirectiveDef(def) {
-        instructionState.currentDirectiveDef = def;
+        instructionState.lFrame.currentDirectiveDef = def;
     }
     function getBindingsEnabled() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return instructionState.bindingsEnabled;
     }
     /**
@@ -2158,20 +2143,28 @@
     function ɵɵdisableBindings() {
         instructionState.bindingsEnabled = false;
     }
+    /**
+     * Return the current LView.
+     *
+     * The return value can be `null` if the method is called outside of template. This can happen if
+     * directive is instantiated by module injector (rather than by node injector.)
+     */
     function getLView() {
-        return instructionState.lView;
+        // TODO(misko): the return value should be `LView|null` but doing so breaks a lot of code.
+        var lFrame = instructionState.lFrame;
+        return lFrame === null ? null : lFrame.lView;
     }
     /**
      * Determines whether or not a flag is currently set for the active element.
      */
     function hasActiveElementFlag(flag) {
-        return (instructionState.selectedIndex & flag) === flag;
+        return (instructionState.lFrame.selectedIndex & flag) === flag;
     }
     /**
      * Sets a flag is for the active element.
      */
     function setActiveElementFlag(flag) {
-        instructionState.selectedIndex |= flag;
+        instructionState.lFrame.selectedIndex |= flag;
     }
     /**
      * Sets the active directive host element and resets the directive id value
@@ -2182,19 +2175,15 @@
      */
     function setActiveHostElement(elementIndex) {
         if (elementIndex === void 0) { elementIndex = null; }
-        if (getSelectedIndex() !== elementIndex) {
-            if (hasActiveElementFlag(1 /* RunExitFn */)) {
-                executeElementExitFn();
-            }
-            setSelectedIndex(elementIndex === null ? -1 : elementIndex);
-            instructionState.activeDirectiveId = 0;
+        if (hasActiveElementFlag(1 /* RunExitFn */)) {
+            executeElementExitFn();
         }
+        setSelectedIndex(elementIndex === null ? -1 : elementIndex);
+        instructionState.lFrame.activeDirectiveId = 0;
     }
     function executeElementExitFn() {
         instructionState.elementExitFn();
-        // TODO (matsko|misko): remove this unassignment once the state management of
-        //                      global variables are better managed.
-        instructionState.selectedIndex &= ~1 /* RunExitFn */;
+        instructionState.lFrame.selectedIndex &= ~1 /* RunExitFn */;
     }
     /**
      * Queues a function to be run once the element is "exited" in CD.
@@ -2233,7 +2222,7 @@
      * different set of directives).
      */
     function getActiveDirectiveId() {
-        return instructionState.activeDirectiveId;
+        return instructionState.lFrame.activeDirectiveId;
     }
     /**
      * Increments the current directive id value.
@@ -2261,7 +2250,7 @@
         // directive uniqueId is not set anywhere--it is just incremented between
         // each hostBindings call and is useful for helping instruction code
         // uniquely determine which directive is currently active when executed.
-        instructionState.activeDirectiveId += 1;
+        instructionState.lFrame.activeDirectiveId += 1;
     }
     /**
      * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -2275,37 +2264,28 @@
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
-        instructionState.contextLView = viewToRestore;
+        instructionState.lFrame.contextLView = viewToRestore;
     }
     function getPreviousOrParentTNode() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.previousOrParentTNode;
+        return instructionState.lFrame.previousOrParentTNode;
     }
     function setPreviousOrParentTNode(tNode, _isParent) {
-        instructionState.previousOrParentTNode = tNode;
-        instructionState.isParent = _isParent;
-    }
-    function setTNodeAndViewData(tNode, view) {
-        ngDevMode && assertLViewOrUndefined(view);
-        instructionState.previousOrParentTNode = tNode;
-        instructionState.lView = view;
+        instructionState.lFrame.previousOrParentTNode = tNode;
+        instructionState.lFrame.isParent = _isParent;
     }
     function getIsParent() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.isParent;
+        return instructionState.lFrame.isParent;
     }
     function setIsNotParent() {
-        instructionState.isParent = false;
+        instructionState.lFrame.isParent = false;
     }
     function setIsParent() {
-        instructionState.isParent = true;
+        instructionState.lFrame.isParent = true;
     }
     function getContextLView() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.contextLView;
+        return instructionState.lFrame.contextLView;
     }
     function getCheckNoChangesMode() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return instructionState.checkNoChangesMode;
     }
     function setCheckNoChangesMode(mode) {
@@ -2313,18 +2293,55 @@
     }
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     function getBindingRoot() {
-        return instructionState.bindingRootIndex;
+        var lFrame = instructionState.lFrame;
+        var index = lFrame.bindingRootIndex;
+        if (index === -1) {
+            var lView = lFrame.lView;
+            index = lFrame.bindingRootIndex = lView[BINDING_INDEX] = lView[TVIEW].bindingStartIndex;
+        }
+        return index;
     }
     function setBindingRoot(value) {
-        instructionState.bindingRootIndex = value;
+        instructionState.lFrame.bindingRootIndex = value;
     }
     function getCurrentQueryIndex() {
-        // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-        return instructionState.currentQueryIndex;
+        return instructionState.lFrame.currentQueryIndex;
     }
     function setCurrentQueryIndex(value) {
-        instructionState.currentQueryIndex = value;
+        instructionState.lFrame.currentQueryIndex = value;
     }
+    /**
+     * This is a light weight version of the `enterView` which is needed by the DI system.
+     * @param newView
+     * @param tNode
+     */
+    function enterDI(newView, tNode) {
+        ngDevMode && assertLViewOrUndefined(newView);
+        var newLFrame = allocLFrame();
+        instructionState.lFrame = newLFrame;
+        newLFrame.previousOrParentTNode = tNode;
+        newLFrame.lView = newView;
+        if (ngDevMode) {
+            // resetting for safety in dev mode only.
+            newLFrame.isParent = DEV_MODE_VALUE;
+            newLFrame.selectedIndex = DEV_MODE_VALUE;
+            newLFrame.contextLView = DEV_MODE_VALUE;
+            newLFrame.elementDepthCount = DEV_MODE_VALUE;
+            newLFrame.currentNamespace = DEV_MODE_VALUE;
+            newLFrame.currentSanitizer = DEV_MODE_VALUE;
+            newLFrame.currentDirectiveDef = DEV_MODE_VALUE;
+            newLFrame.activeDirectiveId = DEV_MODE_VALUE;
+            newLFrame.bindingRootIndex = DEV_MODE_VALUE;
+            newLFrame.currentQueryIndex = DEV_MODE_VALUE;
+        }
+    }
+    var DEV_MODE_VALUE = 'Value indicating that DI is trying to read value which it should not need to know about.';
+    /**
+     * This is a light weight version of the `leaveView` which is needed by the DI system.
+     *
+     * Because the implementation is same it is only an alias
+     */
+    var leaveDI = leaveView;
     /**
      * Swap the current lView with a new lView.
      *
@@ -2334,24 +2351,68 @@
      * exited the state has to be restored
      *
      * @param newView New lView to become active
-     * @param host Element to which the View is a child of
+     * @param tNode Element to which the View is a child of
      * @returns the previously active lView;
      */
-    function selectView(newView, hostTNode) {
+    function enterView(newView, tNode) {
+        ngDevMode && assertLViewOrUndefined(newView);
+        var newLFrame = allocLFrame();
+        instructionState.lFrame = newLFrame;
+        newLFrame.previousOrParentTNode = tNode;
+        newLFrame.isParent = true;
+        newLFrame.lView = newView;
+        newLFrame.selectedIndex = 0;
+        newLFrame.contextLView = newView;
+        newLFrame.elementDepthCount = 0;
+        newLFrame.currentNamespace = null;
+        newLFrame.currentSanitizer = null;
+        newLFrame.currentDirectiveDef = null;
+        newLFrame.activeDirectiveId = 0;
+        newLFrame.bindingRootIndex = -1;
+        newLFrame.currentQueryIndex = 0;
+    }
+    /**
+     * Allocates next free LFrame. This function tries to reuse the `LFrame`s to lower memory pressure.
+     */
+    function allocLFrame() {
+        var currentLFrame = instructionState.lFrame;
+        var childLFrame = currentLFrame === null ? null : currentLFrame.child;
+        var newLFrame = childLFrame === null ? createLFrame(currentLFrame) : childLFrame;
+        return newLFrame;
+    }
+    function createLFrame(parent) {
+        var lFrame = {
+            previousOrParentTNode: null,
+            isParent: true,
+            lView: null,
+            selectedIndex: 0,
+            contextLView: null,
+            elementDepthCount: 0,
+            currentNamespace: null,
+            currentSanitizer: null,
+            currentDirectiveDef: null,
+            activeDirectiveId: 0,
+            bindingRootIndex: -1,
+            currentQueryIndex: 0,
+            parent: parent,
+            child: null,
+        };
+        parent !== null && (parent.child = lFrame); // link the new LFrame for reuse.
+        return lFrame;
+    }
+    function leaveViewProcessExit() {
         if (hasActiveElementFlag(1 /* RunExitFn */)) {
             executeElementExitFn();
         }
-        ngDevMode && assertLViewOrUndefined(newView);
-        var oldView = instructionState.lView;
-        instructionState.previousOrParentTNode = hostTNode;
-        instructionState.isParent = true;
-        instructionState.lView = instructionState.contextLView = newView;
-        return oldView;
+        leaveView();
+    }
+    function leaveView() {
+        instructionState.lFrame = instructionState.lFrame.parent;
     }
     function nextContextImpl(level) {
         if (level === void 0) { level = 1; }
-        instructionState.contextLView = walkUpViews(level, instructionState.contextLView);
-        return instructionState.contextLView[CONTEXT];
+        instructionState.lFrame.contextLView = walkUpViews(level, instructionState.lFrame.contextLView);
+        return instructionState.lFrame.contextLView[CONTEXT];
     }
     function walkUpViews(nestingLevel, currentView) {
         while (nestingLevel > 0) {
@@ -2362,23 +2423,13 @@
         return currentView;
     }
     /**
-     * Resets the application state.
-     */
-    function resetComponentState() {
-        instructionState.isParent = false;
-        instructionState.previousOrParentTNode = null;
-        instructionState.elementDepthCount = 0;
-        instructionState.bindingsEnabled = true;
-        setCurrentStyleSanitizer(null);
-    }
-    /**
      * Gets the most recent index passed to {@link select}
      *
      * Used with {@link property} instruction (and more in the future) to identify the index in the
      * current `LView` to act on.
      */
     function getSelectedIndex() {
-        return instructionState.selectedIndex >> 1 /* Size */;
+        return instructionState.lFrame.selectedIndex >> 1 /* Size */;
     }
     /**
      * Sets the most recent index passed to {@link select}
@@ -2390,7 +2441,7 @@
      * run if and when the provided `index` value is different from the current selected index value.)
      */
     function setSelectedIndex(index) {
-        instructionState.selectedIndex = index << 1 /* Size */;
+        instructionState.lFrame.selectedIndex = index << 1 /* Size */;
     }
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
@@ -2398,7 +2449,7 @@
      * @codeGenApi
      */
     function ɵɵnamespaceSVG() {
-        instructionState.currentNamespace = 'http://www.w3.org/2000/svg';
+        instructionState.lFrame.currentNamespace = 'http://www.w3.org/2000/svg';
     }
     /**
      * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
@@ -2406,7 +2457,7 @@
      * @codeGenApi
      */
     function ɵɵnamespaceMathML() {
-        instructionState.currentNamespace = 'http://www.w3.org/1998/MathML/';
+        instructionState.lFrame.currentNamespace = 'http://www.w3.org/1998/MathML/';
     }
     /**
      * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -2422,19 +2473,22 @@
      * `createElement` rather than `createElementNS`.
      */
     function namespaceHTMLInternal() {
-        instructionState.currentNamespace = null;
+        instructionState.lFrame.currentNamespace = null;
     }
     function getNamespace() {
-        return instructionState.currentNamespace;
+        return instructionState.lFrame.currentNamespace;
     }
     function setCurrentStyleSanitizer(sanitizer) {
-        instructionState.currentSanitizer = sanitizer;
+        instructionState.lFrame.currentSanitizer = sanitizer;
     }
     function resetCurrentStyleSanitizer() {
         setCurrentStyleSanitizer(null);
     }
     function getCurrentStyleSanitizer() {
-        return instructionState.currentSanitizer;
+        // TODO(misko): This should throw when there is no LView, but it turns out we can get here from
+        // `NodeStyleDebug` hence we return `null`. This should be fixed
+        var lFrame = instructionState.lFrame;
+        return lFrame === null ? null : lFrame.currentSanitizer;
     }
 
     /**
@@ -2917,13 +2971,17 @@
         }
         return classes || '';
     }
-    function forceStylesAsString(styles) {
+    function forceStylesAsString(styles, hyphenateProps) {
         var str = '';
         if (styles) {
             var props = Object.keys(styles);
             for (var i = 0; i < props.length; i++) {
                 var prop = props[i];
-                str = concatString(str, prop + ":" + styles[prop], ';');
+                var propLabel = hyphenateProps ? hyphenate(prop) : prop;
+                var value = styles[prop];
+                if (value !== null) {
+                    str = concatString(str, propLabel + ":" + value, ';');
+                }
             }
         }
         return str;
@@ -3588,9 +3646,7 @@
             // If the ID stored here is a function, this is a special object like ElementRef or TemplateRef
             // so just call the factory function to create it.
             if (typeof bloomHash === 'function') {
-                var savePreviousOrParentTNode = getPreviousOrParentTNode();
-                var saveLView = getLView();
-                setTNodeAndViewData(tNode, lView);
+                enterDI(lView, tNode);
                 try {
                     var value = bloomHash();
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
@@ -3601,7 +3657,7 @@
                     }
                 }
                 finally {
-                    setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
+                    leaveDI();
                 }
             }
             else if (typeof bloomHash == 'number') {
@@ -3768,8 +3824,8 @@
     * cached `injectable`. Otherwise if it detects that the value is still a factory it
     * instantiates the `injectable` and caches the value.
     */
-    function getNodeInjectable(tData, lData, index, tNode) {
-        var value = lData[index];
+    function getNodeInjectable(tData, lView, index, tNode) {
+        var value = lView[index];
         if (isFactory(value)) {
             var factory = value;
             if (factory.resolving) {
@@ -3781,18 +3837,16 @@
             if (factory.injectImpl) {
                 previousInjectImplementation = setInjectImplementation(factory.injectImpl);
             }
-            var savePreviousOrParentTNode = getPreviousOrParentTNode();
-            var saveLView = getLView();
-            setTNodeAndViewData(tNode, lData);
+            enterDI(lView, tNode);
             try {
-                value = lData[index] = factory.factory(undefined, tData, lData, tNode);
+                value = lView[index] = factory.factory(undefined, tData, lView, tNode);
             }
             finally {
                 if (factory.injectImpl)
                     setInjectImplementation(previousInjectImplementation);
                 setIncludeViewProviders(previousIncludeViewProviders);
                 factory.resolving = false;
-                setTNodeAndViewData(savePreviousOrParentTNode, saveLView);
+                leaveDI();
             }
         }
         return value;
@@ -5973,6 +6027,7 @@
     * Use of this source code is governed by an MIT-style license that can be
     * found in the LICENSE file at https://angular.io/license
     */
+    var VALUE_IS_EXTERNALLY_MODIFIED = {};
     /**
      * --------
      *
@@ -6519,34 +6574,87 @@
      *
      * @returns whether or not the styling map was applied to the element.
      */
-    function applyStylingMapDirectly(renderer, context, element, data, bindingIndex, map, isClassBased, applyFn, sanitizer, forceUpdate) {
-        if (forceUpdate || hasValueChanged(data[bindingIndex], map)) {
-            setValue(data, bindingIndex, map);
-            var initialStyles = hasConfig(context, 16 /* HasInitialStyling */) ? getStylingMapArray(context) : null;
-            for (var i = 1 /* ValuesStartPosition */; i < map.length; i += 2 /* TupleSize */) {
-                var prop = getMapProp(map, i);
-                var value = getMapValue(map, i);
-                // case 1: apply the map value (if it exists)
-                var applied = applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer);
-                // case 2: apply the initial value (if it exists)
-                if (!applied && initialStyles) {
-                    applied = findAndApplyMapValue(renderer, element, applyFn, initialStyles, prop, bindingIndex, sanitizer);
-                }
-                // default case: apply `null` to remove the value
-                if (!applied) {
-                    applyFn(renderer, element, prop, null, bindingIndex);
+    function applyStylingMapDirectly(renderer, context, element, data, bindingIndex, value, isClassBased, sanitizer, forceUpdate, bindingValueContainsInitial) {
+        var oldValue = getValue(data, bindingIndex);
+        if (forceUpdate || hasValueChanged(oldValue, value)) {
+            var config = getConfig(context);
+            var hasInitial = config & 16 /* HasInitialStyling */;
+            var initialValue = hasInitial && !bindingValueContainsInitial ? getInitialStylingValue(context) : null;
+            setValue(data, bindingIndex, value);
+            // the cached value is the last snapshot of the style or class
+            // attribute value and is used in the if statement below to
+            // keep track of internal/external changes.
+            var cachedValueIndex = bindingIndex + 1;
+            var cachedValue = getValue(data, cachedValueIndex);
+            if (cachedValue === NO_CHANGE) {
+                cachedValue = initialValue;
+            }
+            cachedValue = typeof cachedValue !== 'string' ? '' : cachedValue;
+            // If a class/style value was modified externally then the styling
+            // fast pass cannot guarantee that the external values are retained.
+            // When this happens, the algorithm will bail out and not write to
+            // the style or className attribute directly.
+            var writeToAttrDirectly = !(config & 2 /* HasPropBindings */);
+            if (writeToAttrDirectly &&
+                checkIfExternallyModified(element, cachedValue, isClassBased)) {
+                writeToAttrDirectly = false;
+                if (oldValue !== VALUE_IS_EXTERNALLY_MODIFIED) {
+                    // direct styling will reset the attribute entirely each time,
+                    // and, for this reason, if the algorithm decides it cannot
+                    // write to the class/style attributes directly then it must
+                    // reset all the previous style/class values before it starts
+                    // to apply values in the non-direct way.
+                    removeStylingValues(renderer, element, oldValue, isClassBased);
+                    // this will instruct the algorithm not to apply class or style
+                    // values directly anymore.
+                    setValue(data, cachedValueIndex, VALUE_IS_EXTERNALLY_MODIFIED);
                 }
             }
-            var state = getStylingState(element, TEMPLATE_DIRECTIVE_INDEX);
-            if (isClassBased) {
-                state.lastDirectClassMap = map;
+            if (writeToAttrDirectly) {
+                var valueToApply = void 0;
+                if (isClassBased) {
+                    valueToApply = typeof value === 'string' ? value : objectToClassName(value);
+                    if (initialValue !== null) {
+                        valueToApply = concatString(initialValue, valueToApply, ' ');
+                    }
+                    setClassName(renderer, element, valueToApply);
+                }
+                else {
+                    valueToApply = forceStylesAsString(value, true);
+                    if (initialValue !== null) {
+                        valueToApply = initialValue + ';' + valueToApply;
+                    }
+                    setStyleAttr(renderer, element, valueToApply);
+                }
+                setValue(data, cachedValueIndex, valueToApply || null);
             }
             else {
-                state.lastDirectStyleMap = map;
+                var applyFn = isClassBased ? setClass : setStyle;
+                var map = normalizeIntoStylingMap(oldValue, value, !isClassBased);
+                var initialStyles = hasInitial ? getStylingMapArray(context) : null;
+                for (var i = 1 /* ValuesStartPosition */; i < map.length; i += 2 /* TupleSize */) {
+                    var prop = getMapProp(map, i);
+                    var value_1 = getMapValue(map, i);
+                    // case 1: apply the map value (if it exists)
+                    var applied = applyStylingValue(renderer, element, prop, value_1, applyFn, bindingIndex, sanitizer);
+                    // case 2: apply the initial value (if it exists)
+                    if (!applied && initialStyles) {
+                        applied = findAndApplyMapValue(renderer, element, applyFn, initialStyles, prop, bindingIndex, sanitizer);
+                    }
+                    // default case: apply `null` to remove the value
+                    if (!applied) {
+                        applyFn(renderer, element, prop, null, bindingIndex);
+                    }
+                }
+                var state = getStylingState(element, TEMPLATE_DIRECTIVE_INDEX);
+                if (isClassBased) {
+                    state.lastDirectClassMap = map;
+                }
+                else {
+                    state.lastDirectStyleMap = map;
+                }
             }
-            return true;
         }
-        return false;
     }
     /**
      * Applies the provided styling prop/value to the element directly (without context resolution).
@@ -6578,10 +6686,11 @@
      *
      * @returns whether or not the prop/value styling was applied to the element.
      */
-    function applyStylingValueDirectly(renderer, context, element, data, bindingIndex, prop, value, isClassBased, applyFn, sanitizer) {
+    function applyStylingValueDirectly(renderer, context, element, data, bindingIndex, prop, value, isClassBased, sanitizer) {
         var applied = false;
         if (hasValueChanged(data[bindingIndex], value)) {
             setValue(data, bindingIndex, value);
+            var applyFn = isClassBased ? setClass : setStyle;
             // case 1: apply the provided value (if it exists)
             applied = applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer);
             // case 2: find the matching property in a styling map and apply the detected value
@@ -6724,6 +6833,26 @@
             }
         }
     };
+    var setClassName = function (renderer, native, className) {
+        if (renderer !== null) {
+            if (isProceduralRenderer(renderer)) {
+                renderer.setAttribute(native, 'class', className);
+            }
+            else {
+                native.className = className;
+            }
+        }
+    };
+    var setStyleAttr = function (renderer, native, value) {
+        if (renderer !== null) {
+            if (isProceduralRenderer(renderer)) {
+                renderer.setAttribute(native, 'style', value);
+            }
+            else {
+                native.setAttribute('style', value);
+            }
+        }
+    };
     /**
      * Iterates over all provided styling entries and renders them on the element.
      *
@@ -6745,6 +6874,59 @@
                 else {
                     setStyle(renderer, element, prop, value, null);
                 }
+            }
+        }
+    }
+    function objectToClassName(obj) {
+        var str = '';
+        if (obj) {
+            for (var key in obj) {
+                var value = obj[key];
+                if (value) {
+                    str += (str.length ? ' ' : '') + key;
+                }
+            }
+        }
+        return str;
+    }
+    /**
+     * Determines whether or not an element style/className value has changed since the last update.
+     *
+     * This function helps Angular determine if a style or class attribute value was
+     * modified by an external plugin or API outside of the style binding code. This
+     * means any JS code that adds/removes class/style values on an element outside
+     * of Angular's styling binding algorithm.
+     *
+     * @returns true when the value was modified externally.
+     */
+    function checkIfExternallyModified(element, cachedValue, isClassBased) {
+        // this means it was checked before and there is no reason
+        // to compare the style/class values again. Either that or
+        // web workers are being used.
+        if (_global.Node === 'undefined' || cachedValue === VALUE_IS_EXTERNALLY_MODIFIED)
+            return true;
+        // comparing the DOM value against the cached value is the best way to
+        // see if something has changed.
+        var currentValue = (isClassBased ? element.className : (element.style && element.style.cssText)) || '';
+        return currentValue !== (cachedValue || '');
+    }
+    /**
+     * Removes provided styling values from the element
+     */
+    function removeStylingValues(renderer, element, values, isClassBased) {
+        var arr;
+        if (isStylingMapArray(values)) {
+            arr = values;
+        }
+        else {
+            arr = normalizeIntoStylingMap(null, values, !isClassBased);
+        }
+        var applyFn = isClassBased ? setClass : setStyle;
+        for (var i = 1 /* ValuesStartPosition */; i < arr.length; i += 2 /* TupleSize */) {
+            var value = getMapValue(arr, i);
+            if (value) {
+                var prop = getMapProp(arr, i);
+                applyFn(renderer, element, prop, false);
             }
         }
     }
@@ -6847,6 +7029,28 @@
     // Note: This hack is necessary so we don't erroneously get a circular dependency
     // failure based on types.
     var unusedValueExportToPlacateAjd$6 = 1;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
+     * provided handler.
+     *
+     * The reason why this function exists is because IE doesn't support
+     * the `Proxy` class. For this reason an error must be thrown.
+     */
+    function createProxy(handler) {
+        var g = _global;
+        if (!g.Proxy) {
+            throw new Error('Proxy is not supported in this browser');
+        }
+        return new g.Proxy({}, handler);
+    }
 
     /**
      * @license
@@ -7167,6 +7371,13 @@
     }
 
     /**
+    * @license
+    * Copyright Google Inc. All Rights Reserved.
+    *
+    * Use of this source code is governed by an MIT-style license that can be
+    * found in the LICENSE file at https://angular.io/license
+    */
+    /**
      * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
      */
     function attachStylingDebugObject(context, isClassBased) {
@@ -7375,10 +7586,50 @@
              */
             get: function () {
                 var entries = {};
-                this._mapValues(function (prop, value, bindingIndex) {
+                var config = this.config;
+                var isClassBased = this._isClassBased;
+                var data = this._data;
+                // the direct pass code doesn't convert [style] or [class] values
+                // into StylingMapArray instances. For this reason, the values
+                // need to be converted ahead of time since the styling debug
+                // relies on context resolution to figure out what styling
+                // values have been added/removed on the element.
+                if (config.allowDirectStyling && config.hasMapBindings) {
+                    data = data.concat([]); // make a copy
+                    this._convertMapBindingsToStylingMapArrays(data);
+                }
+                this._mapValues(data, function (prop, value, bindingIndex) {
                     entries[prop] = { prop: prop, value: value, bindingIndex: bindingIndex };
                 });
-                return entries;
+                // because the styling algorithm runs into two different
+                // modes: direct and context-resolution, the output of the entries
+                // object is different because the removed values are not
+                // saved between updates. For this reason a proxy is created
+                // so that the behavior is the same when examining values
+                // that are no longer active on the element.
+                return createProxy({
+                    get: function (target, prop) {
+                        var value = entries[prop];
+                        if (!value) {
+                            value = {
+                                prop: prop,
+                                value: isClassBased ? false : null,
+                                bindingIndex: null,
+                            };
+                        }
+                        return value;
+                    },
+                    set: function (target, prop, value) { return false; },
+                    ownKeys: function () { return Object.keys(entries); },
+                    getOwnPropertyDescriptor: function (k) {
+                        // we use a special property descriptor here so that enumeration operations
+                        // such as `Object.keys` will work on this proxy.
+                        return {
+                            enumerable: true,
+                            configurable: true,
+                        };
+                    },
+                });
             },
             enumerable: true,
             configurable: true
@@ -7394,13 +7645,36 @@
              */
             get: function () {
                 var entries = {};
-                this._mapValues(function (prop, value) { entries[prop] = value; });
+                var config = this.config;
+                var data = this._data;
+                // the direct pass code doesn't convert [style] or [class] values
+                // into StylingMapArray instances. For this reason, the values
+                // need to be converted ahead of time since the styling debug
+                // relies on context resolution to figure out what styling
+                // values have been added/removed on the element.
+                if (config.allowDirectStyling && config.hasMapBindings) {
+                    data = data.concat([]); // make a copy
+                    this._convertMapBindingsToStylingMapArrays(data);
+                }
+                this._mapValues(data, function (prop, value) { entries[prop] = value; });
                 return entries;
             },
             enumerable: true,
             configurable: true
         });
-        NodeStylingDebug.prototype._mapValues = function (fn) {
+        NodeStylingDebug.prototype._convertMapBindingsToStylingMapArrays = function (data) {
+            var context = this.context.context;
+            var limit = getPropValuesStartPosition(context);
+            for (var i = 3 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */; i < limit; i++) {
+                var bindingIndex = context[i];
+                var bindingValue = bindingIndex !== 0 ? getValue(data, bindingIndex) : null;
+                if (bindingValue && !Array.isArray(bindingValue)) {
+                    var stylingMapArray = normalizeIntoStylingMap(null, bindingValue, !this._isClassBased);
+                    setValue(data, bindingIndex, stylingMapArray);
+                }
+            }
+        };
+        NodeStylingDebug.prototype._mapValues = function (data, fn) {
             // there is no need to store/track an element instance. The
             // element is only used when the styling algorithm attempts to
             // style the value (and we mock out the stylingApplyFn anyway).
@@ -7412,9 +7686,9 @@
             var mapFn = function (renderer, element, prop, value, bindingIndex) { return fn(prop, value, bindingIndex || null); };
             var sanitizer = this._isClassBased ? null : (this._sanitizer || getCurrentStyleSanitizer());
             // run the template bindings
-            applyStylingViaContext(this.context.context, null, mockElement, this._data, true, mapFn, sanitizer, false);
+            applyStylingViaContext(this.context.context, null, mockElement, data, true, mapFn, sanitizer, false);
             // and also the host bindings
-            applyStylingViaContext(this.context.context, null, mockElement, this._data, true, mapFn, sanitizer, true);
+            applyStylingViaContext(this.context.context, null, mockElement, data, true, mapFn, sanitizer, true);
         };
         return NodeStylingDebug;
     }());
@@ -8400,7 +8674,7 @@
      */
     function renderView(lView, tView, context) {
         ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
-        var oldView = selectView(lView, lView[T_HOST]);
+        enterView(lView, lView[T_HOST]);
         try {
             var viewQuery = tView.viewQuery;
             if (viewQuery !== null) {
@@ -8440,7 +8714,7 @@
         }
         finally {
             lView[FLAGS] &= ~4 /* CreationMode */;
-            selectView(oldView, null);
+            leaveView();
         }
     }
     /**
@@ -8453,7 +8727,7 @@
      */
     function refreshView(lView, tView, templateFn, context) {
         ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
-        var oldView = selectView(lView, lView[T_HOST]);
+        enterView(lView, lView[T_HOST]);
         var flags = lView[FLAGS];
         try {
             resetPreOrderHookFlags(lView);
@@ -8535,15 +8809,13 @@
         }
         finally {
             lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
-            selectView(oldView, null);
+            leaveViewProcessExit();
         }
     }
     function renderComponentOrTemplate(hostView, templateFn, context) {
         var rendererFactory = hostView[RENDERER_FACTORY];
         var normalExecutionPath = !getCheckNoChangesMode();
         var creationModeIsActive = isCreationMode(hostView);
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var isParent = getIsParent();
         try {
             if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
                 rendererFactory.begin();
@@ -8558,11 +8830,9 @@
             if (normalExecutionPath && !creationModeIsActive && rendererFactory.end) {
                 rendererFactory.end();
             }
-            setPreviousOrParentTNode(previousOrParentTNode, isParent);
         }
     }
     function executeTemplate(lView, templateFn, rf, context) {
-        namespaceHTMLInternal();
         var prevSelectedIndex = getSelectedIndex();
         try {
             setActiveHostElement(null);
@@ -9591,8 +9861,6 @@
     }
     function detectChangesInternal(view, context) {
         var rendererFactory = view[RENDERER_FACTORY];
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        var isParent = getIsParent();
         if (rendererFactory.begin)
             rendererFactory.begin();
         try {
@@ -9606,7 +9874,6 @@
         finally {
             if (rendererFactory.end)
                 rendererFactory.end();
-            setPreviousOrParentTNode(previousOrParentTNode, isParent);
         }
     }
     /**
@@ -9616,16 +9883,6 @@
      */
     function detectChangesInRootView(lView) {
         tickRootContext(lView[CONTEXT]);
-    }
-    /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
-     */
-    function checkNoChanges(component) {
-        var view = getComponentViewByInstance(component);
-        checkNoChangesInternal(view, component);
     }
     function checkNoChangesInternal(view, context) {
         setCheckNoChangesMode(true);
@@ -14883,7 +15140,7 @@
         // in this case we do not need to do anything, but the binding index
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
-        var bindingIndex = lView[BINDING_INDEX]++;
+        var bindingIndex = getAndIncrementBindingIndex(lView, false);
         var updated = stylingProp(elementIndex, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
         if (ngDevMode) {
             ngDevMode.styleProp++;
@@ -14913,7 +15170,7 @@
         // in this case we do not need to do anything, but the binding index
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
-        var bindingIndex = lView[BINDING_INDEX]++;
+        var bindingIndex = getAndIncrementBindingIndex(lView, false);
         var updated = stylingProp(getSelectedIndex(), bindingIndex, className, value, true);
         if (ngDevMode) {
             ngDevMode.classProp++;
@@ -14961,7 +15218,7 @@
         if (allowDirectStyling(context, hostBindingsMode)) {
             var sanitizerToUse = isClassBased ? null : sanitizer;
             var renderer = getRenderer(tNode, lView);
-            updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, isClassBased ? setClass : setStyle, sanitizerToUse);
+            updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, sanitizerToUse);
             if (sanitizerToUse) {
                 // it's important we remove the current style sanitizer once the
                 // element exits, otherwise it will be used by the next styling
@@ -15008,25 +15265,20 @@
         var lView = getLView();
         var tNode = getTNode(index, lView);
         var context = getStylesContext(tNode);
+        var hasDirectiveInput = hasStyleInput(tNode);
         // if a value is interpolated then it may render a `NO_CHANGE` value.
         // in this case we do not need to do anything, but the binding index
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
-        var bindingIndex = lView[BINDING_INDEX]++;
+        var bindingIndex = getAndIncrementBindingIndex(lView, true);
         // inputs are only evaluated from a template binding into a directive, therefore,
         // there should not be a situation where a directive host bindings function
         // evaluates the inputs (this should only happen in the template function)
-        if (!isHostStyling() && hasStyleInput(tNode) && styles !== NO_CHANGE) {
+        if (!isHostStyling() && hasDirectiveInput && styles !== NO_CHANGE) {
             updateDirectiveInputValue(context, lView, tNode, bindingIndex, styles, false);
             styles = NO_CHANGE;
         }
-        var updated = stylingMap(index, context, bindingIndex, styles, false);
-        if (ngDevMode) {
-            ngDevMode.styleMap++;
-            if (updated) {
-                ngDevMode.styleMapCacheMiss++;
-            }
-        }
+        stylingMap(context, tNode, lView, bindingIndex, styles, false, hasDirectiveInput);
     }
     /**
      * Update class bindings using an object literal or class-string on an element.
@@ -15059,25 +15311,20 @@
         var lView = getLView();
         var tNode = getTNode(elementIndex, lView);
         var context = getClassesContext(tNode);
+        var hasDirectiveInput = hasClassInput(tNode);
         // if a value is interpolated then it may render a `NO_CHANGE` value.
         // in this case we do not need to do anything, but the binding index
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
-        var bindingIndex = lView[BINDING_INDEX]++;
+        var bindingIndex = getAndIncrementBindingIndex(lView, true);
         // inputs are only evaluated from a template binding into a directive, therefore,
         // there should not be a situation where a directive host bindings function
         // evaluates the inputs (this should only happen in the template function)
-        if (!isHostStyling() && hasClassInput(tNode) && classes !== NO_CHANGE) {
+        if (!isHostStyling() && hasDirectiveInput && classes !== NO_CHANGE) {
             updateDirectiveInputValue(context, lView, tNode, bindingIndex, classes, true);
             classes = NO_CHANGE;
         }
-        var updated = stylingMap(elementIndex, context, bindingIndex, classes, true);
-        if (ngDevMode) {
-            ngDevMode.classMap++;
-            if (updated) {
-                ngDevMode.classMapCacheMiss++;
-            }
-        }
+        stylingMap(context, tNode, lView, bindingIndex, classes, true, hasDirectiveInput);
     }
     /**
      * Shared function used to update a map-based styling binding for an element.
@@ -15085,11 +15332,8 @@
      * When this function is called it will activate support for `[style]` and
      * `[class]` bindings in Angular.
      */
-    function stylingMap(elementIndex, context, bindingIndex, value, isClassBased) {
-        var updated = false;
-        var lView = getLView();
+    function stylingMap(context, tNode, lView, bindingIndex, value, isClassBased, hasDirectiveInput) {
         var directiveIndex = getActiveDirectiveId();
-        var tNode = getTNode(elementIndex, lView);
         var native = getNativeByTNode(tNode, lView);
         var oldValue = getValue(lView, bindingIndex);
         var hostBindingsMode = isHostStyling();
@@ -15108,13 +15352,12 @@
         if (!isContextLocked(context, hostBindingsMode)) {
             patchConfig(context, 4 /* HasMapBindings */);
         }
-        var stylingMapArr = value === NO_CHANGE ? NO_CHANGE : normalizeIntoStylingMap(oldValue, value, !isClassBased);
         // Direct Apply Case: bypass context resolution and apply the
         // style/class map values directly to the element
         if (allowDirectStyling(context, hostBindingsMode)) {
             var sanitizerToUse = isClassBased ? null : sanitizer;
             var renderer = getRenderer(tNode, lView);
-            updated = applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, stylingMapArr, isClassBased, isClassBased ? setClass : setStyle, sanitizerToUse, valueHasChanged);
+            applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, value, isClassBased, sanitizerToUse, valueHasChanged, hasDirectiveInput);
             if (sanitizerToUse) {
                 // it's important we remove the current style sanitizer once the
                 // element exits, otherwise it will be used by the next styling
@@ -15123,7 +15366,7 @@
             }
         }
         else {
-            updated = valueHasChanged;
+            var stylingMapArr = value === NO_CHANGE ? NO_CHANGE : normalizeIntoStylingMap(oldValue, value, !isClassBased);
             activateStylingMapFeature();
             // Context Resolution (or first update) Case: save the map value
             // and defer to the context to flush and apply the style/class binding
@@ -15136,7 +15379,12 @@
             }
             setElementExitFn(stylingApply);
         }
-        return updated;
+        if (ngDevMode) {
+            isClassBased ? ngDevMode.classMap : ngDevMode.styleMap++;
+            if (valueHasChanged) {
+                isClassBased ? ngDevMode.classMapCacheMiss : ngDevMode.styleMapCacheMiss++;
+            }
+        }
     }
     /**
      * Writes a value to a directive's `style` or `class` input binding (if it has changed).
@@ -15185,7 +15433,7 @@
                 value = concatString(initialValue, forceClassesAsString(bindingValue));
             }
             else {
-                value = concatString(initialValue, forceStylesAsString(bindingValue), ';');
+                value = concatString(initialValue, forceStylesAsString(bindingValue, true), ';');
             }
         }
         return value;
@@ -15312,6 +15560,13 @@
      */
     function isHostStyling() {
         return isHostStylingActive(getActiveDirectiveId());
+    }
+    function getAndIncrementBindingIndex(lView, isMapBased) {
+        // map-based bindings use two slots because the previously constructed
+        // className / style value must be compared against.
+        var index = lView[BINDING_INDEX];
+        lView[BINDING_INDEX] += isMapBased ? 2 : 1;
+        return index;
     }
 
     /**
@@ -15632,7 +15887,7 @@
         var viewToRender = scanForView(lContainer, lContainer[ACTIVE_INDEX], viewBlockId);
         if (viewToRender) {
             setIsParent();
-            selectView(viewToRender, viewToRender[TVIEW].node);
+            enterView(viewToRender, viewToRender[TVIEW].node);
         }
         else {
             // When we create a new LView, we always reset the state of the instructions.
@@ -15640,7 +15895,7 @@
             var tParentNode = getIsParent() ? previousOrParentTNode :
                 previousOrParentTNode && previousOrParentTNode.parent;
             assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
-            selectView(viewToRender, viewToRender[TVIEW].node);
+            enterView(viewToRender, viewToRender[TVIEW].node);
         }
         if (lContainer) {
             if (isCreationMode(viewToRender)) {
@@ -15719,7 +15974,7 @@
         refreshView(lView, tView, tView.template, context); // update mode pass
         var lContainer = lView[PARENT];
         ngDevMode && assertLContainerOrUndefined(lContainer);
-        selectView(lContainer[PARENT], null);
+        leaveViewProcessExit();
         setPreviousOrParentTNode(viewHost, false);
     }
 
@@ -15940,7 +16195,7 @@
             }
         }
     }
-    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+    function executeListenerWithErrorHandling(lView, tNode, listenerFn, e) {
         try {
             // Only explicitly returning false from a listener should preventDefault
             return listenerFn(e) !== false;
@@ -15978,13 +16233,13 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            var result = executeListenerWithErrorHandling(lView, tNode, listenerFn, e);
             // A just-invoked listener function might have coalesced listeners so we need to check for
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
                 // We should prevent default if any of the listeners explicitly return false
-                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+                result = executeListenerWithErrorHandling(lView, tNode, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -18107,9 +18362,6 @@
         if (opts === void 0) { opts = {}; }
         ngDevMode && publishDefaultGlobalUtils();
         ngDevMode && assertComponentType(componentType);
-        // this is preemptively set to avoid having test and debug code accidentally
-        // read data from a previous application state...
-        setActiveHostElement(null);
         var rendererFactory = opts.rendererFactory || domRendererFactory3;
         var sanitizer = opts.sanitizer || null;
         var componentDef = getComponentDef(componentType);
@@ -18124,7 +18376,7 @@
         var renderer = rendererFactory.createRenderer(hostRNode, componentDef);
         var rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
         var rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
-        var oldView = selectView(rootView, null);
+        enterView(rootView, null);
         var component;
         try {
             if (rendererFactory.begin)
@@ -18137,7 +18389,7 @@
             refreshView(rootView, rootTView, null, null);
         }
         finally {
-            selectView(oldView, null);
+            leaveView();
             if (rendererFactory.end)
                 rendererFactory.end();
         }
@@ -18155,7 +18407,6 @@
      * @returns Component view created
      */
     function createRootComponentView(rNode, def, rootView, rendererFactory, renderer, sanitizer) {
-        resetComponentState();
         var tView = rootView[TVIEW];
         ngDevMode && assertDataInRange(rootView, 0 + HEADER_OFFSET);
         rootView[0 + HEADER_OFFSET] = rNode;
@@ -19045,7 +19296,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-next.13+4.sha-3dff266.with-local-changes');
+    var VERSION = new Version('9.0.0-next.13+36.sha-b131f5b.with-local-changes');
 
     /**
      * @license
@@ -22042,9 +22293,6 @@
             var rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
             var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
             var sanitizer = rootViewInjector.get(Sanitizer, null);
-            // Ensure that the namespace for the root node is correct,
-            // otherwise the browser might not render out the element properly.
-            namespaceHTMLInternal();
             var hostRNode = rootSelectorOrNode ?
                 locateHostElement(rendererFactory, rootSelectorOrNode) :
                 elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
@@ -22068,7 +22316,11 @@
             var rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
             var rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
             // rootView is the parent when bootstrapping
-            var oldLView = selectView(rootLView, null);
+            // TODO(misko): it looks like we are entering view here but we don't really need to as
+            // `renderView` does that. However as the code is written it is needed because
+            // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
+            // issues would allow us to drop this.
+            enterView(rootLView, null);
             var component;
             var tElementNode;
             try {
@@ -22088,7 +22340,7 @@
                 renderView(rootLView, rootTView, null);
             }
             finally {
-                selectView(oldLView, null);
+                leaveView();
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
             if (!rootSelectorOrNode || isIsolated) {
@@ -25656,7 +25908,7 @@
             name: type.name,
             type: type,
             typeArgumentCount: 0,
-            selector: metadata.selector,
+            selector: metadata.selector !== undefined ? metadata.selector : null,
             deps: reflectDependencies(type),
             host: metadata.host || EMPTY_OBJ,
             propMetadata: propMetadata,
@@ -27922,28 +28174,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
-     * provided handler.
-     *
-     * The reason why this function exists is because IE doesn't support
-     * the `Proxy` class. For this reason an error must be thrown.
-     */
-    function createProxy(handler) {
-        var g = _global;
-        if (!g.Proxy) {
-            throw new Error('Proxy is not supported in this browser');
-        }
-        return new g.Proxy({}, handler);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * @publicApi
      */
     var DebugEventListener = /** @class */ (function () {
@@ -28678,22 +28908,38 @@
         return defaultKeyValueDiffers;
     }
     function _localeFactory(locale) {
-        if (locale) {
-            if (ivyEnabled) {
-                setLocaleId(locale);
-            }
-            return locale;
+        locale = locale || getGlobalLocale();
+        if (ivyEnabled) {
+            setLocaleId(locale);
         }
-        // Use `goog.LOCALE` as default value for `LOCALE_ID` token for Closure Compiler.
-        // Note: default `goog.LOCALE` value is `en`, when Angular used `en-US`. In order to preserve
-        // backwards compatibility, we use Angular default value over Closure Compiler's one.
+        return locale;
+    }
+    /**
+     * Work out the locale from the potential global properties.
+     *
+     * * Closure Compiler: use `goog.LOCALE`.
+     * * Ivy enabled: use `$localize.locale`
+     */
+    function getGlobalLocale() {
         if (ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
-            if (ivyEnabled) {
-                setLocaleId(goog.LOCALE);
-            }
+            // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
+            // * In order to preserve backwards compatibility, we use Angular default value over
+            //   Closure Compiler's one.
             return goog.LOCALE;
         }
-        return DEFAULT_LOCALE_ID;
+        else {
+            // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
+            // COMPILE-TIME INLINER.
+            //
+            // * During compile time inlining of translations the expression will be replaced
+            //   with a string literal that is the current locale. Other forms of this expression are not
+            //   guaranteed to be replaced.
+            //
+            // * During runtime translation evaluation, the developer is required to set `$localize.locale`
+            //   if required, or just to provide their own `LOCALE_ID` provider.
+            return (ivyEnabled && typeof $localize !== 'undefined' && $localize.locale) ||
+                DEFAULT_LOCALE_ID;
+        }
     }
     /**
      * A built-in [dependency injection token](guide/glossary#di-token)

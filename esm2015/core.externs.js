@@ -53,3 +53,8 @@ angular$packages$core$src$testability$testability.PublicTestability.prototype.wh
  * @return {?}
  */
 angular$packages$core$src$testability$testability.PublicTestability.prototype.findProviders = function(using, provider, exactMatch) {};
+// externs from /b/f/w/packages/core/src/application_module.ts:
+/** @const */
+var angular$packages$core$src$application_module = {};
+/** @type {?} */
+var $localize;
