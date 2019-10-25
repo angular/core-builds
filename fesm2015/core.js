@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+58.sha-335854f.with-local-changes
+ * @license Angular v9.0.0-next.13+59.sha-5607ad8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4712,6 +4712,8 @@ function forceClassesAsString(classes) {
  * @return {?}
  */
 function forceStylesAsString(styles, hyphenateProps) {
+    if (typeof styles == 'string')
+        return styles;
     /** @type {?} */
     let str = '';
     if (styles) {
@@ -10023,21 +10025,9 @@ function applyStylingMapDirectly(renderer, context, element, data, bindingIndex,
         }
         if (writeToAttrDirectly) {
             /** @type {?} */
-            let valueToApply;
-            if (isClassBased) {
-                valueToApply = typeof value === 'string' ? value : objectToClassName(value);
-                if (initialValue !== null) {
-                    valueToApply = concatString(initialValue, valueToApply, ' ');
-                }
-                setClassName(renderer, element, valueToApply);
-            }
-            else {
-                valueToApply = forceStylesAsString((/** @type {?} */ (value)), true);
-                if (initialValue !== null) {
-                    valueToApply = initialValue + ';' + valueToApply;
-                }
-                setStyleAttr(renderer, element, valueToApply);
-            }
+            const initialValue = hasInitial && !bindingValueContainsInitial ? getInitialStylingValue(context) : null;
+            /** @type {?} */
+            const valueToApply = writeStylingValueDirectly(renderer, element, value, isClassBased, initialValue);
             setValue(data, cachedValueIndex, valueToApply || null);
         }
         else {
@@ -10074,6 +10064,33 @@ function applyStylingMapDirectly(renderer, context, element, data, bindingIndex,
             }
         }
     }
+}
+/**
+ * @param {?} renderer
+ * @param {?} element
+ * @param {?} value
+ * @param {?} isClassBased
+ * @param {?} initialValue
+ * @return {?}
+ */
+function writeStylingValueDirectly(renderer, element, value, isClassBased, initialValue) {
+    /** @type {?} */
+    let valueToApply;
+    if (isClassBased) {
+        valueToApply = typeof value === 'string' ? value : objectToClassName(value);
+        if (initialValue !== null) {
+            valueToApply = concatString(initialValue, valueToApply, ' ');
+        }
+        setClassName(renderer, element, valueToApply);
+    }
+    else {
+        valueToApply = forceStylesAsString(value, true);
+        if (initialValue !== null) {
+            valueToApply = initialValue + ';' + valueToApply;
+        }
+        setStyleAttr(renderer, element, valueToApply);
+    }
+    return valueToApply;
 }
 /**
  * Applies the provided styling prop/value to the element directly (without context resolution).
@@ -15043,11 +15060,30 @@ function textBindingInternal(lView, index, value) {
  * @param {?} renderer
  * @param {?} native
  * @param {?} tNode
+ * @param {?} append
  * @return {?}
  */
-function renderInitialStyling(renderer, native, tNode) {
-    renderStylingMap(renderer, native, tNode.classes, true);
-    renderStylingMap(renderer, native, tNode.styles, false);
+function renderInitialStyling(renderer, native, tNode, append) {
+    if (tNode.classes !== null) {
+        if (append) {
+            renderStylingMap(renderer, native, tNode.classes, true);
+        }
+        else {
+            /** @type {?} */
+            const classes = getInitialStylingValue(tNode.classes);
+            writeStylingValueDirectly(renderer, native, classes, true, null);
+        }
+    }
+    if (tNode.styles !== null) {
+        if (append) {
+            renderStylingMap(renderer, native, tNode.styles, false);
+        }
+        else {
+            /** @type {?} */
+            const styles = getInitialStylingValue(tNode.styles);
+            writeStylingValueDirectly(renderer, native, styles, false, null);
+        }
+    }
 }
 
 /**
@@ -22466,7 +22502,7 @@ function normalizeStylingDirectiveInputValue(initialValue, bindingValue, isClass
             value = concatString(initialValue, forceClassesAsString(bindingValue));
         }
         else {
-            value = concatString(initialValue, forceStylesAsString((/** @type {?} */ (bindingValue)), true), ';');
+            value = concatString(initialValue, forceStylesAsString(bindingValue, true), ';');
         }
     }
     return value;
@@ -22704,7 +22740,7 @@ function ɵɵelementStart(index, name, constsIndex, localRefs) {
         }
     }
     if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
-        renderInitialStyling(renderer, native, tNode);
+        renderInitialStyling(renderer, native, tNode, false);
     }
     appendChild(native, tNode, lView);
     // any immediate children of a component or template container must be pre-emptively
@@ -22859,7 +22895,7 @@ function ɵɵelementHostAttrs(attrs) {
             if (stylingNeedsToBeRendered) {
                 /** @type {?} */
                 const renderer = lView[RENDERER];
-                renderInitialStyling(renderer, native, tNode);
+                renderInitialStyling(renderer, native, tNode, true);
             }
         }
     }
@@ -27570,7 +27606,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.13+58.sha-335854f.with-local-changes');
+const VERSION = new Version('9.0.0-next.13+59.sha-5607ad8.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
