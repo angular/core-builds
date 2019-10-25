@@ -136,7 +136,9 @@ export declare function applyStylingViaContext(context: TStylingContext, rendere
  *
  * @returns whether or not the styling map was applied to the element.
  */
-export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, map: StylingMapArray, isClassBased: boolean, applyFn: ApplyStylingFn, sanitizer?: StyleSanitizeFn | null, forceUpdate?: boolean): boolean;
+export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, value: {
+    [key: string]: any;
+} | string | null, isClassBased: boolean, sanitizer?: StyleSanitizeFn | null, forceUpdate?: boolean, bindingValueContainsInitial?: boolean): void;
 /**
  * Applies the provided styling prop/value to the element directly (without context resolution).
  *
@@ -167,7 +169,7 @@ export declare function applyStylingMapDirectly(renderer: any, context: TStyling
  *
  * @returns whether or not the prop/value styling was applied to the element.
  */
-export declare function applyStylingValueDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, prop: string, value: any, isClassBased: boolean, applyFn: ApplyStylingFn, sanitizer?: StyleSanitizeFn | null): boolean;
+export declare function applyStylingValueDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, prop: string, value: any, isClassBased: boolean, sanitizer?: StyleSanitizeFn | null): boolean;
 export declare function getStylingMapsSyncFn(): SyncStylingMapsFn | null;
 export declare function setStylingMapsSyncFn(fn: SyncStylingMapsFn): void;
 /**
@@ -178,6 +180,8 @@ export declare const setStyle: ApplyStylingFn;
  * Adds/removes the provided className value to the provided element.
  */
 export declare const setClass: ApplyStylingFn;
+export declare const setClassName: (renderer: import("@angular/core/src/render3/interfaces/renderer").ObjectOrientedRenderer3 | ProceduralRenderer3 | null, native: RElement, className: string) => void;
+export declare const setStyleAttr: (renderer: import("@angular/core/src/render3/interfaces/renderer").ObjectOrientedRenderer3 | ProceduralRenderer3 | null, native: RElement, value: string) => void;
 /**
  * Iterates over all provided styling entries and renders them on the element.
  *

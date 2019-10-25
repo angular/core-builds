@@ -77,7 +77,7 @@ export declare function hyphenate(value: string): string;
  */
 export declare function getStylingMapArray(value: TStylingContext | StylingMapArray | null): StylingMapArray | null;
 export declare function isStylingContext(value: any): boolean;
-export declare function isStylingMapArray(value: TStylingContext | StylingMapArray | null): boolean;
+export declare function isStylingMapArray(value: any): boolean;
 export declare function getInitialStylingValue(context: TStylingContext | StylingMapArray | null): string;
 export declare function hasClassInput(tNode: TNode): boolean;
 export declare function hasStyleInput(tNode: TNode): boolean;
@@ -90,7 +90,7 @@ export declare function forceClassesAsString(classes: string | {
 } | null | undefined): string;
 export declare function forceStylesAsString(styles: {
     [key: string]: any;
-} | null | undefined): string;
+} | null | undefined, hyphenateProps: boolean): string;
 export declare function isHostStylingActive(directiveOrSourceId: number): boolean;
 /**
  * Converts the provided styling map array into a string.

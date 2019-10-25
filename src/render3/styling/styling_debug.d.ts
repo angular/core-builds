@@ -1,10 +1,3 @@
-/**
-* @license
-* Copyright Google Inc. All Rights Reserved.
-*
-* Use of this source code is governed by an MIT-style license that can be
-* found in the LICENSE file at https://angular.io/license
-*/
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LStylingData, TStylingContext } from '../interfaces/styling';
 /**
@@ -193,6 +186,7 @@ export declare class NodeStylingDebug implements DebugNodeStyling {
     readonly values: {
         [key: string]: any;
     };
+    private _convertMapBindingsToStylingMapArrays;
     private _mapValues;
 }
 export {};
