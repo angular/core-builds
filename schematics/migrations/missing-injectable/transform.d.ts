@@ -46,6 +46,11 @@ export declare class MissingInjectableTransform {
      */
     migrateProviderClass(node: ts.ClassDeclaration, context: ResolvedNgModule | ResolvedDirective): void;
     /**
+     * Evaluates the given TypeScript expression using the partial evaluator with
+     * the foreign function resolver for handling "forwardRef" calls.
+     */
+    private _evaluateExpression;
+    /**
      * Visits the given resolved value of a provider. Providers can be nested in
      * arrays and we need to recursively walk through the providers to be able to
      * migrate all referenced provider classes. e.g. "providers: [[A, [B]]]".
