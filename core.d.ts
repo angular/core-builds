@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.13+53.sha-3505692.with-local-changes
+ * @license Angular v9.0.0-next.13+54.sha-14c4b1b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9460,7 +9460,7 @@ export declare const ɵCompiler_compileModuleSync__POST_R3__: <T>(moduleType: Ty
 /**
  * Runtime link information for Components.
  *
- * This is internal data structure used by the render to link
+ * This is an internal data structure used by the render to link
  * components into templates.
  *
  * NOTE: Always use `defineComponent` function to create this object,
@@ -9643,7 +9643,7 @@ export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQue
 /**
  * Runtime link information for Directives.
  *
- * This is internal data structure used by the render to link
+ * This is an internal data structure used by the render to link
  * directives into templates.
  *
  * NOTE: Always use `defineDirective` function to create this object,
@@ -9654,7 +9654,44 @@ export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQue
  *
  * See: {@link defineDirective}
  */
-export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
+export declare interface ɵDirectiveDef<T> {
+    /**
+     * A dictionary mapping the inputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Input('alias') propertyName: any;`).
+     */
+    readonly inputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
+     * public or minified name.
+     */
+    readonly declaredInputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * A dictionary mapping the outputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Output('alias') propertyName: any;`).
+     */
+    readonly outputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * Function to create and refresh content queries associated with a given directive.
+     */
+    contentQueries: ContentQueriesFunction<T> | null;
+    /**
+     * Query-related instructions for a directive. Note that while directives don't have a
+     * view and as such view queries won't necessarily do anything, there might be
+     * components that extend the directive.
+     */
+    viewQuery: ViewQueriesFunction<T> | null;
+    /**
+     * Refreshes host bindings on the associated directive.
+     */
+    hostBindings: HostBindingsFunction<T> | null;
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
@@ -9962,8 +9999,6 @@ export declare function ɵmpd(flags: ɵNodeFlags, token: any, value: any, deps: 
 
 export declare function ɵncd(ngContentIndex: null | number, index: number): NodeDef;
 
-export declare const ɵNG_BASE_DEF: string;
-
 
 export declare const ɵNG_COMP_DEF: string;
 
@@ -10145,7 +10180,7 @@ export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags,
 /**
  * Runtime link information for Pipes.
  *
- * This is internal data structure used by the renderer to link
+ * This is an internal data structure used by the renderer to link
  * pipes into templates.
  *
  * NOTE: Always use `definePipe` function to create this object,
@@ -10966,57 +11001,6 @@ export declare function ɵɵattributeInterpolate8(attrName: string, prefix: stri
 export declare function ɵɵattributeInterpolateV(attrName: string, values: any[], sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
 
 /**
- * Runtime information for classes that are inherited by components or directives
- * that aren't defined as components or directives.
- *
- * This is an internal data structure used by the renderer to determine what inputs
- * and outputs should be inherited.
- *
- * See: {@link defineBase}
- *
- * @codeGenApi
- */
-export declare interface ɵɵBaseDef<T> {
-    /**
-     * A dictionary mapping the inputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Input('alias') propertyName: any;`).
-     */
-    readonly inputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
-     * public or minified name.
-     */
-    readonly declaredInputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * A dictionary mapping the outputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Output('alias') propertyName: any;`).
-     */
-    readonly outputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * Function to create and refresh content queries associated with a given directive.
-     */
-    contentQueries: ContentQueriesFunction<T> | null;
-    /**
-     * Query-related instructions for a directive. Note that while directives don't have a
-     * view and as such view queries won't necessarily do anything, there might be
-     * components that extend the directive.
-     */
-    viewQuery: ViewQueriesFunction<T> | null;
-    /**
-     * Refreshes host bindings on the associated directive.
-     */
-    hostBindings: HostBindingsFunction<T> | null;
-}
-
-/**
  * Update class bindings using an object literal or class-string on an element.
  *
  * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
@@ -11429,97 +11413,6 @@ export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any
  * @publicApi
  */
 export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
-
-/**
- * Create a base definition
- *
- * # Example
- * ```ts
- * class ShouldBeInherited {
- *   static ngBaseDef = ɵɵdefineBase({
- *      ...
- *   })
- * }
- * ```
- *
- * @param baseDefinition The base definition parameters
- *
- * @codeGenApi
- */
-export declare function ɵɵdefineBase<T>(baseDefinition: {
-    /**
-     * A map of input names.
-     *
-     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
-     *
-     * Given:
-     * ```
-     * class MyComponent {
-     *   @Input()
-     *   publicInput1: string;
-     *
-     *   @Input('publicInput2')
-     *   declaredInput2: string;
-     * }
-     * ```
-     *
-     * is described as:
-     * ```
-     * {
-     *   publicInput1: 'publicInput1',
-     *   declaredInput2: ['declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * Which the minifier may translate to:
-     * ```
-     * {
-     *   minifiedPublicInput1: 'publicInput1',
-     *   minifiedDeclaredInput2: [ 'declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * This allows the render to re-construct the minified, public, and declared names
-     * of properties.
-     *
-     * NOTE:
-     *  - Because declared and public name are usually same we only generate the array
-     *    `['declared', 'public']` format when they differ.
-     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
-     *    inconsistent behavior in that it uses declared names rather than minified or public. For
-     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
-     *    API will be simplified to be consistent with `outputs`.
-     */
-    inputs?: {
-        [P in keyof T]?: string | [string, string];
-    };
-    /**
-     * A map of output names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
-    outputs?: {
-        [P in keyof T]?: string;
-    };
-    /**
-     * Function to create instances of content queries associated with a given directive.
-     */
-    contentQueries?: ContentQueriesFunction<T> | null;
-    /**
-     * Additional set of instructions specific to view query processing. This could be seen as a
-     * set of instructions to be inserted into the template function.
-     */
-    viewQuery?: ViewQueriesFunction<T> | null;
-    /**
-     * Function executed by the parent template to allow children to apply host bindings.
-     */
-    hostBindings?: HostBindingsFunction<T>;
-}): ɵɵBaseDef<T>;
 
 /**
  * Create a component definition object.
