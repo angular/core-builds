@@ -10,7 +10,7 @@ import { Type } from '../interface/type';
 import { NgModuleDef } from '../metadata/ng_module';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction, ɵɵBaseDef } from './interfaces/definition';
+import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { TAttributes } from './interfaces/node';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
@@ -265,96 +265,6 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
     exports?: Type<any>[] | (() => Type<any>[]);
 }): void;
 /**
- * Create a base definition
- *
- * # Example
- * ```ts
- * class ShouldBeInherited {
- *   static ngBaseDef = ɵɵdefineBase({
- *      ...
- *   })
- * }
- * ```
- *
- * @param baseDefinition The base definition parameters
- *
- * @codeGenApi
- */
-export declare function ɵɵdefineBase<T>(baseDefinition: {
-    /**
-     * A map of input names.
-     *
-     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
-     *
-     * Given:
-     * ```
-     * class MyComponent {
-     *   @Input()
-     *   publicInput1: string;
-     *
-     *   @Input('publicInput2')
-     *   declaredInput2: string;
-     * }
-     * ```
-     *
-     * is described as:
-     * ```
-     * {
-     *   publicInput1: 'publicInput1',
-     *   declaredInput2: ['declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * Which the minifier may translate to:
-     * ```
-     * {
-     *   minifiedPublicInput1: 'publicInput1',
-     *   minifiedDeclaredInput2: [ 'declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * This allows the render to re-construct the minified, public, and declared names
-     * of properties.
-     *
-     * NOTE:
-     *  - Because declared and public name are usually same we only generate the array
-     *    `['declared', 'public']` format when they differ.
-     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
-     *    inconsistent behavior in that it uses declared names rather than minified or public. For
-     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
-     *    API will be simplified to be consistent with `outputs`.
-     */
-    inputs?: {
-        [P in keyof T]?: string | [string, string];
-    };
-    /**
-     * A map of output names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
-    outputs?: {
-        [P in keyof T]?: string;
-    };
-    /**
-     * Function to create instances of content queries associated with a given directive.
-     */
-    contentQueries?: ContentQueriesFunction<T> | null;
-    /**
-     * Additional set of instructions specific to view query processing. This could be seen as a
-     * set of instructions to be inserted into the template function.
-     */
-    viewQuery?: ViewQueriesFunction<T> | null;
-    /**
-     * Function executed by the parent template to allow children to apply host bindings.
-     */
-    hostBindings?: HostBindingsFunction<T>;
-}): ɵɵBaseDef<T>;
-/**
  * Create a directive definition object.
  *
  * # Example
@@ -490,7 +400,6 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
 export declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
 export declare function getDirectiveDef<T>(type: any): DirectiveDef<T> | null;
 export declare function getPipeDef<T>(type: any): PipeDef<T> | null;
-export declare function getBaseDef<T>(type: any): ɵɵBaseDef<T> | null;
 export declare function getFactoryDef<T>(type: any, throwNotFound: true): FactoryFn<T>;
 export declare function getFactoryDef<T>(type: any): FactoryFn<T> | null;
 export declare function getNgModuleDef<T>(type: any, throwNotFound: true): NgModuleDef<T>;
