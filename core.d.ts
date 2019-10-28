@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.14+8.sha-c61f413.with-local-changes
+ * @license Angular v9.0.0-next.14+10.sha-e483aca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -459,8 +459,6 @@ export declare interface AttributeDecorator {
     new (name: string): Attribute;
 }
 
-declare const BINDING_INDEX = 7;
-
 declare interface BindingDef {
     flags: ɵBindingFlags;
     ns: string | null;
@@ -604,9 +602,9 @@ export declare abstract class ChangeDetectorRef {
     abstract reattach(): void;
 }
 
-declare const CHILD_HEAD = 14;
+declare const CHILD_HEAD = 13;
 
-declare const CHILD_TAIL = 15;
+declare const CHILD_TAIL = 14;
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
@@ -653,7 +651,7 @@ export declare interface ClassSansProvider {
     useClass: Type<any>;
 }
 
-declare const CLEANUP = 8;
+declare const CLEANUP = 7;
 
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
@@ -1317,7 +1315,7 @@ export declare interface ContentChildrenDecorator {
  */
 declare type ContentQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U, directiveIndex: number) => void;
 
-declare const CONTEXT = 9;
+declare const CONTEXT = 8;
 
 /** Options that control how the component should be bootstrapped. */
 declare interface CreateComponentOptions {
@@ -1535,9 +1533,9 @@ declare class DebugNode__POST_R3__ implements DebugNode {
     readonly providerTokens: any[];
 }
 
-declare const DECLARATION_LCONTAINER = 17;
+declare const DECLARATION_LCONTAINER = 16;
 
-declare const DECLARATION_VIEW = 16;
+declare const DECLARATION_VIEW = 15;
 
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
@@ -3083,7 +3081,7 @@ export declare abstract class Injector {
     static ɵprov: never;
 }
 
-declare const INJECTOR_2 = 10;
+declare const INJECTOR_2 = 9;
 
 /**
  * A type which has an `InjectorDef` static field.
@@ -3635,6 +3633,10 @@ declare interface LFrame {
      * Used by binding instructions. Updated as part of advance instruction.
      */
     selectedIndex: number;
+    /**
+     * Current pointer to the binding index.
+     */
+    bindingIndex: number;
     /**
      * The last viewData retrieved by nextContext().
      * Allows building nextContext() and reference() calls.
@@ -4886,7 +4888,7 @@ export declare interface Predicate<T> {
     (value: T): boolean;
 }
 
-declare const PREORDER_HOOK_FLAGS = 18;
+declare const PREORDER_HOOK_FLAGS = 17;
 
 /** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
@@ -5500,7 +5502,7 @@ declare interface RElement extends RNode {
     setProperty?(name: string, value: any): void;
 }
 
-declare const RENDERER = 12;
+declare const RENDERER = 11;
 
 /**
  * Extend this base class to implement custom rendering. By default, Angular
@@ -5675,7 +5677,7 @@ export declare abstract class Renderer2 {
 
 declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
 
-declare const RENDERER_FACTORY = 11;
+declare const RENDERER_FACTORY = 10;
 
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
@@ -5924,7 +5926,7 @@ declare interface RText extends RNode {
     textContent: string | null;
 }
 
-declare const SANITIZER = 13;
+declare const SANITIZER = 12;
 
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
@@ -7660,6 +7662,8 @@ declare interface TView {
      * starts to store bindings only. Saving this value ensures that we
      * will begin reading bindings at the correct point in the array when
      * we are in update mode.
+     *
+     * -1 means that it has not been initialized.
      */
     bindingStartIndex: number;
     /**
@@ -8865,14 +8869,6 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * If null, this is the root view of an application (root component is in this view).
      */
     [T_HOST]: TViewNode | ɵangular_packages_core_core_bh | null;
-    /**
-     * The binding index we should access next.
-     *
-     * This is stored so that bindings can continue where they left off
-     * if a view is left midway through processing bindings (e.g. if there is
-     * a setter that creates an embedded view, like in ngIf).
-     */
-    [BINDING_INDEX]: number;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with

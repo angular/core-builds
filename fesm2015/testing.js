@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.14+8.sha-c61f413.with-local-changes
+ * @license Angular v9.0.0-next.14+10.sha-e483aca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1733,11 +1733,11 @@ function isTestingModuleOverride(value) {
 function CleanupOperation() { }
 if (false) {
     /** @type {?} */
-    CleanupOperation.prototype.field;
+    CleanupOperation.prototype.fieldName;
     /** @type {?} */
-    CleanupOperation.prototype.def;
+    CleanupOperation.prototype.object;
     /** @type {?} */
-    CleanupOperation.prototype.original;
+    CleanupOperation.prototype.originalValue;
 }
 class R3TestBedCompiler {
     /**
@@ -1873,7 +1873,7 @@ class R3TestBedCompiler {
                 provide: token,
                 useFactory: provider.useFactory,
                 deps: provider.deps || [],
-                multi: provider.multi,
+                multi: provider.multi
             } :
             { provide: token, useValue: provider.useValue, multi: provider.multi };
         /** @type {?} */
@@ -2169,8 +2169,20 @@ class R3TestBedCompiler {
             // Apply provider overrides to imported modules recursively
             /** @type {?} */
             const moduleDef = ((/** @type {?} */ (moduleType)))[ɵNG_MOD_DEF];
-            for (const importType of moduleDef.imports) {
-                this.applyProviderOverridesToModule(importType);
+            for (const importedModule of moduleDef.imports) {
+                this.applyProviderOverridesToModule(importedModule);
+            }
+            // Also override the providers on any ModuleWithProviders imports since those don't appear in
+            // the moduleDef.
+            for (const importedModule of flatten(injectorDef.imports)) {
+                if (isModuleWithProviders(importedModule)) {
+                    this.defCleanupOps.push({
+                        object: importedModule,
+                        fieldName: 'providers',
+                        originalValue: importedModule.providers
+                    });
+                    importedModule.providers = this.getOverriddenProviders(importedModule.providers);
+                }
             }
         }
     }
@@ -2310,15 +2322,15 @@ class R3TestBedCompiler {
      * @private
      * @param {?} type
      * @param {?} defField
-     * @param {?} field
+     * @param {?} fieldName
      * @return {?}
      */
-    storeFieldOfDefOnType(type, defField, field) {
+    storeFieldOfDefOnType(type, defField, fieldName) {
         /** @type {?} */
         const def = ((/** @type {?} */ (type)))[defField];
         /** @type {?} */
-        const original = def[field];
-        this.defCleanupOps.push({ field, def, original });
+        const originalValue = def[fieldName];
+        this.defCleanupOps.push({ object: def, fieldName, originalValue });
     }
     /**
      * Clears current components resolution queue, but stores the state of the queue, so we can
@@ -2363,7 +2375,9 @@ class R3TestBedCompiler {
          * @param {?} op
          * @return {?}
          */
-        (op) => { op.def[op.field] = op.original; }));
+        (op) => {
+            op.object[op.fieldName] = op.originalValue;
+        }));
         // Restore initial component/directive/pipe defs
         this.initialNgDefs.forEach((/**
          * @param {?} value
@@ -2500,21 +2514,17 @@ class R3TestBedCompiler {
         if (!providers || !providers.length || this.providerOverridesByToken.size === 0)
             return [];
         /** @type {?} */
-        const overrides = this.getProviderOverrides(providers);
+        const flattenedProviders = flatten(providers);
         /** @type {?} */
-        const hasMultiProviderOverrides = overrides.some(isMultiProvider);
+        const overrides = this.getProviderOverrides(flattenedProviders);
         /** @type {?} */
-        const overriddenProviders = [...providers, ...overrides];
-        // No additional processing is required in case we have no multi providers to override
-        if (!hasMultiProviderOverrides) {
-            return overriddenProviders;
-        }
+        const overriddenProviders = [...flattenedProviders, ...overrides];
         /** @type {?} */
         const final = [];
         /** @type {?} */
         const seenMultiProviders = new Set();
         // We iterate through the list of providers in reverse order to make sure multi provider
-        // overrides take precedence over the values defined in provider list. We also fiter out all
+        // overrides take precedence over the values defined in provider list. We also filter out all
         // multi providers that have overrides, keeping overridden values only.
         forEachRight(overriddenProviders, (/**
          * @param {?} provider
@@ -2524,21 +2534,11 @@ class R3TestBedCompiler {
             /** @type {?} */
             const token = getProviderToken(provider);
             if (isMultiProvider(provider) && this.providerOverridesByToken.has(token)) {
+                // Don't add overridden multi-providers twice because when you override a multi-provider, we
+                // treat it as `{multi: false}` to avoid providing the same value multiple times.
                 if (!seenMultiProviders.has(token)) {
                     seenMultiProviders.add(token);
-                    if (provider && provider.useValue && Array.isArray(provider.useValue)) {
-                        forEachRight(provider.useValue, (/**
-                         * @param {?} value
-                         * @return {?}
-                         */
-                        (value) => {
-                            // Unwrap provider override array into individual providers in final set.
-                            final.unshift({ provide: token, useValue: value, multi: true });
-                        }));
-                    }
-                    else {
-                        final.unshift(provider);
-                    }
+                    final.unshift(Object.assign(Object.assign({}, provider), { multi: false }));
                 }
             }
             else {
