@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.14+8.sha-c61f413.with-local-changes
+ * @license Angular v9.0.0-next.14+10.sha-e483aca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1179,6 +1179,11 @@ function assertLessThan(actual, expected, msg) {
         throwError(msg);
     }
 }
+function assertLessThanOrEqual(actual, expected, msg) {
+    if (actual > expected) {
+        throwError(msg);
+    }
+}
 function assertGreaterThan(actual, expected, msg) {
     if (actual <= expected) {
         throwError(msg);
@@ -1886,34 +1891,32 @@ const QUERIES = 5;
 /** @type {?} */
 const T_HOST = 6;
 /** @type {?} */
-const BINDING_INDEX = 7;
+const CLEANUP = 7;
 /** @type {?} */
-const CLEANUP = 8;
+const CONTEXT = 8;
 /** @type {?} */
-const CONTEXT = 9;
+const INJECTOR$1 = 9;
 /** @type {?} */
-const INJECTOR$1 = 10;
+const RENDERER_FACTORY = 10;
 /** @type {?} */
-const RENDERER_FACTORY = 11;
+const RENDERER = 11;
 /** @type {?} */
-const RENDERER = 12;
+const SANITIZER = 12;
 /** @type {?} */
-const SANITIZER = 13;
+const CHILD_HEAD = 13;
 /** @type {?} */
-const CHILD_HEAD = 14;
+const CHILD_TAIL = 14;
 /** @type {?} */
-const CHILD_TAIL = 15;
+const DECLARATION_VIEW = 15;
 /** @type {?} */
-const DECLARATION_VIEW = 16;
+const DECLARATION_LCONTAINER = 16;
 /** @type {?} */
-const DECLARATION_LCONTAINER = 17;
-/** @type {?} */
-const PREORDER_HOOK_FLAGS = 18;
+const PREORDER_HOOK_FLAGS = 17;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  * @type {?}
  */
-const HEADER_OFFSET = 19;
+const HEADER_OFFSET = 18;
 /**
  * @record
  */
@@ -1949,8 +1952,6 @@ if (false) {
     [QUERIES]: LQueries|null;*/
     /* Skipping unnamed member:
     [T_HOST]: TViewNode|TElementNode|null;*/
-    /* Skipping unnamed member:
-    [BINDING_INDEX]: number;*/
     /* Skipping unnamed member:
     [CLEANUP]: any[]|null;*/
     /* Skipping unnamed member:
@@ -2122,6 +2123,8 @@ if (false) {
      * starts to store bindings only. Saving this value ensures that we
      * will begin reading bindings at the correct point in the array when
      * we are in update mode.
+     *
+     * -1 means that it has not been initialized.
      * @type {?}
      */
     TView.prototype.bindingStartIndex;
@@ -2936,6 +2939,11 @@ if (false) {
      */
     LFrame.prototype.selectedIndex;
     /**
+     * Current pointer to the binding index.
+     * @type {?}
+     */
+    LFrame.prototype.bindingIndex;
+    /**
      * The last viewData retrieved by nextContext().
      * Allows building nextContext() and reference() calls.
      *
@@ -3339,11 +3347,47 @@ function getBindingRoot() {
     if (index === -1) {
         /** @type {?} */
         const lView = lFrame.lView;
-        index = lFrame.bindingRootIndex = lView[BINDING_INDEX] = lView[TVIEW].bindingStartIndex;
+        index = lFrame.bindingRootIndex = lView[TVIEW].bindingStartIndex;
     }
     return index;
 }
 /**
+ * @return {?}
+ */
+function getBindingIndex() {
+    return instructionState.lFrame.bindingIndex;
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function setBindingIndex(value) {
+    return instructionState.lFrame.bindingIndex = value;
+}
+/**
+ * @return {?}
+ */
+function nextBindingIndex() {
+    return instructionState.lFrame.bindingIndex++;
+}
+/**
+ * @param {?} count
+ * @return {?}
+ */
+function incrementBindingIndex(count) {
+    /** @type {?} */
+    const lFrame = instructionState.lFrame;
+    /** @type {?} */
+    const index = lFrame.bindingIndex;
+    lFrame.bindingIndex = lFrame.bindingIndex + count;
+    return index;
+}
+/**
+ * Set a new binding root index so that host template functions can execute.
+ *
+ * Bindings inside the host template are 0 index. But because we don't know ahead of time
+ * how many host bindings we have we can't pre-compute them. For this reason they are all
+ * 0 index and we just shift the root so that they match next available location in the LView.
  * @param {?} value
  * @return {?}
  */
@@ -3427,6 +3471,7 @@ function enterView(newView, tNode) {
     newLFrame.currentDirectiveDef = null;
     newLFrame.activeDirectiveId = 0;
     newLFrame.bindingRootIndex = -1;
+    newLFrame.bindingIndex = newView === null ? -1 : newView[TVIEW].bindingStartIndex;
     newLFrame.currentQueryIndex = 0;
 }
 /**
@@ -3470,6 +3515,8 @@ function createLFrame(parent) {
         activeDirectiveId: 0,
         //
         bindingRootIndex: -1,
+        //
+        bindingIndex: -1,
         //
         currentQueryIndex: 0,
         //
@@ -12542,10 +12589,6 @@ class LViewDebug {
      */
     get tHost() { return this._raw_lView[T_HOST]; }
     /**
-     * @return {?}
-     */
-    get bindingIndex() { return this._raw_lView[BINDING_INDEX]; }
-    /**
      * Normalized view of child views (and containers) attached at this location.
      * @return {?}
      */
@@ -13000,16 +13043,16 @@ const _CLEAN_PROMISE = ((/**
 /**
  * Sets the host bindings for the current view.
  * @param {?} tView
- * @param {?} viewData
+ * @param {?} lView
  * @return {?}
  */
-function setHostBindings(tView, viewData) {
+function setHostBindings(tView, lView) {
     /** @type {?} */
     const selectedIndex = getSelectedIndex();
     try {
         if (tView.expandoInstructions !== null) {
             /** @type {?} */
-            let bindingRootIndex = viewData[BINDING_INDEX] = tView.expandoStartIndex;
+            let bindingRootIndex = setBindingIndex(tView.expandoStartIndex);
             setBindingRoot(bindingRootIndex);
             /** @type {?} */
             let currentDirectiveIndex = -1;
@@ -13049,9 +13092,9 @@ function setHostBindings(tView, viewData) {
                         // It is important that this be called first before the actual instructions
                         // are run because this way the first directive ID value is not zero.
                         incrementActiveDirectiveId();
-                        viewData[BINDING_INDEX] = bindingRootIndex;
+                        setBindingIndex(bindingRootIndex);
                         /** @type {?} */
-                        const hostCtx = unwrapRNode(viewData[currentDirectiveIndex]);
+                        const hostCtx = unwrapRNode(lView[currentDirectiveIndex]);
                         instruction(2 /* Update */, hostCtx, currentElementIndex);
                     }
                     currentDirectiveIndex++;
@@ -13358,7 +13401,7 @@ function refreshView(lView, tView, templateFn, context) {
     const flags = lView[FLAGS];
     try {
         resetPreOrderHookFlags(lView);
-        setBindingRoot(lView[BINDING_INDEX] = tView.bindingStartIndex);
+        setBindingIndex(tView.bindingStartIndex);
         if (templateFn !== null) {
             executeTemplate(lView, templateFn, 2 /* Update */, context);
         }
@@ -13678,7 +13721,6 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
     for (let i = 0; i < initialViewLength; i++) {
         blueprint.push(i < bindingStartIndex ? null : NO_CHANGE);
     }
-    blueprint[BINDING_INDEX] = bindingStartIndex;
     return (/** @type {?} */ (blueprint));
 }
 /**
@@ -14304,7 +14346,7 @@ function postProcessDirective(lView, hostTNode, directive, def, directiveDefIdx)
  * @return {?}
  */
 function postProcessBaseDirective(lView, hostTNode, directive) {
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
+    ngDevMode && assertLessThanOrEqual(getBindingIndex(), lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
     attachPatchData(directive, lView);
     /** @type {?} */
     const native = getNativeByTNode(hostTNode, lView);
@@ -21063,7 +21105,7 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 function ɵɵattribute(name, value, sanitizer, namespace) {
     /** @type {?} */
     const lView = getLView();
-    if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
+    if (bindingUpdated(lView, nextBindingIndex(), value)) {
         elementAttributeInternal(getSelectedIndex(), name, value, lView, sanitizer, namespace);
     }
     return ɵɵattribute;
@@ -21094,12 +21136,12 @@ function interpolationV(lView, values) {
     /** @type {?} */
     let isBindingUpdated = false;
     /** @type {?} */
-    let bindingIndex = lView[BINDING_INDEX];
+    let bindingIndex = getBindingIndex();
     for (let i = 1; i < values.length; i += 2) {
         // Check if bindings (odd indexes) have changed
         isBindingUpdated = bindingUpdated(lView, bindingIndex++, values[i]) || isBindingUpdated;
     }
-    lView[BINDING_INDEX] = bindingIndex;
+    setBindingIndex(bindingIndex);
     if (!isBindingUpdated) {
         return NO_CHANGE;
     }
@@ -21122,7 +21164,7 @@ function interpolationV(lView, values) {
  */
 function interpolation1(lView, prefix, v0, suffix) {
     /** @type {?} */
-    const different = bindingUpdated(lView, lView[BINDING_INDEX]++, v0);
+    const different = bindingUpdated(lView, nextBindingIndex(), v0);
     return different ? prefix + renderStringify(v0) + suffix : NO_CHANGE;
 }
 /**
@@ -21137,10 +21179,10 @@ function interpolation1(lView, prefix, v0, suffix) {
  */
 function interpolation2(lView, prefix, v0, i0, v1, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     const different = bindingUpdated2(lView, bindingIndex, v0, v1);
-    lView[BINDING_INDEX] += 2;
+    incrementBindingIndex(2);
     return different ? prefix + renderStringify(v0) + i0 + renderStringify(v1) + suffix : NO_CHANGE;
 }
 /**
@@ -21157,10 +21199,10 @@ function interpolation2(lView, prefix, v0, i0, v1, suffix) {
  */
 function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     const different = bindingUpdated3(lView, bindingIndex, v0, v1, v2);
-    lView[BINDING_INDEX] += 3;
+    incrementBindingIndex(3);
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + suffix :
         NO_CHANGE;
@@ -21181,10 +21223,10 @@ function interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix) {
  */
 function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     const different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
-    lView[BINDING_INDEX] += 4;
+    incrementBindingIndex(4);
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
             renderStringify(v3) + suffix :
@@ -21208,11 +21250,11 @@ function interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  */
 function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated(lView, bindingIndex + 4, v4) || different;
-    lView[BINDING_INDEX] += 5;
+    incrementBindingIndex(5);
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
             renderStringify(v3) + i3 + renderStringify(v4) + suffix :
@@ -21238,11 +21280,11 @@ function interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffi
  */
 function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated2(lView, bindingIndex + 4, v4, v5) || different;
-    lView[BINDING_INDEX] += 6;
+    incrementBindingIndex(6);
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
             renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + suffix :
@@ -21270,11 +21312,11 @@ function interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
  */
 function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated3(lView, bindingIndex + 4, v4, v5, v6) || different;
-    lView[BINDING_INDEX] += 7;
+    incrementBindingIndex(7);
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
             renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
@@ -21305,11 +21347,11 @@ function interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
  */
 function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX];
+    const bindingIndex = getBindingIndex();
     /** @type {?} */
     let different = bindingUpdated4(lView, bindingIndex, v0, v1, v2, v3);
     different = bindingUpdated4(lView, bindingIndex + 4, v4, v5, v6, v7) || different;
-    lView[BINDING_INDEX] += 8;
+    incrementBindingIndex(8);
     return different ?
         prefix + renderStringify(v0) + i0 + renderStringify(v1) + i1 + renderStringify(v2) + i2 +
             renderStringify(v3) + i3 + renderStringify(v4) + i4 + renderStringify(v5) + i5 +
@@ -21932,7 +21974,7 @@ function ɵɵcontainerRefreshEnd() {
  * @return {?}
  */
 function containerInternal(lView, nodeIndex, tagName, attrs) {
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
+    ngDevMode && assertEqual(getBindingIndex(), lView[TVIEW].bindingStartIndex, 'container nodes should be created before any bindings');
     /** @type {?} */
     const adjustedIndex = nodeIndex + HEADER_OFFSET;
     ngDevMode && assertDataInRange(lView, nodeIndex + HEADER_OFFSET);
@@ -22114,14 +22156,12 @@ function ɵɵstyleProp(prop, value, suffix) {
  * @return {?}
  */
 function stylePropInternal(elementIndex, prop, value, suffix) {
-    /** @type {?} */
-    const lView = getLView();
     // if a value is interpolated then it may render a `NO_CHANGE` value.
     // in this case we do not need to do anything, but the binding index
     // still needs to be incremented because all styling binding values
     // are stored inside of the lView.
     /** @type {?} */
-    const bindingIndex = getAndIncrementBindingIndex(lView, false);
+    const bindingIndex = nextBindingIndex();
     /** @type {?} */
     const updated = stylingProp(elementIndex, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
     if (ngDevMode) {
@@ -22148,14 +22188,12 @@ function stylePropInternal(elementIndex, prop, value, suffix) {
  * @return {?}
  */
 function ɵɵclassProp(className, value) {
-    /** @type {?} */
-    const lView = getLView();
     // if a value is interpolated then it may render a `NO_CHANGE` value.
     // in this case we do not need to do anything, but the binding index
     // still needs to be incremented because all styling binding values
     // are stored inside of the lView.
     /** @type {?} */
-    const bindingIndex = getAndIncrementBindingIndex(lView, false);
+    const bindingIndex = nextBindingIndex();
     /** @type {?} */
     const updated = stylingProp(getSelectedIndex(), bindingIndex, className, value, true);
     if (ngDevMode) {
@@ -22280,7 +22318,7 @@ function ɵɵstyleMap(styles) {
     // still needs to be incremented because all styling binding values
     // are stored inside of the lView.
     /** @type {?} */
-    const bindingIndex = getAndIncrementBindingIndex(lView, true);
+    const bindingIndex = incrementBindingIndex(2);
     // inputs are only evaluated from a template binding into a directive, therefore,
     // there should not be a situation where a directive host bindings function
     // evaluates the inputs (this should only happen in the template function)
@@ -22335,7 +22373,7 @@ function classMapInternal(elementIndex, classes) {
     // still needs to be incremented because all styling binding values
     // are stored inside of the lView.
     /** @type {?} */
-    const bindingIndex = getAndIncrementBindingIndex(lView, true);
+    const bindingIndex = incrementBindingIndex(2);
     // inputs are only evaluated from a template binding into a directive, therefore,
     // there should not be a situation where a directive host bindings function
     // evaluates the inputs (this should only happen in the template function)
@@ -22665,19 +22703,6 @@ function resolveStylePropValue(value, suffix) {
 function isHostStyling() {
     return isHostStylingActive(getActiveDirectiveId());
 }
-/**
- * @param {?} lView
- * @param {?} isMapBased
- * @return {?}
- */
-function getAndIncrementBindingIndex(lView, isMapBased) {
-    // map-based bindings use two slots because the previously constructed
-    // className / style value must be compared against.
-    /** @type {?} */
-    const index = lView[BINDING_INDEX];
-    lView[BINDING_INDEX] += isMapBased ? 2 : 1;
-    return index;
-}
 
 /**
  * @fileoverview added by tsickle
@@ -22707,7 +22732,7 @@ function ɵɵelementStart(index, name, constsIndex, localRefs) {
     const tViewConsts = tView.consts;
     /** @type {?} */
     const consts = tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex];
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'elements should be created before any bindings');
+    ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
@@ -22934,7 +22959,7 @@ function ɵɵelementContainerStart(index, constsIndex, localRefs) {
     const tViewConsts = tView.consts;
     /** @type {?} */
     const consts = tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex];
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'element containers should be created before any bindings');
+    ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateComment++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
@@ -23665,7 +23690,7 @@ function ɵɵproperty(propName, value, sanitizer) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
+    const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
@@ -23745,7 +23770,8 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         elementPropertyInternal(lView, getSelectedIndex(), propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, getSelectedIndex(), propName, lView[BINDING_INDEX] - 1, prefix, suffix);
+        ngDevMode &&
+            storePropertyBindingMetadata(lView[TVIEW].data, getSelectedIndex(), propName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵpropertyInterpolate1;
 }
@@ -23789,7 +23815,7 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
         ngDevMode &&
-            storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 2, prefix, i0, suffix);
+            storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 2, prefix, i0, suffix);
     }
     return ɵɵpropertyInterpolate2;
 }
@@ -23835,7 +23861,8 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 3, prefix, i0, i1, suffix);
+        ngDevMode &&
+            storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
     return ɵɵpropertyInterpolate3;
 }
@@ -23883,7 +23910,7 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 4, prefix, i0, i1, i2, suffix);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
     return ɵɵpropertyInterpolate4;
 }
@@ -23933,7 +23960,7 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 5, prefix, i0, i1, i2, i3, suffix);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
     return ɵɵpropertyInterpolate5;
 }
@@ -23985,7 +24012,7 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 6, prefix, i0, i1, i2, i3, i4, suffix);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
     return ɵɵpropertyInterpolate6;
 }
@@ -24039,7 +24066,7 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
     return ɵɵpropertyInterpolate7;
 }
@@ -24095,7 +24122,7 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
         elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
     return ɵɵpropertyInterpolate8;
 }
@@ -24144,7 +24171,7 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
             for (let i = 2; i < values.length; i += 2) {
                 interpolationInBetween.push(values[i]);
             }
-            storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, lView[BINDING_INDEX] - interpolationInBetween.length + 1, ...interpolationInBetween);
+            storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
         }
     }
     return ɵɵpropertyInterpolateV;
@@ -24166,7 +24193,7 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
 function ɵɵtext(index, value = '') {
     /** @type {?} */
     const lView = getLView();
-    ngDevMode && assertEqual(lView[BINDING_INDEX], lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
+    ngDevMode && assertEqual(getBindingIndex(), lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
     const textNative = lView[index + HEADER_OFFSET] = createTextNode(value, lView[RENDERER]);
@@ -25268,7 +25295,7 @@ function ɵɵhostProperty(propName, value, sanitizer) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
+    const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
@@ -25303,7 +25330,7 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const bindingIndex = lView[BINDING_INDEX]++;
+    const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
         const nodeIndex = getSelectedIndex();
@@ -27589,7 +27616,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.14+8.sha-c61f413.with-local-changes');
+const VERSION = new Version('9.0.0-next.14+10.sha-e483aca.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34497,7 +34524,7 @@ function ɵɵi18nEnd() {
  * @return {?}
  */
 function i18nEndFirstPass(lView, tView) {
-    ngDevMode && assertEqual(lView[BINDING_INDEX], tView.bindingStartIndex, 'i18nEnd should be called before any binding');
+    ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'i18nEnd should be called before any binding');
     /** @type {?} */
     const rootIndex = i18nIndexStack[i18nIndexStackPointer--];
     /** @type {?} */
@@ -34930,7 +34957,7 @@ let shiftsCounter = 0;
 function ɵɵi18nExp(value) {
     /** @type {?} */
     const lView = getLView();
-    if (bindingUpdated(lView, lView[BINDING_INDEX]++, value)) {
+    if (bindingUpdated(lView, nextBindingIndex(), value)) {
         changeMask = changeMask | (1 << shiftsCounter);
     }
     shiftsCounter++;
@@ -34966,7 +34993,7 @@ function ɵɵi18nApply(index) {
             icus = ((/** @type {?} */ (tI18n))).icus;
         }
         /** @type {?} */
-        const bindingsStartIndex = lView[BINDING_INDEX] - shiftsCounter - 1;
+        const bindingsStartIndex = getBindingIndex() - shiftsCounter - 1;
         readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, lView);
         // Reset changeMask & maskBit to default for the next update cycle
         changeMask = 0b0;
@@ -36080,7 +36107,7 @@ function unwrapValue$1(lView, newValue) {
         // The NO_CHANGE value needs to be written at the index where the impacted binding value is
         // stored
         /** @type {?} */
-        const bindingToInvalidateIdx = lView[BINDING_INDEX];
+        const bindingToInvalidateIdx = getBindingIndex();
         lView[bindingToInvalidateIdx] = NO_CHANGE;
     }
     return newValue;

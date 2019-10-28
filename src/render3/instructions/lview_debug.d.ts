@@ -149,7 +149,6 @@ export declare class LViewDebug {
     readonly declarationView: LViewDebug | null;
     readonly queries: import("@angular/core/src/render3/interfaces/query").LQueries | null;
     readonly tHost: TElementNode | TViewNode | null;
-    readonly bindingIndex: number;
     /**
      * Normalized view of child views (and containers) attached at this location.
      */

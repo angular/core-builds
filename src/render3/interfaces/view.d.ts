@@ -24,20 +24,19 @@ export declare const PARENT = 3;
 export declare const NEXT = 4;
 export declare const QUERIES = 5;
 export declare const T_HOST = 6;
-export declare const BINDING_INDEX = 7;
-export declare const CLEANUP = 8;
-export declare const CONTEXT = 9;
-export declare const INJECTOR = 10;
-export declare const RENDERER_FACTORY = 11;
-export declare const RENDERER = 12;
-export declare const SANITIZER = 13;
-export declare const CHILD_HEAD = 14;
-export declare const CHILD_TAIL = 15;
-export declare const DECLARATION_VIEW = 16;
-export declare const DECLARATION_LCONTAINER = 17;
-export declare const PREORDER_HOOK_FLAGS = 18;
+export declare const CLEANUP = 7;
+export declare const CONTEXT = 8;
+export declare const INJECTOR = 9;
+export declare const RENDERER_FACTORY = 10;
+export declare const RENDERER = 11;
+export declare const SANITIZER = 12;
+export declare const CHILD_HEAD = 13;
+export declare const CHILD_TAIL = 14;
+export declare const DECLARATION_VIEW = 15;
+export declare const DECLARATION_LCONTAINER = 16;
+export declare const PREORDER_HOOK_FLAGS = 17;
 /** Size of LView's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 19;
+export declare const HEADER_OFFSET = 18;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -98,14 +97,6 @@ export interface LView extends Array<any> {
      * If null, this is the root view of an application (root component is in this view).
      */
     [T_HOST]: TViewNode | TElementNode | null;
-    /**
-     * The binding index we should access next.
-     *
-     * This is stored so that bindings can continue where they left off
-     * if a view is left midway through processing bindings (e.g. if there is
-     * a setter that creates an embedded view, like in ngIf).
-     */
-    [BINDING_INDEX]: number;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with
@@ -326,6 +317,8 @@ export interface TView {
      * starts to store bindings only. Saving this value ensures that we
      * will begin reading bindings at the correct point in the array when
      * we are in update mode.
+     *
+     * -1 means that it has not been initialized.
      */
     bindingStartIndex: number;
     /**

@@ -51,6 +51,10 @@ interface LFrame {
      */
     selectedIndex: number;
     /**
+     * Current pointer to the binding index.
+     */
+    bindingIndex: number;
+    /**
      * The last viewData retrieved by nextContext().
      * Allows building nextContext() and reference() calls.
      *
@@ -298,6 +302,18 @@ export declare function getContextLView(): LView;
 export declare function getCheckNoChangesMode(): boolean;
 export declare function setCheckNoChangesMode(mode: boolean): void;
 export declare function getBindingRoot(): number;
+export declare function getBindingIndex(): number;
+export declare function setBindingIndex(value: number): number;
+export declare function nextBindingIndex(): number;
+export declare function incrementBindingIndex(count: number): number;
+/**
+ * Set a new binding root index so that host template functions can execute.
+ *
+ * Bindings inside the host template are 0 index. But because we don't know ahead of time
+ * how many host bindings we have we can't pre-compute them. For this reason they are all
+ * 0 index and we just shift the root so that they match next available location in the LView.
+ * @param value
+ */
 export declare function setBindingRoot(value: number): void;
 export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;

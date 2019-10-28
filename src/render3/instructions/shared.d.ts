@@ -15,7 +15,7 @@ import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/r
 import { SanitizerFn } from '../interfaces/sanitization';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TData, TView } from '../interfaces/view';
 /** Sets the host bindings for the current view. */
-export declare function setHostBindings(tView: TView, viewData: LView): void;
+export declare function setHostBindings(tView: TView, lView: LView): void;
 /**
  * Creates a native element from a tag name, using a renderer.
  * @param name the tag name
