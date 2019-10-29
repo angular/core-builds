@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.14+24.sha-d1246a1.with-local-changes
+ * @license Angular v9.0.0-next.14+25.sha-c3e9356.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1312,7 +1312,7 @@ function ɵɵdefineComponent(componentDefinition) {
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
         directiveDefs: null,
         pipeDefs: null,
-        selectors: componentDefinition.selectors,
+        selectors: componentDefinition.selectors || EMPTY_ARRAY,
         viewQuery: componentDefinition.viewQuery || null,
         features: componentDefinition.features || null,
         data: componentDefinition.data || {},
@@ -19210,7 +19210,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-next.14+24.sha-d1246a1.with-local-changes');
+var VERSION = new Version('9.0.0-next.14+25.sha-c3e9356.with-local-changes');
 
 /**
  * @license

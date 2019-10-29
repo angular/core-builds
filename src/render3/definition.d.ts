@@ -35,7 +35,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this component. */
-    selectors: CssSelectorList;
+    selectors?: CssSelectorList;
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
@@ -286,7 +286,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors: (string | SelectorFlags)[][];
+    selectors?: (string | SelectorFlags)[][] | undefined;
     /**
      * A map of input names.
      *
