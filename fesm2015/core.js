@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.14+21.sha-a3034ef.with-local-changes
+ * @license Angular v9.0.0-next.14+17.sha-4e38cab.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27633,7 +27633,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.14+21.sha-a3034ef.with-local-changes');
+const VERSION = new Version('9.0.0-next.14+17.sha-4e38cab.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34555,23 +34555,10 @@ function i18nEndFirstPass(lView, tView) {
     /** @type {?} */
     const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, lView);
     // Remove deleted nodes
-    /** @type {?} */
-    let index = rootIndex + 1;
-    while (index <= lastCreatedNode.index - HEADER_OFFSET) {
-        if (visitedNodes.indexOf(index) === -1) {
-            removeNode(index, lView, /* markAsDetached */ true);
+    for (let i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
+        if (visitedNodes.indexOf(i) === -1) {
+            removeNode(i, lView, /* markAsDetached */ true);
         }
-        // Check if an element has any local refs and skip them
-        /** @type {?} */
-        const tNode = getTNode(index, lView);
-        if (tNode && (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) &&
-            tNode.localNames !== null) {
-            // Divide by 2 to get the number of local refs,
-            // since they are stored as an array that also includes directive indexes,
-            // i.e. ["localRef", directiveIndex, ...]
-            index += tNode.localNames.length >> 1;
-        }
-        index++;
     }
 }
 /**
