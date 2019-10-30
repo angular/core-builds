@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.14+36.sha-f197191.with-local-changes
+ * @license Angular v9.0.0-next.14+41.sha-300d7ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16148,7 +16148,7 @@ class ViewRef {
         if (this._lView[HOST] == null) {
             /** @type {?} */
             const tView = (/** @type {?} */ (this._lView[T_HOST]));
-            return collectNativeNodes(this._lView, tView, []);
+            return collectNativeNodes(this._lView, tView.child, []);
         }
         return [];
     }
@@ -16460,21 +16460,38 @@ if (false) {
 }
 /**
  * @param {?} lView
- * @param {?} parentTNode
+ * @param {?} tNode
  * @param {?} result
  * @return {?}
  */
-function collectNativeNodes(lView, parentTNode, result) {
-    /** @type {?} */
-    let tNodeChild = parentTNode.child;
-    while (tNodeChild) {
+function collectNativeNodes(lView, tNode, result) {
+    while (tNode !== null) {
+        ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 1 /* Projection */, 4 /* ElementContainer */, 5 /* IcuContainer */);
         /** @type {?} */
-        const nativeNode = getNativeByTNodeOrNull(tNodeChild, lView);
-        nativeNode && result.push(nativeNode);
-        if (tNodeChild.type === 4 /* ElementContainer */) {
-            collectNativeNodes(lView, tNodeChild, result);
+        const lNode = lView[tNode.index];
+        if (lNode !== null) {
+            result.push(unwrapRNode(lNode));
         }
-        else if (tNodeChild.type === 1 /* Projection */) {
+        // A given lNode can represent either a native node or a LContainer (when it is a host of a
+        // ViewContainerRef). When we find a LContainer we need to descend into it to collect root nodes
+        // from the views in this container.
+        if (isLContainer(lNode)) {
+            for (let i = CONTAINER_HEADER_OFFSET; i < lNode.length; i++) {
+                /** @type {?} */
+                const lViewInAContainer = lNode[i];
+                /** @type {?} */
+                const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
+                if (lViewFirstChildTNode !== null) {
+                    collectNativeNodes(lViewInAContainer, lViewFirstChildTNode, result);
+                }
+            }
+        }
+        /** @type {?} */
+        const tNodeType = tNode.type;
+        if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
+            collectNativeNodes(lView, tNode.child, result);
+        }
+        else if (tNodeType === 1 /* Projection */) {
             /** @type {?} */
             const componentView = findComponentView(lView);
             /** @type {?} */
@@ -16482,13 +16499,13 @@ function collectNativeNodes(lView, parentTNode, result) {
             /** @type {?} */
             const parentView = getLViewParent(componentView);
             /** @type {?} */
-            let currentProjectedNode = ((/** @type {?} */ (componentHost.projection)))[(/** @type {?} */ (tNodeChild.projection))];
-            while (currentProjectedNode && parentView) {
+            let currentProjectedNode = ((/** @type {?} */ (componentHost.projection)))[(/** @type {?} */ (tNode.projection))];
+            while (currentProjectedNode !== null && parentView !== null) {
                 result.push(getNativeByTNode(currentProjectedNode, parentView));
                 currentProjectedNode = currentProjectedNode.next;
             }
         }
-        tNodeChild = tNodeChild.next;
+        tNode = tNode.next;
     }
     return result;
 }
@@ -27633,7 +27650,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-next.14+36.sha-f197191.with-local-changes');
+const VERSION = new Version('9.0.0-next.14+41.sha-300d7ca.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
