@@ -1,0 +1,33 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { getClosureSafeProperty } from '../util/property';
+/** @type {?} */
+export const NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
+/** @type {?} */
+export const NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
+/** @type {?} */
+export const NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
+/** @type {?} */
+export const NG_MOD_DEF = getClosureSafeProperty({ ɵmod: getClosureSafeProperty });
+/** @type {?} */
+export const NG_LOC_ID_DEF = getClosureSafeProperty({ ɵloc: getClosureSafeProperty });
+/** @type {?} */
+export const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
+// TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
+/**
+ * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
+ * the key and the directive's unique ID as the value. This allows us to map directives to their
+ * bloom filter bit for DI.
+ * @type {?}
+ */
+export const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmllbGRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvcmVuZGVyMy9maWVsZHMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFRQSxPQUFPLEVBQUMsc0JBQXNCLEVBQUMsTUFBTSxrQkFBa0IsQ0FBQzs7QUFFeEQsTUFBTSxPQUFPLFdBQVcsR0FBRyxzQkFBc0IsQ0FBQyxFQUFDLElBQUksRUFBRSxzQkFBc0IsRUFBQyxDQUFDOztBQUNqRixNQUFNLE9BQU8sVUFBVSxHQUFHLHNCQUFzQixDQUFDLEVBQUMsSUFBSSxFQUFFLHNCQUFzQixFQUFDLENBQUM7O0FBQ2hGLE1BQU0sT0FBTyxXQUFXLEdBQUcsc0JBQXNCLENBQUMsRUFBQyxLQUFLLEVBQUUsc0JBQXNCLEVBQUMsQ0FBQzs7QUFDbEYsTUFBTSxPQUFPLFVBQVUsR0FBRyxzQkFBc0IsQ0FBQyxFQUFDLElBQUksRUFBRSxzQkFBc0IsRUFBQyxDQUFDOztBQUNoRixNQUFNLE9BQU8sYUFBYSxHQUFHLHNCQUFzQixDQUFDLEVBQUMsSUFBSSxFQUFFLHNCQUFzQixFQUFDLENBQUM7O0FBQ25GLE1BQU0sT0FBTyxjQUFjLEdBQUcsc0JBQXNCLENBQUMsRUFBQyxJQUFJLEVBQUUsc0JBQXNCLEVBQUMsQ0FBQzs7Ozs7Ozs7QUFRcEYsTUFBTSxPQUFPLGFBQWEsR0FBRyxzQkFBc0IsQ0FBQyxFQUFDLGlCQUFpQixFQUFFLHNCQUFzQixFQUFDLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7Z2V0Q2xvc3VyZVNhZmVQcm9wZXJ0eX0gZnJvbSAnLi4vdXRpbC9wcm9wZXJ0eSc7XG5cbmV4cG9ydCBjb25zdCBOR19DT01QX0RFRiA9IGdldENsb3N1cmVTYWZlUHJvcGVydHkoe8m1Y21wOiBnZXRDbG9zdXJlU2FmZVByb3BlcnR5fSk7XG5leHBvcnQgY29uc3QgTkdfRElSX0RFRiA9IGdldENsb3N1cmVTYWZlUHJvcGVydHkoe8m1ZGlyOiBnZXRDbG9zdXJlU2FmZVByb3BlcnR5fSk7XG5leHBvcnQgY29uc3QgTkdfUElQRV9ERUYgPSBnZXRDbG9zdXJlU2FmZVByb3BlcnR5KHvJtXBpcGU6IGdldENsb3N1cmVTYWZlUHJvcGVydHl9KTtcbmV4cG9ydCBjb25zdCBOR19NT0RfREVGID0gZ2V0Q2xvc3VyZVNhZmVQcm9wZXJ0eSh7ybVtb2Q6IGdldENsb3N1cmVTYWZlUHJvcGVydHl9KTtcbmV4cG9ydCBjb25zdCBOR19MT0NfSURfREVGID0gZ2V0Q2xvc3VyZVNhZmVQcm9wZXJ0eSh7ybVsb2M6IGdldENsb3N1cmVTYWZlUHJvcGVydHl9KTtcbmV4cG9ydCBjb25zdCBOR19GQUNUT1JZX0RFRiA9IGdldENsb3N1cmVTYWZlUHJvcGVydHkoe8m1ZmFjOiBnZXRDbG9zdXJlU2FmZVByb3BlcnR5fSk7XG5cbi8qKlxuICogSWYgYSBkaXJlY3RpdmUgaXMgZGlQdWJsaWMsIGJsb29tQWRkIHNldHMgYSBwcm9wZXJ0eSBvbiB0aGUgdHlwZSB3aXRoIHRoaXMgY29uc3RhbnQgYXNcbiAqIHRoZSBrZXkgYW5kIHRoZSBkaXJlY3RpdmUncyB1bmlxdWUgSUQgYXMgdGhlIHZhbHVlLiBUaGlzIGFsbG93cyB1cyB0byBtYXAgZGlyZWN0aXZlcyB0byB0aGVpclxuICogYmxvb20gZmlsdGVyIGJpdCBmb3IgREkuXG4gKi9cbi8vIFRPRE8obWlza28pOiBUaGlzIGlzIHdyb25nLiBUaGUgTkdfRUxFTUVOVF9JRCBzaG91bGQgbmV2ZXIgYmUgbWluaWZpZWQuXG5leHBvcnQgY29uc3QgTkdfRUxFTUVOVF9JRCA9IGdldENsb3N1cmVTYWZlUHJvcGVydHkoe19fTkdfRUxFTUVOVF9JRF9fOiBnZXRDbG9zdXJlU2FmZVByb3BlcnR5fSk7XG4iXX0=
