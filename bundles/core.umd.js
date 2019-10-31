@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+11.sha-4452d6d.with-local-changes
+ * @license Angular v9.0.0-rc.0+13.sha-083d48e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15035,7 +15035,7 @@
         var tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], nodeIndex, 0 /* Container */, tagName, attrs);
         var lContainer = lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode);
         appendChild(comment, tNode, lView);
-        attachPatchData(getNativeByTNode(tNode, lView), lView);
+        attachPatchData(comment, lView);
         // Containers are added to the current view tree instead of their embedded views
         // because views can be removed and re-inserted.
         addToViewTree(lView, lContainer);
@@ -19399,7 +19399,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.0+11.sha-4452d6d.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.0+13.sha-083d48e.with-local-changes');
 
     /**
      * @license
