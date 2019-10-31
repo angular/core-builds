@@ -10,7 +10,7 @@ import { SchemaMetadata } from '../../metadata/schema';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
-import { LocalRefExtractor, PropertyAliasValue, TAttributes, TContainerNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
+import { LocalRefExtractor, PropertyAliasValue, TAttributes, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TData, TView } from '../interfaces/view';
@@ -75,12 +75,12 @@ export declare function executeContentQueries(tView: TView, tNode: TNode, lView:
 /**
  * Creates directive instances.
  */
-export declare function createDirectivesInstances(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode): void;
+export declare function createDirectivesInstances(tView: TView, lView: LView, tNode: TDirectiveHostNode): void;
 /**
  * Takes a list of local names and indices and pushes the resolved local variable values
  * to LView in the same order as they are loaded in the template with load().
  */
-export declare function saveResolvedLocalsInData(viewData: LView, tNode: TNode, localRefExtractor?: LocalRefExtractor): void;
+export declare function saveResolvedLocalsInData(viewData: LView, tNode: TDirectiveHostNode, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Gets TView from a template function or creates a new TView
  * if it doesn't already exist.
@@ -149,7 +149,7 @@ export declare function setNgReflectProperties(lView: LView, element: RElement |
 /**
  * Instantiate a root component.
  */
-export declare function instantiateRootComponent<T>(tView: TView, viewData: LView, def: ComponentDef<T>): T;
+export declare function instantiateRootComponent<T>(tView: TView, lView: LView, def: ComponentDef<T>): T;
 /**
  * Resolve the matched directives on a node.
  */

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+4.sha-66ab701.with-local-changes
+ * @license Angular v9.0.0-rc.0+11.sha-4452d6d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8873,7 +8873,7 @@
     function createDirectivesInstances(tView, lView, tNode) {
         if (!getBindingsEnabled())
             return;
-        instantiateAllDirectives(tView, lView, tNode);
+        instantiateAllDirectives(tView, lView, tNode, getNativeByTNode(tNode, lView));
         if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
             invokeDirectivesHostBindings(tView, lView, tNode);
         }
@@ -9307,16 +9307,20 @@
     /**
      * Instantiate a root component.
      */
-    function instantiateRootComponent(tView, viewData, def) {
+    function instantiateRootComponent(tView, lView, def) {
         var rootTNode = getPreviousOrParentTNode();
         if (tView.firstTemplatePass) {
             if (def.providersResolver)
                 def.providersResolver(def);
             generateExpandoInstructionBlock(tView, rootTNode, 1);
-            baseResolveDirective(tView, viewData, def);
+            baseResolveDirective(tView, lView, def);
         }
-        var directive = getNodeInjectable(tView.data, viewData, viewData.length - 1, rootTNode);
-        postProcessBaseDirective(viewData, rootTNode, directive);
+        var directive = getNodeInjectable(tView.data, lView, lView.length - 1, rootTNode);
+        attachPatchData(directive, lView);
+        var native = getNativeByTNode(rootTNode, lView);
+        if (native) {
+            attachPatchData(native, lView);
+        }
         return directive;
     }
     /**
@@ -9368,19 +9372,30 @@
     /**
      * Instantiate all the directives that were previously resolved on the current node.
      */
-    function instantiateAllDirectives(tView, lView, tNode) {
+    function instantiateAllDirectives(tView, lView, tNode, native) {
         var start = tNode.directiveStart;
         var end = tNode.directiveEnd;
         if (!tView.firstTemplatePass) {
             getOrCreateNodeInjectorForNode(tNode, lView);
         }
+        attachPatchData(native, lView);
+        var initialInputs = tNode.initialInputs;
         for (var i = start; i < end; i++) {
             var def = tView.data[i];
-            if (isComponentDef(def)) {
+            var isComponent = isComponentDef(def);
+            if (isComponent) {
+                ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */);
                 addComponentLogic(lView, tNode, def);
             }
             var directive = getNodeInjectable(tView.data, lView, i, tNode);
-            postProcessDirective(lView, tNode, directive, def, i - start);
+            attachPatchData(directive, lView);
+            if (initialInputs !== null) {
+                setInputsFromAttrs(lView, i - start, directive, def, tNode, initialInputs);
+            }
+            if (isComponent) {
+                var componentView = getComponentLViewByIndex(tNode.index, lView);
+                componentView[CONTEXT] = directive;
+            }
         }
     }
     function invokeDirectivesHostBindings(tView, viewData, tNode) {
@@ -9435,30 +9450,6 @@
         var providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
         var providerCount = tView.data.length - providerStartIndex;
         (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, providerCount, directiveCount);
-    }
-    /**
-     * Process a directive on the current node after its creation.
-     */
-    function postProcessDirective(lView, hostTNode, directive, def, directiveDefIdx) {
-        postProcessBaseDirective(lView, hostTNode, directive);
-        if (hostTNode.initialInputs !== null) {
-            setInputsFromAttrs(lView, directiveDefIdx, directive, def, hostTNode);
-        }
-        if (isComponentDef(def)) {
-            var componentView = getComponentLViewByIndex(hostTNode.index, lView);
-            componentView[CONTEXT] = directive;
-        }
-    }
-    /**
-     * A lighter version of postProcessDirective() that is used for the root component.
-     */
-    function postProcessBaseDirective(lView, hostTNode, directive) {
-        ngDevMode && assertLessThanOrEqual(getBindingIndex(), lView[TVIEW].bindingStartIndex, 'directives should be created before any bindings');
-        attachPatchData(directive, lView);
-        var native = getNativeByTNode(hostTNode, lView);
-        if (native) {
-            attachPatchData(native, lView);
-        }
     }
     /**
     * Matches the current node against all available selectors.
@@ -9594,8 +9585,7 @@
      * @param def The directive def that contains the list of inputs
      * @param tNode The static data for this node
      */
-    function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode) {
-        var initialInputData = tNode.initialInputs;
+    function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initialInputData) {
         var initialInputs = initialInputData[directiveIndex];
         if (initialInputs !== null) {
             var setInput = def.setInput;
@@ -19378,7 +19368,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.0+4.sha-66ab701.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.0+11.sha-4452d6d.with-local-changes');
 
     /**
      * @license
