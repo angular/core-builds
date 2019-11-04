@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+34.sha-5977a72.with-local-changes
+ * @license Angular v9.0.0-rc.0+35.sha-316b30b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6297,6 +6297,13 @@ declare const T_HOST = 6;
  */
 declare type TAttributes = (string | ɵAttributeMarker | CssSelector)[];
 
+/**
+ * Constants that are associated with a view. Includes:
+ * - Attribute arrays.
+ * - Local definition arrays.
+ */
+declare type TConstants = (TAttributes | string)[];
+
 /** Static data for an LContainer */
 declare interface TContainerNode extends TNode {
     /**
@@ -7826,10 +7833,10 @@ declare interface TView {
      */
     schemas: SchemaMetadata[] | null;
     /**
-     * Array of attributes for all of the elements in the view. Used
-     * for directive matching and attribute bindings.
+     * Array of constants for the view. Includes attribute arrays, local definition arrays etc.
+     * Used for directive matching, attribute bindings, local definitions and more.
      */
-    consts: TAttributes[] | null;
+    consts: TConstants | null;
 }
 
 /** Static data for a view  */
@@ -9475,7 +9482,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     readonly template: ComponentTemplate<T>;
     /** Constants associated with the component's view. */
-    readonly consts: TAttributes[] | null;
+    readonly consts: TConstants | null;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11550,8 +11557,11 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      *
      */
     template: ComponentTemplate<T>;
-    /** Constants for the nodes in the component's view. */
-    consts?: TAttributes[];
+    /**
+     * Constants for the nodes in the component's view.
+     * Includes attribute arrays, local definition arrays etc.
+     */
+    consts?: TConstants;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11877,24 +11887,24 @@ export declare function ɵɵdisableBindings(): void;
  *
  * @param index Index of the element in the data array
  * @param name Name of the DOM Node
- * @param constsIndex Index of the element in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Creates an empty logical container using {@link elementContainerStart}
  * and {@link elementContainerEnd}
  *
  * @param index Index of the element in the LView array
- * @param constsIndex Index of the container in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainer(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainer(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Mark the end of the <ng-container>.
@@ -11908,8 +11918,8 @@ export declare function ɵɵelementContainerEnd(): void;
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
  * @param index Index of the element in the LView array
- * @param constsIndex Index of the container in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
@@ -11917,7 +11927,7 @@ export declare function ɵɵelementContainerEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerStart(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Mark the end of the element.
@@ -11972,8 +11982,8 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
- * @param constsIndex Index of the element in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
@@ -11981,7 +11991,7 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Marks the end of an embedded view.
@@ -13746,14 +13756,14 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  * @param decls The number of nodes, local refs, and pipes for this template
  * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
- * @param constsIndex Index of template in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, constsIndex?: number | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, attrsIndex?: number | null, localRefsIndex?: number | null, localRefExtractor?: LocalRefExtractor): void;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
