@@ -146,6 +146,7 @@ export declare type TsickleIssue1009 = any;
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 export declare function elementPropertyInternal<T>(lView: LView, index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
 export declare function setNgReflectProperties(lView: LView, element: RElement | RComment, type: TNodeType, dataValue: PropertyAliasValue, value: any): void;
+export declare function matchingSchemas(hostView: LView, tagName: string | null): boolean;
 /**
  * Instantiate a root component.
  */
@@ -153,7 +154,7 @@ export declare function instantiateRootComponent<T>(tView: TView, lView: LView, 
 /**
  * Resolve the matched directives on a node.
  */
-export declare function resolveDirectives(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null): void;
+export declare function resolveDirectives(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null): boolean;
 export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstTemplatePass: boolean): void;
 /**
 * Generates a new block in TView.expandoInstructions for this node.
