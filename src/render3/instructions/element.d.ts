@@ -11,8 +11,8 @@ import { TAttributes } from '../interfaces/node';
  *
  * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
- * @param constsIndex Index of the element in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
@@ -20,7 +20,7 @@ import { TAttributes } from '../interfaces/node';
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
 /**
  * Mark the end of the element.
  *
@@ -32,12 +32,12 @@ export declare function ɵɵelementEnd(): void;
  *
  * @param index Index of the element in the data array
  * @param name Name of the DOM Node
- * @param constsIndex Index of the element in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
 /**
  * Assign static attribute values to a host element.
  *

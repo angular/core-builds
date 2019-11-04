@@ -24,14 +24,14 @@ export declare function ɵɵcontainer(index: number): void;
  * @param decls The number of nodes, local refs, and pipes for this template
  * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
- * @param constsIndex Index of template in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, constsIndex?: number | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, attrsIndex?: number | null, localRefsIndex?: number | null, localRefExtractor?: LocalRefExtractor): void;
 /**
  * Sets a container up to receive views.
  *

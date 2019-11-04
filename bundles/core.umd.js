@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+34.sha-5437e2d.with-local-changes
+ * @license Angular v9.0.0-rc.0+35.sha-66725b7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3292,6 +3292,10 @@
     /** Returns a boolean for whether the view is attached to a container. */
     function viewAttachedToContainer(view) {
         return isLContainer(view[PARENT]);
+    }
+    /** Returns a constant from `TConstants` instance. */
+    function getConstant(consts, index) {
+        return consts === null || index == null ? null : consts[index];
     }
     /**
      * Resets the pre-order hook flags of the view.
@@ -8956,7 +8960,7 @@
             typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
             null, // firstChild: TNode|null,
             schemas, // schemas: SchemaMetadata[]|null,
-            consts) : // consts: TAttributes[]
+            consts) : // consts: TConstants|null
             {
                 id: viewIndex,
                 blueprint: blueprint,
@@ -9333,7 +9337,7 @@
         if (!getBindingsEnabled())
             return false;
         var directives = findDirectiveMatches(tView, lView, tNode);
-        var exportsMap = localRefs ? { '': -1 } : null;
+        var exportsMap = localRefs === null ? null : { '': -1 };
         var hasDirectives = false;
         if (directives !== null) {
             hasDirectives = true;
@@ -14905,22 +14909,23 @@
      * @param decls The number of nodes, local refs, and pipes for this template
      * @param vars The number of bindings for this template
      * @param tagName The name of the container element, if applicable
-     * @param constsIndex Index of template in the `consts` array.
-     * @param localRefs A set of local reference bindings on the element.
+     * @param attrsIndex Index of template attributes in the `consts` array.
+     * @param localRefs Index of the local references in the `consts` array.
      * @param localRefExtractor A function which extracts local-refs values from the template.
      *        Defaults to the current element associated with the local-ref.
      *
      * @codeGenApi
      */
-    function ɵɵtemplate(index, templateFn, decls, vars, tagName, constsIndex, localRefs, localRefExtractor) {
+    function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var tViewConsts = tView.consts;
         // TODO: consider a separate node type for templates
-        var tContainerNode = containerInternal(lView, index, tagName || null, tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex]);
+        var tContainerNode = containerInternal(lView, index, tagName || null, getConstant(tViewConsts, attrsIndex));
+        var localRefs = getConstant(tViewConsts, localRefsIndex);
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
-            resolveDirectives(tView, lView, tContainerNode, localRefs || null);
+            resolveDirectives(tView, lView, tContainerNode, localRefs);
             registerPostOrderHooks(tView, tContainerNode);
             var embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
             var embeddedTViewNode = createTNode(tView, null, 2 /* View */, -1, null, null);
@@ -15589,8 +15594,8 @@
      *
      * @param index Index of the element in the LView array
      * @param name Name of the DOM Node
-     * @param constsIndex Index of the element in the `consts` array.
-     * @param localRefs A set of local reference bindings on the element.
+     * @param attrsIndex Index of the element's attributes in the `consts` array.
+     * @param localRefsIndex Index of the element's local references in the `consts` array.
      *
      * Attributes and localRefs are passed as an array of strings where elements with an even index
      * hold an attribute name and elements with an odd index hold an attribute value, ex.:
@@ -15598,21 +15603,22 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementStart(index, name, constsIndex, localRefs) {
+    function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var tViewConsts = tView.consts;
-        var consts = tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex];
+        var attrs = getConstant(tViewConsts, attrsIndex);
+        var localRefs = getConstant(tViewConsts, localRefsIndex);
         ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateElement++;
         ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
         var renderer = lView[RENDERER];
         var native = lView[index + HEADER_OFFSET] = elementCreate(name, renderer, getNamespace());
-        var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, consts);
-        if (consts != null) {
-            var lastAttrIndex = setUpAttributes(renderer, native, consts);
+        var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
+        if (attrs != null) {
+            var lastAttrIndex = setUpAttributes(renderer, native, attrs);
             if (tView.firstTemplatePass) {
-                registerInitialStylingOnTNode(tNode, consts, lastAttrIndex);
+                registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
             }
         }
         if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
@@ -15632,7 +15638,7 @@
         // and `[class]` bindings work for multiple directives.)
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
-            var hasDirectives = resolveDirectives(tView, lView, tNode, localRefs || null);
+            var hasDirectives = resolveDirectives(tView, lView, tNode, localRefs);
             ngDevMode && validateElement(lView, native, tNode, hasDirectives);
             if (tView.queries !== null) {
                 tView.queries.elementStart(tView, tNode);
@@ -15686,13 +15692,13 @@
      *
      * @param index Index of the element in the data array
      * @param name Name of the DOM Node
-     * @param constsIndex Index of the element in the `consts` array.
-     * @param localRefs A set of local reference bindings on the element.
+     * @param attrsIndex Index of the element's attributes in the `consts` array.
+     * @param localRefsIndex Index of the element's local references in the `consts` array.
      *
      * @codeGenApi
      */
-    function ɵɵelement(index, name, constsIndex, localRefs) {
-        ɵɵelementStart(index, name, constsIndex, localRefs);
+    function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
+        ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
         ɵɵelementEnd();
     }
     /**
@@ -15811,8 +15817,8 @@
      * The instruction must later be followed by `elementContainerEnd()` call.
      *
      * @param index Index of the element in the LView array
-     * @param constsIndex Index of the container in the `consts` array.
-     * @param localRefs A set of local reference bindings on the element.
+     * @param attrsIndex Index of the container attributes in the `consts` array.
+     * @param localRefsIndex Index of the container's local references in the `consts` array.
      *
      * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
      * the DOM (as a comment node can't have attributes). Attributes are here only for directive
@@ -15820,29 +15826,30 @@
      *
      * @codeGenApi
      */
-    function ɵɵelementContainerStart(index, constsIndex, localRefs) {
+    function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var renderer = lView[RENDERER];
         var tagName = 'ng-container';
         var tViewConsts = tView.consts;
-        var consts = tViewConsts === null || constsIndex == null ? null : tViewConsts[constsIndex];
+        var attrs = getConstant(tViewConsts, attrsIndex);
+        var localRefs = getConstant(tViewConsts, localRefsIndex);
         ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateComment++;
         ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
         var native = lView[index + HEADER_OFFSET] = renderer.createComment(ngDevMode ? tagName : '');
         ngDevMode && assertDataInRange(lView, index - 1);
-        var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 4 /* ElementContainer */, tagName, consts);
-        if (consts && tView.firstTemplatePass) {
+        var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 4 /* ElementContainer */, tagName, attrs);
+        if (attrs && tView.firstTemplatePass) {
             // While ng-container doesn't necessarily support styling, we use the style context to identify
             // and execute directives on the ng-container.
-            registerInitialStylingOnTNode(tNode, consts, 0);
+            registerInitialStylingOnTNode(tNode, attrs, 0);
         }
         appendChild(native, tNode, lView);
         attachPatchData(native, lView);
         if (tView.firstTemplatePass) {
             ngDevMode && ngDevMode.firstTemplatePass++;
-            resolveDirectives(tView, lView, tNode, localRefs || null);
+            resolveDirectives(tView, lView, tNode, localRefs);
             if (tView.queries) {
                 tView.queries.elementStart(tView, tNode);
             }
@@ -15885,13 +15892,13 @@
      * and {@link elementContainerEnd}
      *
      * @param index Index of the element in the LView array
-     * @param constsIndex Index of the container in the `consts` array.
-     * @param localRefs A set of local reference bindings on the element.
+     * @param attrsIndex Index of the container attributes in the `consts` array.
+     * @param localRefsIndex Index of the container's local references in the `consts` array.
      *
      * @codeGenApi
      */
-    function ɵɵelementContainer(index, constsIndex, localRefs) {
-        ɵɵelementContainerStart(index, constsIndex, localRefs);
+    function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
+        ɵɵelementContainerStart(index, attrsIndex, localRefsIndex);
         ɵɵelementContainerEnd();
     }
 
@@ -19398,7 +19405,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.0+34.sha-5437e2d.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.0+35.sha-66725b7.with-local-changes');
 
     /**
      * @license

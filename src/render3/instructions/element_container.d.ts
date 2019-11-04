@@ -3,8 +3,8 @@
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
  * @param index Index of the element in the LView array
- * @param constsIndex Index of the container in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
@@ -12,7 +12,7 @@
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerStart(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
 /**
  * Mark the end of the <ng-container>.
  *
@@ -24,9 +24,9 @@ export declare function ɵɵelementContainerEnd(): void;
  * and {@link elementContainerEnd}
  *
  * @param index Index of the element in the LView array
- * @param constsIndex Index of the container in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainer(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainer(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;

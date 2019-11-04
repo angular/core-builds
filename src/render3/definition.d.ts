@@ -11,7 +11,7 @@ import { NgModuleDef } from '../metadata/ng_module';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
 import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
-import { TAttributes } from './interfaces/node';
+import { TConstants } from './interfaces/node';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -153,8 +153,11 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      *
      */
     template: ComponentTemplate<T>;
-    /** Constants for the nodes in the component's view. */
-    consts?: TAttributes[];
+    /**
+     * Constants for the nodes in the component's view.
+     * Includes attribute arrays, local definition arrays etc.
+     */
+    consts?: TConstants;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */

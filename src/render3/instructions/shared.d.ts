@@ -10,7 +10,7 @@ import { SchemaMetadata } from '../../metadata/schema';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
-import { LocalRefExtractor, PropertyAliasValue, TAttributes, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
+import { LocalRefExtractor, PropertyAliasValue, TAttributes, TConstants, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TData, TView } from '../interfaces/view';
@@ -101,7 +101,7 @@ export declare function getOrCreateTView(def: ComponentDef<any>): TView;
  * @param schemas Schemas for this view
  * @param consts Constants for this view
  */
-export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, consts: TAttributes[] | null): TView;
+export declare function createTView(viewIndex: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, consts: TConstants | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
