@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+35.sha-66725b7.with-local-changes
+ * @license Angular v9.0.0-rc.0+36.sha-4ff43e1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10489,7 +10489,8 @@
             else {
                 // We are inserting a root element of the component view into the component host element and
                 // it should always be eager.
-                return getHostNative(currentView);
+                ngDevMode && assertNodeOfPossibleTypes(hostTNode, 3 /* Element */);
+                return currentView[HOST];
             }
         }
         else {
@@ -10517,17 +10518,6 @@
             }
             return getNativeByTNode(parentTNode, currentView);
         }
-    }
-    /**
-     * Gets the native host element for a given view. Will return null if the current view does not have
-     * a host element.
-     */
-    function getHostNative(currentView) {
-        ngDevMode && assertLView(currentView);
-        var hostTNode = currentView[T_HOST];
-        return hostTNode && hostTNode.type === 3 /* Element */ ?
-            getNativeByTNode(hostTNode, getLViewParent(currentView)) :
-            null;
     }
     /**
      * Inserts a native node before another native node for a given parent using {@link Renderer3}.
@@ -19436,7 +19426,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.0+35.sha-66725b7.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.0+36.sha-4ff43e1.with-local-changes');
 
     /**
      * @license
