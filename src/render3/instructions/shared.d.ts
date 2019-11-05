@@ -155,7 +155,7 @@ export declare function instantiateRootComponent<T>(tView: TView, lView: LView, 
  * Resolve the matched directives on a node.
  */
 export declare function resolveDirectives(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null): boolean;
-export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstTemplatePass: boolean): void;
+export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstCreatePass: boolean): void;
 /**
 * Generates a new block in TView.expandoInstructions for this node.
 *
