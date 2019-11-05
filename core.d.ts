@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+43.sha-abdbd46.with-local-changes
+ * @license Angular v9.0.0-rc.0+53.sha-12ddda3.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9601,6 +9601,15 @@ export declare function ɵcrt(values: {
 export declare type ɵCssSelectorList = CssSelector[];
 
 /**
+ * Index of each value in currency data (used to describe CURRENCIES_EN in currencies.ts)
+ */
+export declare const enum ɵCurrencyIndex {
+    Symbol = 0,
+    SymbolNarrow = 1,
+    NbOfDigits = 2
+}
+
+/**
  * The locale id that the application is using by default (for translations and ICU expressions).
  */
 export declare const ɵDEFAULT_LOCALE_ID = "en-US";
@@ -9745,6 +9754,15 @@ export declare const ɵEMPTY_MAP: {
 };
 
 /**
+ * Index of each type of locale data from the extra locale data array
+ */
+export declare const enum ɵExtraLocaleDataIndex {
+    ExtraDayPeriodFormats = 0,
+    ExtraDayPeriodStandalone = 1,
+    ExtraDayPeriodsRules = 2
+}
+
+/**
  * Finds the locale data for a given locale.
  *
  * @param locale The locale code.
@@ -9817,7 +9835,6 @@ export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> |
  * @param target Component, Directive or DOM Node.
  */
 export declare function ɵgetLContext(target: any): ɵLContext | null;
-
 
 /**
  * Retrieves the plural function used by ICU expressions to determine the plural case to use
@@ -9932,13 +9949,6 @@ export declare interface ɵLContext {
  * ```
  */
 export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
-
-/**
- * This const is used to store the locale data registered with `registerLocaleData`
- */
-export declare const ɵLOCALE_DATA: {
-    [localeId: string]: any;
-};
 
 /**
  * Index of each type of locale data from the locale data array
@@ -10350,6 +10360,14 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
 }
 
 /**
+ * Register locale data to be used internally by Angular. See the
+ * ["I18n guide"](guide/i18n#i18n-pipes) to know how to import additional locale data.
+ *
+ * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
+ */
+export declare function ɵregisterLocaleData(data: any, localeId?: string | any, extraData?: any): void;
+
+/**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
  * @publicApi
  */
@@ -10600,6 +10618,11 @@ export declare function ɵted(checkIndex: number, ngContentIndex: number | null,
  * until they have.
  */
 export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: ɵNgModuleType) => void): ɵNgModuleTransitiveScopes;
+
+/**
+ * Helper function to remove all the locale data from `LOCALE_DATA`.
+ */
+export declare function ɵunregisterLocaleData(): void;
 
 export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
 
