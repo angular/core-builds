@@ -8,4 +8,4 @@
  */
 import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
-export declare function createMigrationCompilerHost(tree: Tree, options: ts.CompilerOptions, basePath: string): ts.CompilerHost;
+export declare function createMigrationCompilerHost(tree: Tree, options: ts.CompilerOptions, basePath: string, fakeRead?: (fileName: string) => string | null): ts.CompilerHost;

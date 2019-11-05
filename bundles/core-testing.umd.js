@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+47.sha-85298e3.with-local-changes
+ * @license Angular v9.0.0-rc.0+62.sha-d751ca7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/compiler')) :
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core', '@angular/compiler'], factory) :
     (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}), global.ng.core, global.ng.compiler));
-}(this, function (exports, core, compiler) { 'use strict';
+}(this, (function (exports, core, compiler) { 'use strict';
 
     /**
      * @license
@@ -2671,7 +2671,7 @@
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            var ngZone = new core.NgZone({ enableLongStackTrace: true });
+            var ngZone = new core.NgZone({ enableLongStackTrace: true, shouldCoalesceEventChangeDetection: false });
             var providers = [{ provide: core.NgZone, useValue: ngZone }];
             var ngZoneInjector = core.Injector.create({
                 providers: providers,
@@ -3029,31 +3029,31 @@
      * Generated bundle index. Do not edit.
      */
 
-    exports.ɵangular_packages_core_testing_testing_b = TestBedRender3;
-    exports.ɵangular_packages_core_testing_testing_c = _getTestBedRender3;
-    exports.ɵangular_packages_core_testing_testing_a = TestBedViewEngine;
-    exports.TestBed = TestBed;
-    exports.getTestBed = getTestBed;
-    exports.inject = inject;
-    exports.InjectSetupWrapper = InjectSetupWrapper;
-    exports.withModule = withModule;
-    exports.ɵMetadataOverrider = MetadataOverrider;
-    exports.async = async;
     exports.ComponentFixture = ComponentFixture;
-    exports.resetFakeAsyncZone = resetFakeAsyncZone;
-    exports.fakeAsync = fakeAsync;
-    exports.tick = tick;
-    exports.flush = flush;
-    exports.discardPeriodicTasks = discardPeriodicTasks;
-    exports.flushMicrotasks = flushMicrotasks;
-    exports.TestComponentRenderer = TestComponentRenderer;
     exports.ComponentFixtureAutoDetect = ComponentFixtureAutoDetect;
     exports.ComponentFixtureNoNgZone = ComponentFixtureNoNgZone;
+    exports.InjectSetupWrapper = InjectSetupWrapper;
+    exports.TestBed = TestBed;
+    exports.TestComponentRenderer = TestComponentRenderer;
     exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
+    exports.async = async;
+    exports.discardPeriodicTasks = discardPeriodicTasks;
+    exports.fakeAsync = fakeAsync;
+    exports.flush = flush;
+    exports.flushMicrotasks = flushMicrotasks;
+    exports.getTestBed = getTestBed;
+    exports.inject = inject;
+    exports.resetFakeAsyncZone = resetFakeAsyncZone;
+    exports.tick = tick;
+    exports.withModule = withModule;
+    exports.ɵMetadataOverrider = MetadataOverrider;
     exports.ɵTestingCompiler = TestingCompiler;
     exports.ɵTestingCompilerFactory = TestingCompilerFactory;
+    exports.ɵangular_packages_core_testing_testing_a = TestBedViewEngine;
+    exports.ɵangular_packages_core_testing_testing_b = TestBedRender3;
+    exports.ɵangular_packages_core_testing_testing_c = _getTestBedRender3;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=core-testing.umd.js.map

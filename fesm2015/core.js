@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+47.sha-85298e3.with-local-changes
+ * @license Angular v9.0.0-rc.0+62.sha-d751ca7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27688,7 +27688,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.0+47.sha-85298e3.with-local-changes');
+const VERSION = new Version('9.0.0-rc.0+62.sha-d751ca7.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33675,66 +33675,6 @@ if (typeof ngI18nClosureMode === 'undefined') {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * This const is used to store the locale data registered with `registerLocaleData`
- * @type {?}
- */
-const LOCALE_DATA = {};
-/** @enum {number} */
-const LocaleDataIndex = {
-    LocaleId: 0,
-    DayPeriodsFormat: 1,
-    DayPeriodsStandalone: 2,
-    DaysFormat: 3,
-    DaysStandalone: 4,
-    MonthsFormat: 5,
-    MonthsStandalone: 6,
-    Eras: 7,
-    FirstDayOfWeek: 8,
-    WeekendRange: 9,
-    DateFormat: 10,
-    TimeFormat: 11,
-    DateTimeFormat: 12,
-    NumberSymbols: 13,
-    NumberFormats: 14,
-    CurrencySymbol: 15,
-    CurrencyName: 16,
-    Currencies: 17,
-    PluralCase: 18,
-    ExtraData: 19,
-};
-LocaleDataIndex[LocaleDataIndex.LocaleId] = 'LocaleId';
-LocaleDataIndex[LocaleDataIndex.DayPeriodsFormat] = 'DayPeriodsFormat';
-LocaleDataIndex[LocaleDataIndex.DayPeriodsStandalone] = 'DayPeriodsStandalone';
-LocaleDataIndex[LocaleDataIndex.DaysFormat] = 'DaysFormat';
-LocaleDataIndex[LocaleDataIndex.DaysStandalone] = 'DaysStandalone';
-LocaleDataIndex[LocaleDataIndex.MonthsFormat] = 'MonthsFormat';
-LocaleDataIndex[LocaleDataIndex.MonthsStandalone] = 'MonthsStandalone';
-LocaleDataIndex[LocaleDataIndex.Eras] = 'Eras';
-LocaleDataIndex[LocaleDataIndex.FirstDayOfWeek] = 'FirstDayOfWeek';
-LocaleDataIndex[LocaleDataIndex.WeekendRange] = 'WeekendRange';
-LocaleDataIndex[LocaleDataIndex.DateFormat] = 'DateFormat';
-LocaleDataIndex[LocaleDataIndex.TimeFormat] = 'TimeFormat';
-LocaleDataIndex[LocaleDataIndex.DateTimeFormat] = 'DateTimeFormat';
-LocaleDataIndex[LocaleDataIndex.NumberSymbols] = 'NumberSymbols';
-LocaleDataIndex[LocaleDataIndex.NumberFormats] = 'NumberFormats';
-LocaleDataIndex[LocaleDataIndex.CurrencySymbol] = 'CurrencySymbol';
-LocaleDataIndex[LocaleDataIndex.CurrencyName] = 'CurrencyName';
-LocaleDataIndex[LocaleDataIndex.Currencies] = 'Currencies';
-LocaleDataIndex[LocaleDataIndex.PluralCase] = 'PluralCase';
-LocaleDataIndex[LocaleDataIndex.ExtraData] = 'ExtraData';
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // THIS CODE IS GENERATED - DO NOT MODIFY
 // See angular/tools/gulp-tasks/cldr/extract.js
 /** @type {?} */
@@ -33780,6 +33720,59 @@ var localeEn = [
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * This const is used to store the locale data registered with `registerLocaleData`
+ * @type {?}
+ */
+let LOCALE_DATA = {};
+/**
+ * Register locale data to be used internally by Angular. See the
+ * ["I18n guide"](guide/i18n#i18n-pipes) to know how to import additional locale data.
+ *
+ * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
+ * @param {?} data
+ * @param {?=} localeId
+ * @param {?=} extraData
+ * @return {?}
+ */
+function registerLocaleData(data, localeId, extraData) {
+    if (typeof localeId !== 'string') {
+        extraData = localeId;
+        localeId = data[LocaleDataIndex.LocaleId];
+    }
+    localeId = localeId.toLowerCase().replace(/_/g, '-');
+    LOCALE_DATA[localeId] = data;
+    if (extraData) {
+        LOCALE_DATA[localeId][LocaleDataIndex.ExtraData] = extraData;
+    }
+}
+/**
+ * Finds the locale data for a given locale.
+ *
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @param {?} locale The locale code.
+ * @return {?} The locale data.
+ */
+function findLocaleData(locale) {
+    /** @type {?} */
+    const normalizedLocale = normalizeLocale(locale);
+    /** @type {?} */
+    let match = getLocaleData(normalizedLocale);
+    if (match) {
+        return match;
+    }
+    // let's try to find a parent locale
+    /** @type {?} */
+    const parentLocale = normalizedLocale.split('-')[0];
+    match = getLocaleData(parentLocale);
+    if (match) {
+        return match;
+    }
+    if (parentLocale === 'en') {
+        return localeEn;
+    }
+    throw new Error(`Missing locale data for the locale "${locale}".`);
+}
+/**
  * Retrieves the plural function used by ICU expressions to determine the plural case to use
  * for a given locale.
  * @see `NgPlural` / [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
@@ -33792,31 +33785,85 @@ function getLocalePluralCase(locale) {
     return data[LocaleDataIndex.PluralCase];
 }
 /**
- * Finds the locale data for a given locale.
- *
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
- * @param {?} locale The locale code.
- * @return {?} The locale data.
+ * Helper function to get the given `normalizedLocale` from `LOCALE_DATA`
+ * or from the global `ng.common.locale`.
+ * @param {?} normalizedLocale
+ * @return {?}
  */
-function findLocaleData(locale) {
-    /** @type {?} */
-    const normalizedLocale = locale.toLowerCase().replace(/_/g, '-');
-    /** @type {?} */
-    let match = LOCALE_DATA[normalizedLocale];
-    if (match) {
-        return match;
+function getLocaleData(normalizedLocale) {
+    if (!(normalizedLocale in LOCALE_DATA)) {
+        LOCALE_DATA[normalizedLocale] = _global.ng && _global.ng.common && _global.ng.common.locales &&
+            _global.ng.common.locales[normalizedLocale];
     }
-    // let's try to find a parent locale
-    /** @type {?} */
-    const parentLocale = normalizedLocale.split('-')[0];
-    match = LOCALE_DATA[parentLocale];
-    if (match) {
-        return match;
-    }
-    if (parentLocale === 'en') {
-        return localeEn;
-    }
-    throw new Error(`Missing locale data for the locale "${locale}".`);
+    return LOCALE_DATA[normalizedLocale];
+}
+/**
+ * Helper function to remove all the locale data from `LOCALE_DATA`.
+ * @return {?}
+ */
+function unregisterAllLocaleData() {
+    LOCALE_DATA = {};
+}
+/** @enum {number} */
+const LocaleDataIndex = {
+    LocaleId: 0,
+    DayPeriodsFormat: 1,
+    DayPeriodsStandalone: 2,
+    DaysFormat: 3,
+    DaysStandalone: 4,
+    MonthsFormat: 5,
+    MonthsStandalone: 6,
+    Eras: 7,
+    FirstDayOfWeek: 8,
+    WeekendRange: 9,
+    DateFormat: 10,
+    TimeFormat: 11,
+    DateTimeFormat: 12,
+    NumberSymbols: 13,
+    NumberFormats: 14,
+    CurrencySymbol: 15,
+    CurrencyName: 16,
+    Currencies: 17,
+    PluralCase: 18,
+    ExtraData: 19,
+};
+LocaleDataIndex[LocaleDataIndex.LocaleId] = 'LocaleId';
+LocaleDataIndex[LocaleDataIndex.DayPeriodsFormat] = 'DayPeriodsFormat';
+LocaleDataIndex[LocaleDataIndex.DayPeriodsStandalone] = 'DayPeriodsStandalone';
+LocaleDataIndex[LocaleDataIndex.DaysFormat] = 'DaysFormat';
+LocaleDataIndex[LocaleDataIndex.DaysStandalone] = 'DaysStandalone';
+LocaleDataIndex[LocaleDataIndex.MonthsFormat] = 'MonthsFormat';
+LocaleDataIndex[LocaleDataIndex.MonthsStandalone] = 'MonthsStandalone';
+LocaleDataIndex[LocaleDataIndex.Eras] = 'Eras';
+LocaleDataIndex[LocaleDataIndex.FirstDayOfWeek] = 'FirstDayOfWeek';
+LocaleDataIndex[LocaleDataIndex.WeekendRange] = 'WeekendRange';
+LocaleDataIndex[LocaleDataIndex.DateFormat] = 'DateFormat';
+LocaleDataIndex[LocaleDataIndex.TimeFormat] = 'TimeFormat';
+LocaleDataIndex[LocaleDataIndex.DateTimeFormat] = 'DateTimeFormat';
+LocaleDataIndex[LocaleDataIndex.NumberSymbols] = 'NumberSymbols';
+LocaleDataIndex[LocaleDataIndex.NumberFormats] = 'NumberFormats';
+LocaleDataIndex[LocaleDataIndex.CurrencySymbol] = 'CurrencySymbol';
+LocaleDataIndex[LocaleDataIndex.CurrencyName] = 'CurrencyName';
+LocaleDataIndex[LocaleDataIndex.Currencies] = 'Currencies';
+LocaleDataIndex[LocaleDataIndex.PluralCase] = 'PluralCase';
+LocaleDataIndex[LocaleDataIndex.ExtraData] = 'ExtraData';
+/** @enum {number} */
+const ExtraLocaleDataIndex = {
+    ExtraDayPeriodFormats: 0,
+    ExtraDayPeriodStandalone: 1,
+    ExtraDayPeriodsRules: 2,
+};
+/** @enum {number} */
+const CurrencyIndex = {
+    Symbol: 0, SymbolNarrow: 1, NbOfDigits: 2,
+};
+/**
+ * Returns the canonical form of a locale name - lowercase with `_` replaced with `-`.
+ * @param {?} locale
+ * @return {?}
+ */
+function normalizeLocale(locale) {
+    return locale.toLowerCase().replace(/_/g, '-');
 }
 
 /**
@@ -40345,6 +40392,31 @@ function scheduleMicroTask(fn) {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function getNativeRequestAnimationFrame() {
+    let nativeRequestAnimationFrame = _global['requestAnimationFrame'];
+    let nativeCancelAnimationFrame = _global['cancelAnimationFrame'];
+    if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+        // use unpatched version of requestAnimationFrame(native delegate) if possible
+        // to avoid another Change detection
+        const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedRequestAnimationFrame) {
+            nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+        }
+        const unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedCancelAnimationFrame) {
+            nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
+        }
+    }
+    return { nativeRequestAnimationFrame, nativeCancelAnimationFrame };
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -40426,9 +40498,9 @@ class NgZone {
     /**
      * @param {?} __0
      */
-    constructor({ enableLongStackTrace = false }) {
-        this.hasPendingMicrotasks = false;
+    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false }) {
         this.hasPendingMacrotasks = false;
+        this.hasPendingMicrotasks = false;
         /**
          * Whether there are no outstanding microtasks or macrotasks.
          */
@@ -40470,6 +40542,9 @@ class NgZone {
         if (enableLongStackTrace && ((/** @type {?} */ (Zone)))['longStackTraceZoneSpec']) {
             self._inner = self._inner.fork(((/** @type {?} */ (Zone)))['longStackTraceZoneSpec']);
         }
+        self.shouldCoalesceEventChangeDetection = shouldCoalesceEventChangeDetection;
+        self.lastRequestAnimationFrameId = -1;
+        self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -40576,9 +40651,9 @@ class NgZone {
 }
 if (false) {
     /** @type {?} */
-    NgZone.prototype.hasPendingMicrotasks;
-    /** @type {?} */
     NgZone.prototype.hasPendingMacrotasks;
+    /** @type {?} */
+    NgZone.prototype.hasPendingMicrotasks;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      * @type {?}
@@ -40627,11 +40702,19 @@ if (false) {
     /** @type {?} */
     NgZonePrivate.prototype._nesting;
     /** @type {?} */
-    NgZonePrivate.prototype.hasPendingMicrotasks;
+    NgZonePrivate.prototype._hasPendingMicrotasks;
     /** @type {?} */
     NgZonePrivate.prototype.hasPendingMacrotasks;
     /** @type {?} */
+    NgZonePrivate.prototype.hasPendingMicrotasks;
+    /** @type {?} */
+    NgZonePrivate.prototype.lastRequestAnimationFrameId;
+    /** @type {?} */
     NgZonePrivate.prototype.isStable;
+    /** @type {?} */
+    NgZonePrivate.prototype.shouldCoalesceEventChangeDetection;
+    /** @type {?} */
+    NgZonePrivate.prototype.nativeRequestAnimationFrame;
 }
 /**
  * @param {?} zone
@@ -40663,10 +40746,36 @@ function checkStable(zone) {
  * @param {?} zone
  * @return {?}
  */
+function delayChangeDetectionForEvents(zone) {
+    if (zone.lastRequestAnimationFrameId !== -1) {
+        return;
+    }
+    zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, (/**
+     * @return {?}
+     */
+    () => {
+        zone.lastRequestAnimationFrameId = -1;
+        updateMicroTaskStatus(zone);
+        checkStable(zone);
+    }));
+    updateMicroTaskStatus(zone);
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
 function forkInnerZoneWithAngularBehavior(zone) {
+    /** @type {?} */
+    const delayChangeDetectionForEventsDelegate = (/**
+     * @return {?}
+     */
+    () => { delayChangeDetectionForEvents(zone); });
+    /** @type {?} */
+    const maybeDelayChangeDetection = !!zone.shouldCoalesceEventChangeDetection &&
+        zone.nativeRequestAnimationFrame && delayChangeDetectionForEventsDelegate;
     zone._inner = zone._inner.fork({
         name: 'angular',
-        properties: (/** @type {?} */ ({ 'isAngularZone': true })),
+        properties: (/** @type {?} */ ({ 'isAngularZone': true, 'maybeDelayChangeDetection': maybeDelayChangeDetection })),
         onInvokeTask: (/**
          * @param {?} delegate
          * @param {?} current
@@ -40682,6 +40791,9 @@ function forkInnerZoneWithAngularBehavior(zone) {
                 return delegate.invokeTask(target, task, applyThis, applyArgs);
             }
             finally {
+                if (maybeDelayChangeDetection && task.type === 'eventTask') {
+                    maybeDelayChangeDetection();
+                }
                 onLeave(zone);
             }
         }),
@@ -40717,7 +40829,8 @@ function forkInnerZoneWithAngularBehavior(zone) {
                 // We are only interested in hasTask events which originate from our zone
                 // (A child hasTask event is not interesting to us)
                 if (hasTaskState.change == 'microTask') {
-                    zone.hasPendingMicrotasks = hasTaskState.microTask;
+                    zone._hasPendingMicrotasks = hasTaskState.microTask;
+                    updateMicroTaskStatus(zone);
                     checkStable(zone);
                 }
                 else if (hasTaskState.change == 'macroTask') {
@@ -40741,6 +40854,19 @@ function forkInnerZoneWithAngularBehavior(zone) {
             return false;
         })
     });
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
+function updateMicroTaskStatus(zone) {
+    if (zone._hasPendingMicrotasks ||
+        (zone.shouldCoalesceEventChangeDetection && zone.lastRequestAnimationFrameId !== -1)) {
+        zone.hasPendingMicrotasks = true;
+    }
+    else {
+        zone.hasPendingMicrotasks = false;
+    }
 }
 /**
  * @param {?} zone
@@ -41497,6 +41623,27 @@ if (false) {
      * @type {?|undefined}
      */
     BootstrapOptions.prototype.ngZone;
+    /**
+     * Optionally specify coalescing event change detections or not.
+     * Consider the following case.
+     *
+     * <div (click)="doSomething()">
+     *   <button (click)="doSomethingElse()"></button>
+     * </div>
+     *
+     * When button is clicked, because of the event bubbling, both
+     * event handlers will be called and 2 change detections will be
+     * triggered. We can colesce such kind of events to only trigger
+     * change detection only once.
+     *
+     * By default, this option will be false. So the events will not be
+     * coalesced and the change detection will be triggered multiple times.
+     * And if this option be set to true, the change detection will be
+     * triggered async by scheduling a animation frame. So in the case above,
+     * the change detection will only be trigged once.
+     * @type {?|undefined}
+     */
+    BootstrapOptions.prototype.ngZoneEventCoalescing;
 }
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
@@ -41553,7 +41700,9 @@ class PlatformRef {
         /** @type {?} */
         const ngZoneOption = options ? options.ngZone : undefined;
         /** @type {?} */
-        const ngZone = getNgZone(ngZoneOption);
+        const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
+        /** @type {?} */
+        const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
         /** @type {?} */
         const providers = [{ provide: NgZone, useValue: ngZone }];
         // Attention: Don't use ApplicationRef.run here,
@@ -41727,18 +41876,21 @@ if (false) {
     PlatformRef.prototype._injector;
 }
 /**
- * @param {?=} ngZoneOption
+ * @param {?} ngZoneOption
+ * @param {?} ngZoneEventCoalescing
  * @return {?}
  */
-function getNgZone(ngZoneOption) {
+function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
     /** @type {?} */
     let ngZone;
     if (ngZoneOption === 'noop') {
         ngZone = new NoopNgZone();
     }
     else {
-        ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) ||
-            new NgZone({ enableLongStackTrace: isDevMode() });
+        ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) || new NgZone({
+            enableLongStackTrace: isDevMode(),
+            shouldCoalesceEventChangeDetection: ngZoneEventCoalescing
+        });
     }
     return ngZone;
 }
@@ -47215,5 +47367,5 @@ if (ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, isForwardRef as ɵangular_packages_core_core_a, NullInjector as ɵangular_packages_core_core_c, injectInjectorOnly as ɵangular_packages_core_core_b, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_be, getPreviousOrParentTNode as ɵangular_packages_core_core_bf, instructionState as ɵangular_packages_core_core_bd, nextContextImpl as ɵangular_packages_core_core_bg, getRootContext as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bi, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bj, makePropDecorator as ɵangular_packages_core_core_bk, getClosureSafeProperty as ɵangular_packages_core_core_bl, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode$1 as DebugNode, asNativeElements, getDebugNode$1 as getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, SecurityContext, Sanitizer, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, Renderer2, RendererFactory2, RendererStyleFlags2, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, LOCALE_DATA as ɵLOCALE_DATA, LocaleDataIndex as ɵLocaleDataIndex, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, getSanitizationBypassType as ɵgetSanitizationBypassType, unwrapSafeValue as ɵunwrapSafeValue, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent$1 as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵcontentQuery, ɵɵloadQuery, ɵɵelementEnd, ɵɵhostProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementContainer, ɵɵstyleMap, ɵɵstyleSanitizer, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵadvance, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, setLocaleId as ɵsetLocaleId, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NG_INJ_DEF as ɵNG_INJ_DEF, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DebugElement, DebugEventListener, DebugNode$1 as DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef$1 as ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode$1 as getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, wtfCreateScope, wtfEndTimeRange, wtfLeave, wtfStartTimeRange, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, ComponentFactory as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory$1 as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, NgModuleRef$1 as ɵRender3NgModuleRef, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, anchorDef as ɵand, isForwardRef as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, DebugContext as ɵangular_packages_core_core_ba, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, instructionState as ɵangular_packages_core_core_bd, getLView as ɵangular_packages_core_core_be, getPreviousOrParentTNode as ɵangular_packages_core_core_bf, nextContextImpl as ɵangular_packages_core_core_bg, getUrlSanitizer as ɵangular_packages_core_core_bi, makeParamDecorator as ɵangular_packages_core_core_bj, makePropDecorator as ɵangular_packages_core_core_bk, getClosureSafeProperty as ɵangular_packages_core_core_bl, noSideEffects as ɵangular_packages_core_core_bn, getRootContext as ɵangular_packages_core_core_bo, NullInjector as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, zoneSchedulerFactory as ɵangular_packages_core_core_s, wtfEnabled as ɵangular_packages_core_core_t, detectWTF as ɵangular_packages_core_core_u, createScope as ɵangular_packages_core_core_v, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, endTimeRange as ɵangular_packages_core_core_y, _def as ɵangular_packages_core_core_z, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, createComponentFactory as ɵccf, clearOverrides as ɵclearOverrides, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, createNgModuleFactory as ɵcmf, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, createRendererType2 as ɵcrt, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual$1 as ɵdevModeEqual, directiveDef as ɵdid, elementDef as ɵeld, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocalePluralCase as ɵgetLocalePluralCase, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, initServicesIfNeeded as ɵinitServicesIfNeeded, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable$1 as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, ivyEnabled as ɵivyEnabled, looseIdentical as ɵlooseIdentical, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, pureArrayDef as ɵpad, patchComponentDefWithScope as ɵpatchComponentDefWithScope, pipeDef as ɵpid, pureObjectDef as ɵpod, purePipeDef as ɵppd, providerDef as ɵprd, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, queryDef as ɵqud, registerLocaleData as ɵregisterLocaleData, registerModuleFactory as ɵregisterModuleFactory, registerNgModuleType as ɵregisterNgModuleType, renderComponent$1 as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, textDef as ɵted, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapValue as ɵunv, unwrapSafeValue as ɵunwrapSafeValue, viewDef as ɵvid, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵallocHostVars, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentHostSyntheticListener, ɵɵcontainer, ɵɵcontainerRefreshEnd, ɵɵcontainerRefreshStart, ɵɵcontentQuery, ɵɵdefaultStyleSanitizer, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementHostAttrs, ɵɵelementStart, ɵɵembeddedViewEnd, ɵɵembeddedViewStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵselect, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵstyleMap, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstyleSanitizer, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵviewQuery };
 //# sourceMappingURL=core.js.map
