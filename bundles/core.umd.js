@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+47.sha-85298e3.with-local-changes
+ * @license Angular v9.0.0-rc.0+62.sha-d751ca7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
     typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs', 'rxjs/operators'], factory) :
     (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = {}), global.rxjs, global.rxjs.operators));
-}(this, function (exports, rxjs, operators) { 'use strict';
+}(this, (function (exports, rxjs, operators) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -19402,7 +19402,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.0+47.sha-85298e3.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.0+62.sha-d751ca7.with-local-changes');
 
     /**
      * @license
@@ -22534,40 +22534,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * This const is used to store the locale data registered with `registerLocaleData`
-     */
-    var LOCALE_DATA = {};
-    (function (LocaleDataIndex) {
-        LocaleDataIndex[LocaleDataIndex["LocaleId"] = 0] = "LocaleId";
-        LocaleDataIndex[LocaleDataIndex["DayPeriodsFormat"] = 1] = "DayPeriodsFormat";
-        LocaleDataIndex[LocaleDataIndex["DayPeriodsStandalone"] = 2] = "DayPeriodsStandalone";
-        LocaleDataIndex[LocaleDataIndex["DaysFormat"] = 3] = "DaysFormat";
-        LocaleDataIndex[LocaleDataIndex["DaysStandalone"] = 4] = "DaysStandalone";
-        LocaleDataIndex[LocaleDataIndex["MonthsFormat"] = 5] = "MonthsFormat";
-        LocaleDataIndex[LocaleDataIndex["MonthsStandalone"] = 6] = "MonthsStandalone";
-        LocaleDataIndex[LocaleDataIndex["Eras"] = 7] = "Eras";
-        LocaleDataIndex[LocaleDataIndex["FirstDayOfWeek"] = 8] = "FirstDayOfWeek";
-        LocaleDataIndex[LocaleDataIndex["WeekendRange"] = 9] = "WeekendRange";
-        LocaleDataIndex[LocaleDataIndex["DateFormat"] = 10] = "DateFormat";
-        LocaleDataIndex[LocaleDataIndex["TimeFormat"] = 11] = "TimeFormat";
-        LocaleDataIndex[LocaleDataIndex["DateTimeFormat"] = 12] = "DateTimeFormat";
-        LocaleDataIndex[LocaleDataIndex["NumberSymbols"] = 13] = "NumberSymbols";
-        LocaleDataIndex[LocaleDataIndex["NumberFormats"] = 14] = "NumberFormats";
-        LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 15] = "CurrencySymbol";
-        LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 16] = "CurrencyName";
-        LocaleDataIndex[LocaleDataIndex["Currencies"] = 17] = "Currencies";
-        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 18] = "PluralCase";
-        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 19] = "ExtraData";
-    })(exports.ɵLocaleDataIndex || (exports.ɵLocaleDataIndex = {}));
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     // THIS CODE IS GENERATED - DO NOT MODIFY
     // See angular/tools/gulp-tasks/cldr/extract.js
     var u = undefined;
@@ -22608,6 +22574,51 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * This const is used to store the locale data registered with `registerLocaleData`
+     */
+    var LOCALE_DATA = {};
+    /**
+     * Register locale data to be used internally by Angular. See the
+     * ["I18n guide"](guide/i18n#i18n-pipes) to know how to import additional locale data.
+     *
+     * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
+     */
+    function registerLocaleData(data, localeId, extraData) {
+        if (typeof localeId !== 'string') {
+            extraData = localeId;
+            localeId = data[exports.ɵLocaleDataIndex.LocaleId];
+        }
+        localeId = localeId.toLowerCase().replace(/_/g, '-');
+        LOCALE_DATA[localeId] = data;
+        if (extraData) {
+            LOCALE_DATA[localeId][exports.ɵLocaleDataIndex.ExtraData] = extraData;
+        }
+    }
+    /**
+     * Finds the locale data for a given locale.
+     *
+     * @param locale The locale code.
+     * @returns The locale data.
+     * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+     */
+    function findLocaleData(locale) {
+        var normalizedLocale = normalizeLocale(locale);
+        var match = getLocaleData(normalizedLocale);
+        if (match) {
+            return match;
+        }
+        // let's try to find a parent locale
+        var parentLocale = normalizedLocale.split('-')[0];
+        match = getLocaleData(parentLocale);
+        if (match) {
+            return match;
+        }
+        if (parentLocale === 'en') {
+            return localeEn;
+        }
+        throw new Error("Missing locale data for the locale \"" + locale + "\".");
+    }
+    /**
      * Retrieves the plural function used by ICU expressions to determine the plural case to use
      * for a given locale.
      * @param locale A locale code for the locale format rules to use.
@@ -22620,28 +22631,49 @@
         return data[exports.ɵLocaleDataIndex.PluralCase];
     }
     /**
-     * Finds the locale data for a given locale.
-     *
-     * @param locale The locale code.
-     * @returns The locale data.
-     * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+     * Helper function to get the given `normalizedLocale` from `LOCALE_DATA`
+     * or from the global `ng.common.locale`.
      */
-    function findLocaleData(locale) {
-        var normalizedLocale = locale.toLowerCase().replace(/_/g, '-');
-        var match = LOCALE_DATA[normalizedLocale];
-        if (match) {
-            return match;
+    function getLocaleData(normalizedLocale) {
+        if (!(normalizedLocale in LOCALE_DATA)) {
+            LOCALE_DATA[normalizedLocale] = _global.ng && _global.ng.common && _global.ng.common.locales &&
+                _global.ng.common.locales[normalizedLocale];
         }
-        // let's try to find a parent locale
-        var parentLocale = normalizedLocale.split('-')[0];
-        match = LOCALE_DATA[parentLocale];
-        if (match) {
-            return match;
-        }
-        if (parentLocale === 'en') {
-            return localeEn;
-        }
-        throw new Error("Missing locale data for the locale \"" + locale + "\".");
+        return LOCALE_DATA[normalizedLocale];
+    }
+    /**
+     * Helper function to remove all the locale data from `LOCALE_DATA`.
+     */
+    function unregisterAllLocaleData() {
+        LOCALE_DATA = {};
+    }
+    (function (LocaleDataIndex) {
+        LocaleDataIndex[LocaleDataIndex["LocaleId"] = 0] = "LocaleId";
+        LocaleDataIndex[LocaleDataIndex["DayPeriodsFormat"] = 1] = "DayPeriodsFormat";
+        LocaleDataIndex[LocaleDataIndex["DayPeriodsStandalone"] = 2] = "DayPeriodsStandalone";
+        LocaleDataIndex[LocaleDataIndex["DaysFormat"] = 3] = "DaysFormat";
+        LocaleDataIndex[LocaleDataIndex["DaysStandalone"] = 4] = "DaysStandalone";
+        LocaleDataIndex[LocaleDataIndex["MonthsFormat"] = 5] = "MonthsFormat";
+        LocaleDataIndex[LocaleDataIndex["MonthsStandalone"] = 6] = "MonthsStandalone";
+        LocaleDataIndex[LocaleDataIndex["Eras"] = 7] = "Eras";
+        LocaleDataIndex[LocaleDataIndex["FirstDayOfWeek"] = 8] = "FirstDayOfWeek";
+        LocaleDataIndex[LocaleDataIndex["WeekendRange"] = 9] = "WeekendRange";
+        LocaleDataIndex[LocaleDataIndex["DateFormat"] = 10] = "DateFormat";
+        LocaleDataIndex[LocaleDataIndex["TimeFormat"] = 11] = "TimeFormat";
+        LocaleDataIndex[LocaleDataIndex["DateTimeFormat"] = 12] = "DateTimeFormat";
+        LocaleDataIndex[LocaleDataIndex["NumberSymbols"] = 13] = "NumberSymbols";
+        LocaleDataIndex[LocaleDataIndex["NumberFormats"] = 14] = "NumberFormats";
+        LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 15] = "CurrencySymbol";
+        LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 16] = "CurrencyName";
+        LocaleDataIndex[LocaleDataIndex["Currencies"] = 17] = "Currencies";
+        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 18] = "PluralCase";
+        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 19] = "ExtraData";
+    })(exports.ɵLocaleDataIndex || (exports.ɵLocaleDataIndex = {}));
+    /**
+     * Returns the canonical form of a locale name - lowercase with `_` replaced with `-`.
+     */
+    function normalizeLocale(locale) {
+        return locale.toLowerCase().replace(/_/g, '-');
     }
 
     /**
@@ -26817,6 +26849,31 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function getNativeRequestAnimationFrame() {
+        var nativeRequestAnimationFrame = _global['requestAnimationFrame'];
+        var nativeCancelAnimationFrame = _global['cancelAnimationFrame'];
+        if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+            // use unpatched version of requestAnimationFrame(native delegate) if possible
+            // to avoid another Change detection
+            var unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+            if (unpatchedRequestAnimationFrame) {
+                nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+            }
+            var unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+            if (unpatchedCancelAnimationFrame) {
+                nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
+            }
+        }
+        return { nativeRequestAnimationFrame: nativeRequestAnimationFrame, nativeCancelAnimationFrame: nativeCancelAnimationFrame };
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * An injectable service for executing work inside or outside of the Angular zone.
      *
@@ -26893,9 +26950,9 @@
      */
     var NgZone = /** @class */ (function () {
         function NgZone(_a) {
-            var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;
-            this.hasPendingMicrotasks = false;
+            var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b, _c = _a.shouldCoalesceEventChangeDetection, shouldCoalesceEventChangeDetection = _c === void 0 ? false : _c;
             this.hasPendingMacrotasks = false;
+            this.hasPendingMicrotasks = false;
             /**
              * Whether there are no outstanding microtasks or macrotasks.
              */
@@ -26936,6 +26993,9 @@
             if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
                 self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
             }
+            self.shouldCoalesceEventChangeDetection = shouldCoalesceEventChangeDetection;
+            self.lastRequestAnimationFrameId = -1;
+            self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
             forkInnerZoneWithAngularBehavior(self);
         }
         NgZone.isInAngularZone = function () { return Zone.current.get('isAngularZone') === true; };
@@ -27032,16 +27092,33 @@
             }
         }
     }
+    function delayChangeDetectionForEvents(zone) {
+        if (zone.lastRequestAnimationFrameId !== -1) {
+            return;
+        }
+        zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, function () {
+            zone.lastRequestAnimationFrameId = -1;
+            updateMicroTaskStatus(zone);
+            checkStable(zone);
+        });
+        updateMicroTaskStatus(zone);
+    }
     function forkInnerZoneWithAngularBehavior(zone) {
+        var delayChangeDetectionForEventsDelegate = function () { delayChangeDetectionForEvents(zone); };
+        var maybeDelayChangeDetection = !!zone.shouldCoalesceEventChangeDetection &&
+            zone.nativeRequestAnimationFrame && delayChangeDetectionForEventsDelegate;
         zone._inner = zone._inner.fork({
             name: 'angular',
-            properties: { 'isAngularZone': true },
+            properties: { 'isAngularZone': true, 'maybeDelayChangeDetection': maybeDelayChangeDetection },
             onInvokeTask: function (delegate, current, target, task, applyThis, applyArgs) {
                 try {
                     onEnter(zone);
                     return delegate.invokeTask(target, task, applyThis, applyArgs);
                 }
                 finally {
+                    if (maybeDelayChangeDetection && task.type === 'eventTask') {
+                        maybeDelayChangeDetection();
+                    }
                     onLeave(zone);
                 }
             },
@@ -27060,7 +27137,8 @@
                     // We are only interested in hasTask events which originate from our zone
                     // (A child hasTask event is not interesting to us)
                     if (hasTaskState.change == 'microTask') {
-                        zone.hasPendingMicrotasks = hasTaskState.microTask;
+                        zone._hasPendingMicrotasks = hasTaskState.microTask;
+                        updateMicroTaskStatus(zone);
                         checkStable(zone);
                     }
                     else if (hasTaskState.change == 'macroTask') {
@@ -27074,6 +27152,15 @@
                 return false;
             }
         });
+    }
+    function updateMicroTaskStatus(zone) {
+        if (zone._hasPendingMicrotasks ||
+            (zone.shouldCoalesceEventChangeDetection && zone.lastRequestAnimationFrameId !== -1)) {
+            zone.hasPendingMicrotasks = true;
+        }
+        else {
+            zone.hasPendingMicrotasks = false;
+        }
     }
     function onEnter(zone) {
         zone._nesting++;
@@ -27547,7 +27634,8 @@
             // So we create a mini parent injector that just contains the new NgZone and
             // pass that as parent to the NgModuleFactory.
             var ngZoneOption = options ? options.ngZone : undefined;
-            var ngZone = getNgZone(ngZoneOption);
+            var ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
+            var ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
             var providers = [{ provide: NgZone, useValue: ngZone }];
             // Attention: Don't use ApplicationRef.run here,
             // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
@@ -27648,14 +27736,16 @@
     /*@__PURE__*/ setClassMetadata(PlatformRef, [{
             type: Injectable
         }], function () { return [{ type: Injector }]; }, null);
-    function getNgZone(ngZoneOption) {
+    function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
         var ngZone;
         if (ngZoneOption === 'noop') {
             ngZone = new NoopNgZone();
         }
         else {
-            ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) ||
-                new NgZone({ enableLongStackTrace: isDevMode() });
+            ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) || new NgZone({
+                enableLongStackTrace: isDevMode(),
+                shouldCoalesceEventChangeDetection: ngZoneEventCoalescing
+            });
         }
         return ngZone;
     }
@@ -31429,149 +31519,239 @@
      * found in the LICENSE file at https://angular.io/license
      */
 
-    exports.createPlatform = createPlatform;
-    exports.assertPlatform = assertPlatform;
-    exports.destroyPlatform = destroyPlatform;
-    exports.getPlatform = getPlatform;
-    exports.PlatformRef = PlatformRef;
-    exports.ApplicationRef = ApplicationRef;
-    exports.createPlatformFactory = createPlatformFactory;
-    exports.NgProbeToken = NgProbeToken;
-    exports.enableProdMode = enableProdMode;
-    exports.isDevMode = isDevMode;
-    exports.APP_ID = APP_ID;
-    exports.PACKAGE_ROOT_URL = PACKAGE_ROOT_URL;
-    exports.PLATFORM_INITIALIZER = PLATFORM_INITIALIZER;
-    exports.PLATFORM_ID = PLATFORM_ID;
+    exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
     exports.APP_BOOTSTRAP_LISTENER = APP_BOOTSTRAP_LISTENER;
+    exports.APP_ID = APP_ID;
     exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.ApplicationInitStatus = ApplicationInitStatus;
+    exports.ApplicationModule = ApplicationModule;
+    exports.ApplicationRef = ApplicationRef;
+    exports.Attribute = Attribute;
+    exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
+    exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
+    exports.ChangeDetectorRef = ChangeDetectorRef;
+    exports.Compiler = Compiler;
+    exports.CompilerFactory = CompilerFactory;
+    exports.Component = Component;
+    exports.ComponentFactory = ComponentFactory;
+    exports.ComponentFactoryResolver = ComponentFactoryResolver;
+    exports.ComponentRef = ComponentRef;
+    exports.ContentChild = ContentChild;
+    exports.ContentChildren = ContentChildren;
     exports.DebugElement = DebugElement;
     exports.DebugEventListener = DebugEventListener;
     exports.DebugNode = DebugNode;
-    exports.asNativeElements = asNativeElements;
-    exports.getDebugNode = getDebugNode$1;
-    exports.Testability = Testability;
-    exports.TestabilityRegistry = TestabilityRegistry;
-    exports.setTestabilityGetter = setTestabilityGetter;
-    exports.TRANSLATIONS = TRANSLATIONS;
-    exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
-    exports.LOCALE_ID = LOCALE_ID$1;
-    exports.ApplicationModule = ApplicationModule;
-    exports.wtfCreateScope = wtfCreateScope;
-    exports.wtfLeave = wtfLeave;
-    exports.wtfStartTimeRange = wtfStartTimeRange;
-    exports.wtfEndTimeRange = wtfEndTimeRange;
-    exports.Type = Type;
-    exports.EventEmitter = EventEmitter;
-    exports.ErrorHandler = ErrorHandler;
-    exports.Sanitizer = Sanitizer;
-    exports.Attribute = Attribute;
-    exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
-    exports.ContentChild = ContentChild;
-    exports.ContentChildren = ContentChildren;
-    exports.Query = Query;
-    exports.ViewChild = ViewChild;
-    exports.ViewChildren = ViewChildren;
-    exports.Component = Component;
+    exports.DefaultIterableDiffer = DefaultIterableDiffer;
     exports.Directive = Directive;
+    exports.ElementRef = ElementRef;
+    exports.EmbeddedViewRef = EmbeddedViewRef;
+    exports.ErrorHandler = ErrorHandler;
+    exports.EventEmitter = EventEmitter;
+    exports.Host = Host;
     exports.HostBinding = HostBinding;
     exports.HostListener = HostListener;
-    exports.Input = Input;
-    exports.Output = Output;
-    exports.Pipe = Pipe;
-    exports.NgModule = NgModule;
-    exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
-    exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
-    exports.Version = Version;
-    exports.VERSION = VERSION;
-    exports.ɵɵdefineInjectable = ɵɵdefineInjectable;
-    exports.defineInjectable = defineInjectable;
-    exports.ɵɵdefineInjector = ɵɵdefineInjector;
-    exports.forwardRef = forwardRef;
-    exports.resolveForwardRef = resolveForwardRef;
-    exports.Injectable = Injectable;
-    exports.Injector = Injector;
-    exports.ɵɵinject = ɵɵinject;
-    exports.inject = inject;
     exports.INJECTOR = INJECTOR;
-    exports.ReflectiveInjector = ReflectiveInjector;
-    exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
-    exports.ReflectiveKey = ReflectiveKey;
-    exports.InjectionToken = InjectionToken;
     exports.Inject = Inject;
-    exports.Optional = Optional;
-    exports.Self = Self;
-    exports.SkipSelf = SkipSelf;
-    exports.Host = Host;
-    exports.NgZone = NgZone;
-    exports.ɵNoopNgZone = NoopNgZone;
-    exports.Renderer2 = Renderer2;
-    exports.RendererFactory2 = RendererFactory2;
-    exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
-    exports.Compiler = Compiler;
-    exports.CompilerFactory = CompilerFactory;
-    exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
-    exports.ComponentFactory = ComponentFactory;
-    exports.ɵComponentFactory = ComponentFactory;
-    exports.ComponentRef = ComponentRef;
-    exports.ComponentFactoryResolver = ComponentFactoryResolver;
-    exports.ElementRef = ElementRef;
-    exports.NgModuleFactory = NgModuleFactory;
-    exports.NgModuleRef = NgModuleRef;
-    exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
-    exports.getModuleFactory = getModuleFactory;
-    exports.QueryList = QueryList;
-    exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
-    exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
-    exports.TemplateRef = TemplateRef;
-    exports.ViewContainerRef = ViewContainerRef;
-    exports.EmbeddedViewRef = EmbeddedViewRef;
-    exports.ViewRef = ViewRef$1;
-    exports.ChangeDetectorRef = ChangeDetectorRef;
-    exports.DefaultIterableDiffer = DefaultIterableDiffer;
+    exports.Injectable = Injectable;
+    exports.InjectionToken = InjectionToken;
+    exports.Injector = Injector;
+    exports.Input = Input;
     exports.IterableDiffers = IterableDiffers;
     exports.KeyValueDiffers = KeyValueDiffers;
+    exports.LOCALE_ID = LOCALE_ID$1;
+    exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
+    exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
+    exports.NgModule = NgModule;
+    exports.NgModuleFactory = NgModuleFactory;
+    exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
+    exports.NgModuleRef = NgModuleRef;
+    exports.NgProbeToken = NgProbeToken;
+    exports.NgZone = NgZone;
+    exports.Optional = Optional;
+    exports.Output = Output;
+    exports.PACKAGE_ROOT_URL = PACKAGE_ROOT_URL;
+    exports.PLATFORM_ID = PLATFORM_ID;
+    exports.PLATFORM_INITIALIZER = PLATFORM_INITIALIZER;
+    exports.Pipe = Pipe;
+    exports.PlatformRef = PlatformRef;
+    exports.Query = Query;
+    exports.QueryList = QueryList;
+    exports.ReflectiveInjector = ReflectiveInjector;
+    exports.ReflectiveKey = ReflectiveKey;
+    exports.Renderer2 = Renderer2;
+    exports.RendererFactory2 = RendererFactory2;
+    exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
+    exports.Sanitizer = Sanitizer;
+    exports.Self = Self;
     exports.SimpleChange = SimpleChange;
+    exports.SkipSelf = SkipSelf;
+    exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
+    exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
+    exports.TRANSLATIONS = TRANSLATIONS;
+    exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
+    exports.TemplateRef = TemplateRef;
+    exports.Testability = Testability;
+    exports.TestabilityRegistry = TestabilityRegistry;
+    exports.Type = Type;
+    exports.VERSION = VERSION;
+    exports.Version = Version;
+    exports.ViewChild = ViewChild;
+    exports.ViewChildren = ViewChildren;
+    exports.ViewContainerRef = ViewContainerRef;
+    exports.ViewRef = ViewRef$1;
     exports.WrappedValue = WrappedValue;
+    exports.asNativeElements = asNativeElements;
+    exports.assertPlatform = assertPlatform;
+    exports.createPlatform = createPlatform;
+    exports.createPlatformFactory = createPlatformFactory;
+    exports.defineInjectable = defineInjectable;
+    exports.destroyPlatform = destroyPlatform;
+    exports.enableProdMode = enableProdMode;
+    exports.forwardRef = forwardRef;
+    exports.getDebugNode = getDebugNode$1;
+    exports.getModuleFactory = getModuleFactory;
+    exports.getPlatform = getPlatform;
+    exports.inject = inject;
+    exports.isDevMode = isDevMode;
     exports.platformCore = platformCore;
+    exports.resolveForwardRef = resolveForwardRef;
+    exports.setTestabilityGetter = setTestabilityGetter;
+    exports.wtfCreateScope = wtfCreateScope;
+    exports.wtfEndTimeRange = wtfEndTimeRange;
+    exports.wtfLeave = wtfLeave;
+    exports.wtfStartTimeRange = wtfStartTimeRange;
     exports.ɵALLOW_MULTIPLE_PLATFORMS = ALLOW_MULTIPLE_PLATFORMS;
     exports.ɵAPP_ID_RANDOM_PROVIDER = APP_ID_RANDOM_PROVIDER;
-    exports.ɵdefaultIterableDiffers = defaultIterableDiffers;
-    exports.ɵdefaultKeyValueDiffers = defaultKeyValueDiffers;
-    exports.ɵdevModeEqual = devModeEqual$1;
-    exports.ɵisListLikeIterable = isListLikeIterable$1;
-    exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
-    exports.ɵConsole = Console;
-    exports.ɵsetCurrentInjector = setCurrentInjector;
-    exports.ɵgetInjectableDef = getInjectableDef;
-    exports.ɵINJECTOR_SCOPE = INJECTOR_SCOPE;
-    exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
-    exports.ɵivyEnabled = ivyEnabled;
     exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
-    exports.ɵclearResolutionOfComponentResourcesQueue = clearResolutionOfComponentResourcesQueue;
-    exports.ɵresolveComponentResources = resolveComponentResources;
+    exports.ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__ = Compiler_compileModuleAndAllComponentsAsync__POST_R3__;
+    exports.ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__ = Compiler_compileModuleAndAllComponentsSync__POST_R3__;
+    exports.ɵCompiler_compileModuleAsync__POST_R3__ = Compiler_compileModuleAsync__POST_R3__;
+    exports.ɵCompiler_compileModuleSync__POST_R3__ = Compiler_compileModuleSync__POST_R3__;
+    exports.ɵComponentFactory = ComponentFactory;
+    exports.ɵConsole = Console;
+    exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
+    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$3;
+    exports.ɵEMPTY_MAP = EMPTY_MAP;
+    exports.ɵINJECTOR_IMPL__POST_R3__ = INJECTOR_IMPL__POST_R3__;
+    exports.ɵINJECTOR_SCOPE = INJECTOR_SCOPE;
+    exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
+    exports.ɵNG_COMP_DEF = NG_COMP_DEF;
+    exports.ɵNG_DIR_DEF = NG_DIR_DEF;
+    exports.ɵNG_ELEMENT_ID = NG_ELEMENT_ID;
+    exports.ɵNG_INJ_DEF = NG_INJ_DEF;
+    exports.ɵNG_MOD_DEF = NG_MOD_DEF;
+    exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
+    exports.ɵNG_PROV_DEF = NG_PROV_DEF;
+    exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
+    exports.ɵNO_CHANGE = NO_CHANGE;
+    exports.ɵNgModuleFactory = NgModuleFactory$1;
+    exports.ɵNoopNgZone = NoopNgZone;
     exports.ɵReflectionCapabilities = ReflectionCapabilities;
+    exports.ɵRender3ComponentFactory = ComponentFactory$1;
+    exports.ɵRender3ComponentRef = ComponentRef$1;
+    exports.ɵRender3NgModuleRef = NgModuleRef$1;
+    exports.ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
+    exports.ɵSWITCH_COMPILE_COMPONENT__POST_R3__ = SWITCH_COMPILE_COMPONENT__POST_R3__;
+    exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
+    exports.ɵSWITCH_COMPILE_INJECTABLE__POST_R3__ = SWITCH_COMPILE_INJECTABLE__POST_R3__;
+    exports.ɵSWITCH_COMPILE_NGMODULE__POST_R3__ = SWITCH_COMPILE_NGMODULE__POST_R3__;
+    exports.ɵSWITCH_COMPILE_PIPE__POST_R3__ = SWITCH_COMPILE_PIPE__POST_R3__;
+    exports.ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__ = SWITCH_ELEMENT_REF_FACTORY__POST_R3__;
+    exports.ɵSWITCH_IVY_ENABLED__POST_R3__ = SWITCH_IVY_ENABLED__POST_R3__;
+    exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
+    exports.ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
+    exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
     exports.ɵ_sanitizeHtml = _sanitizeHtml;
     exports.ɵ_sanitizeStyle = _sanitizeStyle;
     exports.ɵ_sanitizeUrl = _sanitizeUrl;
+    exports.ɵallowSanitizationBypassAndThrow = allowSanitizationBypassAndThrow;
+    exports.ɵand = anchorDef;
+    exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
+    exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
+    exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
+    exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
+    exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
+    exports.ɵccf = createComponentFactory;
+    exports.ɵclearOverrides = clearOverrides;
+    exports.ɵclearResolutionOfComponentResourcesQueue = clearResolutionOfComponentResourcesQueue;
+    exports.ɵcmf = createNgModuleFactory;
+    exports.ɵcompileComponent = compileComponent;
+    exports.ɵcompileDirective = compileDirective;
+    exports.ɵcompileNgModule = compileNgModule;
+    exports.ɵcompileNgModuleDefs = compileNgModuleDefs;
+    exports.ɵcompileNgModuleFactory__POST_R3__ = compileNgModuleFactory__POST_R3__;
+    exports.ɵcompilePipe = compilePipe;
+    exports.ɵcreateInjector = createInjector;
+    exports.ɵcrt = createRendererType2;
+    exports.ɵdefaultIterableDiffers = defaultIterableDiffers;
+    exports.ɵdefaultKeyValueDiffers = defaultKeyValueDiffers;
+    exports.ɵdetectChanges = detectChanges;
+    exports.ɵdevModeEqual = devModeEqual$1;
+    exports.ɵdid = directiveDef;
+    exports.ɵeld = elementDef;
+    exports.ɵfindLocaleData = findLocaleData;
+    exports.ɵflushModuleScopingQueueAsMuchAsPossible = flushModuleScopingQueueAsMuchAsPossible;
+    exports.ɵgetComponentViewDefinitionFactory = getComponentViewDefinitionFactory;
+    exports.ɵgetDebugNode__POST_R3__ = getDebugNode__POST_R3__;
+    exports.ɵgetDirectives = getDirectives;
+    exports.ɵgetHostElement = getHostElement;
+    exports.ɵgetInjectableDef = getInjectableDef;
+    exports.ɵgetLContext = getLContext;
+    exports.ɵgetLocalePluralCase = getLocalePluralCase;
+    exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
+    exports.ɵgetSanitizationBypassType = getSanitizationBypassType;
     exports.ɵglobal = _global;
-    exports.ɵlooseIdentical = looseIdentical;
-    exports.ɵstringify = stringify;
-    exports.ɵmakeDecorator = makeDecorator;
+    exports.ɵinitServicesIfNeeded = initServicesIfNeeded;
+    exports.ɵinlineInterpolate = inlineInterpolate;
+    exports.ɵinterpolate = interpolate;
+    exports.ɵisBoundToModule__POST_R3__ = isBoundToModule__POST_R3__;
+    exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
+    exports.ɵisListLikeIterable = isListLikeIterable$1;
     exports.ɵisObservable = isObservable;
     exports.ɵisPromise = isPromise;
-    exports.ɵclearOverrides = clearOverrides;
-    exports.ɵinitServicesIfNeeded = initServicesIfNeeded;
+    exports.ɵivyEnabled = ivyEnabled;
+    exports.ɵlooseIdentical = looseIdentical;
+    exports.ɵmakeDecorator = makeDecorator;
+    exports.ɵmarkDirty = markDirty;
+    exports.ɵmod = moduleDef;
+    exports.ɵmpd = moduleProvideDef;
+    exports.ɵncd = ngContentDef;
+    exports.ɵnov = nodeValue;
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
-    exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
-    exports.ɵgetLocalePluralCase = getLocalePluralCase;
-    exports.ɵfindLocaleData = findLocaleData;
-    exports.ɵLOCALE_DATA = LOCALE_DATA;
-    exports.ɵallowSanitizationBypassAndThrow = allowSanitizationBypassAndThrow;
-    exports.ɵgetSanitizationBypassType = getSanitizationBypassType;
+    exports.ɵpad = pureArrayDef;
+    exports.ɵpatchComponentDefWithScope = patchComponentDefWithScope;
+    exports.ɵpid = pipeDef;
+    exports.ɵpod = pureObjectDef;
+    exports.ɵppd = purePipeDef;
+    exports.ɵprd = providerDef;
+    exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
+    exports.ɵpublishGlobalUtil = publishGlobalUtil;
+    exports.ɵqud = queryDef;
+    exports.ɵregisterLocaleData = registerLocaleData;
+    exports.ɵregisterModuleFactory = registerModuleFactory;
+    exports.ɵregisterNgModuleType = registerNgModuleType;
+    exports.ɵrenderComponent = renderComponent$1;
+    exports.ɵresetCompiledComponents = resetCompiledComponents;
+    exports.ɵresolveComponentResources = resolveComponentResources;
+    exports.ɵsetClassMetadata = setClassMetadata;
+    exports.ɵsetCurrentInjector = setCurrentInjector;
+    exports.ɵsetLocaleId = setLocaleId;
+    exports.ɵstore = store;
+    exports.ɵstringify = stringify;
+    exports.ɵted = textDef;
+    exports.ɵtransitiveScopesFor = transitiveScopesFor;
+    exports.ɵunregisterLocaleData = unregisterAllLocaleData;
+    exports.ɵunv = unwrapValue;
     exports.ɵunwrapSafeValue = unwrapSafeValue;
+    exports.ɵvid = viewDef;
+    exports.ɵwhenRendered = whenRendered;
+    exports.ɵɵCopyDefinitionFeature = ɵɵCopyDefinitionFeature;
+    exports.ɵɵInheritDefinitionFeature = ɵɵInheritDefinitionFeature;
+    exports.ɵɵNgOnChangesFeature = ɵɵNgOnChangesFeature;
+    exports.ɵɵProvidersFeature = ɵɵProvidersFeature;
+    exports.ɵɵadvance = ɵɵadvance;
+    exports.ɵɵallocHostVars = ɵɵallocHostVars;
     exports.ɵɵattribute = ɵɵattribute;
     exports.ɵɵattributeInterpolate1 = ɵɵattributeInterpolate1;
     exports.ɵɵattributeInterpolate2 = ɵɵattributeInterpolate2;
@@ -31582,82 +31762,70 @@
     exports.ɵɵattributeInterpolate7 = ɵɵattributeInterpolate7;
     exports.ɵɵattributeInterpolate8 = ɵɵattributeInterpolate8;
     exports.ɵɵattributeInterpolateV = ɵɵattributeInterpolateV;
+    exports.ɵɵclassMap = ɵɵclassMap;
+    exports.ɵɵclassMapInterpolate1 = ɵɵclassMapInterpolate1;
+    exports.ɵɵclassMapInterpolate2 = ɵɵclassMapInterpolate2;
+    exports.ɵɵclassMapInterpolate3 = ɵɵclassMapInterpolate3;
+    exports.ɵɵclassMapInterpolate4 = ɵɵclassMapInterpolate4;
+    exports.ɵɵclassMapInterpolate5 = ɵɵclassMapInterpolate5;
+    exports.ɵɵclassMapInterpolate6 = ɵɵclassMapInterpolate6;
+    exports.ɵɵclassMapInterpolate7 = ɵɵclassMapInterpolate7;
+    exports.ɵɵclassMapInterpolate8 = ɵɵclassMapInterpolate8;
+    exports.ɵɵclassMapInterpolateV = ɵɵclassMapInterpolateV;
+    exports.ɵɵclassProp = ɵɵclassProp;
+    exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
+    exports.ɵɵcontainer = ɵɵcontainer;
+    exports.ɵɵcontainerRefreshEnd = ɵɵcontainerRefreshEnd;
+    exports.ɵɵcontainerRefreshStart = ɵɵcontainerRefreshStart;
+    exports.ɵɵcontentQuery = ɵɵcontentQuery;
+    exports.ɵɵdefaultStyleSanitizer = ɵɵdefaultStyleSanitizer;
     exports.ɵɵdefineComponent = ɵɵdefineComponent;
     exports.ɵɵdefineDirective = ɵɵdefineDirective;
-    exports.ɵɵdefinePipe = ɵɵdefinePipe;
+    exports.ɵɵdefineInjectable = ɵɵdefineInjectable;
+    exports.ɵɵdefineInjector = ɵɵdefineInjector;
     exports.ɵɵdefineNgModule = ɵɵdefineNgModule;
-    exports.ɵdetectChanges = detectChanges;
-    exports.ɵrenderComponent = renderComponent$1;
-    exports.ɵRender3ComponentFactory = ComponentFactory$1;
-    exports.ɵRender3ComponentRef = ComponentRef$1;
+    exports.ɵɵdefinePipe = ɵɵdefinePipe;
     exports.ɵɵdirectiveInject = ɵɵdirectiveInject;
+    exports.ɵɵdisableBindings = ɵɵdisableBindings;
+    exports.ɵɵelement = ɵɵelement;
+    exports.ɵɵelementContainer = ɵɵelementContainer;
+    exports.ɵɵelementContainerEnd = ɵɵelementContainerEnd;
+    exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
+    exports.ɵɵelementEnd = ɵɵelementEnd;
+    exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
+    exports.ɵɵelementStart = ɵɵelementStart;
+    exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
+    exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
+    exports.ɵɵenableBindings = ɵɵenableBindings;
+    exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
+    exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
+    exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
+    exports.ɵɵhostProperty = ɵɵhostProperty;
+    exports.ɵɵi18n = ɵɵi18n;
+    exports.ɵɵi18nApply = ɵɵi18nApply;
+    exports.ɵɵi18nAttributes = ɵɵi18nAttributes;
+    exports.ɵɵi18nEnd = ɵɵi18nEnd;
+    exports.ɵɵi18nExp = ɵɵi18nExp;
+    exports.ɵɵi18nPostprocess = ɵɵi18nPostprocess;
+    exports.ɵɵi18nStart = ɵɵi18nStart;
+    exports.ɵɵinject = ɵɵinject;
     exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
     exports.ɵɵinjectPipeChangeDetectorRef = ɵɵinjectPipeChangeDetectorRef;
     exports.ɵɵinvalidFactory = ɵɵinvalidFactory;
-    exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
-    exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
-    exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
-    exports.ɵɵsetNgModuleScope = ɵɵsetNgModuleScope;
-    exports.ɵɵtemplateRefExtractor = ɵɵtemplateRefExtractor;
-    exports.ɵɵProvidersFeature = ɵɵProvidersFeature;
-    exports.ɵɵCopyDefinitionFeature = ɵɵCopyDefinitionFeature;
-    exports.ɵɵInheritDefinitionFeature = ɵɵInheritDefinitionFeature;
-    exports.ɵɵNgOnChangesFeature = ɵɵNgOnChangesFeature;
-    exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
-    exports.ɵRender3NgModuleRef = NgModuleRef$1;
-    exports.ɵmarkDirty = markDirty;
-    exports.ɵNgModuleFactory = NgModuleFactory$1;
-    exports.ɵNO_CHANGE = NO_CHANGE;
-    exports.ɵɵcontainer = ɵɵcontainer;
-    exports.ɵɵnextContext = ɵɵnextContext;
-    exports.ɵɵelementStart = ɵɵelementStart;
+    exports.ɵɵlistener = ɵɵlistener;
+    exports.ɵɵloadQuery = ɵɵloadQuery;
     exports.ɵɵnamespaceHTML = ɵɵnamespaceHTML;
     exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
     exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
-    exports.ɵɵelement = ɵɵelement;
-    exports.ɵɵlistener = ɵɵlistener;
-    exports.ɵɵtext = ɵɵtext;
-    exports.ɵɵtextInterpolate = ɵɵtextInterpolate;
-    exports.ɵɵtextInterpolate1 = ɵɵtextInterpolate1;
-    exports.ɵɵtextInterpolate2 = ɵɵtextInterpolate2;
-    exports.ɵɵtextInterpolate3 = ɵɵtextInterpolate3;
-    exports.ɵɵtextInterpolate4 = ɵɵtextInterpolate4;
-    exports.ɵɵtextInterpolate5 = ɵɵtextInterpolate5;
-    exports.ɵɵtextInterpolate6 = ɵɵtextInterpolate6;
-    exports.ɵɵtextInterpolate7 = ɵɵtextInterpolate7;
-    exports.ɵɵtextInterpolate8 = ɵɵtextInterpolate8;
-    exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
-    exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
-    exports.ɵɵprojection = ɵɵprojection;
+    exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
     exports.ɵɵpipeBind2 = ɵɵpipeBind2;
     exports.ɵɵpipeBind3 = ɵɵpipeBind3;
     exports.ɵɵpipeBind4 = ɵɵpipeBind4;
     exports.ɵɵpipeBindV = ɵɵpipeBindV;
-    exports.ɵɵpureFunction0 = ɵɵpureFunction0;
-    exports.ɵɵpureFunction1 = ɵɵpureFunction1;
-    exports.ɵɵpureFunction2 = ɵɵpureFunction2;
-    exports.ɵɵpureFunction3 = ɵɵpureFunction3;
-    exports.ɵɵpureFunction4 = ɵɵpureFunction4;
-    exports.ɵɵpureFunction5 = ɵɵpureFunction5;
-    exports.ɵɵpureFunction6 = ɵɵpureFunction6;
-    exports.ɵɵpureFunction7 = ɵɵpureFunction7;
-    exports.ɵɵpureFunction8 = ɵɵpureFunction8;
-    exports.ɵɵpureFunctionV = ɵɵpureFunctionV;
-    exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
-    exports.ɵgetDirectives = getDirectives;
-    exports.ɵgetHostElement = getHostElement;
-    exports.ɵɵrestoreView = ɵɵrestoreView;
-    exports.ɵɵcontainerRefreshStart = ɵɵcontainerRefreshStart;
-    exports.ɵɵcontainerRefreshEnd = ɵɵcontainerRefreshEnd;
-    exports.ɵɵqueryRefresh = ɵɵqueryRefresh;
-    exports.ɵɵviewQuery = ɵɵviewQuery;
-    exports.ɵɵstaticViewQuery = ɵɵstaticViewQuery;
-    exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
-    exports.ɵɵcontentQuery = ɵɵcontentQuery;
-    exports.ɵɵloadQuery = ɵɵloadQuery;
-    exports.ɵɵelementEnd = ɵɵelementEnd;
-    exports.ɵɵhostProperty = ɵɵhostProperty;
+    exports.ɵɵprojection = ɵɵprojection;
+    exports.ɵɵprojectionDef = ɵɵprojectionDef;
     exports.ɵɵproperty = ɵɵproperty;
     exports.ɵɵpropertyInterpolate = ɵɵpropertyInterpolate;
     exports.ɵɵpropertyInterpolate1 = ɵɵpropertyInterpolate1;
@@ -31669,28 +31837,34 @@
     exports.ɵɵpropertyInterpolate7 = ɵɵpropertyInterpolate7;
     exports.ɵɵpropertyInterpolate8 = ɵɵpropertyInterpolate8;
     exports.ɵɵpropertyInterpolateV = ɵɵpropertyInterpolateV;
-    exports.ɵɵupdateSyntheticHostBinding = ɵɵupdateSyntheticHostBinding;
-    exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
-    exports.ɵɵprojectionDef = ɵɵprojectionDef;
+    exports.ɵɵpureFunction0 = ɵɵpureFunction0;
+    exports.ɵɵpureFunction1 = ɵɵpureFunction1;
+    exports.ɵɵpureFunction2 = ɵɵpureFunction2;
+    exports.ɵɵpureFunction3 = ɵɵpureFunction3;
+    exports.ɵɵpureFunction4 = ɵɵpureFunction4;
+    exports.ɵɵpureFunction5 = ɵɵpureFunction5;
+    exports.ɵɵpureFunction6 = ɵɵpureFunction6;
+    exports.ɵɵpureFunction7 = ɵɵpureFunction7;
+    exports.ɵɵpureFunction8 = ɵɵpureFunction8;
+    exports.ɵɵpureFunctionV = ɵɵpureFunctionV;
+    exports.ɵɵqueryRefresh = ɵɵqueryRefresh;
     exports.ɵɵreference = ɵɵreference;
-    exports.ɵɵenableBindings = ɵɵenableBindings;
-    exports.ɵɵdisableBindings = ɵɵdisableBindings;
-    exports.ɵɵallocHostVars = ɵɵallocHostVars;
-    exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
-    exports.ɵɵelementContainerEnd = ɵɵelementContainerEnd;
-    exports.ɵɵelementContainer = ɵɵelementContainer;
+    exports.ɵɵresolveBody = ɵɵresolveBody;
+    exports.ɵɵresolveDocument = ɵɵresolveDocument;
+    exports.ɵɵresolveWindow = ɵɵresolveWindow;
+    exports.ɵɵrestoreView = ɵɵrestoreView;
+    exports.ɵɵsanitizeHtml = ɵɵsanitizeHtml;
+    exports.ɵɵsanitizeResourceUrl = ɵɵsanitizeResourceUrl;
+    exports.ɵɵsanitizeScript = ɵɵsanitizeScript;
+    exports.ɵɵsanitizeStyle = ɵɵsanitizeStyle;
+    exports.ɵɵsanitizeUrl = ɵɵsanitizeUrl;
+    exports.ɵɵsanitizeUrlOrResourceUrl = ɵɵsanitizeUrlOrResourceUrl;
+    exports.ɵɵselect = ɵɵselect;
+    exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
+    exports.ɵɵsetNgModuleScope = ɵɵsetNgModuleScope;
+    exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
+    exports.ɵɵstaticViewQuery = ɵɵstaticViewQuery;
     exports.ɵɵstyleMap = ɵɵstyleMap;
-    exports.ɵɵstyleSanitizer = ɵɵstyleSanitizer;
-    exports.ɵɵclassMap = ɵɵclassMap;
-    exports.ɵɵclassMapInterpolate1 = ɵɵclassMapInterpolate1;
-    exports.ɵɵclassMapInterpolate2 = ɵɵclassMapInterpolate2;
-    exports.ɵɵclassMapInterpolate3 = ɵɵclassMapInterpolate3;
-    exports.ɵɵclassMapInterpolate4 = ɵɵclassMapInterpolate4;
-    exports.ɵɵclassMapInterpolate5 = ɵɵclassMapInterpolate5;
-    exports.ɵɵclassMapInterpolate6 = ɵɵclassMapInterpolate6;
-    exports.ɵɵclassMapInterpolate7 = ɵɵclassMapInterpolate7;
-    exports.ɵɵclassMapInterpolate8 = ɵɵclassMapInterpolate8;
-    exports.ɵɵclassMapInterpolateV = ɵɵclassMapInterpolateV;
     exports.ɵɵstyleProp = ɵɵstyleProp;
     exports.ɵɵstylePropInterpolate1 = ɵɵstylePropInterpolate1;
     exports.ɵɵstylePropInterpolate2 = ɵɵstylePropInterpolate2;
@@ -31701,107 +31875,24 @@
     exports.ɵɵstylePropInterpolate7 = ɵɵstylePropInterpolate7;
     exports.ɵɵstylePropInterpolate8 = ɵɵstylePropInterpolate8;
     exports.ɵɵstylePropInterpolateV = ɵɵstylePropInterpolateV;
-    exports.ɵɵclassProp = ɵɵclassProp;
-    exports.ɵɵelementHostAttrs = ɵɵelementHostAttrs;
-    exports.ɵɵselect = ɵɵselect;
-    exports.ɵɵadvance = ɵɵadvance;
+    exports.ɵɵstyleSanitizer = ɵɵstyleSanitizer;
     exports.ɵɵtemplate = ɵɵtemplate;
-    exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
-    exports.ɵstore = store;
-    exports.ɵɵpipe = ɵɵpipe;
-    exports.ɵwhenRendered = whenRendered;
-    exports.ɵɵi18n = ɵɵi18n;
-    exports.ɵɵi18nAttributes = ɵɵi18nAttributes;
-    exports.ɵɵi18nExp = ɵɵi18nExp;
-    exports.ɵɵi18nStart = ɵɵi18nStart;
-    exports.ɵɵi18nEnd = ɵɵi18nEnd;
-    exports.ɵɵi18nApply = ɵɵi18nApply;
-    exports.ɵɵi18nPostprocess = ɵɵi18nPostprocess;
-    exports.ɵsetLocaleId = setLocaleId;
-    exports.ɵsetClassMetadata = setClassMetadata;
-    exports.ɵɵresolveWindow = ɵɵresolveWindow;
-    exports.ɵɵresolveDocument = ɵɵresolveDocument;
-    exports.ɵɵresolveBody = ɵɵresolveBody;
-    exports.ɵcompileComponent = compileComponent;
-    exports.ɵcompileDirective = compileDirective;
-    exports.ɵcompileNgModule = compileNgModule;
-    exports.ɵcompileNgModuleDefs = compileNgModuleDefs;
-    exports.ɵpatchComponentDefWithScope = patchComponentDefWithScope;
-    exports.ɵresetCompiledComponents = resetCompiledComponents;
-    exports.ɵflushModuleScopingQueueAsMuchAsPossible = flushModuleScopingQueueAsMuchAsPossible;
-    exports.ɵtransitiveScopesFor = transitiveScopesFor;
-    exports.ɵcompilePipe = compilePipe;
-    exports.ɵɵsanitizeHtml = ɵɵsanitizeHtml;
-    exports.ɵɵsanitizeStyle = ɵɵsanitizeStyle;
-    exports.ɵɵdefaultStyleSanitizer = ɵɵdefaultStyleSanitizer;
-    exports.ɵɵsanitizeScript = ɵɵsanitizeScript;
-    exports.ɵɵsanitizeUrl = ɵɵsanitizeUrl;
-    exports.ɵɵsanitizeResourceUrl = ɵɵsanitizeResourceUrl;
-    exports.ɵɵsanitizeUrlOrResourceUrl = ɵɵsanitizeUrlOrResourceUrl;
-    exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
-    exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
-    exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
-    exports.ɵbypassSanitizationTrustUrl = bypassSanitizationTrustUrl;
-    exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
-    exports.ɵgetLContext = getLContext;
-    exports.ɵNG_ELEMENT_ID = NG_ELEMENT_ID;
-    exports.ɵNG_COMP_DEF = NG_COMP_DEF;
-    exports.ɵNG_DIR_DEF = NG_DIR_DEF;
-    exports.ɵNG_PIPE_DEF = NG_PIPE_DEF;
-    exports.ɵNG_MOD_DEF = NG_MOD_DEF;
-    exports.ɵNG_PROV_DEF = NG_PROV_DEF;
-    exports.ɵNG_INJ_DEF = NG_INJ_DEF;
-    exports.ɵcompileNgModuleFactory__POST_R3__ = compileNgModuleFactory__POST_R3__;
-    exports.ɵisBoundToModule__POST_R3__ = isBoundToModule__POST_R3__;
-    exports.ɵSWITCH_COMPILE_COMPONENT__POST_R3__ = SWITCH_COMPILE_COMPONENT__POST_R3__;
-    exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
-    exports.ɵSWITCH_COMPILE_PIPE__POST_R3__ = SWITCH_COMPILE_PIPE__POST_R3__;
-    exports.ɵSWITCH_COMPILE_NGMODULE__POST_R3__ = SWITCH_COMPILE_NGMODULE__POST_R3__;
-    exports.ɵgetDebugNode__POST_R3__ = getDebugNode__POST_R3__;
-    exports.ɵSWITCH_COMPILE_INJECTABLE__POST_R3__ = SWITCH_COMPILE_INJECTABLE__POST_R3__;
-    exports.ɵSWITCH_IVY_ENABLED__POST_R3__ = SWITCH_IVY_ENABLED__POST_R3__;
-    exports.ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
-    exports.ɵCompiler_compileModuleSync__POST_R3__ = Compiler_compileModuleSync__POST_R3__;
-    exports.ɵCompiler_compileModuleAsync__POST_R3__ = Compiler_compileModuleAsync__POST_R3__;
-    exports.ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__ = Compiler_compileModuleAndAllComponentsSync__POST_R3__;
-    exports.ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__ = Compiler_compileModuleAndAllComponentsAsync__POST_R3__;
-    exports.ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__ = SWITCH_ELEMENT_REF_FACTORY__POST_R3__;
-    exports.ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
-    exports.ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
-    exports.ɵSWITCH_RENDERER2_FACTORY__POST_R3__ = SWITCH_RENDERER2_FACTORY__POST_R3__;
-    exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
-    exports.ɵregisterNgModuleType = registerNgModuleType;
-    exports.ɵpublishGlobalUtil = publishGlobalUtil;
-    exports.ɵpublishDefaultGlobalUtils = publishDefaultGlobalUtils;
-    exports.ɵcreateInjector = createInjector;
-    exports.ɵINJECTOR_IMPL__POST_R3__ = INJECTOR_IMPL__POST_R3__;
-    exports.ɵregisterModuleFactory = registerModuleFactory;
-    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$3;
-    exports.ɵEMPTY_MAP = EMPTY_MAP;
-    exports.ɵand = anchorDef;
-    exports.ɵccf = createComponentFactory;
-    exports.ɵcmf = createNgModuleFactory;
-    exports.ɵcrt = createRendererType2;
-    exports.ɵdid = directiveDef;
-    exports.ɵeld = elementDef;
-    exports.ɵgetComponentViewDefinitionFactory = getComponentViewDefinitionFactory;
-    exports.ɵinlineInterpolate = inlineInterpolate;
-    exports.ɵinterpolate = interpolate;
-    exports.ɵmod = moduleDef;
-    exports.ɵmpd = moduleProvideDef;
-    exports.ɵncd = ngContentDef;
-    exports.ɵnov = nodeValue;
-    exports.ɵpid = pipeDef;
-    exports.ɵprd = providerDef;
-    exports.ɵpad = pureArrayDef;
-    exports.ɵpod = pureObjectDef;
-    exports.ɵppd = purePipeDef;
-    exports.ɵqud = queryDef;
-    exports.ɵted = textDef;
-    exports.ɵunv = unwrapValue;
-    exports.ɵvid = viewDef;
+    exports.ɵɵtemplateRefExtractor = ɵɵtemplateRefExtractor;
+    exports.ɵɵtext = ɵɵtext;
+    exports.ɵɵtextInterpolate = ɵɵtextInterpolate;
+    exports.ɵɵtextInterpolate1 = ɵɵtextInterpolate1;
+    exports.ɵɵtextInterpolate2 = ɵɵtextInterpolate2;
+    exports.ɵɵtextInterpolate3 = ɵɵtextInterpolate3;
+    exports.ɵɵtextInterpolate4 = ɵɵtextInterpolate4;
+    exports.ɵɵtextInterpolate5 = ɵɵtextInterpolate5;
+    exports.ɵɵtextInterpolate6 = ɵɵtextInterpolate6;
+    exports.ɵɵtextInterpolate7 = ɵɵtextInterpolate7;
+    exports.ɵɵtextInterpolate8 = ɵɵtextInterpolate8;
+    exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
+    exports.ɵɵupdateSyntheticHostBinding = ɵɵupdateSyntheticHostBinding;
+    exports.ɵɵviewQuery = ɵɵviewQuery;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=core.umd.js.map

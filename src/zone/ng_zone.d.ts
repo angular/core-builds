@@ -81,8 +81,8 @@ import { EventEmitter } from '../event_emitter';
  * @publicApi
  */
 export declare class NgZone {
-    readonly hasPendingMicrotasks: boolean;
     readonly hasPendingMacrotasks: boolean;
+    readonly hasPendingMicrotasks: boolean;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      */
@@ -107,8 +107,9 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace }: {
+    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
         enableLongStackTrace?: boolean | undefined;
+        shouldCoalesceEventChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;

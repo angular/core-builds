@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+47.sha-85298e3.with-local-changes
+ * @license Angular v9.0.0-rc.0+62.sha-d751ca7.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2468,7 +2468,7 @@ var TestBedViewEngine = /** @class */ (function () {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        var ngZone = new NgZone({ enableLongStackTrace: true });
+        var ngZone = new NgZone({ enableLongStackTrace: true, shouldCoalesceEventChangeDetection: false });
         var providers = [{ provide: NgZone, useValue: ngZone }];
         var ngZoneInjector = Injector.create({
             providers: providers,
@@ -2822,5 +2822,5 @@ var __core_private_testing_placeholder__ = '';
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { TestBed, getTestBed, inject, InjectSetupWrapper, withModule, MetadataOverrider as ɵMetadataOverrider, async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, withModule, MetadataOverrider as ɵMetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map
