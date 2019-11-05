@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+37.sha-e3189f9.with-local-changes
+ * @license Angular v9.0.0-rc.0+40.sha-4abf15c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7660,8 +7660,10 @@ declare interface TView {
      * TNodes cannot be shared (due to different indices, etc).
      */
     node: TViewNode | ɵangular_packages_core_core_bh | null;
-    /** Whether or not this template has been processed. */
-    firstTemplatePass: boolean;
+    /** Whether or not this template has been processed in creation mode. */
+    firstCreatePass: boolean;
+    /** Whether or not the first update for this template has been processed. */
+    firstUpdatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes, PipeDefInternal or TI18n. */
     data: TData;
     /**
