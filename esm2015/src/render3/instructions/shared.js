@@ -590,7 +590,7 @@ export function createDirectivesInstances(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
     instantiateAllDirectives(tView, lView, tNode, getNativeByTNode(tNode, lView));
-    if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
+    if ((tNode.flags & 128 /* hasHostBindings */) === 128 /* hasHostBindings */) {
         invokeDirectivesHostBindings(tView, lView, tNode);
     }
 }
@@ -1212,7 +1212,7 @@ export function resolveDirectives(tView, lView, tNode, localRefs) {
             if (def.contentQueries !== null)
                 tNode.flags |= 8 /* hasContentQuery */;
             if (def.hostBindings !== null)
-                tNode.flags |= 256 /* hasHostBindings */;
+                tNode.flags |= 128 /* hasHostBindings */;
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
