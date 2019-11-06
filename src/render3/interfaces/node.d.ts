@@ -42,28 +42,31 @@ export declare const enum TNodeType {
  * Corresponds to the TNode.flags property.
  */
 export declare const enum TNodeFlags {
-    /** This bit is set if the node is a host for any directive (including a component) */
+    /** Bit #1 - This bit is set if the node is a host for any directive (including a component) */
     isDirectiveHost = 1,
     /**
-     * This bit is set if the node is a host for a component. Setting this bit implies that the
-     * isDirectiveHost bit is set as well. */
+     * Bit #2 - This bit is set if the node is a host for a component.
+     *
+     * Setting this bit implies that the `isDirectiveHost` bit is set as well.
+     * */
     isComponentHost = 2,
-    /** This bit is set if the node has been projected */
+    /** Bit #3 - This bit is set if the node has been projected */
     isProjected = 4,
-    /** This bit is set if any directive on this node has content queries */
+    /** Bit #4 - This bit is set if any directive on this node has content queries */
     hasContentQuery = 8,
-    /** This bit is set if the node has any "class" inputs */
+    /** Bit #5 - This bit is set if the node has any "class" inputs */
     hasClassInput = 16,
-    /** This bit is set if the node has any "style" inputs */
+    /** Bit #6 - This bit is set if the node has any "style" inputs */
     hasStyleInput = 32,
-    /** This bit is set if the node has initial styling */
+    /** Bit #7 - This bit is set if the node has initial styling */
     hasInitialStyling = 64,
-    /** This bit is set if the node has been detached by i18n */
+    /** Bit #8 - This bit is set if the node has been detached by i18n */
     isDetached = 128,
     /**
-     * This bit is set if the node has directives with host bindings. This flags allows us to guard
-     * host-binding logic and invoke it only on nodes that actually have directives with host
-     * bindings.
+     * Bit #9 - This bit is set if the node has directives with host bindings.
+     *
+     * This flags allows us to guard host-binding logic and invoke it only on nodes
+     * that actually have directives with host bindings.
      */
     hasHostBindings = 256
 }
