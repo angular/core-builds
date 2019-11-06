@@ -1,5 +1,5 @@
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
-import { LStylingData, TStylingContext } from '../interfaces/styling';
+import { LStylingData, TStylingContext, TStylingNode } from '../interfaces/styling';
 /**
  * --------
  *
@@ -29,7 +29,7 @@ export interface DebugStylingContext {
     printTable(): void;
 }
 /**
- * A debug/testing-oriented summary of `TStylingConfig`.
+ * A debug/testing-oriented summary of all styling information in `TNode.flags`.
  */
 export interface DebugStylingConfig {
     hasMapBindings: boolean;
@@ -112,7 +112,7 @@ export interface DebugNodeStylingEntry {
 /**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
  */
-export declare function attachStylingDebugObject(context: TStylingContext, isClassBased: boolean): TStylingContextDebug;
+export declare function attachStylingDebugObject(context: TStylingContext, tNode: TStylingNode, isClassBased: boolean): TStylingContextDebug;
 /**
  * A human-readable debug summary of the styling data present within `TStylingContext`.
  *
@@ -121,8 +121,9 @@ export declare function attachStylingDebugObject(context: TStylingContext, isCla
  */
 declare class TStylingContextDebug implements DebugStylingContext {
     readonly context: TStylingContext;
+    private _tNode;
     private _isClassBased;
-    constructor(context: TStylingContext, _isClassBased: boolean);
+    constructor(context: TStylingContext, _tNode: TStylingNode, _isClassBased: boolean);
     readonly config: DebugStylingConfig;
     /**
      * Returns a detailed summary of each styling entry in the context.
@@ -149,11 +150,12 @@ declare class TStylingContextDebug implements DebugStylingContext {
  * application has `ngDevMode` activated.
  */
 export declare class NodeStylingDebug implements DebugNodeStyling {
+    private _tNode;
     private _data;
     private _isClassBased;
     private _sanitizer;
     private _debugContext;
-    constructor(context: TStylingContext | DebugStylingContext, _data: LStylingData, _isClassBased: boolean);
+    constructor(context: TStylingContext | DebugStylingContext, _tNode: TStylingNode, _data: LStylingData, _isClassBased: boolean);
     readonly context: DebugStylingContext;
     /**
      * Overrides the sanitizer used to process styles.
@@ -168,14 +170,7 @@ export declare class NodeStylingDebug implements DebugNodeStyling {
     readonly summary: {
         [key: string]: DebugNodeStylingEntry;
     };
-    readonly config: {
-        hasMapBindings: boolean;
-        hasPropBindings: boolean;
-        hasCollisions: boolean;
-        hasTemplateBindings: boolean;
-        hasHostBindings: boolean;
-        allowDirectStyling: boolean;
-    };
+    readonly config: DebugStylingConfig;
     /**
      * Returns a key/value map of all the styles/classes that were last applied to the element.
      */

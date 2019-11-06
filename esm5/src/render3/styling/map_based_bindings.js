@@ -149,7 +149,7 @@ function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, s
     var targetPropValueWasApplied = false;
     if (currentMapIndex <= mapsLimit) {
         var cursor = getCurrentSyncCursor(currentMapIndex);
-        var bindingIndex = getBindingValue(context, 3 /* ValuesStartPosition */, currentMapIndex);
+        var bindingIndex = getBindingValue(context, 2 /* ValuesStartPosition */, currentMapIndex);
         var stylingMapArr = getValue(data, bindingIndex);
         if (stylingMapArr) {
             while (cursor < stylingMapArr.length) {

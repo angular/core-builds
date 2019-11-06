@@ -8,7 +8,7 @@
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ProceduralRenderer3, RElement, Renderer3 } from '../interfaces/renderer';
-import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext } from '../interfaces/styling';
+import { ApplyStylingFn, LStylingData, StylingMapArray, SyncStylingMapsFn, TStylingContext, TStylingNode } from '../interfaces/styling';
 import { NO_CHANGE } from '../tokens';
 /**
  * Visits a class-based binding and updates the new value (if changed).
@@ -20,7 +20,7 @@ import { NO_CHANGE } from '../tokens';
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateClassViaContext(context: TStylingContext, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray | NO_CHANGE, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
+export declare function updateClassViaContext(context: TStylingContext, tNode: TStylingNode, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray | NO_CHANGE, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
 /**
  * Visits a style-based binding and updates the new value (if changed).
  *
@@ -31,7 +31,7 @@ export declare function updateClassViaContext(context: TStylingContext, data: LS
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleViaContext(context: TStylingContext, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
+export declare function updateStyleViaContext(context: TStylingContext, tNode: TStylingNode, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *
@@ -62,7 +62,7 @@ export declare function updateStyleViaContext(context: TStylingContext, data: LS
  * Note that this function is also used for map-based styling bindings. They are treated
  * much the same as prop-based bindings, but, their property name value is set as `[MAP]`.
  */
-export declare function registerBinding(context: TStylingContext, countId: number, sourceIndex: number, prop: string | null, bindingValue: number | null | string | boolean, sanitizationRequired?: boolean): void;
+export declare function registerBinding(context: TStylingContext, tNode: TStylingNode, countId: number, sourceIndex: number, prop: string | null, bindingValue: number | null | string | boolean, sanitizationRequired: boolean, isClassBased: boolean): void;
 /**
  * Applies all pending style and class bindings to the provided element.
  *
@@ -85,7 +85,7 @@ export declare function registerBinding(context: TStylingContext, countId: numbe
  * Note that once this function is called all temporary styling state data
  * (i.e. the `bitMask` and `counter` values for styles and classes will be cleared).
  */
-export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, classesContext: TStylingContext | null, stylesContext: TStylingContext | null, element: RElement, directiveIndex: number, styleSanitizer: StyleSanitizeFn | null, firstUpdatePass: boolean): void;
+export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, tNode: TStylingNode, classesContext: TStylingContext | null, stylesContext: TStylingContext | null, element: RElement, directiveIndex: number, styleSanitizer: StyleSanitizeFn | null, firstUpdatePass: boolean): void;
 /**
  * Runs through the provided styling context and applies each value to
  * the provided element (via the renderer) if one or more values are present.
@@ -113,7 +113,7 @@ export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 |
  * the `flushStyling` function so that it can call this function for both
  * the styles and classes contexts).
  */
-export declare function applyStylingViaContext(context: TStylingContext, renderer: Renderer3 | ProceduralRenderer3 | null, element: RElement, bindingData: LStylingData, bitMaskValue: number | boolean, applyStylingFn: ApplyStylingFn, sanitizer: StyleSanitizeFn | null, hostBindingsMode: boolean): void;
+export declare function applyStylingViaContext(context: TStylingContext, tNode: TStylingNode, renderer: Renderer3 | ProceduralRenderer3 | null, element: RElement, bindingData: LStylingData, bitMaskValue: number | boolean, applyStylingFn: ApplyStylingFn, sanitizer: StyleSanitizeFn | null, hostBindingsMode: boolean, isClassBased: boolean): void;
 /**
  * Applies the provided styling map to the element directly (without context resolution).
  *
@@ -136,9 +136,9 @@ export declare function applyStylingViaContext(context: TStylingContext, rendere
  *
  * @returns whether or not the styling map was applied to the element.
  */
-export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, value: {
+export declare function applyStylingMapDirectly(renderer: any, context: TStylingContext, tNode: TStylingNode, element: RElement, data: LStylingData, bindingIndex: number, value: {
     [key: string]: any;
-} | string | null, isClassBased: boolean, sanitizer?: StyleSanitizeFn | null, forceUpdate?: boolean, bindingValueContainsInitial?: boolean): void;
+} | string | null, isClassBased: boolean, sanitizer: StyleSanitizeFn | null, forceUpdate: boolean, bindingValueContainsInitial: boolean): void;
 export declare function writeStylingValueDirectly(renderer: any, element: RElement, value: {
     [key: string]: any;
 } | string | null, isClassBased: boolean, initialValue: string | null): string;
@@ -172,7 +172,7 @@ export declare function writeStylingValueDirectly(renderer: any, element: REleme
  *
  * @returns whether or not the prop/value styling was applied to the element.
  */
-export declare function applyStylingValueDirectly(renderer: any, context: TStylingContext, element: RElement, data: LStylingData, bindingIndex: number, prop: string, value: any, isClassBased: boolean, sanitizer?: StyleSanitizeFn | null): boolean;
+export declare function applyStylingValueDirectly(renderer: any, context: TStylingContext, tNode: TStylingNode, element: RElement, data: LStylingData, bindingIndex: number, prop: string, value: any, isClassBased: boolean, sanitizer?: StyleSanitizeFn | null): boolean;
 export declare function getStylingMapsSyncFn(): SyncStylingMapsFn | null;
 export declare function setStylingMapsSyncFn(fn: SyncStylingMapsFn): void;
 /**

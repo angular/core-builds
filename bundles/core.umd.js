@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+68.sha-e89c2dd.with-local-changes
+ * @license Angular v9.0.0-rc.0+70.sha-2a4061a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2774,15 +2774,7 @@
      */
     function allocTStylingContext(initialStyling, hasDirectives) {
         initialStyling = initialStyling || allocStylingMapArray(null);
-        var config = 0 /* Initial */;
-        if (hasDirectives) {
-            config |= 1 /* HasDirectives */;
-        }
-        if (initialStyling.length > 1 /* ValuesStartPosition */) {
-            config |= 16 /* HasInitialStyling */;
-        }
         return [
-            config,
             DEFAULT_TOTAL_SOURCES,
             initialStyling,
         ];
@@ -2790,11 +2782,8 @@
     function allocStylingMapArray(value) {
         return [value];
     }
-    function getConfig(context) {
-        return context[0 /* ConfigPosition */];
-    }
-    function hasConfig(context, flag) {
-        return (getConfig(context) & flag) !== 0;
+    function hasConfig(tNode, flag) {
+        return (tNode.flags & flag) !== 0;
     }
     /**
      * Determines whether or not to apply styles/classes directly or via context resolution.
@@ -2807,32 +2796,31 @@
      * 3. There are no collisions (i.e. properties with more than one binding) across multiple
      *    sources (i.e. template + directive, directive + directive, directive + component)
      */
-    function allowDirectStyling(context, firstUpdatePass) {
+    function allowDirectStyling(tNode, isClassBased, firstUpdatePass) {
         var allow = false;
-        var config = getConfig(context);
-        var hasNoDirectives = (config & 1 /* HasDirectives */) === 0;
         // if no directives are present then we do not need populate a context at all. This
         // is because duplicate prop bindings cannot be registered through the template. If
         // and when this happens we can safely apply the value directly without context
         // resolution...
-        if (hasNoDirectives) {
+        var hasDirectives = hasConfig(tNode, 128 /* hasHostBindings */);
+        if (!hasDirectives) {
             // `ngDevMode` is required to be checked here because tests/debugging rely on the context being
             // populated. If things are in production mode then there is no need to build a context
             // therefore the direct apply can be allowed (even on the first update).
             allow = ngDevMode ? !firstUpdatePass : true;
         }
         else if (!firstUpdatePass) {
-            var hasNoCollisions = (config & 8 /* HasCollisions */) === 0;
-            var hasOnlyMapsOrOnlyProps = (config & 6 /* HasPropAndMapBindings */) !== 6 /* HasPropAndMapBindings */;
-            allow = hasNoCollisions && hasOnlyMapsOrOnlyProps;
+            var duplicateStylingFlag = isClassBased ? 8192 /* hasDuplicateClassBindings */ : 262144 /* hasDuplicateStyleBindings */;
+            var hasDuplicates = hasConfig(tNode, duplicateStylingFlag);
+            var hasOnlyMapOrPropsFlag = isClassBased ? 1536 /* hasClassPropAndMapBindings */ :
+                49152 /* hasStylePropAndMapBindings */;
+            var hasOnlyMapsOrOnlyProps = (tNode.flags & hasOnlyMapOrPropsFlag) !== hasOnlyMapOrPropsFlag;
+            allow = !hasDuplicates && hasOnlyMapsOrOnlyProps;
         }
         return allow;
     }
-    function setConfig(context, value) {
-        context[0 /* ConfigPosition */] = value;
-    }
-    function patchConfig(context, flag) {
-        context[0 /* ConfigPosition */] |= flag;
+    function patchConfig(tNode, flag) {
+        tNode.flags |= flag;
     }
     function getProp(context, index) {
         return context[index + 3 /* PropOffset */];
@@ -2859,7 +2847,7 @@
         return getTotalSources(context) + 1;
     }
     function getTotalSources(context) {
-        return context[1 /* TotalSourcesPosition */];
+        return context[0 /* TotalSourcesPosition */];
     }
     function getBindingValue(context, index, offset) {
         return context[index + 4 /* BindingsStartOffset */ + offset];
@@ -2877,9 +2865,10 @@
     function getValue(data, bindingIndex) {
         return bindingIndex !== 0 ? data[bindingIndex] : null;
     }
-    function getPropValuesStartPosition(context) {
-        var startPosition = 3 /* ValuesStartPosition */;
-        if (hasConfig(context, 4 /* HasMapBindings */)) {
+    function getPropValuesStartPosition(context, tNode, isClassBased) {
+        var startPosition = 2 /* ValuesStartPosition */;
+        var flag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+        if (hasConfig(tNode, flag)) {
             startPosition += 4 /* BindingsStartOffset */ + getValuesCount(context);
         }
         return startPosition;
@@ -2919,13 +2908,13 @@
      */
     function getStylingMapArray(value) {
         return isStylingContext(value) ?
-            value[2 /* InitialStylingValuePosition */] :
+            value[1 /* InitialStylingValuePosition */] :
             value;
     }
     function isStylingContext(value) {
         // the StylingMapArray is in the format of [initial, prop, string, prop, string]
         // and this is the defining value to distinguish between arrays
-        return Array.isArray(value) && value.length >= 3 /* ValuesStartPosition */ &&
+        return Array.isArray(value) && value.length >= 2 /* ValuesStartPosition */ &&
             typeof value[1] !== 'string';
     }
     function isStylingMapArray(value) {
@@ -6036,7 +6025,7 @@
      *
      * When a binding is encountered (e.g. `<div [style.width]="w">`) then
      * the binding data will be populated into a `TStylingContext` data-structure.
-     * There is only one `TStylingContext` per `TNode` and each element instance
+     * There is only one `TStylingContext` per `TStylingNode` and each element instance
      * will update its style/class binding values in concert with the styling
      * context.
      *
@@ -6060,7 +6049,7 @@
      * state each time it's called (which then allows the `TStylingContext`
      * and the bit mask values to be in sync).
      */
-    function updateClassViaContext(context, data, element, directiveIndex, prop, bindingIndex, value, forceUpdate, firstUpdatePass) {
+    function updateClassViaContext(context, tNode, data, element, directiveIndex, prop, bindingIndex, value, forceUpdate, firstUpdatePass) {
         var isMapBased = !prop;
         var state = getStylingState(element, directiveIndex);
         var countIndex = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : state.classesIndex++;
@@ -6068,7 +6057,7 @@
         // then we still need to register the binding within the context so that the context
         // is aware of the binding even if things change after the first update pass.
         if (firstUpdatePass || value !== NO_CHANGE) {
-            var updated = updateBindingData(context, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, false, firstUpdatePass);
+            var updated = updateBindingData(context, tNode, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, false, firstUpdatePass, true);
             if (updated || forceUpdate) {
                 // We flip the bit in the bitMask to reflect that the binding
                 // at the `index` slot has changed. This identifies to the flushing
@@ -6091,7 +6080,7 @@
      * state each time it's called (which then allows the `TStylingContext`
      * and the bit mask values to be in sync).
      */
-    function updateStyleViaContext(context, data, element, directiveIndex, prop, bindingIndex, value, sanitizer, forceUpdate, firstUpdatePass) {
+    function updateStyleViaContext(context, tNode, data, element, directiveIndex, prop, bindingIndex, value, sanitizer, forceUpdate, firstUpdatePass) {
         var isMapBased = !prop;
         var state = getStylingState(element, directiveIndex);
         var countIndex = isMapBased ? STYLING_INDEX_FOR_MAP_BINDING : state.stylesIndex++;
@@ -6102,7 +6091,7 @@
             var sanitizationRequired = isMapBased ?
                 true :
                 (sanitizer ? sanitizer(prop, null, 1 /* ValidateProperty */) : false);
-            var updated = updateBindingData(context, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass);
+            var updated = updateBindingData(context, tNode, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass, false);
             if (updated || forceUpdate) {
                 // We flip the bit in the bitMask to reflect that the binding
                 // at the `index` slot has changed. This identifies to the flushing
@@ -6126,8 +6115,9 @@
      *
      * @returns whether or not the binding value was updated in the `LStylingData`.
      */
-    function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass) {
+    function updateBindingData(context, tNode, data, counterIndex, sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass, isClassBased) {
         var hostBindingsMode = isHostStylingActive(sourceIndex);
+        var hostBindingsFlag = isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */;
         if (firstUpdatePass) {
             // this will only happen during the first update pass of the
             // context. The reason why we can't use `tView.firstCreatePass`
@@ -6135,16 +6125,14 @@
             // update pass is executed (remember that all styling instructions
             // are run in the update phase, and, as a result, are no more
             // styling instructions that are run in the creation phase).
-            registerBinding(context, counterIndex, sourceIndex, prop, bindingIndex, sanitizationRequired);
-            patchConfig(context, hostBindingsMode ? 64 /* HasHostBindings */ : 32 /* HasTemplateBindings */);
+            registerBinding(context, tNode, counterIndex, sourceIndex, prop, bindingIndex, sanitizationRequired, isClassBased);
         }
         var changed = forceUpdate || hasValueChanged(data[bindingIndex], value);
         if (changed) {
             setValue(data, bindingIndex, value);
-            var doSetValuesAsStale = (getConfig(context) & 64 /* HasHostBindings */) &&
-                !hostBindingsMode && (prop ? !value : true);
+            var doSetValuesAsStale = hasConfig(tNode, hostBindingsFlag) && !hostBindingsMode && (prop ? !value : true);
             if (doSetValuesAsStale) {
-                renderHostBindingsAsStale(context, data, prop);
+                renderHostBindingsAsStale(context, tNode, data, prop, isClassBased);
             }
         }
         return changed;
@@ -6160,11 +6148,12 @@
      * is expected to be called each time a template binding becomes falsy or when a map-based template
      * binding changes.
      */
-    function renderHostBindingsAsStale(context, data, prop) {
+    function renderHostBindingsAsStale(context, tNode, data, prop, isClassBased) {
         var valuesCount = getValuesCount(context);
-        if (prop !== null && hasConfig(context, 2 /* HasPropBindings */)) {
+        var hostBindingsFlag = isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */;
+        if (prop !== null && hasConfig(tNode, hostBindingsFlag)) {
             var itemsPerRow = 4 /* BindingsStartOffset */ + valuesCount;
-            var i = 3 /* ValuesStartPosition */;
+            var i = 2 /* ValuesStartPosition */;
             var found = false;
             while (i < context.length) {
                 if (getProp(context, i) === prop) {
@@ -6185,8 +6174,9 @@
                 }
             }
         }
-        if (hasConfig(context, 4 /* HasMapBindings */)) {
-            var bindingsStart = 3 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */;
+        var mapBindingsFlag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+        if (hasConfig(tNode, mapBindingsFlag)) {
+            var bindingsStart = 2 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */;
             var valuesStart = bindingsStart + 1; // the first column is template bindings
             var valuesEnd = bindingsStart + valuesCount - 1;
             for (var i = valuesStart; i < valuesEnd; i++) {
@@ -6227,7 +6217,7 @@
      * Note that this function is also used for map-based styling bindings. They are treated
      * much the same as prop-based bindings, but, their property name value is set as `[MAP]`.
      */
-    function registerBinding(context, countId, sourceIndex, prop, bindingValue, sanitizationRequired) {
+    function registerBinding(context, tNode, countId, sourceIndex, prop, bindingValue, sanitizationRequired, isClassBased) {
         var found = false;
         prop = prop || MAP_BASED_ENTRY_PROP_NAME;
         var totalSources = getTotalSources(context);
@@ -6238,9 +6228,10 @@
             addNewSourceColumn(context);
             totalSources++;
         }
+        var collisionFlag = isClassBased ? 8192 /* hasDuplicateClassBindings */ : 262144 /* hasDuplicateStyleBindings */;
         var isBindingIndexValue = typeof bindingValue === 'number';
         var entriesPerRow = 4 /* BindingsStartOffset */ + getValuesCount(context);
-        var i = 3 /* ValuesStartPosition */;
+        var i = 2 /* ValuesStartPosition */;
         // all style/class bindings are sorted by property name
         while (i < context.length) {
             var p = getProp(context, i);
@@ -6249,7 +6240,7 @@
                     allocateNewContextEntry(context, i, prop, sanitizationRequired);
                 }
                 else if (isBindingIndexValue) {
-                    patchConfig(context, 8 /* HasCollisions */);
+                    patchConfig(tNode, collisionFlag);
                 }
                 addBindingIntoContext(context, i, bindingValue, countId, sourceIndex);
                 found = true;
@@ -6327,7 +6318,7 @@
     function addNewSourceColumn(context) {
         // we use -1 here because we want to insert right before the last value (the default value)
         var insertOffset = 4 /* BindingsStartOffset */ + getValuesCount(context) - 1;
-        var index = 3 /* ValuesStartPosition */;
+        var index = 2 /* ValuesStartPosition */;
         while (index < context.length) {
             index += insertOffset;
             context.splice(index++, 0, DEFAULT_BINDING_INDEX);
@@ -6335,7 +6326,7 @@
             // next entry in the context starts just after it. Therefore++.
             index++;
         }
-        context[1 /* TotalSourcesPosition */]++;
+        context[0 /* TotalSourcesPosition */]++;
     }
     /**
      * Applies all pending style and class bindings to the provided element.
@@ -6359,20 +6350,20 @@
      * Note that once this function is called all temporary styling state data
      * (i.e. the `bitMask` and `counter` values for styles and classes will be cleared).
      */
-    function flushStyling(renderer, data, classesContext, stylesContext, element, directiveIndex, styleSanitizer, firstUpdatePass) {
+    function flushStyling(renderer, data, tNode, classesContext, stylesContext, element, directiveIndex, styleSanitizer, firstUpdatePass) {
         ngDevMode && ngDevMode.flushStyling++;
         var state = getStylingState(element, directiveIndex);
         var hostBindingsMode = isHostStylingActive(state.sourceIndex);
         if (stylesContext) {
-            firstUpdatePass && syncContextInitialStyling(stylesContext);
+            firstUpdatePass && syncContextInitialStyling(stylesContext, tNode, false);
             if (state.stylesBitMask !== 0) {
-                applyStylingViaContext(stylesContext, renderer, element, data, state.stylesBitMask, setStyle, styleSanitizer, hostBindingsMode);
+                applyStylingViaContext(stylesContext, tNode, renderer, element, data, state.stylesBitMask, setStyle, styleSanitizer, hostBindingsMode, false);
             }
         }
         if (classesContext) {
-            firstUpdatePass && syncContextInitialStyling(classesContext);
+            firstUpdatePass && syncContextInitialStyling(classesContext, tNode, true);
             if (state.classesBitMask !== 0) {
-                applyStylingViaContext(classesContext, renderer, element, data, state.classesBitMask, setClass, null, hostBindingsMode);
+                applyStylingViaContext(classesContext, tNode, renderer, element, data, state.classesBitMask, setClass, null, hostBindingsMode, true);
             }
         }
         resetStylingState();
@@ -6432,10 +6423,10 @@
      * ]
      * ```
      */
-    function syncContextInitialStyling(context) {
+    function syncContextInitialStyling(context, tNode, isClassBased) {
         // the TStylingContext always has initial style/class values which are
         // stored in styling array format.
-        updateInitialStylingOnContext(context, getStylingMapArray(context));
+        updateInitialStylingOnContext(context, tNode, getStylingMapArray(context), isClassBased);
     }
     /**
      * Registers all initial styling entries into the provided context.
@@ -6451,7 +6442,7 @@
      * is first applied (at the end of the update phase). Once that happens then the context will
      * update itself with the complete initial styling for the element.
      */
-    function updateInitialStylingOnContext(context, initialStyling) {
+    function updateInitialStylingOnContext(context, tNode, initialStyling, isClassBased) {
         // `-1` is used here because all initial styling data is not a apart
         // of a binding (since it's static)
         var COUNT_ID_FOR_STYLING = -1;
@@ -6460,12 +6451,12 @@
             var value = getMapValue(initialStyling, i);
             if (value) {
                 var prop = getMapProp(initialStyling, i);
-                registerBinding(context, COUNT_ID_FOR_STYLING, 0, prop, value, false);
+                registerBinding(context, tNode, COUNT_ID_FOR_STYLING, 0, prop, value, false, isClassBased);
                 hasInitialStyling = true;
             }
         }
         if (hasInitialStyling) {
-            patchConfig(context, 16 /* HasInitialStyling */);
+            patchConfig(tNode, 256 /* hasInitialStyling */);
         }
     }
     /**
@@ -6495,13 +6486,14 @@
      * the `flushStyling` function so that it can call this function for both
      * the styles and classes contexts).
      */
-    function applyStylingViaContext(context, renderer, element, bindingData, bitMaskValue, applyStylingFn, sanitizer, hostBindingsMode) {
+    function applyStylingViaContext(context, tNode, renderer, element, bindingData, bitMaskValue, applyStylingFn, sanitizer, hostBindingsMode, isClassBased) {
         var bitMask = normalizeBitMaskValue(bitMaskValue);
         var stylingMapsSyncFn = null;
         var applyAllValues = false;
-        if (hasConfig(context, 4 /* HasMapBindings */)) {
+        var mapBindingsFlag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+        if (hasConfig(tNode, mapBindingsFlag)) {
             stylingMapsSyncFn = getStylingMapsSyncFn();
-            var mapsGuardMask = getGuardMask(context, 3 /* ValuesStartPosition */, hostBindingsMode);
+            var mapsGuardMask = getGuardMask(context, 2 /* ValuesStartPosition */, hostBindingsMode);
             applyAllValues = (bitMask & mapsGuardMask) !== 0;
         }
         var valuesCount = getValuesCount(context);
@@ -6511,7 +6503,7 @@
             mapsMode |= 8 /* RecurseInnerMaps */;
             totalBindingsToVisit = valuesCount - 1;
         }
-        var i = getPropValuesStartPosition(context);
+        var i = getPropValuesStartPosition(context, tNode, isClassBased);
         while (i < context.length) {
             var guardMask = getGuardMask(context, i, hostBindingsMode);
             if (bitMask & guardMask) {
@@ -6595,11 +6587,10 @@
      *
      * @returns whether or not the styling map was applied to the element.
      */
-    function applyStylingMapDirectly(renderer, context, element, data, bindingIndex, value, isClassBased, sanitizer, forceUpdate, bindingValueContainsInitial) {
+    function applyStylingMapDirectly(renderer, context, tNode, element, data, bindingIndex, value, isClassBased, sanitizer, forceUpdate, bindingValueContainsInitial) {
         var oldValue = getValue(data, bindingIndex);
         if (forceUpdate || hasValueChanged(oldValue, value)) {
-            var config = getConfig(context);
-            var hasInitial = config & 16 /* HasInitialStyling */;
+            var hasInitial = hasConfig(tNode, 256 /* hasInitialStyling */);
             var initialValue = hasInitial && !bindingValueContainsInitial ? getInitialStylingValue(context) : null;
             setValue(data, bindingIndex, value);
             // the cached value is the last snapshot of the style or class
@@ -6615,7 +6606,8 @@
             // fast pass cannot guarantee that the external values are retained.
             // When this happens, the algorithm will bail out and not write to
             // the style or className attribute directly.
-            var writeToAttrDirectly = !(config & 2 /* HasPropBindings */);
+            var propBindingsFlag = isClassBased ? 1024 /* hasClassPropBindings */ : 32768 /* hasStylePropBindings */;
+            var writeToAttrDirectly = !hasConfig(tNode, propBindingsFlag);
             if (writeToAttrDirectly &&
                 checkIfExternallyModified(element, cachedValue, isClassBased)) {
                 writeToAttrDirectly = false;
@@ -6712,7 +6704,7 @@
      *
      * @returns whether or not the prop/value styling was applied to the element.
      */
-    function applyStylingValueDirectly(renderer, context, element, data, bindingIndex, prop, value, isClassBased, sanitizer) {
+    function applyStylingValueDirectly(renderer, context, tNode, element, data, bindingIndex, prop, value, isClassBased, sanitizer) {
         var applied = false;
         if (hasValueChanged(data[bindingIndex], value)) {
             setValue(data, bindingIndex, value);
@@ -6720,7 +6712,8 @@
             // case 1: apply the provided value (if it exists)
             applied = applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer);
             // case 2: find the matching property in a styling map and apply the detected value
-            if (!applied && hasConfig(context, 4 /* HasMapBindings */)) {
+            var mapBindingsFlag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+            if (!applied && hasConfig(tNode, mapBindingsFlag)) {
                 var state = getStylingState(element, TEMPLATE_DIRECTIVE_INDEX);
                 var map = isClassBased ? state.lastDirectClassMap : state.lastDirectStyleMap;
                 applied = map ?
@@ -6728,7 +6721,7 @@
                     false;
             }
             // case 3: apply the initial value (if it exists)
-            if (!applied && hasConfig(context, 16 /* HasInitialStyling */)) {
+            if (!applied && hasConfig(tNode, 256 /* hasInitialStyling */)) {
                 var map = getStylingMapArray(context);
                 applied =
                     map ? findAndApplyMapValue(renderer, element, applyFn, map, prop, bindingIndex) : false;
@@ -7237,7 +7230,7 @@
         var targetPropValueWasApplied = false;
         if (currentMapIndex <= mapsLimit) {
             var cursor = getCurrentSyncCursor(currentMapIndex);
-            var bindingIndex = getBindingValue(context, 3 /* ValuesStartPosition */, currentMapIndex);
+            var bindingIndex = getBindingValue(context, 2 /* ValuesStartPosition */, currentMapIndex);
             var stylingMapArr = getValue(data, bindingIndex);
             if (stylingMapArr) {
                 while (cursor < stylingMapArr.length) {
@@ -7406,8 +7399,8 @@
     /**
      * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
      */
-    function attachStylingDebugObject(context, isClassBased) {
-        var debug = new TStylingContextDebug(context, isClassBased);
+    function attachStylingDebugObject(context, tNode, isClassBased) {
+        var debug = new TStylingContextDebug(context, tNode, isClassBased);
         attachDebugObject(context, debug);
         return debug;
     }
@@ -7418,12 +7411,13 @@
      * application has `ngDevMode` activated.
      */
     var TStylingContextDebug = /** @class */ (function () {
-        function TStylingContextDebug(context, _isClassBased) {
+        function TStylingContextDebug(context, _tNode, _isClassBased) {
             this.context = context;
+            this._tNode = _tNode;
             this._isClassBased = _isClassBased;
         }
         Object.defineProperty(TStylingContextDebug.prototype, "config", {
-            get: function () { return buildConfig(this.context); },
+            get: function () { return buildConfig(this._tNode, this._isClassBased); },
             enumerable: true,
             configurable: true
         });
@@ -7437,7 +7431,7 @@
                 var context = this.context;
                 var totalColumns = getValuesCount(context);
                 var entries = {};
-                var start = getPropValuesStartPosition(context);
+                var start = getPropValuesStartPosition(context, this._tNode, this._isClassBased);
                 var i = start;
                 while (i < context.length) {
                     var prop = getProp(context, i);
@@ -7483,7 +7477,7 @@
                 var hostBindingsMode = i !== TEMPLATE_DIRECTIVE_INDEX;
                 var type = getTypeFromColumn(i, totalColumns);
                 var entries = [];
-                var j = 3 /* ValuesStartPosition */;
+                var j = 2 /* ValuesStartPosition */;
                 while (j < context.length) {
                     var value = getBindingValue(context, j, i);
                     if (isDefaultColumn || value > 0) {
@@ -7530,7 +7524,7 @@
             var totalColumns = getValuesCount(context);
             var itemsPerRow = 4 /* BindingsStartOffset */ + totalColumns;
             var totalProps = Math.floor(context.length / itemsPerRow);
-            var i = 3 /* ValuesStartPosition */;
+            var i = 2 /* ValuesStartPosition */;
             while (i < context.length) {
                 var prop = getProp(context, i);
                 var isMapBased = prop === MAP_BASED_ENTRY_PROP_NAME;
@@ -7586,12 +7580,13 @@
      * application has `ngDevMode` activated.
      */
     var NodeStylingDebug = /** @class */ (function () {
-        function NodeStylingDebug(context, _data, _isClassBased) {
+        function NodeStylingDebug(context, _tNode, _data, _isClassBased) {
+            this._tNode = _tNode;
             this._data = _data;
             this._isClassBased = _isClassBased;
             this._sanitizer = null;
             this._debugContext = isStylingContext(context) ?
-                new TStylingContextDebug(context, _isClassBased) :
+                new TStylingContextDebug(context, _tNode, _isClassBased) :
                 context;
         }
         Object.defineProperty(NodeStylingDebug.prototype, "context", {
@@ -7661,7 +7656,7 @@
             configurable: true
         });
         Object.defineProperty(NodeStylingDebug.prototype, "config", {
-            get: function () { return buildConfig(this.context.context); },
+            get: function () { return buildConfig(this._tNode, this._isClassBased); },
             enumerable: true,
             configurable: true
         });
@@ -7690,8 +7685,8 @@
         });
         NodeStylingDebug.prototype._convertMapBindingsToStylingMapArrays = function (data) {
             var context = this.context.context;
-            var limit = getPropValuesStartPosition(context);
-            for (var i = 3 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */; i < limit; i++) {
+            var limit = getPropValuesStartPosition(context, this._tNode, this._isClassBased);
+            for (var i = 2 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */; i < limit; i++) {
                 var bindingIndex = context[i];
                 var bindingValue = bindingIndex !== 0 ? getValue(data, bindingIndex) : null;
                 if (bindingValue && !Array.isArray(bindingValue)) {
@@ -7705,29 +7700,30 @@
             // element is only used when the styling algorithm attempts to
             // style the value (and we mock out the stylingApplyFn anyway).
             var mockElement = {};
-            var hasMaps = hasConfig(this.context.context, 4 /* HasMapBindings */);
+            var mapBindingsFlag = this._isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+            var hasMaps = hasConfig(this._tNode, mapBindingsFlag);
             if (hasMaps) {
                 activateStylingMapFeature();
             }
             var mapFn = function (renderer, element, prop, value, bindingIndex) { return fn(prop, value, bindingIndex || null); };
             var sanitizer = this._isClassBased ? null : (this._sanitizer || getCurrentStyleSanitizer());
             // run the template bindings
-            applyStylingViaContext(this.context.context, null, mockElement, data, true, mapFn, sanitizer, false);
+            applyStylingViaContext(this.context.context, this._tNode, null, mockElement, data, true, mapFn, sanitizer, false, this._isClassBased);
             // and also the host bindings
-            applyStylingViaContext(this.context.context, null, mockElement, data, true, mapFn, sanitizer, true);
+            applyStylingViaContext(this.context.context, this._tNode, null, mockElement, data, true, mapFn, sanitizer, true, this._isClassBased);
         };
         return NodeStylingDebug;
     }());
-    function buildConfig(context) {
-        var hasMapBindings = hasConfig(context, 4 /* HasMapBindings */);
-        var hasPropBindings = hasConfig(context, 2 /* HasPropBindings */);
-        var hasCollisions = hasConfig(context, 8 /* HasCollisions */);
-        var hasTemplateBindings = hasConfig(context, 32 /* HasTemplateBindings */);
-        var hasHostBindings = hasConfig(context, 64 /* HasHostBindings */);
+    function buildConfig(tNode, isClassBased) {
+        var hasMapBindings = hasConfig(tNode, isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */);
+        var hasPropBindings = hasConfig(tNode, isClassBased ? 1024 /* hasClassPropBindings */ : 32768 /* hasStylePropBindings */);
+        var hasCollisions = hasConfig(tNode, isClassBased ? 8192 /* hasDuplicateClassBindings */ : 262144 /* hasDuplicateStyleBindings */);
+        var hasTemplateBindings = hasConfig(tNode, isClassBased ? 2048 /* hasTemplateClassBindings */ : 65536 /* hasTemplateStyleBindings */);
+        var hasHostBindings = hasConfig(tNode, isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */);
         // `firstTemplatePass` here is false because the context has already been constructed
         // directly within the behavior of the debugging tools (outside of style/class debugging,
         // the context is constructed during the first template pass).
-        var allowDirectStyling$1 = allowDirectStyling(context, false);
+        var allowDirectStyling$1 = allowDirectStyling(tNode, isClassBased, false);
         return {
             hasMapBindings: hasMapBindings,
             hasPropBindings: hasPropBindings,
@@ -7941,15 +7937,15 @@
                     flags.push('TNodeFlags.hasContentQuery');
                 if (this.flags & 32 /* hasStyleInput */)
                     flags.push('TNodeFlags.hasStyleInput');
-                if (this.flags & 64 /* hasInitialStyling */)
+                if (this.flags & 256 /* hasInitialStyling */)
                     flags.push('TNodeFlags.hasInitialStyling');
-                if (this.flags & 256 /* hasHostBindings */)
+                if (this.flags & 128 /* hasHostBindings */)
                     flags.push('TNodeFlags.hasHostBindings');
                 if (this.flags & 2 /* isComponentHost */)
                     flags.push('TNodeFlags.isComponentHost');
                 if (this.flags & 1 /* isDirectiveHost */)
                     flags.push('TNodeFlags.isDirectiveHost');
-                if (this.flags & 128 /* isDetached */)
+                if (this.flags & 64 /* isDetached */)
                     flags.push('TNodeFlags.isDetached');
                 if (this.flags & 4 /* isProjected */)
                     flags.push('TNodeFlags.isProjected');
@@ -8214,10 +8210,10 @@
         var native = unwrapRNode(rawValue);
         var componentLViewDebug = toDebug(readLViewValue(rawValue));
         var styles = isStylingContext(tNode.styles) ?
-            new NodeStylingDebug(tNode.styles, lView, false) :
+            new NodeStylingDebug(tNode.styles, tNode, lView, false) :
             null;
         var classes = isStylingContext(tNode.classes) ?
-            new NodeStylingDebug(tNode.classes, lView, true) :
+            new NodeStylingDebug(tNode.classes, tNode, lView, true) :
             null;
         return {
             html: toHtml(native),
@@ -8896,7 +8892,7 @@
         if (!getBindingsEnabled())
             return;
         instantiateAllDirectives(tView, lView, tNode, getNativeByTNode(tNode, lView));
-        if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
+        if ((tNode.flags & 128 /* hasHostBindings */) === 128 /* hasHostBindings */) {
             invokeDirectivesHostBindings(tView, lView, tNode);
         }
     }
@@ -9385,7 +9381,7 @@
                 if (def.contentQueries !== null)
                     tNode.flags |= 8 /* hasContentQuery */;
                 if (def.hostBindings !== null)
-                    tNode.flags |= 256 /* hasHostBindings */;
+                    tNode.flags |= 128 /* hasHostBindings */;
                 // Init hooks are queued now so ngOnInit is called in host components before
                 // any projected components.
                 registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
@@ -10684,7 +10680,7 @@
                     tNode.flags |= 4 /* isProjected */;
                 }
             }
-            if ((tNode.flags & 128 /* isDetached */) !== 128 /* isDetached */) {
+            if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
                 if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
                     applyNodes(renderer, action, tNode.child, lView, renderParent, beforeNode, false);
                     applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
@@ -15172,7 +15168,17 @@
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
         var bindingIndex = nextBindingIndex();
-        var updated = stylingProp(elementIndex, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
+        var lView = getLView();
+        var tNode = getTNode(elementIndex, lView);
+        var firstUpdatePass = lView[TVIEW].firstUpdatePass;
+        // we check for this in the instruction code so that the context can be notified
+        // about prop or map bindings so that the direct apply check can decide earlier
+        // if it allows for context resolution to be bypassed.
+        if (firstUpdatePass) {
+            patchConfig(tNode, 32768 /* hasStylePropBindings */);
+            patchHostStylingFlag(tNode, isHostStyling(), false);
+        }
+        var updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
         if (ngDevMode) {
             ngDevMode.styleProp++;
             if (updated) {
@@ -15201,7 +15207,18 @@
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
         var bindingIndex = nextBindingIndex();
-        var updated = stylingProp(getSelectedIndex(), bindingIndex, className, value, true);
+        var lView = getLView();
+        var elementIndex = getSelectedIndex();
+        var tNode = getTNode(elementIndex, lView);
+        var firstUpdatePass = lView[TVIEW].firstUpdatePass;
+        // we check for this in the instruction code so that the context can be notified
+        // about prop or map bindings so that the direct apply check can decide earlier
+        // if it allows for context resolution to be bypassed.
+        if (firstUpdatePass) {
+            patchConfig(tNode, 1024 /* hasClassPropBindings */);
+            patchHostStylingFlag(tNode, isHostStyling(), true);
+        }
+        var updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, className, value, true);
         if (ngDevMode) {
             ngDevMode.classProp++;
             if (updated) {
@@ -15219,20 +15236,11 @@
      * bindings or whether or not there are map-based bindings and property bindings
      * present together).
      */
-    function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
+    function stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, value, isClassBased) {
         var updated = false;
-        var lView = getLView();
-        var firstUpdatePass = lView[TVIEW].firstUpdatePass;
-        var tNode = getTNode(elementIndex, lView);
         var native = getNativeByTNode(tNode, lView);
         var context = isClassBased ? getClassesContext(tNode) : getStylesContext(tNode);
         var sanitizer = isClassBased ? null : getCurrentStyleSanitizer();
-        // we check for this in the instruction code so that the context can be notified
-        // about prop or map bindings so that the direct apply check can decide earlier
-        // if it allows for context resolution to be bypassed.
-        if (firstUpdatePass) {
-            patchConfig(context, 2 /* HasPropBindings */);
-        }
         // [style.prop] and [class.name] bindings do not use `bind()` and will
         // therefore manage accessing and updating the new value in the lView directly.
         // For this reason, the checkNoChanges situation must also be handled here
@@ -15245,10 +15253,10 @@
         }
         // Direct Apply Case: bypass context resolution and apply the
         // style/class value directly to the element
-        if (allowDirectStyling(context, firstUpdatePass)) {
+        if (allowDirectStyling(tNode, isClassBased, firstUpdatePass)) {
             var sanitizerToUse = isClassBased ? null : sanitizer;
             var renderer = getRenderer(tNode, lView);
-            updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, sanitizerToUse);
+            updated = applyStylingValueDirectly(renderer, context, tNode, native, lView, bindingIndex, prop, value, isClassBased, sanitizerToUse);
             if (sanitizerToUse) {
                 // it's important we remove the current style sanitizer once the
                 // element exits, otherwise it will be used by the next styling
@@ -15262,10 +15270,10 @@
             // value to the element.
             var directiveIndex = getActiveDirectiveId();
             if (isClassBased) {
-                updated = updateClassViaContext(context, lView, native, directiveIndex, prop, bindingIndex, value, false, firstUpdatePass);
+                updated = updateClassViaContext(context, tNode, lView, native, directiveIndex, prop, bindingIndex, value, false, firstUpdatePass);
             }
             else {
-                updated = updateStyleViaContext(context, lView, native, directiveIndex, prop, bindingIndex, value, sanitizer, false, firstUpdatePass);
+                updated = updateStyleViaContext(context, tNode, lView, native, directiveIndex, prop, bindingIndex, value, sanitizer, false, firstUpdatePass);
             }
             setElementExitFn(stylingApply);
         }
@@ -15302,12 +15310,20 @@
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
         var bindingIndex = incrementBindingIndex(2);
+        var hostBindingsMode = isHostStyling();
         // inputs are only evaluated from a template binding into a directive, therefore,
         // there should not be a situation where a directive host bindings function
         // evaluates the inputs (this should only happen in the template function)
-        if (!isHostStyling() && hasDirectiveInput && styles !== NO_CHANGE) {
+        if (!hostBindingsMode && hasDirectiveInput && styles !== NO_CHANGE) {
             updateDirectiveInputValue(context, lView, tNode, bindingIndex, styles, false, firstUpdatePass);
             styles = NO_CHANGE;
+        }
+        // we check for this in the instruction code so that the context can be notified
+        // about prop or map bindings so that the direct apply check can decide earlier
+        // if it allows for context resolution to be bypassed.
+        if (firstUpdatePass) {
+            patchConfig(tNode, 16384 /* hasStyleMapBindings */);
+            patchHostStylingFlag(tNode, isHostStyling(), false);
         }
         stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, styles, false, hasDirectiveInput);
     }
@@ -15349,12 +15365,20 @@
         // still needs to be incremented because all styling binding values
         // are stored inside of the lView.
         var bindingIndex = incrementBindingIndex(2);
+        var hostBindingsMode = isHostStyling();
         // inputs are only evaluated from a template binding into a directive, therefore,
         // there should not be a situation where a directive host bindings function
         // evaluates the inputs (this should only happen in the template function)
-        if (!isHostStyling() && hasDirectiveInput && classes !== NO_CHANGE) {
+        if (!hostBindingsMode && hasDirectiveInput && classes !== NO_CHANGE) {
             updateDirectiveInputValue(context, lView, tNode, bindingIndex, classes, true, firstUpdatePass);
             classes = NO_CHANGE;
+        }
+        // we check for this in the instruction code so that the context can be notified
+        // about prop or map bindings so that the direct apply check can decide earlier
+        // if it allows for context resolution to be bypassed.
+        if (firstUpdatePass) {
+            patchConfig(tNode, 512 /* hasClassMapBindings */);
+            patchHostStylingFlag(tNode, isHostStyling(), true);
         }
         stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, classes, true, hasDirectiveInput);
     }
@@ -15377,18 +15401,12 @@
         if (ngDevMode && valueHasChanged && getCheckNoChangesMode()) {
             throwErrorIfNoChangesMode(false, oldValue, value);
         }
-        // we check for this in the instruction code so that the context can be notified
-        // about prop or map bindings so that the direct apply check can decide earlier
-        // if it allows for context resolution to be bypassed.
-        if (firstUpdatePass) {
-            patchConfig(context, 4 /* HasMapBindings */);
-        }
         // Direct Apply Case: bypass context resolution and apply the
         // style/class map values directly to the element
-        if (allowDirectStyling(context, firstUpdatePass)) {
+        if (allowDirectStyling(tNode, isClassBased, firstUpdatePass)) {
             var sanitizerToUse = isClassBased ? null : sanitizer;
             var renderer = getRenderer(tNode, lView);
-            applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, value, isClassBased, sanitizerToUse, valueHasChanged, hasDirectiveInput);
+            applyStylingMapDirectly(renderer, context, tNode, native, lView, bindingIndex, value, isClassBased, sanitizerToUse, valueHasChanged, hasDirectiveInput);
             if (sanitizerToUse) {
                 // it's important we remove the current style sanitizer once the
                 // element exits, otherwise it will be used by the next styling
@@ -15403,10 +15421,10 @@
             // and defer to the context to flush and apply the style/class binding
             // value to the element.
             if (isClassBased) {
-                updateClassViaContext(context, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, valueHasChanged, firstUpdatePass);
+                updateClassViaContext(context, tNode, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, valueHasChanged, firstUpdatePass);
             }
             else {
-                updateStyleViaContext(context, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, sanitizer, valueHasChanged, firstUpdatePass);
+                updateStyleViaContext(context, tNode, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, sanitizer, valueHasChanged, firstUpdatePass);
             }
             setElementExitFn(stylingApply);
         }
@@ -15486,7 +15504,7 @@
         var sanitizer = getCurrentStyleSanitizer();
         var classesContext = isStylingContext(tNode.classes) ? tNode.classes : null;
         var stylesContext = isStylingContext(tNode.styles) ? tNode.styles : null;
-        flushStyling(renderer, lView, classesContext, stylesContext, native, directiveIndex, sanitizer, tView.firstUpdatePass);
+        flushStyling(renderer, lView, tNode, classesContext, stylesContext, native, directiveIndex, sanitizer, tView.firstUpdatePass);
         resetCurrentStyleSanitizer();
     }
     function getRenderer(tNode, lView) {
@@ -15531,7 +15549,7 @@
             updateRawValueOnContext(tNode.styles, stylingMapToString(styles, false));
         }
         if (hasAdditionalInitialStyling) {
-            tNode.flags |= 64 /* hasInitialStyling */;
+            tNode.flags |= 256 /* hasInitialStyling */;
         }
         return hasAdditionalInitialStyling;
     }
@@ -15554,7 +15572,7 @@
             var hasDirectives = isDirectiveHost(tNode);
             context = allocTStylingContext(context, hasDirectives);
             if (ngDevMode) {
-                attachStylingDebugObject(context, isClassBased);
+                attachStylingDebugObject(context, tNode, isClassBased);
             }
             if (isClassBased) {
                 tNode.classes = context;
@@ -15591,6 +15609,12 @@
      */
     function isHostStyling() {
         return isHostStylingActive(getActiveDirectiveId());
+    }
+    function patchHostStylingFlag(tNode, hostBindingsMode, isClassBased) {
+        var flag = hostBindingsMode ?
+            isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */ :
+            isClassBased ? 2048 /* hasTemplateClassBindings */ : 65536 /* hasTemplateStyleBindings */;
+        patchConfig(tNode, flag);
     }
 
     /**
@@ -15632,7 +15656,7 @@
                 registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
             }
         }
-        if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
+        if ((tNode.flags & 256 /* hasInitialStyling */) === 256 /* hasInitialStyling */) {
             renderInitialStyling(renderer, native, tNode, false);
         }
         appendChild(native, tNode, lView);
@@ -19416,7 +19440,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.0+68.sha-e89c2dd.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.0+70.sha-2a4061a.with-local-changes');
 
     /**
      * @license
@@ -23490,7 +23514,7 @@
         }
         if (markAsDetached) {
             // Define this node as detached to avoid projecting it later
-            removedPhTNode.flags |= 128 /* isDetached */;
+            removedPhTNode.flags |= 64 /* isDetached */;
         }
         ngDevMode && ngDevMode.rendererRemoveNode++;
     }

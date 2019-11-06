@@ -5,8 +5,8 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.io/license
 */
-import { PropertyAliases, TNode } from '../interfaces/node';
-import { LStylingData, StylingMapArray, TStylingConfig, TStylingContext, TStylingContextIndex } from '../interfaces/styling';
+import { PropertyAliases, TNodeFlags } from '../interfaces/node';
+import { LStylingData, StylingMapArray, TStylingContext, TStylingContextIndex, TStylingNode } from '../interfaces/styling';
 import { NO_CHANGE } from '../tokens';
 export declare const MAP_BASED_ENTRY_PROP_NAME = "[MAP]";
 export declare const TEMPLATE_DIRECTIVE_INDEX = 0;
@@ -31,8 +31,7 @@ export declare const DEFAULT_GUARD_MASK_VALUE = 1;
  */
 export declare function allocTStylingContext(initialStyling: StylingMapArray | null, hasDirectives: boolean): TStylingContext;
 export declare function allocStylingMapArray(value: {} | string | null): StylingMapArray;
-export declare function getConfig(context: TStylingContext): TStylingConfig;
-export declare function hasConfig(context: TStylingContext, flag: TStylingConfig): boolean;
+export declare function hasConfig(tNode: TStylingNode, flag: TNodeFlags): boolean;
 /**
  * Determines whether or not to apply styles/classes directly or via context resolution.
  *
@@ -44,9 +43,8 @@ export declare function hasConfig(context: TStylingContext, flag: TStylingConfig
  * 3. There are no collisions (i.e. properties with more than one binding) across multiple
  *    sources (i.e. template + directive, directive + directive, directive + component)
  */
-export declare function allowDirectStyling(context: TStylingContext, firstUpdatePass: boolean): boolean;
-export declare function setConfig(context: TStylingContext, value: TStylingConfig): void;
-export declare function patchConfig(context: TStylingContext, flag: TStylingConfig): void;
+export declare function allowDirectStyling(tNode: TStylingNode, isClassBased: boolean, firstUpdatePass: boolean): boolean;
+export declare function patchConfig(tNode: TStylingNode, flag: TNodeFlags): void;
 export declare function getProp(context: TStylingContext, index: number): string;
 export declare function isSanitizationRequired(context: TStylingContext, index: number): boolean;
 export declare function getGuardMask(context: TStylingContext, index: number, isHostBinding: boolean): number;
@@ -58,7 +56,7 @@ export declare function getDefaultValue(context: TStylingContext, index: number)
 export declare function setDefaultValue(context: TStylingContext, index: number, value: string | boolean | null): string | boolean | null;
 export declare function setValue(data: LStylingData, bindingIndex: number, value: any): void;
 export declare function getValue<T = any>(data: LStylingData, bindingIndex: number): T | null;
-export declare function getPropValuesStartPosition(context: TStylingContext): TStylingContextIndex;
+export declare function getPropValuesStartPosition(context: TStylingContext, tNode: TStylingNode, isClassBased: boolean): TStylingContextIndex;
 export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 /**
  * Determines whether the provided styling value is truthy or falsy.
@@ -78,8 +76,8 @@ export declare function getStylingMapArray(value: TStylingContext | StylingMapAr
 export declare function isStylingContext(value: any): boolean;
 export declare function isStylingMapArray(value: any): boolean;
 export declare function getInitialStylingValue(context: TStylingContext | StylingMapArray | null): string;
-export declare function hasClassInput(tNode: TNode): boolean;
-export declare function hasStyleInput(tNode: TNode): boolean;
+export declare function hasClassInput(tNode: TStylingNode): boolean;
+export declare function hasStyleInput(tNode: TStylingNode): boolean;
 export declare function getMapProp(map: StylingMapArray, index: number): string;
 export declare function setMapAsDirty(map: StylingMapArray): void;
 export declare function setMapValue(map: StylingMapArray, index: number, value: string | boolean | null): void;

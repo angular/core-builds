@@ -58,17 +58,107 @@ export declare const enum TNodeFlags {
     hasClassInput = 16,
     /** Bit #6 - This bit is set if the node has any "style" inputs */
     hasStyleInput = 32,
-    /** Bit #7 - This bit is set if the node has initial styling */
-    hasInitialStyling = 64,
-    /** Bit #8 - This bit is set if the node has been detached by i18n */
-    isDetached = 128,
+    /** Bit #7 This bit is set if the node has been detached by i18n */
+    isDetached = 64,
     /**
-     * Bit #9 - This bit is set if the node has directives with host bindings.
+     * Bit #8 - This bit is set if the node has directives with host bindings.
      *
      * This flags allows us to guard host-binding logic and invoke it only on nodes
      * that actually have directives with host bindings.
      */
-    hasHostBindings = 256
+    hasHostBindings = 128,
+    /** Bit #9 - This bit is set if the node has initial styling */
+    hasInitialStyling = 256,
+    /**
+     * Bit #10 - Whether or not there are class-based map bindings present.
+     *
+     * Examples include:
+     * 1. `<div [class]="x">`
+     * 2. `@HostBinding('class') x`
+     */
+    hasClassMapBindings = 512,
+    /**
+     * Bit #11 - Whether or not there are any class-based prop bindings present.
+     *
+     * Examples include:
+     * 1. `<div [class.name]="x">`
+     * 2. `@HostBinding('class.name') x`
+     */
+    hasClassPropBindings = 1024,
+    /**
+     * Bit #12 - whether or not there are any active [class] and [class.name] bindings
+     */
+    hasClassPropAndMapBindings = 1536,
+    /**
+     * Bit #13 - Whether or not the context contains one or more class-based template bindings.
+     *
+     * Examples include:
+     * 1. `<div [class]="x">`
+     * 2. `<div [class.name]="x">`
+     */
+    hasTemplateClassBindings = 2048,
+    /**
+     * Bit #14 - Whether or not the context contains one or more class-based host bindings.
+     *
+     * Examples include:
+     * 1. `@HostBinding('class') x`
+     * 2. `@HostBinding('class.name') x`
+     */
+    hasHostClassBindings = 4096,
+    /**
+     * Bit #15 - Whether or not there are two or more sources for a class property in the context.
+     *
+     * Examples include:
+     * 1. prop + prop: `<div [class.active]="x" dir-that-sets-active-class>`
+     * 2. map + prop: `<div [class]="x" [class.foo]>`
+     * 3. map + map: `<div [class]="x" dir-that-sets-class>`
+     */
+    hasDuplicateClassBindings = 8192,
+    /**
+     * Bit #16 - Whether or not there are style-based map bindings present.
+     *
+     * Examples include:
+     * 1. `<div [style]="x">`
+     * 2. `@HostBinding('style') x`
+     */
+    hasStyleMapBindings = 16384,
+    /**
+     * Bit #17 - Whether or not there are any style-based prop bindings present.
+     *
+     * Examples include:
+     * 1. `<div [style.prop]="x">`
+     * 2. `@HostBinding('style.prop') x`
+     */
+    hasStylePropBindings = 32768,
+    /**
+     * Bit #18 - whether or not there are any active [style] and [style.prop] bindings
+     */
+    hasStylePropAndMapBindings = 49152,
+    /**
+     * Bit #19 - Whether or not the context contains one or more style-based template bindings.
+     *
+     * Examples include:
+     * 1. `<div [style]="x">`
+     * 2. `<div [style.prop]="x">`
+     */
+    hasTemplateStyleBindings = 65536,
+    /**
+     * Bit #20 - Whether or not the context contains one or more style-based host bindings.
+     *
+     * Examples include:
+     * 1. `@HostBinding('style') x`
+     * 2. `@HostBinding('style.prop') x`
+     */
+    hasHostStyleBindings = 131072,
+    /**
+     * Bit #21 - Whether or not there are two or more sources for a style property in the context.
+     *
+     * Examples include:
+     * 1. prop + prop: `<div [style.width]="x" dir-that-sets-width>`
+     * 2. map + prop: `<div [style]="x" [style.prop]>`
+     * 3. map + map: `<div [style]="x" dir-that-sets-style>`
+     */
+    hasDuplicateStyleBindings = 262144
 }
 /**
  * Corresponds to the TNode.providerIndexes property.
