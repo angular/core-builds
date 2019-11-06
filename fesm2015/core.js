@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+65.sha-8e6bed9.with-local-changes
+ * @license Angular v9.0.0-rc.0+66.sha-5453c4c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8263,28 +8263,31 @@ const TNodeType = {
 };
 /** @enum {number} */
 const TNodeFlags = {
-    /** This bit is set if the node is a host for any directive (including a component) */
+    /** Bit #1 - This bit is set if the node is a host for any directive (including a component) */
     isDirectiveHost: 1,
     /**
-     * This bit is set if the node is a host for a component. Setting this bit implies that the
-     * isDirectiveHost bit is set as well. */
+     * Bit #2 - This bit is set if the node is a host for a component.
+     *
+     * Setting this bit implies that the `isDirectiveHost` bit is set as well.
+     * */
     isComponentHost: 2,
-    /** This bit is set if the node has been projected */
+    /** Bit #3 - This bit is set if the node has been projected */
     isProjected: 4,
-    /** This bit is set if any directive on this node has content queries */
+    /** Bit #4 - This bit is set if any directive on this node has content queries */
     hasContentQuery: 8,
-    /** This bit is set if the node has any "class" inputs */
+    /** Bit #5 - This bit is set if the node has any "class" inputs */
     hasClassInput: 16,
-    /** This bit is set if the node has any "style" inputs */
+    /** Bit #6 - This bit is set if the node has any "style" inputs */
     hasStyleInput: 32,
-    /** This bit is set if the node has initial styling */
+    /** Bit #7 - This bit is set if the node has initial styling */
     hasInitialStyling: 64,
-    /** This bit is set if the node has been detached by i18n */
+    /** Bit #8 - This bit is set if the node has been detached by i18n */
     isDetached: 128,
     /**
-     * This bit is set if the node has directives with host bindings. This flags allows us to guard
-     * host-binding logic and invoke it only on nodes that actually have directives with host
-     * bindings.
+     * Bit #9 - This bit is set if the node has directives with host bindings.
+     *
+     * This flags allows us to guard host-binding logic and invoke it only on nodes
+     * that actually have directives with host bindings.
      */
     hasHostBindings: 256,
 };
@@ -27688,7 +27691,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.0+65.sha-8e6bed9.with-local-changes');
+const VERSION = new Version('9.0.0-rc.0+66.sha-5453c4c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
