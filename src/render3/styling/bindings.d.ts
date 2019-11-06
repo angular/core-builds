@@ -20,7 +20,7 @@ import { NO_CHANGE } from '../tokens';
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateClassViaContext(context: TStylingContext, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray | NO_CHANGE, forceUpdate?: boolean): boolean;
+export declare function updateClassViaContext(context: TStylingContext, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: boolean | string | null | undefined | StylingMapArray | NO_CHANGE, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
 /**
  * Visits a style-based binding and updates the new value (if changed).
  *
@@ -31,7 +31,7 @@ export declare function updateClassViaContext(context: TStylingContext, data: LS
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleViaContext(context: TStylingContext, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null, forceUpdate?: boolean): boolean;
+export declare function updateStyleViaContext(context: TStylingContext, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *
@@ -85,7 +85,7 @@ export declare function registerBinding(context: TStylingContext, countId: numbe
  * Note that once this function is called all temporary styling state data
  * (i.e. the `bitMask` and `counter` values for styles and classes will be cleared).
  */
-export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, classesContext: TStylingContext | null, stylesContext: TStylingContext | null, element: RElement, directiveIndex: number, styleSanitizer: StyleSanitizeFn | null): void;
+export declare function flushStyling(renderer: Renderer3 | ProceduralRenderer3 | null, data: LStylingData, classesContext: TStylingContext | null, stylesContext: TStylingContext | null, element: RElement, directiveIndex: number, styleSanitizer: StyleSanitizeFn | null, firstUpdatePass: boolean): void;
 /**
  * Runs through the provided styling context and applies each value to
  * the provided element (via the renderer) if one or more values are present.

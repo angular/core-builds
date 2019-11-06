@@ -37,12 +37,14 @@ export declare function hasConfig(context: TStylingContext, flag: TStylingConfig
  * Determines whether or not to apply styles/classes directly or via context resolution.
  *
  * There are three cases that are matched here:
- * 1. there are no directives present AND ngDevMode is falsy
- * 2. context is locked for template or host bindings (depending on `hostBindingsMode`)
+ * 1. there are no directives present AND `ngDevMode` is falsy
+ * 2. the `firstUpdatePass` has not already run (which means that
+ *    there are more bindings to register and, therefore, direct
+ *    style/class application is not yet possible)
  * 3. There are no collisions (i.e. properties with more than one binding) across multiple
  *    sources (i.e. template + directive, directive + directive, directive + component)
  */
-export declare function allowDirectStyling(context: TStylingContext, hostBindingsMode: boolean): boolean;
+export declare function allowDirectStyling(context: TStylingContext, firstUpdatePass: boolean): boolean;
 export declare function setConfig(context: TStylingContext, value: TStylingConfig): void;
 export declare function patchConfig(context: TStylingContext, flag: TStylingConfig): void;
 export declare function getProp(context: TStylingContext, index: number): string;
@@ -56,9 +58,6 @@ export declare function getDefaultValue(context: TStylingContext, index: number)
 export declare function setDefaultValue(context: TStylingContext, index: number, value: string | boolean | null): string | boolean | null;
 export declare function setValue(data: LStylingData, bindingIndex: number, value: any): void;
 export declare function getValue<T = any>(data: LStylingData, bindingIndex: number): T | null;
-export declare function lockContext(context: TStylingContext, hostBindingsMode: boolean): void;
-export declare function isContextLocked(context: TStylingContext, hostBindingsMode: boolean): boolean;
-export declare function getLockedConfig(hostBindingsMode: boolean): TStylingConfig;
 export declare function getPropValuesStartPosition(context: TStylingContext): TStylingContextIndex;
 export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 /**

@@ -422,30 +422,10 @@ export declare const enum TStylingConfig {
      * 4. `@HostBinding('class.name') x`
      */
     HasHostBindings = 64,
-    /**
-     * Whether or not the template bindings are allowed to be registered in the context.
-     *
-     * This flag is after one or more template-based style/class bindings were
-     * set and processed for an element. Once the bindings are processed then a call
-     * to stylingApply is issued and the lock will be put into place.
-     *
-     * Note that this is only set once.
-     */
-    TemplateBindingsLocked = 128,
-    /**
-     * Whether or not the host bindings are allowed to be registered in the context.
-     *
-     * This flag is after one or more host-based style/class bindings were
-     * set and processed for an element. Once the bindings are processed then a call
-     * to stylingApply is issued and the lock will be put into place.
-     *
-     * Note that this is only set once.
-     */
-    HostBindingsLocked = 256,
     /** A Mask of all the configurations */
-    Mask = 511,
+    Mask = 127,
     /** Total amount of configuration bits used */
-    TotalBits = 9
+    TotalBits = 7
 }
 /**
  * An index of position and offset values used to navigate the `TStylingContext`.

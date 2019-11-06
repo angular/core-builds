@@ -37,8 +37,6 @@ export interface DebugStylingConfig {
     hasCollisions: boolean;
     hasTemplateBindings: boolean;
     hasHostBindings: boolean;
-    templateBindingsLocked: boolean;
-    hostBindingsLocked: boolean;
     allowDirectStyling: boolean;
 }
 /**
@@ -176,8 +174,6 @@ export declare class NodeStylingDebug implements DebugNodeStyling {
         hasCollisions: boolean;
         hasTemplateBindings: boolean;
         hasHostBindings: boolean;
-        templateBindingsLocked: boolean;
-        hostBindingsLocked: boolean;
         allowDirectStyling: boolean;
     };
     /**
