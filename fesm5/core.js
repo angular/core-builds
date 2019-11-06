@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+62.sha-d8e6501.with-local-changes
+ * @license Angular v9.0.0-rc.0+63.sha-88eefd8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -755,9 +755,9 @@ var NullInjector = /** @class */ (function () {
             // reason why correctly written application should cause this exception.
             // TODO(misko): uncomment the next line once `ngDevMode` works with closure.
             // if (ngDevMode) debugger;
-            var error_1 = new Error("NullInjectorError: No provider for " + stringify(token) + "!");
-            error_1.name = 'NullInjectorError';
-            throw error_1;
+            var error = new Error("NullInjectorError: No provider for " + stringify(token) + "!");
+            error.name = 'NullInjectorError';
+            throw error;
         }
         return notFoundValue;
     };
@@ -19280,7 +19280,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.0+62.sha-d8e6501.with-local-changes');
+var VERSION = new Version('9.0.0-rc.0+63.sha-88eefd8.with-local-changes');
 
 /**
  * @license
@@ -25835,15 +25835,15 @@ function compileComponent(type, metadata) {
             if (ngComponentDef === null) {
                 var compiler = getCompilerFacade();
                 if (componentNeedsResolution(metadata)) {
-                    var error_1 = ["Component '" + type.name + "' is not resolved:"];
+                    var error = ["Component '" + type.name + "' is not resolved:"];
                     if (metadata.templateUrl) {
-                        error_1.push(" - templateUrl: " + metadata.templateUrl);
+                        error.push(" - templateUrl: " + metadata.templateUrl);
                     }
                     if (metadata.styleUrls && metadata.styleUrls.length) {
-                        error_1.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
+                        error.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
                     }
-                    error_1.push("Did you run and wait for 'resolveComponentResources()'?");
-                    throw new Error(error_1.join('\n'));
+                    error.push("Did you run and wait for 'resolveComponentResources()'?");
+                    throw new Error(error.join('\n'));
                 }
                 var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
                 var meta = __assign(__assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
