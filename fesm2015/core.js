@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+66.sha-1735135.with-local-changes
+ * @license Angular v9.0.0-rc.0+75.sha-114317c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4370,16 +4370,7 @@ const DEFAULT_GUARD_MASK_VALUE = 0b1;
  */
 function allocTStylingContext(initialStyling, hasDirectives) {
     initialStyling = initialStyling || allocStylingMapArray(null);
-    /** @type {?} */
-    let config = 0 /* Initial */;
-    if (hasDirectives) {
-        config |= 1 /* HasDirectives */;
-    }
-    if (initialStyling.length > 1 /* ValuesStartPosition */) {
-        config |= 16 /* HasInitialStyling */;
-    }
     return [
-        config,
         DEFAULT_TOTAL_SOURCES,
         initialStyling,
     ];
@@ -4392,19 +4383,12 @@ function allocStylingMapArray(value) {
     return [value];
 }
 /**
- * @param {?} context
- * @return {?}
- */
-function getConfig(context) {
-    return context[0 /* ConfigPosition */];
-}
-/**
- * @param {?} context
+ * @param {?} tNode
  * @param {?} flag
  * @return {?}
  */
-function hasConfig(context, flag) {
-    return (getConfig(context) & flag) !== 0;
+function hasConfig(tNode, flag) {
+    return (tNode.flags & flag) !== 0;
 }
 /**
  * Determines whether or not to apply styles/classes directly or via context resolution.
@@ -4416,22 +4400,21 @@ function hasConfig(context, flag) {
  *    style/class application is not yet possible)
  * 3. There are no collisions (i.e. properties with more than one binding) across multiple
  *    sources (i.e. template + directive, directive + directive, directive + component)
- * @param {?} context
+ * @param {?} tNode
+ * @param {?} isClassBased
  * @param {?} firstUpdatePass
  * @return {?}
  */
-function allowDirectStyling(context, firstUpdatePass) {
+function allowDirectStyling(tNode, isClassBased, firstUpdatePass) {
     /** @type {?} */
     let allow = false;
-    /** @type {?} */
-    const config = getConfig(context);
-    /** @type {?} */
-    const hasNoDirectives = (config & 1 /* HasDirectives */) === 0;
     // if no directives are present then we do not need populate a context at all. This
     // is because duplicate prop bindings cannot be registered through the template. If
     // and when this happens we can safely apply the value directly without context
     // resolution...
-    if (hasNoDirectives) {
+    /** @type {?} */
+    const hasDirectives = hasConfig(tNode, 128 /* hasHostBindings */);
+    if (!hasDirectives) {
         // `ngDevMode` is required to be checked here because tests/debugging rely on the context being
         // populated. If things are in production mode then there is no need to build a context
         // therefore the direct apply can be allowed (even on the first update).
@@ -4439,28 +4422,25 @@ function allowDirectStyling(context, firstUpdatePass) {
     }
     else if (!firstUpdatePass) {
         /** @type {?} */
-        const hasNoCollisions = (config & 8 /* HasCollisions */) === 0;
+        const duplicateStylingFlag = isClassBased ? 8192 /* hasDuplicateClassBindings */ : 262144 /* hasDuplicateStyleBindings */;
         /** @type {?} */
-        const hasOnlyMapsOrOnlyProps = (config & 6 /* HasPropAndMapBindings */) !== 6 /* HasPropAndMapBindings */;
-        allow = hasNoCollisions && hasOnlyMapsOrOnlyProps;
+        const hasDuplicates = hasConfig(tNode, duplicateStylingFlag);
+        /** @type {?} */
+        const hasOnlyMapOrPropsFlag = isClassBased ? 1536 /* hasClassPropAndMapBindings */ :
+            49152 /* hasStylePropAndMapBindings */;
+        /** @type {?} */
+        const hasOnlyMapsOrOnlyProps = (tNode.flags & hasOnlyMapOrPropsFlag) !== hasOnlyMapOrPropsFlag;
+        allow = !hasDuplicates && hasOnlyMapsOrOnlyProps;
     }
     return allow;
 }
 /**
- * @param {?} context
- * @param {?} value
- * @return {?}
- */
-function setConfig(context, value) {
-    context[0 /* ConfigPosition */] = value;
-}
-/**
- * @param {?} context
+ * @param {?} tNode
  * @param {?} flag
  * @return {?}
  */
-function patchConfig(context, flag) {
-    context[0 /* ConfigPosition */] |= flag;
+function patchConfig(tNode, flag) {
+    tNode.flags |= flag;
 }
 /**
  * @param {?} context
@@ -4525,7 +4505,7 @@ function getValuesCount(context) {
  * @return {?}
  */
 function getTotalSources(context) {
-    return context[1 /* TotalSourcesPosition */];
+    return context[0 /* TotalSourcesPosition */];
 }
 /**
  * @param {?} context
@@ -4574,12 +4554,16 @@ function getValue(data, bindingIndex) {
 }
 /**
  * @param {?} context
+ * @param {?} tNode
+ * @param {?} isClassBased
  * @return {?}
  */
-function getPropValuesStartPosition(context) {
+function getPropValuesStartPosition(context, tNode, isClassBased) {
     /** @type {?} */
-    let startPosition = 3 /* ValuesStartPosition */;
-    if (hasConfig(context, 4 /* HasMapBindings */)) {
+    let startPosition = 2 /* ValuesStartPosition */;
+    /** @type {?} */
+    const flag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+    if (hasConfig(tNode, flag)) {
         startPosition += 4 /* BindingsStartOffset */ + getValuesCount(context);
     }
     return startPosition;
@@ -4644,7 +4628,7 @@ function hyphenate(value) {
  */
 function getStylingMapArray(value) {
     return isStylingContext(value) ?
-        ((/** @type {?} */ (value)))[2 /* InitialStylingValuePosition */] :
+        ((/** @type {?} */ (value)))[1 /* InitialStylingValuePosition */] :
         (/** @type {?} */ (value));
 }
 /**
@@ -4654,7 +4638,7 @@ function getStylingMapArray(value) {
 function isStylingContext(value) {
     // the StylingMapArray is in the format of [initial, prop, string, prop, string]
     // and this is the defining value to distinguish between arrays
-    return Array.isArray(value) && value.length >= 3 /* ValuesStartPosition */ &&
+    return Array.isArray(value) && value.length >= 2 /* ValuesStartPosition */ &&
         typeof value[1] !== 'string';
 }
 /**
@@ -8255,17 +8239,107 @@ const TNodeFlags = {
     hasClassInput: 16,
     /** Bit #6 - This bit is set if the node has any "style" inputs */
     hasStyleInput: 32,
-    /** Bit #7 - This bit is set if the node has initial styling */
-    hasInitialStyling: 64,
-    /** Bit #8 - This bit is set if the node has been detached by i18n */
-    isDetached: 128,
+    /** Bit #7 This bit is set if the node has been detached by i18n */
+    isDetached: 64,
     /**
-     * Bit #9 - This bit is set if the node has directives with host bindings.
+     * Bit #8 - This bit is set if the node has directives with host bindings.
      *
      * This flags allows us to guard host-binding logic and invoke it only on nodes
      * that actually have directives with host bindings.
      */
-    hasHostBindings: 256,
+    hasHostBindings: 128,
+    /** Bit #9 - This bit is set if the node has initial styling */
+    hasInitialStyling: 256,
+    /**
+     * Bit #10 - Whether or not there are class-based map bindings present.
+     *
+     * Examples include:
+     * 1. `<div [class]="x">`
+     * 2. `@HostBinding('class') x`
+     */
+    hasClassMapBindings: 512,
+    /**
+     * Bit #11 - Whether or not there are any class-based prop bindings present.
+     *
+     * Examples include:
+     * 1. `<div [class.name]="x">`
+     * 2. `@HostBinding('class.name') x`
+     */
+    hasClassPropBindings: 1024,
+    /**
+     * Bit #12 - whether or not there are any active [class] and [class.name] bindings
+     */
+    hasClassPropAndMapBindings: 1536,
+    /**
+     * Bit #13 - Whether or not the context contains one or more class-based template bindings.
+     *
+     * Examples include:
+     * 1. `<div [class]="x">`
+     * 2. `<div [class.name]="x">`
+     */
+    hasTemplateClassBindings: 2048,
+    /**
+     * Bit #14 - Whether or not the context contains one or more class-based host bindings.
+     *
+     * Examples include:
+     * 1. `@HostBinding('class') x`
+     * 2. `@HostBinding('class.name') x`
+     */
+    hasHostClassBindings: 4096,
+    /**
+     * Bit #15 - Whether or not there are two or more sources for a class property in the context.
+     *
+     * Examples include:
+     * 1. prop + prop: `<div [class.active]="x" dir-that-sets-active-class>`
+     * 2. map + prop: `<div [class]="x" [class.foo]>`
+     * 3. map + map: `<div [class]="x" dir-that-sets-class>`
+     */
+    hasDuplicateClassBindings: 8192,
+    /**
+     * Bit #16 - Whether or not there are style-based map bindings present.
+     *
+     * Examples include:
+     * 1. `<div [style]="x">`
+     * 2. `@HostBinding('style') x`
+     */
+    hasStyleMapBindings: 16384,
+    /**
+     * Bit #17 - Whether or not there are any style-based prop bindings present.
+     *
+     * Examples include:
+     * 1. `<div [style.prop]="x">`
+     * 2. `@HostBinding('style.prop') x`
+     */
+    hasStylePropBindings: 32768,
+    /**
+     * Bit #18 - whether or not there are any active [style] and [style.prop] bindings
+     */
+    hasStylePropAndMapBindings: 49152,
+    /**
+     * Bit #19 - Whether or not the context contains one or more style-based template bindings.
+     *
+     * Examples include:
+     * 1. `<div [style]="x">`
+     * 2. `<div [style.prop]="x">`
+     */
+    hasTemplateStyleBindings: 65536,
+    /**
+     * Bit #20 - Whether or not the context contains one or more style-based host bindings.
+     *
+     * Examples include:
+     * 1. `@HostBinding('style') x`
+     * 2. `@HostBinding('style.prop') x`
+     */
+    hasHostStyleBindings: 131072,
+    /**
+     * Bit #21 - Whether or not there are two or more sources for a style property in the context.
+     *
+     * Examples include:
+     * 1. prop + prop: `<div [style.width]="x" dir-that-sets-width>`
+     * 2. map + prop: `<div [style]="x" [style.prop]>`
+     * 3. map + map: `<div [style]="x" dir-that-sets-style>`
+     */
+    hasDuplicateStyleBindings: 262144,
 };
 /** @enum {number} */
 const TNodeProviderIndexes = {
@@ -9356,6 +9430,7 @@ const STYLING_INDEX_FOR_MAP_BINDING = 0;
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  * @param {?} context
+ * @param {?} tNode
  * @param {?} data
  * @param {?} element
  * @param {?} directiveIndex
@@ -9366,7 +9441,7 @@ const STYLING_INDEX_FOR_MAP_BINDING = 0;
  * @param {?} firstUpdatePass
  * @return {?}
  */
-function updateClassViaContext(context, data, element, directiveIndex, prop, bindingIndex, value, forceUpdate, firstUpdatePass) {
+function updateClassViaContext(context, tNode, data, element, directiveIndex, prop, bindingIndex, value, forceUpdate, firstUpdatePass) {
     /** @type {?} */
     const isMapBased = !prop;
     /** @type {?} */
@@ -9378,7 +9453,7 @@ function updateClassViaContext(context, data, element, directiveIndex, prop, bin
     // is aware of the binding even if things change after the first update pass.
     if (firstUpdatePass || value !== NO_CHANGE) {
         /** @type {?} */
-        const updated = updateBindingData(context, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, false, firstUpdatePass);
+        const updated = updateBindingData(context, tNode, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, false, firstUpdatePass, true);
         if (updated || forceUpdate) {
             // We flip the bit in the bitMask to reflect that the binding
             // at the `index` slot has changed. This identifies to the flushing
@@ -9401,6 +9476,7 @@ function updateClassViaContext(context, data, element, directiveIndex, prop, bin
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  * @param {?} context
+ * @param {?} tNode
  * @param {?} data
  * @param {?} element
  * @param {?} directiveIndex
@@ -9412,7 +9488,7 @@ function updateClassViaContext(context, data, element, directiveIndex, prop, bin
  * @param {?} firstUpdatePass
  * @return {?}
  */
-function updateStyleViaContext(context, data, element, directiveIndex, prop, bindingIndex, value, sanitizer, forceUpdate, firstUpdatePass) {
+function updateStyleViaContext(context, tNode, data, element, directiveIndex, prop, bindingIndex, value, sanitizer, forceUpdate, firstUpdatePass) {
     /** @type {?} */
     const isMapBased = !prop;
     /** @type {?} */
@@ -9428,7 +9504,7 @@ function updateStyleViaContext(context, data, element, directiveIndex, prop, bin
             true :
             (sanitizer ? sanitizer((/** @type {?} */ (prop)), null, 1 /* ValidateProperty */) : false);
         /** @type {?} */
-        const updated = updateBindingData(context, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass);
+        const updated = updateBindingData(context, tNode, data, countIndex, state.sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass, false);
         if (updated || forceUpdate) {
             // We flip the bit in the bitMask to reflect that the binding
             // at the `index` slot has changed. This identifies to the flushing
@@ -9451,6 +9527,7 @@ function updateStyleViaContext(context, data, element, directiveIndex, prop, bin
  * new binding entry (if it has changed).
  *
  * @param {?} context
+ * @param {?} tNode
  * @param {?} data
  * @param {?} counterIndex
  * @param {?} sourceIndex
@@ -9460,11 +9537,14 @@ function updateStyleViaContext(context, data, element, directiveIndex, prop, bin
  * @param {?} forceUpdate
  * @param {?} sanitizationRequired
  * @param {?} firstUpdatePass
+ * @param {?} isClassBased
  * @return {?} whether or not the binding value was updated in the `LStylingData`.
  */
-function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass) {
+function updateBindingData(context, tNode, data, counterIndex, sourceIndex, prop, bindingIndex, value, forceUpdate, sanitizationRequired, firstUpdatePass, isClassBased) {
     /** @type {?} */
     const hostBindingsMode = isHostStylingActive(sourceIndex);
+    /** @type {?} */
+    const hostBindingsFlag = isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */;
     if (firstUpdatePass) {
         // this will only happen during the first update pass of the
         // context. The reason why we can't use `tView.firstCreatePass`
@@ -9472,18 +9552,16 @@ function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindi
         // update pass is executed (remember that all styling instructions
         // are run in the update phase, and, as a result, are no more
         // styling instructions that are run in the creation phase).
-        registerBinding(context, counterIndex, sourceIndex, prop, bindingIndex, sanitizationRequired);
-        patchConfig(context, hostBindingsMode ? 64 /* HasHostBindings */ : 32 /* HasTemplateBindings */);
+        registerBinding(context, tNode, counterIndex, sourceIndex, prop, bindingIndex, sanitizationRequired, isClassBased);
     }
     /** @type {?} */
     const changed = forceUpdate || hasValueChanged(data[bindingIndex], value);
     if (changed) {
         setValue(data, bindingIndex, value);
         /** @type {?} */
-        const doSetValuesAsStale = (getConfig(context) & 64 /* HasHostBindings */) &&
-            !hostBindingsMode && (prop ? !value : true);
+        const doSetValuesAsStale = hasConfig(tNode, hostBindingsFlag) && !hostBindingsMode && (prop ? !value : true);
         if (doSetValuesAsStale) {
-            renderHostBindingsAsStale(context, data, prop);
+            renderHostBindingsAsStale(context, tNode, data, prop, isClassBased);
         }
     }
     return changed;
@@ -9499,18 +9577,22 @@ function updateBindingData(context, data, counterIndex, sourceIndex, prop, bindi
  * is expected to be called each time a template binding becomes falsy or when a map-based template
  * binding changes.
  * @param {?} context
+ * @param {?} tNode
  * @param {?} data
  * @param {?} prop
+ * @param {?} isClassBased
  * @return {?}
  */
-function renderHostBindingsAsStale(context, data, prop) {
+function renderHostBindingsAsStale(context, tNode, data, prop, isClassBased) {
     /** @type {?} */
     const valuesCount = getValuesCount(context);
-    if (prop !== null && hasConfig(context, 2 /* HasPropBindings */)) {
+    /** @type {?} */
+    const hostBindingsFlag = isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */;
+    if (prop !== null && hasConfig(tNode, hostBindingsFlag)) {
         /** @type {?} */
         const itemsPerRow = 4 /* BindingsStartOffset */ + valuesCount;
         /** @type {?} */
-        let i = 3 /* ValuesStartPosition */;
+        let i = 2 /* ValuesStartPosition */;
         /** @type {?} */
         let found = false;
         while (i < context.length) {
@@ -9537,9 +9619,11 @@ function renderHostBindingsAsStale(context, data, prop) {
             }
         }
     }
-    if (hasConfig(context, 4 /* HasMapBindings */)) {
+    /** @type {?} */
+    const mapBindingsFlag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+    if (hasConfig(tNode, mapBindingsFlag)) {
         /** @type {?} */
-        const bindingsStart = 3 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */;
+        const bindingsStart = 2 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */;
         /** @type {?} */
         const valuesStart = bindingsStart + 1;
         // the first column is template bindings
@@ -9584,14 +9668,16 @@ function renderHostBindingsAsStale(context, data, prop) {
  * Note that this function is also used for map-based styling bindings. They are treated
  * much the same as prop-based bindings, but, their property name value is set as `[MAP]`.
  * @param {?} context
+ * @param {?} tNode
  * @param {?} countId
  * @param {?} sourceIndex
  * @param {?} prop
  * @param {?} bindingValue
- * @param {?=} sanitizationRequired
+ * @param {?} sanitizationRequired
+ * @param {?} isClassBased
  * @return {?}
  */
-function registerBinding(context, countId, sourceIndex, prop, bindingValue, sanitizationRequired) {
+function registerBinding(context, tNode, countId, sourceIndex, prop, bindingValue, sanitizationRequired, isClassBased) {
     /** @type {?} */
     let found = false;
     prop = prop || MAP_BASED_ENTRY_PROP_NAME;
@@ -9605,11 +9691,13 @@ function registerBinding(context, countId, sourceIndex, prop, bindingValue, sani
         totalSources++;
     }
     /** @type {?} */
+    const collisionFlag = isClassBased ? 8192 /* hasDuplicateClassBindings */ : 262144 /* hasDuplicateStyleBindings */;
+    /** @type {?} */
     const isBindingIndexValue = typeof bindingValue === 'number';
     /** @type {?} */
     const entriesPerRow = 4 /* BindingsStartOffset */ + getValuesCount(context);
     /** @type {?} */
-    let i = 3 /* ValuesStartPosition */;
+    let i = 2 /* ValuesStartPosition */;
     // all style/class bindings are sorted by property name
     while (i < context.length) {
         /** @type {?} */
@@ -9619,7 +9707,7 @@ function registerBinding(context, countId, sourceIndex, prop, bindingValue, sani
                 allocateNewContextEntry(context, i, prop, sanitizationRequired);
             }
             else if (isBindingIndexValue) {
-                patchConfig(context, 8 /* HasCollisions */);
+                patchConfig(tNode, collisionFlag);
             }
             addBindingIntoContext(context, i, bindingValue, countId, sourceIndex);
             found = true;
@@ -9718,7 +9806,7 @@ function addNewSourceColumn(context) {
     /** @type {?} */
     const insertOffset = 4 /* BindingsStartOffset */ + getValuesCount(context) - 1;
     /** @type {?} */
-    let index = 3 /* ValuesStartPosition */;
+    let index = 2 /* ValuesStartPosition */;
     while (index < context.length) {
         index += insertOffset;
         context.splice(index++, 0, DEFAULT_BINDING_INDEX);
@@ -9726,7 +9814,7 @@ function addNewSourceColumn(context) {
         // next entry in the context starts just after it. Therefore++.
         index++;
     }
-    context[1 /* TotalSourcesPosition */]++;
+    context[0 /* TotalSourcesPosition */]++;
 }
 /**
  * Applies all pending style and class bindings to the provided element.
@@ -9751,6 +9839,7 @@ function addNewSourceColumn(context) {
  * (i.e. the `bitMask` and `counter` values for styles and classes will be cleared).
  * @param {?} renderer
  * @param {?} data
+ * @param {?} tNode
  * @param {?} classesContext
  * @param {?} stylesContext
  * @param {?} element
@@ -9759,22 +9848,22 @@ function addNewSourceColumn(context) {
  * @param {?} firstUpdatePass
  * @return {?}
  */
-function flushStyling(renderer, data, classesContext, stylesContext, element, directiveIndex, styleSanitizer, firstUpdatePass) {
+function flushStyling(renderer, data, tNode, classesContext, stylesContext, element, directiveIndex, styleSanitizer, firstUpdatePass) {
     ngDevMode && ngDevMode.flushStyling++;
     /** @type {?} */
     const state = getStylingState(element, directiveIndex);
     /** @type {?} */
     const hostBindingsMode = isHostStylingActive(state.sourceIndex);
     if (stylesContext) {
-        firstUpdatePass && syncContextInitialStyling(stylesContext);
+        firstUpdatePass && syncContextInitialStyling(stylesContext, tNode, false);
         if (state.stylesBitMask !== 0) {
-            applyStylingViaContext(stylesContext, renderer, element, data, state.stylesBitMask, setStyle, styleSanitizer, hostBindingsMode);
+            applyStylingViaContext(stylesContext, tNode, renderer, element, data, state.stylesBitMask, setStyle, styleSanitizer, hostBindingsMode, false);
         }
     }
     if (classesContext) {
-        firstUpdatePass && syncContextInitialStyling(classesContext);
+        firstUpdatePass && syncContextInitialStyling(classesContext, tNode, true);
         if (state.classesBitMask !== 0) {
-            applyStylingViaContext(classesContext, renderer, element, data, state.classesBitMask, setClass, null, hostBindingsMode);
+            applyStylingViaContext(classesContext, tNode, renderer, element, data, state.classesBitMask, setClass, null, hostBindingsMode, true);
         }
     }
     resetStylingState();
@@ -9834,12 +9923,14 @@ function flushStyling(renderer, data, classesContext, stylesContext, element, di
  * ]
  * ```
  * @param {?} context
+ * @param {?} tNode
+ * @param {?} isClassBased
  * @return {?}
  */
-function syncContextInitialStyling(context) {
+function syncContextInitialStyling(context, tNode, isClassBased) {
     // the TStylingContext always has initial style/class values which are
     // stored in styling array format.
-    updateInitialStylingOnContext(context, (/** @type {?} */ (getStylingMapArray(context))));
+    updateInitialStylingOnContext(context, tNode, (/** @type {?} */ (getStylingMapArray(context))), isClassBased);
 }
 /**
  * Registers all initial styling entries into the provided context.
@@ -9855,10 +9946,12 @@ function syncContextInitialStyling(context) {
  * is first applied (at the end of the update phase). Once that happens then the context will
  * update itself with the complete initial styling for the element.
  * @param {?} context
+ * @param {?} tNode
  * @param {?} initialStyling
+ * @param {?} isClassBased
  * @return {?}
  */
-function updateInitialStylingOnContext(context, initialStyling) {
+function updateInitialStylingOnContext(context, tNode, initialStyling, isClassBased) {
     // `-1` is used here because all initial styling data is not a apart
     // of a binding (since it's static)
     /** @type {?} */
@@ -9871,12 +9964,12 @@ function updateInitialStylingOnContext(context, initialStyling) {
         if (value) {
             /** @type {?} */
             const prop = getMapProp(initialStyling, i);
-            registerBinding(context, COUNT_ID_FOR_STYLING, 0, prop, value, false);
+            registerBinding(context, tNode, COUNT_ID_FOR_STYLING, 0, prop, value, false, isClassBased);
             hasInitialStyling = true;
         }
     }
     if (hasInitialStyling) {
-        patchConfig(context, 16 /* HasInitialStyling */);
+        patchConfig(tNode, 256 /* hasInitialStyling */);
     }
 }
 /**
@@ -9906,6 +9999,7 @@ function updateInitialStylingOnContext(context, initialStyling) {
  * the `flushStyling` function so that it can call this function for both
  * the styles and classes contexts).
  * @param {?} context
+ * @param {?} tNode
  * @param {?} renderer
  * @param {?} element
  * @param {?} bindingData
@@ -9913,19 +10007,22 @@ function updateInitialStylingOnContext(context, initialStyling) {
  * @param {?} applyStylingFn
  * @param {?} sanitizer
  * @param {?} hostBindingsMode
+ * @param {?} isClassBased
  * @return {?}
  */
-function applyStylingViaContext(context, renderer, element, bindingData, bitMaskValue, applyStylingFn, sanitizer, hostBindingsMode) {
+function applyStylingViaContext(context, tNode, renderer, element, bindingData, bitMaskValue, applyStylingFn, sanitizer, hostBindingsMode, isClassBased) {
     /** @type {?} */
     const bitMask = normalizeBitMaskValue(bitMaskValue);
     /** @type {?} */
     let stylingMapsSyncFn = null;
     /** @type {?} */
     let applyAllValues = false;
-    if (hasConfig(context, 4 /* HasMapBindings */)) {
+    /** @type {?} */
+    const mapBindingsFlag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+    if (hasConfig(tNode, mapBindingsFlag)) {
         stylingMapsSyncFn = getStylingMapsSyncFn();
         /** @type {?} */
-        const mapsGuardMask = getGuardMask(context, 3 /* ValuesStartPosition */, hostBindingsMode);
+        const mapsGuardMask = getGuardMask(context, 2 /* ValuesStartPosition */, hostBindingsMode);
         applyAllValues = (bitMask & mapsGuardMask) !== 0;
     }
     /** @type {?} */
@@ -9939,7 +10036,7 @@ function applyStylingViaContext(context, renderer, element, bindingData, bitMask
         totalBindingsToVisit = valuesCount - 1;
     }
     /** @type {?} */
-    let i = getPropValuesStartPosition(context);
+    let i = getPropValuesStartPosition(context, tNode, isClassBased);
     while (i < context.length) {
         /** @type {?} */
         const guardMask = getGuardMask(context, i, hostBindingsMode);
@@ -10033,24 +10130,23 @@ function applyStylingViaContext(context, renderer, element, bindingData, bitMask
  *
  * @param {?} renderer
  * @param {?} context
+ * @param {?} tNode
  * @param {?} element
  * @param {?} data
  * @param {?} bindingIndex
  * @param {?} value
  * @param {?} isClassBased
- * @param {?=} sanitizer
- * @param {?=} forceUpdate
- * @param {?=} bindingValueContainsInitial
+ * @param {?} sanitizer
+ * @param {?} forceUpdate
+ * @param {?} bindingValueContainsInitial
  * @return {?} whether or not the styling map was applied to the element.
  */
-function applyStylingMapDirectly(renderer, context, element, data, bindingIndex, value, isClassBased, sanitizer, forceUpdate, bindingValueContainsInitial) {
+function applyStylingMapDirectly(renderer, context, tNode, element, data, bindingIndex, value, isClassBased, sanitizer, forceUpdate, bindingValueContainsInitial) {
     /** @type {?} */
     const oldValue = getValue(data, bindingIndex);
     if (forceUpdate || hasValueChanged(oldValue, value)) {
         /** @type {?} */
-        const config = getConfig(context);
-        /** @type {?} */
-        const hasInitial = config & 16 /* HasInitialStyling */;
+        const hasInitial = hasConfig(tNode, 256 /* hasInitialStyling */);
         /** @type {?} */
         const initialValue = hasInitial && !bindingValueContainsInitial ? getInitialStylingValue(context) : null;
         setValue(data, bindingIndex, value);
@@ -10070,7 +10166,9 @@ function applyStylingMapDirectly(renderer, context, element, data, bindingIndex,
         // When this happens, the algorithm will bail out and not write to
         // the style or className attribute directly.
         /** @type {?} */
-        let writeToAttrDirectly = !(config & 2 /* HasPropBindings */);
+        const propBindingsFlag = isClassBased ? 1024 /* hasClassPropBindings */ : 32768 /* hasStylePropBindings */;
+        /** @type {?} */
+        let writeToAttrDirectly = !hasConfig(tNode, propBindingsFlag);
         if (writeToAttrDirectly &&
             checkIfExternallyModified((/** @type {?} */ (element)), cachedValue, isClassBased)) {
             writeToAttrDirectly = false;
@@ -10185,6 +10283,7 @@ function writeStylingValueDirectly(renderer, element, value, isClassBased, initi
  *
  * @param {?} renderer
  * @param {?} context
+ * @param {?} tNode
  * @param {?} element
  * @param {?} data
  * @param {?} bindingIndex
@@ -10194,7 +10293,7 @@ function writeStylingValueDirectly(renderer, element, value, isClassBased, initi
  * @param {?=} sanitizer
  * @return {?} whether or not the prop/value styling was applied to the element.
  */
-function applyStylingValueDirectly(renderer, context, element, data, bindingIndex, prop, value, isClassBased, sanitizer) {
+function applyStylingValueDirectly(renderer, context, tNode, element, data, bindingIndex, prop, value, isClassBased, sanitizer) {
     /** @type {?} */
     let applied = false;
     if (hasValueChanged(data[bindingIndex], value)) {
@@ -10204,7 +10303,9 @@ function applyStylingValueDirectly(renderer, context, element, data, bindingInde
         // case 1: apply the provided value (if it exists)
         applied = applyStylingValue(renderer, element, prop, value, applyFn, bindingIndex, sanitizer);
         // case 2: find the matching property in a styling map and apply the detected value
-        if (!applied && hasConfig(context, 4 /* HasMapBindings */)) {
+        /** @type {?} */
+        const mapBindingsFlag = isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+        if (!applied && hasConfig(tNode, mapBindingsFlag)) {
             /** @type {?} */
             const state = getStylingState(element, TEMPLATE_DIRECTIVE_INDEX);
             /** @type {?} */
@@ -10214,7 +10315,7 @@ function applyStylingValueDirectly(renderer, context, element, data, bindingInde
                 false;
         }
         // case 3: apply the initial value (if it exists)
-        if (!applied && hasConfig(context, 16 /* HasInitialStyling */)) {
+        if (!applied && hasConfig(tNode, 256 /* hasInitialStyling */)) {
             /** @type {?} */
             const map = getStylingMapArray(context);
             applied =
@@ -11219,7 +11320,7 @@ function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, s
         /** @type {?} */
         let cursor = getCurrentSyncCursor(currentMapIndex);
         /** @type {?} */
-        const bindingIndex = (/** @type {?} */ (getBindingValue(context, 3 /* ValuesStartPosition */, currentMapIndex)));
+        const bindingIndex = (/** @type {?} */ (getBindingValue(context, 2 /* ValuesStartPosition */, currentMapIndex)));
         /** @type {?} */
         const stylingMapArr = getValue(data, bindingIndex);
         if (stylingMapArr) {
@@ -11448,7 +11549,7 @@ if (false) {
     DebugStylingContext.prototype.printTable = function () { };
 }
 /**
- * A debug/testing-oriented summary of `TStylingConfig`.
+ * A debug/testing-oriented summary of all styling information in `TNode.flags`.
  * @record
  */
 function DebugStylingConfig() { }
@@ -11568,12 +11669,13 @@ if (false) {
 /**
  * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
  * @param {?} context
+ * @param {?} tNode
  * @param {?} isClassBased
  * @return {?}
  */
-function attachStylingDebugObject(context, isClassBased) {
+function attachStylingDebugObject(context, tNode, isClassBased) {
     /** @type {?} */
-    const debug = new TStylingContextDebug(context, isClassBased);
+    const debug = new TStylingContextDebug(context, tNode, isClassBased);
     attachDebugObject(context, debug);
     return debug;
 }
@@ -11586,16 +11688,18 @@ function attachStylingDebugObject(context, isClassBased) {
 class TStylingContextDebug {
     /**
      * @param {?} context
+     * @param {?} _tNode
      * @param {?} _isClassBased
      */
-    constructor(context, _isClassBased) {
+    constructor(context, _tNode, _isClassBased) {
         this.context = context;
+        this._tNode = _tNode;
         this._isClassBased = _isClassBased;
     }
     /**
      * @return {?}
      */
-    get config() { return buildConfig(this.context); }
+    get config() { return buildConfig(this._tNode, this._isClassBased); }
     /**
      * Returns a detailed summary of each styling entry in the context.
      *
@@ -11610,7 +11714,7 @@ class TStylingContextDebug {
         /** @type {?} */
         const entries = {};
         /** @type {?} */
-        const start = getPropValuesStartPosition(context);
+        const start = getPropValuesStartPosition(context, this._tNode, this._isClassBased);
         /** @type {?} */
         let i = start;
         while (i < context.length) {
@@ -11674,7 +11778,7 @@ class TStylingContextDebug {
             /** @type {?} */
             const entries = [];
             /** @type {?} */
-            let j = 3 /* ValuesStartPosition */;
+            let j = 2 /* ValuesStartPosition */;
             while (j < context.length) {
                 /** @type {?} */
                 const value = getBindingValue(context, j, i);
@@ -11750,7 +11854,7 @@ class TStylingContextDebug {
         /** @type {?} */
         const totalProps = Math.floor(context.length / itemsPerRow);
         /** @type {?} */
-        let i = 3 /* ValuesStartPosition */;
+        let i = 2 /* ValuesStartPosition */;
         while (i < context.length) {
             /** @type {?} */
             const prop = getProp(context, i);
@@ -11779,6 +11883,11 @@ class TStylingContextDebug {
 if (false) {
     /** @type {?} */
     TStylingContextDebug.prototype.context;
+    /**
+     * @type {?}
+     * @private
+     */
+    TStylingContextDebug.prototype._tNode;
     /**
      * @type {?}
      * @private
@@ -11844,15 +11953,17 @@ function repeat(c, times) {
 class NodeStylingDebug {
     /**
      * @param {?} context
+     * @param {?} _tNode
      * @param {?} _data
      * @param {?} _isClassBased
      */
-    constructor(context, _data, _isClassBased) {
+    constructor(context, _tNode, _data, _isClassBased) {
+        this._tNode = _tNode;
         this._data = _data;
         this._isClassBased = _isClassBased;
         this._sanitizer = null;
         this._debugContext = isStylingContext(context) ?
-            new TStylingContextDebug((/** @type {?} */ (context)), _isClassBased) :
+            new TStylingContextDebug((/** @type {?} */ (context)), _tNode, _isClassBased) :
             ((/** @type {?} */ (context)));
     }
     /**
@@ -11951,7 +12062,7 @@ class NodeStylingDebug {
     /**
      * @return {?}
      */
-    get config() { return buildConfig(this.context.context); }
+    get config() { return buildConfig(this._tNode, this._isClassBased); }
     /**
      * Returns a key/value map of all the styles/classes that were last applied to the element.
      * @return {?}
@@ -11989,8 +12100,8 @@ class NodeStylingDebug {
         /** @type {?} */
         const context = this.context.context;
         /** @type {?} */
-        const limit = getPropValuesStartPosition(context);
-        for (let i = 3 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */; i < limit; i++) {
+        const limit = getPropValuesStartPosition(context, this._tNode, this._isClassBased);
+        for (let i = 2 /* ValuesStartPosition */ + 4 /* BindingsStartOffset */; i < limit; i++) {
             /** @type {?} */
             const bindingIndex = (/** @type {?} */ (context[i]));
             /** @type {?} */
@@ -12015,7 +12126,9 @@ class NodeStylingDebug {
         /** @type {?} */
         const mockElement = (/** @type {?} */ ({}));
         /** @type {?} */
-        const hasMaps = hasConfig(this.context.context, 4 /* HasMapBindings */);
+        const mapBindingsFlag = this._isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */;
+        /** @type {?} */
+        const hasMaps = hasConfig(this._tNode, mapBindingsFlag);
         if (hasMaps) {
             activateStylingMapFeature();
         }
@@ -12032,9 +12145,9 @@ class NodeStylingDebug {
         /** @type {?} */
         const sanitizer = this._isClassBased ? null : (this._sanitizer || getCurrentStyleSanitizer());
         // run the template bindings
-        applyStylingViaContext(this.context.context, null, mockElement, data, true, mapFn, sanitizer, false);
+        applyStylingViaContext(this.context.context, this._tNode, null, mockElement, data, true, mapFn, sanitizer, false, this._isClassBased);
         // and also the host bindings
-        applyStylingViaContext(this.context.context, null, mockElement, data, true, mapFn, sanitizer, true);
+        applyStylingViaContext(this.context.context, this._tNode, null, mockElement, data, true, mapFn, sanitizer, true, this._isClassBased);
     }
 }
 if (false) {
@@ -12052,6 +12165,11 @@ if (false) {
      * @type {?}
      * @private
      */
+    NodeStylingDebug.prototype._tNode;
+    /**
+     * @type {?}
+     * @private
+     */
     NodeStylingDebug.prototype._data;
     /**
      * @type {?}
@@ -12060,25 +12178,26 @@ if (false) {
     NodeStylingDebug.prototype._isClassBased;
 }
 /**
- * @param {?} context
+ * @param {?} tNode
+ * @param {?} isClassBased
  * @return {?}
  */
-function buildConfig(context) {
+function buildConfig(tNode, isClassBased) {
     /** @type {?} */
-    const hasMapBindings = hasConfig(context, 4 /* HasMapBindings */);
+    const hasMapBindings = hasConfig(tNode, isClassBased ? 512 /* hasClassMapBindings */ : 16384 /* hasStyleMapBindings */);
     /** @type {?} */
-    const hasPropBindings = hasConfig(context, 2 /* HasPropBindings */);
+    const hasPropBindings = hasConfig(tNode, isClassBased ? 1024 /* hasClassPropBindings */ : 32768 /* hasStylePropBindings */);
     /** @type {?} */
-    const hasCollisions = hasConfig(context, 8 /* HasCollisions */);
+    const hasCollisions = hasConfig(tNode, isClassBased ? 8192 /* hasDuplicateClassBindings */ : 262144 /* hasDuplicateStyleBindings */);
     /** @type {?} */
-    const hasTemplateBindings = hasConfig(context, 32 /* HasTemplateBindings */);
+    const hasTemplateBindings = hasConfig(tNode, isClassBased ? 2048 /* hasTemplateClassBindings */ : 65536 /* hasTemplateStyleBindings */);
     /** @type {?} */
-    const hasHostBindings = hasConfig(context, 64 /* HasHostBindings */);
+    const hasHostBindings = hasConfig(tNode, isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */);
     // `firstTemplatePass` here is false because the context has already been constructed
     // directly within the behavior of the debugging tools (outside of style/class debugging,
     // the context is constructed during the first template pass).
     /** @type {?} */
-    const allowDirectStyling$1 = allowDirectStyling(context, false);
+    const allowDirectStyling$1 = allowDirectStyling(tNode, isClassBased, false);
     return {
         hasMapBindings,
         hasPropBindings,
@@ -12354,15 +12473,15 @@ const TNodeConstructor = class TNode {
             flags.push('TNodeFlags.hasContentQuery');
         if (this.flags & 32 /* hasStyleInput */)
             flags.push('TNodeFlags.hasStyleInput');
-        if (this.flags & 64 /* hasInitialStyling */)
+        if (this.flags & 256 /* hasInitialStyling */)
             flags.push('TNodeFlags.hasInitialStyling');
-        if (this.flags & 256 /* hasHostBindings */)
+        if (this.flags & 128 /* hasHostBindings */)
             flags.push('TNodeFlags.hasHostBindings');
         if (this.flags & 2 /* isComponentHost */)
             flags.push('TNodeFlags.isComponentHost');
         if (this.flags & 1 /* isDirectiveHost */)
             flags.push('TNodeFlags.isDirectiveHost');
-        if (this.flags & 128 /* isDetached */)
+        if (this.flags & 64 /* isDetached */)
             flags.push('TNodeFlags.isDetached');
         if (this.flags & 4 /* isProjected */)
             flags.push('TNodeFlags.isProjected');
@@ -12684,11 +12803,11 @@ function buildDebugNode(tNode, lView, nodeIndex) {
     const componentLViewDebug = toDebug(readLViewValue(rawValue));
     /** @type {?} */
     const styles = isStylingContext(tNode.styles) ?
-        new NodeStylingDebug((/** @type {?} */ ((/** @type {?} */ (tNode.styles)))), lView, false) :
+        new NodeStylingDebug((/** @type {?} */ ((/** @type {?} */ (tNode.styles)))), tNode, lView, false) :
         null;
     /** @type {?} */
     const classes = isStylingContext(tNode.classes) ?
-        new NodeStylingDebug((/** @type {?} */ ((/** @type {?} */ (tNode.classes)))), lView, true) :
+        new NodeStylingDebug((/** @type {?} */ ((/** @type {?} */ (tNode.classes)))), tNode, lView, true) :
         null;
     return {
         html: toHtml(native),
@@ -13606,7 +13725,7 @@ function createDirectivesInstances(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
     instantiateAllDirectives(tView, lView, tNode, getNativeByTNode(tNode, lView));
-    if ((tNode.flags & 256 /* hasHostBindings */) === 256 /* hasHostBindings */) {
+    if ((tNode.flags & 128 /* hasHostBindings */) === 128 /* hasHostBindings */) {
         invokeDirectivesHostBindings(tView, lView, tNode);
     }
 }
@@ -14228,7 +14347,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             if (def.contentQueries !== null)
                 tNode.flags |= 8 /* hasContentQuery */;
             if (def.hostBindings !== null)
-                tNode.flags |= 256 /* hasHostBindings */;
+                tNode.flags |= 128 /* hasHostBindings */;
             // Init hooks are queued now so ngOnInit is called in host components before
             // any projected components.
             registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
@@ -15910,7 +16029,7 @@ function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, is
                 tNode.flags |= 4 /* isProjected */;
             }
         }
-        if ((tNode.flags & 128 /* isDetached */) !== 128 /* isDetached */) {
+        if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
             if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
                 applyNodes(renderer, action, tNode.child, lView, renderParent, beforeNode, false);
                 applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
@@ -22187,7 +22306,20 @@ function stylePropInternal(elementIndex, prop, value, suffix) {
     /** @type {?} */
     const bindingIndex = nextBindingIndex();
     /** @type {?} */
-    const updated = stylingProp(elementIndex, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
+    const lView = getLView();
+    /** @type {?} */
+    const tNode = getTNode(elementIndex, lView);
+    /** @type {?} */
+    const firstUpdatePass = lView[TVIEW].firstUpdatePass;
+    // we check for this in the instruction code so that the context can be notified
+    // about prop or map bindings so that the direct apply check can decide earlier
+    // if it allows for context resolution to be bypassed.
+    if (firstUpdatePass) {
+        patchConfig(tNode, 32768 /* hasStylePropBindings */);
+        patchHostStylingFlag(tNode, isHostStyling(), false);
+    }
+    /** @type {?} */
+    const updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
     if (ngDevMode) {
         ngDevMode.styleProp++;
         if (updated) {
@@ -22219,7 +22351,22 @@ function ɵɵclassProp(className, value) {
     /** @type {?} */
     const bindingIndex = nextBindingIndex();
     /** @type {?} */
-    const updated = stylingProp(getSelectedIndex(), bindingIndex, className, value, true);
+    const lView = getLView();
+    /** @type {?} */
+    const elementIndex = getSelectedIndex();
+    /** @type {?} */
+    const tNode = getTNode(elementIndex, lView);
+    /** @type {?} */
+    const firstUpdatePass = lView[TVIEW].firstUpdatePass;
+    // we check for this in the instruction code so that the context can be notified
+    // about prop or map bindings so that the direct apply check can decide earlier
+    // if it allows for context resolution to be bypassed.
+    if (firstUpdatePass) {
+        patchConfig(tNode, 1024 /* hasClassPropBindings */);
+        patchHostStylingFlag(tNode, isHostStyling(), true);
+    }
+    /** @type {?} */
+    const updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, className, value, true);
     if (ngDevMode) {
         ngDevMode.classProp++;
         if (updated) {
@@ -22236,34 +22383,24 @@ function ɵɵclassProp(className, value) {
  * depends on the state of the context (i.e. whether or not there are duplicate
  * bindings or whether or not there are map-based bindings and property bindings
  * present together).
- * @param {?} elementIndex
+ * @param {?} tNode
+ * @param {?} firstUpdatePass
+ * @param {?} lView
  * @param {?} bindingIndex
  * @param {?} prop
  * @param {?} value
  * @param {?} isClassBased
  * @return {?}
  */
-function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
+function stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, value, isClassBased) {
     /** @type {?} */
     let updated = false;
-    /** @type {?} */
-    const lView = getLView();
-    /** @type {?} */
-    const firstUpdatePass = lView[TVIEW].firstUpdatePass;
-    /** @type {?} */
-    const tNode = getTNode(elementIndex, lView);
     /** @type {?} */
     const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
     /** @type {?} */
     const context = isClassBased ? getClassesContext(tNode) : getStylesContext(tNode);
     /** @type {?} */
     const sanitizer = isClassBased ? null : getCurrentStyleSanitizer();
-    // we check for this in the instruction code so that the context can be notified
-    // about prop or map bindings so that the direct apply check can decide earlier
-    // if it allows for context resolution to be bypassed.
-    if (firstUpdatePass) {
-        patchConfig(context, 2 /* HasPropBindings */);
-    }
     // [style.prop] and [class.name] bindings do not use `bind()` and will
     // therefore manage accessing and updating the new value in the lView directly.
     // For this reason, the checkNoChanges situation must also be handled here
@@ -22277,12 +22414,12 @@ function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
     }
     // Direct Apply Case: bypass context resolution and apply the
     // style/class value directly to the element
-    if (allowDirectStyling(context, firstUpdatePass)) {
+    if (allowDirectStyling(tNode, isClassBased, firstUpdatePass)) {
         /** @type {?} */
         const sanitizerToUse = isClassBased ? null : sanitizer;
         /** @type {?} */
         const renderer = getRenderer(tNode, lView);
-        updated = applyStylingValueDirectly(renderer, context, native, lView, bindingIndex, prop, value, isClassBased, sanitizerToUse);
+        updated = applyStylingValueDirectly(renderer, context, tNode, native, lView, bindingIndex, prop, value, isClassBased, sanitizerToUse);
         if (sanitizerToUse) {
             // it's important we remove the current style sanitizer once the
             // element exits, otherwise it will be used by the next styling
@@ -22297,10 +22434,10 @@ function stylingProp(elementIndex, bindingIndex, prop, value, isClassBased) {
         /** @type {?} */
         const directiveIndex = getActiveDirectiveId();
         if (isClassBased) {
-            updated = updateClassViaContext(context, lView, native, directiveIndex, prop, bindingIndex, (/** @type {?} */ (value)), false, firstUpdatePass);
+            updated = updateClassViaContext(context, tNode, lView, native, directiveIndex, prop, bindingIndex, (/** @type {?} */ (value)), false, firstUpdatePass);
         }
         else {
-            updated = updateStyleViaContext(context, lView, native, directiveIndex, prop, bindingIndex, (/** @type {?} */ (value)), sanitizer, false, firstUpdatePass);
+            updated = updateStyleViaContext(context, tNode, lView, native, directiveIndex, prop, bindingIndex, (/** @type {?} */ (value)), sanitizer, false, firstUpdatePass);
         }
         setElementExitFn(stylingApply);
     }
@@ -22345,12 +22482,21 @@ function ɵɵstyleMap(styles) {
     // are stored inside of the lView.
     /** @type {?} */
     const bindingIndex = incrementBindingIndex(2);
+    /** @type {?} */
+    const hostBindingsMode = isHostStyling();
     // inputs are only evaluated from a template binding into a directive, therefore,
     // there should not be a situation where a directive host bindings function
     // evaluates the inputs (this should only happen in the template function)
-    if (!isHostStyling() && hasDirectiveInput && styles !== NO_CHANGE) {
+    if (!hostBindingsMode && hasDirectiveInput && styles !== NO_CHANGE) {
         updateDirectiveInputValue(context, lView, tNode, bindingIndex, styles, false, firstUpdatePass);
         styles = NO_CHANGE;
+    }
+    // we check for this in the instruction code so that the context can be notified
+    // about prop or map bindings so that the direct apply check can decide earlier
+    // if it allows for context resolution to be bypassed.
+    if (firstUpdatePass) {
+        patchConfig(tNode, 16384 /* hasStyleMapBindings */);
+        patchHostStylingFlag(tNode, isHostStyling(), false);
     }
     stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, styles, false, hasDirectiveInput);
 }
@@ -22402,12 +22548,21 @@ function classMapInternal(elementIndex, classes) {
     // are stored inside of the lView.
     /** @type {?} */
     const bindingIndex = incrementBindingIndex(2);
+    /** @type {?} */
+    const hostBindingsMode = isHostStyling();
     // inputs are only evaluated from a template binding into a directive, therefore,
     // there should not be a situation where a directive host bindings function
     // evaluates the inputs (this should only happen in the template function)
-    if (!isHostStyling() && hasDirectiveInput && classes !== NO_CHANGE) {
+    if (!hostBindingsMode && hasDirectiveInput && classes !== NO_CHANGE) {
         updateDirectiveInputValue(context, lView, tNode, bindingIndex, classes, true, firstUpdatePass);
         classes = NO_CHANGE;
+    }
+    // we check for this in the instruction code so that the context can be notified
+    // about prop or map bindings so that the direct apply check can decide earlier
+    // if it allows for context resolution to be bypassed.
+    if (firstUpdatePass) {
+        patchConfig(tNode, 512 /* hasClassMapBindings */);
+        patchHostStylingFlag(tNode, isHostStyling(), true);
     }
     stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, classes, true, hasDirectiveInput);
 }
@@ -22444,20 +22599,14 @@ function stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, value,
     if (ngDevMode && valueHasChanged && getCheckNoChangesMode()) {
         throwErrorIfNoChangesMode(false, oldValue, value);
     }
-    // we check for this in the instruction code so that the context can be notified
-    // about prop or map bindings so that the direct apply check can decide earlier
-    // if it allows for context resolution to be bypassed.
-    if (firstUpdatePass) {
-        patchConfig(context, 4 /* HasMapBindings */);
-    }
     // Direct Apply Case: bypass context resolution and apply the
     // style/class map values directly to the element
-    if (allowDirectStyling(context, firstUpdatePass)) {
+    if (allowDirectStyling(tNode, isClassBased, firstUpdatePass)) {
         /** @type {?} */
         const sanitizerToUse = isClassBased ? null : sanitizer;
         /** @type {?} */
         const renderer = getRenderer(tNode, lView);
-        applyStylingMapDirectly(renderer, context, native, lView, bindingIndex, value, isClassBased, sanitizerToUse, valueHasChanged, hasDirectiveInput);
+        applyStylingMapDirectly(renderer, context, tNode, native, lView, bindingIndex, value, isClassBased, sanitizerToUse, valueHasChanged, hasDirectiveInput);
         if (sanitizerToUse) {
             // it's important we remove the current style sanitizer once the
             // element exits, otherwise it will be used by the next styling
@@ -22473,10 +22622,10 @@ function stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, value,
         // and defer to the context to flush and apply the style/class binding
         // value to the element.
         if (isClassBased) {
-            updateClassViaContext(context, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, valueHasChanged, firstUpdatePass);
+            updateClassViaContext(context, tNode, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, valueHasChanged, firstUpdatePass);
         }
         else {
-            updateStyleViaContext(context, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, sanitizer, valueHasChanged, firstUpdatePass);
+            updateStyleViaContext(context, tNode, lView, native, directiveIndex, null, bindingIndex, stylingMapArr, sanitizer, valueHasChanged, firstUpdatePass);
         }
         setElementExitFn(stylingApply);
     }
@@ -22585,7 +22734,7 @@ function stylingApply() {
     const classesContext = isStylingContext(tNode.classes) ? (/** @type {?} */ (tNode.classes)) : null;
     /** @type {?} */
     const stylesContext = isStylingContext(tNode.styles) ? (/** @type {?} */ (tNode.styles)) : null;
-    flushStyling(renderer, lView, classesContext, stylesContext, native, directiveIndex, sanitizer, tView.firstUpdatePass);
+    flushStyling(renderer, lView, tNode, classesContext, stylesContext, native, directiveIndex, sanitizer, tView.firstUpdatePass);
     resetCurrentStyleSanitizer();
 }
 /**
@@ -22645,7 +22794,7 @@ function registerInitialStylingOnTNode(tNode, attrs, startIndex) {
         updateRawValueOnContext(tNode.styles, stylingMapToString(styles, false));
     }
     if (hasAdditionalInitialStyling) {
-        tNode.flags |= 64 /* hasInitialStyling */;
+        tNode.flags |= 256 /* hasInitialStyling */;
     }
     return hasAdditionalInitialStyling;
 }
@@ -22687,7 +22836,7 @@ function getContext(tNode, isClassBased) {
         const hasDirectives = isDirectiveHost(tNode);
         context = allocTStylingContext((/** @type {?} */ (context)), hasDirectives);
         if (ngDevMode) {
-            attachStylingDebugObject((/** @type {?} */ (context)), isClassBased);
+            attachStylingDebugObject((/** @type {?} */ (context)), tNode, isClassBased);
         }
         if (isClassBased) {
             tNode.classes = context;
@@ -22731,6 +22880,19 @@ function resolveStylePropValue(value, suffix) {
  */
 function isHostStyling() {
     return isHostStylingActive(getActiveDirectiveId());
+}
+/**
+ * @param {?} tNode
+ * @param {?} hostBindingsMode
+ * @param {?} isClassBased
+ * @return {?}
+ */
+function patchHostStylingFlag(tNode, hostBindingsMode, isClassBased) {
+    /** @type {?} */
+    const flag = hostBindingsMode ?
+        isClassBased ? 4096 /* hasHostClassBindings */ : 131072 /* hasHostStyleBindings */ :
+        isClassBased ? 2048 /* hasTemplateClassBindings */ : 65536 /* hasTemplateStyleBindings */;
+    patchConfig(tNode, flag);
 }
 
 /**
@@ -22779,7 +22941,7 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
             registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
         }
     }
-    if ((tNode.flags & 64 /* hasInitialStyling */) === 64 /* hasInitialStyling */) {
+    if ((tNode.flags & 256 /* hasInitialStyling */) === 256 /* hasInitialStyling */) {
         renderInitialStyling(renderer, native, tNode, false);
     }
     appendChild(native, tNode, lView);
@@ -27688,7 +27850,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.0+66.sha-1735135.with-local-changes');
+const VERSION = new Version('9.0.0-rc.0+75.sha-114317c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34958,7 +35120,7 @@ function removeNode(index, viewData, markAsDetached) {
     }
     if (markAsDetached) {
         // Define this node as detached to avoid projecting it later
-        removedPhTNode.flags |= 128 /* isDetached */;
+        removedPhTNode.flags |= 64 /* isDetached */;
     }
     ngDevMode && ngDevMode.rendererRemoveNode++;
 }
@@ -47262,5 +47424,5 @@ if (ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, zoneSchedulerFactory as ɵangular_packages_core_core_s, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, isForwardRef as ɵangular_packages_core_core_a, NullInjector as ɵangular_packages_core_core_c, injectInjectorOnly as ɵangular_packages_core_core_b, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, wtfEnabled as ɵangular_packages_core_core_t, createScope as ɵangular_packages_core_core_v, detectWTF as ɵangular_packages_core_core_u, endTimeRange as ɵangular_packages_core_core_y, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, getLView as ɵangular_packages_core_core_be, getPreviousOrParentTNode as ɵangular_packages_core_core_bf, instructionState as ɵangular_packages_core_core_bd, nextContextImpl as ɵangular_packages_core_core_bg, getRootContext as ɵangular_packages_core_core_bo, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getUrlSanitizer as ɵangular_packages_core_core_bi, noSideEffects as ɵangular_packages_core_core_bn, makeParamDecorator as ɵangular_packages_core_core_bj, makePropDecorator as ɵangular_packages_core_core_bk, getClosureSafeProperty as ɵangular_packages_core_core_bl, _def as ɵangular_packages_core_core_z, DebugContext as ɵangular_packages_core_core_ba, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, createPlatformFactory, NgProbeToken, enableProdMode, isDevMode, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugEventListener, DebugNode$1 as DebugNode, asNativeElements, getDebugNode$1 as getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, SecurityContext, Sanitizer, Attribute, ANALYZE_FOR_ENTRY_COMPONENTS, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, ViewEncapsulation, Version, VERSION, InjectFlags, ɵɵdefineInjectable, defineInjectable, ɵɵdefineInjector, forwardRef, resolveForwardRef, Injectable, Injector, ɵɵinject, inject, INJECTOR, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, NoopNgZone as ɵNoopNgZone, Renderer2, RendererFactory2, RendererStyleFlags2, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentFactory as ɵComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual$1 as ɵdevModeEqual, isListLikeIterable$1 as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, getInjectableDef as ɵgetInjectableDef, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ivyEnabled as ɵivyEnabled, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, LocaleDataIndex as ɵLocaleDataIndex, getLocalePluralCase as ɵgetLocalePluralCase, findLocaleData as ɵfindLocaleData, registerLocaleData as ɵregisterLocaleData, unregisterAllLocaleData as ɵunregisterLocaleData, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, getSanitizationBypassType as ɵgetSanitizationBypassType, unwrapSafeValue as ɵunwrapSafeValue, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefinePipe, ɵɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent$1 as ɵrenderComponent, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, ɵɵdirectiveInject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵtemplateRefExtractor, ɵɵProvidersFeature, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, LifecycleHooksFeature as ɵLifecycleHooksFeature, NgModuleRef$1 as ɵRender3NgModuleRef, markDirty as ɵmarkDirty, NgModuleFactory$1 as ɵNgModuleFactory, NO_CHANGE as ɵNO_CHANGE, ɵɵcontainer, ɵɵnextContext, ɵɵelementStart, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵelement, ɵɵlistener, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵembeddedViewStart, ɵɵprojection, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵgetCurrentView, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, ɵɵrestoreView, ɵɵcontainerRefreshStart, ɵɵcontainerRefreshEnd, ɵɵqueryRefresh, ɵɵviewQuery, ɵɵstaticViewQuery, ɵɵstaticContentQuery, ɵɵcontentQuery, ɵɵloadQuery, ɵɵelementEnd, ɵɵhostProperty, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵcomponentHostSyntheticListener, ɵɵprojectionDef, ɵɵreference, ɵɵenableBindings, ɵɵdisableBindings, ɵɵallocHostVars, ɵɵelementContainerStart, ɵɵelementContainerEnd, ɵɵelementContainer, ɵɵstyleMap, ɵɵstyleSanitizer, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵclassProp, ɵɵelementHostAttrs, ɵɵselect, ɵɵadvance, ɵɵtemplate, ɵɵembeddedViewEnd, store as ɵstore, ɵɵpipe, whenRendered as ɵwhenRendered, ɵɵi18n, ɵɵi18nAttributes, ɵɵi18nExp, ɵɵi18nStart, ɵɵi18nEnd, ɵɵi18nApply, ɵɵi18nPostprocess, setLocaleId as ɵsetLocaleId, setClassMetadata as ɵsetClassMetadata, ɵɵresolveWindow, ɵɵresolveDocument, ɵɵresolveBody, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, compilePipe as ɵcompilePipe, ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, getLContext as ɵgetLContext, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NG_INJ_DEF as ɵNG_INJ_DEF, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, registerNgModuleType as ɵregisterNgModuleType, publishGlobalUtil as ɵpublishGlobalUtil, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, createInjector as ɵcreateInjector, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DebugElement, DebugEventListener, DebugNode$1 as DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef$1 as ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode$1 as getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, wtfCreateScope, wtfEndTimeRange, wtfLeave, wtfStartTimeRange, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, ComponentFactory as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory$1 as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, NgModuleRef$1 as ɵRender3NgModuleRef, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, anchorDef as ɵand, isForwardRef as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, DebugContext as ɵangular_packages_core_core_ba, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, instructionState as ɵangular_packages_core_core_bd, getLView as ɵangular_packages_core_core_be, getPreviousOrParentTNode as ɵangular_packages_core_core_bf, nextContextImpl as ɵangular_packages_core_core_bg, getUrlSanitizer as ɵangular_packages_core_core_bi, makeParamDecorator as ɵangular_packages_core_core_bj, makePropDecorator as ɵangular_packages_core_core_bk, getClosureSafeProperty as ɵangular_packages_core_core_bl, noSideEffects as ɵangular_packages_core_core_bn, getRootContext as ɵangular_packages_core_core_bo, NullInjector as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, zoneSchedulerFactory as ɵangular_packages_core_core_s, wtfEnabled as ɵangular_packages_core_core_t, detectWTF as ɵangular_packages_core_core_u, createScope as ɵangular_packages_core_core_v, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, endTimeRange as ɵangular_packages_core_core_y, _def as ɵangular_packages_core_core_z, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, createComponentFactory as ɵccf, clearOverrides as ɵclearOverrides, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, createNgModuleFactory as ɵcmf, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, createRendererType2 as ɵcrt, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual$1 as ɵdevModeEqual, directiveDef as ɵdid, elementDef as ɵeld, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocalePluralCase as ɵgetLocalePluralCase, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, initServicesIfNeeded as ɵinitServicesIfNeeded, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable$1 as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, ivyEnabled as ɵivyEnabled, looseIdentical as ɵlooseIdentical, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, pureArrayDef as ɵpad, patchComponentDefWithScope as ɵpatchComponentDefWithScope, pipeDef as ɵpid, pureObjectDef as ɵpod, purePipeDef as ɵppd, providerDef as ɵprd, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, queryDef as ɵqud, registerLocaleData as ɵregisterLocaleData, registerModuleFactory as ɵregisterModuleFactory, registerNgModuleType as ɵregisterNgModuleType, renderComponent$1 as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, textDef as ɵted, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapValue as ɵunv, unwrapSafeValue as ɵunwrapSafeValue, viewDef as ɵvid, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵallocHostVars, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentHostSyntheticListener, ɵɵcontainer, ɵɵcontainerRefreshEnd, ɵɵcontainerRefreshStart, ɵɵcontentQuery, ɵɵdefaultStyleSanitizer, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementHostAttrs, ɵɵelementStart, ɵɵembeddedViewEnd, ɵɵembeddedViewStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵselect, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵstyleMap, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstyleSanitizer, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵviewQuery };
 //# sourceMappingURL=core.js.map

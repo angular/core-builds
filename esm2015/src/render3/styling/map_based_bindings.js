@@ -191,7 +191,7 @@ function innerSyncStylingMap(context, renderer, element, data, applyStylingFn, s
         /** @type {?} */
         let cursor = getCurrentSyncCursor(currentMapIndex);
         /** @type {?} */
-        const bindingIndex = (/** @type {?} */ (getBindingValue(context, 3 /* ValuesStartPosition */, currentMapIndex)));
+        const bindingIndex = (/** @type {?} */ (getBindingValue(context, 2 /* ValuesStartPosition */, currentMapIndex)));
         /** @type {?} */
         const stylingMapArr = getValue(data, bindingIndex);
         if (stylingMapArr) {
