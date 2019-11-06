@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+69.sha-41560b4.with-local-changes
+ * @license Angular v9.0.0-rc.0+77.sha-2ed04ff.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/compiler')) :
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core', '@angular/compiler'], factory) :
     (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}), global.ng.core, global.ng.compiler));
-}(this, function (exports, i0, compiler) { 'use strict';
+}(this, (function (exports, i0, compiler) { 'use strict';
 
     /**
      * @license
@@ -3021,28 +3021,28 @@
      * found in the LICENSE file at https://angular.io/license
      */
 
-    exports.TestBed = TestBed;
-    exports.getTestBed = getTestBed;
-    exports.inject = inject;
-    exports.InjectSetupWrapper = InjectSetupWrapper;
-    exports.withModule = withModule;
-    exports.ɵMetadataOverrider = MetadataOverrider;
-    exports.async = async;
     exports.ComponentFixture = ComponentFixture;
-    exports.resetFakeAsyncZone = resetFakeAsyncZone;
-    exports.fakeAsync = fakeAsync;
-    exports.tick = tick;
-    exports.flush = flush;
-    exports.discardPeriodicTasks = discardPeriodicTasks;
-    exports.flushMicrotasks = flushMicrotasks;
-    exports.TestComponentRenderer = TestComponentRenderer;
     exports.ComponentFixtureAutoDetect = ComponentFixtureAutoDetect;
     exports.ComponentFixtureNoNgZone = ComponentFixtureNoNgZone;
+    exports.InjectSetupWrapper = InjectSetupWrapper;
+    exports.TestBed = TestBed;
+    exports.TestComponentRenderer = TestComponentRenderer;
     exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
+    exports.async = async;
+    exports.discardPeriodicTasks = discardPeriodicTasks;
+    exports.fakeAsync = fakeAsync;
+    exports.flush = flush;
+    exports.flushMicrotasks = flushMicrotasks;
+    exports.getTestBed = getTestBed;
+    exports.inject = inject;
+    exports.resetFakeAsyncZone = resetFakeAsyncZone;
+    exports.tick = tick;
+    exports.withModule = withModule;
+    exports.ɵMetadataOverrider = MetadataOverrider;
     exports.ɵTestingCompiler = TestingCompiler;
     exports.ɵTestingCompilerFactory = TestingCompilerFactory;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=core-testing.umd.js.map
