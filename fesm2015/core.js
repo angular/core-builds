@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.0+76.sha-814ed31.with-local-changes
+ * @license Angular v9.0.0-rc.1.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27850,7 +27850,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.0+76.sha-814ed31.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -40554,6 +40554,31 @@ function scheduleMicroTask(fn) {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function getNativeRequestAnimationFrame() {
+    let nativeRequestAnimationFrame = _global['requestAnimationFrame'];
+    let nativeCancelAnimationFrame = _global['cancelAnimationFrame'];
+    if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+        // use unpatched version of requestAnimationFrame(native delegate) if possible
+        // to avoid another Change detection
+        const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedRequestAnimationFrame) {
+            nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+        }
+        const unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedCancelAnimationFrame) {
+            nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
+        }
+    }
+    return { nativeRequestAnimationFrame, nativeCancelAnimationFrame };
+}
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -40635,9 +40660,9 @@ class NgZone {
     /**
      * @param {?} __0
      */
-    constructor({ enableLongStackTrace = false }) {
-        this.hasPendingMicrotasks = false;
+    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false }) {
         this.hasPendingMacrotasks = false;
+        this.hasPendingMicrotasks = false;
         /**
          * Whether there are no outstanding microtasks or macrotasks.
          */
@@ -40679,6 +40704,9 @@ class NgZone {
         if (enableLongStackTrace && ((/** @type {?} */ (Zone)))['longStackTraceZoneSpec']) {
             self._inner = self._inner.fork(((/** @type {?} */ (Zone)))['longStackTraceZoneSpec']);
         }
+        self.shouldCoalesceEventChangeDetection = shouldCoalesceEventChangeDetection;
+        self.lastRequestAnimationFrameId = -1;
+        self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -40785,9 +40813,9 @@ class NgZone {
 }
 if (false) {
     /** @type {?} */
-    NgZone.prototype.hasPendingMicrotasks;
-    /** @type {?} */
     NgZone.prototype.hasPendingMacrotasks;
+    /** @type {?} */
+    NgZone.prototype.hasPendingMicrotasks;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      * @type {?}
@@ -40836,11 +40864,19 @@ if (false) {
     /** @type {?} */
     NgZonePrivate.prototype._nesting;
     /** @type {?} */
-    NgZonePrivate.prototype.hasPendingMicrotasks;
+    NgZonePrivate.prototype._hasPendingMicrotasks;
     /** @type {?} */
     NgZonePrivate.prototype.hasPendingMacrotasks;
     /** @type {?} */
+    NgZonePrivate.prototype.hasPendingMicrotasks;
+    /** @type {?} */
+    NgZonePrivate.prototype.lastRequestAnimationFrameId;
+    /** @type {?} */
     NgZonePrivate.prototype.isStable;
+    /** @type {?} */
+    NgZonePrivate.prototype.shouldCoalesceEventChangeDetection;
+    /** @type {?} */
+    NgZonePrivate.prototype.nativeRequestAnimationFrame;
 }
 /**
  * @param {?} zone
@@ -40872,10 +40908,36 @@ function checkStable(zone) {
  * @param {?} zone
  * @return {?}
  */
+function delayChangeDetectionForEvents(zone) {
+    if (zone.lastRequestAnimationFrameId !== -1) {
+        return;
+    }
+    zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, (/**
+     * @return {?}
+     */
+    () => {
+        zone.lastRequestAnimationFrameId = -1;
+        updateMicroTaskStatus(zone);
+        checkStable(zone);
+    }));
+    updateMicroTaskStatus(zone);
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
 function forkInnerZoneWithAngularBehavior(zone) {
+    /** @type {?} */
+    const delayChangeDetectionForEventsDelegate = (/**
+     * @return {?}
+     */
+    () => { delayChangeDetectionForEvents(zone); });
+    /** @type {?} */
+    const maybeDelayChangeDetection = !!zone.shouldCoalesceEventChangeDetection &&
+        zone.nativeRequestAnimationFrame && delayChangeDetectionForEventsDelegate;
     zone._inner = zone._inner.fork({
         name: 'angular',
-        properties: (/** @type {?} */ ({ 'isAngularZone': true })),
+        properties: (/** @type {?} */ ({ 'isAngularZone': true, 'maybeDelayChangeDetection': maybeDelayChangeDetection })),
         onInvokeTask: (/**
          * @param {?} delegate
          * @param {?} current
@@ -40891,6 +40953,9 @@ function forkInnerZoneWithAngularBehavior(zone) {
                 return delegate.invokeTask(target, task, applyThis, applyArgs);
             }
             finally {
+                if (maybeDelayChangeDetection && task.type === 'eventTask') {
+                    maybeDelayChangeDetection();
+                }
                 onLeave(zone);
             }
         }),
@@ -40926,7 +40991,8 @@ function forkInnerZoneWithAngularBehavior(zone) {
                 // We are only interested in hasTask events which originate from our zone
                 // (A child hasTask event is not interesting to us)
                 if (hasTaskState.change == 'microTask') {
-                    zone.hasPendingMicrotasks = hasTaskState.microTask;
+                    zone._hasPendingMicrotasks = hasTaskState.microTask;
+                    updateMicroTaskStatus(zone);
                     checkStable(zone);
                 }
                 else if (hasTaskState.change == 'macroTask') {
@@ -40950,6 +41016,19 @@ function forkInnerZoneWithAngularBehavior(zone) {
             return false;
         })
     });
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
+function updateMicroTaskStatus(zone) {
+    if (zone._hasPendingMicrotasks ||
+        (zone.shouldCoalesceEventChangeDetection && zone.lastRequestAnimationFrameId !== -1)) {
+        zone.hasPendingMicrotasks = true;
+    }
+    else {
+        zone.hasPendingMicrotasks = false;
+    }
 }
 /**
  * @param {?} zone
@@ -41706,6 +41785,27 @@ if (false) {
      * @type {?|undefined}
      */
     BootstrapOptions.prototype.ngZone;
+    /**
+     * Optionally specify coalescing event change detections or not.
+     * Consider the following case.
+     *
+     * <div (click)="doSomething()">
+     *   <button (click)="doSomethingElse()"></button>
+     * </div>
+     *
+     * When button is clicked, because of the event bubbling, both
+     * event handlers will be called and 2 change detections will be
+     * triggered. We can colesce such kind of events to only trigger
+     * change detection only once.
+     *
+     * By default, this option will be false. So the events will not be
+     * coalesced and the change detection will be triggered multiple times.
+     * And if this option be set to true, the change detection will be
+     * triggered async by scheduling a animation frame. So in the case above,
+     * the change detection will only be trigged once.
+     * @type {?|undefined}
+     */
+    BootstrapOptions.prototype.ngZoneEventCoalescing;
 }
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
@@ -41762,7 +41862,9 @@ class PlatformRef {
         /** @type {?} */
         const ngZoneOption = options ? options.ngZone : undefined;
         /** @type {?} */
-        const ngZone = getNgZone(ngZoneOption);
+        const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
+        /** @type {?} */
+        const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
         /** @type {?} */
         const providers = [{ provide: NgZone, useValue: ngZone }];
         // Attention: Don't use ApplicationRef.run here,
@@ -41936,18 +42038,21 @@ if (false) {
     PlatformRef.prototype._injector;
 }
 /**
- * @param {?=} ngZoneOption
+ * @param {?} ngZoneOption
+ * @param {?} ngZoneEventCoalescing
  * @return {?}
  */
-function getNgZone(ngZoneOption) {
+function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
     /** @type {?} */
     let ngZone;
     if (ngZoneOption === 'noop') {
         ngZone = new NoopNgZone();
     }
     else {
-        ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) ||
-            new NgZone({ enableLongStackTrace: isDevMode() });
+        ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) || new NgZone({
+            enableLongStackTrace: isDevMode(),
+            shouldCoalesceEventChangeDetection: ngZoneEventCoalescing
+        });
     }
     return ngZone;
 }
