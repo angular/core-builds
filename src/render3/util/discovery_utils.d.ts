@@ -8,6 +8,7 @@
 import { Injector } from '../../di/injector';
 import { DebugNode } from '../instructions/lview_debug';
 import { LContext } from '../interfaces/context';
+import { LView } from '../interfaces/view';
 /**
  * Returns the component instance associated with a given DOM host element.
  * Elements which don't represent components return `null`.
@@ -183,3 +184,12 @@ export declare function getListeners(element: Element): Listener[];
  * @publicApi
  */
 export declare function getDebugNode(element: Node): DebugNode | null;
+/**
+ * Retrieve the component `LView` from component/element.
+ *
+ * NOTE: `LView` is a private and should not be leaked outside.
+ *       Don't export this method to `ng.*` on window.
+ *
+ * @param target Component or Element instance.
+ */
+export declare function getComponentLView(target: any): LView;

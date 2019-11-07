@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AttributeMarker, ComponentTemplate } from '..';
-import { SchemaMetadata } from '../../core';
+import { SchemaMetadata, Type } from '../../core';
 import { LContainer } from '../interfaces/container';
 import { ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
@@ -15,28 +15,29 @@ import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
 import { TStylingContext } from '../interfaces/styling';
-import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView } from '../interfaces/view';
+import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
 import { DebugNodeStyling } from '../styling/styling_debug';
-export declare const LViewArray: ArrayConstructor;
 /**
  * This function clones a blueprint and creates LView.
  *
  * Simple slice will keep the same type, and we need it to be LView
  */
-export declare function cloneToLView(list: any[]): LView;
+export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
 /**
- * This class is a debug version of Object literal so that we can have constructor name show up in
+ * This class is a debug version of Object literal so that we can have constructor name show up
+ * in
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[], bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: (string | (string | (string | SelectorFlags)[] | AttributeMarker)[])[] | null): {
+    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[], bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: (string | (string | (string | SelectorFlags)[] | AttributeMarker)[])[] | null): {
+        type: TViewType;
         id: number;
         blueprint: LView;
         template: ComponentTemplate<{}> | null;
         queries: TQueries | null;
         viewQuery: ViewQueriesFunction<{}> | null;
         node: TElementNode | TViewNode | null;
-        data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[];
+        data: (string | number | Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[];
         bindingStartIndex: number;
         expandoStartIndex: number;
         expandoInstructions: ExpandoInstructions | null;
@@ -134,7 +135,8 @@ export declare class LViewDebug {
     readonly html: string;
     readonly context: {} | null;
     /**
-     * The tree of nodes associated with the current `LView`. The nodes have been normalized into a
+     * The tree of nodes associated with the current `LView`. The nodes have been normalized into
+     * a
      * tree structure with relevant details pulled out for readability.
      */
     readonly nodes: DebugNode[] | null;
