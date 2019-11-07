@@ -31,6 +31,7 @@ export declare class R3TestBedCompiler {
     private compilerProviders;
     private providerOverrides;
     private rootProviderOverrides;
+    private providerOverridesByModule;
     private providerOverridesByToken;
     private moduleProvidersOverridden;
     private testModuleType;
