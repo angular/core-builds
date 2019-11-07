@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+6.sha-1ebe172.with-local-changes
+ * @license Angular v9.0.0-rc.1+5.sha-c25503b.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1138,9 +1138,6 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.compilerProviders = null;
         this.providerOverrides = [];
         this.rootProviderOverrides = [];
-        // Overrides for injectables with `{providedIn: SomeModule}` need to be tracked and added to that
-        // module's provider list.
-        this.providerOverridesByModule = new Map();
         this.providerOverridesByToken = new Map();
         this.moduleProvidersOverridden = new Set();
         this.testModuleRef = null;
@@ -1208,22 +1205,13 @@ var R3TestBedCompiler = /** @class */ (function () {
                 multi: provider.multi
             } :
             { provide: token, useValue: provider.useValue, multi: provider.multi };
-        var injectableDef = typeof token !== 'string' ? ɵgetInjectableDef(token) : null;
-        var isRoot = injectableDef !== null && injectableDef.providedIn === 'root';
+        var injectableDef;
+        var isRoot = (typeof token !== 'string' && (injectableDef = ɵgetInjectableDef(token)) &&
+            injectableDef.providedIn === 'root');
         var overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
         overridesBucket.push(providerDef);
         // Keep overrides grouped by token as well for fast lookups using token
         this.providerOverridesByToken.set(token, providerDef);
-        if (injectableDef !== null && injectableDef.providedIn !== null &&
-            typeof injectableDef.providedIn !== 'string') {
-            var existingOverrides = this.providerOverridesByModule.get(injectableDef.providedIn);
-            if (existingOverrides !== undefined) {
-                existingOverrides.push(providerDef);
-            }
-            else {
-                this.providerOverridesByModule.set(injectableDef.providedIn, [providerDef]);
-            }
-        }
     };
     R3TestBedCompiler.prototype.overrideTemplateUsingTestingModule = function (type, template) {
         var _this = this;
@@ -1416,7 +1404,7 @@ var R3TestBedCompiler = /** @class */ (function () {
             var providersFromModules = flatten(flatten(injectorDef.imports, function (imported) {
                 return isModuleWithProviders(imported) ? imported.providers : [];
             }));
-            var providers = __spread(providersFromModules, injectorDef.providers, (this.providerOverridesByModule.get(moduleType) || []));
+            var providers = __spread(providersFromModules, injectorDef.providers);
             if (this.hasProviderOverrides(providers)) {
                 this.maybeStoreNgDef(ɵNG_INJ_DEF, moduleType);
                 this.storeFieldOfDefOnType(moduleType, ɵNG_INJ_DEF, 'providers');
