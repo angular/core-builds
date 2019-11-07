@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+1.sha-c0f69f3.with-local-changes
+ * @license Angular v9.0.0-rc.1+3.sha-3955074.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19287,7 +19287,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+1.sha-c0f69f3.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+3.sha-3955074.with-local-changes');
 
 /**
  * @license
@@ -23440,9 +23440,13 @@ function i18nAttributesFirstPass(lView, tView, index, values) {
                     }
                 }
                 else {
-                    elementAttributeInternal(previousElementIndex, attrName, value, lView);
-                    // Check if that attribute is a directive input
                     var tNode = getTNode(previousElementIndex, lView);
+                    // Set attributes for Elements only, for other types (like ElementContainer),
+                    // only set inputs below
+                    if (tNode.type === 3 /* Element */) {
+                        elementAttributeInternal(previousElementIndex, attrName, value, lView);
+                    }
+                    // Check if that attribute is a directive input
                     var dataValue = tNode.inputs && tNode.inputs[attrName];
                     if (dataValue) {
                         setInputsForProperty(lView, dataValue, value);
