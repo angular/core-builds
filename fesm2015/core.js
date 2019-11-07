@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+4.sha-10583f9.with-local-changes
+ * @license Angular v9.0.0-rc.1+6.sha-1ebe172.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2059,6 +2059,25 @@ const PreOrderHookFlags = {
  * @record
  */
 function ExpandoInstructions() { }
+/** @enum {number} */
+const TViewType = {
+    /**
+     * Root `TView` is the used to bootstrap components into. It is used in conjunction with
+     * `LView` which takes an existing DOM node not owned by Angular and wraps it in `TView`/`LView`
+     * so that other components can be loaded into it.
+     */
+    Root: 0,
+    /**
+     * `TView` associated with a Component. This would be the `TView` directly associated with the
+     * component view (as opposed an `Embedded` `TView` which would be a child of `Component` `TView`)
+     */
+    Component: 1,
+    /**
+     * `TView` associated with a template. Such as `*ngIf`, `<ng-template>` etc... A `Component`
+     * can have zero or more `Embedede` `TView`s.
+     */
+    Embedded: 2,
+};
 /**
  * The static data for an LView (shared between all templates of a
  * given type).
@@ -12243,30 +12262,87 @@ const NG_DEV_MODE = ((typeof ngDevMode === 'undefined' || !!ngDevMode) && initNg
  * ```
  */
 /** @type {?} */
-const LViewArray = NG_DEV_MODE && createNamedArrayType('LView') || (/** @type {?} */ ((/** @type {?} */ (null))));
+let LVIEW_COMPONENT_CACHE;
 /** @type {?} */
-let LVIEW_EMPTY;
-// can't initialize here or it will not be tree shaken, because `LView`
-// constructor could have side-effects.
+let LVIEW_EMBEDDED_CACHE;
+/** @type {?} */
+let LVIEW_ROOT;
+/**
+ * @record
+ */
+function TViewDebug() { }
+if (false) {
+    /** @type {?} */
+    TViewDebug.prototype.type;
+}
 /**
  * This function clones a blueprint and creates LView.
  *
  * Simple slice will keep the same type, and we need it to be LView
- * @param {?} list
+ * @param {?} tView
  * @return {?}
  */
-function cloneToLView(list) {
-    if (LVIEW_EMPTY === undefined)
-        LVIEW_EMPTY = new LViewArray();
-    return (/** @type {?} */ (LVIEW_EMPTY.concat(list)));
+function cloneToLViewFromTViewBlueprint(tView) {
+    /** @type {?} */
+    const debugTView = (/** @type {?} */ (tView));
+    /** @type {?} */
+    const lView = getLViewToClone(debugTView.type, tView.template && tView.template.name);
+    return (/** @type {?} */ (lView.concat(tView.blueprint)));
 }
 /**
- * This class is a debug version of Object literal so that we can have constructor name show up in
+ * @param {?} type
+ * @param {?} name
+ * @return {?}
+ */
+function getLViewToClone(type, name) {
+    switch (type) {
+        case 0 /* Root */:
+            if (LVIEW_ROOT === undefined)
+                LVIEW_ROOT = new (createNamedArrayType('LRootView'))();
+            return LVIEW_ROOT;
+        case 1 /* Component */:
+            if (LVIEW_COMPONENT_CACHE === undefined)
+                LVIEW_COMPONENT_CACHE = new Map();
+            /** @type {?} */
+            let componentArray = LVIEW_COMPONENT_CACHE.get(name);
+            if (componentArray === undefined) {
+                componentArray = new (createNamedArrayType('LComponentView' + nameSuffix(name)))();
+                LVIEW_COMPONENT_CACHE.set(name, componentArray);
+            }
+            return componentArray;
+        case 2 /* Embedded */:
+            if (LVIEW_EMBEDDED_CACHE === undefined)
+                LVIEW_EMBEDDED_CACHE = new Map();
+            /** @type {?} */
+            let embeddedArray = LVIEW_EMBEDDED_CACHE.get(name);
+            if (embeddedArray === undefined) {
+                embeddedArray = new (createNamedArrayType('LEmbeddedView' + nameSuffix(name)))();
+                LVIEW_EMBEDDED_CACHE.set(name, embeddedArray);
+            }
+            return embeddedArray;
+    }
+    throw new Error('unreachable code');
+}
+/**
+ * @param {?} text
+ * @return {?}
+ */
+function nameSuffix(text) {
+    if (text == null)
+        return '';
+    /** @type {?} */
+    const index = text.lastIndexOf('_Template');
+    return '_' + (index === -1 ? text : text.substr(0, index));
+}
+/**
+ * This class is a debug version of Object literal so that we can have constructor name show up
+ * in
  * debug tools in ngDevMode.
  * @type {?}
  */
 const TViewConstructor = class TView {
     /**
+     * @param {?} type
      * @param {?} id
      * @param {?} blueprint
      * @param {?} template
@@ -12297,7 +12373,8 @@ const TViewConstructor = class TView {
      * @param {?} schemas
      * @param {?} consts
      */
-    constructor(id, //
+    constructor(type, //
+    id, //
     blueprint, //
     template, //
     queries, //
@@ -12326,6 +12403,7 @@ const TViewConstructor = class TView {
     firstChild, //
     schemas, //
     consts) {
+        this.type = type;
         this.id = id;
         this.blueprint = blueprint;
         this.template = template;
@@ -12591,8 +12669,10 @@ function toDebug(obj) {
  * reading.
  *
  * @param {?} value possibly wrapped native DOM node.
- * @param {?=} includeChildren If `true` then the serialized HTML form will include child elements (same
- * as `outerHTML`). If `false` then the serialized HTML form will only contain the element itself
+ * @param {?=} includeChildren If `true` then the serialized HTML form will include child elements
+ * (same
+ * as `outerHTML`). If `false` then the serialized HTML form will only contain the element
+ * itself
  * (will not serialize child elements).
  * @return {?}
  */
@@ -12665,7 +12745,8 @@ class LViewDebug {
      */
     get context() { return this._raw_lView[CONTEXT]; }
     /**
-     * The tree of nodes associated with the current `LView`. The nodes have been normalized into a
+     * The tree of nodes associated with the current `LView`. The nodes have been normalized into
+     * a
      * tree structure with relevant details pulled out for readability.
      * @return {?}
      */
@@ -13323,7 +13404,7 @@ function elementCreate(name, renderer, namespace) {
  */
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector) {
     /** @type {?} */
-    const lView = ngDevMode ? cloneToLView(tView.blueprint) : (/** @type {?} */ (tView.blueprint.slice()));
+    const lView = ngDevMode ? cloneToLViewFromTViewBlueprint(tView) : (/** @type {?} */ (tView.blueprint.slice()));
     lView[HOST] = host;
     lView[FLAGS] = flags | 4 /* CreationMode */ | 128 /* Attached */ | 8 /* FirstLViewPass */;
     resetPreOrderHookFlags(lView);
@@ -13761,12 +13842,14 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor = getNative
  * @param {?} def ComponentDef
  * @return {?} TView
  */
-function getOrCreateTView(def) {
-    return def.tView || (def.tView = createTView(-1, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts));
+function getOrCreateTComponentView(def) {
+    return def.tView ||
+        (def.tView = createTView(1 /* Component */, -1, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts));
 }
 /**
  * Creates a TView instance
  *
+ * @param {?} type
  * @param {?} viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
  * @param {?} templateFn Template function
  * @param {?} decls The number of nodes, local refs, and pipes in this template
@@ -13778,7 +13861,7 @@ function getOrCreateTView(def) {
  * @param {?} consts Constants for this view
  * @return {?}
  */
-function createTView(viewIndex, templateFn, decls, vars, directives, pipes, viewQuery, schemas, consts) {
+function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes, viewQuery, schemas, consts) {
     ngDevMode && ngDevMode.tView++;
     /** @type {?} */
     const bindingStartIndex = HEADER_OFFSET + decls;
@@ -13790,7 +13873,7 @@ function createTView(viewIndex, templateFn, decls, vars, directives, pipes, view
     /** @type {?} */
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
     return blueprint[(/** @type {?} */ (TVIEW))] = ngDevMode ?
-        new TViewConstructor(viewIndex, // id: number,
+        new TViewConstructor(type, viewIndex, // id: number,
         blueprint, // blueprint: LView,
         templateFn, // template: ComponentTemplate<{}>|null,
         null, // queries: TQueries|null
@@ -14618,7 +14701,7 @@ function addComponentLogic(lView, hostTNode, def) {
     /** @type {?} */
     const native = (/** @type {?} */ (getNativeByTNode(hostTNode, lView)));
     /** @type {?} */
-    const tView = getOrCreateTView(def);
+    const tView = getOrCreateTComponentView(def);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     /** @type {?} */
@@ -22021,7 +22104,7 @@ function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, local
         resolveDirectives(tView, lView, tContainerNode, localRefs);
         registerPostOrderHooks(tView, tContainerNode);
         /** @type {?} */
-        const embeddedTView = tContainerNode.tViews = createTView(-1, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
+        const embeddedTView = tContainerNode.tViews = createTView(2 /* Embedded */, -1, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
         /** @type {?} */
         const embeddedTViewNode = (/** @type {?} */ (createTNode(tView, null, 2 /* View */, -1, null, null)));
         embeddedTViewNode.injectorIndex = tContainerNode.injectorIndex;
@@ -23341,7 +23424,7 @@ function getOrCreateEmbeddedTView(viewIndex, decls, vars, parent) {
     ngDevMode && assertDefined(containerTViews, 'TView expected');
     ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
     if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-        containerTViews[viewIndex] = createTView(viewIndex, null, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, null, tView.consts);
+        containerTViews[viewIndex] = createTView(2 /* Embedded */, viewIndex, null, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, null, tView.consts);
     }
     return containerTViews[viewIndex];
 }
@@ -25984,6 +26067,27 @@ function getDebugNode(element) {
     }
     return debugNode;
 }
+/**
+ * Retrieve the component `LView` from component/element.
+ *
+ * NOTE: `LView` is a private and should not be leaked outside.
+ *       Don't export this method to `ng.*` on window.
+ *
+ * @param {?} target Component or Element instance.
+ * @return {?}
+ */
+function getComponentLView(target) {
+    /** @type {?} */
+    const lContext = loadLContext(target);
+    /** @type {?} */
+    const nodeIndx = lContext.nodeIndex;
+    /** @type {?} */
+    const lView = lContext.lView;
+    /** @type {?} */
+    const componentLView = lView[nodeIndx];
+    ngDevMode && assertLView(componentLView);
+    return componentLView;
+}
 
 /**
  * @license
@@ -26172,7 +26276,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
     /** @type {?} */
     const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     /** @type {?} */
-    const rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
+    const rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
     /** @type {?} */
     const rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
     enterView(rootView, null);
@@ -26216,7 +26320,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, renderer
     /** @type {?} */
     const tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
     /** @type {?} */
-    const componentView = createLView(rootView, getOrCreateTView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
+    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, renderer, sanitizer);
     if (tView.firstCreatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
         markAsComponentHost(tView, tNode);
@@ -27850,7 +27954,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+4.sha-10583f9.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+6.sha-1ebe172.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -33642,7 +33746,7 @@ class ComponentFactory$1 extends ComponentFactory {
         }
         // Create the root view. Uses empty TView and ContentTemplate.
         /** @type {?} */
-        const rootTView = createTView(-1, null, 1, 0, null, null, null, null, null);
+        const rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
         /** @type {?} */
         const rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, sanitizer, rootViewInjector);
         // rootView is the parent when bootstrapping
