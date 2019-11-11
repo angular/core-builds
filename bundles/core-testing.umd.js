@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+47.sha-9396b19.with-local-changes
+ * @license Angular v9.0.0-rc.1+51.sha-c540061.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1910,17 +1910,19 @@
             var overrides = this.getProviderOverrides(flattenedProviders);
             var overriddenProviders = __spread(flattenedProviders, overrides);
             var final = [];
-            var seenMultiProviders = new Set();
-            // We iterate through the list of providers in reverse order to make sure multi provider
-            // overrides take precedence over the values defined in provider list. We also filter out all
-            // multi providers that have overrides, keeping overridden values only.
+            var seenOverriddenProviders = new Set();
+            // We iterate through the list of providers in reverse order to make sure provider overrides
+            // take precedence over the values defined in provider list. We also filter out all providers
+            // that have overrides, keeping overridden values only. This is needed, since presence of a
+            // provider with `ngOnDestroy` hook will cause this hook to be registered and invoked later.
             forEachRight(overriddenProviders, function (provider) {
                 var token = getProviderToken(provider);
-                if (isMultiProvider(provider) && _this.providerOverridesByToken.has(token)) {
-                    // Don't add overridden multi-providers twice because when you override a multi-provider, we
-                    // treat it as `{multi: false}` to avoid providing the same value multiple times.
-                    if (!seenMultiProviders.has(token)) {
-                        seenMultiProviders.add(token);
+                if (_this.providerOverridesByToken.has(token)) {
+                    if (!seenOverriddenProviders.has(token)) {
+                        seenOverriddenProviders.add(token);
+                        // Treat all overridden providers as `{multi: false}` (even if it's a multi-provider) to
+                        // make sure that provided override takes highest precedence and is not combined with
+                        // other instances of the same multi provider.
                         final.unshift(__assign(__assign({}, provider), { multi: false }));
                     }
                 }
@@ -1977,9 +1979,6 @@
     }
     function getProviderToken(provider) {
         return getProviderField(provider, 'provide') || provider;
-    }
-    function isMultiProvider(provider) {
-        return !!getProviderField(provider, 'multi');
     }
     function isModuleWithProviders(value) {
         return value.hasOwnProperty('ngModule');
