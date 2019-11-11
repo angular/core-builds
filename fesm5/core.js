@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+33.sha-1d429b2.with-local-changes
+ * @license Angular v9.0.0-rc.1+41.sha-b197e90.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10523,17 +10523,16 @@ function getFirstNativeNode(lView, tNode) {
             return getNativeByTNode(tNode, lView);
         }
         else if (tNodeType === 0 /* Container */) {
-            var lContainer = lView[tNode.index];
-            if (lContainer.length > CONTAINER_HEADER_OFFSET) {
-                var firstView = lContainer[CONTAINER_HEADER_OFFSET];
-                return getFirstNativeNode(firstView, firstView[TVIEW].firstChild);
-            }
-            else {
-                return lContainer[NATIVE];
-            }
+            return getBeforeNodeForView(-1, lView[tNode.index]);
         }
         else if (tNodeType === 4 /* ElementContainer */ || tNodeType === 5 /* IcuContainer */) {
-            return getFirstNativeNode(lView, tNode.child);
+            var elIcuContainerChild = tNode.child;
+            if (elIcuContainerChild !== null) {
+                return getFirstNativeNode(lView, elIcuContainerChild);
+            }
+            else {
+                return getNativeByTNode(tNode, lView);
+            }
         }
         else {
             var componentView = findComponentView(lView);
@@ -10554,7 +10553,10 @@ function getBeforeNodeForView(viewIndexInContainer, lContainer) {
     var nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
     if (nextViewIndex < lContainer.length) {
         var lView = lContainer[nextViewIndex];
-        return getFirstNativeNode(lView, lView[TVIEW].firstChild);
+        var firstTNodeOfView = lView[TVIEW].firstChild;
+        if (firstTNodeOfView !== null) {
+            return getFirstNativeNode(lView, firstTNodeOfView);
+        }
     }
     return lContainer[NATIVE];
 }
@@ -11045,7 +11047,8 @@ var RootViewRef = /** @class */ (function (_super) {
     });
     return RootViewRef;
 }(ViewRef));
-function collectNativeNodes(lView, tNode, result) {
+function collectNativeNodes(lView, tNode, result, isProjection) {
+    if (isProjection === void 0) { isProjection = false; }
     while (tNode !== null) {
         ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 1 /* Projection */, 4 /* ElementContainer */, 5 /* IcuContainer */);
         var lNode = lView[tNode.index];
@@ -11072,13 +11075,12 @@ function collectNativeNodes(lView, tNode, result) {
             var componentView = findComponentView(lView);
             var componentHost = componentView[T_HOST];
             var parentView = getLViewParent(componentView);
-            var currentProjectedNode = componentHost.projection[tNode.projection];
-            while (currentProjectedNode !== null && parentView !== null) {
-                result.push(getNativeByTNode(currentProjectedNode, parentView));
-                currentProjectedNode = currentProjectedNode.next;
+            var firstProjectedNode = componentHost.projection[tNode.projection];
+            if (firstProjectedNode !== null && parentView !== null) {
+                collectNativeNodes(parentView, firstProjectedNode, result, true);
             }
         }
-        tNode = tNode.next;
+        tNode = isProjection ? tNode.projectionNext : tNode.next;
     }
     return result;
 }
@@ -19370,7 +19372,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+33.sha-1d429b2.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+41.sha-b197e90.with-local-changes');
 
 /**
  * @license
