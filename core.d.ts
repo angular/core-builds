@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+25.sha-083d4b8.with-local-changes
+ * @license Angular v9.0.0-rc.1+58.sha-dbd55fc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -459,8 +459,6 @@ export declare interface AttributeDecorator {
     new (name: string): Attribute;
 }
 
-declare const BINDING_INDEX = 7;
-
 declare interface BindingDef {
     flags: ɵBindingFlags;
     ns: string | null;
@@ -484,6 +482,26 @@ declare interface BootstrapOptions {
      * - `noop` - Use `NoopNgZone` which does nothing.
      */
     ngZone?: NgZone | 'zone.js' | 'noop';
+    /**
+     * Optionally specify coalescing event change detections or not.
+     * Consider the following case.
+     *
+     * <div (click)="doSomething()">
+     *   <button (click)="doSomethingElse()"></button>
+     * </div>
+     *
+     * When button is clicked, because of the event bubbling, both
+     * event handlers will be called and 2 change detections will be
+     * triggered. We can colesce such kind of events to only trigger
+     * change detection only once.
+     *
+     * By default, this option will be false. So the events will not be
+     * coalesced and the change detection will be triggered multiple times.
+     * And if this option be set to true, the change detection will be
+     * triggered async by scheduling a animation frame. So in the case above,
+     * the change detection will only be trigged once.
+     */
+    ngZoneEventCoalescing?: boolean;
 }
 
 
@@ -604,9 +622,9 @@ export declare abstract class ChangeDetectorRef {
     abstract reattach(): void;
 }
 
-declare const CHILD_HEAD = 14;
+declare const CHILD_HEAD = 13;
 
-declare const CHILD_TAIL = 15;
+declare const CHILD_TAIL = 14;
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
@@ -653,7 +671,7 @@ export declare interface ClassSansProvider {
     useClass: Type<any>;
 }
 
-declare const CLEANUP = 8;
+declare const CLEANUP = 7;
 
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
@@ -1317,7 +1335,7 @@ export declare interface ContentChildrenDecorator {
  */
 declare type ContentQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U, directiveIndex: number) => void;
 
-declare const CONTEXT = 9;
+declare const CONTEXT = 8;
 
 /** Options that control how the component should be bootstrapped. */
 declare interface CreateComponentOptions {
@@ -1535,9 +1553,9 @@ declare class DebugNode__POST_R3__ implements DebugNode {
     readonly providerTokens: any[];
 }
 
-declare const DECLARATION_LCONTAINER = 17;
+declare const DECLARATION_LCONTAINER = 16;
 
-declare const DECLARATION_VIEW = 16;
+declare const DECLARATION_VIEW = 15;
 
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
@@ -3083,7 +3101,7 @@ export declare abstract class Injector {
     static ɵprov: never;
 }
 
-declare const INJECTOR_2 = 10;
+declare const INJECTOR_2 = 9;
 
 /**
  * A type which has an `InjectorDef` static field.
@@ -3212,52 +3230,15 @@ export declare interface InputDecorator {
  */
 declare interface InstructionState {
     /**
-     * State of the current view being processed.
+     * Current `LFrame`
      *
-     * An array of nodes (text, element, container, etc), pipes, their bindings, and
-     * any local variables that need to be stored between invocations.
+     * `null` if we have not called `enterView`
      */
-    lView: ɵangular_packages_core_core_bm;
-    /**
-     * Used to set the parent property when nodes are created and track query results.
-     *
-     * This is used in conjection with `isParent`.
-     */
-    previousOrParentTNode: TNode;
-    /**
-     * If `isParent` is:
-     *  - `true`: then `previousOrParentTNode` points to a parent node.
-     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
-     */
-    isParent: boolean;
-    /**
-     * Index of currently selected element in LView.
-     *
-     * Used by binding instructions. Updated as part of advance instruction.
-     */
-    selectedIndex: number;
-    /**
-     * The last viewData retrieved by nextContext().
-     * Allows building nextContext() and reference() calls.
-     *
-     * e.g. const inner = x().$implicit; const outer = x().$implicit;
-     */
-    contextLView: ɵangular_packages_core_core_bm;
-    /**
-     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
-     *
-     * Necessary to support ChangeDetectorRef.checkNoChanges().
-     */
-    checkNoChangesMode: boolean;
-    /**
-     * Store the element depth count. This is used to identify the root elements of the template
-     * so that we can then attach `LView` to only those elements.
-     */
-    elementDepthCount: number;
+    lFrame: LFrame;
     /**
      * Stores whether directives should be matched to elements.
      *
-     * When template contains `ngNonBindable` then we need to prevent the runtime form matching
+     * When template contains `ngNonBindable` then we need to prevent the runtime from matching
      * directives on children of that element.
      *
      * Example:
@@ -3274,36 +3255,11 @@ declare interface InstructionState {
      */
     bindingsEnabled: boolean;
     /**
-     * Current namespace to be used when creating elements
-     */
-    currentNamespace: string | null;
-    /**
-     * Current sanitizer
-     */
-    currentSanitizer: StyleSanitizeFn | null;
-    /**
-     * Used when processing host bindings.
-     */
-    currentDirectiveDef: ɵDirectiveDef<any> | ɵComponentDef<any> | null;
-    /**
-     * Used as the starting directive id value.
+     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
      *
-     * All subsequent directives are incremented from this value onwards.
-     * The reason why this value is `1` instead of `0` is because the `0`
-     * value is reserved for the template.
+     * Necessary to support ChangeDetectorRef.checkNoChanges().
      */
-    activeDirectiveId: number;
-    /**
-     * The root index from which pure function instructions should calculate their binding
-     * indices. In component views, this is TView.bindingStartIndex. In a host binding
-     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
-     */
-    bindingRootIndex: number;
-    /**
-     * Current index of a View or Content Query which needs to be processed next.
-     * We iterate over the list of Queries and increment current query index at every step.
-     */
-    currentQueryIndex: number;
+    checkNoChangesMode: boolean;
     /**
      * Function to be called when the element is exited.
      *
@@ -3657,6 +3613,98 @@ declare interface LContainer extends Array<any> {
 }
 
 /**
+ *
+ */
+declare interface LFrame {
+    /**
+     * Parent LFrame.
+     *
+     * This is needed when `leaveView` is called to restore the previous state.
+     */
+    parent: LFrame;
+    /**
+     * Child LFrame.
+     *
+     * This is used to cache existing LFrames to relieve the memory pressure.
+     */
+    child: LFrame | null;
+    /**
+     * State of the current view being processed.
+     *
+     * An array of nodes (text, element, container, etc), pipes, their bindings, and
+     * any local variables that need to be stored between invocations.
+     */
+    lView: ɵangular_packages_core_core_bm;
+    /**
+     * Used to set the parent property when nodes are created and track query results.
+     *
+     * This is used in conjection with `isParent`.
+     */
+    previousOrParentTNode: TNode;
+    /**
+     * If `isParent` is:
+     *  - `true`: then `previousOrParentTNode` points to a parent node.
+     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
+     */
+    isParent: boolean;
+    /**
+     * Index of currently selected element in LView.
+     *
+     * Used by binding instructions. Updated as part of advance instruction.
+     */
+    selectedIndex: number;
+    /**
+     * Current pointer to the binding index.
+     */
+    bindingIndex: number;
+    /**
+     * The last viewData retrieved by nextContext().
+     * Allows building nextContext() and reference() calls.
+     *
+     * e.g. const inner = x().$implicit; const outer = x().$implicit;
+     */
+    contextLView: ɵangular_packages_core_core_bm;
+    /**
+     * Store the element depth count. This is used to identify the root elements of the template
+     * so that we can then attach patch data `LView` to only those elements. We know that those
+     * are the only places where the patch data could change, this way we will save on number
+     * of places where tha patching occurs.
+     */
+    elementDepthCount: number;
+    /**
+     * Current namespace to be used when creating elements
+     */
+    currentNamespace: string | null;
+    /**
+     * Current sanitizer
+     */
+    currentSanitizer: StyleSanitizeFn | null;
+    /**
+     * Used when processing host bindings.
+     */
+    currentDirectiveDef: ɵDirectiveDef<any> | ɵComponentDef<any> | null;
+    /**
+     * Used as the starting directive id value.
+     *
+     * All subsequent directives are incremented from this value onwards.
+     * The reason why this value is `1` instead of `0` is because the `0`
+     * value is reserved for the template.
+     */
+    activeDirectiveId: number;
+    /**
+     * The root index from which pure function instructions should calculate their binding
+     * indices. In component views, this is TView.bindingStartIndex. In a host binding
+     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
+     */
+    bindingRootIndex: number;
+    /**
+     * Current index of a View or Content Query which needs to be processed next.
+     * We iterate over the list of Queries and increment current query index at every step.
+     */
+    currentQueryIndex: number;
+}
+
+/**
  * Provide this token to set the locale of your application.
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
@@ -3844,6 +3892,9 @@ export declare class ModuleWithComponentFactories<T> {
  *
  * @param T the module type. In Ivy applications, this must be explicitly
  * provided.
+ *
+ * Note that using ModuleWithProviders without a generic type is deprecated.
+ * The generic will become required in a future version of Angular.
  *
  * @publicApi
  */
@@ -4239,8 +4290,8 @@ export declare class NgProbeToken {
  * @publicApi
  */
 export declare class NgZone {
-    readonly hasPendingMicrotasks: boolean;
     readonly hasPendingMacrotasks: boolean;
+    readonly hasPendingMicrotasks: boolean;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      */
@@ -4265,8 +4316,9 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace }: {
+    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
         enableLongStackTrace?: boolean | undefined;
+        shouldCoalesceEventChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;
@@ -4857,9 +4909,9 @@ export declare interface Predicate<T> {
     (value: T): boolean;
 }
 
-declare const PREORDER_HOOK_FLAGS = 18;
+declare const PREORDER_HOOK_FLAGS = 17;
 
-/** More flags associated with an LView (saved in LView[FLAGS_MORE]) */
+/** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
     /** The index of the next pre-order hook to be called in the hooks array, on the first 16
        bits */
@@ -5471,7 +5523,7 @@ declare interface RElement extends RNode {
     setProperty?(name: string, value: any): void;
 }
 
-declare const RENDERER = 12;
+declare const RENDERER = 11;
 
 /**
  * Extend this base class to implement custom rendering. By default, Angular
@@ -5646,7 +5698,7 @@ export declare abstract class Renderer2 {
 
 declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
 
-declare const RENDERER_FACTORY = 11;
+declare const RENDERER_FACTORY = 10;
 
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
@@ -5895,7 +5947,7 @@ declare interface RText extends RNode {
     textContent: string | null;
 }
 
-declare const SANITIZER = 13;
+declare const SANITIZER = 12;
 
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
@@ -6265,6 +6317,13 @@ declare const T_HOST = 6;
  * - Parsed ngProjectAs selectors.
  */
 declare type TAttributes = (string | ɵAttributeMarker | CssSelector)[];
+
+/**
+ * Constants that are associated with a view. Includes:
+ * - Attribute arrays.
+ * - Local definition arrays.
+ */
+declare type TConstants = (TAttributes | string)[];
 
 /** Static data for an LContainer */
 declare interface TContainerNode extends TNode {
@@ -6821,30 +6880,123 @@ declare interface TNode {
  * Corresponds to the TNode.flags property.
  */
 declare const enum TNodeFlags {
-    /** This bit is set if the node is a host for any directive (including a component) */
+    /** Bit #1 - This bit is set if the node is a host for any directive (including a component) */
     isDirectiveHost = 1,
     /**
-     * This bit is set if the node is a host for a component. Setting this bit implies that the
-     * isDirectiveHost bit is set as well. */
+     * Bit #2 - This bit is set if the node is a host for a component.
+     *
+     * Setting this bit implies that the `isDirectiveHost` bit is set as well.
+     * */
     isComponentHost = 2,
-    /** This bit is set if the node has been projected */
+    /** Bit #3 - This bit is set if the node has been projected */
     isProjected = 4,
-    /** This bit is set if any directive on this node has content queries */
+    /** Bit #4 - This bit is set if any directive on this node has content queries */
     hasContentQuery = 8,
-    /** This bit is set if the node has any "class" inputs */
+    /** Bit #5 - This bit is set if the node has any "class" inputs */
     hasClassInput = 16,
-    /** This bit is set if the node has any "style" inputs */
+    /** Bit #6 - This bit is set if the node has any "style" inputs */
     hasStyleInput = 32,
-    /** This bit is set if the node has initial styling */
-    hasInitialStyling = 64,
-    /** This bit is set if the node has been detached by i18n */
-    isDetached = 128,
+    /** Bit #7 This bit is set if the node has been detached by i18n */
+    isDetached = 64,
     /**
-     * This bit is set if the node has directives with host bindings. This flags allows us to guard
-     * host-binding logic and invoke it only on nodes that actually have directives with host
-     * bindings.
+     * Bit #8 - This bit is set if the node has directives with host bindings.
+     *
+     * This flags allows us to guard host-binding logic and invoke it only on nodes
+     * that actually have directives with host bindings.
      */
-    hasHostBindings = 256
+    hasHostBindings = 128,
+    /** Bit #9 - This bit is set if the node has initial styling */
+    hasInitialStyling = 256,
+    /**
+     * Bit #10 - Whether or not there are class-based map bindings present.
+     *
+     * Examples include:
+     * 1. `<div [class]="x">`
+     * 2. `@HostBinding('class') x`
+     */
+    hasClassMapBindings = 512,
+    /**
+     * Bit #11 - Whether or not there are any class-based prop bindings present.
+     *
+     * Examples include:
+     * 1. `<div [class.name]="x">`
+     * 2. `@HostBinding('class.name') x`
+     */
+    hasClassPropBindings = 1024,
+    /**
+     * Bit #12 - whether or not there are any active [class] and [class.name] bindings
+     */
+    hasClassPropAndMapBindings = 1536,
+    /**
+     * Bit #13 - Whether or not the context contains one or more class-based template bindings.
+     *
+     * Examples include:
+     * 1. `<div [class]="x">`
+     * 2. `<div [class.name]="x">`
+     */
+    hasTemplateClassBindings = 2048,
+    /**
+     * Bit #14 - Whether or not the context contains one or more class-based host bindings.
+     *
+     * Examples include:
+     * 1. `@HostBinding('class') x`
+     * 2. `@HostBinding('class.name') x`
+     */
+    hasHostClassBindings = 4096,
+    /**
+     * Bit #15 - Whether or not there are two or more sources for a class property in the context.
+     *
+     * Examples include:
+     * 1. prop + prop: `<div [class.active]="x" dir-that-sets-active-class>`
+     * 2. map + prop: `<div [class]="x" [class.foo]>`
+     * 3. map + map: `<div [class]="x" dir-that-sets-class>`
+     */
+    hasDuplicateClassBindings = 8192,
+    /**
+     * Bit #16 - Whether or not there are style-based map bindings present.
+     *
+     * Examples include:
+     * 1. `<div [style]="x">`
+     * 2. `@HostBinding('style') x`
+     */
+    hasStyleMapBindings = 16384,
+    /**
+     * Bit #17 - Whether or not there are any style-based prop bindings present.
+     *
+     * Examples include:
+     * 1. `<div [style.prop]="x">`
+     * 2. `@HostBinding('style.prop') x`
+     */
+    hasStylePropBindings = 32768,
+    /**
+     * Bit #18 - whether or not there are any active [style] and [style.prop] bindings
+     */
+    hasStylePropAndMapBindings = 49152,
+    /**
+     * Bit #19 - Whether or not the context contains one or more style-based template bindings.
+     *
+     * Examples include:
+     * 1. `<div [style]="x">`
+     * 2. `<div [style.prop]="x">`
+     */
+    hasTemplateStyleBindings = 65536,
+    /**
+     * Bit #20 - Whether or not the context contains one or more style-based host bindings.
+     *
+     * Examples include:
+     * 1. `@HostBinding('style') x`
+     * 2. `@HostBinding('style.prop') x`
+     */
+    hasHostStyleBindings = 131072,
+    /**
+     * Bit #21 - Whether or not there are two or more sources for a style property in the context.
+     *
+     * Examples include:
+     * 1. prop + prop: `<div [style.width]="x" dir-that-sets-width>`
+     * 2. map + prop: `<div [style]="x" [style.prop]>`
+     * 3. map + map: `<div [style]="x" dir-that-sets-style>`
+     */
+    hasDuplicateStyleBindings = 262144
 }
 
 /**
@@ -7105,127 +7257,6 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 declare type TsickleIssue1009 = any;
 
 /**
- * A series of flags used to configure the config value present within an instance of
- * `TStylingContext`.
- */
-declare const enum TStylingConfig {
-    /**
-     * The initial state of the styling context config.
-     */
-    Initial = 0,
-    /**
-     * Whether or not there are any directives on this element.
-     *
-     * This is used so that certain performance optimizations can
-     * take place (e.g. direct style/class binding application).
-     *
-     * Note that the presence of this flag doesn't guarantee the
-     * presence of host-level style or class bindings within any
-     * of the active directives on the element.
-     *
-     * Examples include:
-     * 1. `<div dir-one>`
-     * 2. `<div dir-one [dir-two]="x">`
-     * 3. `<comp>`
-     * 4. `<comp dir-one>`
-     */
-    HasDirectives = 1,
-    /**
-     * Whether or not there are prop-based bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style.prop]="x">`
-     * 2. `<div [class.prop]="x">`
-     * 3. `@HostBinding('style.prop') x`
-     * 4. `@HostBinding('class.prop') x`
-     */
-    HasPropBindings = 2,
-    /**
-     * Whether or not there are map-based bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style]="x">`
-     * 2. `<div [class]="x">`
-     * 3. `@HostBinding('style') x`
-     * 4. `@HostBinding('class') x`
-     */
-    HasMapBindings = 4,
-    /**
-     * Whether or not there are map-based and prop-based bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style]="x" [style.prop]="y">`
-     * 2. `<div [class]="x" [style.prop]="y">`
-     * 3. `<div [style]="x" dir-that-sets-some-prop>`
-     * 4. `<div [class]="x" dir-that-sets-some-class>`
-     */
-    HasPropAndMapBindings = 6,
-    /**
-     * Whether or not there are two or more sources for a single property in the context.
-     *
-     * Examples include:
-     * 1. prop + prop: `<div [style.width]="x" dir-that-sets-width>`
-     * 2. map + prop: `<div [style]="x" [style.prop]>`
-     * 3. map + map: `<div [style]="x" dir-that-sets-style>`
-     */
-    HasCollisions = 8,
-    /**
-     * Whether or not the context contains initial styling values.
-     *
-     * Examples include:
-     * 1. `<div style="width:200px">`
-     * 2. `<div class="one two three">`
-     * 3. `@Directive({ host: { 'style': 'width:200px' } })`
-     * 4. `@Directive({ host: { 'class': 'one two three' } })`
-     */
-    HasInitialStyling = 16,
-    /**
-     * Whether or not the context contains one or more template bindings.
-     *
-     * Examples include:
-     * 1. `<div [style]="x">`
-     * 2. `<div [style.width]="x">`
-     * 3. `<div [class]="x">`
-     * 4. `<div [class.name]="x">`
-     */
-    HasTemplateBindings = 32,
-    /**
-     * Whether or not the context contains one or more host bindings.
-     *
-     * Examples include:
-     * 1. `@HostBinding('style') x`
-     * 2. `@HostBinding('style.width') x`
-     * 3. `@HostBinding('class') x`
-     * 4. `@HostBinding('class.name') x`
-     */
-    HasHostBindings = 64,
-    /**
-     * Whether or not the template bindings are allowed to be registered in the context.
-     *
-     * This flag is after one or more template-based style/class bindings were
-     * set and processed for an element. Once the bindings are processed then a call
-     * to stylingApply is issued and the lock will be put into place.
-     *
-     * Note that this is only set once.
-     */
-    TemplateBindingsLocked = 128,
-    /**
-     * Whether or not the host bindings are allowed to be registered in the context.
-     *
-     * This flag is after one or more host-based style/class bindings were
-     * set and processed for an element. Once the bindings are processed then a call
-     * to stylingApply is issued and the lock will be put into place.
-     *
-     * Note that this is only set once.
-     */
-    HostBindingsLocked = 256,
-    /** A Mask of all the configurations */
-    Mask = 511,
-    /** Total amount of configuration bits used */
-    TotalBits = 9
-}
-
-/**
  * --------
  *
  * This file contains the core interfaces for styling in Angular.
@@ -7290,7 +7321,6 @@ declare const enum TStylingConfig {
  * //  ...
  * // </div>
  * tNode.styles = [
- *   0,         // the context config value (see `TStylingContextConfig`)
  *   1,         // the total amount of sources present (only `1` b/c there are only template
  * bindings)
  *   [null],    // initial values array (an instance of `StylingMapArray`)
@@ -7537,8 +7567,6 @@ declare const enum TStylingConfig {
  * to the element.
  */
 declare interface TStylingContext extends Array<number | string | number | boolean | null | StylingMapArray | {}> {
-    /** Configuration data for the context */
-    [TStylingContextIndex.ConfigPosition]: TStylingConfig;
     /** The total amount of sources present in the context */
     [TStylingContextIndex.TotalSourcesPosition]: number;
     /** Initial value position for static styles */
@@ -7549,10 +7577,9 @@ declare interface TStylingContext extends Array<number | string | number | boole
  * An index of position and offset values used to navigate the `TStylingContext`.
  */
 declare const enum TStylingContextIndex {
-    ConfigPosition = 0,
-    TotalSourcesPosition = 1,
-    InitialStylingValuePosition = 2,
-    ValuesStartPosition = 3,
+    TotalSourcesPosition = 0,
+    InitialStylingValuePosition = 1,
+    ValuesStartPosition = 2,
     ConfigOffset = 0,
     TemplateBitGuardOffset = 1,
     HostBindingsBitGuardOffset = 2,
@@ -7622,8 +7649,10 @@ declare interface TView {
      * TNodes cannot be shared (due to different indices, etc).
      */
     node: TViewNode | ɵangular_packages_core_core_bh | null;
-    /** Whether or not this template has been processed. */
-    firstTemplatePass: boolean;
+    /** Whether or not this template has been processed in creation mode. */
+    firstCreatePass: boolean;
+    /** Whether or not the first update for this template has been processed. */
+    firstUpdatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes, PipeDefInternal or TI18n. */
     data: TData;
     /**
@@ -7631,6 +7660,8 @@ declare interface TView {
      * starts to store bindings only. Saving this value ensures that we
      * will begin reading bindings at the correct point in the array when
      * we are in update mode.
+     *
+     * -1 means that it has not been initialized.
      */
     bindingStartIndex: number;
     /**
@@ -7793,10 +7824,10 @@ declare interface TView {
      */
     schemas: SchemaMetadata[] | null;
     /**
-     * Array of attributes for all of the elements in the view. Used
-     * for directive matching and attribute bindings.
+     * Array of constants for the view. Includes attribute arrays, local definition arrays etc.
+     * Used for directive matching, attribute bindings, local definitions and more.
      */
-    consts: TAttributes[] | null;
+    consts: TConstants | null;
 }
 
 /** Static data for a view  */
@@ -8281,12 +8312,36 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
 }
 
 declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewEngine_ChangeDetectorRef_interface {
-    private _context;
-    private _componentIndex;
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    private _cdRefInjectingView?;
     private _appRef;
     private _viewContainerRef;
     readonly rootNodes: any[];
-    constructor(_lView: ɵangular_packages_core_core_bm, _context: T | null, _componentIndex: number);
+    constructor(
+    /**
+     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
+     *
+     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
+     * component.
+     *
+     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
+     * view.
+     *
+     * @internal
+     */
+    _lView: ɵangular_packages_core_core_bm, 
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    _cdRefInjectingView?: ɵangular_packages_core_core_bm | undefined);
     readonly context: T;
     readonly destroyed: boolean;
     destroy(): void;
@@ -8469,7 +8524,6 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
     attachToViewContainerRef(vcRef: ViewContainerRef): void;
     detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
-    private _lookUpContext;
 }
 
 /**
@@ -8708,6 +8762,12 @@ export declare function ɵangular_packages_core_core_bc(tNode: TNode, attrNameTo
 
 export declare const ɵangular_packages_core_core_bd: InstructionState;
 
+/**
+ * Return the current LView.
+ *
+ * The return value can be `null` if the method is called outside of template. This can happen if
+ * directive is instantiated by module injector (rather than by node injector.)
+ */
 export declare function ɵangular_packages_core_core_be(): ɵangular_packages_core_core_bm;
 
 export declare function ɵangular_packages_core_core_bf(): TNode;
@@ -8807,14 +8867,6 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * If null, this is the root view of an application (root component is in this view).
      */
     [T_HOST]: TViewNode | ɵangular_packages_core_core_bh | null;
-    /**
-     * The binding index we should access next.
-     *
-     * This is stored so that bindings can continue where they left off
-     * if a view is left midway through processing bindings (e.g. if there is
-     * a setter that creates an embedded view, like in ngIf).
-     */
-    [BINDING_INDEX]: number;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with
@@ -9402,7 +9454,7 @@ export declare const ɵCompiler_compileModuleSync__POST_R3__: <T>(moduleType: Ty
 /**
  * Runtime link information for Components.
  *
- * This is internal data structure used by the render to link
+ * This is an internal data structure used by the render to link
  * components into templates.
  *
  * NOTE: Always use `defineComponent` function to create this object,
@@ -9421,7 +9473,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     readonly template: ComponentTemplate<T>;
     /** Constants associated with the component's view. */
-    readonly consts: TAttributes[] | null;
+    readonly consts: TConstants | null;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -9538,6 +9590,15 @@ export declare function ɵcrt(values: {
 export declare type ɵCssSelectorList = CssSelector[];
 
 /**
+ * Index of each value in currency data (used to describe CURRENCIES_EN in currencies.ts)
+ */
+export declare const enum ɵCurrencyIndex {
+    Symbol = 0,
+    SymbolNarrow = 1,
+    NbOfDigits = 2
+}
+
+/**
  * The locale id that the application is using by default (for translations and ICU expressions).
  */
 export declare const ɵDEFAULT_LOCALE_ID = "en-US";
@@ -9585,7 +9646,7 @@ export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQue
 /**
  * Runtime link information for Directives.
  *
- * This is internal data structure used by the render to link
+ * This is an internal data structure used by the render to link
  * directives into templates.
  *
  * NOTE: Always use `defineDirective` function to create this object,
@@ -9596,7 +9657,44 @@ export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQue
  *
  * See: {@link defineDirective}
  */
-export declare interface ɵDirectiveDef<T> extends ɵɵBaseDef<T> {
+export declare interface ɵDirectiveDef<T> {
+    /**
+     * A dictionary mapping the inputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Input('alias') propertyName: any;`).
+     */
+    readonly inputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
+     * public or minified name.
+     */
+    readonly declaredInputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * A dictionary mapping the outputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Output('alias') propertyName: any;`).
+     */
+    readonly outputs: {
+        [P in keyof T]: string;
+    };
+    /**
+     * Function to create and refresh content queries associated with a given directive.
+     */
+    contentQueries: ContentQueriesFunction<T> | null;
+    /**
+     * Query-related instructions for a directive. Note that while directives don't have a
+     * view and as such view queries won't necessarily do anything, there might be
+     * components that extend the directive.
+     */
+    viewQuery: ViewQueriesFunction<T> | null;
+    /**
+     * Refreshes host bindings on the associated directive.
+     */
+    hostBindings: HostBindingsFunction<T> | null;
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
@@ -9643,6 +9741,15 @@ export declare const ɵEMPTY_ARRAY: any[];
 export declare const ɵEMPTY_MAP: {
     [key: string]: any;
 };
+
+/**
+ * Index of each type of locale data from the extra locale data array
+ */
+export declare const enum ɵExtraLocaleDataIndex {
+    ExtraDayPeriodFormats = 0,
+    ExtraDayPeriodStandalone = 1,
+    ExtraDayPeriodsRules = 2
+}
 
 /**
  * Finds the locale data for a given locale.
@@ -9717,7 +9824,6 @@ export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> |
  * @param target Component, Directive or DOM Node.
  */
 export declare function ɵgetLContext(target: any): ɵLContext | null;
-
 
 /**
  * Retrieves the plural function used by ICU expressions to determine the plural case to use
@@ -9834,13 +9940,6 @@ export declare interface ɵLContext {
 export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
 
 /**
- * This const is used to store the locale data registered with `registerLocaleData`
- */
-export declare const ɵLOCALE_DATA: {
-    [localeId: string]: any;
-};
-
-/**
  * Index of each type of locale data from the locale data array
  */
 export declare enum ɵLocaleDataIndex {
@@ -9903,8 +10002,6 @@ export declare function ɵmod(providers: NgModuleProviderDef[]): NgModuleDefinit
 export declare function ɵmpd(flags: ɵNodeFlags, token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NgModuleProviderDef;
 
 export declare function ɵncd(ngContentIndex: null | number, index: number): NodeDef;
-
-export declare const ɵNG_BASE_DEF: string;
 
 
 export declare const ɵNG_COMP_DEF: string;
@@ -10087,7 +10184,7 @@ export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags,
 /**
  * Runtime link information for Pipes.
  *
- * This is internal data structure used by the renderer to link
+ * This is an internal data structure used by the renderer to link
  * pipes into templates.
  *
  * NOTE: Always use `definePipe` function to create this object,
@@ -10250,6 +10347,14 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
     resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
     resolveEnum(enumIdentifier: any, name: string): any;
 }
+
+/**
+ * Register locale data to be used internally by Angular. See the
+ * ["I18n guide"](guide/i18n#i18n-pipes) to know how to import additional locale data.
+ *
+ * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
+ */
+export declare function ɵregisterLocaleData(data: any, localeId?: string | any, extraData?: any): void;
 
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
@@ -10451,6 +10556,16 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 
+
+/**
+ * Tell ivy what the `document` is for this platform.
+ *
+ * It is only necessary to call this if the current platform is not a browser.
+ *
+ * @param document The object representing the global `document` in this environment.
+ */
+export declare function ɵsetDocument(document: Document | undefined): void;
+
 /**
  * Sets the locale id that will be used for translations and ICU expressions.
  * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
@@ -10502,6 +10617,11 @@ export declare function ɵted(checkIndex: number, ngContentIndex: number | null,
  * until they have.
  */
 export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: ɵNgModuleType) => void): ɵNgModuleTransitiveScopes;
+
+/**
+ * Helper function to remove all the locale data from `LOCALE_DATA`.
+ */
+export declare function ɵunregisterLocaleData(): void;
 
 export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
 
@@ -10908,57 +11028,6 @@ export declare function ɵɵattributeInterpolate8(attrName: string, prefix: stri
 export declare function ɵɵattributeInterpolateV(attrName: string, values: any[], sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
 
 /**
- * Runtime information for classes that are inherited by components or directives
- * that aren't defined as components or directives.
- *
- * This is an internal data structure used by the renderer to determine what inputs
- * and outputs should be inherited.
- *
- * See: {@link defineBase}
- *
- * @codeGenApi
- */
-export declare interface ɵɵBaseDef<T> {
-    /**
-     * A dictionary mapping the inputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Input('alias') propertyName: any;`).
-     */
-    readonly inputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
-     * public or minified name.
-     */
-    readonly declaredInputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * A dictionary mapping the outputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Output('alias') propertyName: any;`).
-     */
-    readonly outputs: {
-        [P in keyof T]: string;
-    };
-    /**
-     * Function to create and refresh content queries associated with a given directive.
-     */
-    contentQueries: ContentQueriesFunction<T> | null;
-    /**
-     * Query-related instructions for a directive. Note that while directives don't have a
-     * view and as such view queries won't necessarily do anything, there might be
-     * components that extend the directive.
-     */
-    viewQuery: ViewQueriesFunction<T> | null;
-    /**
-     * Refreshes host bindings on the associated directive.
-     */
-    hostBindings: HostBindingsFunction<T> | null;
-}
-
-/**
  * Update class bindings using an object literal or class-string on an element.
  *
  * This instruction is meant to apply styling via the `[class]="exp"` template bindings.
@@ -11347,103 +11416,30 @@ export declare function ɵɵcontainerRefreshStart(index: number): void;
 export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
 
 /**
+ * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
+ * definition.
+ *
+ * This exists primarily to support ngcc migration of an existing View Engine pattern, where an
+ * entire decorator is inherited from a parent to a child class. When ngcc detects this case, it
+ * generates a skeleton definition on the child class, and applies this feature.
+ *
+ * The `ɵɵCopyDefinitionFeature` then copies any needed fields from the parent class' definition,
+ * including things like the component template function.
+ *
+ * @param definition The definition of a child class which inherits from a parent class with its
+ * own definition.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
+
+/**
  * The default style sanitizer will handle sanitization for style properties by
  * sanitizing any CSS property that can include a `url` value (usually image-based properties)
  *
  * @publicApi
  */
 export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
-
-/**
- * Create a base definition
- *
- * # Example
- * ```ts
- * class ShouldBeInherited {
- *   static ngBaseDef = ɵɵdefineBase({
- *      ...
- *   })
- * }
- * ```
- *
- * @param baseDefinition The base definition parameters
- *
- * @codeGenApi
- */
-export declare function ɵɵdefineBase<T>(baseDefinition: {
-    /**
-     * A map of input names.
-     *
-     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
-     *
-     * Given:
-     * ```
-     * class MyComponent {
-     *   @Input()
-     *   publicInput1: string;
-     *
-     *   @Input('publicInput2')
-     *   declaredInput2: string;
-     * }
-     * ```
-     *
-     * is described as:
-     * ```
-     * {
-     *   publicInput1: 'publicInput1',
-     *   declaredInput2: ['declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * Which the minifier may translate to:
-     * ```
-     * {
-     *   minifiedPublicInput1: 'publicInput1',
-     *   minifiedDeclaredInput2: [ 'declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * This allows the render to re-construct the minified, public, and declared names
-     * of properties.
-     *
-     * NOTE:
-     *  - Because declared and public name are usually same we only generate the array
-     *    `['declared', 'public']` format when they differ.
-     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
-     *    inconsistent behavior in that it uses declared names rather than minified or public. For
-     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
-     *    API will be simplified to be consistent with `outputs`.
-     */
-    inputs?: {
-        [P in keyof T]?: string | [string, string];
-    };
-    /**
-     * A map of output names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
-    outputs?: {
-        [P in keyof T]?: string;
-    };
-    /**
-     * Function to create instances of content queries associated with a given directive.
-     */
-    contentQueries?: ContentQueriesFunction<T> | null;
-    /**
-     * Additional set of instructions specific to view query processing. This could be seen as a
-     * set of instructions to be inserted into the template function.
-     */
-    viewQuery?: ViewQueriesFunction<T> | null;
-    /**
-     * Function executed by the parent template to allow children to apply host bindings.
-     */
-    hostBindings?: HostBindingsFunction<T>;
-}): ɵɵBaseDef<T>;
 
 /**
  * Create a component definition object.
@@ -11467,7 +11463,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this component. */
-    selectors: ɵCssSelectorList;
+    selectors?: ɵCssSelectorList;
     /**
      * The number of nodes, local refs, and pipes in this component template.
      *
@@ -11585,8 +11581,11 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      *
      */
     template: ComponentTemplate<T>;
-    /** Constants for the nodes in the component's view. */
-    consts?: TAttributes[];
+    /**
+     * Constants for the nodes in the component's view.
+     * Includes attribute arrays, local definition arrays etc.
+     */
+    consts?: TConstants;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11670,7 +11669,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors: (string | SelectorFlags)[][];
+    selectors?: (string | SelectorFlags)[][] | undefined;
     /**
      * A map of input names.
      *
@@ -11912,24 +11911,24 @@ export declare function ɵɵdisableBindings(): void;
  *
  * @param index Index of the element in the data array
  * @param name Name of the DOM Node
- * @param constsIndex Index of the element in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Creates an empty logical container using {@link elementContainerStart}
  * and {@link elementContainerEnd}
  *
  * @param index Index of the element in the LView array
- * @param constsIndex Index of the container in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainer(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainer(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Mark the end of the <ng-container>.
@@ -11943,8 +11942,8 @@ export declare function ɵɵelementContainerEnd(): void;
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
  * @param index Index of the element in the LView array
- * @param constsIndex Index of the container in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
@@ -11952,7 +11951,7 @@ export declare function ɵɵelementContainerEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerStart(index: number, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementContainerStart(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Mark the end of the element.
@@ -12007,8 +12006,8 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @param index Index of the element in the LView array
  * @param name Name of the DOM Node
- * @param constsIndex Index of the element in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
@@ -12016,7 +12015,7 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, constsIndex?: number | null, localRefs?: string[] | null): void;
+export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
 
 /**
  * Marks the end of an embedded view.
@@ -12315,6 +12314,20 @@ export declare interface ɵɵInjectorDef<T> {
  * @codeGenApi
  */
 export declare function ɵɵinjectPipeChangeDetectorRef(flags?: InjectFlags): ChangeDetectorRef | null;
+
+/**
+ * Throws an error indicating that a factory function could not be generated by the compiler for a
+ * particular class.
+ *
+ * This instruction allows the actual error message to be optimized away when ngDevMode is turned
+ * off, saving bytes of generated code while still providing a good experience in dev mode.
+ *
+ * The name of the class is not mentioned here, but will be in the generated factory function name
+ * and thus in the stack trace.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵinvalidFactory(): never;
 
 /**
  * Adds an event listener to the current node.
@@ -13767,14 +13780,14 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  * @param decls The number of nodes, local refs, and pipes for this template
  * @param vars The number of bindings for this template
  * @param tagName The name of the container element, if applicable
- * @param constsIndex Index of template in the `consts` array.
- * @param localRefs A set of local reference bindings on the element.
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
  * @param localRefExtractor A function which extracts local-refs values from the template.
  *        Defaults to the current element associated with the local-ref.
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, constsIndex?: number | null, localRefs?: string[] | null, localRefExtractor?: LocalRefExtractor): void;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, attrsIndex?: number | null, localRefsIndex?: number | null, localRefExtractor?: LocalRefExtractor): void;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the

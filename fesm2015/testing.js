@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-next.12+25.sha-083d4b8.with-local-changes
+ * @license Angular v9.0.0-rc.1+58.sha-dbd55fc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1733,11 +1733,11 @@ function isTestingModuleOverride(value) {
 function CleanupOperation() { }
 if (false) {
     /** @type {?} */
-    CleanupOperation.prototype.field;
+    CleanupOperation.prototype.fieldName;
     /** @type {?} */
-    CleanupOperation.prototype.def;
+    CleanupOperation.prototype.object;
     /** @type {?} */
-    CleanupOperation.prototype.original;
+    CleanupOperation.prototype.originalValue;
 }
 class R3TestBedCompiler {
     /**
@@ -1778,6 +1778,9 @@ class R3TestBedCompiler {
         this.compilerProviders = null;
         this.providerOverrides = [];
         this.rootProviderOverrides = [];
+        // Overrides for injectables with `{providedIn: SomeModule}` need to be tracked and added to that
+        // module's provider list.
+        this.providerOverridesByModule = new Map();
         this.providerOverridesByToken = new Map();
         this.moduleProvidersOverridden = new Set();
         this.testModuleRef = null;
@@ -1873,19 +1876,29 @@ class R3TestBedCompiler {
                 provide: token,
                 useFactory: provider.useFactory,
                 deps: provider.deps || [],
-                multi: provider.multi,
+                multi: provider.multi
             } :
             { provide: token, useValue: provider.useValue, multi: provider.multi };
         /** @type {?} */
-        let injectableDef;
+        const injectableDef = typeof token !== 'string' ? ɵgetInjectableDef(token) : null;
         /** @type {?} */
-        const isRoot = (typeof token !== 'string' && (injectableDef = ɵgetInjectableDef(token)) &&
-            injectableDef.providedIn === 'root');
+        const isRoot = injectableDef !== null && injectableDef.providedIn === 'root';
         /** @type {?} */
         const overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
         overridesBucket.push(providerDef);
         // Keep overrides grouped by token as well for fast lookups using token
         this.providerOverridesByToken.set(token, providerDef);
+        if (injectableDef !== null && injectableDef.providedIn !== null &&
+            typeof injectableDef.providedIn !== 'string') {
+            /** @type {?} */
+            const existingOverrides = this.providerOverridesByModule.get(injectableDef.providedIn);
+            if (existingOverrides !== undefined) {
+                existingOverrides.push(providerDef);
+            }
+            else {
+                this.providerOverridesByModule.set(injectableDef.providedIn, [providerDef]);
+            }
+        }
     }
     /**
      * @param {?} type
@@ -2160,7 +2173,10 @@ class R3TestBedCompiler {
              */
             (imported) => isModuleWithProviders(imported) ? imported.providers : [])));
             /** @type {?} */
-            const providers = [...providersFromModules, ...injectorDef.providers];
+            const providers = [
+                ...providersFromModules, ...injectorDef.providers,
+                ...(this.providerOverridesByModule.get((/** @type {?} */ (moduleType))) || [])
+            ];
             if (this.hasProviderOverrides(providers)) {
                 this.maybeStoreNgDef(ɵNG_INJ_DEF, moduleType);
                 this.storeFieldOfDefOnType(moduleType, ɵNG_INJ_DEF, 'providers');
@@ -2169,8 +2185,20 @@ class R3TestBedCompiler {
             // Apply provider overrides to imported modules recursively
             /** @type {?} */
             const moduleDef = ((/** @type {?} */ (moduleType)))[ɵNG_MOD_DEF];
-            for (const importType of moduleDef.imports) {
-                this.applyProviderOverridesToModule(importType);
+            for (const importedModule of moduleDef.imports) {
+                this.applyProviderOverridesToModule(importedModule);
+            }
+            // Also override the providers on any ModuleWithProviders imports since those don't appear in
+            // the moduleDef.
+            for (const importedModule of flatten(injectorDef.imports)) {
+                if (isModuleWithProviders(importedModule)) {
+                    this.defCleanupOps.push({
+                        object: importedModule,
+                        fieldName: 'providers',
+                        originalValue: importedModule.providers
+                    });
+                    importedModule.providers = this.getOverriddenProviders(importedModule.providers);
+                }
             }
         }
     }
@@ -2310,15 +2338,15 @@ class R3TestBedCompiler {
      * @private
      * @param {?} type
      * @param {?} defField
-     * @param {?} field
+     * @param {?} fieldName
      * @return {?}
      */
-    storeFieldOfDefOnType(type, defField, field) {
+    storeFieldOfDefOnType(type, defField, fieldName) {
         /** @type {?} */
         const def = ((/** @type {?} */ (type)))[defField];
         /** @type {?} */
-        const original = def[field];
-        this.defCleanupOps.push({ field, def, original });
+        const originalValue = def[fieldName];
+        this.defCleanupOps.push({ object: def, fieldName, originalValue });
     }
     /**
      * Clears current components resolution queue, but stores the state of the queue, so we can
@@ -2363,7 +2391,9 @@ class R3TestBedCompiler {
          * @param {?} op
          * @return {?}
          */
-        (op) => { op.def[op.field] = op.original; }));
+        (op) => {
+            op.object[op.fieldName] = op.originalValue;
+        }));
         // Restore initial component/directive/pipe defs
         this.initialNgDefs.forEach((/**
          * @param {?} value
@@ -2500,22 +2530,19 @@ class R3TestBedCompiler {
         if (!providers || !providers.length || this.providerOverridesByToken.size === 0)
             return [];
         /** @type {?} */
-        const overrides = this.getProviderOverrides(providers);
+        const flattenedProviders = flatten(providers);
         /** @type {?} */
-        const hasMultiProviderOverrides = overrides.some(isMultiProvider);
+        const overrides = this.getProviderOverrides(flattenedProviders);
         /** @type {?} */
-        const overriddenProviders = [...providers, ...overrides];
-        // No additional processing is required in case we have no multi providers to override
-        if (!hasMultiProviderOverrides) {
-            return overriddenProviders;
-        }
+        const overriddenProviders = [...flattenedProviders, ...overrides];
         /** @type {?} */
         const final = [];
         /** @type {?} */
-        const seenMultiProviders = new Set();
-        // We iterate through the list of providers in reverse order to make sure multi provider
-        // overrides take precedence over the values defined in provider list. We also fiter out all
-        // multi providers that have overrides, keeping overridden values only.
+        const seenOverriddenProviders = new Set();
+        // We iterate through the list of providers in reverse order to make sure provider overrides
+        // take precedence over the values defined in provider list. We also filter out all providers
+        // that have overrides, keeping overridden values only. This is needed, since presence of a
+        // provider with `ngOnDestroy` hook will cause this hook to be registered and invoked later.
         forEachRight(overriddenProviders, (/**
          * @param {?} provider
          * @return {?}
@@ -2523,22 +2550,13 @@ class R3TestBedCompiler {
         (provider) => {
             /** @type {?} */
             const token = getProviderToken(provider);
-            if (isMultiProvider(provider) && this.providerOverridesByToken.has(token)) {
-                if (!seenMultiProviders.has(token)) {
-                    seenMultiProviders.add(token);
-                    if (provider && provider.useValue && Array.isArray(provider.useValue)) {
-                        forEachRight(provider.useValue, (/**
-                         * @param {?} value
-                         * @return {?}
-                         */
-                        (value) => {
-                            // Unwrap provider override array into individual providers in final set.
-                            final.unshift({ provide: token, useValue: value, multi: true });
-                        }));
-                    }
-                    else {
-                        final.unshift(provider);
-                    }
+            if (this.providerOverridesByToken.has(token)) {
+                if (!seenOverriddenProviders.has(token)) {
+                    seenOverriddenProviders.add(token);
+                    // Treat all overridden providers as `{multi: false}` (even if it's a multi-provider) to
+                    // make sure that provided override takes highest precedence and is not combined with
+                    // other instances of the same multi provider.
+                    final.unshift(Object.assign(Object.assign({}, provider), { multi: false }));
                 }
             }
             else {
@@ -2688,6 +2706,11 @@ if (false) {
      * @type {?}
      * @private
      */
+    R3TestBedCompiler.prototype.providerOverridesByModule;
+    /**
+     * @type {?}
+     * @private
+     */
     R3TestBedCompiler.prototype.providerOverridesByToken;
     /**
      * @type {?}
@@ -2779,13 +2802,6 @@ function getProviderField(provider, field) {
  */
 function getProviderToken(provider) {
     return getProviderField(provider, 'provide') || provider;
-}
-/**
- * @param {?} provider
- * @return {?}
- */
-function isMultiProvider(provider) {
-    return !!getProviderField(provider, 'multi');
 }
 /**
  * @param {?} value
@@ -3844,7 +3860,7 @@ class TestBedViewEngine {
             ɵoverrideComponentView(component, compFactory);
         }
         /** @type {?} */
-        const ngZone = new NgZone({ enableLongStackTrace: true });
+        const ngZone = new NgZone({ enableLongStackTrace: true, shouldCoalesceEventChangeDetection: false });
         /** @type {?} */
         const providers = [{ provide: NgZone, useValue: ngZone }];
         /** @type {?} */
@@ -4470,5 +4486,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, MetadataOverrider as ɵMetadataOverrider, async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, withModule, MetadataOverrider as ɵMetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c };
 //# sourceMappingURL=testing.js.map
