@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+63.sha-2ce9cda.with-local-changes
+ * @license Angular v9.0.0-rc.1+58.sha-fcde671.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1366,7 +1366,6 @@ function extractPipeDef(type) {
     }
     return def;
 }
-var autoRegisterModuleById = {};
 /**
  * @codeGenApi
  */
@@ -1381,9 +1380,6 @@ function ɵɵdefineNgModule(def) {
         schemas: def.schemas || null,
         id: def.id || null,
     };
-    if (def.id != null) {
-        noSideEffects(function () { autoRegisterModuleById[def.id] = def.type; });
-    }
     return res;
 }
 /**
@@ -19431,7 +19427,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+63.sha-2ce9cda.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+58.sha-fcde671.with-local-changes');
 
 /**
  * @license
@@ -23941,11 +23937,17 @@ function registerNgModuleType(ngModuleType) {
         imports.forEach(function (i) { return registerNgModuleType(i); });
     }
 }
-function clearModulesForTest() {
+function clearRegisteredModuleState() {
     modules.clear();
 }
+function getRegisteredModulesState() {
+    return new Map(modules);
+}
+function restoreRegisteredModulesState(moduleMap) {
+    modules = new Map(moduleMap);
+}
 function getRegisteredNgModuleType(id) {
-    return modules.get(id) || autoRegisterModuleById[id];
+    return modules.get(id);
 }
 
 /**
