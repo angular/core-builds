@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+64.sha-ccee818.with-local-changes
+ * @license Angular v9.0.0-rc.1+67.sha-2f0b8bc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11368,7 +11368,7 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
  *
  * @codeGenApi
 */
-export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): TsickleIssue1009;
 
 /**
  * Creates an LContainer for inline views, e.g.
@@ -12343,7 +12343,7 @@ export declare function ɵɵinvalidFactory(): never;
  *
  * @codeGenApi
  */
-export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): TsickleIssue1009;
 
 /**
  * Loads a QueryList corresponding to the current view or content query.
