@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+51.sha-c540061.with-local-changes
+ * @license Angular v9.0.0-rc.1+58.sha-6615743.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10555,6 +10555,16 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 } | null): void;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
+
+
+/**
+ * Tell ivy what the `document` is for this platform.
+ *
+ * It is only necessary to call this if the current platform is not a browser.
+ *
+ * @param document The object representing the global `document` in this environment.
+ */
+export declare function ɵsetDocument(document: Document | undefined): void;
 
 /**
  * Sets the locale id that will be used for translations and ICU expressions.
