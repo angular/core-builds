@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+58.sha-6615743.with-local-changes
+ * @license Angular v9.0.0-rc.1+65.sha-c315881.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1369,6 +1369,7 @@ function extractPipeDef(type) {
     }
     return def;
 }
+var autoRegisterModuleById = {};
 /**
  * @codeGenApi
  */
@@ -1383,6 +1384,9 @@ function ɵɵdefineNgModule(def) {
         schemas: def.schemas || null,
         id: def.id || null,
     };
+    if (def.id != null) {
+        noSideEffects(function () { autoRegisterModuleById[def.id] = def.type; });
+    }
     return res;
 }
 /**
@@ -12474,11 +12478,11 @@ function getUndecoratedInjectableFactory(token) {
     }
 }
 function providerToRecord(provider, ngModuleType, providers) {
-    var factory = providerToFactory(provider, ngModuleType, providers);
     if (isValueProvider(provider)) {
         return makeRecord(undefined, provider.useValue);
     }
     else {
+        var factory = providerToFactory(provider, ngModuleType, providers);
         return makeRecord(factory, NOT_YET);
     }
 }
@@ -19458,7 +19462,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+58.sha-6615743.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+65.sha-c315881.with-local-changes');
 
 /**
  * @license
@@ -23976,17 +23980,11 @@ function registerNgModuleType(ngModuleType) {
         imports.forEach(function (i) { return registerNgModuleType(i); });
     }
 }
-function clearRegisteredModuleState() {
+function clearModulesForTest() {
     modules.clear();
 }
-function getRegisteredModulesState() {
-    return new Map(modules);
-}
-function restoreRegisteredModulesState(moduleMap) {
-    modules = new Map(moduleMap);
-}
 function getRegisteredNgModuleType(id) {
-    return modules.get(id);
+    return modules.get(id) || autoRegisterModuleById[id];
 }
 
 /**

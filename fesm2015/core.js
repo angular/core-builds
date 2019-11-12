@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+58.sha-6615743.with-local-changes
+ * @license Angular v9.0.0-rc.1+65.sha-c315881.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1631,6 +1631,8 @@ function extractPipeDef(type) {
     }
     return (/** @type {?} */ (def));
 }
+/** @type {?} */
+const autoRegisterModuleById = {};
 /**
  * \@codeGenApi
  * @template T
@@ -1649,6 +1651,12 @@ function ɵɵdefineNgModule(def) {
         schemas: def.schemas || null,
         id: def.id || null,
     };
+    if (def.id != null) {
+        noSideEffects((/**
+         * @return {?}
+         */
+        () => { autoRegisterModuleById[(/** @type {?} */ (def.id))] = (/** @type {?} */ ((/** @type {?} */ (def.type)))); }));
+    }
     return (/** @type {?} */ (res));
 }
 /**
@@ -18570,12 +18578,12 @@ function getUndecoratedInjectableFactory(token) {
  * @return {?}
  */
 function providerToRecord(provider, ngModuleType, providers) {
-    /** @type {?} */
-    let factory = providerToFactory(provider, ngModuleType, providers);
     if (isValueProvider(provider)) {
         return makeRecord(undefined, provider.useValue);
     }
     else {
+        /** @type {?} */
+        const factory = providerToFactory(provider, ngModuleType, providers);
         return makeRecord(factory, NOT_YET);
     }
 }
@@ -28038,7 +28046,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+58.sha-6615743.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+65.sha-c315881.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -35788,7 +35796,7 @@ function getLocaleId() {
  * - In post Ivy we track the NgModuleType
  * @type {?}
  */
-let modules = new Map();
+const modules = new Map();
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
  * \@publicApi
@@ -35842,28 +35850,15 @@ function registerNgModuleType(ngModuleType) {
 /**
  * @return {?}
  */
-function clearRegisteredModuleState() {
+function clearModulesForTest() {
     modules.clear();
-}
-/**
- * @return {?}
- */
-function getRegisteredModulesState() {
-    return new Map(modules);
-}
-/**
- * @param {?} moduleMap
- * @return {?}
- */
-function restoreRegisteredModulesState(moduleMap) {
-    modules = new Map(moduleMap);
 }
 /**
  * @param {?} id
  * @return {?}
  */
 function getRegisteredNgModuleType(id) {
-    return modules.get(id);
+    return modules.get(id) || autoRegisterModuleById[id];
 }
 
 /**
