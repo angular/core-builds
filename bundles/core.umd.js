@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+65.sha-e31f620.with-local-changes
+ * @license Angular v9.0.0-rc.1+64.sha-ccee818.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16246,7 +16246,6 @@
         var lView = getLView();
         var tNode = getPreviousOrParentTNode();
         listenerInternal(lView, lView[RENDERER], tNode, eventName, listenerFn, useCapture, eventTargetResolver);
-        return ɵɵlistener;
     }
     /**
     * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
@@ -16275,7 +16274,6 @@
         var tNode = getPreviousOrParentTNode();
         var renderer = loadComponentRenderer(tNode, lView);
         listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
-        return ɵɵcomponentHostSyntheticListener;
     }
     /**
      * A utility function that checks if a given element has already an event handler registered for an
@@ -19586,7 +19584,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+65.sha-e31f620.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+64.sha-ccee818.with-local-changes');
 
     /**
      * @license
