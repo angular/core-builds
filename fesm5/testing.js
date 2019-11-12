@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+58.sha-fcde671.with-local-changes
+ * @license Angular v9.0.0-rc.1+61.sha-f1b0547.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -657,92 +657,6 @@ var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function stringify(token) {
-    if (typeof token === 'string') {
-        return token;
-    }
-    if (Array.isArray(token)) {
-        return '[' + token.map(stringify).join(', ') + ']';
-    }
-    if (token == null) {
-        return '' + token;
-    }
-    if (token.overriddenName) {
-        return "" + token.overriddenName;
-    }
-    if (token.name) {
-        return "" + token.name;
-    }
-    var res = token.toString();
-    if (res == null) {
-        return '' + res;
-    }
-    var newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Map of module-id to the corresponding NgModule.
- * - In pre Ivy we track NgModuleFactory,
- * - In post Ivy we track the NgModuleType
- */
-var modules = new Map();
-/**
- * Registers a loaded module. Should only be called from generated NgModuleFactory code.
- * @publicApi
- */
-function registerModuleFactory(id, factory) {
-    var existing = modules.get(id);
-    assertSameOrNotExisting(id, existing && existing.moduleType, factory.moduleType);
-    modules.set(id, factory);
-}
-function assertSameOrNotExisting(id, type, incoming) {
-    if (type && type !== incoming) {
-        throw new Error("Duplicate module registered for " + id + " - " + stringify(type) + " vs " + stringify(type.name));
-    }
-}
-function registerNgModuleType(ngModuleType) {
-    if (ngModuleType.ɵmod.id !== null) {
-        var id = ngModuleType.ɵmod.id;
-        var existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
-    }
-    var imports = ngModuleType.ɵmod.imports;
-    if (imports instanceof Function) {
-        imports = imports();
-    }
-    if (imports) {
-        imports.forEach(function (i) { return registerNgModuleType(i); });
-    }
-}
-function clearRegisteredModuleState() {
-    modules.clear();
-}
-function getRegisteredModulesState() {
-    return new Map(modules);
-}
-function restoreRegisteredModulesState(moduleMap) {
-    modules = new Map(moduleMap);
-}
-function getRegisteredNgModuleType(id) {
-    return modules.get(id);
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
  *
@@ -1108,7 +1022,6 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.platform = platform;
         this.additionalModuleTypes = additionalModuleTypes;
         this.originalComponentResolutionQueue = null;
-        this.originalRegisteredModules = null;
         // Testing module configuration
         this.declarations = [];
         this.imports = [];
@@ -1314,9 +1227,6 @@ var R3TestBedCompiler = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (this.originalRegisteredModules === null) {
-                            this.originalRegisteredModules = getRegisteredModulesState();
-                        }
                         this.queueTypesFromModulesArray([moduleType]);
                         return [4 /*yield*/, this.compileComponents()];
                     case 1:
@@ -1625,10 +1535,6 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.initialNgDefs.clear();
         this.moduleProvidersOverridden.clear();
         this.restoreComponentResolutionQueue();
-        if (this.originalRegisteredModules) {
-            restoreRegisteredModulesState(this.originalRegisteredModules);
-            this.originalRegisteredModules = null;
-        }
         // Restore the locale ID to the default value, this shouldn't be necessary but we never know
         ɵsetLocaleId(ɵDEFAULT_LOCALE_ID);
     };

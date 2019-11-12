@@ -13,6 +13,7 @@ import { ViewEncapsulation } from '../metadata/view';
 import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { TConstants } from './interfaces/node';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
+import { NgModuleType } from './ng_module_ref';
 /**
  * Create a component definition object.
  *
@@ -224,6 +225,9 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
 export declare function ɵɵsetComponentScope(type: ComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
 export declare function extractDirectiveDef(type: Type<any>): DirectiveDef<any> | ComponentDef<any>;
 export declare function extractPipeDef(type: Type<any>): PipeDef<any>;
+export declare const autoRegisterModuleById: {
+    [id: string]: NgModuleType;
+};
 /**
  * @codeGenApi
  */
