@@ -57,7 +57,7 @@ export declare function setDefaultValue(context: TStylingContext, index: number,
 export declare function setValue(data: LStylingData, bindingIndex: number, value: any): void;
 export declare function getValue<T = any>(data: LStylingData, bindingIndex: number): T | null;
 export declare function getPropValuesStartPosition(context: TStylingContext, tNode: TStylingNode, isClassBased: boolean): TStylingContextIndex;
-export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
+export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | string | null | boolean | undefined | {}): boolean;
 /**
  * Determines whether the provided styling value is truthy or falsy.
  */

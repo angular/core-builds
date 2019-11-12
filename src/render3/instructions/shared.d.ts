@@ -186,7 +186,7 @@ export declare function elementAttributeInternal(index: number, name: string, va
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(hostNative: RElement | RComment | LView, currentView: LView, native: RComment, tNode: TNode, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(hostNative: RElement | RComment | LView, currentView: LView, native: RComment, tNode: TNode): LContainer;
 /**
  * Adds LView or LContainer to the end of the current view tree.
  *
