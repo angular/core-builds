@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+65.sha-c315881.with-local-changes
+ * @license Angular v9.0.0-rc.1+77.sha-4e027fe.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -512,14 +512,21 @@
      * @param type A type which may have its own (non-inherited) `ɵprov`.
      */
     function getInjectableDef(type) {
-        var def = (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
-        // The definition read above may come from a base class. `hasOwnProperty` is not sufficient to
-        // distinguish this case, as in older browsers (e.g. IE10) static property inheritance is
-        // implemented by copying the properties.
-        //
-        // Instead, the ɵprov's token is compared to the type, and if they don't match then the
-        // property was not defined directly on the type itself, and was likely inherited. The definition
-        // is only returned if the type matches the def.token.
+        return getOwnDefinition(type, type[NG_PROV_DEF]) ||
+            getOwnDefinition(type, type[NG_INJECTABLE_DEF]);
+    }
+    /**
+     * Return `def` only if it is defined directly on `type` and is not inherited from a base
+     * class of `type`.
+     *
+     * The function `Object.hasOwnProperty` is not sufficient to distinguish this case because in older
+     * browsers (e.g. IE10) static property inheritance is implemented by copying the properties.
+     *
+     * Instead, the definition's `token` is compared to the `type`, and if they don't match then the
+     * property was not defined directly on the type itself, and was likely inherited. The definition
+     * is only returned if the `type` matches the `def.token`.
+     */
+    function getOwnDefinition(type, def) {
         return def && def.token === type ? def : null;
     }
     /**
@@ -3394,9 +3401,10 @@
      */
     function findComponentView(lView) {
         var rootTNode = lView[T_HOST];
-        while (rootTNode !== null && rootTNode.type === 2 /* View */) {
-            ngDevMode && assertDefined(lView[DECLARATION_VIEW], 'lView[DECLARATION_VIEW]');
-            lView = lView[DECLARATION_VIEW];
+        var declaredView;
+        while (rootTNode !== null && rootTNode.type === 2 /* View */ &&
+            (declaredView = lView[DECLARATION_VIEW]) !== null) {
+            lView = declaredView;
             rootTNode = lView[T_HOST];
         }
         ngDevMode && assertLView(lView);
@@ -9791,13 +9799,13 @@
      * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
      * @returns LContainer
      */
-    function createLContainer(hostNative, currentView, native, tNode, isForViewContainerRef) {
+    function createLContainer(hostNative, currentView, native, tNode) {
         ngDevMode && assertLView(currentView);
         ngDevMode && !isProceduralRenderer(currentView[RENDERER]) && assertDomNode(native);
         // https://jsperf.com/array-literal-vs-new-array-really
         var lContainer = new (ngDevMode ? LContainerArray : Array)(hostNative, // host native
         true, // Boolean `true` in this position signifies that this is an `LContainer`
-        isForViewContainerRef ? -1 : 0, // active index
+        -1, // active index
         currentView, // parent
         null, // next
         null, // queries
@@ -9822,6 +9830,31 @@
                     var embeddedTView = embeddedLView[TVIEW];
                     ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
                     refreshView(embeddedLView, embeddedTView, embeddedTView.template, embeddedLView[CONTEXT]);
+                }
+                var movedViews = viewOrContainer[MOVED_VIEWS];
+                if (movedViews !== null) {
+                    // We should only CD moved views if the component where they were inserted does not match
+                    // the component where they were declared. Moved views also contains intra component moves,
+                    // which we don't care about.
+                    // TODO(misko): this is not the most efficient way to do this as we have to do a lot of
+                    // searches. Will refactor for performance later.
+                    var declaredComponentLView = findComponentView(lView);
+                    for (var i = 0; i < movedViews.length; i++) {
+                        var movedLView = movedViews[i];
+                        var parentLView = movedLView[PARENT];
+                        while (isLContainer(parentLView)) {
+                            parentLView = parentLView[PARENT];
+                        }
+                        var insertedComponentLView = findComponentView(parentLView);
+                        var insertionIsOnPush = (insertedComponentLView[FLAGS] & 16 /* CheckAlways */) !== 16 /* CheckAlways */;
+                        if (insertionIsOnPush && insertedComponentLView !== declaredComponentLView) {
+                            // Here we know that the template has been transplanted across components
+                            // (not just moved within a component)
+                            var movedTView = movedLView[TVIEW];
+                            ngDevMode && assertDefined(movedTView, 'TView must be allocated');
+                            refreshView(movedLView, movedTView, movedTView.template, movedLView[CONTEXT]);
+                        }
+                    }
                 }
             }
             viewOrContainer = viewOrContainer[NEXT];
@@ -10365,21 +10398,22 @@
      * different LContainer.
      */
     function trackMovedView(declarationContainer, lView) {
+        ngDevMode && assertDefined(lView, 'LView required');
         ngDevMode && assertLContainer(declarationContainer);
-        var declaredViews = declarationContainer[MOVED_VIEWS];
-        if (declaredViews === null) {
+        var movedViews = declarationContainer[MOVED_VIEWS];
+        if (movedViews === null) {
             declarationContainer[MOVED_VIEWS] = [lView];
         }
         else {
-            declaredViews.push(lView);
+            movedViews.push(lView);
         }
     }
     function detachMovedView(declarationContainer, lView) {
         ngDevMode && assertLContainer(declarationContainer);
         ngDevMode && assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
-        var projectedViews = declarationContainer[MOVED_VIEWS];
-        var declaredViewIndex = projectedViews.indexOf(lView);
-        projectedViews.splice(declaredViewIndex, 1);
+        var movedViews = declarationContainer[MOVED_VIEWS];
+        var declaredViewIndex = movedViews.indexOf(lView);
+        movedViews.splice(declaredViewIndex, 1);
     }
     /**
      * Detaches a view from a container.
@@ -11591,7 +11625,7 @@
                 appendChild(commentNode, hostTNode, hostView);
             }
             hostView[hostTNode.index] = lContainer =
-                createLContainer(slotValue, hostView, commentNode, hostTNode, true);
+                createLContainer(slotValue, hostView, commentNode, hostTNode);
             addToViewTree(hostView, lContainer);
         }
         return new R3ViewContainerRef(lContainer, hostTNode, hostView);
@@ -19615,7 +19649,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+65.sha-c315881.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+77.sha-4e027fe.with-local-changes');
 
     /**
      * @license
