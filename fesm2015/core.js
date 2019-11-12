@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+64.sha-ccee818.with-local-changes
+ * @license Angular v9.0.0-rc.1+67.sha-2f0b8bc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23627,6 +23627,7 @@ function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetReso
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     listenerInternal(lView, lView[RENDERER], tNode, eventName, listenerFn, useCapture, eventTargetResolver);
+    return ɵɵlistener;
 }
 /**
  * Registers a synthetic host listener (e.g. `(\@foo.start)`) on a component.
@@ -23658,6 +23659,7 @@ function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture = 
     /** @type {?} */
     const renderer = loadComponentRenderer(tNode, lView);
     listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
+    return ɵɵcomponentHostSyntheticListener;
 }
 /**
  * A utility function that checks if a given element has already an event handler registered for an
@@ -28029,7 +28031,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+64.sha-ccee818.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+67.sha-2f0b8bc.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
