@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+89.sha-f1b3284.with-local-changes
+ * @license Angular v9.0.0-rc.1+100.sha-b30bb8d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5278,12 +5278,13 @@ function viewAttachedToContainer(view) {
 }
 /**
  * Returns a constant from `TConstants` instance.
+ * @template T
  * @param {?} consts
  * @param {?} index
  * @return {?}
  */
 function getConstant(consts, index) {
-    return consts === null || index == null ? null : consts[index];
+    return consts === null || index == null ? null : (/** @type {?} */ ((/** @type {?} */ (consts[index]))));
 }
 /**
  * Resets the pre-order hook flags of the view.
@@ -22241,9 +22242,9 @@ function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, local
     const tViewConsts = tView.consts;
     // TODO: consider a separate node type for templates
     /** @type {?} */
-    const tContainerNode = containerInternal(lView, index, tagName || null, (/** @type {?} */ (getConstant(tViewConsts, attrsIndex))));
+    const tContainerNode = containerInternal(lView, index, tagName || null, getConstant(tViewConsts, attrsIndex));
     /** @type {?} */
-    const localRefs = (/** @type {?} */ (getConstant(tViewConsts, localRefsIndex)));
+    const localRefs = getConstant(tViewConsts, localRefsIndex);
     if (tView.firstCreatePass) {
         ngDevMode && ngDevMode.firstCreatePass++;
         resolveDirectives(tView, lView, tContainerNode, localRefs);
@@ -23085,7 +23086,7 @@ function resolveStylePropValue(value, suffix) {
         return value;
     /** @type {?} */
     let resolvedValue = null;
-    if (value !== null) {
+    if (isStylingValueDefined(value)) {
         if (suffix) {
             // when a suffix is applied then it will bypass
             // sanitization entirely (b/c a new string is created)
@@ -23150,9 +23151,9 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     /** @type {?} */
     const tViewConsts = tView.consts;
     /** @type {?} */
-    const attrs = (/** @type {?} */ (getConstant(tViewConsts, attrsIndex)));
+    const attrs = getConstant(tViewConsts, attrsIndex);
     /** @type {?} */
-    const localRefs = (/** @type {?} */ (getConstant(tViewConsts, localRefsIndex)));
+    const localRefs = getConstant(tViewConsts, localRefsIndex);
     ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
@@ -23417,9 +23418,9 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
     /** @type {?} */
     const tViewConsts = tView.consts;
     /** @type {?} */
-    const attrs = (/** @type {?} */ (getConstant(tViewConsts, attrsIndex)));
+    const attrs = getConstant(tViewConsts, attrsIndex);
     /** @type {?} */
-    const localRefs = (/** @type {?} */ (getConstant(tViewConsts, localRefsIndex)));
+    const localRefs = getConstant(tViewConsts, localRefsIndex);
     ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateComment++;
     ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
@@ -28100,7 +28101,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+89.sha-f1b3284.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+100.sha-b30bb8d.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -36191,7 +36192,7 @@ function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
     const bindingIndex = getBindingRoot() + slotOffset;
     /** @type {?} */
     const lView = getLView();
-    return isCreationMode(lView) ?
+    return lView[bindingIndex] === NO_CHANGE ?
         updateBinding(lView, bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
         getBinding(lView, bindingIndex);
 }

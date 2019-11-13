@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+89.sha-f1b3284.with-local-changes
+ * @license Angular v9.0.0-rc.1+100.sha-b30bb8d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15769,7 +15769,7 @@
         if (value === NO_CHANGE)
             return value;
         var resolvedValue = null;
-        if (value !== null) {
+        if (isStylingValueDefined(value)) {
             if (suffix) {
                 // when a suffix is applied then it will bypass
                 // sanitization entirely (b/c a new string is created)
@@ -19640,7 +19640,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+89.sha-f1b3284.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+100.sha-b30bb8d.with-local-changes');
 
     /**
      * @license
@@ -24356,7 +24356,7 @@
         // TODO(kara): use bindingRoot instead of bindingStartIndex when implementing host bindings
         var bindingIndex = getBindingRoot() + slotOffset;
         var lView = getLView();
-        return isCreationMode(lView) ?
+        return lView[bindingIndex] === NO_CHANGE ?
             updateBinding(lView, bindingIndex, thisArg ? pureFn.call(thisArg) : pureFn()) :
             getBinding(lView, bindingIndex);
     }

@@ -86,7 +86,7 @@ export declare function viewAttachedToChangeDetector(view: LView): boolean;
 /** Returns a boolean for whether the view is attached to a container. */
 export declare function viewAttachedToContainer(view: LView): boolean;
 /** Returns a constant from `TConstants` instance. */
-export declare function getConstant(consts: TConstants | null, index: number | null | undefined): string | (string | (string | import("@angular/core/src/render3/interfaces/projection").SelectorFlags)[] | import("@angular/core/src/render3/interfaces/node").AttributeMarker)[] | null;
+export declare function getConstant<T>(consts: TConstants | null, index: number | null | undefined): T | null;
 /**
  * Resets the pre-order hook flags of the view.
  * @param lView the LView on which the flags are reset
