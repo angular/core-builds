@@ -7,6 +7,7 @@
  */
 import { Injector } from '../../di';
 import { SchemaMetadata } from '../../metadata/schema';
+import { ViewEncapsulation } from '../../metadata/view';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
@@ -102,13 +103,14 @@ export declare function getOrCreateTComponentView(def: ComponentDef<any>): TView
  * @param consts Constants for this view
  */
 export declare function createTView(type: TViewType, viewIndex: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, consts: TConstants | null): TView;
-export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
  *
+ * @param rendererFactory Factory function to create renderer instance.
  * @param elementOrSelector Render element or CSS selector to locate the element.
+ * @param encapsulation View Encapsulation defined for component that requests host element.
  */
-export declare function locateHostElement(factory: RendererFactory3, elementOrSelector: RElement | string): RElement | null;
+export declare function locateHostElement(rendererFactory: RendererFactory3, elementOrSelector: RElement | string, encapsulation: ViewEncapsulation): RElement;
 /**
  * Saves context for this cleanup function in LView.cleanupInstances.
  *

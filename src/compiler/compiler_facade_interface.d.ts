@@ -155,7 +155,12 @@ export interface R3FactoryDefMetadataFacade {
     injectFn: 'directiveInject' | 'inject';
     target: R3FactoryTarget;
 }
-export declare type ViewEncapsulation = number;
+export declare enum ViewEncapsulation {
+    Emulated = 0,
+    Native = 1,
+    None = 2,
+    ShadowDom = 3
+}
 export declare type ChangeDetectionStrategy = number;
 export interface R3QueryMetadataFacade {
     propertyName: string;
