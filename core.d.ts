@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+78.sha-f750f18.with-local-changes
+ * @license Angular v9.0.0-rc.1+80.sha-8ed32e5.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4945,7 +4945,7 @@ declare interface ProceduralRenderer3 {
     appendChild(parent: RElement, newChild: RNode): void;
     insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null): void;
     removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
-    selectRootElement(selectorOrNode: string | any): RElement;
+    selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
     setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
@@ -5515,6 +5515,7 @@ declare interface RElement extends RNode {
     style: RCssStyleDeclaration;
     classList: RDomTokenList;
     className: string;
+    textContent: string | null;
     setAttribute(name: string, value: string): void;
     removeAttribute(name: string): void;
     setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
