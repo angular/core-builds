@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+78.sha-9485e16.with-local-changes
+ * @license Angular v9.0.0-rc.1+80.sha-2be0a1d.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -682,6 +682,13 @@
         R3FactoryTarget[R3FactoryTarget["Pipe"] = 3] = "Pipe";
         R3FactoryTarget[R3FactoryTarget["NgModule"] = 4] = "NgModule";
     })(R3FactoryTarget || (R3FactoryTarget = {}));
+    var ViewEncapsulation;
+    (function (ViewEncapsulation) {
+        ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+        ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+        ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+        ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+    })(ViewEncapsulation || (ViewEncapsulation = {}));
 
     /**
      * @license
@@ -9131,19 +9138,8 @@
     function createError(text, token) {
         return new Error("Renderer: " + text + " [" + stringifyForError(token) + "]");
     }
-    /**
-     * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
-     *
-     * @param elementOrSelector Render element or CSS selector to locate the element.
-     */
-    function locateHostElement(factory, elementOrSelector) {
-        var defaultRenderer = factory.createRenderer(null, null);
-        var rNode = typeof elementOrSelector === 'string' ?
-            (isProceduralRenderer(defaultRenderer) ?
-                defaultRenderer.selectRootElement(elementOrSelector) :
-                defaultRenderer.querySelector(elementOrSelector)) :
-            elementOrSelector;
-        if (ngDevMode && !rNode) {
+    function assertHostNodeExists(rElement, elementOrSelector) {
+        if (!rElement) {
             if (typeof elementOrSelector === 'string') {
                 throw createError('Host node with selector not found:', elementOrSelector);
             }
@@ -9151,7 +9147,31 @@
                 throw createError('Host node is required:', elementOrSelector);
             }
         }
-        return rNode;
+    }
+    /**
+     * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
+     *
+     * @param rendererFactory Factory function to create renderer instance.
+     * @param elementOrSelector Render element or CSS selector to locate the element.
+     * @param encapsulation View Encapsulation defined for component that requests host element.
+     */
+    function locateHostElement(rendererFactory, elementOrSelector, encapsulation) {
+        var renderer = rendererFactory.createRenderer(null, null);
+        if (isProceduralRenderer(renderer)) {
+            // When using native Shadow DOM, do not clear host element to allow native slot projection
+            var preserveContent = encapsulation === exports.ViewEncapsulation.ShadowDom;
+            return renderer.selectRootElement(elementOrSelector, preserveContent);
+        }
+        var rElement = typeof elementOrSelector === 'string' ?
+            renderer.querySelector(elementOrSelector) :
+            elementOrSelector;
+        ngDevMode && assertHostNodeExists(rElement, elementOrSelector);
+        // Always clear host element's content when Renderer3 is in use. For procedural renderer case we
+        // make it depend on whether ShadowDom encapsulation is used (in which case the content should be
+        // preserved to allow native slot projection). ShadowDom encapsulation requires procedural
+        // renderer, and procedural renderer case is handled above.
+        rElement.textContent = '';
+        return rElement;
     }
     /**
      * Saves context for this cleanup function in LView.cleanupInstances.
@@ -18658,7 +18678,7 @@
             componentDef.type = componentType;
         // The first index of the first selector is the tag name.
         var componentTag = componentDef.selectors[0][0];
-        var hostRNode = locateHostElement(rendererFactory, opts.host || componentTag);
+        var hostRNode = locateHostElement(rendererFactory, opts.host || componentTag, componentDef.encapsulation);
         var rootFlags = componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
         var rootContext = createRootContext(opts.scheduler, opts.playerHandler);
@@ -19651,7 +19671,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+78.sha-9485e16.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+80.sha-2be0a1d.with-local-changes');
 
     /**
      * @license
@@ -22649,7 +22669,7 @@
             var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
             var sanitizer = rootViewInjector.get(Sanitizer, null);
             var hostRNode = rootSelectorOrNode ?
-                locateHostElement(rendererFactory, rootSelectorOrNode) :
+                locateHostElement(rendererFactory, rootSelectorOrNode, this.componentDef.encapsulation) :
                 elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
