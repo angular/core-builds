@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "9.0.0-rc.1+86.sha-49e517d.with-local-changes",
+  "version": "9.0.0-rc.1+87.sha-b4d7a68.with-local-changes",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./fesm5/core.js",
@@ -44,5 +44,8 @@
       "@angular/service-worker"
     ]
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "publishConfig": {
+    "registry": "https://wombat-dressing-room.appspot.com"
+  }
 }
