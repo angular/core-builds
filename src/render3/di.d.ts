@@ -95,7 +95,7 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
-export declare function getOrCreateInjectable<T>(tNode: TElementNode | TContainerNode | TElementContainerNode | null, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
+export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | null, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
 /**
  * Searches for the given token among the node's directives and providers.
  *

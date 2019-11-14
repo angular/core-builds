@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AttributeMarker, ComponentTemplate } from '..';
-import { SchemaMetadata, Type } from '../../core';
+import { SchemaMetadata } from '../../core';
 import { LContainer } from '../interfaces/container';
 import { ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
@@ -29,7 +29,7 @@ export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[], bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: (string | (string | (string | SelectorFlags)[] | AttributeMarker)[])[] | null): {
+    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[], bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: (string | (string | (string | SelectorFlags)[] | AttributeMarker)[])[] | null): {
         type: TViewType;
         id: number;
         blueprint: LView;
@@ -37,7 +37,7 @@ export declare const TViewConstructor: {
         queries: TQueries | null;
         viewQuery: ViewQueriesFunction<{}> | null;
         node: TElementNode | TViewNode | null;
-        data: (string | number | Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[];
+        data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[];
         bindingStartIndex: number;
         expandoStartIndex: number;
         expandoInstructions: ExpandoInstructions | null;
@@ -177,6 +177,7 @@ export declare class LContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);
     readonly activeIndex: number;
+    readonly hasTransplantedViews: boolean;
     readonly views: LViewDebug[];
     readonly parent: LViewDebug | LContainerDebug | null;
     readonly movedViews: LView[] | null;

@@ -1,3 +1,4 @@
+import { LContainer } from '../interfaces/container';
 import { ComponentTemplate } from '../interfaces/definition';
 import { LocalRefExtractor } from '../interfaces/node';
 /**
@@ -48,3 +49,5 @@ export declare function ɵɵcontainerRefreshStart(index: number): void;
  * @codeGenApi
  */
 export declare function ɵɵcontainerRefreshEnd(): void;
+export declare function getLContainerActiveIndex(lContainer: LContainer): number;
+export declare function setLContainerActiveIndex(lContainer: LContainer, index: number): void;
