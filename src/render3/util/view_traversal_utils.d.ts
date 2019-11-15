@@ -20,18 +20,6 @@ export declare function getLViewParent(lView: LView): LView | null;
  */
 export declare function getRootView(componentOrLView: LView | {}): LView;
 /**
- * Given an `LView`, find the closest declaration view which is not an embedded view.
- *
- * This method searches for the `LView` associated with the component which declared the `LView`.
- *
- * This function may return itself if the `LView` passed in is not an embedded `LView`. Otherwise
- * it walks the declaration parents until it finds a component view (non-embedded-view.)
- *
- * @param lView LView for which we want a host element node
- * @returns The host node
- */
-export declare function findComponentView(lView: LView): LView;
-/**
  * Returns the `RootContext` instance that is associated with
  * the application where the target is situated. It does this by walking the parent views until it
  * gets to the root view, then getting the context off of that.

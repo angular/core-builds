@@ -1,10 +1,3 @@
-/**
-* @license
-* Copyright Google Inc. All Rights Reserved.
-*
-* Use of this source code is governed by an MIT-style license that can be
-* found in the LICENSE file at https://angular.io/license
-*/
 import { PropertyAliases, TNodeFlags } from '../interfaces/node';
 import { LStylingData, StylingMapArray, TStylingContext, TStylingContextIndex, TStylingNode } from '../interfaces/styling';
 import { NO_CHANGE } from '../tokens';
@@ -57,6 +50,7 @@ export declare function setDefaultValue(context: TStylingContext, index: number,
 export declare function setValue(data: LStylingData, bindingIndex: number, value: any): void;
 export declare function getValue<T = any>(data: LStylingData, bindingIndex: number): T | null;
 export declare function getPropValuesStartPosition(context: TStylingContext, tNode: TStylingNode, isClassBased: boolean): TStylingContextIndex;
+export declare function hasValueChangedUnwrapSafeValue(a: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | String | string | null | boolean | undefined | {}): boolean;
 export declare function hasValueChanged(a: NO_CHANGE | StylingMapArray | number | string | null | boolean | undefined | {}, b: NO_CHANGE | StylingMapArray | number | string | null | boolean | undefined | {}): boolean;
 /**
  * Determines whether the provided styling value is truthy or falsy.

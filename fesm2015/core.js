@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+110.sha-e51ec67.with-local-changes
+ * @license Angular v9.0.0-rc.1+125.sha-9d21065.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1995,7 +1995,7 @@ if (false) {
     /* Skipping unnamed member:
     [DECLARATION_VIEW]: LView|null;*/
     /* Skipping unnamed member:
-    [DECLARATION_COMPONENT_VIEW]: LView|null;*/
+    [DECLARATION_COMPONENT_VIEW]: LView;*/
     /* Skipping unnamed member:
     [DECLARATION_LCONTAINER]: LContainer|null;*/
     /* Skipping unnamed member:
@@ -4441,6 +4441,217 @@ function maybeUnwrapFn(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @enum {string} */
+const BypassType = {
+    Url: 'URL',
+    Html: 'HTML',
+    ResourceUrl: 'ResourceURL',
+    Script: 'Script',
+    Style: 'Style',
+};
+/**
+ * Marker interface for a value that's safe to use in a particular context.
+ *
+ * \@publicApi
+ * @record
+ */
+function SafeValue() { }
+/**
+ * Marker interface for a value that's safe to use as HTML.
+ *
+ * \@publicApi
+ * @record
+ */
+function SafeHtml() { }
+/**
+ * Marker interface for a value that's safe to use as style (CSS).
+ *
+ * \@publicApi
+ * @record
+ */
+function SafeStyle() { }
+/**
+ * Marker interface for a value that's safe to use as JavaScript.
+ *
+ * \@publicApi
+ * @record
+ */
+function SafeScript() { }
+/**
+ * Marker interface for a value that's safe to use as a URL linking to a document.
+ *
+ * \@publicApi
+ * @record
+ */
+function SafeUrl() { }
+/**
+ * Marker interface for a value that's safe to use as a URL to load executable code from.
+ *
+ * \@publicApi
+ * @record
+ */
+function SafeResourceUrl() { }
+/**
+ * @abstract
+ */
+class SafeValueImpl {
+    /**
+     * @param {?} changingThisBreaksApplicationSecurity
+     */
+    constructor(changingThisBreaksApplicationSecurity) {
+        this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
+    }
+    /**
+     * @return {?}
+     */
+    toString() {
+        return `SafeValue must use [property]=binding: ${this.changingThisBreaksApplicationSecurity}` +
+            ` (see http://g.co/ng/security#xss)`;
+    }
+}
+if (false) {
+    /** @type {?} */
+    SafeValueImpl.prototype.changingThisBreaksApplicationSecurity;
+    /**
+     * @abstract
+     * @return {?}
+     */
+    SafeValueImpl.prototype.getTypeName = function () { };
+}
+class SafeHtmlImpl extends SafeValueImpl {
+    /**
+     * @return {?}
+     */
+    getTypeName() { return "HTML" /* Html */; }
+}
+class SafeStyleImpl extends SafeValueImpl {
+    /**
+     * @return {?}
+     */
+    getTypeName() { return "Style" /* Style */; }
+}
+class SafeScriptImpl extends SafeValueImpl {
+    /**
+     * @return {?}
+     */
+    getTypeName() { return "Script" /* Script */; }
+}
+class SafeUrlImpl extends SafeValueImpl {
+    /**
+     * @return {?}
+     */
+    getTypeName() { return "URL" /* Url */; }
+}
+class SafeResourceUrlImpl extends SafeValueImpl {
+    /**
+     * @return {?}
+     */
+    getTypeName() { return "ResourceURL" /* ResourceUrl */; }
+}
+/**
+ * @template T
+ * @param {?} value
+ * @return {?}
+ */
+function unwrapSafeValue(value) {
+    return value instanceof SafeValueImpl ? (/** @type {?} */ ((/** @type {?} */ (value.changingThisBreaksApplicationSecurity)))) :
+        (/** @type {?} */ ((/** @type {?} */ (value))));
+}
+/**
+ * @param {?} value
+ * @param {?} type
+ * @return {?}
+ */
+function allowSanitizationBypassAndThrow(value, type) {
+    /** @type {?} */
+    const actualType = getSanitizationBypassType(value);
+    if (actualType != null && actualType !== type) {
+        // Allow ResourceURLs in URL contexts, they are strictly more trusted.
+        if (actualType === "ResourceURL" /* ResourceUrl */ && type === "URL" /* Url */)
+            return true;
+        throw new Error(`Required a safe ${type}, got a ${actualType} (see http://g.co/ng/security#xss)`);
+    }
+    return actualType === type;
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function getSanitizationBypassType(value) {
+    return value instanceof SafeValueImpl && (/** @type {?} */ (value.getTypeName())) || null;
+}
+/**
+ * Mark `html` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link htmlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedHtml `html` string which needs to be implicitly trusted.
+ * @return {?} a `html` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustHtml(trustedHtml) {
+    return new SafeHtmlImpl(trustedHtml);
+}
+/**
+ * Mark `style` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link styleSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedStyle `style` string which needs to be implicitly trusted.
+ * @return {?} a `style` hich has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustStyle(trustedStyle) {
+    return new SafeStyleImpl(trustedStyle);
+}
+/**
+ * Mark `script` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link scriptSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedScript `script` string which needs to be implicitly trusted.
+ * @return {?} a `script` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustScript(trustedScript) {
+    return new SafeScriptImpl(trustedScript);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link urlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedUrl `url` string which needs to be implicitly trusted.
+ * @return {?} a `url`  which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustUrl(trustedUrl) {
+    return new SafeUrlImpl(trustedUrl);
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link resourceUrlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedResourceUrl `url` string which needs to be implicitly trusted.
+ * @return {?} a `url` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+    return new SafeResourceUrlImpl(trustedResourceUrl);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 // WARNING: interface has both a type and a value, skipping emit
 /**
  * A special value which designates that a value has not changed.
@@ -4687,6 +4898,14 @@ function getPropValuesStartPosition(context, tNode, isClassBased) {
         startPosition += 4 /* BindingsStartOffset */ + getValuesCount(context);
     }
     return startPosition;
+}
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function hasValueChangedUnwrapSafeValue(a, b) {
+    return hasValueChanged(unwrapSafeValue(a), unwrapSafeValue(b));
 }
 /**
  * @param {?} a
@@ -5060,368 +5279,6 @@ function selectClassBasedInputName(inputs) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This property will be monkey-patched on elements, components and directives
- * @type {?}
- */
-const MONKEY_PATCH_KEY_NAME = '__ngContext__';
-/**
- * The internal view context which is specific to a given DOM element, directive or
- * component instance. Each value in here (besides the LView and element node details)
- * can be present, null or undefined. If undefined then it implies the value has not been
- * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
- *
- * Each value will get filled when the respective value is examined within the getContext
- * function. The component, element and each directive instance will share the same instance
- * of the context.
- * @record
- */
-function LContext() { }
-if (false) {
-    /**
-     * The component's parent view data.
-     * @type {?}
-     */
-    LContext.prototype.lView;
-    /**
-     * The index instance of the node.
-     * @type {?}
-     */
-    LContext.prototype.nodeIndex;
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     * @type {?}
-     */
-    LContext.prototype.native;
-    /**
-     * The instance of the Component node.
-     * @type {?}
-     */
-    LContext.prototype.component;
-    /**
-     * The list of active directives that exist on this element.
-     * @type {?}
-     */
-    LContext.prototype.directives;
-    /**
-     * The map of local references (local reference name => element or directive instance) that exist
-     * on this element.
-     * @type {?}
-     */
-    LContext.prototype.localRefs;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
- * in same location in `LView`. This is because we don't want to pre-allocate space for it
- * because the storage is sparse. This file contains utilities for dealing with such data types.
- *
- * How do we know what is stored at a given location in `LView`.
- * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
- * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
- *   - `typeof value[TYPE] === 'object'` => `LView`
- *      - This happens when we have a component at a given location
- *   - `typeof value[TYPE] === true` => `LContainer`
- *      - This happens when we have `LContainer` binding at a given location.
- *
- *
- * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
- */
-/**
- * Returns `RNode`.
- * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
- * @return {?}
- */
-function unwrapRNode(value) {
-    while (Array.isArray(value)) {
-        value = (/** @type {?} */ (value[HOST]));
-    }
-    return (/** @type {?} */ (value));
-}
-/**
- * Returns `LView` or `null` if not found.
- * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
- * @return {?}
- */
-function unwrapLView(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLView()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (typeof value[TYPE] === 'object')
-            return (/** @type {?} */ (value));
-        value = (/** @type {?} */ (value[HOST]));
-    }
-    return null;
-}
-/**
- * Returns `LContainer` or `null` if not found.
- * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
- * @return {?}
- */
-function unwrapLContainer(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLContainer()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (value[TYPE] === true)
-            return (/** @type {?} */ (value));
-        value = (/** @type {?} */ (value[HOST]));
-    }
-    return null;
-}
-/**
- * Retrieves an element value from the provided `viewData`, by unwrapping
- * from any containers, component views, or style contexts.
- * @param {?} index
- * @param {?} lView
- * @return {?}
- */
-function getNativeByIndex(index, lView) {
-    return unwrapRNode(lView[index + HEADER_OFFSET]);
-}
-/**
- * Retrieve an `RNode` for a given `TNode` and `LView`.
- *
- * This function guarantees in dev mode to retrieve a non-null `RNode`.
- *
- * @param {?} tNode
- * @param {?} lView
- * @return {?}
- */
-function getNativeByTNode(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    ngDevMode && assertDataInRange(lView, tNode.index);
-    /** @type {?} */
-    const node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
-    return node;
-}
-/**
- * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
- *
- * Some `TNode`s don't have associated `RNode`s. For example `Projection`
- *
- * @param {?} tNode
- * @param {?} lView
- * @return {?}
- */
-function getNativeByTNodeOrNull(tNode, lView) {
-    /** @type {?} */
-    const index = tNode.index;
-    if (index !== -1) {
-        ngDevMode && assertTNodeForLView(tNode, lView);
-        /** @type {?} */
-        const node = unwrapRNode(lView[index]);
-        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
-        return node;
-    }
-    return null;
-}
-/**
- * @param {?} index
- * @param {?} view
- * @return {?}
- */
-function getTNode(index, view) {
-    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
-    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
-    return (/** @type {?} */ (view[TVIEW].data[index + HEADER_OFFSET]));
-}
-/**
- * Retrieves a value from any `LView` or `TData`.
- * @template T
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function load(view, index) {
-    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
-}
-/**
- * @param {?} nodeIndex
- * @param {?} hostView
- * @return {?}
- */
-function getComponentLViewByIndex(nodeIndex, hostView) {
-    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-    ngDevMode && assertDataInRange(hostView, nodeIndex);
-    /** @type {?} */
-    const slotValue = hostView[nodeIndex];
-    /** @type {?} */
-    const lView = isLView(slotValue) ? slotValue : slotValue[HOST];
-    return lView;
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- * @param {?} target
- * @return {?}
- */
-function readPatchedData(target) {
-    ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME] || null;
-}
-/**
- * @param {?} target
- * @return {?}
- */
-function readPatchedLView(target) {
-    /** @type {?} */
-    const value = readPatchedData(target);
-    if (value) {
-        return Array.isArray(value) ? value : ((/** @type {?} */ (value))).lView;
-    }
-    return null;
-}
-/**
- * Checks whether a given view is in creation mode
- * @param {?} view
- * @return {?}
- */
-function isCreationMode(view) {
-    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
-}
-/**
- * Returns a boolean for whether the view is attached to the change detection tree.
- *
- * Note: This determines whether a view should be checked, not whether it's inserted
- * into a container. For that, you'll want `viewAttachedToContainer` below.
- * @param {?} view
- * @return {?}
- */
-function viewAttachedToChangeDetector(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
-}
-/**
- * Returns a boolean for whether the view is attached to a container.
- * @param {?} view
- * @return {?}
- */
-function viewAttachedToContainer(view) {
-    return isLContainer(view[PARENT]);
-}
-/**
- * Returns a constant from `TConstants` instance.
- * @template T
- * @param {?} consts
- * @param {?} index
- * @return {?}
- */
-function getConstant(consts, index) {
-    return consts === null || index == null ? null : (/** @type {?} */ ((/** @type {?} */ (consts[index]))));
-}
-/**
- * Resets the pre-order hook flags of the view.
- * @param {?} lView the LView on which the flags are reset
- * @return {?}
- */
-function resetPreOrderHookFlags(lView) {
-    lView[PREORDER_HOOK_FLAGS] = 0;
-}
-/**
- * @param {?} lContainer
- * @return {?}
- */
-function getLContainerActiveIndex(lContainer) {
-    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
-}
-/**
- * @param {?} lContainer
- * @param {?} index
- * @return {?}
- */
-function setLContainerActiveIndex(lContainer, index) {
-    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
- * that LContainer, which is an LView
- * @param {?} lView the lView whose parent to get
- * @return {?}
- */
-function getLViewParent(lView) {
-    ngDevMode && assertLView(lView);
-    /** @type {?} */
-    const parent = lView[PARENT];
-    return isLContainer(parent) ? (/** @type {?} */ (parent[PARENT])) : parent;
-}
-/**
- * Retrieve the root view from any component or `LView` by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param {?} componentOrLView any component or `LView`
- * @return {?}
- */
-function getRootView(componentOrLView) {
-    ngDevMode && assertDefined(componentOrLView, 'component');
-    /** @type {?} */
-    let lView = isLView(componentOrLView) ? componentOrLView : (/** @type {?} */ (readPatchedLView(componentOrLView)));
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
-        lView = (/** @type {?} */ (getLViewParent(lView)));
-    }
-    ngDevMode && assertLView(lView);
-    return lView;
-}
-/**
- * Given an `LView`, find the closest declaration view which is not an embedded view.
- *
- * This method searches for the `LView` associated with the component which declared the `LView`.
- *
- * This function may return itself if the `LView` passed in is not an embedded `LView`. Otherwise
- * it walks the declaration parents until it finds a component view (non-embedded-view.)
- *
- * @param {?} lView LView for which we want a host element node
- * @return {?} The host node
- */
-function findComponentView(lView) {
-    /** @type {?} */
-    let rootTNode = lView[T_HOST];
-    /** @type {?} */
-    let declaredView;
-    while (rootTNode !== null && rootTNode.type === 2 /* View */ &&
-        (declaredView = lView[DECLARATION_VIEW]) !== null) {
-        lView = declaredView;
-        rootTNode = lView[T_HOST];
-    }
-    ngDevMode && assertLView(lView);
-    return lView;
-}
-/**
- * Returns the `RootContext` instance that is associated with
- * the application where the target is situated. It does this by walking the parent views until it
- * gets to the root view, then getting the context off of that.
- *
- * @param {?} viewOrComponent the `LView` or component to get the root context for.
- * @return {?}
- */
-function getRootContext(viewOrComponent) {
-    /** @type {?} */
-    const rootView = getRootView(viewOrComponent);
-    ngDevMode &&
-        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
-    return (/** @type {?} */ (rootView[CONTEXT]));
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * Defines if the call to `inject` should include `viewProviders` in its resolution.
  *
  * This is set to true when we try to instantiate a component. This value is reset in
@@ -5777,7 +5634,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
             /** @type {?} */
             let parentLocation = NO_PARENT_INJECTOR;
             /** @type {?} */
-            let hostTElementNode = flags & InjectFlags.Host ? findComponentView(lView)[T_HOST] : null;
+            let hostTElementNode = flags & InjectFlags.Host ? lView[DECLARATION_COMPONENT_VIEW][T_HOST] : null;
             // If we should skip this injector, or if there is no injector on this node, start by
             // searching
             // the parent injector.
@@ -6344,216 +6201,6 @@ const CUSTOM_ELEMENTS_SCHEMA = {
 const NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @enum {string} */
-const BypassType = {
-    Url: 'URL',
-    Html: 'HTML',
-    ResourceUrl: 'ResourceURL',
-    Script: 'Script',
-    Style: 'Style',
-};
-/**
- * Marker interface for a value that's safe to use in a particular context.
- *
- * \@publicApi
- * @record
- */
-function SafeValue() { }
-/**
- * Marker interface for a value that's safe to use as HTML.
- *
- * \@publicApi
- * @record
- */
-function SafeHtml() { }
-/**
- * Marker interface for a value that's safe to use as style (CSS).
- *
- * \@publicApi
- * @record
- */
-function SafeStyle() { }
-/**
- * Marker interface for a value that's safe to use as JavaScript.
- *
- * \@publicApi
- * @record
- */
-function SafeScript() { }
-/**
- * Marker interface for a value that's safe to use as a URL linking to a document.
- *
- * \@publicApi
- * @record
- */
-function SafeUrl() { }
-/**
- * Marker interface for a value that's safe to use as a URL to load executable code from.
- *
- * \@publicApi
- * @record
- */
-function SafeResourceUrl() { }
-/**
- * @abstract
- */
-class SafeValueImpl {
-    /**
-     * @param {?} changingThisBreaksApplicationSecurity
-     */
-    constructor(changingThisBreaksApplicationSecurity) {
-        this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
-    }
-    /**
-     * @return {?}
-     */
-    toString() {
-        return `SafeValue must use [property]=binding: ${this.changingThisBreaksApplicationSecurity}` +
-            ` (see http://g.co/ng/security#xss)`;
-    }
-}
-if (false) {
-    /** @type {?} */
-    SafeValueImpl.prototype.changingThisBreaksApplicationSecurity;
-    /**
-     * @abstract
-     * @return {?}
-     */
-    SafeValueImpl.prototype.getTypeName = function () { };
-}
-class SafeHtmlImpl extends SafeValueImpl {
-    /**
-     * @return {?}
-     */
-    getTypeName() { return "HTML" /* Html */; }
-}
-class SafeStyleImpl extends SafeValueImpl {
-    /**
-     * @return {?}
-     */
-    getTypeName() { return "Style" /* Style */; }
-}
-class SafeScriptImpl extends SafeValueImpl {
-    /**
-     * @return {?}
-     */
-    getTypeName() { return "Script" /* Script */; }
-}
-class SafeUrlImpl extends SafeValueImpl {
-    /**
-     * @return {?}
-     */
-    getTypeName() { return "URL" /* Url */; }
-}
-class SafeResourceUrlImpl extends SafeValueImpl {
-    /**
-     * @return {?}
-     */
-    getTypeName() { return "ResourceURL" /* ResourceUrl */; }
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function unwrapSafeValue(value) {
-    return value instanceof SafeValueImpl ? value.changingThisBreaksApplicationSecurity :
-        (/** @type {?} */ (value));
-}
-/**
- * @param {?} value
- * @param {?} type
- * @return {?}
- */
-function allowSanitizationBypassAndThrow(value, type) {
-    /** @type {?} */
-    const actualType = getSanitizationBypassType(value);
-    if (actualType != null && actualType !== type) {
-        // Allow ResourceURLs in URL contexts, they are strictly more trusted.
-        if (actualType === "ResourceURL" /* ResourceUrl */ && type === "URL" /* Url */)
-            return true;
-        throw new Error(`Required a safe ${type}, got a ${actualType} (see http://g.co/ng/security#xss)`);
-    }
-    return actualType === type;
-}
-/**
- * @param {?} value
- * @return {?}
- */
-function getSanitizationBypassType(value) {
-    return value instanceof SafeValueImpl && (/** @type {?} */ (value.getTypeName())) || null;
-}
-/**
- * Mark `html` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link htmlSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedHtml `html` string which needs to be implicitly trusted.
- * @return {?} a `html` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustHtml(trustedHtml) {
-    return new SafeHtmlImpl(trustedHtml);
-}
-/**
- * Mark `style` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link styleSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedStyle `style` string which needs to be implicitly trusted.
- * @return {?} a `style` hich has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustStyle(trustedStyle) {
-    return new SafeStyleImpl(trustedStyle);
-}
-/**
- * Mark `script` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link scriptSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedScript `script` string which needs to be implicitly trusted.
- * @return {?} a `script` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustScript(trustedScript) {
-    return new SafeScriptImpl(trustedScript);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link urlSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedUrl `url` string which needs to be implicitly trusted.
- * @return {?} a `url`  which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustUrl(trustedUrl) {
-    return new SafeUrlImpl(trustedUrl);
-}
-/**
- * Mark `url` string as trusted.
- *
- * This function wraps the trusted string in `String` and brands it in a way which makes it
- * recognizable to {\@link resourceUrlSanitizer} to be trusted implicitly.
- *
- * @param {?} trustedResourceUrl `url` string which needs to be implicitly trusted.
- * @return {?} a `url` which has been branded to be implicitly trusted.
- */
-function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
-    return new SafeResourceUrlImpl(trustedResourceUrl);
-}
 
 /**
  * @license
@@ -7652,6 +7299,295 @@ function normalizeDebugBindingValue(value) {
     catch (e) {
         return '[ERROR] Exception while trying to serialize the value';
     }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This property will be monkey-patched on elements, components and directives
+ * @type {?}
+ */
+const MONKEY_PATCH_KEY_NAME = '__ngContext__';
+/**
+ * The internal view context which is specific to a given DOM element, directive or
+ * component instance. Each value in here (besides the LView and element node details)
+ * can be present, null or undefined. If undefined then it implies the value has not been
+ * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
+ *
+ * Each value will get filled when the respective value is examined within the getContext
+ * function. The component, element and each directive instance will share the same instance
+ * of the context.
+ * @record
+ */
+function LContext() { }
+if (false) {
+    /**
+     * The component's parent view data.
+     * @type {?}
+     */
+    LContext.prototype.lView;
+    /**
+     * The index instance of the node.
+     * @type {?}
+     */
+    LContext.prototype.nodeIndex;
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     * @type {?}
+     */
+    LContext.prototype.native;
+    /**
+     * The instance of the Component node.
+     * @type {?}
+     */
+    LContext.prototype.component;
+    /**
+     * The list of active directives that exist on this element.
+     * @type {?}
+     */
+    LContext.prototype.directives;
+    /**
+     * The map of local references (local reference name => element or directive instance) that exist
+     * on this element.
+     * @type {?}
+     */
+    LContext.prototype.localRefs;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
+ * in same location in `LView`. This is because we don't want to pre-allocate space for it
+ * because the storage is sparse. This file contains utilities for dealing with such data types.
+ *
+ * How do we know what is stored at a given location in `LView`.
+ * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
+ * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
+ *   - `typeof value[TYPE] === 'object'` => `LView`
+ *      - This happens when we have a component at a given location
+ *   - `typeof value[TYPE] === true` => `LContainer`
+ *      - This happens when we have `LContainer` binding at a given location.
+ *
+ *
+ * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
+ */
+/**
+ * Returns `RNode`.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
+ * @return {?}
+ */
+function unwrapRNode(value) {
+    while (Array.isArray(value)) {
+        value = (/** @type {?} */ (value[HOST]));
+    }
+    return (/** @type {?} */ (value));
+}
+/**
+ * Returns `LView` or `null` if not found.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
+ * @return {?}
+ */
+function unwrapLView(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLView()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (typeof value[TYPE] === 'object')
+            return (/** @type {?} */ (value));
+        value = (/** @type {?} */ (value[HOST]));
+    }
+    return null;
+}
+/**
+ * Returns `LContainer` or `null` if not found.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
+ * @return {?}
+ */
+function unwrapLContainer(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLContainer()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (value[TYPE] === true)
+            return (/** @type {?} */ (value));
+        value = (/** @type {?} */ (value[HOST]));
+    }
+    return null;
+}
+/**
+ * Retrieves an element value from the provided `viewData`, by unwrapping
+ * from any containers, component views, or style contexts.
+ * @param {?} index
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByIndex(index, lView) {
+    return unwrapRNode(lView[index + HEADER_OFFSET]);
+}
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param {?} tNode
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByTNode(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    ngDevMode && assertDataInRange(lView, tNode.index);
+    /** @type {?} */
+    const node = unwrapRNode(lView[tNode.index]);
+    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
+    return node;
+}
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param {?} tNode
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByTNodeOrNull(tNode, lView) {
+    /** @type {?} */
+    const index = tNode.index;
+    if (index !== -1) {
+        ngDevMode && assertTNodeForLView(tNode, lView);
+        /** @type {?} */
+        const node = unwrapRNode(lView[index]);
+        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
+        return node;
+    }
+    return null;
+}
+/**
+ * @param {?} index
+ * @param {?} view
+ * @return {?}
+ */
+function getTNode(index, view) {
+    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
+    ngDevMode && assertLessThan(index, view[TVIEW].data.length, 'wrong index for TNode');
+    return (/** @type {?} */ (view[TVIEW].data[index + HEADER_OFFSET]));
+}
+/**
+ * Retrieves a value from any `LView` or `TData`.
+ * @template T
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function load(view, index) {
+    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+    return view[index + HEADER_OFFSET];
+}
+/**
+ * @param {?} nodeIndex
+ * @param {?} hostView
+ * @return {?}
+ */
+function getComponentLViewByIndex(nodeIndex, hostView) {
+    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
+    ngDevMode && assertDataInRange(hostView, nodeIndex);
+    /** @type {?} */
+    const slotValue = hostView[nodeIndex];
+    /** @type {?} */
+    const lView = isLView(slotValue) ? slotValue : slotValue[HOST];
+    return lView;
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ * @param {?} target
+ * @return {?}
+ */
+function readPatchedData(target) {
+    ngDevMode && assertDefined(target, 'Target expected');
+    return target[MONKEY_PATCH_KEY_NAME] || null;
+}
+/**
+ * @param {?} target
+ * @return {?}
+ */
+function readPatchedLView(target) {
+    /** @type {?} */
+    const value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : ((/** @type {?} */ (value))).lView;
+    }
+    return null;
+}
+/**
+ * Checks whether a given view is in creation mode
+ * @param {?} view
+ * @return {?}
+ */
+function isCreationMode(view) {
+    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/**
+ * Returns a boolean for whether the view is attached to a container.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
+}
+/**
+ * Returns a constant from `TConstants` instance.
+ * @template T
+ * @param {?} consts
+ * @param {?} index
+ * @return {?}
+ */
+function getConstant(consts, index) {
+    return consts === null || index == null ? null : (/** @type {?} */ ((/** @type {?} */ (consts[index]))));
+}
+/**
+ * Resets the pre-order hook flags of the view.
+ * @param {?} lView the LView on which the flags are reset
+ * @return {?}
+ */
+function resetPreOrderHookFlags(lView) {
+    lView[PREORDER_HOOK_FLAGS] = 0;
+}
+/**
+ * @param {?} lContainer
+ * @return {?}
+ */
+function getLContainerActiveIndex(lContainer) {
+    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
+}
+/**
+ * @param {?} lContainer
+ * @param {?} index
+ * @return {?}
+ */
+function setLContainerActiveIndex(lContainer, index) {
+    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
 }
 
 /**
@@ -10784,6 +10720,55 @@ function removeStylingValues(renderer, element, values, isClassBased) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
+ * that LContainer, which is an LView
+ * @param {?} lView the lView whose parent to get
+ * @return {?}
+ */
+function getLViewParent(lView) {
+    ngDevMode && assertLView(lView);
+    /** @type {?} */
+    const parent = lView[PARENT];
+    return isLContainer(parent) ? (/** @type {?} */ (parent[PARENT])) : parent;
+}
+/**
+ * Retrieve the root view from any component or `LView` by walking the parent `LView` until
+ * reaching the root `LView`.
+ *
+ * @param {?} componentOrLView any component or `LView`
+ * @return {?}
+ */
+function getRootView(componentOrLView) {
+    ngDevMode && assertDefined(componentOrLView, 'component');
+    /** @type {?} */
+    let lView = isLView(componentOrLView) ? componentOrLView : (/** @type {?} */ (readPatchedLView(componentOrLView)));
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
+        lView = (/** @type {?} */ (getLViewParent(lView)));
+    }
+    ngDevMode && assertLView(lView);
+    return lView;
+}
+/**
+ * Returns the `RootContext` instance that is associated with
+ * the application where the target is situated. It does this by walking the parent views until it
+ * gets to the root view, then getting the context off of that.
+ *
+ * @param {?} viewOrComponent the `LView` or component to get the root context for.
+ * @return {?}
+ */
+function getRootContext(viewOrComponent) {
+    /** @type {?} */
+    const rootView = getRootView(viewOrComponent);
+    ngDevMode &&
+        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
+    return (/** @type {?} */ (rootView[CONTEXT]));
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
  * Advances to an element for later binding instructions.
  *
  * Used in conjunction with instructions like {\@link property} to act on elements with specified
@@ -13542,9 +13527,9 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     lView[SANITIZER] = sanitizer || parentLView && parentLView[SANITIZER] || (/** @type {?} */ (null));
     lView[(/** @type {?} */ (INJECTOR$1))] = injector || parentLView && parentLView[INJECTOR$1] || null;
     lView[T_HOST] = tHostNode;
-    lView[DECLARATION_COMPONENT_VIEW] = tView.type == 2 /* Embedded */ ?
-        (parentLView === null ? null : (/** @type {?} */ (parentLView))[DECLARATION_COMPONENT_VIEW]) :
-        lView;
+    ngDevMode && assertEqual(tView.type == 2 /* Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
+    lView[DECLARATION_COMPONENT_VIEW] =
+        tView.type == 2 /* Embedded */ ? (/** @type {?} */ (parentLView))[DECLARATION_COMPONENT_VIEW] : lView;
     ngDevMode && attachLViewDebug(lView);
     return lView;
 }
@@ -15793,7 +15778,7 @@ function trackMovedView(declarationContainer, lView) {
     const insertedLContainer = (/** @type {?} */ (lView[PARENT]));
     ngDevMode && assertLContainer(insertedLContainer);
     /** @type {?} */
-    const insertedComponentLView = (/** @type {?} */ ((/** @type {?} */ (insertedLContainer[PARENT]))[DECLARATION_COMPONENT_VIEW]));
+    const insertedComponentLView = (/** @type {?} */ (insertedLContainer[PARENT]))[DECLARATION_COMPONENT_VIEW];
     ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
     /** @type {?} */
     const insertedComponentIsOnPush = (insertedComponentLView[FLAGS] & 16 /* CheckAlways */) !== 16 /* CheckAlways */;
@@ -16292,7 +16277,7 @@ function getFirstNativeNode(lView, tNode) {
         }
         else {
             /** @type {?} */
-            const componentView = findComponentView(lView);
+            const componentView = lView[DECLARATION_COMPONENT_VIEW];
             /** @type {?} */
             const componentHost = (/** @type {?} */ (componentView[T_HOST]));
             /** @type {?} */
@@ -16456,7 +16441,7 @@ function applyProjection(lView, tProjectionNode) {
  */
 function applyProjectionRecursive(renderer, action, lView, tProjectionNode, renderParent, beforeNode) {
     /** @type {?} */
-    const componentLView = findComponentView(lView);
+    const componentLView = lView[DECLARATION_COMPONENT_VIEW];
     /** @type {?} */
     const componentNode = (/** @type {?} */ (componentLView[T_HOST]));
     ngDevMode &&
@@ -16944,7 +16929,7 @@ function collectNativeNodes(lView, tNode, result, isProjection = false) {
         }
         else if (tNodeType === 1 /* Projection */) {
             /** @type {?} */
-            const componentView = findComponentView(lView);
+            const componentView = lView[DECLARATION_COMPONENT_VIEW];
             /** @type {?} */
             const componentHost = (/** @type {?} */ (componentView[T_HOST]));
             /** @type {?} */
@@ -17368,7 +17353,7 @@ function createViewRef(tNode, lView, isPipe) {
         // The LView represents the location where the injection is requested from.
         // We need to locate the containing LView (in case where the `lView` is an embedded view)
         /** @type {?} */
-        const hostComponentView = findComponentView(lView);
+        const hostComponentView = lView[DECLARATION_COMPONENT_VIEW];
         return new ViewRef(hostComponentView, lView);
     }
     return (/** @type {?} */ (null));
@@ -22742,7 +22727,7 @@ function stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, value, i
     if (ngDevMode && getCheckNoChangesMode()) {
         /** @type {?} */
         const oldValue = getValue(lView, bindingIndex);
-        if (hasValueChanged(oldValue, value)) {
+        if (hasValueChangedUnwrapSafeValue(oldValue, value)) {
             throwErrorIfNoChangesMode(false, oldValue, value);
         }
     }
@@ -24167,7 +24152,7 @@ function matchingProjectionSlotIndex(tNode, projectionSlots) {
  */
 function ɵɵprojectionDef(projectionSlots) {
     /** @type {?} */
-    const componentNode = (/** @type {?} */ (findComponentView(getLView())[T_HOST]));
+    const componentNode = (/** @type {?} */ (getLView()[DECLARATION_COMPONENT_VIEW][T_HOST]));
     if (!componentNode.projection) {
         // If no explicit projection slots are defined, fall back to a single
         // projection slot with the wildcard selector.
@@ -28206,7 +28191,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+110.sha-e51ec67.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+125.sha-9d21065.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -44092,7 +44077,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // Case 3: the TNode is a projection insertion point (i.e. a <ng-content>).
         // The nodes projected at this location all need to be processed.
         /** @type {?} */
-        const componentView = findComponentView((/** @type {?} */ (lView)));
+        const componentView = (/** @type {?} */ (lView))[DECLARATION_COMPONENT_VIEW];
         /** @type {?} */
         const componentHost = (/** @type {?} */ (componentView[T_HOST]));
         /** @type {?} */
@@ -47961,7 +47946,8 @@ if (ngDevMode) {
         throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
             'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
             'Please run `ng add @angular/localize` from the Angular CLI.\n' +
-            '(For non-CLI projects, add `import \'@angular/localize/init\';` to your polyfills.ts file)');
+            '(For non-CLI projects, add `import \'@angular/localize/init\';` to your `polyfills.ts` file.\n' +
+            'For server-side rendering applications add the import to your `main.server.ts` file.)');
     });
 }
 
