@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+110.sha-e51ec67.with-local-changes
+ * @license Angular v9.0.0-rc.1+125.sha-9d21065.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9072,7 +9072,7 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      *   - `LView[DECLARATION_LCONTAINER]` similar problem for queries
      *   - `LContainer[MOVED_VIEWS]` similar problem for queries
      */
-    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bm | null;
+    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bm;
     /**
      * A declaration point of embedded views (ones instantiated based on the content of a
      * <ng-template>), null for other types of views.
@@ -10766,7 +10766,9 @@ export declare function ɵunregisterLocaleData(): void;
 
 export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
 
-export declare function ɵunwrapSafeValue(value: string | ɵSafeValue): string;
+export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
+
+export declare function ɵunwrapSafeValue<T>(value: T): T;
 
 export declare function ɵvid(flags: ɵViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn, updateRenderer?: null | ViewUpdateFn): ɵViewDefinition;
 
