@@ -32,7 +32,7 @@ import { Observable } from 'rxjs';
  *
  * @publicApi
  */
-export declare class QueryList<T> {
+export declare class QueryList<T> implements Iterable<T> {
     readonly dirty = true;
     private _results;
     readonly changes: Observable<any>;
@@ -91,4 +91,5 @@ export declare class QueryList<T> {
     setDirty(): void;
     /** internal */
     destroy(): void;
+    [Symbol.iterator]: () => Iterator<T>;
 }
