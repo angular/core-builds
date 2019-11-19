@@ -18,9 +18,11 @@ export declare class MissingInjectableTransform {
     private getUpdateRecorder;
     private printer;
     private importManager;
-    private partialEvaluator;
+    private providersEvaluator;
     /** Set of provider class declarations which were already checked or migrated. */
     private visitedProviderClasses;
+    /** Set of provider object literals which were already checked or migrated. */
+    private visitedProviderLiterals;
     constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
     recordChanges(): void;
     /**
@@ -46,10 +48,18 @@ export declare class MissingInjectableTransform {
      */
     migrateProviderClass(node: ts.ClassDeclaration, context: ResolvedNgModule | ResolvedDirective): void;
     /**
-     * Evaluates the given TypeScript expression using the partial evaluator with
-     * the foreign function resolver for handling "forwardRef" calls.
+     * Migrates object literal providers which do not use "useValue", "useClass",
+     * "useExisting" or "useFactory". These providers behave differently in Ivy. e.g.
+     *
+     * ```ts
+     *   {provide: X} -> {provide: X, useValue: undefined} // this is how it behaves in VE
+     *   {provide: X} -> {provide: X, useClass: X} // this is how it behaves in Ivy
+     * ```
+     *
+     * To ensure forward compatibility, we migrate these empty object literal providers
+     * to explicitly use `useValue: undefined`.
      */
-    private _evaluateExpression;
+    private _migrateLiteralProviders;
     /**
      * Visits the given resolved value of a provider. Providers can be nested in
      * arrays and we need to recursively walk through the providers to be able to
