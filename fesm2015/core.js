@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+151.sha-341d584.with-local-changes
+ * @license Angular v9.0.0-rc.1+164.sha-c68200c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17297,28 +17297,31 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
         let commentNode;
         // If the host is an element container, the native host element is guaranteed to be a
         // comment and we can reuse that comment as anchor element for the new LContainer.
+        // The comment node in question is already part of the DOM structure so we don't need to append
+        // it again.
         if (hostTNode.type === 4 /* ElementContainer */) {
             commentNode = (/** @type {?} */ (unwrapRNode(slotValue)));
         }
         else {
             ngDevMode && ngDevMode.rendererCreateComment++;
             commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
-        }
-        // A container can be created on the root (topmost / bootstrapped) component and in this case we
-        // can't use LTree to insert container's marker node (both parent of a comment node and the
-        // commend node itself is located outside of elements hold by LTree). In this specific case we
-        // use low-level DOM manipulation to insert container's marker (comment) node.
-        if (isRootView(hostView)) {
-            /** @type {?} */
-            const renderer = hostView[RENDERER];
-            /** @type {?} */
-            const hostNative = (/** @type {?} */ (getNativeByTNode(hostTNode, hostView)));
-            /** @type {?} */
-            const parentOfHostNative = nativeParentNode(renderer, hostNative);
-            nativeInsertBefore(renderer, (/** @type {?} */ (parentOfHostNative)), commentNode, nativeNextSibling(renderer, hostNative));
-        }
-        else {
-            appendChild(commentNode, hostTNode, hostView);
+            // A `ViewContainerRef` can be injected by the root (topmost / bootstrapped) component. In
+            // this case we can't use TView / TNode data structures to insert container's marker node
+            // (both a parent of a comment node and the comment node itself are not part of any view). In
+            // this specific case we use low-level DOM manipulation to insert container's marker (comment)
+            // node.
+            if (isRootView(hostView)) {
+                /** @type {?} */
+                const renderer = hostView[RENDERER];
+                /** @type {?} */
+                const hostNative = (/** @type {?} */ (getNativeByTNode(hostTNode, hostView)));
+                /** @type {?} */
+                const parentOfHostNative = nativeParentNode(renderer, hostNative);
+                nativeInsertBefore(renderer, (/** @type {?} */ (parentOfHostNative)), commentNode, nativeNextSibling(renderer, hostNative));
+            }
+            else {
+                appendChild(commentNode, hostTNode, hostView);
+            }
         }
         hostView[hostTNode.index] = lContainer =
             createLContainer(slotValue, hostView, commentNode, hostTNode);
@@ -23498,6 +23501,35 @@ function validateElement(hostView, element, tNode, hasDirectives) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
+ * @param {?} index
+ * @param {?} tView
+ * @param {?} lView
+ * @param {?=} attrsIndex
+ * @param {?=} localRefsIndex
+ * @return {?}
+ */
+function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) {
+    ngDevMode && ngDevMode.firstCreatePass++;
+    /** @type {?} */
+    const tViewConsts = tView.consts;
+    /** @type {?} */
+    const attrs = getConstant(tViewConsts, attrsIndex);
+    /** @type {?} */
+    const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 4 /* ElementContainer */, 'ng-container', attrs);
+    // While ng-container doesn't necessarily support styling, we use the style context to identify
+    // and execute directives on the ng-container.
+    if (attrs !== null) {
+        registerInitialStylingOnTNode(tNode, attrs, 0);
+    }
+    /** @type {?} */
+    const localRefs = getConstant(tViewConsts, localRefsIndex);
+    resolveDirectives(tView, lView, tNode, localRefs);
+    if (tView.queries !== null) {
+        tView.queries.elementStart(tView, tNode);
+    }
+    return tNode;
+}
+/**
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
  * The instruction must later be followed by `elementContainerEnd()` call.
  *
@@ -23518,42 +23550,25 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
     /** @type {?} */
     const tView = lView[TVIEW];
     /** @type {?} */
-    const renderer = lView[RENDERER];
-    /** @type {?} */
-    const tagName = 'ng-container';
-    /** @type {?} */
-    const tViewConsts = tView.consts;
-    /** @type {?} */
-    const attrs = getConstant(tViewConsts, attrsIndex);
-    /** @type {?} */
-    const localRefs = getConstant(tViewConsts, localRefsIndex);
+    const adjustedIndex = index + HEADER_OFFSET;
+    ngDevMode && assertDataInRange(lView, adjustedIndex);
     ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
+    /** @type {?} */
+    const tNode = tView.firstCreatePass ?
+        elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) :
+        (/** @type {?} */ (tView.data[adjustedIndex]));
+    setPreviousOrParentTNode(tNode, true);
     ngDevMode && ngDevMode.rendererCreateComment++;
-    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
-    const native = lView[index + HEADER_OFFSET] = renderer.createComment(ngDevMode ? tagName : '');
-    ngDevMode && assertDataInRange(lView, index - 1);
-    /** @type {?} */
-    const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 4 /* ElementContainer */, tagName, attrs);
-    if (attrs && tView.firstCreatePass) {
-        // While ng-container doesn't necessarily support styling, we use the style context to identify
-        // and execute directives on the ng-container.
-        registerInitialStylingOnTNode(tNode, attrs, 0);
-    }
+    const native = lView[adjustedIndex] =
+        lView[RENDERER].createComment(ngDevMode ? 'ng-container' : '');
     appendChild(native, tNode, lView);
     attachPatchData(native, lView);
-    if (tView.firstCreatePass) {
-        ngDevMode && ngDevMode.firstCreatePass++;
-        resolveDirectives(tView, lView, tNode, localRefs);
-        if (tView.queries) {
-            tView.queries.elementStart(tView, tNode);
-        }
-    }
     if (isDirectiveHost(tNode)) {
         createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
-    if (localRefs != null) {
+    if (localRefsIndex != null) {
         saveResolvedLocalsInData(lView, tNode);
     }
 }
@@ -24763,15 +24778,21 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
 function ɵɵtext(index, value = '') {
     /** @type {?} */
     const lView = getLView();
-    ngDevMode && assertEqual(getBindingIndex(), lView[TVIEW].bindingStartIndex, 'text nodes should be created before any bindings');
-    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     /** @type {?} */
-    const textNative = lView[index + HEADER_OFFSET] = createTextNode(value, lView[RENDERER]);
+    const tView = lView[TVIEW];
     /** @type {?} */
-    const tNode = getOrCreateTNode(lView[TVIEW], lView[T_HOST], index, 3 /* Element */, null, null);
-    // Text nodes are self closing.
-    setIsNotParent();
+    const adjustedIndex = index + HEADER_OFFSET;
+    ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'text nodes should be created before any bindings');
+    ngDevMode && assertDataInRange(lView, adjustedIndex);
+    /** @type {?} */
+    const tNode = tView.firstCreatePass ?
+        getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, null, null) :
+        (/** @type {?} */ (tView.data[adjustedIndex]));
+    /** @type {?} */
+    const textNative = lView[adjustedIndex] = createTextNode(value, lView[RENDERER]);
     appendChild(textNative, tNode, lView);
+    // Text nodes are self closing.
+    setPreviousOrParentTNode(tNode, false);
 }
 
 /**
@@ -28208,7 +28229,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+151.sha-341d584.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+164.sha-c68200c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -43689,13 +43710,12 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         /** @type {?} */
         const tNode = (/** @type {?} */ (tData[context.nodeIndex]));
         /** @type {?} */
-        const properties = collectPropertyBindings(tNode, lView, tData);
-        /** @type {?} */
-        const className = collectClassNames(this);
-        if (className) {
-            properties['className'] =
-                properties['className'] ? properties['className'] + ` ${className}` : className;
-        }
+        const properties = {};
+        // Collect properties from the DOM.
+        copyDomProperties(this.nativeElement, properties);
+        // Collect properties from the bindings. This is needed for animation renderer which has
+        // synthetic properties which don't get reflected into the DOM.
+        collectPropertyBindings(properties, tNode, lView, tData);
         return properties;
     }
     /**
@@ -43927,6 +43947,45 @@ if (false) {
     DebugElement__POST_R3__.prototype._classesProxy;
 }
 /**
+ * @param {?} element
+ * @param {?} properties
+ * @return {?}
+ */
+function copyDomProperties(element, properties) {
+    if (element) {
+        // Skip own properties (as those are patched)
+        /** @type {?} */
+        let obj = Object.getPrototypeOf(element);
+        /** @type {?} */
+        const NodePrototype = Node.prototype;
+        while (obj !== null && obj !== NodePrototype) {
+            /** @type {?} */
+            const descriptors = Object.getOwnPropertyDescriptors(obj);
+            for (let key in descriptors) {
+                if (!key.startsWith('__') && !key.startsWith('on')) {
+                    // don't include properties starting with `__` and `on`.
+                    // `__` are patched values which should not be included.
+                    // `on` are listeners which also should not be included.
+                    /** @type {?} */
+                    const value = ((/** @type {?} */ (element)))[key];
+                    if (isPrimitiveValue(value)) {
+                        properties[key] = value;
+                    }
+                }
+            }
+            obj = Object.getPrototypeOf(obj);
+        }
+    }
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function isPrimitiveValue(value) {
+    return typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' ||
+        value === null;
+}
+/**
  * @param {?} parentElement
  * @param {?} predicate
  * @param {?} matches
@@ -44120,14 +44179,13 @@ function _queryNativeNodeDescendants(parentNode, predicate, matches, elementsOnl
  * Iterates through the property bindings for a given node and generates
  * a map of property names to values. This map only contains property bindings
  * defined in templates, not in host bindings.
+ * @param {?} properties
  * @param {?} tNode
  * @param {?} lView
  * @param {?} tData
  * @return {?}
  */
-function collectPropertyBindings(tNode, lView, tData) {
-    /** @type {?} */
-    const properties = {};
+function collectPropertyBindings(properties, tNode, lView, tData) {
     /** @type {?} */
     let bindingIndexes = tNode.propertyBindings;
     if (bindingIndexes !== null) {
@@ -44153,23 +44211,6 @@ function collectPropertyBindings(tNode, lView, tData) {
             }
         }
     }
-    return properties;
-}
-/**
- * @param {?} debugElement
- * @return {?}
- */
-function collectClassNames(debugElement) {
-    /** @type {?} */
-    const classes = debugElement.classes;
-    /** @type {?} */
-    let output = '';
-    for (const className of Object.keys(classes)) {
-        if (classes[className]) {
-            output = output ? output + ` ${className}` : className;
-        }
-    }
-    return output;
 }
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 /** @type {?} */
