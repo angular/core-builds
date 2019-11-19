@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+179.sha-850aee2.with-local-changes
+ * @license Angular v9.0.0-rc.1+180.sha-bb290ce.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5140,7 +5140,7 @@ declare interface QueryDef {
  *
  * @publicApi
  */
-export declare class QueryList<T> {
+export declare class QueryList<T> implements Iterable<T> {
     readonly dirty = true;
     private _results;
     readonly changes: Observable<any>;
@@ -5199,6 +5199,7 @@ export declare class QueryList<T> {
     setDirty(): void;
     /** internal */
     destroy(): void;
+    [Symbol.iterator]: () => Iterator<T>;
 }
 
 declare class R3Injector {
