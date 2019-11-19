@@ -99,7 +99,7 @@ export declare function createRootContext(scheduler?: (workFn: () => void) => vo
  * Example:
  *
  * ```
- * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+ * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
 export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
