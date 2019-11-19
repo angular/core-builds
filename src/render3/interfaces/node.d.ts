@@ -401,15 +401,19 @@ export interface TNode {
     /** Information about input properties that need to be set once from attribute data. */
     initialInputs: InitialInputData | null | undefined;
     /**
-     * Input data for all directives on this node. `null` means that there are no directives with
-     * inputs on this node.
+     * Input data for all directives on this node.
+     *
+     * - `undefined` means that the prop has not been initialized yet,
+     * - `null` means that the prop has been initialized but no inputs have been found.
      */
-    inputs: PropertyAliases | null;
+    inputs: PropertyAliases | null | undefined;
     /**
-     * Output data for all directives on this node. `null` means that there are no directives with
-     * outputs on this node.
+     * Output data for all directives on this node.
+     *
+     * - `undefined` means that the prop has not been initialized yet,
+     * - `null` means that the prop has been initialized but no outputs have been found.
      */
-    outputs: PropertyAliases | null;
+    outputs: PropertyAliases | null | undefined;
     /**
      * The TView or TViews attached to this node.
      *
@@ -664,9 +668,10 @@ export declare type PropertyAliases = {
  * Store the runtime input or output names for all the directives.
  *
  * i+0: directive instance index
- * i+1: privateName
+ * i+1: publicName
+ * i+2: privateName
  *
- * e.g. [0, 'change-minified']
+ * e.g. [0, 'change', 'change-minified']
  */
 export declare type PropertyAliasValue = (number | string)[];
 /**

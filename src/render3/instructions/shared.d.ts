@@ -283,7 +283,7 @@ export declare function handleError(lView: LView, error: any): void;
  * possibly minified, property names to write to.
  * @param value Value to set.
  */
-export declare function setInputsForProperty(lView: LView, inputs: PropertyAliasValue, publicName: string, value: any): void;
+export declare function setInputsForProperty(lView: LView, inputs: PropertyAliasValue, value: any): void;
 /**
  * Updates a text binding at a given index in a given LView.
  */
