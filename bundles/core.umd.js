@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+164.sha-c68200c.with-local-changes
+ * @license Angular v9.0.0-rc.1+177.sha-6bf2531.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9028,7 +9028,7 @@
     function saveResolvedLocalsInData(viewData, tNode, localRefExtractor) {
         if (localRefExtractor === void 0) { localRefExtractor = getNativeByTNode; }
         var localNames = tNode.localNames;
-        if (localNames) {
+        if (localNames !== null) {
             var localIndex = tNode.index + 1;
             for (var i = 0; i < localNames.length; i += 2) {
                 var index = localNames[i + 1];
@@ -9235,8 +9235,8 @@
         attrs, // attrs: (string|AttributeMarker|(string|SelectorFlags)[])[]|null
         null, // localNames: (string|number)[]|null
         undefined, // initialInputs: (string[]|null)[]|null|undefined
-        undefined, // inputs: PropertyAliases|null|undefined
-        undefined, // outputs: PropertyAliases|null|undefined
+        null, // inputs: PropertyAliases|null
+        null, // outputs: PropertyAliases|null
         null, // tViews: ITView|ITView[]|null
         null, // next: ITNode|null
         null, // projectionNext: ITNode|null
@@ -9258,8 +9258,8 @@
                 attrs: attrs,
                 localNames: null,
                 initialInputs: undefined,
-                inputs: undefined,
-                outputs: undefined,
+                inputs: null,
+                outputs: null,
                 tViews: null,
                 next: null,
                 projectionNext: null,
@@ -9276,10 +9276,10 @@
                 propStore = propStore === null ? {} : propStore;
                 var internalName = inputAliasMap[publicName];
                 if (propStore.hasOwnProperty(publicName)) {
-                    propStore[publicName].push(directiveDefIdx, publicName, internalName);
+                    propStore[publicName].push(directiveDefIdx, internalName);
                 }
                 else {
-                    (propStore[publicName] = [directiveDefIdx, publicName, internalName]);
+                    (propStore[publicName] = [directiveDefIdx, internalName]);
                 }
             }
         }
@@ -9349,7 +9349,7 @@
         var inputData = tNode.inputs;
         var dataValue;
         if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
-            setInputsForProperty(lView, dataValue, value);
+            setInputsForProperty(lView, dataValue, propName, value);
             if (isComponentHost(tNode))
                 markDirtyIfOnPush(lView, index + HEADER_OFFSET);
             if (ngDevMode) {
@@ -9426,14 +9426,13 @@
             /**
              * dataValue is an array containing runtime input or output names for the directives:
              * i+0: directive instance index
-             * i+1: publicName
-             * i+2: privateName
+             * i+1: privateName
              *
              * e.g. [0, 'change', 'change-minified']
-             * we want to set the reflected property with the privateName: dataValue[i+2]
+             * we want to set the reflected property with the privateName: dataValue[i+1]
              */
-            for (var i = 0; i < dataValue.length; i += 3) {
-                setNgReflectProperty(lView, element, type, dataValue[i + 2], value);
+            for (var i = 0; i < dataValue.length; i += 2) {
+                setNgReflectProperty(lView, element, type, dataValue[i + 1], value);
             }
         }
     }
@@ -10193,17 +10192,15 @@
      * possibly minified, property names to write to.
      * @param value Value to set.
      */
-    function setInputsForProperty(lView, inputs, value) {
+    function setInputsForProperty(lView, inputs, publicName, value) {
         var tView = lView[TVIEW];
         for (var i = 0; i < inputs.length;) {
             var index = inputs[i++];
-            var publicName = inputs[i++];
             var privateName = inputs[i++];
             var instance = lView[index];
             ngDevMode && assertDataInRange(lView, index);
             var def = tView.data[index];
-            var setInput = def.setInput;
-            if (setInput) {
+            if (def.setInput !== null) {
                 def.setInput(instance, value, publicName, privateName);
             }
             else {
@@ -10853,7 +10850,13 @@
                     return getFirstNativeNode(lView, elIcuContainerChild);
                 }
                 else {
-                    return getNativeByTNode(tNode, lView);
+                    var rNodeOrLContainer = lView[tNode.index];
+                    if (isLContainer(rNodeOrLContainer)) {
+                        return getBeforeNodeForView(-1, rNodeOrLContainer);
+                    }
+                    else {
+                        return unwrapRNode(rNodeOrLContainer);
+                    }
                 }
             }
             else {
@@ -15163,6 +15166,24 @@
         }
         setIsNotParent();
     }
+    function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
+        ngDevMode && assertFirstCreatePass(tView);
+        ngDevMode && ngDevMode.firstCreatePass++;
+        var tViewConsts = tView.consts;
+        // TODO(pk): refactor getOrCreateTNode to have the "create" only version
+        var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 0 /* Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
+        resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
+        registerPostOrderHooks(tView, tNode);
+        var embeddedTView = tNode.tViews = createTView(2 /* Embedded */, -1, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
+        var embeddedTViewNode = createTNode(tView, null, 2 /* View */, -1, null, null);
+        embeddedTViewNode.injectorIndex = tNode.injectorIndex;
+        embeddedTView.node = embeddedTViewNode;
+        if (tView.queries !== null) {
+            tView.queries.template(tView, tNode);
+            embeddedTView.queries = tView.queries.embeddedTView(tNode);
+        }
+        return tNode;
+    }
     /**
      * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
      *
@@ -15185,30 +15206,21 @@
     function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
         var lView = getLView();
         var tView = lView[TVIEW];
-        var tViewConsts = tView.consts;
-        // TODO: consider a separate node type for templates
-        var tContainerNode = containerInternal(lView, index, tagName || null, getConstant(tViewConsts, attrsIndex));
-        var localRefs = getConstant(tViewConsts, localRefsIndex);
-        if (tView.firstCreatePass) {
-            ngDevMode && ngDevMode.firstCreatePass++;
-            resolveDirectives(tView, lView, tContainerNode, localRefs);
-            registerPostOrderHooks(tView, tContainerNode);
-            var embeddedTView = tContainerNode.tViews = createTView(2 /* Embedded */, -1, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
-            var embeddedTViewNode = createTNode(tView, null, 2 /* View */, -1, null, null);
-            embeddedTViewNode.injectorIndex = tContainerNode.injectorIndex;
-            embeddedTView.node = embeddedTViewNode;
-            if (tView.queries !== null) {
-                tView.queries.template(tView, tContainerNode);
-                embeddedTView.queries = tView.queries.embeddedTView(tContainerNode);
-            }
+        var adjustedIndex = index + HEADER_OFFSET;
+        var tNode = tView.firstCreatePass ?
+            templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
+            tView.data[adjustedIndex];
+        setPreviousOrParentTNode(tNode, false);
+        var comment = lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+        appendChild(comment, tNode, lView);
+        attachPatchData(comment, lView);
+        addToViewTree(lView, lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode));
+        if (isDirectiveHost(tNode)) {
+            createDirectivesInstances(tView, lView, tNode);
         }
-        if (isDirectiveHost(tContainerNode)) {
-            createDirectivesInstances(tView, lView, tContainerNode);
+        if (localRefsIndex != null) {
+            saveResolvedLocalsInData(lView, tNode, localRefExtractor);
         }
-        if (localRefs != null) {
-            saveResolvedLocalsInData(lView, tContainerNode, localRefExtractor);
-        }
-        setIsNotParent();
     }
     /**
      * Sets a container up to receive views.
@@ -15416,6 +15428,7 @@
      */
     function ɵɵstyleProp(prop, value, suffix) {
         stylePropInternal(getSelectedIndex(), prop, value, suffix);
+        return ɵɵstyleProp;
     }
     /**
      * Internal function for applying a single style to an element.
@@ -15486,6 +15499,7 @@
                 ngDevMode.classPropCacheMiss++;
             }
         }
+        return ɵɵclassProp;
     }
     /**
      * Shared function used to update a prop-based styling binding for an element.
@@ -15720,7 +15734,7 @@
                 var inputs = tNode.inputs[inputName];
                 var initialValue = getInitialStylingValue(context);
                 var value = normalizeStylingDirectiveInputValue(initialValue, newValue, isClassBased);
-                setInputsForProperty(lView, inputs, value);
+                setInputsForProperty(lView, inputs, inputName, value);
                 setElementExitFn(stylingApply);
             }
             setValue(lView, bindingIndex, newValue);
@@ -15977,10 +15991,10 @@
         }
         if (hasClassInput(tNode)) {
             var inputName = selectClassBasedInputName(tNode.inputs);
-            setDirectiveStylingInput(tNode.classes, lView, tNode.inputs[inputName]);
+            setDirectiveStylingInput(tNode.classes, lView, tNode.inputs[inputName], inputName);
         }
         if (hasStyleInput(tNode)) {
-            setDirectiveStylingInput(tNode.styles, lView, tNode.inputs['style']);
+            setDirectiveStylingInput(tNode.styles, lView, tNode.inputs['style'], 'style');
         }
     }
     /**
@@ -16064,7 +16078,7 @@
             }
         }
     }
-    function setDirectiveStylingInput(context, lView, stylingInputs) {
+    function setDirectiveStylingInput(context, lView, stylingInputs, propName) {
         // older versions of Angular treat the input as `null` in the
         // event that the value does not exist at all. For this reason
         // we can't have a styling value be an empty string.
@@ -16072,7 +16086,7 @@
         // Ivy does an extra `[class]` write with a falsy value since the value
         // is applied during creation mode. This is a deviation from VE and should
         // be (Jira Issue = FW-1467).
-        setInputsForProperty(lView, stylingInputs, value);
+        setInputsForProperty(lView, stylingInputs, propName, value);
     }
     function validateElement(hostView, element, tNode, hasDirectives) {
         var tagName = tNode.tagName;
@@ -16518,14 +16532,14 @@
         // subscribe to directive outputs
         var outputs = tNode.outputs;
         var props;
-        if (processOutputs && outputs != null && (props = outputs[eventName])) {
+        if (processOutputs && outputs !== null && (props = outputs[eventName])) {
             var propsLength = props.length;
             if (propsLength) {
                 var lCleanup = getCleanup(lView);
-                for (var i = 0; i < propsLength; i += 3) {
+                for (var i = 0; i < propsLength; i += 2) {
                     var index = props[i];
                     ngDevMode && assertDataInRange(lView, index);
-                    var minifiedName = props[i + 2];
+                    var minifiedName = props[i + 1];
                     var directiveInstance = lView[index];
                     var output = directiveInstance[minifiedName];
                     if (ngDevMode && !isObservable(output)) {
@@ -18833,7 +18847,7 @@
      * Example:
      *
      * ```
-     * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+     * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
      * ```
      */
     function LifecycleHooksFeature(component, def) {
@@ -19728,7 +19742,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+164.sha-c68200c.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+177.sha-6bf2531.with-local-changes');
 
     /**
      * @license
@@ -23892,9 +23906,9 @@
                             elementAttributeInternal(previousElementIndex, attrName, value, lView);
                         }
                         // Check if that attribute is a directive input
-                        var dataValue = tNode.inputs && tNode.inputs[attrName];
+                        var dataValue = tNode.inputs !== null && tNode.inputs[attrName];
                         if (dataValue) {
-                            setInputsForProperty(lView, dataValue, value);
+                            setInputsForProperty(lView, dataValue, attrName, value);
                             if (ngDevMode) {
                                 var element = getNativeByIndex(previousElementIndex, lView);
                                 setNgReflectProperties(lView, element, tNode.type, dataValue, value);

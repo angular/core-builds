@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+164.sha-c68200c.with-local-changes
+ * @license Angular v9.0.0-rc.1+177.sha-6bf2531.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5032,10 +5032,9 @@ declare type PropertyAliases = {
  * Store the runtime input or output names for all the directives.
  *
  * i+0: directive instance index
- * i+1: publicName
- * i+2: privateName
+ * i+1: privateName
  *
- * e.g. [0, 'change', 'change-minified']
+ * e.g. [0, 'change-minified']
  */
 declare type PropertyAliasValue = (number | string)[];
 
@@ -6768,19 +6767,15 @@ declare interface TNode {
     /** Information about input properties that need to be set once from attribute data. */
     initialInputs: InitialInputData | null | undefined;
     /**
-     * Input data for all directives on this node.
-     *
-     * - `undefined` means that the prop has not been initialized yet,
-     * - `null` means that the prop has been initialized but no inputs have been found.
+     * Input data for all directives on this node. `null` means that there are no directives with
+     * inputs on this node.
      */
-    inputs: PropertyAliases | null | undefined;
+    inputs: PropertyAliases | null;
     /**
-     * Output data for all directives on this node.
-     *
-     * - `undefined` means that the prop has not been initialized yet,
-     * - `null` means that the prop has been initialized but no outputs have been found.
+     * Output data for all directives on this node. `null` means that there are no directives with
+     * outputs on this node.
      */
-    outputs: PropertyAliases | null | undefined;
+    outputs: PropertyAliases | null;
     /**
      * The TView or TViews attached to this node.
      *
@@ -10075,7 +10070,7 @@ export declare interface ɵLContext {
  * Example:
  *
  * ```
- * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+ * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
 export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
@@ -11479,7 +11474,7 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(className: string, value: boolean | null): void;
+export declare function ɵɵclassProp(className: string, value: boolean | null): TsickleIssue1009;
 
 /**
  * @codeGenApi
@@ -13568,7 +13563,7 @@ export declare function ɵɵstyleMap(styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): TsickleIssue1009;
 
 /**
  *
