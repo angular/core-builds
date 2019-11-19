@@ -7,6 +7,7 @@
 */
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
+import { TsickleIssue1009 } from '../instructions/shared';
 import { TAttributes, TNode } from '../interfaces/node';
 import { NO_CHANGE } from '../tokens';
 /**
@@ -56,7 +57,7 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffix?: string | null): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffix?: string | null): TsickleIssue1009;
 /**
  * Internal function for applying a single style to an element.
  *
@@ -79,7 +80,7 @@ export declare function stylePropInternal(elementIndex: number, prop: string, va
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(className: string, value: boolean | null): void;
+export declare function ɵɵclassProp(className: string, value: boolean | null): TsickleIssue1009;
 /**
  * Update style bindings using an object literal on an element.
  *

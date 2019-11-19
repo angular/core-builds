@@ -64,7 +64,7 @@ export declare const TViewConstructor: {
     };
 };
 export declare const TNodeConstructor: {
-    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyBindings: number[] | null, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null | undefined, outputs: PropertyAliases | null | undefined, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, projection: number | (ITNode | RNode[])[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
+    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyBindings: number[] | null, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null, outputs: PropertyAliases | null, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, projection: number | (ITNode | RNode[])[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
         tView_: ITView;
         type: TNodeType;
         index: number;
@@ -78,8 +78,8 @@ export declare const TNodeConstructor: {
         attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null;
         localNames: (string | number)[] | null;
         initialInputs: (string[] | null)[] | null | undefined;
-        inputs: PropertyAliases | null | undefined;
-        outputs: PropertyAliases | null | undefined;
+        inputs: PropertyAliases | null;
+        outputs: PropertyAliases | null;
         tViews: ITView | ITView[] | null;
         next: ITNode | null;
         projectionNext: ITNode | null;
