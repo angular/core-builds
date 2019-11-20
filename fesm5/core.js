@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+186.sha-97fbdab.with-local-changes
+ * @license Angular v9.0.0-rc.1+188.sha-b54ed98.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19589,7 +19589,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+186.sha-97fbdab.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+188.sha-b54ed98.with-local-changes');
 
 /**
  * @license
@@ -25761,7 +25761,6 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
                     exports: flatten(ngModule.exports || EMPTY_ARRAY$4)
                         .map(resolveForwardRef)
                         .map(expandModuleWithProviders),
-                    emitInline: true,
                     schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                     id: ngModule.id || null,
                 });
