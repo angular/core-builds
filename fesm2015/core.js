@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
+ * @license Angular v9.0.0-rc.1+199.sha-fd83d94.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28237,7 +28237,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+197.sha-55748db.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+199.sha-fd83d94.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -39211,21 +39211,26 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * This operation is memoized and the result is cached on the module's definition. It can be called
- * on modules with components that have not fully compiled yet, but the result should not be used
- * until they have.
+ * By default this operation is memoized and the result is cached on the module's definition. You
+ * can avoid memoization and previously stored results (if available) by providing the second
+ * argument with the `true` value (forcing transitive scopes recalculation).
+ *
+ * This function can be called on modules with components that have not fully compiled yet, but the
+ * result should not be used until they have.
+ *
  * @template T
- * @param {?} moduleType
- * @param {?=} processNgModuleFn
+ * @param {?} moduleType module that transitive scope should be calculated for.
+ * @param {?=} forceRecalc flag that indicates whether previously calculated and memoized values should
+ * be ignored and transitive scope to be fully recalculated.
  * @return {?}
  */
-function transitiveScopesFor(moduleType, processNgModuleFn) {
+function transitiveScopesFor(moduleType, forceRecalc = false) {
     if (!isNgModule(moduleType)) {
         throw new Error(`${moduleType.name} does not have a module def (ɵmod property)`);
     }
     /** @type {?} */
     const def = (/** @type {?} */ (getNgModuleDef(moduleType)));
-    if (def.transitiveCompileScopes !== null) {
+    if (!forceRecalc && def.transitiveCompileScopes !== null) {
         return def.transitiveCompileScopes;
     }
     /** @type {?} */
@@ -39268,13 +39273,10 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
         if (!isNgModule(importedType)) {
             throw new Error(`Importing ${importedType.name} which does not have a ɵmod property`);
         }
-        if (processNgModuleFn) {
-            processNgModuleFn((/** @type {?} */ (importedType)));
-        }
         // When this module imports another, the imported module's exported directives and pipes are
         // added to the compilation scope of this module.
         /** @type {?} */
-        const importedScope = transitiveScopesFor(importedType, processNgModuleFn);
+        const importedScope = transitiveScopesFor(importedType, forceRecalc);
         importedScope.exported.directives.forEach((/**
          * @param {?} entry
          * @return {?}
@@ -39300,7 +39302,7 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             // When this module exports another, the exported module's exported directives and pipes are
             // added to both the compilation and exported scopes of this module.
             /** @type {?} */
-            const exportedScope = transitiveScopesFor(exportedType, processNgModuleFn);
+            const exportedScope = transitiveScopesFor(exportedType, forceRecalc);
             exportedScope.exported.directives.forEach((/**
              * @param {?} entry
              * @return {?}
@@ -39325,7 +39327,9 @@ function transitiveScopesFor(moduleType, processNgModuleFn) {
             scopes.exported.directives.add(exportedType);
         }
     }));
-    def.transitiveCompileScopes = scopes;
+    if (!forceRecalc) {
+        def.transitiveCompileScopes = scopes;
+    }
     return scopes;
 }
 /**

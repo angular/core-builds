@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
+ * @license Angular v9.0.0-rc.1+199.sha-fd83d94.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1664,6 +1664,7 @@ class R3TestBedCompiler {
         this.providerOverridesByToken = new Map();
         this.moduleProvidersOverridden = new Set();
         this.testModuleRef = null;
+        this.hasModuleOverrides = false;
         class DynamicTestModule {
         }
         this.testModuleType = (/** @type {?} */ (DynamicTestModule));
@@ -1704,6 +1705,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     overrideModule(ngModule, override) {
+        this.hasModuleOverrides = true;
         // Compile the module right away.
         this.resolvers.module.addOverride(ngModule, override);
         /** @type {?} */
@@ -1979,8 +1981,17 @@ class R3TestBedCompiler {
         (moduleType) => {
             if (!moduleToScope.has(moduleType)) {
                 /** @type {?} */
-                const realType = isTestingModuleOverride(moduleType) ? this.testModuleType : moduleType;
-                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType));
+                const isTestingModule = isTestingModuleOverride(moduleType);
+                /** @type {?} */
+                const realType = isTestingModule ? this.testModuleType : (/** @type {?} */ (moduleType));
+                // Module overrides (via TestBed.overrideModule) might affect scopes that were
+                // previously calculated and stored in `transitiveCompileScopes`. If module overrides
+                // are present, always re-calculate transitive scopes to have the most up-to-date
+                // information available. The `moduleToScope` map avoids repeated re-calculation of
+                // scopes for the same module.
+                /** @type {?} */
+                const forceRecalc = !isTestingModule && this.hasModuleOverrides;
+                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType, forceRecalc));
             }
             return (/** @type {?} */ (moduleToScope.get(moduleType)));
         });
@@ -2613,6 +2624,11 @@ if (false) {
      * @private
      */
     R3TestBedCompiler.prototype.testModuleRef;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.hasModuleOverrides;
     /**
      * @type {?}
      * @private

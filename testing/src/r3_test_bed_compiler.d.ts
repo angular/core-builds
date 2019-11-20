@@ -35,6 +35,7 @@ export declare class R3TestBedCompiler {
     private moduleProvidersOverridden;
     private testModuleType;
     private testModuleRef;
+    private hasModuleOverrides;
     constructor(platform: PlatformRef, additionalModuleTypes: Type<any> | Type<any>[]);
     setCompilerProviders(providers: Provider[] | null): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
