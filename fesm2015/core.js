@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+188.sha-b54ed98.with-local-changes
+ * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6914,7 +6914,7 @@ const COLOR_FNS = '(?:rgb|hsl)a?';
 /** @type {?} */
 const GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
 /** @type {?} */
-const CSS3_FNS = '(?:calc|attr)';
+const CSS3_FNS = '(?:attr|calc|var)';
 /** @type {?} */
 const FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
 /** @type {?} */
@@ -10706,7 +10706,7 @@ function removeStylingValues(renderer, element, values, isClassBased) {
         if (value) {
             /** @type {?} */
             const prop = getMapProp(arr, i);
-            applyFn(renderer, element, prop, false);
+            applyFn(renderer, element, prop, null);
         }
     }
 }
@@ -28237,7 +28237,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+188.sha-b54ed98.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+197.sha-55748db.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -40273,14 +40273,14 @@ ApplicationInitStatus.ctorParameters = () => [
 ];
 /** @nocollapse */ ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
 /** @nocollapse */ ApplicationInitStatus.ɵprov = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: function (t) { return ApplicationInitStatus.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(ApplicationInitStatus, [{
+/*@__PURE__*/ (function () { setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
     }], function () { return [{ type: undefined, decorators: [{
                 type: Inject,
                 args: [APP_INITIALIZER]
             }, {
                 type: Optional
-            }] }]; }, null);
+            }] }]; }, null); })();
 if (false) {
     /**
      * @type {?}
@@ -40410,9 +40410,9 @@ Console.decorators = [
 ];
 /** @nocollapse */ Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
 /** @nocollapse */ Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: function (t) { return Console.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(Console, [{
+/*@__PURE__*/ (function () { setClassMetadata(Console, [{
         type: Injectable
-    }], null, null);
+    }], null, null); })();
 
 /**
  * @fileoverview added by tsickle
@@ -40681,9 +40681,9 @@ Compiler.decorators = [
 ];
 /** @nocollapse */ Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
 /** @nocollapse */ Compiler.ɵprov = ɵɵdefineInjectable({ token: Compiler, factory: function (t) { return Compiler.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(Compiler, [{
+/*@__PURE__*/ (function () { setClassMetadata(Compiler, [{
         type: Injectable
-    }], null, null);
+    }], null, null); })();
 if (false) {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
@@ -41816,9 +41816,9 @@ Testability.ctorParameters = () => [
 ];
 /** @nocollapse */ Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
 /** @nocollapse */ Testability.ɵprov = ɵɵdefineInjectable({ token: Testability, factory: function (t) { return Testability.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(Testability, [{
+/*@__PURE__*/ (function () { setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{ type: NgZone }]; }, null);
+    }], function () { return [{ type: NgZone }]; }, null); })();
 if (false) {
     /**
      * @type {?}
@@ -41921,9 +41921,9 @@ TestabilityRegistry.decorators = [
 TestabilityRegistry.ctorParameters = () => [];
 /** @nocollapse */ TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
 /** @nocollapse */ TestabilityRegistry.ɵprov = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: function (t) { return TestabilityRegistry.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(TestabilityRegistry, [{
+/*@__PURE__*/ (function () { setClassMetadata(TestabilityRegistry, [{
         type: Injectable
-    }], function () { return []; }, null);
+    }], function () { return []; }, null); })();
 if (false) {
     /**
      * \@internal
@@ -42462,9 +42462,9 @@ PlatformRef.ctorParameters = () => [
 ];
 /** @nocollapse */ PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
 /** @nocollapse */ PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: function (t) { return PlatformRef.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(PlatformRef, [{
+/*@__PURE__*/ (function () { setClassMetadata(PlatformRef, [{
         type: Injectable
-    }], function () { return [{ type: Injector }]; }, null);
+    }], function () { return [{ type: Injector }]; }, null); })();
 if (false) {
     /**
      * @type {?}
@@ -42946,9 +42946,9 @@ ApplicationRef.ctorParameters = () => [
 ];
 /** @nocollapse */ ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
 /** @nocollapse */ ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: function (t) { return ApplicationRef.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(ApplicationRef, [{
+/*@__PURE__*/ (function () { setClassMetadata(ApplicationRef, [{
         type: Injectable
-    }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
+    }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null); })();
 if (false) {
     /**
      * \@internal
@@ -43257,11 +43257,11 @@ SystemJsNgModuleLoader.ctorParameters = () => [
 ];
 /** @nocollapse */ SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
 /** @nocollapse */ SystemJsNgModuleLoader.ɵprov = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: function (t) { return SystemJsNgModuleLoader.ɵfac(t); }, providedIn: null });
-/*@__PURE__*/ setClassMetadata(SystemJsNgModuleLoader, [{
+/*@__PURE__*/ (function () { setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
     }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
                 type: Optional
-            }] }]; }, null);
+            }] }]; }, null); })();
 if (false) {
     /**
      * @type {?}
@@ -44551,10 +44551,10 @@ ApplicationModule.ctorParameters = () => [
 ];
 /** @nocollapse */ ApplicationModule.ɵmod = ɵɵdefineNgModule({ type: ApplicationModule });
 /** @nocollapse */ ApplicationModule.ɵinj = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
-/*@__PURE__*/ setClassMetadata(ApplicationModule, [{
+/*@__PURE__*/ (function () { setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
-    }], function () { return [{ type: ApplicationRef }]; }, null);
+    }], function () { return [{ type: ApplicationRef }]; }, null); })();
 
 /**
  * @fileoverview added by tsickle
