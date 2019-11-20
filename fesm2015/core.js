@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+190.sha-d78d29f.with-local-changes
+ * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6919,7 +6919,7 @@ const COLOR_FNS = '(?:rgb|hsl)a?';
 /** @type {?} */
 const GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
 /** @type {?} */
-const CSS3_FNS = '(?:calc|attr)';
+const CSS3_FNS = '(?:attr|calc|var)';
 /** @type {?} */
 const FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
 /** @type {?} */
@@ -10711,7 +10711,7 @@ function removeStylingValues(renderer, element, values, isClassBased) {
         if (value) {
             /** @type {?} */
             const prop = getMapProp(arr, i);
-            applyFn(renderer, element, prop, false);
+            applyFn(renderer, element, prop, null);
         }
     }
 }
@@ -28254,7 +28254,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+190.sha-d78d29f.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+197.sha-55748db.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

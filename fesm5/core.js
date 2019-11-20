@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+190.sha-d78d29f.with-local-changes
+ * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4473,7 +4473,7 @@ var VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
 var TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|Z|3d)?';
 var COLOR_FNS = '(?:rgb|hsl)a?';
 var GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
-var CSS3_FNS = '(?:calc|attr)';
+var CSS3_FNS = '(?:attr|calc|var)';
 var FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
 var SAFE_STYLE_VALUE = new RegExp("^(" + VALUES + "|" +
     ("(?:" + TRANSFORMATION_FNS + "|" + COLOR_FNS + "|" + GRADIENTS + "|" + CSS3_FNS + ")") +
@@ -6815,7 +6815,7 @@ function removeStylingValues(renderer, element, values, isClassBased) {
         var value = getMapValue(arr, i);
         if (value) {
             var prop = getMapProp(arr, i);
-            applyFn(renderer, element, prop, false);
+            applyFn(renderer, element, prop, null);
         }
     }
 }
@@ -19589,7 +19589,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+190.sha-d78d29f.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+197.sha-55748db.with-local-changes');
 
 /**
  * @license

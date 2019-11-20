@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+190.sha-d78d29f.with-local-changes
+ * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1452,29 +1452,42 @@ var R3TestBedCompiler = /** @class */ (function () {
         }
     };
     R3TestBedCompiler.prototype.queueTypesFromModulesArray = function (arr) {
-        var e_4, _a;
-        try {
-            for (var arr_2 = __values(arr), arr_2_1 = arr_2.next(); !arr_2_1.done; arr_2_1 = arr_2.next()) {
-                var value = arr_2_1.value;
-                if (Array.isArray(value)) {
-                    this.queueTypesFromModulesArray(value);
-                }
-                else if (hasNgModuleDef(value)) {
-                    var def = value.ɵmod;
-                    // Look through declarations, imports, and exports, and queue everything found there.
-                    this.queueTypeArray(maybeUnwrapFn(def.declarations), value);
-                    this.queueTypesFromModulesArray(maybeUnwrapFn(def.imports));
-                    this.queueTypesFromModulesArray(maybeUnwrapFn(def.exports));
-                }
-            }
-        }
-        catch (e_4_1) { e_4 = { error: e_4_1 }; }
-        finally {
+        var _this = this;
+        // Because we may encounter the same NgModule while processing the imports and exports of an
+        // NgModule tree, we cache them in this set so we can skip ones that have already been seen
+        // encountered. In some test setups, this caching resulted in 10X runtime improvement.
+        var processedNgModuleDefs = new Set();
+        var queueTypesFromModulesArrayRecur = function (arr) {
+            var e_4, _a;
             try {
-                if (arr_2_1 && !arr_2_1.done && (_a = arr_2.return)) _a.call(arr_2);
+                for (var arr_2 = __values(arr), arr_2_1 = arr_2.next(); !arr_2_1.done; arr_2_1 = arr_2.next()) {
+                    var value = arr_2_1.value;
+                    if (Array.isArray(value)) {
+                        queueTypesFromModulesArrayRecur(value);
+                    }
+                    else if (hasNgModuleDef(value)) {
+                        var def = value.ɵmod;
+                        if (processedNgModuleDefs.has(def)) {
+                            continue;
+                        }
+                        processedNgModuleDefs.add(def);
+                        // Look through declarations, imports, and exports, and queue
+                        // everything found there.
+                        _this.queueTypeArray(maybeUnwrapFn(def.declarations), value);
+                        queueTypesFromModulesArrayRecur(maybeUnwrapFn(def.imports));
+                        queueTypesFromModulesArrayRecur(maybeUnwrapFn(def.exports));
+                    }
+                }
             }
-            finally { if (e_4) throw e_4.error; }
-        }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            finally {
+                try {
+                    if (arr_2_1 && !arr_2_1.done && (_a = arr_2.return)) _a.call(arr_2);
+                }
+                finally { if (e_4) throw e_4.error; }
+            }
+        };
+        queueTypesFromModulesArrayRecur(arr);
     };
     R3TestBedCompiler.prototype.maybeStoreNgDef = function (prop, type) {
         if (!this.initialNgDefs.has(type)) {
