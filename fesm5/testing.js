@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+197.sha-55748db.with-local-changes
+ * @license Angular v9.0.0-rc.1+199.sha-fd83d94.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1057,6 +1057,7 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.providerOverridesByToken = new Map();
         this.moduleProvidersOverridden = new Set();
         this.testModuleRef = null;
+        this.hasModuleOverrides = false;
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
@@ -1088,6 +1089,7 @@ var R3TestBedCompiler = /** @class */ (function () {
         }
     };
     R3TestBedCompiler.prototype.overrideModule = function (ngModule, override) {
+        this.hasModuleOverrides = true;
         // Compile the module right away.
         this.resolvers.module.addOverride(ngModule, override);
         var metadata = this.resolvers.module.resolve(ngModule);
@@ -1284,8 +1286,15 @@ var R3TestBedCompiler = /** @class */ (function () {
         var moduleToScope = new Map();
         var getScopeOfModule = function (moduleType) {
             if (!moduleToScope.has(moduleType)) {
-                var realType = isTestingModuleOverride(moduleType) ? _this.testModuleType : moduleType;
-                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType));
+                var isTestingModule = isTestingModuleOverride(moduleType);
+                var realType = isTestingModule ? _this.testModuleType : moduleType;
+                // Module overrides (via TestBed.overrideModule) might affect scopes that were
+                // previously calculated and stored in `transitiveCompileScopes`. If module overrides
+                // are present, always re-calculate transitive scopes to have the most up-to-date
+                // information available. The `moduleToScope` map avoids repeated re-calculation of
+                // scopes for the same module.
+                var forceRecalc = !isTestingModule && _this.hasModuleOverrides;
+                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType, forceRecalc));
             }
             return moduleToScope.get(moduleType);
         };
