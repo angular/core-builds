@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.2+98.sha-213e3c3.with-local-changes
+ * @license Angular v9.0.0-rc.3+14.sha-fc6ad19.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1664,6 +1664,7 @@ class R3TestBedCompiler {
         this.providerOverridesByToken = new Map();
         this.moduleProvidersOverridden = new Set();
         this.testModuleRef = null;
+        this.hasModuleOverrides = false;
         class DynamicTestModule {
         }
         this.testModuleType = (/** @type {?} */ (DynamicTestModule));
@@ -1704,6 +1705,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     overrideModule(ngModule, override) {
+        this.hasModuleOverrides = true;
         // Compile the module right away.
         this.resolvers.module.addOverride(ngModule, override);
         /** @type {?} */
@@ -1979,8 +1981,17 @@ class R3TestBedCompiler {
         (moduleType) => {
             if (!moduleToScope.has(moduleType)) {
                 /** @type {?} */
-                const realType = isTestingModuleOverride(moduleType) ? this.testModuleType : moduleType;
-                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType));
+                const isTestingModule = isTestingModuleOverride(moduleType);
+                /** @type {?} */
+                const realType = isTestingModule ? this.testModuleType : (/** @type {?} */ (moduleType));
+                // Module overrides (via TestBed.overrideModule) might affect scopes that were
+                // previously calculated and stored in `transitiveCompileScopes`. If module overrides
+                // are present, always re-calculate transitive scopes to have the most up-to-date
+                // information available. The `moduleToScope` map avoids repeated re-calculation of
+                // scopes for the same module.
+                /** @type {?} */
+                const forceRecalc = !isTestingModule && this.hasModuleOverrides;
+                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType, forceRecalc));
             }
             return (/** @type {?} */ (moduleToScope.get(moduleType)));
         });
@@ -2184,19 +2195,37 @@ class R3TestBedCompiler {
      * @return {?}
      */
     queueTypesFromModulesArray(arr) {
-        for (const value of arr) {
-            if (Array.isArray(value)) {
-                this.queueTypesFromModulesArray(value);
+        // Because we may encounter the same NgModule while processing the imports and exports of an
+        // NgModule tree, we cache them in this set so we can skip ones that have already been seen
+        // encountered. In some test setups, this caching resulted in 10X runtime improvement.
+        /** @type {?} */
+        const processedNgModuleDefs = new Set();
+        /** @type {?} */
+        const queueTypesFromModulesArrayRecur = (/**
+         * @param {?} arr
+         * @return {?}
+         */
+        (arr) => {
+            for (const value of arr) {
+                if (Array.isArray(value)) {
+                    queueTypesFromModulesArrayRecur(value);
+                }
+                else if (hasNgModuleDef(value)) {
+                    /** @nocollapse @type {?} */
+                    const def = value.ɵmod;
+                    if (processedNgModuleDefs.has(def)) {
+                        continue;
+                    }
+                    processedNgModuleDefs.add(def);
+                    // Look through declarations, imports, and exports, and queue
+                    // everything found there.
+                    this.queueTypeArray(maybeUnwrapFn(def.declarations), value);
+                    queueTypesFromModulesArrayRecur(maybeUnwrapFn(def.imports));
+                    queueTypesFromModulesArrayRecur(maybeUnwrapFn(def.exports));
+                }
             }
-            else if (hasNgModuleDef(value)) {
-                /** @nocollapse @type {?} */
-                const def = value.ɵmod;
-                // Look through declarations, imports, and exports, and queue everything found there.
-                this.queueTypeArray(maybeUnwrapFn(def.declarations), value);
-                this.queueTypesFromModulesArray(maybeUnwrapFn(def.imports));
-                this.queueTypesFromModulesArray(maybeUnwrapFn(def.exports));
-            }
-        }
+        });
+        queueTypesFromModulesArrayRecur(arr);
     }
     /**
      * @private
@@ -2595,6 +2624,11 @@ if (false) {
      * @private
      */
     R3TestBedCompiler.prototype.testModuleRef;
+    /**
+     * @type {?}
+     * @private
+     */
+    R3TestBedCompiler.prototype.hasModuleOverrides;
     /**
      * @type {?}
      * @private

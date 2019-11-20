@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.2+98.sha-213e3c3.with-local-changes
+ * @license Angular v9.0.0-rc.3+14.sha-fc6ad19.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10749,11 +10749,18 @@ export declare function ɵted(checkIndex: number, ngContentIndex: number | null,
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * This operation is memoized and the result is cached on the module's definition. It can be called
- * on modules with components that have not fully compiled yet, but the result should not be used
- * until they have.
+ * By default this operation is memoized and the result is cached on the module's definition. You
+ * can avoid memoization and previously stored results (if available) by providing the second
+ * argument with the `true` value (forcing transitive scopes recalculation).
+ *
+ * This function can be called on modules with components that have not fully compiled yet, but the
+ * result should not be used until they have.
+ *
+ * @param moduleType module that transitive scope should be calculated for.
+ * @param forceRecalc flag that indicates whether previously calculated and memoized values should
+ * be ignored and transitive scope to be fully recalculated.
  */
-export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, processNgModuleFn?: (ngModule: ɵNgModuleType) => void): ɵNgModuleTransitiveScopes;
+export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, forceRecalc?: boolean): ɵNgModuleTransitiveScopes;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
