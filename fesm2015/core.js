@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+216.sha-fd5f101.with-local-changes
+ * @license Angular v9.0.0-rc.1+217.sha-3d69693.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22543,7 +22543,6 @@ function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
         return ɵɵinject(token, flags);
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
-    ngDevMode && assertNodeOfPossibleTypes(tNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */, 5 /* IcuContainer */);
     return getOrCreateInjectable((/** @type {?} */ (tNode)), lView, resolveForwardRef(token), flags);
 }
 /**
@@ -28237,7 +28236,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+216.sha-fd5f101.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+217.sha-3d69693.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
