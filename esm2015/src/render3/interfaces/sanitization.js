@@ -1,5 +1,6 @@
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/sanitization.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**

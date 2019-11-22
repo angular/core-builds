@@ -1,5 +1,6 @@
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/metadata_override.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
