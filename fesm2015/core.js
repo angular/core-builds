@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.3+35.sha-ad9b9a3.with-local-changes
+ * @license Angular v9.0.0-rc.3+42.sha-99e68d0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -123,6 +123,7 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/metadata.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -445,6 +446,7 @@ function stringify(token) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/forward_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -577,6 +579,7 @@ function getCompilerFacade() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/fields.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -602,6 +605,7 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/injection_token.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -702,6 +706,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/injector_compatibility.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -962,6 +967,7 @@ function formatError(text, obj, injectorErrorName, source = null) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/jit/environment.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1004,6 +1010,7 @@ function getFactoryOf(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/ng_module_factory.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1234,6 +1241,7 @@ function assertDataInRange(arr, index) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/constants.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1312,6 +1320,7 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/view.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1466,6 +1475,7 @@ function initNgDevMode() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/empty.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1490,6 +1500,7 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/definition.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -1889,6 +1900,7 @@ function getNgLocaleIdDef(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/view.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -2419,6 +2431,7 @@ const unusedValueExportToPlacateAjd = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/container.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -2516,6 +2529,7 @@ const unusedValueExportToPlacateAjd$1 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/type_checks.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -2573,6 +2587,7 @@ function isRootView(target) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/assert.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -2670,6 +2685,7 @@ function assertFirstCreatePass(tView, errMessage) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/injector.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -2922,6 +2938,7 @@ const unusedValueExportToPlacateAjd$2 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/node_assert.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -2970,6 +2987,7 @@ function typeName(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/state.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -3739,6 +3757,7 @@ function getCurrentStyleSanitizer() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/document.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -3801,6 +3820,7 @@ function getDocument() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/renderer.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @enum {number} */
@@ -4179,6 +4199,7 @@ const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/attrs_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -4287,6 +4308,7 @@ function isAnimationProp(name) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/injector_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /// Parent Injector Utils ///////////////////////////////////////////////////////////////
@@ -4338,6 +4360,7 @@ function getParentInjectorView(location, startView) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/misc_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -4437,6 +4460,7 @@ function maybeUnwrapFn(value) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/bypass.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -4448,11 +4472,11 @@ function maybeUnwrapFn(value) {
  */
 /** @enum {string} */
 const BypassType = {
-    Url: 'URL',
-    Html: 'HTML',
-    ResourceUrl: 'ResourceURL',
-    Script: 'Script',
-    Style: 'Style',
+    Url: "URL",
+    Html: "HTML",
+    ResourceUrl: "ResourceURL",
+    Script: "Script",
+    Style: "Style",
 };
 /**
  * Marker interface for a value that's safe to use in a particular context.
@@ -4648,6 +4672,7 @@ function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/tokens.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -4666,6 +4691,7 @@ const NO_CHANGE = (/** @type {?} */ ({}));
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/styling_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -5281,6 +5307,7 @@ function selectClassBasedInputName(inputs) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/di.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6029,6 +6056,7 @@ function wrappedError(message, originalError) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/errors.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6070,6 +6098,7 @@ function defaultErrorLogger(console, ...values) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/error_handler.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6161,6 +6190,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/schema.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6253,6 +6283,7 @@ function enableProdMode() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/inert_body.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6464,6 +6495,7 @@ function isDOMParserAvailable() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/url_sanitizer.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6530,6 +6562,7 @@ function sanitizeSrcset(srcset) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/html_sanitizer.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6867,6 +6900,7 @@ function isTemplateElement(el) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/security.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -6894,6 +6928,7 @@ SecurityContext[SecurityContext.RESOURCE_URL] = 'RESOURCE_URL';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/style_sanitizer.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -7017,6 +7052,7 @@ function StyleSanitizeFn() { }
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/sanitization.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -7308,6 +7344,7 @@ function normalizeDebugBindingValue(value) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/context.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -7370,6 +7407,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/view_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -7597,6 +7635,7 @@ function setLContainerActiveIndex(lContainer, index) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/context_discovery.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -7955,6 +7994,7 @@ function discoverLocalRefs(lView, nodeIndex) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/errors.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -8021,6 +8061,7 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/hooks.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -8271,6 +8312,7 @@ function callHook(currentView, initPhase, arr, i) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/node.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @enum {number} */
@@ -8999,6 +9041,7 @@ const unusedValueExportToPlacateAjd$4 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/projection.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -9026,6 +9069,7 @@ const unusedValueExportToPlacateAjd$5 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/node_selector_matcher.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -9351,6 +9395,7 @@ function isSelectorInSelectorList(selector, list) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/styling/state.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -9484,6 +9529,7 @@ function resetStylingState() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/styling/bindings.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -10718,6 +10764,7 @@ function removeStylingValues(renderer, element, values, isClassBased) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/view_traversal_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -10767,6 +10814,7 @@ function getRootContext(viewOrComponent) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/advance.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -10848,6 +10896,7 @@ function selectIndexInternal(lView, index, checkNoChangesMode) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/i18n.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -11214,6 +11263,7 @@ const unusedValueExportToPlacateAjd$6 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/debug/proxy.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -11245,6 +11295,7 @@ function createProxy(handler) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/debug_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -11263,6 +11314,7 @@ function attachDebugObject(obj, debug) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/styling/map_based_bindings.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -11636,6 +11688,7 @@ function setCurrentSyncCursor(mapIndex, indexValue) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/styling/styling_debug.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -12334,6 +12387,7 @@ function buildConfig(tNode, isClassBased) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/lview_debug.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -13358,6 +13412,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/shared.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 const ɵ0$4 = /**
@@ -15518,6 +15573,7 @@ function renderInitialStyling(renderer, native, tNode, append) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/node_manipulation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -16516,6 +16572,7 @@ function applyContainer(renderer, action, lContainer, renderParent, beforeNode) 
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/node_util.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -16557,6 +16614,7 @@ function getParentInjectorTNode(location, startView, startTNode) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/view_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -16952,6 +17010,7 @@ function collectNativeNodes(lView, tNode, result, isProjection = false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/view_engine_compatibility.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -17399,6 +17458,7 @@ function injectRenderer2() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/change_detector_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -17801,6 +17861,7 @@ function getParentCtor(ctor) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/jit/util.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -17904,6 +17965,7 @@ function reflectDependency(compiler, dep) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/jit/injectable.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -18032,6 +18094,7 @@ function getInjectableMetadata(type, srcMeta) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/util.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 const ɵ0$7 = getClosureSafeProperty;
@@ -18112,6 +18175,7 @@ function convertInjectableProviderToFactory(type, provider) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/injectable.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -18172,6 +18236,7 @@ const SWITCH_COMPILE_INJECTABLE = SWITCH_COMPILE_INJECTABLE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/scope.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -18184,6 +18249,7 @@ const INJECTOR_SCOPE = new InjectionToken('Set Injector scope.');
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/r3_injector.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -18875,6 +18941,7 @@ function couldBeInjectableType(value) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/injector.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -19395,6 +19462,7 @@ function staticError(text, obj) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/reflective_errors.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -19692,6 +19760,7 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/reflective_key.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -19838,6 +19907,7 @@ const reflector = new Reflector(new ReflectionCapabilities());
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/reflective_provider.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -20197,6 +20267,7 @@ function _createDependency(token, optional, visibility) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/reflective_injector.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // Threshold for the dynamic version
@@ -20768,16 +20839,19 @@ function _mapProviders(injector, fn) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di/index.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/di.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/di.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -20948,6 +21022,7 @@ const ViewChild = makePropDecorator('ViewChild', (ɵ3), Query);
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/resource_loading.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -21143,6 +21218,7 @@ function componentDefResolved(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/alloc_host_vars.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -21315,6 +21391,7 @@ function devModeEqual(a, b) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/change_detection_util.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -21462,6 +21539,7 @@ function isJsObject$1(o) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/bindings.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 // TODO(misko): consider inlining
@@ -21562,6 +21640,7 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/attribute.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -21589,6 +21668,7 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/interpolation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -21837,6 +21917,7 @@ function interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/attribute_interpolation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -22223,6 +22304,7 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/change_detection.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -22295,6 +22377,7 @@ function tick(component) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/container.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -22498,6 +22581,7 @@ function containerInternal(lView, nodeIndex, tagName, attrs) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/storage.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -22542,6 +22626,7 @@ function ɵɵreference(index) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/di.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -22592,6 +22677,7 @@ function ɵɵinvalidFactory() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/styling.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -23256,6 +23342,7 @@ function patchHostStylingFlag(tNode, hostBindingsMode, isClassBased) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/element.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -23520,6 +23607,7 @@ function validateElement(hostView, element, tNode, hasDirectives) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/element_container.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -23641,6 +23729,7 @@ function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/embedded_view.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -23775,6 +23864,7 @@ function ɵɵembeddedViewEnd() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/get_current_view.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -23817,6 +23907,7 @@ function isObservable(obj) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/listener.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -24116,11 +24207,13 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/namespace.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/next_context.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -24142,6 +24235,7 @@ function ɵɵnextContext(level = 1) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/projection.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -24270,6 +24364,7 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/property.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -24307,6 +24402,7 @@ function ɵɵproperty(propName, value, sanitizer) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/property_interpolation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -24784,6 +24880,7 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/text.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -24817,6 +24914,7 @@ function ɵɵtext(index, value = '') {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/text_interpolation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -25200,6 +25298,7 @@ function ɵɵtextInterpolateV(values) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/class_map_interpolation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -25530,6 +25629,7 @@ function ɵɵclassMapInterpolateV(values) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/style_prop_interpolation.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -25885,6 +25985,7 @@ function ɵɵstylePropInterpolateV(prop, values, valueSuffix) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/host_property.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -25953,11 +26054,13 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/instructions/all.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/discovery_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -26394,6 +26497,7 @@ function getComponentLView(target) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/global_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -26456,6 +26560,7 @@ function publishGlobalUtil(name, fn) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/component.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -26730,6 +26835,7 @@ function whenRendered(component) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/features/inherit_definition_feature.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -26906,6 +27012,7 @@ function inheritHostBindings(definition, superHostBindings) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/features/copy_definition_feature.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -27015,6 +27122,7 @@ class SimpleChange {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/features/ng_onchanges_feature.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -27145,6 +27253,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/di_setup.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -27419,6 +27528,7 @@ function multiFactory(factoryFn, index, isViewProvider, isComponent, f) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/features/providers_feature.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -27477,6 +27587,7 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/component_factory.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -27609,6 +27720,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/component_factory_resolver.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -27780,6 +27892,7 @@ function noop(...args) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/element_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -27854,6 +27967,7 @@ const SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render/api.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -28174,6 +28288,7 @@ const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/sanitization/sanitizer.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -28210,6 +28325,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/version.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -28249,10 +28365,11 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.3+35.sha-ad9b9a3.with-local-changes');
+const VERSION = new Version('9.0.0-rc.3+42.sha-99e68d0.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/differs/default_iterable_differ.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class DefaultIterableDifferFactory {
@@ -29310,6 +29427,7 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/differs/default_keyvalue_differ.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -29766,6 +29884,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/differs/iterable_differs.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -30034,6 +30153,7 @@ function getTypeNameForDebugging(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/differs/keyvalue_differs.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -30260,6 +30380,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection/change_detection.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -30279,6 +30400,7 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/template_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -30351,6 +30473,7 @@ const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/view_container_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -30515,6 +30638,7 @@ const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/errors.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -30585,6 +30709,7 @@ function viewDestroyedError(action) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/types.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -31395,6 +31520,7 @@ const Services = {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/util.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -32017,6 +32143,7 @@ const EMPTY_MAP = {};
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/ng_module.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -32296,6 +32423,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/view_attach.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -32462,6 +32590,7 @@ function renderDetachView$1(view) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/refs.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -33195,6 +33324,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/provider.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -33881,6 +34011,7 @@ function callProviderLifecycles(view, index, lifecycles, initIndex) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/component_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class ComponentFactoryResolver$1 extends ComponentFactoryResolver {
@@ -34227,6 +34358,7 @@ if (typeof ngI18nClosureMode === 'undefined') {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/i18n/locale_en.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -34278,6 +34410,7 @@ var localeEn = [
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/i18n/locale_data_api.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -34429,6 +34562,7 @@ function normalizeLocale(locale) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/i18n/localization.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -34463,6 +34597,7 @@ const DEFAULT_LOCALE_ID = 'en-US';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/i18n.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -34479,9 +34614,9 @@ const BINDING_REGEXP = /�(\d+):?\d*�/gi;
 const ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
 /** @enum {string} */
 const TagType = {
-    ELEMENT: '#',
-    TEMPLATE: '*',
-    PROJECTION: '!',
+    ELEMENT: "#",
+    TEMPLATE: "*",
+    PROJECTION: "!",
 };
 // i18nPostprocess consts
 /** @type {?} */
@@ -35991,6 +36126,7 @@ function getLocaleId() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/ng_module_factory_registration.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -36066,6 +36202,7 @@ function getRegisteredNgModuleType(id) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/ng_module_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -36228,6 +36365,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/metadata.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -36304,6 +36442,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/pure_function.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -36596,6 +36735,7 @@ function ɵɵpureFunctionV(slotOffset, pureFn, exps, thisArg) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/pipe.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -36800,6 +36940,7 @@ function unwrapValue$1(lView, newValue) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/event_emitter.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -37001,6 +37142,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/query_list.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -37173,6 +37315,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/definition.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -37533,6 +37676,7 @@ const unusedValueExportToPlacateAjd$7 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/query.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -37764,6 +37908,7 @@ const unusedValueExportToPlacateAjd$8 = 1;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/query.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -38511,6 +38656,7 @@ function getTQuery(tView, index) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/view_engine_compatibility_prebound.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -38545,11 +38691,13 @@ function ɵɵinjectPipeChangeDetectorRef(flags = InjectFlags.Default) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/index.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/jit/environment.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 const ɵ0$d = /**
@@ -38712,6 +38860,7 @@ const angularCoreEnv = ((ɵ0$d))();
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/jit/module.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -39374,6 +39523,7 @@ function isNgModule(value) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/jit/directive.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -39743,6 +39893,7 @@ function shouldAddAbstractDirective(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/jit/pipe.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -39806,6 +39957,7 @@ function getPipeMetadata(type, meta) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/directives.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40007,6 +40159,7 @@ const SWITCH_COMPILE_PIPE = SWITCH_COMPILE_PIPE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/ng_module.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40194,11 +40347,13 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/application_init.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40308,6 +40463,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/application_tokens.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40375,6 +40531,7 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/console.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class Console {
@@ -40402,6 +40559,7 @@ Console.decorators = [
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/i18n/tokens.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40489,6 +40647,7 @@ MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = 'Ignore';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/ivy_switch.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40507,6 +40666,7 @@ const ivyEnabled = SWITCH_IVY_ENABLED__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/compiler.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40707,6 +40867,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/profile/wtf_impl.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40825,6 +40986,7 @@ function endTimeRange(range) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/profile/profile.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -40975,6 +41137,7 @@ function getNativeRequestAnimationFrame() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/zone/ng_zone.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -41511,6 +41674,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/testability/testability.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -41940,6 +42104,7 @@ let _testabilityGetter = new _NoopGetTestability();
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/application_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -42999,16 +43164,19 @@ function _mergeArrays(parts) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/zone.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/ng_module_factory_loader.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -43069,6 +43237,7 @@ function noModuleError(id) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/system_js_ng_module_factory_loader.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -43215,6 +43384,7 @@ function checkNotEmpty(value, modulePath, exportName) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker/view_ref.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -43342,11 +43512,13 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/linker.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/debug/debug_node.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -44311,11 +44483,13 @@ const DebugElement = DebugElement__PRE_R3__;
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/change_detection.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/platform_core_providers.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -44336,6 +44510,7 @@ const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDER
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/application_module.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -44471,6 +44646,7 @@ ApplicationModule.ctorParameters = () => [
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/element.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -44899,6 +45075,7 @@ function setElementProperty(view, binding, renderNode, name, value) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/query.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -45126,6 +45303,7 @@ function getQueryValue(view, nodeDef, queryValueType) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/ng_content.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -45181,6 +45359,7 @@ function appendNgContent(view, renderHost, def) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/pure_expression.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -45460,6 +45639,7 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/text.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -45641,6 +45821,7 @@ function _addInterpolationPart(value, binding) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/view.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -46495,6 +46676,7 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/services.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -47792,6 +47974,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/entrypoint.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -47893,26 +48076,31 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/view/index.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/core_private_export.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/core_render3_private_export.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/codegen_private_exports.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/core.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 if (ngDevMode) {
@@ -47933,11 +48121,13 @@ if (ngDevMode) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/public_api.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/index.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.3+35.sha-ad9b9a3.with-local-changes
+ * @license Angular v9.0.0-rc.3+42.sha-99e68d0.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,6 +10,7 @@ import { ResourceLoader } from '@angular/compiler';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/async_fallback.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -172,6 +173,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/async.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -218,6 +220,7 @@ function async(fn) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/component_fixture.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -528,6 +531,7 @@ function scheduleMicroTask(fn) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/fake_async_fallback.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -693,6 +697,7 @@ function flushMicrotasksFallback() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/fake_async.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -813,6 +818,7 @@ function flushMicrotasks() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/async_test_completer.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -873,6 +879,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/test_bed_common.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1046,6 +1053,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/metadata/resource_loading.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -1241,6 +1249,7 @@ function componentDefResolved(type) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/metadata_overrider.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -1432,6 +1441,7 @@ function _valueProps(obj) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/resolvers.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -1591,6 +1601,7 @@ class NgModuleResolver extends OverrideResolver {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/r3_test_bed_compiler.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @enum {number} */
@@ -1821,7 +1832,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     compileComponents() {
-        return __awaiter(this, void 0, void 0, /** @this {!R3TestBedCompiler} */ function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             this.clearComponentResolutionQueue();
             // Run compilers for all queued types.
             /** @type {?} */
@@ -1891,7 +1902,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     _compileNgModuleAsync(moduleType) {
-        return __awaiter(this, void 0, void 0, /** @this {!R3TestBedCompiler} */ function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             this.queueTypesFromModulesArray([moduleType]);
             yield this.compileComponents();
             this.applyProviderOverrides();
@@ -2745,7 +2756,7 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAsync(moduleType) {
-        return __awaiter(this, void 0, void 0, /** @this {!R3TestCompiler} */ function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this.testBed._compileNgModuleAsync(moduleType);
             return new ɵNgModuleFactory(moduleType);
         });
@@ -2768,7 +2779,7 @@ class R3TestCompiler {
      * @return {?}
      */
     compileModuleAndAllComponentsAsync(moduleType) {
-        return __awaiter(this, void 0, void 0, /** @this {!R3TestCompiler} */ function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             /** @type {?} */
             const ngModuleFactory = yield this.compileModuleAsync(moduleType);
             /** @type {?} */
@@ -2805,6 +2816,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/r3_test_bed.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -3311,6 +3323,7 @@ function _getTestBedRender3() {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/test_compiler.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -3407,6 +3420,7 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/test_bed.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -4333,6 +4347,7 @@ function withModule(moduleDef, fn) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/before_each.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
@@ -4354,6 +4369,7 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/metadata_override.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /**
@@ -4366,21 +4382,25 @@ const __core_private_testing_placeholder__ = '';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/private_export_testing.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/testing.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/public_api.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/index.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
