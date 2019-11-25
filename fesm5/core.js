@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+251.sha-478f882.with-local-changes
+ * @license Angular v9.0.0-rc.1+250.sha-04b12fc.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15736,21 +15736,6 @@ function patchHostStylingFlag(tNode, hostBindingsMode, isClassBased) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) {
-    ngDevMode && ngDevMode.firstCreatePass++;
-    var tViewConsts = tView.consts;
-    var attrs = getConstant(tViewConsts, attrsIndex);
-    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
-    if (attrs !== null) {
-        registerInitialStylingOnTNode(tNode, attrs, 0);
-    }
-    var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && validateElement(lView, native, tNode, hasDirectives);
-    if (tView.queries !== null) {
-        tView.queries.elementStart(tView, tNode);
-    }
-    return tNode;
-}
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -15768,19 +15753,20 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
 function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     var lView = getLView();
     var tView = lView[TVIEW];
-    var adjustedIndex = HEADER_OFFSET + index;
+    var tViewConsts = tView.consts;
+    var attrs = getConstant(tViewConsts, attrsIndex);
+    var localRefs = getConstant(tViewConsts, localRefsIndex);
     ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
-    ngDevMode && assertDataInRange(lView, adjustedIndex);
+    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
     var renderer = lView[RENDERER];
-    var native = lView[adjustedIndex] = elementCreate(name, renderer, getNamespace());
-    var tNode = tView.firstCreatePass ?
-        elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    setPreviousOrParentTNode(tNode, true);
-    var attrs = tNode.attrs;
+    var native = lView[index + HEADER_OFFSET] = elementCreate(name, renderer, getNamespace());
+    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
     if (attrs != null) {
-        setUpAttributes(renderer, native, attrs);
+        var lastAttrIndex = setUpAttributes(renderer, native, attrs);
+        if (tView.firstCreatePass) {
+            registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
+        }
     }
     if ((tNode.flags & 256 /* hasInitialStyling */) === 256 /* hasInitialStyling */) {
         renderInitialStyling(renderer, native, tNode, false);
@@ -15793,11 +15779,23 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
         attachPatchData(native, lView);
     }
     increaseElementDepthCount();
+    // if a directive contains a host binding for "class" then all class-based data will
+    // flow through that (except for `[class.prop]` bindings). This also includes initial
+    // static class values as well. (Note that this will be fixed once map-based `[style]`
+    // and `[class]` bindings work for multiple directives.)
+    if (tView.firstCreatePass) {
+        ngDevMode && ngDevMode.firstCreatePass++;
+        var hasDirectives = resolveDirectives(tView, lView, tNode, localRefs);
+        ngDevMode && validateElement(lView, native, tNode, hasDirectives);
+        if (tView.queries !== null) {
+            tView.queries.elementStart(tView, tNode);
+        }
+    }
     if (isDirectiveHost(tNode)) {
         createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
-    if (localRefsIndex != null) {
+    if (localRefs != null) {
         saveResolvedLocalsInData(lView, tNode);
     }
 }
@@ -19586,7 +19584,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+251.sha-478f882.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+250.sha-04b12fc.with-local-changes');
 
 /**
  * @license
