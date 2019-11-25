@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.3+55.sha-7b77ead.with-local-changes
+ * @license Angular v9.0.0-rc.3+63.sha-688b188.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10513,10 +10513,6 @@ function executeOnDestroys(view) {
  *   into destination.
  */
 function getRenderParent(tNode, currentView) {
-    // Nodes of the top-most view can be inserted eagerly.
-    if (isRootView(currentView)) {
-        return nativeParentNode(currentView[RENDERER], getNativeByTNode(tNode, currentView));
-    }
     // Skip over element and ICU containers as those are represented by a comment node and
     // can't be used as a render parent.
     var parentTNode = tNode.parent;
@@ -15738,6 +15734,21 @@ function patchHostStylingFlag(tNode, hostBindingsMode, isClassBased) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) {
+    ngDevMode && ngDevMode.firstCreatePass++;
+    var tViewConsts = tView.consts;
+    var attrs = getConstant(tViewConsts, attrsIndex);
+    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
+    if (attrs !== null) {
+        registerInitialStylingOnTNode(tNode, attrs, 0);
+    }
+    var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
+    ngDevMode && validateElement(lView, native, tNode, hasDirectives);
+    if (tView.queries !== null) {
+        tView.queries.elementStart(tView, tNode);
+    }
+    return tNode;
+}
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -15755,20 +15766,19 @@ function patchHostStylingFlag(tNode, hostBindingsMode, isClassBased) {
 function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     var lView = getLView();
     var tView = lView[TVIEW];
-    var tViewConsts = tView.consts;
-    var attrs = getConstant(tViewConsts, attrsIndex);
-    var localRefs = getConstant(tViewConsts, localRefsIndex);
+    var adjustedIndex = HEADER_OFFSET + index;
     ngDevMode && assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
-    ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+    ngDevMode && assertDataInRange(lView, adjustedIndex);
     var renderer = lView[RENDERER];
-    var native = lView[index + HEADER_OFFSET] = elementCreate(name, renderer, getNamespace());
-    var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
+    var native = lView[adjustedIndex] = elementCreate(name, renderer, getNamespace());
+    var tNode = tView.firstCreatePass ?
+        elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) :
+        tView.data[adjustedIndex];
+    setPreviousOrParentTNode(tNode, true);
+    var attrs = tNode.attrs;
     if (attrs != null) {
-        var lastAttrIndex = setUpAttributes(renderer, native, attrs);
-        if (tView.firstCreatePass) {
-            registerInitialStylingOnTNode(tNode, attrs, lastAttrIndex);
-        }
+        setUpAttributes(renderer, native, attrs);
     }
     if ((tNode.flags & 256 /* hasInitialStyling */) === 256 /* hasInitialStyling */) {
         renderInitialStyling(renderer, native, tNode, false);
@@ -15781,23 +15791,11 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
         attachPatchData(native, lView);
     }
     increaseElementDepthCount();
-    // if a directive contains a host binding for "class" then all class-based data will
-    // flow through that (except for `[class.prop]` bindings). This also includes initial
-    // static class values as well. (Note that this will be fixed once map-based `[style]`
-    // and `[class]` bindings work for multiple directives.)
-    if (tView.firstCreatePass) {
-        ngDevMode && ngDevMode.firstCreatePass++;
-        var hasDirectives = resolveDirectives(tView, lView, tNode, localRefs);
-        ngDevMode && validateElement(lView, native, tNode, hasDirectives);
-        if (tView.queries !== null) {
-            tView.queries.elementStart(tView, tNode);
-        }
-    }
     if (isDirectiveHost(tNode)) {
         createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
-    if (localRefs != null) {
+    if (localRefsIndex != null) {
         saveResolvedLocalsInData(lView, tNode);
     }
 }
@@ -19584,7 +19582,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.3+55.sha-7b77ead.with-local-changes');
+var VERSION = new Version('9.0.0-rc.3+63.sha-688b188.with-local-changes');
 
 /**
  * @license
