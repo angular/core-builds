@@ -1,5 +1,4 @@
 import { SanitizerFn } from '../interfaces/sanitization';
-import { TsickleIssue1009 } from './shared';
 /**
  * Updates the value of or removes a bound attribute on an Element.
  *
@@ -13,4 +12,4 @@ import { TsickleIssue1009 } from './shared';
  *
  * @codeGenApi
  */
-export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): typeof ɵɵattribute;

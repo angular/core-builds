@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import '../util/ng_i18n_closure_mode';
-import { TsickleIssue1009 } from './instructions/shared';
 /**
  * Extracts a part of a message and removes the rest.
  *
@@ -129,7 +128,7 @@ export declare function ɵɵi18nAttributes(index: number, values: string[]): voi
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
+export declare function ɵɵi18nExp<T>(value: T): typeof ɵɵi18nExp;
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
  *

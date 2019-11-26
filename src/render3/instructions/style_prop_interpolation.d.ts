@@ -1,4 +1,3 @@
-import { TsickleIssue1009 } from './shared';
 /**
  *
  * Update an interpolated style property on an element with single bound value surrounded by text.
@@ -25,7 +24,7 @@ import { TsickleIssue1009 } from './shared';
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate1;
 /**
  *
  * Update an interpolated style property on an element with 2 bound values surrounded by text.
@@ -54,7 +53,7 @@ export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate2;
 /**
  *
  * Update an interpolated style property on an element with 3 bound values surrounded by text.
@@ -85,7 +84,7 @@ export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate3;
 /**
  *
  * Update an interpolated style property on an element with 4 bound values surrounded by text.
@@ -118,7 +117,7 @@ export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate4;
 /**
  *
  * Update an interpolated style property on an element with 5 bound values surrounded by text.
@@ -153,7 +152,7 @@ export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate5;
 /**
  *
  * Update an interpolated style property on an element with 6 bound values surrounded by text.
@@ -190,7 +189,7 @@ export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate6;
 /**
  *
  * Update an interpolated style property on an element with 7 bound values surrounded by text.
@@ -230,7 +229,7 @@ export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate7;
 /**
  *
  * Update an interpolated style property on an element with 8 bound values surrounded by text.
@@ -272,7 +271,7 @@ export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate8;
 /**
  * Update an interpolated style property on an element with 8 or more bound values surrounded by
  * text.
@@ -303,4 +302,4 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;

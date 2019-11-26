@@ -1,6 +1,5 @@
 import { SanitizerFn } from '../interfaces/sanitization';
 import { NO_CHANGE } from '../tokens';
-import { TsickleIssue1009 } from './shared';
 /**
  * Update a property on a host element. Only applies to native node properties, not inputs.
  *
@@ -15,7 +14,7 @@ import { TsickleIssue1009 } from './shared';
  *
  * @codeGenApi
  */
-export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵhostProperty;
 /**
  * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
  *
@@ -37,4 +36,4 @@ export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitize
  *
  * @codeGenApi
  */
-export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵupdateSyntheticHostBinding;

@@ -129,12 +129,6 @@ export declare function storeCleanupWithContext(lView: LView, context: any, clea
  */
 export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
 /**
- * Tsickle has a bug where it creates an infinite loop for a function returning itself.
- * This is a temporary type that will be removed when the issue is resolved.
- * https://github.com/angular/tsickle/issues/1009)
- */
-export declare type TsickleIssue1009 = any;
-/**
  * Constructs a TNode object from the arguments.
  *
  * @param tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)

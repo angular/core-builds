@@ -1,5 +1,4 @@
 import { SanitizerFn } from '../interfaces/sanitization';
-import { TsickleIssue1009 } from './shared';
 /**
  * Update a property on a selected element.
  *
@@ -18,4 +17,4 @@ import { TsickleIssue1009 } from './shared';
  *
  * @codeGenApi
  */
-export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵproperty;

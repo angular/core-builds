@@ -1,4 +1,3 @@
-import { TsickleIssue1009 } from './shared';
 /**
  *
  * Update text content with a lone bound value
@@ -19,7 +18,7 @@ import { TsickleIssue1009 } from './shared';
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
+export declare function ɵɵtextInterpolate(v0: any): typeof ɵɵtextInterpolate;
 /**
  *
  * Update text content with single bound value surrounded by other text.
@@ -39,7 +38,7 @@ export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): typeof ɵɵtextInterpolate1;
 /**
  *
  * Update text content with 2 bound values surrounded by other text.
@@ -59,7 +58,7 @@ export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: st
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): typeof ɵɵtextInterpolate2;
 /**
  *
  * Update text content with 3 bound values surrounded by other text.
@@ -80,7 +79,7 @@ export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): typeof ɵɵtextInterpolate3;
 /**
  *
  * Update text content with 4 bound values surrounded by other text.
@@ -101,7 +100,7 @@ export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string
  * @see ɵɵtextInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): typeof ɵɵtextInterpolate4;
 /**
  *
  * Update text content with 5 bound values surrounded by other text.
@@ -122,7 +121,7 @@ export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): typeof ɵɵtextInterpolate5;
 /**
  *
  * Update text content with 6 bound values surrounded by other text.
@@ -145,7 +144,7 @@ export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): typeof ɵɵtextInterpolate6;
 /**
  *
  * Update text content with 7 bound values surrounded by other text.
@@ -166,7 +165,7 @@ export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): typeof ɵɵtextInterpolate7;
 /**
  *
  * Update text content with 8 bound values surrounded by other text.
@@ -187,7 +186,7 @@ export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): typeof ɵɵtextInterpolate8;
 /**
  * Update text content with 9 or more bound values other surrounded by text.
  *
@@ -212,4 +211,4 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
+export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;

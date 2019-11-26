@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { GlobalTargetResolver } from '../interfaces/renderer';
-import { TsickleIssue1009 } from './shared';
 /**
  * Adds an event listener to the current node.
  *
@@ -21,7 +20,7 @@ import { TsickleIssue1009 } from './shared';
  *
  * @codeGenApi
  */
-export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): TsickleIssue1009;
+export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
 /**
 * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
 *
@@ -43,4 +42,4 @@ export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) =>
  *
  * @codeGenApi
 */
-export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): TsickleIssue1009;
+export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵcomponentHostSyntheticListener;
