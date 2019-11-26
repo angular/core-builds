@@ -19,13 +19,8 @@ import { HookData, InitPhaseState, LView, TView } from './interfaces/view';
  * @param directiveIndex The index of the directive in LView
  * @param directiveDef The definition containing the hooks to setup in tView
  * @param tView The current TView
- * @param nodeIndex The index of the node to which the directive is attached
- * @param initialPreOrderHooksLength the number of pre-order hooks already registered before the
- * current process, used to know if the node index has to be added to the array. If it is -1,
- * the node index is never added.
- * @param initialPreOrderCheckHooksLength same as previous for pre-order check hooks
  */
-export declare function registerPreOrderHooks(directiveIndex: number, directiveDef: DirectiveDef<any>, tView: TView, nodeIndex: number, initialPreOrderHooksLength: number, initialPreOrderCheckHooksLength: number): void;
+export declare function registerPreOrderHooks(directiveIndex: number, directiveDef: DirectiveDef<any>, tView: TView): void;
 /**
  *
  * Loops through the directives on the provided `tNode` and queues hooks to be

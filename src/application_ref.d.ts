@@ -269,7 +269,6 @@ export declare class ApplicationRef {
     private _exceptionHandler;
     private _componentFactoryResolver;
     private _initStatus;
-    private _bootstrapListeners;
     private _views;
     private _runningTick;
     private _enforceNoNewChanges;

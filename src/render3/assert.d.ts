@@ -18,3 +18,8 @@ export declare function assertLContainer(value: any): void;
 export declare function assertLViewOrUndefined(value: any): void;
 export declare function assertLView(value: any): void;
 export declare function assertFirstCreatePass(tView: TView, errMessage?: string): void;
+/**
+ * This is a basic sanity check that an object is probably a directive def. DirectiveDef is
+ * an interface, so we can't do a direct instanceof check.
+ */
+export declare function assertDirectiveDef(obj: any): void;
