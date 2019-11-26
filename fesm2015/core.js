@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+260.sha-9ba5344.with-local-changes
+ * @license Angular v9.0.0-rc.1+264.sha-d25de63.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2682,307 +2682,16 @@ function assertLView(value) {
 function assertFirstCreatePass(tView, errMessage) {
     assertEqual(tView.firstCreatePass, true, errMessage || 'Should only be called in first create pass.');
 }
-
 /**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/interfaces/injector.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @type {?} */
-const TNODE = 8;
-/** @type {?} */
-const PARENT_INJECTOR = 8;
-/** @type {?} */
-const INJECTOR_BLOOM_PARENT_SIZE = 9;
-/**
- * Represents a relative location of parent injector.
- *
- * The interfaces encodes number of parents `LView`s to traverse and index in the `LView`
- * pointing to the parent injector.
- * @record
- */
-function RelativeInjectorLocation() { }
-if (false) {
-    /** @type {?} */
-    RelativeInjectorLocation.prototype.__brand__;
-}
-/** @enum {number} */
-const RelativeInjectorLocationFlags = {
-    InjectorIndexMask: 32767,
-    ViewOffsetShift: 16,
-    NO_PARENT: -1,
-};
-/** @type {?} */
-const NO_PARENT_INJECTOR = (/** @type {?} */ (-1));
-/**
- * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
- * `TView.data`. This allows us to store information about the current node's tokens (which
- * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
- * shared, so they live in `LView`).
- *
- * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
- * determines whether a directive is available on the associated node or not. This prevents us
- * from searching the directives array at this level unless it's probable the directive is in it.
- *
- * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
- *
- * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
- * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
- * will differ based on where it is flattened into the main array, so it's not possible to know
- * the indices ahead of time and save their types here. The interfaces are still included here
- * for documentation purposes.
- *
- * export interface LInjector extends Array<any> {
- *
- *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
- *    [0]: number;
- *
- *    // Cumulative bloom for directive IDs 32-63
- *    [1]: number;
- *
- *    // Cumulative bloom for directive IDs 64-95
- *    [2]: number;
- *
- *    // Cumulative bloom for directive IDs 96-127
- *    [3]: number;
- *
- *    // Cumulative bloom for directive IDs 128-159
- *    [4]: number;
- *
- *    // Cumulative bloom for directive IDs 160 - 191
- *    [5]: number;
- *
- *    // Cumulative bloom for directive IDs 192 - 223
- *    [6]: number;
- *
- *    // Cumulative bloom for directive IDs 224 - 255
- *    [7]: number;
- *
- *    // We need to store a reference to the injector's parent so DI can keep looking up
- *    // the injector tree until it finds the dependency it's looking for.
- *    [PARENT_INJECTOR]: number;
- * }
- *
- * export interface TInjector extends Array<any> {
- *
- *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
- *    [0]: number;
- *
- *    // Shared node bloom for directive IDs 32-63
- *    [1]: number;
- *
- *    // Shared node bloom for directive IDs 64-95
- *    [2]: number;
- *
- *    // Shared node bloom for directive IDs 96-127
- *    [3]: number;
- *
- *    // Shared node bloom for directive IDs 128-159
- *    [4]: number;
- *
- *    // Shared node bloom for directive IDs 160 - 191
- *    [5]: number;
- *
- *    // Shared node bloom for directive IDs 192 - 223
- *    [6]: number;
- *
- *    // Shared node bloom for directive IDs 224 - 255
- *    [7]: number;
- *
- *    // Necessary to find directive indices for a particular node.
- *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
- *  }
- */
-/**
- * Factory for creating instances of injectors in the NodeInjector.
- *
- * This factory is complicated by the fact that it can resolve `multi` factories as well.
- *
- * NOTE: Some of the fields are optional which means that this class has two hidden classes.
- * - One without `multi` support (most common)
- * - One with `multi` values, (rare).
- *
- * Since VMs can cache up to 4 inline hidden classes this is OK.
- *
- * - Single factory: Only `resolving` and `factory` is defined.
- * - `providers` factory: `componentProviders` is a number and `index = -1`.
- * - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
- */
-class NodeInjectorFactory {
-    /**
-     * @param {?} factory
-     * @param {?} isViewProvider
-     * @param {?} injectImplementation
-     */
-    constructor(factory, 
-    /**
-     * Set to `true` if the token is declared in `viewProviders` (or if it is component).
-     */
-    isViewProvider, injectImplementation) {
-        this.factory = factory;
-        /**
-         * Marker set to true during factory invocation to see if we get into recursive loop.
-         * Recursive loop causes an error to be displayed.
-         */
-        this.resolving = false;
-        this.canSeeViewProviders = isViewProvider;
-        this.injectImpl = injectImplementation;
-    }
-}
-if (false) {
-    /**
-     * The inject implementation to be activated when using the factory.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.injectImpl;
-    /**
-     * Marker set to true during factory invocation to see if we get into recursive loop.
-     * Recursive loop causes an error to be displayed.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.resolving;
-    /**
-     * Marks that the token can see other Tokens declared in `viewProviders` on the same node.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.canSeeViewProviders;
-    /**
-     * An array of factories to use in case of `multi` provider.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.multi;
-    /**
-     * Number of `multi`-providers which belong to the component.
-     *
-     * This is needed because when multiple components and directives declare the `multi` provider
-     * they have to be concatenated in the correct order.
-     *
-     * Example:
-     *
-     * If we have a component and directive active an a single element as declared here
-     * ```
-     * component:
-     *   provides: [ {provide: String, useValue: 'component', multi: true} ],
-     *   viewProvides: [ {provide: String, useValue: 'componentView', multi: true} ],
-     *
-     * directive:
-     *   provides: [ {provide: String, useValue: 'directive', multi: true} ],
-     * ```
-     *
-     * Then the expected results are:
-     *
-     * ```
-     * providers: ['component', 'directive']
-     * viewProviders: ['component', 'componentView', 'directive']
-     * ```
-     *
-     * The way to think about it is that the `viewProviders` have been inserted after the component
-     * but before the directives, which is why we need to know how many `multi`s have been declared by
-     * the component.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.componentProviders;
-    /**
-     * Current index of the Factory in the `data`. Needed for `viewProviders` and `providers` merging.
-     * See `providerFactory`.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.index;
-    /**
-     * Because the same `multi` provider can be declared in `provides` and `viewProvides` it is
-     * possible for `viewProvides` to shadow the `provides`. For this reason we store the
-     * `provideFactory` of the `providers` so that `providers` can be extended with `viewProviders`.
-     *
-     * Example:
-     *
-     * Given:
-     * ```
-     * provides: [ {provide: String, useValue: 'all', multi: true} ],
-     * viewProvides: [ {provide: String, useValue: 'viewOnly', multi: true} ],
-     * ```
-     *
-     * We have to return `['all']` in case of content injection, but `['all', 'viewOnly']` in case
-     * of view injection. We further have to make sure that the shared instances (in our case
-     * `all`) are the exact same instance in both the content as well as the view injection. (We
-     * have to make sure that we don't double instantiate.) For this reason the `viewProvides`
-     * `Factory` has a pointer to the shadowed `provides` factory so that it can instantiate the
-     * `providers` (`['all']`) and then extend it with `viewProviders` (`['all'] + ['viewOnly'] =
-     * ['all', 'viewOnly']`).
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.providerFactory;
-    /**
-     * Factory to invoke in order to create a new instance.
-     * @type {?}
-     */
-    NodeInjectorFactory.prototype.factory;
-}
-/**
+ * This is a basic sanity check that an object is probably a directive def. DirectiveDef is
+ * an interface, so we can't do a direct instanceof check.
  * @param {?} obj
  * @return {?}
  */
-function isFactory(obj) {
-    return obj instanceof NodeInjectorFactory;
-}
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-/** @type {?} */
-const unusedValueExportToPlacateAjd$2 = 1;
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/node_assert.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} tNode
- * @param {?} type
- * @return {?}
- */
-function assertNodeType(tNode, type) {
-    assertDefined(tNode, 'should be called with a TNode');
-    assertEqual(tNode.type, type, `should be a ${typeName(type)}`);
-}
-/**
- * @param {?} tNode
- * @param {...?} types
- * @return {?}
- */
-function assertNodeOfPossibleTypes(tNode, ...types) {
-    assertDefined(tNode, 'should be called with a TNode');
-    /** @type {?} */
-    const found = types.some((/**
-     * @param {?} type
-     * @return {?}
-     */
-    type => tNode.type === type));
-    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
-}
-/**
- * @param {?} type
- * @return {?}
- */
-function typeName(type) {
-    if (type == 1 /* Projection */)
-        return 'Projection';
-    if (type == 0 /* Container */)
-        return 'Container';
-    if (type == 5 /* IcuContainer */)
-        return 'IcuContainer';
-    if (type == 2 /* View */)
-        return 'View';
-    if (type == 3 /* Element */)
-        return 'Element';
-    if (type == 4 /* ElementContainer */)
-        return 'ElementContainer';
-    return '<unknown>';
+function assertDirectiveDef(obj) {
+    if (obj.type === undefined || obj.selectors == undefined || obj.inputs === undefined) {
+        throwError(`Expected a DirectiveDef/ComponentDef and this object does not seem to have the expected shape.`);
+    }
 }
 
 /**
@@ -3753,6 +3462,543 @@ function getCurrentStyleSanitizer() {
     /** @type {?} */
     const lFrame = instructionState.lFrame;
     return lFrame === null ? null : lFrame.currentSanitizer;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/hooks.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Adds all directive lifecycle hooks from the given `DirectiveDef` to the given `TView`.
+ *
+ * Must be run *only* on the first template pass.
+ *
+ * Sets up the pre-order hooks on the provided `tView`,
+ * see {\@link HookData} for details about the data structure.
+ *
+ * @param {?} directiveIndex The index of the directive in LView
+ * @param {?} directiveDef The definition containing the hooks to setup in tView
+ * @param {?} tView The current TView
+ * @return {?}
+ */
+function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
+    ngDevMode && assertFirstCreatePass(tView);
+    const { onChanges, onInit, doCheck } = directiveDef;
+    if (onChanges) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, onChanges);
+        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, onChanges);
+    }
+    if (onInit) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(-directiveIndex, onInit);
+    }
+    if (doCheck) {
+        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, doCheck);
+        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, doCheck);
+    }
+}
+/**
+ *
+ * Loops through the directives on the provided `tNode` and queues hooks to be
+ * run that are not initialization hooks.
+ *
+ * Should be executed during `elementEnd()` and similar to
+ * preserve hook execution order. Content, view, and destroy hooks for projected
+ * components and directives must be called *before* their hosts.
+ *
+ * Sets up the content, view, and destroy hooks on the provided `tView`,
+ * see {\@link HookData} for details about the data structure.
+ *
+ * NOTE: This does not set up `onChanges`, `onInit` or `doCheck`, those are set up
+ * separately at `elementStart`.
+ *
+ * @param {?} tView The current TView
+ * @param {?} tNode The TNode whose directives are to be searched for hooks to queue
+ * @return {?}
+ */
+function registerPostOrderHooks(tView, tNode) {
+    ngDevMode && assertFirstCreatePass(tView);
+    // It's necessary to loop through the directives at elementEnd() (rather than processing in
+    // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
+    // hooks for projected components and directives must be called *before* their hosts.
+    for (let i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
+        /** @type {?} */
+        const directiveDef = (/** @type {?} */ (tView.data[i]));
+        if (directiveDef.afterContentInit) {
+            (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
+        }
+        if (directiveDef.afterContentChecked) {
+            (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
+            (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, directiveDef.afterContentChecked);
+        }
+        if (directiveDef.afterViewInit) {
+            (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
+        }
+        if (directiveDef.afterViewChecked) {
+            (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
+            (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
+        }
+        if (directiveDef.onDestroy != null) {
+            (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
+        }
+    }
+}
+/**
+ * Executing hooks requires complex logic as we need to deal with 2 constraints.
+ *
+ * 1. Init hooks (ngOnInit, ngAfterContentInit, ngAfterViewInit) must all be executed once and only
+ * once, across many change detection cycles. This must be true even if some hooks throw, or if
+ * some recursively trigger a change detection cycle.
+ * To solve that, it is required to track the state of the execution of these init hooks.
+ * This is done by storing and maintaining flags in the view: the {@link InitPhaseState},
+ * and the index within that phase. They can be seen as a cursor in the following structure:
+ * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
+ * They are are stored as flags in LView[FLAGS].
+ *
+ * 2. Pre-order hooks can be executed in batches, because of the select instruction.
+ * To be able to pause and resume their execution, we also need some state about the hook's array
+ * that is being processed:
+ * - the index of the next hook to be executed
+ * - the number of init hooks already found in the processed part of the  array
+ * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
+ */
+/**
+ * Executes pre-order check hooks ( OnChanges, DoChanges) given a view where all the init hooks were
+ * executed once. This is a light version of executeInitAndCheckPreOrderHooks where we can skip read
+ * / write of the init-hooks related flags.
+ * @param {?} lView The LView where hooks are defined
+ * @param {?} hooks Hooks to be run
+ * @param {?=} nodeIndex 3 cases depending on the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ * @return {?}
+ */
+function executeCheckHooks(lView, hooks, nodeIndex) {
+    callHooks(lView, hooks, 3 /* InitPhaseCompleted */, nodeIndex);
+}
+/**
+ * Executes post-order init and check hooks (one of AfterContentInit, AfterContentChecked,
+ * AfterViewInit, AfterViewChecked) given a view where there are pending init hooks to be executed.
+ * @param {?} lView The LView where hooks are defined
+ * @param {?} hooks Hooks to be run
+ * @param {?} initPhase A phase for which hooks should be run
+ * @param {?=} nodeIndex 3 cases depending on the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ * @return {?}
+ */
+function executeInitAndCheckHooks(lView, hooks, initPhase, nodeIndex) {
+    ngDevMode && assertNotEqual(initPhase, 3 /* InitPhaseCompleted */, 'Init pre-order hooks should not be called more than once');
+    if ((lView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
+        callHooks(lView, hooks, initPhase, nodeIndex);
+    }
+}
+/**
+ * @param {?} lView
+ * @param {?} initPhase
+ * @return {?}
+ */
+function incrementInitPhaseFlags(lView, initPhase) {
+    ngDevMode &&
+        assertNotEqual(initPhase, 3 /* InitPhaseCompleted */, 'Init hooks phase should not be incremented after all init hooks have been run.');
+    /** @type {?} */
+    let flags = lView[FLAGS];
+    if ((flags & 3 /* InitPhaseStateMask */) === initPhase) {
+        flags &= 1023 /* IndexWithinInitPhaseReset */;
+        flags += 1 /* InitPhaseStateIncrementer */;
+        lView[FLAGS] = flags;
+    }
+}
+/**
+ * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
+ * the first LView pass
+ *
+ * @param {?} currentView The current view
+ * @param {?} arr The array in which the hooks are found
+ * @param {?} initPhase
+ * @param {?} currentNodeIndex 3 cases depending on the value:
+ * - undefined: all hooks from the array should be executed (post-order case)
+ * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
+ * flushing the remaining hooks)
+ * - number: execute hooks only from the saved index until that node index exclusive (pre-order
+ * case, when executing select(number))
+ * @return {?}
+ */
+function callHooks(currentView, arr, initPhase, currentNodeIndex) {
+    ngDevMode && assertEqual(getCheckNoChangesMode(), false, 'Hooks should never be run in the check no changes mode.');
+    /** @type {?} */
+    const startIndex = currentNodeIndex !== undefined ?
+        (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
+        0;
+    /** @type {?} */
+    const nodeIndexLimit = currentNodeIndex != null ? currentNodeIndex : -1;
+    /** @type {?} */
+    let lastNodeIndexFound = 0;
+    for (let i = startIndex; i < arr.length; i++) {
+        /** @type {?} */
+        const hook = (/** @type {?} */ (arr[i + 1]));
+        if (typeof hook === 'number') {
+            lastNodeIndexFound = (/** @type {?} */ (arr[i]));
+            if (currentNodeIndex != null && lastNodeIndexFound >= currentNodeIndex) {
+                break;
+            }
+        }
+        else {
+            /** @type {?} */
+            const isInitHook = arr[i] < 0;
+            if (isInitHook)
+                currentView[PREORDER_HOOK_FLAGS] += 65536 /* NumberOfInitHooksCalledIncrementer */;
+            if (lastNodeIndexFound < nodeIndexLimit || nodeIndexLimit == -1) {
+                callHook(currentView, initPhase, arr, i);
+                currentView[PREORDER_HOOK_FLAGS] =
+                    (currentView[PREORDER_HOOK_FLAGS] & 4294901760 /* NumberOfInitHooksCalledMask */) + i +
+                        2;
+            }
+            i++;
+        }
+    }
+}
+/**
+ * Execute one hook against the current `LView`.
+ *
+ * @param {?} currentView The current view
+ * @param {?} initPhase
+ * @param {?} arr The array in which the hooks are found
+ * @param {?} i The current index within the hook data array
+ * @return {?}
+ */
+function callHook(currentView, initPhase, arr, i) {
+    /** @type {?} */
+    const isInitHook = arr[i] < 0;
+    /** @type {?} */
+    const hook = (/** @type {?} */ (arr[i + 1]));
+    /** @type {?} */
+    const directiveIndex = isInitHook ? -arr[i] : (/** @type {?} */ (arr[i]));
+    /** @type {?} */
+    const directive = currentView[directiveIndex];
+    if (isInitHook) {
+        /** @type {?} */
+        const indexWithintInitPhase = currentView[FLAGS] >> 10 /* IndexWithinInitPhaseShift */;
+        // The init phase state must be always checked here as it may have been recursively
+        // updated
+        if (indexWithintInitPhase <
+            (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
+            (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
+            currentView[FLAGS] += 1024 /* IndexWithinInitPhaseIncrementer */;
+            hook.call(directive);
+        }
+    }
+    else {
+        hook.call(directive);
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/injector.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @type {?} */
+const TNODE = 8;
+/** @type {?} */
+const PARENT_INJECTOR = 8;
+/** @type {?} */
+const INJECTOR_BLOOM_PARENT_SIZE = 9;
+/**
+ * Represents a relative location of parent injector.
+ *
+ * The interfaces encodes number of parents `LView`s to traverse and index in the `LView`
+ * pointing to the parent injector.
+ * @record
+ */
+function RelativeInjectorLocation() { }
+if (false) {
+    /** @type {?} */
+    RelativeInjectorLocation.prototype.__brand__;
+}
+/** @enum {number} */
+const RelativeInjectorLocationFlags = {
+    InjectorIndexMask: 32767,
+    ViewOffsetShift: 16,
+    NO_PARENT: -1,
+};
+/** @type {?} */
+const NO_PARENT_INJECTOR = (/** @type {?} */ (-1));
+/**
+ * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
+ * `TView.data`. This allows us to store information about the current node's tokens (which
+ * can be shared in `TView`) as well as the tokens of its ancestor nodes (which cannot be
+ * shared, so they live in `LView`).
+ *
+ * Each of these slots (aside from the last slot) contains a bloom filter. This bloom filter
+ * determines whether a directive is available on the associated node or not. This prevents us
+ * from searching the directives array at this level unless it's probable the directive is in it.
+ *
+ * See: https://en.wikipedia.org/wiki/Bloom_filter for more about bloom filters.
+ *
+ * Because all injectors have been flattened into `LView` and `TViewData`, they cannot typed
+ * using interfaces as they were previously. The start index of each `LInjector` and `TInjector`
+ * will differ based on where it is flattened into the main array, so it's not possible to know
+ * the indices ahead of time and save their types here. The interfaces are still included here
+ * for documentation purposes.
+ *
+ * export interface LInjector extends Array<any> {
+ *
+ *    // Cumulative bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+ *    [0]: number;
+ *
+ *    // Cumulative bloom for directive IDs 32-63
+ *    [1]: number;
+ *
+ *    // Cumulative bloom for directive IDs 64-95
+ *    [2]: number;
+ *
+ *    // Cumulative bloom for directive IDs 96-127
+ *    [3]: number;
+ *
+ *    // Cumulative bloom for directive IDs 128-159
+ *    [4]: number;
+ *
+ *    // Cumulative bloom for directive IDs 160 - 191
+ *    [5]: number;
+ *
+ *    // Cumulative bloom for directive IDs 192 - 223
+ *    [6]: number;
+ *
+ *    // Cumulative bloom for directive IDs 224 - 255
+ *    [7]: number;
+ *
+ *    // We need to store a reference to the injector's parent so DI can keep looking up
+ *    // the injector tree until it finds the dependency it's looking for.
+ *    [PARENT_INJECTOR]: number;
+ * }
+ *
+ * export interface TInjector extends Array<any> {
+ *
+ *    // Shared node bloom for directive IDs 0-31  (IDs are % BLOOM_SIZE)
+ *    [0]: number;
+ *
+ *    // Shared node bloom for directive IDs 32-63
+ *    [1]: number;
+ *
+ *    // Shared node bloom for directive IDs 64-95
+ *    [2]: number;
+ *
+ *    // Shared node bloom for directive IDs 96-127
+ *    [3]: number;
+ *
+ *    // Shared node bloom for directive IDs 128-159
+ *    [4]: number;
+ *
+ *    // Shared node bloom for directive IDs 160 - 191
+ *    [5]: number;
+ *
+ *    // Shared node bloom for directive IDs 192 - 223
+ *    [6]: number;
+ *
+ *    // Shared node bloom for directive IDs 224 - 255
+ *    [7]: number;
+ *
+ *    // Necessary to find directive indices for a particular node.
+ *    [TNODE]: TElementNode|TElementContainerNode|TContainerNode;
+ *  }
+ */
+/**
+ * Factory for creating instances of injectors in the NodeInjector.
+ *
+ * This factory is complicated by the fact that it can resolve `multi` factories as well.
+ *
+ * NOTE: Some of the fields are optional which means that this class has two hidden classes.
+ * - One without `multi` support (most common)
+ * - One with `multi` values, (rare).
+ *
+ * Since VMs can cache up to 4 inline hidden classes this is OK.
+ *
+ * - Single factory: Only `resolving` and `factory` is defined.
+ * - `providers` factory: `componentProviders` is a number and `index = -1`.
+ * - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
+ */
+class NodeInjectorFactory {
+    /**
+     * @param {?} factory
+     * @param {?} isViewProvider
+     * @param {?} injectImplementation
+     */
+    constructor(factory, 
+    /**
+     * Set to `true` if the token is declared in `viewProviders` (or if it is component).
+     */
+    isViewProvider, injectImplementation) {
+        this.factory = factory;
+        /**
+         * Marker set to true during factory invocation to see if we get into recursive loop.
+         * Recursive loop causes an error to be displayed.
+         */
+        this.resolving = false;
+        this.canSeeViewProviders = isViewProvider;
+        this.injectImpl = injectImplementation;
+    }
+}
+if (false) {
+    /**
+     * The inject implementation to be activated when using the factory.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.injectImpl;
+    /**
+     * Marker set to true during factory invocation to see if we get into recursive loop.
+     * Recursive loop causes an error to be displayed.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.resolving;
+    /**
+     * Marks that the token can see other Tokens declared in `viewProviders` on the same node.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.canSeeViewProviders;
+    /**
+     * An array of factories to use in case of `multi` provider.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.multi;
+    /**
+     * Number of `multi`-providers which belong to the component.
+     *
+     * This is needed because when multiple components and directives declare the `multi` provider
+     * they have to be concatenated in the correct order.
+     *
+     * Example:
+     *
+     * If we have a component and directive active an a single element as declared here
+     * ```
+     * component:
+     *   provides: [ {provide: String, useValue: 'component', multi: true} ],
+     *   viewProvides: [ {provide: String, useValue: 'componentView', multi: true} ],
+     *
+     * directive:
+     *   provides: [ {provide: String, useValue: 'directive', multi: true} ],
+     * ```
+     *
+     * Then the expected results are:
+     *
+     * ```
+     * providers: ['component', 'directive']
+     * viewProviders: ['component', 'componentView', 'directive']
+     * ```
+     *
+     * The way to think about it is that the `viewProviders` have been inserted after the component
+     * but before the directives, which is why we need to know how many `multi`s have been declared by
+     * the component.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.componentProviders;
+    /**
+     * Current index of the Factory in the `data`. Needed for `viewProviders` and `providers` merging.
+     * See `providerFactory`.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.index;
+    /**
+     * Because the same `multi` provider can be declared in `provides` and `viewProvides` it is
+     * possible for `viewProvides` to shadow the `provides`. For this reason we store the
+     * `provideFactory` of the `providers` so that `providers` can be extended with `viewProviders`.
+     *
+     * Example:
+     *
+     * Given:
+     * ```
+     * provides: [ {provide: String, useValue: 'all', multi: true} ],
+     * viewProvides: [ {provide: String, useValue: 'viewOnly', multi: true} ],
+     * ```
+     *
+     * We have to return `['all']` in case of content injection, but `['all', 'viewOnly']` in case
+     * of view injection. We further have to make sure that the shared instances (in our case
+     * `all`) are the exact same instance in both the content as well as the view injection. (We
+     * have to make sure that we don't double instantiate.) For this reason the `viewProvides`
+     * `Factory` has a pointer to the shadowed `provides` factory so that it can instantiate the
+     * `providers` (`['all']`) and then extend it with `viewProviders` (`['all'] + ['viewOnly'] =
+     * ['all', 'viewOnly']`).
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.providerFactory;
+    /**
+     * Factory to invoke in order to create a new instance.
+     * @type {?}
+     */
+    NodeInjectorFactory.prototype.factory;
+}
+/**
+ * @param {?} obj
+ * @return {?}
+ */
+function isFactory(obj) {
+    return obj instanceof NodeInjectorFactory;
+}
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+/** @type {?} */
+const unusedValueExportToPlacateAjd$2 = 1;
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/node_assert.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @param {?} tNode
+ * @param {?} type
+ * @return {?}
+ */
+function assertNodeType(tNode, type) {
+    assertDefined(tNode, 'should be called with a TNode');
+    assertEqual(tNode.type, type, `should be a ${typeName(type)}`);
+}
+/**
+ * @param {?} tNode
+ * @param {...?} types
+ * @return {?}
+ */
+function assertNodeOfPossibleTypes(tNode, ...types) {
+    assertDefined(tNode, 'should be called with a TNode');
+    /** @type {?} */
+    const found = types.some((/**
+     * @param {?} type
+     * @return {?}
+     */
+    type => tNode.type === type));
+    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function typeName(type) {
+    if (type == 1 /* Projection */)
+        return 'Projection';
+    if (type == 0 /* Container */)
+        return 'Container';
+    if (type == 5 /* IcuContainer */)
+        return 'IcuContainer';
+    if (type == 2 /* View */)
+        return 'View';
+    if (type == 3 /* Element */)
+        return 'Element';
+    if (type == 4 /* ElementContainer */)
+        return 'ElementContainer';
+    return '<unknown>';
 }
 
 /**
@@ -5790,7 +6036,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
     /** @type {?} */
     const injectableIdx = locateDirectiveOrProvider(tNode, currentTView, token, canAccessViewProviders, isHostSpecialCase);
     if (injectableIdx !== null) {
-        return getNodeInjectable(currentTView.data, lView, injectableIdx, (/** @type {?} */ (tNode)));
+        return getNodeInjectable(lView, currentTView, injectableIdx, (/** @type {?} */ (tNode)));
     }
     else {
         return NOT_FOUND;
@@ -5843,20 +6089,22 @@ function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, 
     return null;
 }
 /**
- * Retrieve or instantiate the injectable from the `lData` at particular `index`.
+ * Retrieve or instantiate the injectable from the `LView` at particular `index`.
  *
  * This function checks to see if the value has already been instantiated and if so returns the
  * cached `injectable`. Otherwise if it detects that the value is still a factory it
  * instantiates the `injectable` and caches the value.
- * @param {?} tData
  * @param {?} lView
+ * @param {?} tView
  * @param {?} index
  * @param {?} tNode
  * @return {?}
  */
-function getNodeInjectable(tData, lView, index, tNode) {
+function getNodeInjectable(lView, tView, index, tNode) {
     /** @type {?} */
     let value = lView[index];
+    /** @type {?} */
+    const tData = tView.data;
     if (isFactory(value)) {
         /** @type {?} */
         const factory = value;
@@ -5874,6 +6122,16 @@ function getNodeInjectable(tData, lView, index, tNode) {
         enterDI(lView, tNode);
         try {
             value = lView[index] = factory.factory(undefined, tData, lView, tNode);
+            // This code path is hit for both directives and providers.
+            // For perf reasons, we want to avoid searching for hooks on providers.
+            // It does no harm to try (the hooks just won't exist), but the extra
+            // checks are unnecessary and this is a hot path. So we check to see
+            // if the index of the dependency is in the directive range for this
+            // tNode. If it's not, we know it's a provider and skip hook registration.
+            if (tView.firstCreatePass && index >= tNode.directiveStart) {
+                ngDevMode && assertDirectiveDef(tData[index]);
+                registerPreOrderHooks(index, (/** @type {?} */ (tData[index])), tView);
+            }
         }
         finally {
             if (factory.injectImpl)
@@ -8057,257 +8315,6 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
             ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
     }
     throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
-}
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/hooks.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Adds all directive lifecycle hooks from the given `DirectiveDef` to the given `TView`.
- *
- * Must be run *only* on the first template pass.
- *
- * Sets up the pre-order hooks on the provided `tView`,
- * see {\@link HookData} for details about the data structure.
- *
- * @param {?} directiveIndex The index of the directive in LView
- * @param {?} directiveDef The definition containing the hooks to setup in tView
- * @param {?} tView The current TView
- * @param {?} nodeIndex The index of the node to which the directive is attached
- * @param {?} initialPreOrderHooksLength the number of pre-order hooks already registered before the
- * current process, used to know if the node index has to be added to the array. If it is -1,
- * the node index is never added.
- * @param {?} initialPreOrderCheckHooksLength same as previous for pre-order check hooks
- * @return {?}
- */
-function registerPreOrderHooks(directiveIndex, directiveDef, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength) {
-    ngDevMode && assertFirstCreatePass(tView);
-    const { onChanges, onInit, doCheck } = directiveDef;
-    if (initialPreOrderHooksLength >= 0 &&
-        (!tView.preOrderHooks || initialPreOrderHooksLength === tView.preOrderHooks.length) &&
-        (onChanges || onInit || doCheck)) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(nodeIndex);
-    }
-    if (initialPreOrderCheckHooksLength >= 0 &&
-        (!tView.preOrderCheckHooks ||
-            initialPreOrderCheckHooksLength === tView.preOrderCheckHooks.length) &&
-        (onChanges || doCheck)) {
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(nodeIndex);
-    }
-    if (onChanges) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, onChanges);
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, onChanges);
-    }
-    if (onInit) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(-directiveIndex, onInit);
-    }
-    if (doCheck) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, doCheck);
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, doCheck);
-    }
-}
-/**
- *
- * Loops through the directives on the provided `tNode` and queues hooks to be
- * run that are not initialization hooks.
- *
- * Should be executed during `elementEnd()` and similar to
- * preserve hook execution order. Content, view, and destroy hooks for projected
- * components and directives must be called *before* their hosts.
- *
- * Sets up the content, view, and destroy hooks on the provided `tView`,
- * see {\@link HookData} for details about the data structure.
- *
- * NOTE: This does not set up `onChanges`, `onInit` or `doCheck`, those are set up
- * separately at `elementStart`.
- *
- * @param {?} tView The current TView
- * @param {?} tNode The TNode whose directives are to be searched for hooks to queue
- * @return {?}
- */
-function registerPostOrderHooks(tView, tNode) {
-    ngDevMode && assertFirstCreatePass(tView);
-    // It's necessary to loop through the directives at elementEnd() (rather than processing in
-    // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
-    // hooks for projected components and directives must be called *before* their hosts.
-    for (let i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
-        /** @type {?} */
-        const directiveDef = (/** @type {?} */ (tView.data[i]));
-        if (directiveDef.afterContentInit) {
-            (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
-        }
-        if (directiveDef.afterContentChecked) {
-            (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
-            (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, directiveDef.afterContentChecked);
-        }
-        if (directiveDef.afterViewInit) {
-            (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
-        }
-        if (directiveDef.afterViewChecked) {
-            (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
-            (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
-        }
-        if (directiveDef.onDestroy != null) {
-            (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
-        }
-    }
-}
-/**
- * Executing hooks requires complex logic as we need to deal with 2 constraints.
- *
- * 1. Init hooks (ngOnInit, ngAfterContentInit, ngAfterViewInit) must all be executed once and only
- * once, across many change detection cycles. This must be true even if some hooks throw, or if
- * some recursively trigger a change detection cycle.
- * To solve that, it is required to track the state of the execution of these init hooks.
- * This is done by storing and maintaining flags in the view: the {@link InitPhaseState},
- * and the index within that phase. They can be seen as a cursor in the following structure:
- * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
- * They are are stored as flags in LView[FLAGS].
- *
- * 2. Pre-order hooks can be executed in batches, because of the select instruction.
- * To be able to pause and resume their execution, we also need some state about the hook's array
- * that is being processed:
- * - the index of the next hook to be executed
- * - the number of init hooks already found in the processed part of the  array
- * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
- */
-/**
- * Executes pre-order check hooks ( OnChanges, DoChanges) given a view where all the init hooks were
- * executed once. This is a light version of executeInitAndCheckPreOrderHooks where we can skip read
- * / write of the init-hooks related flags.
- * @param {?} lView The LView where hooks are defined
- * @param {?} hooks Hooks to be run
- * @param {?=} nodeIndex 3 cases depending on the value:
- * - undefined: all hooks from the array should be executed (post-order case)
- * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
- * flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- * @return {?}
- */
-function executeCheckHooks(lView, hooks, nodeIndex) {
-    callHooks(lView, hooks, 3 /* InitPhaseCompleted */, nodeIndex);
-}
-/**
- * Executes post-order init and check hooks (one of AfterContentInit, AfterContentChecked,
- * AfterViewInit, AfterViewChecked) given a view where there are pending init hooks to be executed.
- * @param {?} lView The LView where hooks are defined
- * @param {?} hooks Hooks to be run
- * @param {?} initPhase A phase for which hooks should be run
- * @param {?=} nodeIndex 3 cases depending on the value:
- * - undefined: all hooks from the array should be executed (post-order case)
- * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
- * flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- * @return {?}
- */
-function executeInitAndCheckHooks(lView, hooks, initPhase, nodeIndex) {
-    ngDevMode && assertNotEqual(initPhase, 3 /* InitPhaseCompleted */, 'Init pre-order hooks should not be called more than once');
-    if ((lView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
-        callHooks(lView, hooks, initPhase, nodeIndex);
-    }
-}
-/**
- * @param {?} lView
- * @param {?} initPhase
- * @return {?}
- */
-function incrementInitPhaseFlags(lView, initPhase) {
-    ngDevMode &&
-        assertNotEqual(initPhase, 3 /* InitPhaseCompleted */, 'Init hooks phase should not be incremented after all init hooks have been run.');
-    /** @type {?} */
-    let flags = lView[FLAGS];
-    if ((flags & 3 /* InitPhaseStateMask */) === initPhase) {
-        flags &= 1023 /* IndexWithinInitPhaseReset */;
-        flags += 1 /* InitPhaseStateIncrementer */;
-        lView[FLAGS] = flags;
-    }
-}
-/**
- * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
- * the first LView pass
- *
- * @param {?} currentView The current view
- * @param {?} arr The array in which the hooks are found
- * @param {?} initPhase
- * @param {?} currentNodeIndex 3 cases depending on the value:
- * - undefined: all hooks from the array should be executed (post-order case)
- * - null: execute hooks only from the saved index until the end of the array (pre-order case, when
- * flushing the remaining hooks)
- * - number: execute hooks only from the saved index until that node index exclusive (pre-order
- * case, when executing select(number))
- * @return {?}
- */
-function callHooks(currentView, arr, initPhase, currentNodeIndex) {
-    ngDevMode && assertEqual(getCheckNoChangesMode(), false, 'Hooks should never be run in the check no changes mode.');
-    /** @type {?} */
-    const startIndex = currentNodeIndex !== undefined ?
-        (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
-        0;
-    /** @type {?} */
-    const nodeIndexLimit = currentNodeIndex != null ? currentNodeIndex : -1;
-    /** @type {?} */
-    let lastNodeIndexFound = 0;
-    for (let i = startIndex; i < arr.length; i++) {
-        /** @type {?} */
-        const hook = (/** @type {?} */ (arr[i + 1]));
-        if (typeof hook === 'number') {
-            lastNodeIndexFound = (/** @type {?} */ (arr[i]));
-            if (currentNodeIndex != null && lastNodeIndexFound >= currentNodeIndex) {
-                break;
-            }
-        }
-        else {
-            /** @type {?} */
-            const isInitHook = arr[i] < 0;
-            if (isInitHook)
-                currentView[PREORDER_HOOK_FLAGS] += 65536 /* NumberOfInitHooksCalledIncrementer */;
-            if (lastNodeIndexFound < nodeIndexLimit || nodeIndexLimit == -1) {
-                callHook(currentView, initPhase, arr, i);
-                currentView[PREORDER_HOOK_FLAGS] =
-                    (currentView[PREORDER_HOOK_FLAGS] & 4294901760 /* NumberOfInitHooksCalledMask */) + i +
-                        2;
-            }
-            i++;
-        }
-    }
-}
-/**
- * Execute one hook against the current `LView`.
- *
- * @param {?} currentView The current view
- * @param {?} initPhase
- * @param {?} arr The array in which the hooks are found
- * @param {?} i The current index within the hook data array
- * @return {?}
- */
-function callHook(currentView, initPhase, arr, i) {
-    /** @type {?} */
-    const isInitHook = arr[i] < 0;
-    /** @type {?} */
-    const hook = (/** @type {?} */ (arr[i + 1]));
-    /** @type {?} */
-    const directiveIndex = isInitHook ? -arr[i] : (/** @type {?} */ (arr[i]));
-    /** @type {?} */
-    const directive = currentView[directiveIndex];
-    if (isInitHook) {
-        /** @type {?} */
-        const indexWithintInitPhase = currentView[FLAGS] >> 10 /* IndexWithinInitPhaseShift */;
-        // The init phase state must be always checked here as it may have been recursively
-        // updated
-        if (indexWithintInitPhase <
-            (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
-            (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
-            currentView[FLAGS] += 1024 /* IndexWithinInitPhaseIncrementer */;
-            hook.call(directive);
-        }
-    }
-    else {
-        hook.call(directive);
-    }
 }
 
 /**
@@ -14557,7 +14564,7 @@ function instantiateRootComponent(tView, lView, def) {
         baseResolveDirective(tView, lView, def);
     }
     /** @type {?} */
-    const directive = getNodeInjectable(tView.data, lView, lView.length - 1, (/** @type {?} */ (rootTNode)));
+    const directive = getNodeInjectable(lView, tView, lView.length - 1, (/** @type {?} */ (rootTNode)));
     attachPatchData(directive, lView);
     /** @type {?} */
     const native = getNativeByTNode(rootTNode, lView);
@@ -14603,25 +14610,31 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
         }
         generateExpandoInstructionBlock(tView, tNode, directives.length);
         /** @type {?} */
-        const initialPreOrderHooksLength = (tView.preOrderHooks && tView.preOrderHooks.length) || 0;
+        let preOrderHooksFound = false;
         /** @type {?} */
-        const initialPreOrderCheckHooksLength = (tView.preOrderCheckHooks && tView.preOrderCheckHooks.length) || 0;
-        /** @type {?} */
-        const nodeIndex = tNode.index - HEADER_OFFSET;
+        let preOrderCheckHooksFound = false;
         for (let i = 0; i < directives.length; i++) {
             /** @type {?} */
             const def = (/** @type {?} */ (directives[i]));
-            /** @type {?} */
-            const directiveDefIdx = tView.data.length;
             baseResolveDirective(tView, lView, def);
             saveNameToExportMap((/** @type {?} */ (tView.data)).length - 1, def, exportsMap);
             if (def.contentQueries !== null)
                 tNode.flags |= 8 /* hasContentQuery */;
             if (def.hostBindings !== null)
                 tNode.flags |= 128 /* hasHostBindings */;
-            // Init hooks are queued now so ngOnInit is called in host components before
-            // any projected components.
-            registerPreOrderHooks(directiveDefIdx, def, tView, nodeIndex, initialPreOrderHooksLength, initialPreOrderCheckHooksLength);
+            // Only push a node index into the preOrderHooks array if this is the first
+            // pre-order hook found on this node.
+            if (!preOrderHooksFound && (def.onChanges || def.onInit || def.doCheck)) {
+                // We will push the actual hook function into this array later during dir instantiation.
+                // We cannot do it now because we must ensure hooks are registered in the same
+                // order that directives are created (i.e. injection order).
+                (tView.preOrderHooks || (tView.preOrderHooks = [])).push(tNode.index - HEADER_OFFSET);
+                preOrderHooksFound = true;
+            }
+            if (!preOrderCheckHooksFound && (def.onChanges || def.doCheck)) {
+                (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(tNode.index - HEADER_OFFSET);
+                preOrderCheckHooksFound = true;
+            }
         }
         initializeInputAndOutputAliases(tView, tNode);
     }
@@ -14658,7 +14671,7 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
             addComponentLogic(lView, (/** @type {?} */ (tNode)), (/** @type {?} */ (def)));
         }
         /** @type {?} */
-        const directive = getNodeInjectable(tView.data, lView, i, tNode);
+        const directive = getNodeInjectable(lView, tView, i, tNode);
         attachPatchData(directive, lView);
         if (initialInputs !== null) {
             setInputsFromAttrs(lView, i - start, directive, def, tNode, (/** @type {?} */ (initialInputs)));
@@ -26821,7 +26834,6 @@ function LifecycleHooksFeature(component, def) {
     const rootTView = (/** @type {?} */ (readPatchedLView(component)))[TVIEW];
     /** @type {?} */
     const dirIndex = rootTView.data.length - 1;
-    registerPreOrderHooks(dirIndex, def, rootTView, -1, -1, -1);
     // TODO(misko): replace `as TNode` with createTNode call. (needs refactoring to lose dep on
     // LNode).
     registerPostOrderHooks(rootTView, (/** @type {?} */ ({ directiveStart: dirIndex, directiveEnd: dirIndex + 1 })));
@@ -27476,11 +27488,11 @@ function multiProvidersFactoryResolver(_, tData, lData, tNode) {
  * @this {?}
  * @param {?} _
  * @param {?} tData
- * @param {?} lData
+ * @param {?} lView
  * @param {?} tNode
  * @return {?}
  */
-function multiViewProvidersFactoryResolver(_, tData, lData, tNode) {
+function multiViewProvidersFactoryResolver(_, tData, lView, tNode) {
     /** @type {?} */
     const factories = (/** @type {?} */ (this.multi));
     /** @type {?} */
@@ -27489,7 +27501,7 @@ function multiViewProvidersFactoryResolver(_, tData, lData, tNode) {
         /** @type {?} */
         const componentCount = (/** @type {?} */ (this.providerFactory.componentProviders));
         /** @type {?} */
-        const multiProviders = getNodeInjectable(tData, lData, (/** @type {?} */ ((/** @type {?} */ (this.providerFactory)).index)), tNode);
+        const multiProviders = getNodeInjectable(lView, lView[TVIEW], (/** @type {?} */ ((/** @type {?} */ (this.providerFactory)).index)), tNode);
         // Copy the section of the array which contains `multi` `providers` from the component
         result = multiProviders.slice(0, componentCount);
         // Insert the `viewProvider` instances.
@@ -28378,7 +28390,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+260.sha-9ba5344.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+264.sha-d25de63.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -38342,7 +38354,7 @@ function createResultForNode(lView, tNode, matchingIdx, read) {
     }
     else {
         // read a token
-        return getNodeInjectable(lView[TVIEW].data, lView, matchingIdx, (/** @type {?} */ (tNode)));
+        return getNodeInjectable(lView, lView[TVIEW], matchingIdx, (/** @type {?} */ (tNode)));
     }
 }
 /**
@@ -40879,233 +40891,6 @@ if (false) {
 }
 
 /**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/profile/wtf_impl.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * A scope function for the Web Tracing Framework (WTF).
- *
- * \@publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- * @record
- */
-function WtfScopeFn() { }
-/**
- * @record
- */
-function WTF() { }
-if (false) {
-    /** @type {?} */
-    WTF.prototype.trace;
-}
-/**
- * @record
- */
-function Trace() { }
-if (false) {
-    /** @type {?} */
-    Trace.prototype.events;
-    /**
-     * @param {?} scope
-     * @param {?} returnValue
-     * @return {?}
-     */
-    Trace.prototype.leaveScope = function (scope, returnValue) { };
-    /**
-     * @param {?} rangeType
-     * @param {?} action
-     * @return {?}
-     */
-    Trace.prototype.beginTimeRange = function (rangeType, action) { };
-    /**
-     * @param {?} range
-     * @return {?}
-     */
-    Trace.prototype.endTimeRange = function (range) { };
-}
-/**
- * @record
- */
-function Range() { }
-/**
- * @record
- */
-function Events() { }
-if (false) {
-    /**
-     * @param {?} signature
-     * @param {?} flags
-     * @return {?}
-     */
-    Events.prototype.createScope = function (signature, flags) { };
-}
-/**
- * @record
- */
-function Scope() { }
-/** @type {?} */
-let trace;
-/** @type {?} */
-let events;
-/**
- * @return {?}
- */
-function detectWTF() {
-    /** @type {?} */
-    const wtf = ((/** @type {?} */ (_global)))['wtf'];
-    if (wtf) {
-        trace = wtf['trace'];
-        if (trace) {
-            events = trace['events'];
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * @param {?} signature
- * @param {?=} flags
- * @return {?}
- */
-function createScope(signature, flags = null) {
-    return events.createScope(signature, flags);
-}
-/**
- * @template T
- * @param {?} scope
- * @param {?=} returnValue
- * @return {?}
- */
-function leave(scope, returnValue) {
-    trace.leaveScope(scope, returnValue);
-    return returnValue;
-}
-/**
- * @param {?} rangeType
- * @param {?} action
- * @return {?}
- */
-function startTimeRange(rangeType, action) {
-    return trace.beginTimeRange(rangeType, action);
-}
-/**
- * @param {?} range
- * @return {?}
- */
-function endTimeRange(range) {
-    trace.endTimeRange(range);
-}
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/profile/profile.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * True if WTF is enabled.
- * @type {?}
- */
-const wtfEnabled = detectWTF();
-/**
- * @param {?=} arg0
- * @param {?=} arg1
- * @return {?}
- */
-function noopScope(arg0, arg1) {
-    return null;
-}
-/**
- * Create trace scope.
- *
- * Scopes must be strictly nested and are analogous to stack frames, but
- * do not have to follow the stack frames. Instead it is recommended that they follow logical
- * nesting. You may want to use
- * [Event
- * Signatures](http://google.github.io/tracing-framework/instrumenting-code.html#custom-events)
- * as they are defined in WTF.
- *
- * Used to mark scope entry. The return value is used to leave the scope.
- *
- *     var myScope = wtfCreateScope('MyClass#myMethod(ascii someVal)');
- *
- *     someMethod() {
- *        var s = myScope('Foo'); // 'Foo' gets stored in tracing UI
- *        // DO SOME WORK HERE
- *        return wtfLeave(s, 123); // Return value 123
- *     }
- *
- * Note, adding try-finally block around the work to ensure that `wtfLeave` gets called can
- * negatively impact the performance of your application. For this reason we recommend that
- * you don't add them to ensure that `wtfLeave` gets called. In production `wtfLeave` is a noop and
- * so try-finally block has no value. When debugging perf issues, skipping `wtfLeave`, do to
- * exception, will produce incorrect trace, but presence of exception signifies logic error which
- * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
- * an exception is expected during normal execution while profiling.
- *
- * \@publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- * @type {?}
- */
-const wtfCreateScope = wtfEnabled ? createScope : (/**
- * @param {?} signature
- * @param {?=} flags
- * @return {?}
- */
-(signature, flags) => noopScope);
-/**
- * Used to mark end of Scope.
- *
- * - `scope` to end.
- * - `returnValue` (optional) to be passed to the WTF.
- *
- * Returns the `returnValue for easy chaining.
- * \@publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- * @type {?}
- */
-const wtfLeave = wtfEnabled ? leave : (/**
- * @param {?} s
- * @param {?=} r
- * @return {?}
- */
-(s, r) => r);
-/**
- * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
- * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
- * enabled.
- *
- *     someMethod() {
- *        var s = wtfStartTimeRange('HTTP:GET', 'some.url');
- *        var future = new Future.delay(5).then((_) {
- *          wtfEndTimeRange(s);
- *        });
- *     }
- * \@publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- * @type {?}
- */
-const wtfStartTimeRange = wtfEnabled ? startTimeRange : (/**
- * @param {?} rangeType
- * @param {?} action
- * @return {?}
- */
-(rangeType, action) => null);
-/**
- * Ends a async time range operation.
- * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
- * enabled.
- * \@publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- * @type {?}
- */
-const wtfEndTimeRange = wtfEnabled ? endTimeRange : (/**
- * @param {?} r
- * @return {?}
- */
-(r) => null);
-
-/**
  * @license
  * Copyright Google Inc. All Rights Reserved.
  *
@@ -42789,6 +42574,9 @@ class ApplicationRef {
         this._exceptionHandler = _exceptionHandler;
         this._componentFactoryResolver = _componentFactoryResolver;
         this._initStatus = _initStatus;
+        /**
+         * \@internal
+         */
         this._bootstrapListeners = [];
         this._views = [];
         this._runningTick = false;
@@ -42957,8 +42745,6 @@ class ApplicationRef {
         if (this._runningTick) {
             throw new Error('ApplicationRef.tick is called recursively');
         }
-        /** @type {?} */
-        const scope = ApplicationRef._tickScope();
         try {
             this._runningTick = true;
             for (let view of this._views) {
@@ -42979,7 +42765,6 @@ class ApplicationRef {
         }
         finally {
             this._runningTick = false;
-            wtfLeave(scope);
         }
     }
     /**
@@ -43051,10 +42836,6 @@ class ApplicationRef {
      */
     get viewCount() { return this._views.length; }
 }
-/**
- * \@internal
- */
-ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
 ApplicationRef.decorators = [
     { type: Injectable }
 ];
@@ -43070,10 +42851,6 @@ ApplicationRef.ctorParameters = () => [
 if (false) {
     /**
      * \@internal
-     * @type {?}
-     */
-    ApplicationRef._tickScope;
-    /**
      * @type {?}
      * @private
      */
@@ -48148,5 +47925,5 @@ if (ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DebugElement, DebugEventListener, DebugNode$1 as DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode$1 as getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, wtfCreateScope, wtfEndTimeRange, wtfLeave, wtfStartTimeRange, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, ComponentFactory as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory$1 as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, NgModuleRef$1 as ɵRender3NgModuleRef, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, anchorDef as ɵand, isForwardRef as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, DebugContext as ɵangular_packages_core_core_ba, SCHEDULER as ɵangular_packages_core_core_bb, injectAttributeImpl as ɵangular_packages_core_core_bc, instructionState as ɵangular_packages_core_core_bd, getLView as ɵangular_packages_core_core_be, getPreviousOrParentTNode as ɵangular_packages_core_core_bf, nextContextImpl as ɵangular_packages_core_core_bg, getUrlSanitizer as ɵangular_packages_core_core_bi, makeParamDecorator as ɵangular_packages_core_core_bj, makePropDecorator as ɵangular_packages_core_core_bk, getClosureSafeProperty as ɵangular_packages_core_core_bl, noSideEffects as ɵangular_packages_core_core_bn, getRootContext as ɵangular_packages_core_core_bo, NullInjector as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, zoneSchedulerFactory as ɵangular_packages_core_core_s, wtfEnabled as ɵangular_packages_core_core_t, detectWTF as ɵangular_packages_core_core_u, createScope as ɵangular_packages_core_core_v, leave as ɵangular_packages_core_core_w, startTimeRange as ɵangular_packages_core_core_x, endTimeRange as ɵangular_packages_core_core_y, _def as ɵangular_packages_core_core_z, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, createComponentFactory as ɵccf, clearOverrides as ɵclearOverrides, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, createNgModuleFactory as ɵcmf, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, createRendererType2 as ɵcrt, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual$1 as ɵdevModeEqual, directiveDef as ɵdid, elementDef as ɵeld, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocalePluralCase as ɵgetLocalePluralCase, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, initServicesIfNeeded as ɵinitServicesIfNeeded, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable$1 as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, ivyEnabled as ɵivyEnabled, looseIdentical as ɵlooseIdentical, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, pureArrayDef as ɵpad, patchComponentDefWithScope as ɵpatchComponentDefWithScope, pipeDef as ɵpid, pureObjectDef as ɵpod, purePipeDef as ɵppd, providerDef as ɵprd, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, queryDef as ɵqud, registerLocaleData as ɵregisterLocaleData, registerModuleFactory as ɵregisterModuleFactory, registerNgModuleType as ɵregisterNgModuleType, renderComponent$1 as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, textDef as ɵted, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapValue as ɵunv, unwrapSafeValue as ɵunwrapSafeValue, viewDef as ɵvid, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵallocHostVars, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentHostSyntheticListener, ɵɵcontainer, ɵɵcontainerRefreshEnd, ɵɵcontainerRefreshStart, ɵɵcontentQuery, ɵɵdefaultStyleSanitizer, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementHostAttrs, ɵɵelementStart, ɵɵembeddedViewEnd, ɵɵembeddedViewStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵselect, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵstyleMap, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstyleSanitizer, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DebugElement, DebugEventListener, DebugNode$1 as DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode$1 as getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, ComponentFactory as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, EMPTY_ARRAY$3 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory$1 as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, NgModuleRef$1 as ɵRender3NgModuleRef, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, anchorDef as ɵand, isForwardRef as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, nextContextImpl as ɵangular_packages_core_core_ba, getUrlSanitizer as ɵangular_packages_core_core_bc, makeParamDecorator as ɵangular_packages_core_core_bd, makePropDecorator as ɵangular_packages_core_core_be, getClosureSafeProperty as ɵangular_packages_core_core_bf, noSideEffects as ɵangular_packages_core_core_bh, getRootContext as ɵangular_packages_core_core_bi, NullInjector as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, DefaultIterableDifferFactory as ɵangular_packages_core_core_m, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_n, _iterableDiffersFactory as ɵangular_packages_core_core_o, _keyValueDiffersFactory as ɵangular_packages_core_core_p, _localeFactory as ɵangular_packages_core_core_q, APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_r, zoneSchedulerFactory as ɵangular_packages_core_core_s, _def as ɵangular_packages_core_core_t, DebugContext as ɵangular_packages_core_core_u, SCHEDULER as ɵangular_packages_core_core_v, injectAttributeImpl as ɵangular_packages_core_core_w, instructionState as ɵangular_packages_core_core_x, getLView as ɵangular_packages_core_core_y, getPreviousOrParentTNode as ɵangular_packages_core_core_z, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, createComponentFactory as ɵccf, clearOverrides as ɵclearOverrides, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, createNgModuleFactory as ɵcmf, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, createRendererType2 as ɵcrt, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual$1 as ɵdevModeEqual, directiveDef as ɵdid, elementDef as ɵeld, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocalePluralCase as ɵgetLocalePluralCase, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, initServicesIfNeeded as ɵinitServicesIfNeeded, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable$1 as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, ivyEnabled as ɵivyEnabled, looseIdentical as ɵlooseIdentical, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, pureArrayDef as ɵpad, patchComponentDefWithScope as ɵpatchComponentDefWithScope, pipeDef as ɵpid, pureObjectDef as ɵpod, purePipeDef as ɵppd, providerDef as ɵprd, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, queryDef as ɵqud, registerLocaleData as ɵregisterLocaleData, registerModuleFactory as ɵregisterModuleFactory, registerNgModuleType as ɵregisterNgModuleType, renderComponent$1 as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, textDef as ɵted, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapValue as ɵunv, unwrapSafeValue as ɵunwrapSafeValue, viewDef as ɵvid, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵallocHostVars, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentHostSyntheticListener, ɵɵcontainer, ɵɵcontainerRefreshEnd, ɵɵcontainerRefreshStart, ɵɵcontentQuery, ɵɵdefaultStyleSanitizer, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementHostAttrs, ɵɵelementStart, ɵɵembeddedViewEnd, ɵɵembeddedViewStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵselect, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵstyleMap, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵstyleSanitizer, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵupdateSyntheticHostBinding, ɵɵviewQuery };
 //# sourceMappingURL=core.js.map
