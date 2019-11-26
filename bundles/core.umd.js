@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+268.sha-5de7960.with-local-changes
+ * @license Angular v9.0.0-rc.1+270.sha-fadb2d9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11601,12 +11601,14 @@
                     }
                     this.allocateContainerIfNeeded();
                     var lView = viewRef._lView;
-                    var adjustedIdx = this._adjustIndex(index);
                     if (viewAttachedToContainer(lView)) {
                         // If view is already attached, fall back to move() so we clean up
                         // references appropriately.
-                        return this.move(viewRef, adjustedIdx);
+                        // Note that we "shift" -1 because the move will involve inserting
+                        // one view but also removing one view.
+                        return this.move(viewRef, this._adjustIndex(index, -1));
                     }
+                    var adjustedIdx = this._adjustIndex(index);
                     insertView(lView, this._lContainer, adjustedIdx);
                     var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
                     addRemoveViewFromContainer(lView, true, beforeNode);
@@ -11619,9 +11621,13 @@
                         throw new Error('Cannot move a destroyed View in a ViewContainer!');
                     }
                     var index = this.indexOf(viewRef);
-                    if (index !== -1)
+                    if (index === -1) {
+                        this.insert(viewRef, newIndex);
+                    }
+                    else if (index !== newIndex) {
                         this.detach(index);
-                    this.insert(viewRef, newIndex);
+                        this.insert(viewRef, newIndex);
+                    }
                     return viewRef;
                 };
                 ViewContainerRef_.prototype.indexOf = function (viewRef) {
@@ -19719,7 +19725,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+268.sha-5de7960.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+270.sha-fadb2d9.with-local-changes');
 
     /**
      * @license
