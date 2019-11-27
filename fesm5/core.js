@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.3+98.sha-9e5065a.with-local-changes
+ * @license Angular v9.0.0-rc.3+110.sha-ef8b95a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15944,6 +15944,13 @@ function setDirectiveStylingInput(context, lView, stylingInputs, propName) {
     setInputsForProperty(lView, stylingInputs, propName, value);
 }
 function validateElement(hostView, element, tNode, hasDirectives) {
+    var schemas = hostView[TVIEW].schemas;
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (schemas === null)
+        return;
     var tagName = tNode.tagName;
     // If the element matches any directive, it's considered as valid.
     if (!hasDirectives && tagName !== null) {
@@ -19599,7 +19606,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.3+98.sha-9e5065a.with-local-changes');
+var VERSION = new Version('9.0.0-rc.3+110.sha-ef8b95a.with-local-changes');
 
 /**
  * @license
@@ -25777,6 +25784,13 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
                     schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
                     id: ngModule.id || null,
                 });
+                // Set `schemas` on ngModuleDef to an empty array in JIT mode to indicate that runtime
+                // should verify that there are no unknown elements in a template. In AOT mode, that check
+                // happens at compile time and `schemas` information is not present on Component and Module
+                // defs after compilation (so the check doesn't happen the second time at runtime).
+                if (!ngModuleDef.schemas) {
+                    ngModuleDef.schemas = [];
+                }
             }
             return ngModuleDef;
         }
