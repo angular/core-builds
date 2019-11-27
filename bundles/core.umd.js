@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.3+76.sha-b659aa3.with-local-changes
+ * @license Angular v9.0.0-rc.3+98.sha-9e5065a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11607,12 +11607,14 @@
                     }
                     this.allocateContainerIfNeeded();
                     var lView = viewRef._lView;
-                    var adjustedIdx = this._adjustIndex(index);
                     if (viewAttachedToContainer(lView)) {
                         // If view is already attached, fall back to move() so we clean up
                         // references appropriately.
-                        return this.move(viewRef, adjustedIdx);
+                        // Note that we "shift" -1 because the move will involve inserting
+                        // one view but also removing one view.
+                        return this.move(viewRef, this._adjustIndex(index, -1));
                     }
+                    var adjustedIdx = this._adjustIndex(index);
                     insertView(lView, this._lContainer, adjustedIdx);
                     var beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
                     addRemoveViewFromContainer(lView, true, beforeNode);
@@ -11625,9 +11627,13 @@
                         throw new Error('Cannot move a destroyed View in a ViewContainer!');
                     }
                     var index = this.indexOf(viewRef);
-                    if (index !== -1)
+                    if (index === -1) {
+                        this.insert(viewRef, newIndex);
+                    }
+                    else if (index !== newIndex) {
                         this.detach(index);
-                    this.insert(viewRef, newIndex);
+                        this.insert(viewRef, newIndex);
+                    }
                     return viewRef;
                 };
                 ViewContainerRef_.prototype.indexOf = function (viewRef) {
@@ -18662,7 +18668,7 @@
      *
      * To see this in action run the following command:
      *
-     *   bazel run --define=compile=aot
+     *   bazel run --config=ivy
      *   //packages/core/test/bundling/todo:devserver
      *
      *  Then load `localhost:5432` and start using the console tools.
@@ -19746,7 +19752,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.3+76.sha-b659aa3.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.3+98.sha-9e5065a.with-local-changes');
 
     /**
      * @license
@@ -23162,7 +23168,6 @@
                 values.push(blocks);
             }
         }
-        assertGreaterThan(cases.indexOf('other'), -1, 'Missing key "other" in ICU statement.');
         // TODO(ocombe): support ICU expressions in attributes, see #21615
         return { type: icuType, mainBinding: mainBinding, cases: cases, values: values };
     }
@@ -23795,15 +23800,19 @@
                                     // Update the active caseIndex
                                     var caseIndex = getCaseIndex(tIcu, value);
                                     icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
-                                    // Add the nodes for the new case
-                                    readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
-                                    caseCreated = true;
+                                    if (caseIndex > -1) {
+                                        // Add the nodes for the new case
+                                        readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
+                                        caseCreated = true;
+                                    }
                                     break;
                                 case 3 /* IcuUpdate */:
                                     tIcuIndex = updateOpCodes[++j];
                                     tIcu = icus[tIcuIndex];
                                     icuTNode = getTNode(nodeIndex, viewData);
-                                    readUpdateOpCodes(tIcu.update[icuTNode.activeCaseIndex], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                    if (icuTNode.activeCaseIndex !== null) {
+                                        readUpdateOpCodes(tIcu.update[icuTNode.activeCaseIndex], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                    }
                                     break;
                             }
                         }

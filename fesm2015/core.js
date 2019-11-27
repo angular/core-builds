@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.3+76.sha-b659aa3.with-local-changes
+ * @license Angular v9.0.0-rc.3+98.sha-9e5065a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17256,13 +17256,15 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 this.allocateContainerIfNeeded();
                 /** @type {?} */
                 const lView = (/** @type {?} */ (((/** @type {?} */ (viewRef)))._lView));
-                /** @type {?} */
-                const adjustedIdx = this._adjustIndex(index);
                 if (viewAttachedToContainer(lView)) {
                     // If view is already attached, fall back to move() so we clean up
                     // references appropriately.
-                    return this.move(viewRef, adjustedIdx);
+                    // Note that we "shift" -1 because the move will involve inserting
+                    // one view but also removing one view.
+                    return this.move(viewRef, this._adjustIndex(index, -1));
                 }
+                /** @type {?} */
+                const adjustedIdx = this._adjustIndex(index);
                 insertView(lView, this._lContainer, adjustedIdx);
                 /** @type {?} */
                 const beforeNode = getBeforeNodeForView(adjustedIdx, this._lContainer);
@@ -17282,9 +17284,13 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 /** @type {?} */
                 const index = this.indexOf(viewRef);
-                if (index !== -1)
+                if (index === -1) {
+                    this.insert(viewRef, newIndex);
+                }
+                else if (index !== newIndex) {
                     this.detach(index);
-                this.insert(viewRef, newIndex);
+                    this.insert(viewRef, newIndex);
+                }
                 return viewRef;
             }
             /**
@@ -28386,7 +28392,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.3+76.sha-b659aa3.with-local-changes');
+const VERSION = new Version('9.0.0-rc.3+98.sha-9e5065a.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34816,7 +34822,6 @@ function parseICUBlock(pattern) {
             values.push(blocks);
         }
     }
-    assertGreaterThan(cases.indexOf('other'), -1, 'Missing key "other" in ICU statement.');
     // TODO(ocombe): support ICU expressions in attributes, see #21615
     return { type: icuType, mainBinding: mainBinding, cases, values };
 }
@@ -35632,15 +35637,19 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 /** @type {?} */
                                 const caseIndex = getCaseIndex(tIcu, value);
                                 icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
-                                // Add the nodes for the new case
-                                readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
-                                caseCreated = true;
+                                if (caseIndex > -1) {
+                                    // Add the nodes for the new case
+                                    readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
+                                    caseCreated = true;
+                                }
                                 break;
                             case 3 /* IcuUpdate */:
                                 tIcuIndex = (/** @type {?} */ (updateOpCodes[++j]));
                                 tIcu = (/** @type {?} */ (icus))[tIcuIndex];
                                 icuTNode = (/** @type {?} */ (getTNode(nodeIndex, viewData)));
-                                readUpdateOpCodes(tIcu.update[(/** @type {?} */ (icuTNode.activeCaseIndex))], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                if (icuTNode.activeCaseIndex !== null) {
+                                    readUpdateOpCodes(tIcu.update[icuTNode.activeCaseIndex], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                }
                                 break;
                         }
                     }
