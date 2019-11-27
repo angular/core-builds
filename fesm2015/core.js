@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+270.sha-fadb2d9.with-local-changes
+ * @license Angular v9.0.0-rc.1+286.sha-3f68377.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28379,7 +28379,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+270.sha-fadb2d9.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+286.sha-3f68377.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34808,7 +34808,6 @@ function parseICUBlock(pattern) {
             values.push(blocks);
         }
     }
-    assertGreaterThan(cases.indexOf('other'), -1, 'Missing key "other" in ICU statement.');
     // TODO(ocombe): support ICU expressions in attributes, see #21615
     return { type: icuType, mainBinding: mainBinding, cases, values };
 }
@@ -35624,15 +35623,19 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 /** @type {?} */
                                 const caseIndex = getCaseIndex(tIcu, value);
                                 icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
-                                // Add the nodes for the new case
-                                readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
-                                caseCreated = true;
+                                if (caseIndex > -1) {
+                                    // Add the nodes for the new case
+                                    readCreateOpCodes(-1, tIcu.create[caseIndex], viewData);
+                                    caseCreated = true;
+                                }
                                 break;
                             case 3 /* IcuUpdate */:
                                 tIcuIndex = (/** @type {?} */ (updateOpCodes[++j]));
                                 tIcu = (/** @type {?} */ (icus))[tIcuIndex];
                                 icuTNode = (/** @type {?} */ (getTNode(nodeIndex, viewData)));
-                                readUpdateOpCodes(tIcu.update[(/** @type {?} */ (icuTNode.activeCaseIndex))], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                if (icuTNode.activeCaseIndex !== null) {
+                                    readUpdateOpCodes(tIcu.update[icuTNode.activeCaseIndex], icus, bindingsStartIndex, changeMask, viewData, caseCreated);
+                                }
                                 break;
                         }
                     }
