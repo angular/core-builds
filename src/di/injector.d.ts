@@ -29,7 +29,7 @@ export declare const INJECTOR_IMPL: typeof INJECTOR_IMPL__PRE_R3__;
  * @publicApi
  */
 export declare abstract class Injector {
-    static THROW_IF_NOT_FOUND: Object;
+    static THROW_IF_NOT_FOUND: {};
     static NULL: Injector;
     /**
      * Retrieves an instance from the injector based on the provided token.

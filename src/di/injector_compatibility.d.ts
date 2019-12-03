@@ -18,7 +18,7 @@ import { InjectFlags } from './interface/injector';
  * @publicApi
  */
 export declare const INJECTOR: InjectionToken<Injector>;
-export declare const THROW_IF_NOT_FOUND: Object;
+export declare const THROW_IF_NOT_FOUND: {};
 export declare const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
 export declare const SOURCE = "__source";
 export declare const USE_VALUE: string;
