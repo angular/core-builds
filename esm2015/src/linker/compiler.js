@@ -167,7 +167,7 @@ Compiler.decorators = [
     { type: Injectable },
 ];
 /** @nocollapse */ Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
-/** @nocollapse */ Compiler.ɵprov = i0.ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: null });
+/** @nocollapse */ Compiler.ɵprov = i0.ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
 /*@__PURE__*/ (function () { i0.setClassMetadata(Compiler, [{
         type: Injectable
     }], null, null); })();

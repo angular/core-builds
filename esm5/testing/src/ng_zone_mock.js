@@ -22,7 +22,7 @@ var MockNgZone = /** @class */ (function (_super) {
     MockNgZone.prototype.runOutsideAngular = function (fn) { return fn(); };
     MockNgZone.prototype.simulateZoneExit = function () { this.onStable.emit(null); };
     MockNgZone.ɵfac = function MockNgZone_Factory(t) { return new (t || MockNgZone)(); };
-    MockNgZone.ɵprov = i0.ɵɵdefineInjectable({ token: MockNgZone, factory: MockNgZone.ɵfac, providedIn: null });
+    MockNgZone.ɵprov = i0.ɵɵdefineInjectable({ token: MockNgZone, factory: MockNgZone.ɵfac });
     return MockNgZone;
 }(NgZone));
 export { MockNgZone };

@@ -41,7 +41,7 @@ MockNgZone.decorators = [
 /** @nocollapse */
 MockNgZone.ctorParameters = () => [];
 /** @nocollapse */ MockNgZone.ɵfac = function MockNgZone_Factory(t) { return new (t || MockNgZone)(); };
-/** @nocollapse */ MockNgZone.ɵprov = i0.ɵɵdefineInjectable({ token: MockNgZone, factory: MockNgZone.ɵfac, providedIn: null });
+/** @nocollapse */ MockNgZone.ɵprov = i0.ɵɵdefineInjectable({ token: MockNgZone, factory: MockNgZone.ɵfac });
 /*@__PURE__*/ (function () { i0.ɵsetClassMetadata(MockNgZone, [{
         type: Injectable
     }], function () { return []; }, null); })();

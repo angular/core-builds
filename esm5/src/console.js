@@ -20,7 +20,7 @@ var Console = /** @class */ (function () {
         console.warn(message);
     };
     Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-    Console.ɵprov = i0.ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: null });
+    Console.ɵprov = i0.ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
     return Console;
 }());
 export { Console };

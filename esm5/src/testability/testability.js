@@ -173,7 +173,7 @@ var Testability = /** @class */ (function () {
         return [];
     };
     Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(i0.ɵɵinject(i1.NgZone)); };
-    Testability.ɵprov = i0.ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac, providedIn: null });
+    Testability.ɵprov = i0.ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
     return Testability;
 }());
 export { Testability };
@@ -231,7 +231,7 @@ var TestabilityRegistry = /** @class */ (function () {
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
     TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-    TestabilityRegistry.ɵprov = i0.ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: null });
+    TestabilityRegistry.ɵprov = i0.ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
     return TestabilityRegistry;
 }());
 export { TestabilityRegistry };

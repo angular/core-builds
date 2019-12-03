@@ -53,7 +53,7 @@ Log.decorators = [
 /** @nocollapse */
 Log.ctorParameters = () => [];
 /** @nocollapse */ Log.ɵfac = function Log_Factory(t) { return new (t || Log)(); };
-/** @nocollapse */ Log.ɵprov = i0.ɵɵdefineInjectable({ token: Log, factory: Log.ɵfac, providedIn: null });
+/** @nocollapse */ Log.ɵprov = i0.ɵɵdefineInjectable({ token: Log, factory: Log.ɵfac });
 /*@__PURE__*/ (function () { i0.ɵsetClassMetadata(Log, [{
         type: Injectable
     }], function () { return []; }, null); })();

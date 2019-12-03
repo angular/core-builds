@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+335.sha-56f4e56.with-local-changes
+ * @license Angular v9.0.0-rc.1+336.sha-67eac73.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19732,7 +19732,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+335.sha-56f4e56.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+336.sha-67eac73.with-local-changes');
 
     /**
      * @license
@@ -26744,7 +26744,7 @@
             this.initialized = true;
         };
         ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
-        ApplicationInitStatus.ɵprov = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: null });
+        ApplicationInitStatus.ɵprov = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac });
         return ApplicationInitStatus;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(ApplicationInitStatus, [{
@@ -26834,7 +26834,7 @@
             console.warn(message);
         };
         Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-        Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: null });
+        Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
         return Console;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(Console, [{
@@ -27029,7 +27029,7 @@
          */
         Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
         Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
-        Compiler.ɵprov = ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: null });
+        Compiler.ɵprov = ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
         return Compiler;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(Compiler, [{
@@ -27598,7 +27598,7 @@
             return [];
         };
         Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
-        Testability.ɵprov = ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac, providedIn: null });
+        Testability.ɵprov = ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
         return Testability;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(Testability, [{
@@ -27655,7 +27655,7 @@
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
         TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-        TestabilityRegistry.ɵprov = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: null });
+        TestabilityRegistry.ɵprov = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
         return TestabilityRegistry;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(TestabilityRegistry, [{
@@ -27958,7 +27958,7 @@
             configurable: true
         });
         PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
-        PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: null });
+        PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
         return PlatformRef;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(PlatformRef, [{
@@ -28310,7 +28310,7 @@
             configurable: true
         });
         ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
-        ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: null });
+        ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
         return ApplicationRef;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(ApplicationRef, [{
@@ -28443,7 +28443,7 @@
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
         SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
-        SystemJsNgModuleLoader.ɵprov = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac, providedIn: null });
+        SystemJsNgModuleLoader.ɵprov = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
         return SystemJsNgModuleLoader;
     }());
     /*@__PURE__*/ (function () { setClassMetadata(SystemJsNgModuleLoader, [{

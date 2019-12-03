@@ -513,7 +513,7 @@ PlatformRef.ctorParameters = () => [
     { type: Injector }
 ];
 /** @nocollapse */ PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(i0.ɵɵinject(i1.Injector)); };
-/** @nocollapse */ PlatformRef.ɵprov = i0.ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: null });
+/** @nocollapse */ PlatformRef.ɵprov = i0.ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
 /*@__PURE__*/ (function () { i0.setClassMetadata(PlatformRef, [{
         type: Injectable
     }], function () { return [{ type: i1.Injector }]; }, null); })();
@@ -993,7 +993,7 @@ ApplicationRef.ctorParameters = () => [
     { type: ApplicationInitStatus }
 ];
 /** @nocollapse */ ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(i0.ɵɵinject(i2.NgZone), i0.ɵɵinject(i3.Console), i0.ɵɵinject(i1.Injector), i0.ɵɵinject(i4.ErrorHandler), i0.ɵɵinject(i5.ComponentFactoryResolver), i0.ɵɵinject(i6.ApplicationInitStatus)); };
-/** @nocollapse */ ApplicationRef.ɵprov = i0.ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: null });
+/** @nocollapse */ ApplicationRef.ɵprov = i0.ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
 /*@__PURE__*/ (function () { i0.setClassMetadata(ApplicationRef, [{
         type: Injectable
     }], function () { return [{ type: i2.NgZone }, { type: i3.Console }, { type: i1.Injector }, { type: i4.ErrorHandler }, { type: i5.ComponentFactoryResolver }, { type: i6.ApplicationInitStatus }]; }, null); })();

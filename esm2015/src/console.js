@@ -35,7 +35,7 @@ Console.decorators = [
     { type: Injectable },
 ];
 /** @nocollapse */ Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-/** @nocollapse */ Console.ɵprov = i0.ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: null });
+/** @nocollapse */ Console.ɵprov = i0.ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
 /*@__PURE__*/ (function () { i0.setClassMetadata(Console, [{
         type: Injectable
     }], null, null); })();

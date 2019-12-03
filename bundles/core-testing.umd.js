@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+335.sha-56f4e56.with-local-changes
+ * @license Angular v9.0.0-rc.1+336.sha-67eac73.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2322,7 +2322,7 @@
          */
         TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
         TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
-        TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac, providedIn: null });
+        TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac });
         return TestingCompiler;
     }(i0.Compiler));
     var ɵTestingCompiler_BaseFactory = i0.ɵɵgetInheritedFactory(TestingCompiler);

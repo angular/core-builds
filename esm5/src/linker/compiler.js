@@ -100,7 +100,7 @@ var Compiler = /** @class */ (function () {
      */
     Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
     Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
-    Compiler.ɵprov = i0.ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: null });
+    Compiler.ɵprov = i0.ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
     return Compiler;
 }());
 export { Compiler };

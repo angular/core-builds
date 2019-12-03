@@ -55,7 +55,7 @@ var TestingCompiler = /** @class */ (function (_super) {
      */
     TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
     TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
-    TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac, providedIn: null });
+    TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac });
     return TestingCompiler;
 }(Compiler));
 export { TestingCompiler };

@@ -69,7 +69,7 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
     SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(i0.ɵɵinject(i1.Compiler), i0.ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
-    SystemJsNgModuleLoader.ɵprov = i0.ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac, providedIn: null });
+    SystemJsNgModuleLoader.ɵprov = i0.ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
     return SystemJsNgModuleLoader;
 }());
 export { SystemJsNgModuleLoader };

@@ -320,7 +320,7 @@ var PlatformRef = /** @class */ (function () {
         configurable: true
     });
     PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(i0.ɵɵinject(i1.Injector)); };
-    PlatformRef.ɵprov = i0.ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: null });
+    PlatformRef.ɵprov = i0.ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
     return PlatformRef;
 }());
 export { PlatformRef };
@@ -673,7 +673,7 @@ var ApplicationRef = /** @class */ (function () {
         configurable: true
     });
     ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(i0.ɵɵinject(i2.NgZone), i0.ɵɵinject(i3.Console), i0.ɵɵinject(i1.Injector), i0.ɵɵinject(i4.ErrorHandler), i0.ɵɵinject(i5.ComponentFactoryResolver), i0.ɵɵinject(i6.ApplicationInitStatus)); };
-    ApplicationRef.ɵprov = i0.ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: null });
+    ApplicationRef.ɵprov = i0.ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
     return ApplicationRef;
 }());
 export { ApplicationRef };

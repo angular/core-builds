@@ -284,7 +284,7 @@ Testability.ctorParameters = () => [
     { type: NgZone }
 ];
 /** @nocollapse */ Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(i0.ɵɵinject(i1.NgZone)); };
-/** @nocollapse */ Testability.ɵprov = i0.ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac, providedIn: null });
+/** @nocollapse */ Testability.ɵprov = i0.ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
 /*@__PURE__*/ (function () { i0.setClassMetadata(Testability, [{
         type: Injectable
     }], function () { return [{ type: i1.NgZone }]; }, null); })();
@@ -389,7 +389,7 @@ TestabilityRegistry.decorators = [
 /** @nocollapse */
 TestabilityRegistry.ctorParameters = () => [];
 /** @nocollapse */ TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-/** @nocollapse */ TestabilityRegistry.ɵprov = i0.ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: null });
+/** @nocollapse */ TestabilityRegistry.ɵprov = i0.ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
 /*@__PURE__*/ (function () { i0.setClassMetadata(TestabilityRegistry, [{
         type: Injectable
     }], function () { return []; }, null); })();

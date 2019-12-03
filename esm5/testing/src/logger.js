@@ -26,7 +26,7 @@ var Log = /** @class */ (function () {
     Log.prototype.clear = function () { this.logItems = []; };
     Log.prototype.result = function () { return this.logItems.join('; '); };
     Log.ɵfac = function Log_Factory(t) { return new (t || Log)(); };
-    Log.ɵprov = i0.ɵɵdefineInjectable({ token: Log, factory: Log.ɵfac, providedIn: null });
+    Log.ɵprov = i0.ɵɵdefineInjectable({ token: Log, factory: Log.ɵfac });
     return Log;
 }());
 export { Log };

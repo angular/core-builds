@@ -88,7 +88,7 @@ TestingCompiler.decorators = [
     { type: Injectable },
 ];
 /** @nocollapse */ TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
-/** @nocollapse */ TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac, providedIn: null });
+/** @nocollapse */ TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac });
 const ɵTestingCompiler_BaseFactory = i0.ɵɵgetInheritedFactory(TestingCompiler);
 /*@__PURE__*/ (function () { i0.ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable
