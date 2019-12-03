@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.4+28.sha-716fc84.with-local-changes
+ * @license Angular v9.0.0-rc.4+51.sha-d2538ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3106,7 +3106,7 @@ export declare const INJECTOR: InjectionToken<Injector>;
  * @publicApi
  */
 export declare abstract class Injector {
-    static THROW_IF_NOT_FOUND: Object;
+    static THROW_IF_NOT_FOUND: {};
     static NULL: Injector;
     /**
      * Retrieves an instance from the injector based on the provided token.

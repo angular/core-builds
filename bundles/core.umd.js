@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.4+28.sha-716fc84.with-local-changes
+ * @license Angular v9.0.0-rc.4+51.sha-d2538ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -817,7 +817,7 @@
      */
     var INJECTOR = new InjectionToken('INJECTOR', -1 // `-1` is used by Ivy DI system as special value to recognize it as `Injector`.
     );
-    var _THROW_IF_NOT_FOUND = new Object();
+    var _THROW_IF_NOT_FOUND = {};
     var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
     var NG_TOKEN_PATH = 'ngTokenPath';
@@ -13717,7 +13717,7 @@
      * found in the LICENSE file at https://angular.io/license
      */
     // Threshold for the dynamic version
-    var UNDEFINED = new Object();
+    var UNDEFINED = {};
     /**
      * A ReflectiveDependency injection container used for instantiating objects and resolving
      * dependencies.
@@ -19759,7 +19759,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.4+28.sha-716fc84.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.4+51.sha-d2538ca.with-local-changes');
 
     /**
      * @license
@@ -21472,7 +21472,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var UNDEFINED_VALUE = new Object();
+    var UNDEFINED_VALUE = {};
     var InjectorRefTokenKey = tokenKey(Injector);
     var INJECTORRefTokenKey = tokenKey(INJECTOR);
     var NgModuleRefTokenKey = tokenKey(NgModuleRef);
@@ -21785,7 +21785,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var EMPTY_CONTEXT = new Object();
+    var EMPTY_CONTEXT = {};
     // Attention: this function is called as top level function.
     // Putting any logic in here will destroy closure tree shaking!
     function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {

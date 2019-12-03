@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.4+28.sha-716fc84.with-local-changes
+ * @license Angular v9.0.0-rc.4+51.sha-d2538ca.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -720,7 +720,7 @@ if (false) {
  */
 const INJECTOR = new InjectionToken('INJECTOR', (/** @type {?} */ (-1)));
 /** @type {?} */
-const _THROW_IF_NOT_FOUND = new Object();
+const _THROW_IF_NOT_FOUND = {};
 /** @type {?} */
 const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 /** @type {?} */
@@ -20287,7 +20287,7 @@ function _createDependency(token, optional, visibility) {
  */
 // Threshold for the dynamic version
 /** @type {?} */
-const UNDEFINED = new Object();
+const UNDEFINED = {};
 /**
  * A ReflectiveDependency injection container used for instantiating objects and resolving
  * dependencies.
@@ -28400,7 +28400,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.4+28.sha-716fc84.with-local-changes');
+const VERSION = new Version('9.0.0-rc.4+51.sha-d2538ca.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -32182,7 +32182,7 @@ const EMPTY_MAP = {};
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const UNDEFINED_VALUE = new Object();
+const UNDEFINED_VALUE = {};
 /** @type {?} */
 const InjectorRefTokenKey = tokenKey(Injector);
 /** @type {?} */
@@ -32629,7 +32629,7 @@ function renderDetachView$1(view) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const EMPTY_CONTEXT = new Object();
+const EMPTY_CONTEXT = {};
 // Attention: this function is called as top level function.
 // Putting any logic in here will destroy closure tree shaking!
 /**
