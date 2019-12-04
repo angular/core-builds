@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+352.sha-86d5472.with-local-changes
+ * @license Angular v9.0.0-rc.1+354.sha-15d3e74.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28387,7 +28387,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+352.sha-86d5472.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+354.sha-15d3e74.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -34407,7 +34407,9 @@ function plural(n) {
     return 5;
 }
 var localeEn = [
-    'en', [['a', 'p'], ['AM', 'PM'], u], [['AM', 'PM'], u, u],
+    'en',
+    [['a', 'p'], ['AM', 'PM'], u],
+    [['AM', 'PM'], u, u],
     [
         ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -34422,11 +34424,20 @@ var localeEn = [
             'October', 'November', 'December'
         ]
     ],
-    u, [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']], 0, [6, 0],
+    u,
+    [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']],
+    0,
+    [6, 0],
     ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
-    ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'], ['{1}, {0}', u, '{1} \'at\' {0}', u],
+    ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'],
+    ['{1}, {0}', u, '{1} \'at\' {0}', u],
     ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
-    ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'], '$', 'US Dollar', {}, plural
+    ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'],
+    '$',
+    'US Dollar',
+    {},
+    'ltr',
+    plural
 ];
 
 /**
@@ -34539,8 +34550,9 @@ const LocaleDataIndex = {
     CurrencySymbol: 15,
     CurrencyName: 16,
     Currencies: 17,
-    PluralCase: 18,
-    ExtraData: 19,
+    Directionality: 18,
+    PluralCase: 19,
+    ExtraData: 20,
 };
 LocaleDataIndex[LocaleDataIndex.LocaleId] = 'LocaleId';
 LocaleDataIndex[LocaleDataIndex.DayPeriodsFormat] = 'DayPeriodsFormat';
@@ -34560,6 +34572,7 @@ LocaleDataIndex[LocaleDataIndex.NumberFormats] = 'NumberFormats';
 LocaleDataIndex[LocaleDataIndex.CurrencySymbol] = 'CurrencySymbol';
 LocaleDataIndex[LocaleDataIndex.CurrencyName] = 'CurrencyName';
 LocaleDataIndex[LocaleDataIndex.Currencies] = 'Currencies';
+LocaleDataIndex[LocaleDataIndex.Directionality] = 'Directionality';
 LocaleDataIndex[LocaleDataIndex.PluralCase] = 'PluralCase';
 LocaleDataIndex[LocaleDataIndex.ExtraData] = 'ExtraData';
 /** @enum {number} */

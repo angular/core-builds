@@ -53,8 +53,9 @@ export declare enum LocaleDataIndex {
     CurrencySymbol = 15,
     CurrencyName = 16,
     Currencies = 17,
-    PluralCase = 18,
-    ExtraData = 19
+    Directionality = 18,
+    PluralCase = 19,
+    ExtraData = 20
 }
 /**
  * Index of each type of locale data from the extra locale data array
