@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+357.sha-bd820fd.with-local-changes
+ * @license Angular v9.0.0-rc.1+360.sha-fcbc38c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11602,17 +11602,29 @@
                     return componentRef;
                 };
                 ViewContainerRef_.prototype.insert = function (viewRef, index) {
+                    var lView = viewRef._lView;
                     if (viewRef.destroyed) {
                         throw new Error('Cannot insert a destroyed View in a ViewContainer!');
                     }
                     this.allocateContainerIfNeeded();
-                    var lView = viewRef._lView;
                     if (viewAttachedToContainer(lView)) {
-                        // If view is already attached, fall back to move() so we clean up
-                        // references appropriately.
-                        // Note that we "shift" -1 because the move will involve inserting
-                        // one view but also removing one view.
-                        return this.move(viewRef, this._adjustIndex(index, -1));
+                        // If view is already attached, detach it first so we clean up references appropriately.
+                        var prevIdx = this.indexOf(viewRef);
+                        // A view might be attached either to this or a different container. The `prevIdx` for
+                        // those cases will be:
+                        // equal to -1 for views attached to this ViewContainerRef
+                        // >= 0 for views attached to a different ViewContainerRef
+                        if (prevIdx !== -1) {
+                            this.detach(prevIdx);
+                        }
+                        else {
+                            var prevLContainer = lView[PARENT];
+                            ngDevMode && assertEqual(isLContainer(prevLContainer), true, 'An attached view should have its PARENT point to a container.');
+                            // We need to re-create a R3ViewContainerRef instance since those are not stored on
+                            // LView (nor anywhere else).
+                            var prevVCRef = new R3ViewContainerRef(prevLContainer, prevLContainer[T_HOST], prevLContainer[PARENT]);
+                            prevVCRef.detach(prevVCRef.indexOf(viewRef));
+                        }
                     }
                     var adjustedIdx = this._adjustIndex(index);
                     insertView(lView, this._lContainer, adjustedIdx);
@@ -11626,20 +11638,11 @@
                     if (viewRef.destroyed) {
                         throw new Error('Cannot move a destroyed View in a ViewContainer!');
                     }
-                    var index = this.indexOf(viewRef);
-                    if (index === -1) {
-                        this.insert(viewRef, newIndex);
-                    }
-                    else if (index !== newIndex) {
-                        this.detach(index);
-                        this.insert(viewRef, newIndex);
-                    }
-                    return viewRef;
+                    return this.insert(viewRef, newIndex);
                 };
                 ViewContainerRef_.prototype.indexOf = function (viewRef) {
-                    return this._lContainer[VIEW_REFS] !== null ?
-                        this._lContainer[VIEW_REFS].indexOf(viewRef) :
-                        0;
+                    var viewRefsArr = this._lContainer[VIEW_REFS];
+                    return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
                 };
                 ViewContainerRef_.prototype.remove = function (index) {
                     this.allocateContainerIfNeeded();
@@ -11660,7 +11663,7 @@
                         return this.length + shift;
                     }
                     if (ngDevMode) {
-                        assertGreaterThan(index, -1, 'index must be positive');
+                        assertGreaterThan(index, -1, "ViewRef index must be positive, got " + index);
                         // +1 because it's legal to insert at the end.
                         assertLessThan(index, this.length + 1 + shift, 'index');
                     }
@@ -19763,7 +19766,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+357.sha-bd820fd.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+360.sha-fcbc38c.with-local-changes');
 
     /**
      * @license
