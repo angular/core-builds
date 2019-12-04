@@ -228,7 +228,7 @@ export declare function hasActiveElementFlag(flag: ActiveElementFlags): boolean;
  * @param elementIndex the element index value for the host element where
  *                     the directive/component instance lives
  */
-export declare function setActiveHostElement(elementIndex?: number | null): void;
+export declare function setActiveHostElement(elementIndex: number | null): void;
 export declare function executeElementExitFn(): void;
 /**
  * Queues a function to be run once the element is "exited" in CD.
@@ -344,7 +344,7 @@ export declare const leaveDI: typeof leaveView;
 export declare function enterView(newView: LView, tNode: TNode | null): void;
 export declare function leaveViewProcessExit(): void;
 export declare function leaveView(): void;
-export declare function nextContextImpl<T = any>(level?: number): T;
+export declare function nextContextImpl<T = any>(level: number): T;
 /**
  * Gets the most recent index passed to {@link select}
  *
