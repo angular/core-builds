@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+352.sha-86d5472.with-local-changes
+ * @license Angular v9.0.0-rc.1+354.sha-15d3e74.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19763,7 +19763,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+352.sha-86d5472.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+354.sha-15d3e74.with-local-changes');
 
     /**
      * @license
@@ -22913,7 +22913,9 @@
         return 5;
     }
     var localeEn = [
-        'en', [['a', 'p'], ['AM', 'PM'], u], [['AM', 'PM'], u, u],
+        'en',
+        [['a', 'p'], ['AM', 'PM'], u],
+        [['AM', 'PM'], u, u],
         [
             ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
             ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -22928,11 +22930,20 @@
                 'October', 'November', 'December'
             ]
         ],
-        u, [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']], 0, [6, 0],
+        u,
+        [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']],
+        0,
+        [6, 0],
         ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
-        ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'], ['{1}, {0}', u, '{1} \'at\' {0}', u],
+        ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'],
+        ['{1}, {0}', u, '{1} \'at\' {0}', u],
         ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
-        ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'], '$', 'US Dollar', {}, plural
+        ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'],
+        '$',
+        'US Dollar',
+        {},
+        'ltr',
+        plural
     ];
 
     /**
@@ -23035,8 +23046,9 @@
         LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 15] = "CurrencySymbol";
         LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 16] = "CurrencyName";
         LocaleDataIndex[LocaleDataIndex["Currencies"] = 17] = "Currencies";
-        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 18] = "PluralCase";
-        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 19] = "ExtraData";
+        LocaleDataIndex[LocaleDataIndex["Directionality"] = 18] = "Directionality";
+        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 19] = "PluralCase";
+        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 20] = "ExtraData";
     })(exports.ɵLocaleDataIndex || (exports.ɵLocaleDataIndex = {}));
     /**
      * Returns the canonical form of a locale name - lowercase with `_` replaced with `-`.

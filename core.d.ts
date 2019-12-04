@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+352.sha-86d5472.with-local-changes
+ * @license Angular v9.0.0-rc.1+354.sha-15d3e74.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9985,8 +9985,9 @@ export declare enum ɵLocaleDataIndex {
     CurrencySymbol = 15,
     CurrencyName = 16,
     Currencies = 17,
-    PluralCase = 18,
-    ExtraData = 19
+    Directionality = 18,
+    PluralCase = 19,
+    ExtraData = 20
 }
 
 
