@@ -117,7 +117,7 @@ export interface LView extends Array<any> {
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR]: Injector | null;
-    /** Renderer to be used for this view. */
+    /** Factory to be used for creating Renderer. */
     [RENDERER_FACTORY]: RendererFactory3;
     /** Renderer to be used for this view. */
     [RENDERER]: Renderer3;
