@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+364.sha-c50faa9.with-local-changes
+ * @license Angular v9.0.0-rc.1+366.sha-cca2616.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1094,9 +1094,9 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.resolvers.module.addOverride(ngModule, override);
         var metadata = this.resolvers.module.resolve(ngModule);
         if (metadata === null) {
-            throw new Error(ngModule.name + " is not an @NgModule or is missing metadata");
+            throw invalidTypeError(ngModule.name, 'NgModule');
         }
-        this.recompileNgModule(ngModule);
+        this.recompileNgModule(ngModule, metadata);
         // At this point, the module has a valid module def (ɵmod), but the override may have introduced
         // new declarations or imported modules. Ingest any possible new types and add them to the
         // current queue.
@@ -1263,18 +1263,27 @@ var R3TestBedCompiler = /** @class */ (function () {
         this.pendingComponents.forEach(function (declaration) {
             needsAsyncResources = needsAsyncResources || isComponentDefPendingResolution(declaration);
             var metadata = _this.resolvers.component.resolve(declaration);
+            if (metadata === null) {
+                throw invalidTypeError(declaration.name, 'Component');
+            }
             _this.maybeStoreNgDef(ɵNG_COMP_DEF, declaration);
             ɵcompileComponent(declaration, metadata);
         });
         this.pendingComponents.clear();
         this.pendingDirectives.forEach(function (declaration) {
             var metadata = _this.resolvers.directive.resolve(declaration);
+            if (metadata === null) {
+                throw invalidTypeError(declaration.name, 'Directive');
+            }
             _this.maybeStoreNgDef(ɵNG_DIR_DEF, declaration);
             ɵcompileDirective(declaration, metadata);
         });
         this.pendingDirectives.clear();
         this.pendingPipes.forEach(function (declaration) {
             var metadata = _this.resolvers.pipe.resolve(declaration);
+            if (metadata === null) {
+                throw invalidTypeError(declaration.name, 'Pipe');
+            }
             _this.maybeStoreNgDef(ɵNG_PIPE_DEF, declaration);
             ɵcompilePipe(declaration, metadata);
         });
@@ -1405,11 +1414,7 @@ var R3TestBedCompiler = /** @class */ (function () {
             finally { if (e_3) throw e_3.error; }
         }
     };
-    R3TestBedCompiler.prototype.recompileNgModule = function (ngModule) {
-        var metadata = this.resolvers.module.resolve(ngModule);
-        if (metadata === null) {
-            throw new Error("Unable to resolve metadata for NgModule: " + ngModule.name);
-        }
+    R3TestBedCompiler.prototype.recompileNgModule = function (ngModule, metadata) {
         // Cache the initial ngModuleDef as it will be overwritten.
         this.maybeStoreNgDef(ɵNG_MOD_DEF, ngModule);
         this.maybeStoreNgDef(ɵNG_INJ_DEF, ngModule);
@@ -1716,6 +1721,9 @@ function forEachRight(values, fn) {
     for (var idx = values.length - 1; idx >= 0; idx--) {
         fn(values[idx], idx);
     }
+}
+function invalidTypeError(name, expectedType) {
+    return new Error(name + " class doesn't have @" + expectedType + " decorator or is missing metadata.");
 }
 var R3TestCompiler = /** @class */ (function () {
     function R3TestCompiler(testBed) {
