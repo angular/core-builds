@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+364.sha-c50faa9.with-local-changes
+ * @license Angular v9.0.0-rc.1+366.sha-cca2616.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1722,9 +1722,9 @@ class R3TestBedCompiler {
         /** @type {?} */
         const metadata = this.resolvers.module.resolve(ngModule);
         if (metadata === null) {
-            throw new Error(`${ngModule.name} is not an @NgModule or is missing metadata`);
+            throw invalidTypeError(ngModule.name, 'NgModule');
         }
-        this.recompileNgModule(ngModule);
+        this.recompileNgModule(ngModule, metadata);
         // At this point, the module has a valid module def (ɵmod), but the override may have introduced
         // new declarations or imported modules. Ingest any possible new types and add them to the
         // current queue.
@@ -1948,7 +1948,10 @@ class R3TestBedCompiler {
         declaration => {
             needsAsyncResources = needsAsyncResources || isComponentDefPendingResolution(declaration);
             /** @type {?} */
-            const metadata = (/** @type {?} */ (this.resolvers.component.resolve(declaration)));
+            const metadata = this.resolvers.component.resolve(declaration);
+            if (metadata === null) {
+                throw invalidTypeError(declaration.name, 'Component');
+            }
             this.maybeStoreNgDef(ɵNG_COMP_DEF, declaration);
             ɵcompileComponent(declaration, metadata);
         }));
@@ -1960,6 +1963,9 @@ class R3TestBedCompiler {
         declaration => {
             /** @type {?} */
             const metadata = this.resolvers.directive.resolve(declaration);
+            if (metadata === null) {
+                throw invalidTypeError(declaration.name, 'Directive');
+            }
             this.maybeStoreNgDef(ɵNG_DIR_DEF, declaration);
             ɵcompileDirective(declaration, metadata);
         }));
@@ -1970,7 +1976,10 @@ class R3TestBedCompiler {
          */
         declaration => {
             /** @type {?} */
-            const metadata = (/** @type {?} */ (this.resolvers.pipe.resolve(declaration)));
+            const metadata = this.resolvers.pipe.resolve(declaration);
+            if (metadata === null) {
+                throw invalidTypeError(declaration.name, 'Pipe');
+            }
             this.maybeStoreNgDef(ɵNG_PIPE_DEF, declaration);
             ɵcompilePipe(declaration, metadata);
         }));
@@ -2133,14 +2142,10 @@ class R3TestBedCompiler {
     /**
      * @private
      * @param {?} ngModule
+     * @param {?} metadata
      * @return {?}
      */
-    recompileNgModule(ngModule) {
-        /** @type {?} */
-        const metadata = this.resolvers.module.resolve(ngModule);
-        if (metadata === null) {
-            throw new Error(`Unable to resolve metadata for NgModule: ${ngModule.name}`);
-        }
+    recompileNgModule(ngModule, metadata) {
         // Cache the initial ngModuleDef as it will be overwritten.
         this.maybeStoreNgDef(ɵNG_MOD_DEF, ngModule);
         this.maybeStoreNgDef(ɵNG_INJ_DEF, ngModule);
@@ -2733,6 +2738,14 @@ function forEachRight(values, fn) {
     for (let idx = values.length - 1; idx >= 0; idx--) {
         fn(values[idx], idx);
     }
+}
+/**
+ * @param {?} name
+ * @param {?} expectedType
+ * @return {?}
+ */
+function invalidTypeError(name, expectedType) {
+    return new Error(`${name} class doesn't have @${expectedType} decorator or is missing metadata.`);
 }
 class R3TestCompiler {
     /**
