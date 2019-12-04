@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.4+51.sha-d2538ca.with-local-changes
+ * @license Angular v9.0.0-rc.4+67.sha-9555731.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8684,7 +8684,7 @@ export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | Injec
 
 export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
-export declare function ɵangular_packages_core_core_ba<T = any>(level?: number): T;
+export declare function ɵangular_packages_core_core_ba<T = any>(level: number): T;
 
 /** Static data for an element  */
 export declare interface ɵangular_packages_core_core_bb extends TNode {
@@ -8798,7 +8798,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
-    /** Renderer to be used for this view. */
+    /** Factory to be used for creating Renderer. */
     [RENDERER_FACTORY]: RendererFactory3;
     /** Renderer to be used for this view. */
     [RENDERER]: Renderer3;

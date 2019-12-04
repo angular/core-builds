@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.4+51.sha-d2538ca.with-local-changes
+ * @license Angular v9.0.0-rc.4+67.sha-9555731.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1846,7 +1846,6 @@ function setActiveElementFlag(flag) {
  *                     the directive/component instance lives
  */
 function setActiveHostElement(elementIndex) {
-    if (elementIndex === void 0) { elementIndex = null; }
     if (hasActiveElementFlag(1 /* RunExitFn */)) {
         executeElementExitFn();
     }
@@ -1872,7 +1871,7 @@ function executeElementExitFn() {
  */
 function setElementExitFn(fn) {
     setActiveElementFlag(1 /* RunExitFn */);
-    if (instructionState.elementExitFn == null) {
+    if (instructionState.elementExitFn === null) {
         instructionState.elementExitFn = fn;
     }
     ngDevMode &&
@@ -2107,9 +2106,9 @@ function leaveView() {
     instructionState.lFrame = instructionState.lFrame.parent;
 }
 function nextContextImpl(level) {
-    if (level === void 0) { level = 1; }
-    instructionState.lFrame.contextLView = walkUpViews(level, instructionState.lFrame.contextLView);
-    return instructionState.lFrame.contextLView[CONTEXT];
+    var contextLView = instructionState.lFrame.contextLView =
+        walkUpViews(level, instructionState.lFrame.contextLView);
+    return contextLView[CONTEXT];
 }
 function walkUpViews(nestingLevel, currentView) {
     while (nestingLevel > 0) {
@@ -11444,17 +11443,29 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 return componentRef;
             };
             ViewContainerRef_.prototype.insert = function (viewRef, index) {
+                var lView = viewRef._lView;
                 if (viewRef.destroyed) {
                     throw new Error('Cannot insert a destroyed View in a ViewContainer!');
                 }
                 this.allocateContainerIfNeeded();
-                var lView = viewRef._lView;
                 if (viewAttachedToContainer(lView)) {
-                    // If view is already attached, fall back to move() so we clean up
-                    // references appropriately.
-                    // Note that we "shift" -1 because the move will involve inserting
-                    // one view but also removing one view.
-                    return this.move(viewRef, this._adjustIndex(index, -1));
+                    // If view is already attached, detach it first so we clean up references appropriately.
+                    var prevIdx = this.indexOf(viewRef);
+                    // A view might be attached either to this or a different container. The `prevIdx` for
+                    // those cases will be:
+                    // equal to -1 for views attached to this ViewContainerRef
+                    // >= 0 for views attached to a different ViewContainerRef
+                    if (prevIdx !== -1) {
+                        this.detach(prevIdx);
+                    }
+                    else {
+                        var prevLContainer = lView[PARENT];
+                        ngDevMode && assertEqual(isLContainer(prevLContainer), true, 'An attached view should have its PARENT point to a container.');
+                        // We need to re-create a R3ViewContainerRef instance since those are not stored on
+                        // LView (nor anywhere else).
+                        var prevVCRef = new R3ViewContainerRef(prevLContainer, prevLContainer[T_HOST], prevLContainer[PARENT]);
+                        prevVCRef.detach(prevVCRef.indexOf(viewRef));
+                    }
                 }
                 var adjustedIdx = this._adjustIndex(index);
                 insertView(lView, this._lContainer, adjustedIdx);
@@ -11468,20 +11479,11 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 if (viewRef.destroyed) {
                     throw new Error('Cannot move a destroyed View in a ViewContainer!');
                 }
-                var index = this.indexOf(viewRef);
-                if (index === -1) {
-                    this.insert(viewRef, newIndex);
-                }
-                else if (index !== newIndex) {
-                    this.detach(index);
-                    this.insert(viewRef, newIndex);
-                }
-                return viewRef;
+                return this.insert(viewRef, newIndex);
             };
             ViewContainerRef_.prototype.indexOf = function (viewRef) {
-                return this._lContainer[VIEW_REFS] !== null ?
-                    this._lContainer[VIEW_REFS].indexOf(viewRef) :
-                    0;
+                var viewRefsArr = this._lContainer[VIEW_REFS];
+                return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
             };
             ViewContainerRef_.prototype.remove = function (index) {
                 this.allocateContainerIfNeeded();
@@ -11502,7 +11504,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                     return this.length + shift;
                 }
                 if (ngDevMode) {
-                    assertGreaterThan(index, -1, 'index must be positive');
+                    assertGreaterThan(index, -1, "ViewRef index must be positive, got " + index);
                     // +1 because it's legal to insert at the end.
                     assertLessThan(index, this.length + 1 + shift, 'index');
                 }
@@ -11581,7 +11583,7 @@ function createViewRef(tNode, lView, isPipe) {
         return new ViewRef(componentView, componentView);
     }
     else if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */ ||
-        tNode.type === 4 /* ElementContainer */) {
+        tNode.type === 4 /* ElementContainer */ || tNode.type === 5 /* IcuContainer */) {
         // The LView represents the location where the injection is requested from.
         // We need to locate the containing LView (in case where the `lView` is an embedded view)
         var hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
@@ -19606,7 +19608,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.4+51.sha-d2538ca.with-local-changes');
+var VERSION = new Version('9.0.0-rc.4+67.sha-9555731.with-local-changes');
 
 /**
  * @license
@@ -29231,7 +29233,8 @@ function _localeFactory(locale) {
  * * Ivy enabled: use `$localize.locale`
  */
 function getGlobalLocale() {
-    if (ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
+    if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
+        typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
         // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
         // * In order to preserve backwards compatibility, we use Angular default value over
         //   Closure Compiler's one.
