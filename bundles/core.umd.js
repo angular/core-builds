@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+361.sha-a295255.with-local-changes
+ * @license Angular v9.0.0-rc.1+363.sha-60b13d9.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11741,7 +11741,7 @@
             return new ViewRef(componentView, componentView);
         }
         else if (tNode.type === 3 /* Element */ || tNode.type === 0 /* Container */ ||
-            tNode.type === 4 /* ElementContainer */) {
+            tNode.type === 4 /* ElementContainer */ || tNode.type === 5 /* IcuContainer */) {
             // The LView represents the location where the injection is requested from.
             // We need to locate the containing LView (in case where the `lView` is an embedded view)
             var hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
@@ -19765,7 +19765,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+361.sha-a295255.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+363.sha-60b13d9.with-local-changes');
 
     /**
      * @license
