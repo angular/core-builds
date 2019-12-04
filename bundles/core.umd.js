@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+365.sha-9b6a1b8.with-local-changes
+ * @license Angular v9.0.0-rc.1+370.sha-634887c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19765,7 +19765,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+365.sha-9b6a1b8.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+370.sha-634887c.with-local-changes');
 
     /**
      * @license
@@ -29374,7 +29374,8 @@
      * * Ivy enabled: use `$localize.locale`
      */
     function getGlobalLocale() {
-        if (ngI18nClosureMode && typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
+        if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
+            typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
             // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
             // * In order to preserve backwards compatibility, we use Angular default value over
             //   Closure Compiler's one.
