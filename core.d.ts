@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+356.sha-627814c.with-local-changes
+ * @license Angular v9.0.0-rc.1+357.sha-bd820fd.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8791,7 +8791,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
-    /** Renderer to be used for this view. */
+    /** Factory to be used for creating Renderer. */
     [RENDERER_FACTORY]: RendererFactory3;
     /** Renderer to be used for this view. */
     [RENDERER]: Renderer3;
