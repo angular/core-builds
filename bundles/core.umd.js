@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+360.sha-fcbc38c.with-local-changes
+ * @license Angular v9.0.0-rc.1+362.sha-e315215.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2014,7 +2014,6 @@
      *                     the directive/component instance lives
      */
     function setActiveHostElement(elementIndex) {
-        if (elementIndex === void 0) { elementIndex = null; }
         if (hasActiveElementFlag(1 /* RunExitFn */)) {
             executeElementExitFn();
         }
@@ -2040,7 +2039,7 @@
      */
     function setElementExitFn(fn) {
         setActiveElementFlag(1 /* RunExitFn */);
-        if (instructionState.elementExitFn == null) {
+        if (instructionState.elementExitFn === null) {
             instructionState.elementExitFn = fn;
         }
         ngDevMode &&
@@ -2275,9 +2274,9 @@
         instructionState.lFrame = instructionState.lFrame.parent;
     }
     function nextContextImpl(level) {
-        if (level === void 0) { level = 1; }
-        instructionState.lFrame.contextLView = walkUpViews(level, instructionState.lFrame.contextLView);
-        return instructionState.lFrame.contextLView[CONTEXT];
+        var contextLView = instructionState.lFrame.contextLView =
+            walkUpViews(level, instructionState.lFrame.contextLView);
+        return contextLView[CONTEXT];
     }
     function walkUpViews(nestingLevel, currentView) {
         while (nestingLevel > 0) {
@@ -19766,7 +19765,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+360.sha-fcbc38c.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+362.sha-e315215.with-local-changes');
 
     /**
      * @license

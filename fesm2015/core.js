@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+360.sha-fcbc38c.with-local-changes
+ * @license Angular v9.0.0-rc.1+362.sha-e315215.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2990,11 +2990,11 @@ function setActiveElementFlag(flag) {
  * Sets the active directive host element and resets the directive id value
  * (when the provided elementIndex value has changed).
  *
- * @param {?=} elementIndex the element index value for the host element where
+ * @param {?} elementIndex the element index value for the host element where
  *                     the directive/component instance lives
  * @return {?}
  */
-function setActiveHostElement(elementIndex = null) {
+function setActiveHostElement(elementIndex) {
     if (hasActiveElementFlag(1 /* RunExitFn */)) {
         executeElementExitFn();
     }
@@ -3024,7 +3024,7 @@ function executeElementExitFn() {
  */
 function setElementExitFn(fn) {
     setActiveElementFlag(1 /* RunExitFn */);
-    if (instructionState.elementExitFn == null) {
+    if (instructionState.elementExitFn === null) {
         instructionState.elementExitFn = fn;
     }
     ngDevMode &&
@@ -3354,12 +3354,14 @@ function leaveView() {
 }
 /**
  * @template T
- * @param {?=} level
+ * @param {?} level
  * @return {?}
  */
-function nextContextImpl(level = 1) {
-    instructionState.lFrame.contextLView = walkUpViews(level, (/** @type {?} */ (instructionState.lFrame.contextLView)));
-    return (/** @type {?} */ (instructionState.lFrame.contextLView[CONTEXT]));
+function nextContextImpl(level) {
+    /** @type {?} */
+    const contextLView = instructionState.lFrame.contextLView =
+        walkUpViews(level, (/** @type {?} */ (instructionState.lFrame.contextLView)));
+    return (/** @type {?} */ (contextLView[CONTEXT]));
 }
 /**
  * @param {?} nestingLevel
@@ -28410,7 +28412,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+360.sha-fcbc38c.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+362.sha-e315215.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
