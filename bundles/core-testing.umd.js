@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.5+28.sha-6e944ac.with-local-changes
+ * @license Angular v9.0.0-rc.5+32.sha-10a33ef.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1314,14 +1314,21 @@
             this.pendingPipes.add(pipe);
         };
         R3TestBedCompiler.prototype.overrideProvider = function (token, provider) {
-            var providerDef = provider.useFactory ?
-                {
+            var providerDef;
+            if (provider.useFactory !== undefined) {
+                providerDef = {
                     provide: token,
                     useFactory: provider.useFactory,
                     deps: provider.deps || [],
                     multi: provider.multi
-                } :
-                { provide: token, useValue: provider.useValue, multi: provider.multi };
+                };
+            }
+            else if (provider.useValue !== undefined) {
+                providerDef = { provide: token, useValue: provider.useValue, multi: provider.multi };
+            }
+            else {
+                providerDef = { provide: token };
+            }
             var injectableDef = typeof token !== 'string' ? core.ɵgetInjectableDef(token) : null;
             var isRoot = injectableDef !== null && injectableDef.providedIn === 'root';
             var overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
