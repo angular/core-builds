@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+399.sha-718d7fe.with-local-changes
+ * @license Angular v9.0.0-rc.1+400.sha-b342a69.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13787,9 +13787,11 @@ function renderView(lView, tView, context) {
  */
 function refreshView(lView, tView, templateFn, context) {
     ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
-    enterView(lView, lView[T_HOST]);
     /** @type {?} */
     const flags = lView[FLAGS];
+    if ((flags & 256 /* Destroyed */) === 256 /* Destroyed */)
+        return;
+    enterView(lView, lView[T_HOST]);
     try {
         resetPreOrderHookFlags(lView);
         setBindingIndex(tView.bindingStartIndex);
@@ -28395,7 +28397,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+399.sha-718d7fe.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+400.sha-b342a69.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
