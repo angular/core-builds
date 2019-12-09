@@ -53,7 +53,8 @@ export declare type Provider = any;
 export declare enum R3ResolvedDependencyType {
     Token = 0,
     Attribute = 1,
-    ChangeDetectorRef = 2
+    ChangeDetectorRef = 2,
+    Invalid = 3
 }
 export declare enum R3FactoryTarget {
     Directive = 0,
