@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+402.sha-a1d0f1e.with-local-changes
+ * @license Angular v9.0.0-rc.1+404.sha-d3069db.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16303,6 +16303,10 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
     var isTNodeDirectiveHost = isDirectiveHost(tNode);
     var firstCreatePass = tView.firstCreatePass;
     var tCleanup = firstCreatePass && (tView.cleanup || (tView.cleanup = []));
+    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
+    // native listener or a directive output on this element. As such we we know that we will have to
+    // register a listener and store its cleanup function on LView.
+    var lCleanup = getCleanup(lView);
     ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
     var processOutputs = true;
     // add native event listener - applicable to elements only
@@ -16310,7 +16314,6 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
         var native = getNativeByTNode(tNode, lView);
         var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
         var target = resolved.target || native;
-        var lCleanup = getCleanup(lView);
         var lCleanupIndex = lCleanup.length;
         var idxOrTargetGetter = eventTargetResolver ?
             function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
@@ -16373,7 +16376,6 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
     if (processOutputs && outputs !== null && (props = outputs[eventName])) {
         var propsLength = props.length;
         if (propsLength) {
-            var lCleanup = getCleanup(lView);
             for (var i = 0; i < propsLength; i += 2) {
                 var index = props[i];
                 ngDevMode && assertDataInRange(lView, index);
@@ -16391,7 +16393,7 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
         }
     }
 }
-function executeListenerWithErrorHandling(lView, tNode, listenerFn, e) {
+function executeListenerWithErrorHandling(lView, listenerFn, e) {
     try {
         // Only explicitly returning false from a listener should preventDefault
         return listenerFn(e) !== false;
@@ -16429,13 +16431,13 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
             markViewDirty(startView);
         }
-        var result = executeListenerWithErrorHandling(lView, tNode, listenerFn, e);
+        var result = executeListenerWithErrorHandling(lView, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
         var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
         while (nextListenerFn) {
             // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, tNode, nextListenerFn, e) && result;
+            result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
             nextListenerFn = nextListenerFn.__ngNextListenerFn__;
         }
         if (wrapWithPreventDefault && result === false) {
@@ -19583,7 +19585,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+402.sha-a1d0f1e.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+404.sha-d3069db.with-local-changes');
 
 /**
  * @license
