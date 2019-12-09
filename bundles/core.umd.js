@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.5+32.sha-10a33ef.with-local-changes
+ * @license Angular v9.0.0-rc.5+35.sha-1347064.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16487,6 +16487,10 @@
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
         var tCleanup = firstCreatePass && (tView.cleanup || (tView.cleanup = []));
+        // When the ɵɵlistener instruction was generated and is executed we know that there is either a
+        // native listener or a directive output on this element. As such we we know that we will have to
+        // register a listener and store its cleanup function on LView.
+        var lCleanup = getCleanup(lView);
         ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
         var processOutputs = true;
         // add native event listener - applicable to elements only
@@ -16494,7 +16498,6 @@
             var native = getNativeByTNode(tNode, lView);
             var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
             var target = resolved.target || native;
-            var lCleanup = getCleanup(lView);
             var lCleanupIndex = lCleanup.length;
             var idxOrTargetGetter = eventTargetResolver ?
                 function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
@@ -16557,7 +16560,6 @@
         if (processOutputs && outputs !== null && (props = outputs[eventName])) {
             var propsLength = props.length;
             if (propsLength) {
-                var lCleanup = getCleanup(lView);
                 for (var i = 0; i < propsLength; i += 2) {
                     var index = props[i];
                     ngDevMode && assertDataInRange(lView, index);
@@ -16575,7 +16577,7 @@
             }
         }
     }
-    function executeListenerWithErrorHandling(lView, tNode, listenerFn, e) {
+    function executeListenerWithErrorHandling(lView, listenerFn, e) {
         try {
             // Only explicitly returning false from a listener should preventDefault
             return listenerFn(e) !== false;
@@ -16613,13 +16615,13 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            var result = executeListenerWithErrorHandling(lView, tNode, listenerFn, e);
+            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
             // A just-invoked listener function might have coalesced listeners so we need to check for
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
                 // We should prevent default if any of the listeners explicitly return false
-                result = executeListenerWithErrorHandling(lView, tNode, nextListenerFn, e) && result;
+                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -19763,7 +19765,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.5+32.sha-10a33ef.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.5+35.sha-1347064.with-local-changes');
 
     /**
      * @license
@@ -26674,6 +26676,29 @@
      *   template: '<button counting>Increment</button>',
      * })
      * class App {}
+     *
+     * ```
+     *
+     * The following example registers another DOM event handler that listens for key-press events.
+     * ``` ts
+     * import { HostListener, Component } from "@angular/core";
+     *
+     * @Component({
+     *   selector: 'app',
+     *   template: `<h1>Hello, you have pressed keys {{counter}} number of times!</h1> Press any key to
+     * increment the counter.
+     *   <button (click)="resetCounter()">Reset Counter</button>`
+     * })
+     * class AppComponent {
+     *   counter = 0;
+     *   @HostListener('window:keydown', ['$event'])
+     *   handleKeyDown(event: KeyboardEvent) {
+     *     this.counter++;
+     *   }
+     *   resetCounter() {
+     *     this.counter = 0;
+     *   }
+     * }
      * ```
      *
      * @Annotation

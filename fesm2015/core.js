@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.5+32.sha-10a33ef.with-local-changes
+ * @license Angular v9.0.0-rc.5+35.sha-1347064.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24068,6 +24068,11 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
     const firstCreatePass = tView.firstCreatePass;
     /** @type {?} */
     const tCleanup = firstCreatePass && (tView.cleanup || (tView.cleanup = []));
+    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
+    // native listener or a directive output on this element. As such we we know that we will have to
+    // register a listener and store its cleanup function on LView.
+    /** @type {?} */
+    const lCleanup = getCleanup(lView);
     ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
     /** @type {?} */
     let processOutputs = true;
@@ -24079,8 +24084,6 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
         const resolved = eventTargetResolver ? eventTargetResolver(native) : (/** @type {?} */ (EMPTY_OBJ));
         /** @type {?} */
         const target = resolved.target || native;
-        /** @type {?} */
-        const lCleanup = getCleanup(lView);
         /** @type {?} */
         const lCleanupIndex = lCleanup.length;
         /** @type {?} */
@@ -24155,8 +24158,6 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
         /** @type {?} */
         const propsLength = props.length;
         if (propsLength) {
-            /** @type {?} */
-            const lCleanup = getCleanup(lView);
             for (let i = 0; i < propsLength; i += 2) {
                 /** @type {?} */
                 const index = (/** @type {?} */ (props[i]));
@@ -24182,12 +24183,11 @@ function listenerInternal(lView, renderer, tNode, eventName, listenerFn, useCapt
 }
 /**
  * @param {?} lView
- * @param {?} tNode
  * @param {?} listenerFn
  * @param {?} e
  * @return {?}
  */
-function executeListenerWithErrorHandling(lView, tNode, listenerFn, e) {
+function executeListenerWithErrorHandling(lView, listenerFn, e) {
     try {
         // Only explicitly returning false from a listener should preventDefault
         return listenerFn(e) !== false;
@@ -24232,14 +24232,14 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
             markViewDirty(startView);
         }
         /** @type {?} */
-        let result = executeListenerWithErrorHandling(lView, tNode, listenerFn, e);
+        let result = executeListenerWithErrorHandling(lView, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
         /** @type {?} */
         let nextListenerFn = ((/** @type {?} */ (wrapListenerIn_markDirtyAndPreventDefault))).__ngNextListenerFn__;
         while (nextListenerFn) {
             // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, tNode, nextListenerFn, e) && result;
+            result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
             nextListenerFn = ((/** @type {?} */ (nextListenerFn))).__ngNextListenerFn__;
         }
         if (wrapWithPreventDefault && result === false) {
@@ -28410,7 +28410,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.5+32.sha-10a33ef.with-local-changes');
+const VERSION = new Version('9.0.0-rc.5+35.sha-1347064.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -40186,6 +40186,29 @@ const ɵ9 = /**
  *   template: '<button counting>Increment</button>',
  * })
  * class App {}
+ *
+ * ```
+ *
+ * The following example registers another DOM event handler that listens for key-press events.
+ * ``` ts
+ * import { HostListener, Component } from "\@angular/core";
+ *
+ * \@Component({
+ *   selector: 'app',
+ *   template: `<h1>Hello, you have pressed keys {{counter}} number of times!</h1> Press any key to
+ * increment the counter.
+ *   <button (click)="resetCounter()">Reset Counter</button>`
+ * })
+ * class AppComponent {
+ *   counter = 0;
+ * \@HostListener('window:keydown', ['$event'])
+ *   handleKeyDown(event: KeyboardEvent) {
+ *     this.counter++;
+ *   }
+ *   resetCounter() {
+ *     this.counter = 0;
+ *   }
+ * }
  * ```
  *
  * \@Annotation
