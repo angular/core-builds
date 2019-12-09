@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+403.sha-f98aeca.with-local-changes
+ * @license Angular v9.0.0-rc.1+405.sha-2f3d41f.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2631,6 +2631,29 @@ export declare interface HostListener {
  *   template: '<button counting>Increment</button>',
  * })
  * class App {}
+ *
+ * ```
+ *
+ * The following example registers another DOM event handler that listens for key-press events.
+ * ``` ts
+ * import { HostListener, Component } from "@angular/core";
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `<h1>Hello, you have pressed keys {{counter}} number of times!</h1> Press any key to
+ * increment the counter.
+ *   <button (click)="resetCounter()">Reset Counter</button>`
+ * })
+ * class AppComponent {
+ *   counter = 0;
+ *   @HostListener('window:keydown', ['$event'])
+ *   handleKeyDown(event: KeyboardEvent) {
+ *     this.counter++;
+ *   }
+ *   resetCounter() {
+ *     this.counter = 0;
+ *   }
+ * }
  * ```
  *
  * @Annotation
