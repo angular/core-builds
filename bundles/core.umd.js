@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+417.sha-bb52fb7.with-local-changes
+ * @license Angular v9.0.0-rc.1+419.sha-c8447d2.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8634,13 +8634,14 @@
     function setHostBindings(tView, lView) {
         var selectedIndex = getSelectedIndex();
         try {
-            if (tView.expandoInstructions !== null) {
+            var expandoInstructions = tView.expandoInstructions;
+            if (expandoInstructions !== null) {
                 var bindingRootIndex = setBindingIndex(tView.expandoStartIndex);
                 setBindingRoot(bindingRootIndex);
                 var currentDirectiveIndex = -1;
                 var currentElementIndex = -1;
-                for (var i = 0; i < tView.expandoInstructions.length; i++) {
-                    var instruction = tView.expandoInstructions[i];
+                for (var i = 0; i < expandoInstructions.length; i++) {
+                    var instruction = expandoInstructions[i];
                     if (typeof instruction === 'number') {
                         if (instruction <= 0) {
                             // Negative numbers mean that we are starting new EXPANDO block and need to update
@@ -8648,7 +8649,7 @@
                             currentElementIndex = -instruction;
                             setActiveHostElement(currentElementIndex);
                             // Injector block and providers are taken into account.
-                            var providerCount = tView.expandoInstructions[++i];
+                            var providerCount = expandoInstructions[++i];
                             bindingRootIndex += INJECTOR_BLOOM_PARENT_SIZE + providerCount;
                             currentDirectiveIndex = bindingRootIndex;
                         }
@@ -9641,7 +9642,10 @@
     */
     function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
         ngDevMode && assertEqual(tView.firstCreatePass, true, 'Expando block should only be generated on first create pass.');
-        var elementIndex = -(tNode.index - HEADER_OFFSET);
+        // Important: In JS `-x` and `0-x` is not the same! If `x===0` then `-x` will produce `-0` which
+        // requires non standard math arithmetic and it can prevent VM optimizations.
+        // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
+        var elementIndex = HEADER_OFFSET - tNode.index;
         var providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
         var providerCount = tView.data.length - providerStartIndex;
         (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, providerCount, directiveCount);
@@ -19790,7 +19794,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+417.sha-bb52fb7.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+419.sha-c8447d2.with-local-changes');
 
     /**
      * @license
