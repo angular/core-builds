@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.5+44.sha-7c2bb37.with-local-changes
+ * @license Angular v9.0.0-rc.5+47.sha-46f9201.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7498,7 +7498,7 @@ function (prop, value, mode) {
             prop === 'list-style-image' || prop === 'clip-path';
     }
     if (mode & 2 /* SanitizeOnly */) {
-        return doSanitizeValue ? ɵɵsanitizeStyle(value) : value;
+        return doSanitizeValue ? ɵɵsanitizeStyle(value) : unwrapSafeValue(value);
     }
     else {
         return doSanitizeValue;
@@ -13444,7 +13444,9 @@ function setHostBindings(tView, lView) {
     /** @type {?} */
     const selectedIndex = getSelectedIndex();
     try {
-        if (tView.expandoInstructions !== null) {
+        /** @type {?} */
+        const expandoInstructions = tView.expandoInstructions;
+        if (expandoInstructions !== null) {
             /** @type {?} */
             let bindingRootIndex = setBindingIndex(tView.expandoStartIndex);
             setBindingRoot(bindingRootIndex);
@@ -13452,9 +13454,9 @@ function setHostBindings(tView, lView) {
             let currentDirectiveIndex = -1;
             /** @type {?} */
             let currentElementIndex = -1;
-            for (let i = 0; i < tView.expandoInstructions.length; i++) {
+            for (let i = 0; i < expandoInstructions.length; i++) {
                 /** @type {?} */
-                const instruction = tView.expandoInstructions[i];
+                const instruction = expandoInstructions[i];
                 if (typeof instruction === 'number') {
                     if (instruction <= 0) {
                         // Negative numbers mean that we are starting new EXPANDO block and need to update
@@ -13463,7 +13465,7 @@ function setHostBindings(tView, lView) {
                         setActiveHostElement(currentElementIndex);
                         // Injector block and providers are taken into account.
                         /** @type {?} */
-                        const providerCount = ((/** @type {?} */ (tView.expandoInstructions[++i])));
+                        const providerCount = ((/** @type {?} */ (expandoInstructions[++i])));
                         bindingRootIndex += INJECTOR_BLOOM_PARENT_SIZE + providerCount;
                         currentDirectiveIndex = bindingRootIndex;
                     }
@@ -14762,8 +14764,11 @@ function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstC
  */
 function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
     ngDevMode && assertEqual(tView.firstCreatePass, true, 'Expando block should only be generated on first create pass.');
+    // Important: In JS `-x` and `0-x` is not the same! If `x===0` then `-x` will produce `-0` which
+    // requires non standard math arithmetic and it can prevent VM optimizations.
+    // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
     /** @type {?} */
-    const elementIndex = -(tNode.index - HEADER_OFFSET);
+    const elementIndex = HEADER_OFFSET - tNode.index;
     /** @type {?} */
     const providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
     /** @type {?} */
@@ -28410,7 +28415,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.5+44.sha-7c2bb37.with-local-changes');
+const VERSION = new Version('9.0.0-rc.5+47.sha-46f9201.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
