@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.5+47.sha-46f9201.with-local-changes
+ * @license Angular v9.0.0-rc.5+48.sha-74bbe3e.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14864,7 +14864,7 @@ function saveNameToExportMap(index, def, exportsMap) {
                 exportsMap[def.exportAs[i]] = index;
             }
         }
-        if (((/** @type {?} */ (def))).template)
+        if (isComponentDef(def))
             exportsMap[''] = index;
     }
 }
@@ -28415,7 +28415,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.5+47.sha-46f9201.with-local-changes');
+const VERSION = new Version('9.0.0-rc.5+48.sha-74bbe3e.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
