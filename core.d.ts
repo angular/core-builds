@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.5+51.sha-bbb9412.with-local-changes
+ * @license Angular v9.0.0-rc.5+58.sha-ad82ed8.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7301,13 +7301,6 @@ export declare const TRANSLATIONS: InjectionToken<string>;
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
 /**
- * Tsickle has a bug where it creates an infinite loop for a function returning itself.
- * This is a temporary type that will be removed when the issue is resolved.
- * https://github.com/angular/tsickle/issues/1009)
- */
-declare type TsickleIssue1009 = any;
-
-/**
  * --------
  *
  * This file contains the core interfaces for styling in Angular.
@@ -10790,7 +10783,7 @@ export declare function ɵɵallocHostVars(count: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): typeof ɵɵattribute;
 
 /**
  *
@@ -10816,7 +10809,7 @@ export declare function ɵɵattribute(name: string, value: any, sanitizer?: Sani
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate1(attrName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate1(attrName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate1;
 
 /**
  *
@@ -10844,7 +10837,7 @@ export declare function ɵɵattributeInterpolate1(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate2(attrName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate2(attrName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate2;
 
 /**
  *
@@ -10875,7 +10868,7 @@ export declare function ɵɵattributeInterpolate2(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate3(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate3(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate3;
 
 /**
  *
@@ -10908,7 +10901,7 @@ export declare function ɵɵattributeInterpolate3(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate4(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate4(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate4;
 
 /**
  *
@@ -10943,7 +10936,7 @@ export declare function ɵɵattributeInterpolate4(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate5(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate5(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate5;
 
 /**
  *
@@ -10980,7 +10973,7 @@ export declare function ɵɵattributeInterpolate5(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate6(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate6(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate6;
 
 /**
  *
@@ -11019,7 +11012,7 @@ export declare function ɵɵattributeInterpolate6(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate7(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate7(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate7;
 
 /**
  *
@@ -11060,7 +11053,7 @@ export declare function ɵɵattributeInterpolate7(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate8(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate8(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate8;
 
 /**
  * Update an interpolated attribute on an element with 8 or more bound values surrounded by text.
@@ -11088,7 +11081,7 @@ export declare function ɵɵattributeInterpolate8(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolateV(attrName: string, values: any[], sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolateV(attrName: string, values: any[], sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolateV;
 
 /**
  * Update class bindings using an object literal or class-string on an element.
@@ -11399,7 +11392,7 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(className: string, value: boolean | null): void;
+export declare function ɵɵclassProp(className: string, value: boolean | null): typeof ɵɵclassProp;
 
 /**
  * @codeGenApi
@@ -11431,7 +11424,7 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
  *
  * @codeGenApi
 */
-export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵcomponentHostSyntheticListener;
 
 /**
  * Creates an LContainer for inline views, e.g.
@@ -12158,7 +12151,7 @@ export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type
  *
  * @codeGenApi
  */
-export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵhostProperty;
 
 /**
  *
@@ -12226,7 +12219,7 @@ export declare function ɵɵi18nEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
+export declare function ɵɵi18nExp<T>(value: T): typeof ɵɵi18nExp;
 
 /**
  * Handles message string post-processing for internationalization.
@@ -12393,6 +12386,20 @@ export declare function ɵɵinjectPipeChangeDetectorRef(flags?: InjectFlags): Ch
 export declare function ɵɵinvalidFactory(): never;
 
 /**
+ * Throws an error indicating that a factory function could not be generated by the compiler for a
+ * particular class.
+ *
+ * This instruction allows the actual error message to be optimized away when ngDevMode is turned
+ * off, saving bytes of generated code while still providing a good experience in dev mode.
+ *
+ * The name of the class is not mentioned here, but will be in the generated factory function name
+ * and thus in the stack trace.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵinvalidFactoryDep(index: number): never;
+
+/**
  * Adds an event listener to the current node.
  *
  * If an output exists on one of the node's directives, it also subscribes to the output
@@ -12406,7 +12413,7 @@ export declare function ɵɵinvalidFactory(): never;
  *
  * @codeGenApi
  */
-export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): void;
+export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
 
 /**
  * Loads a QueryList corresponding to the current view or content query.
@@ -12631,7 +12638,7 @@ export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): vo
  *
  * @codeGenApi
  */
-export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵproperty;
 
 /**
  *
@@ -12662,7 +12669,7 @@ export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate;
 
 /**
  *
@@ -12692,7 +12699,7 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanit
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate1;
 
 /**
  *
@@ -12724,7 +12731,7 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate2;
 
 /**
  *
@@ -12759,7 +12766,7 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate3;
 
 /**
  *
@@ -12796,7 +12803,7 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate4;
 
 /**
  *
@@ -12835,7 +12842,7 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate5;
 
 /**
  *
@@ -12876,7 +12883,7 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate6;
 
 /**
  *
@@ -12919,7 +12926,7 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate7;
 
 /**
  *
@@ -12964,7 +12971,7 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate8;
 
 /**
  * Update an interpolated property on an element with 8 or more bound values surrounded by text.
@@ -12996,7 +13003,7 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolateV;
 
 /**
  * This feature resolves the providers of a directive (or component),
@@ -13488,7 +13495,7 @@ export declare function ɵɵstyleMap(styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): typeof ɵɵstyleProp;
 
 /**
  *
@@ -13516,7 +13523,7 @@ export declare function ɵɵstyleProp(prop: string, value: string | number | ɵS
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate1;
 
 /**
  *
@@ -13546,7 +13553,7 @@ export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate2;
 
 /**
  *
@@ -13578,7 +13585,7 @@ export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate3;
 
 /**
  *
@@ -13612,7 +13619,7 @@ export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate4;
 
 /**
  *
@@ -13648,7 +13655,7 @@ export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate5;
 
 /**
  *
@@ -13686,7 +13693,7 @@ export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate6;
 
 /**
  *
@@ -13727,7 +13734,7 @@ export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate7;
 
 /**
  *
@@ -13770,7 +13777,7 @@ export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate8;
 
 /**
  * Update an interpolated style property on an element with 8 or more bound values surrounded by
@@ -13802,7 +13809,7 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;
 
 /**
  * --------
@@ -13890,7 +13897,7 @@ export declare function ɵɵtext(index: number, value?: string): void;
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
+export declare function ɵɵtextInterpolate(v0: any): typeof ɵɵtextInterpolate;
 
 /**
  *
@@ -13911,7 +13918,7 @@ export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): typeof ɵɵtextInterpolate1;
 
 /**
  *
@@ -13932,7 +13939,7 @@ export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: st
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): typeof ɵɵtextInterpolate2;
 
 /**
  *
@@ -13954,7 +13961,7 @@ export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): typeof ɵɵtextInterpolate3;
 
 /**
  *
@@ -13976,7 +13983,7 @@ export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string
  * @see ɵɵtextInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): typeof ɵɵtextInterpolate4;
 
 /**
  *
@@ -13998,7 +14005,7 @@ export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): typeof ɵɵtextInterpolate5;
 
 /**
  *
@@ -14022,7 +14029,7 @@ export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): typeof ɵɵtextInterpolate6;
 
 /**
  *
@@ -14044,7 +14051,7 @@ export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): typeof ɵɵtextInterpolate7;
 
 /**
  *
@@ -14066,7 +14073,7 @@ export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): typeof ɵɵtextInterpolate8;
 
 /**
  * Update text content with 9 or more bound values other surrounded by text.
@@ -14092,7 +14099,7 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
+export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
 
 /**
  * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
@@ -14115,7 +14122,7 @@ export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
  *
  * @codeGenApi
  */
-export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵupdateSyntheticHostBinding;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
