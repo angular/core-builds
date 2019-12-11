@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+420.sha-ed486b5.with-local-changes
+ * @license Angular v9.0.0-rc.1+421.sha-7cd465a.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -561,6 +561,7 @@ function ngDevModeResetPerfCounters() {
         rendererSetClassName: 0,
         rendererAddClass: 0,
         rendererRemoveClass: 0,
+        rendererCssText: 0,
         rendererSetStyle: 0,
         rendererRemoveStyle: 0,
         rendererDestroy: 0,
@@ -2759,7 +2760,7 @@ function isAnimationProp(name) {
     // Perf note: accessing charCodeAt to check for the first character of a string is faster as
     // compared to accessing a character at index 0 (ex. name[0]). The main reason for this is that
     // charCodeAt doesn't allocate memory to return a substring.
-    return name.charCodeAt(0) === 64; // @
+    return name.charCodeAt(0) === 64 /* AT_SIGN */;
 }
 
 /**
@@ -3382,7 +3383,7 @@ function splitOnWhitespace(text) {
     var foundChar = false;
     for (var i = 0; i < length; i++) {
         var char = text.charCodeAt(i);
-        if (char <= 32 /*' '*/) {
+        if (char <= 32 /* SPACE */) {
             if (foundChar) {
                 if (array === null)
                     array = [];
@@ -19641,7 +19642,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+420.sha-ed486b5.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+421.sha-7cd465a.with-local-changes');
 
 /**
  * @license
