@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+459.sha-a9e3cbd.with-local-changes
+ * @license Angular v9.0.0-rc.1+460.sha-0fba79c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7148,28 +7148,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
-     * provided handler.
-     *
-     * The reason why this function exists is because IE doesn't support
-     * the `Proxy` class. For this reason an error must be thrown.
-     */
-    function createProxy(handler) {
-        var g = _global;
-        if (!g.Proxy) {
-            throw new Error('Proxy is not supported in this browser');
-        }
-        return new g.Proxy({}, handler);
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function attachDebugObject(obj, debug) {
         Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
     }
@@ -7482,13 +7460,6 @@
     }
 
     /**
-    * @license
-    * Copyright Google Inc. All Rights Reserved.
-    *
-    * Use of this source code is governed by an MIT-style license that can be
-    * found in the LICENSE file at https://angular.io/license
-    */
-    /**
      * Instantiates and attaches an instance of `TStylingContextDebug` to the provided context
      */
     function attachStylingDebugObject(context, tNode, isClassBased) {
@@ -7700,7 +7671,6 @@
             get: function () {
                 var entries = {};
                 var config = this.config;
-                var isClassBased = this._isClassBased;
                 var data = this._data;
                 // the direct pass code doesn't convert [style] or [class] values
                 // into StylingMapArray instances. For this reason, the values
@@ -7714,35 +7684,7 @@
                 this._mapValues(data, function (prop, value, bindingIndex) {
                     entries[prop] = { prop: prop, value: value, bindingIndex: bindingIndex };
                 });
-                // because the styling algorithm runs into two different
-                // modes: direct and context-resolution, the output of the entries
-                // object is different because the removed values are not
-                // saved between updates. For this reason a proxy is created
-                // so that the behavior is the same when examining values
-                // that are no longer active on the element.
-                return createProxy({
-                    get: function (target, prop) {
-                        var value = entries[prop];
-                        if (!value) {
-                            value = {
-                                prop: prop,
-                                value: isClassBased ? false : null,
-                                bindingIndex: null,
-                            };
-                        }
-                        return value;
-                    },
-                    set: function (target, prop, value) { return false; },
-                    ownKeys: function () { return Object.keys(entries); },
-                    getOwnPropertyDescriptor: function (k) {
-                        // we use a special property descriptor here so that enumeration operations
-                        // such as `Object.keys` will work on this proxy.
-                        return {
-                            enumerable: true,
-                            configurable: true,
-                        };
-                    },
-                });
+                return entries;
             },
             enumerable: true,
             configurable: true
@@ -19763,7 +19705,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+459.sha-a9e3cbd.with-local-changes');
+    var VERSION = new Version('9.0.0-rc.1+460.sha-0fba79c.with-local-changes');
 
     /**
      * @license
@@ -28617,6 +28559,28 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
+     * provided handler.
+     *
+     * The reason why this function exists is because IE doesn't support
+     * the `Proxy` class. For this reason an error must be thrown.
+     */
+    function createProxy(handler) {
+        var g = _global;
+        if (!g.Proxy) {
+            throw new Error('Proxy is not supported in this browser');
+        }
+        return new g.Proxy({}, handler);
+    }
 
     /**
      * @publicApi

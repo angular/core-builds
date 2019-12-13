@@ -1,3 +1,10 @@
+/**
+* @license
+* Copyright Google Inc. All Rights Reserved.
+*
+* Use of this source code is governed by an MIT-style license that can be
+* found in the LICENSE file at https://angular.io/license
+*/
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { LStylingData, TStylingContext, TStylingNode } from '../interfaces/styling';
 /**
@@ -105,7 +112,7 @@ export interface DebugNodeStylingEntry {
     /** The style/class property that the summary is attached to */
     prop: string;
     /** The last applied value for the style/class property */
-    value: string | boolean | null;
+    value: string | null;
     /** The binding index of the last applied style/class property */
     bindingIndex: number | null;
 }
