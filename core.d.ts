@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+460.sha-0fba79c.with-local-changes
+ * @license Angular v9.0.0-rc.1+463.sha-ea57587
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1524,7 +1524,6 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
     readonly styles: {
         [key: string]: string | null;
     };
-    private _classesProxy;
     readonly classes: {
         [key: string]: boolean;
     };
