@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.6+29.sha-fb4a11a.with-local-changes
+ * @license Angular v9.0.0-rc.6+31.sha-5e075ae.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11298,38 +11298,6 @@ const unusedValueExportToPlacateAjd$6 = 1;
 
 /**
  * @fileoverview added by tsickle
- * Generated from: packages/core/src/debug/proxy.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Used to inform TS about the `Proxy` class existing globally.
- * @record
- */
-function GlobalWithProxy() { }
-if (false) {
-    /** @type {?} */
-    GlobalWithProxy.prototype.Proxy;
-}
-/**
- * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
- * provided handler.
- *
- * The reason why this function exists is because IE doesn't support
- * the `Proxy` class. For this reason an error must be thrown.
- * @param {?} handler
- * @return {?}
- */
-function createProxy(handler) {
-    /** @type {?} */
-    const g = (/** @type {?} */ ((/** @type {?} */ (_global))));
-    if (!g.Proxy) {
-        throw new Error('Proxy is not supported in this browser');
-    }
-    return new g.Proxy({}, handler);
-}
-
-/**
- * @fileoverview added by tsickle
  * Generated from: packages/core/src/render3/util/debug_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -12201,8 +12169,6 @@ class NodeStylingDebug {
         /** @type {?} */
         const config = this.config;
         /** @type {?} */
-        const isClassBased = this._isClassBased;
-        /** @type {?} */
         let data = this._data;
         // the direct pass code doesn't convert [style] or [class] values
         // into StylingMapArray instances. For this reason, the values
@@ -12222,54 +12188,7 @@ class NodeStylingDebug {
         (prop, value, bindingIndex) => {
             entries[prop] = { prop, value, bindingIndex };
         }));
-        // because the styling algorithm runs into two different
-        // modes: direct and context-resolution, the output of the entries
-        // object is different because the removed values are not
-        // saved between updates. For this reason a proxy is created
-        // so that the behavior is the same when examining values
-        // that are no longer active on the element.
-        return createProxy({
-            /**
-             * @param {?} target
-             * @param {?} prop
-             * @return {?}
-             */
-            get(target, prop) {
-                /** @type {?} */
-                let value = entries[prop];
-                if (!value) {
-                    value = {
-                        prop,
-                        value: isClassBased ? false : null,
-                        bindingIndex: null,
-                    };
-                }
-                return value;
-            },
-            /**
-             * @param {?} target
-             * @param {?} prop
-             * @param {?} value
-             * @return {?}
-             */
-            set(target, prop, value) { return false; },
-            /**
-             * @return {?}
-             */
-            ownKeys() { return Object.keys(entries); },
-            /**
-             * @param {?} k
-             * @return {?}
-             */
-            getOwnPropertyDescriptor(k) {
-                // we use a special property descriptor here so that enumeration operations
-                // such as `Object.keys` will work on this proxy.
-                return {
-                    enumerable: true,
-                    configurable: true,
-                };
-            },
-        });
+        return entries;
     }
     /**
      * @return {?}
@@ -28446,7 +28365,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.6+29.sha-fb4a11a.with-local-changes');
+const VERSION = new Version('9.0.0-rc.6+31.sha-5e075ae.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -43395,6 +43314,38 @@ if (false) {
  * Generated from: packages/core/src/linker.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/debug/proxy.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Used to inform TS about the `Proxy` class existing globally.
+ * @record
+ */
+function GlobalWithProxy() { }
+if (false) {
+    /** @type {?} */
+    GlobalWithProxy.prototype.Proxy;
+}
+/**
+ * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
+ * provided handler.
+ *
+ * The reason why this function exists is because IE doesn't support
+ * the `Proxy` class. For this reason an error must be thrown.
+ * @param {?} handler
+ * @return {?}
+ */
+function createProxy(handler) {
+    /** @type {?} */
+    const g = (/** @type {?} */ ((/** @type {?} */ (_global))));
+    if (!g.Proxy) {
+        throw new Error('Proxy is not supported in this browser');
+    }
+    return new g.Proxy({}, handler);
+}
 
 /**
  * @fileoverview added by tsickle
