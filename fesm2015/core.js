@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+461.sha-b405942
+ * @license Angular v9.0.0-rc.1+463.sha-ea57587
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28365,7 +28365,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+461.sha-b405942');
+const VERSION = new Version('9.0.0-rc.1+463.sha-ea57587');
 
 /**
  * @fileoverview added by tsickle
@@ -43330,38 +43330,6 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
- * Generated from: packages/core/src/debug/proxy.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Used to inform TS about the `Proxy` class existing globally.
- * @record
- */
-function GlobalWithProxy() { }
-if (false) {
-    /** @type {?} */
-    GlobalWithProxy.prototype.Proxy;
-}
-/**
- * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
- * provided handler.
- *
- * The reason why this function exists is because IE doesn't support
- * the `Proxy` class. For this reason an error must be thrown.
- * @param {?} handler
- * @return {?}
- */
-function createProxy(handler) {
-    /** @type {?} */
-    const g = (/** @type {?} */ ((/** @type {?} */ (_global))));
-    if (!g.Proxy) {
-        throw new Error('Proxy is not supported in this browser');
-    }
-    return new g.Proxy({}, handler);
-}
-
-/**
- * @fileoverview added by tsickle
  * Generated from: packages/core/src/debug/debug_node.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -43831,51 +43799,18 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
      * @return {?}
      */
     get classes() {
-        if (!this._classesProxy) {
-            /** @type {?} */
-            const element = this.nativeElement;
-            // we use a proxy here because VE code expects `.classes` to keep
-            // track of which classes have been added and removed. Because we
-            // do not make use of a debug renderer anymore, the return value
-            // must always be `false` in the event that a class does not exist
-            // on the element (even if it wasn't added and removed beforehand).
-            this._classesProxy = createProxy({
-                /**
-                 * @param {?} target
-                 * @param {?} prop
-                 * @return {?}
-                 */
-                get(target, prop) {
-                    return element ? element.classList.contains(prop) : false;
-                },
-                /**
-                 * @param {?} target
-                 * @param {?} prop
-                 * @param {?} value
-                 * @return {?}
-                 */
-                set(target, prop, value) {
-                    return element ? element.classList.toggle(prop, !!value) : false;
-                },
-                /**
-                 * @return {?}
-                 */
-                ownKeys() { return element ? Array.from(element.classList).sort() : []; },
-                /**
-                 * @param {?} k
-                 * @return {?}
-                 */
-                getOwnPropertyDescriptor(k) {
-                    // we use a special property descriptor here so that enumeration operations
-                    // such as `Object.keys` will work on this proxy.
-                    return {
-                        enumerable: true,
-                        configurable: true,
-                    };
-                },
-            });
-        }
-        return this._classesProxy;
+        /** @type {?} */
+        const result = {};
+        /** @type {?} */
+        const element = (/** @type {?} */ (this.nativeElement));
+        /** @type {?} */
+        const classNames = element.className.split(' ');
+        classNames.forEach((/**
+         * @param {?} value
+         * @return {?}
+         */
+        (value) => result[value] = true));
+        return result;
     }
     /**
      * @return {?}
@@ -43979,13 +43914,6 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             }));
         }
     }
-}
-if (false) {
-    /**
-     * @type {?}
-     * @private
-     */
-    DebugElement__POST_R3__.prototype._classesProxy;
 }
 /**
  * @param {?} element
