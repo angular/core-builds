@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+464.sha-17f7f06.with-local-changes
+ * @license Angular v9.0.0-rc.1+472.sha-f79110c.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -383,17 +383,34 @@ function getOwnDefinition(type, def) {
  * `ɵprov` on an ancestor only.
  */
 function getInheritedInjectableDef(type) {
-    const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
+    // See `jit/injectable.ts#compileInjectable` for context on NG_PROV_DEF_FALLBACK.
+    const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF] ||
+        (type[NG_PROV_DEF_FALLBACK] && type[NG_PROV_DEF_FALLBACK]()));
     if (def) {
+        const typeName = getTypeName(type);
         // TODO(FW-1307): Re-add ngDevMode when closure can handle it
         // ngDevMode &&
-        console.warn(`DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
-            `This will become an error in v10. Please add @Injectable() to the "${type.name}" class.`);
+        console.warn(`DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+            `This will become an error in v10. Please add @Injectable() to the "${typeName}" class.`);
         return def;
     }
     else {
         return null;
     }
+}
+/** Gets the name of a type, accounting for some cross-browser differences. */
+function getTypeName(type) {
+    // `Function.prototype.name` behaves differently between IE and other browsers. In most browsers
+    // it'll always return the name of the function itself, no matter how many other functions it
+    // inherits from. On IE the function doesn't have its own `name` property, but it takes it from
+    // the lowest level in the prototype chain. E.g. if we have `class Foo extends Parent` most
+    // browsers will evaluate `Foo.name` to `Foo` while IE will return `Parent`. We work around
+    // the issue by converting the function to a string and parsing its name out that way via a regex.
+    if (type.hasOwnProperty('name')) {
+        return type.name;
+    }
+    const match = ('' + type).match(/^function\s*([^\s(]+)/);
+    return match === null ? '' : match[1];
 }
 /**
  * Read the injector def type in a way which is immune to accidentally reading inherited value.
@@ -407,6 +424,13 @@ function getInjectorDef(type) {
 }
 const NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
 const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
+// On IE10 properties defined via `defineProperty` won't be inherited by child classes,
+// which will break inheriting the injectable definition from a grandparent through an
+// undecorated parent class. We work around it by defining a fallback method which will be
+// used to retrieve the definition. This should only be a problem in JIT mode, because in
+// AOT TypeScript seems to have a workaround for static properties. When inheriting from an
+// undecorated parent is no longer supported in v10, this can safely be removed.
+const NG_PROV_DEF_FALLBACK = getClosureSafeProperty({ ɵprovFallback: getClosureSafeProperty });
 // We need to keep these around so we can read off old defs if new defs are unavailable
 const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
 const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
@@ -6589,26 +6613,26 @@ class InertBodyHelper {
     constructor(defaultDoc) {
         this.defaultDoc = defaultDoc;
         this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-        this.inertBodyElement = this.inertDocument.body;
-        if (this.inertBodyElement == null) {
+        /** @type {?} */
+        let inertBodyElement = this.inertDocument.body;
+        if (inertBodyElement == null) {
             // usually there should be only one body element in the document, but IE doesn't have any, so
             // we need to create one.
             /** @type {?} */
             const inertHtml = this.inertDocument.createElement('html');
             this.inertDocument.appendChild(inertHtml);
-            this.inertBodyElement = this.inertDocument.createElement('body');
-            inertHtml.appendChild(this.inertBodyElement);
+            inertBodyElement = this.inertDocument.createElement('body');
+            inertHtml.appendChild(inertBodyElement);
         }
-        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+        inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+        if (inertBodyElement.querySelector && !inertBodyElement.querySelector('svg')) {
             // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
             // so use the XHR strategy.
             this.getInertBodyElement = this.getInertBodyElement_XHR;
             return;
         }
-        this.inertBodyElement.innerHTML =
-            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+        inertBodyElement.innerHTML = '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+        if (inertBodyElement.querySelector && inertBodyElement.querySelector('svg img')) {
             // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
             // so use the DOMParser strategy, if it is available.
             // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
@@ -6693,13 +6717,22 @@ class InertBodyHelper {
             templateEl.innerHTML = html;
             return templateEl;
         }
-        this.inertBodyElement.innerHTML = html;
+        // Note that previously we used to do something like `this.inertDocument.body.innerHTML = html`
+        // and we returned the inert `body` node. This was changed, because IE seems to treat setting
+        // `innerHTML` on an inserted element differently, compared to one that hasn't been inserted
+        // yet. In particular, IE appears to split some of the text into multiple text nodes rather
+        // than keeping them in a single one which ends up messing with Ivy's i18n parsing further
+        // down the line. This has been worked around by creating a new inert `body` and using it as
+        // the root node in which we insert the HTML.
+        /** @type {?} */
+        const inertBody = this.inertDocument.createElement('body');
+        inertBody.innerHTML = html;
         // Support: IE 9-11 only
         // strip custom-namespaced attributes on IE<=11
         if (((/** @type {?} */ (this.defaultDoc))).documentMode) {
-            this.stripCustomNsAttrs(this.inertBodyElement);
+            this.stripCustomNsAttrs(inertBody);
         }
-        return this.inertBodyElement;
+        return inertBody;
     }
     /**
      * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
@@ -6735,11 +6768,6 @@ class InertBodyHelper {
     }
 }
 if (false) {
-    /**
-     * @type {?}
-     * @private
-     */
-    InertBodyHelper.prototype.inertBodyElement;
     /**
      * @type {?}
      * @private
@@ -14459,8 +14487,13 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
 function validateProperty(hostView, element, propName, tNode) {
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    return matchingSchemas(hostView, tNode.tagName) || propName in element ||
-        isAnimationProp(propName) || typeof Node !== 'function' || !(element instanceof Node);
+    if (matchingSchemas(hostView, tNode.tagName) || propName in element ||
+        isAnimationProp(propName)) {
+        return true;
+    }
+    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
+    // need to account for both here, while being careful for `typeof null` also returning 'object'.
+    return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
 /**
  * @param {?} hostView
@@ -17891,16 +17924,18 @@ function reflectDependency(compiler, dep) {
                 // param may be undefined if type of dep is not set by ngtsc
                 continue;
             }
-            else if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
+            /** @type {?} */
+            const proto = Object.getPrototypeOf(param);
+            if (param instanceof Optional || proto.ngMetadataName === 'Optional') {
                 meta.optional = true;
             }
-            else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
+            else if (param instanceof SkipSelf || proto.ngMetadataName === 'SkipSelf') {
                 meta.skipSelf = true;
             }
-            else if (param instanceof Self || param.__proto__.ngMetadataName === 'Self') {
+            else if (param instanceof Self || proto.ngMetadataName === 'Self') {
                 meta.self = true;
             }
-            else if (param instanceof Host || param.__proto__.ngMetadataName === 'Host') {
+            else if (param instanceof Host || proto.ngMetadataName === 'Host') {
                 meta.host = true;
             }
             else if (param instanceof Inject) {
@@ -17962,6 +17997,18 @@ function compileInjectable(type, srcMeta) {
                 return ngInjectableDef;
             }),
         });
+        // On IE10 properties defined via `defineProperty` won't be inherited by child classes,
+        // which will break inheriting the injectable definition from a grandparent through an
+        // undecorated parent class. We work around it by defining a method which should be used
+        // as a fallback. This should only be a problem in JIT mode, because in AOT TypeScript
+        // seems to have a workaround for static properties. When inheriting from an undecorated
+        // parent is no longer supported in v10, this can safely be removed.
+        if (!type.hasOwnProperty(NG_PROV_DEF_FALLBACK)) {
+            ((/** @type {?} */ (type)))[NG_PROV_DEF_FALLBACK] = (/**
+             * @return {?}
+             */
+            () => ((/** @type {?} */ (type)))[NG_PROV_DEF]);
+        }
     }
     // if NG_FACTORY_DEF is already defined on this class then don't overwrite it
     if (!type.hasOwnProperty(NG_FACTORY_DEF)) {
@@ -23567,7 +23614,11 @@ function validateElement(hostView, element, tNode, hasDirectives) {
         // as a custom element. Note that unknown elements with a dash in their name won't be instances
         // of HTMLUnknownElement in browsers that support web components.
         /** @type {?} */
-        const isUnknown = (typeof HTMLUnknownElement === 'function' && element instanceof HTMLUnknownElement) ||
+        const isUnknown = 
+        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
+        // because while most browsers return 'function', IE returns 'object'.
+        (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
+            element instanceof HTMLUnknownElement) ||
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(hostView, tagName)) {
@@ -28348,7 +28399,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+464.sha-17f7f06.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+472.sha-f79110c.with-local-changes');
 
 /**
  * @fileoverview added by tsickle
@@ -39710,7 +39761,9 @@ function extendsDirectlyFromObject(type) {
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
     /** @type {?} */
-    const propMetadata = getReflect().ownPropMetadata(type);
+    const reflect = getReflect();
+    /** @type {?} */
+    const propMetadata = reflect.ownPropMetadata(type);
     return {
         name: type.name,
         type: type,
@@ -39722,7 +39775,7 @@ function directiveMetadata(type, metadata) {
         inputs: metadata.inputs || EMPTY_ARRAY,
         outputs: metadata.outputs || EMPTY_ARRAY,
         queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
-        lifecycle: { usesOnChanges: usesLifecycleHook(type, 'ngOnChanges') },
+        lifecycle: { usesOnChanges: reflect.hasLifecycleHook(type, 'ngOnChanges') },
         typeSourceSpan: (/** @type {?} */ (null)),
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: extractExportAs(metadata.exportAs),
@@ -39739,7 +39792,7 @@ function addDirectiveDefToUndecoratedParents(type) {
     /** @type {?} */
     const objPrototype = Object.prototype;
     /** @type {?} */
-    let parent = Object.getPrototypeOf(type);
+    let parent = Object.getPrototypeOf(type.prototype).constructor;
     // Go up the prototype until we hit `Object`.
     while (parent && parent !== objPrototype) {
         // Since inheritance works if the class was annotated already, we only need to add
@@ -39849,16 +39902,6 @@ function splitByComma(value) {
      */
     piece => piece.trim()));
 }
-/**
- * @param {?} type
- * @param {?} name
- * @return {?}
- */
-function usesLifecycleHook(type, name) {
-    /** @type {?} */
-    const prototype = type.prototype;
-    return prototype && prototype.hasOwnProperty(name);
-}
 /** @type {?} */
 const LIFECYCLE_HOOKS = [
     'ngOnChanges', 'ngOnInit', 'ngOnDestroy', 'ngDoCheck', 'ngAfterViewInit', 'ngAfterViewChecked',
@@ -39869,15 +39912,17 @@ const LIFECYCLE_HOOKS = [
  * @return {?}
  */
 function shouldAddAbstractDirective(type) {
+    /** @type {?} */
+    const reflect = getReflect();
     if (LIFECYCLE_HOOKS.some((/**
      * @param {?} hookName
      * @return {?}
      */
-    hookName => usesLifecycleHook(type, hookName)))) {
+    hookName => reflect.hasLifecycleHook(type, hookName)))) {
         return true;
     }
     /** @type {?} */
-    const propMetadata = getReflect().ownPropMetadata(type);
+    const propMetadata = reflect.propMetadata(type);
     for (const field in propMetadata) {
         /** @type {?} */
         const annotations = propMetadata[field];
@@ -43852,10 +43897,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         for (let i = 0; i < eAttrs.length; i++) {
             /** @type {?} */
             const attr = eAttrs[i];
+            /** @type {?} */
+            const lowercaseName = attr.name.toLowerCase();
             // Make sure that we don't assign the same attribute both in its
             // case-sensitive form and the lower-cased one from the browser.
-            if (lowercaseTNodeAttrs.indexOf(attr.name) === -1) {
-                attributes[attr.name] = attr.value;
+            if (lowercaseTNodeAttrs.indexOf(lowercaseName) === -1) {
+                // Save the lowercase name to align the behavior between browsers.
+                // IE preserves the case, while all other browser convert it to lower case.
+                attributes[lowercaseName] = attr.value;
             }
         }
         return attributes;

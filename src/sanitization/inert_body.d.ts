@@ -15,7 +15,6 @@
  */
 export declare class InertBodyHelper {
     private defaultDoc;
-    private inertBodyElement;
     private inertDocument;
     constructor(defaultDoc: Document);
     /**
