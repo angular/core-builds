@@ -138,7 +138,6 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
     readonly styles: {
         [key: string]: string | null;
     };
-    private _classesProxy;
     readonly classes: {
         [key: string]: boolean;
     };
