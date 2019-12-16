@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+483.sha-23cf11a
+ * @license Angular v9.0.0-rc.1+488.sha-28b4f4a
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12636,11 +12636,11 @@ function providerToFactory(provider, ngModuleType, providers) {
         if (isValueProvider(provider)) {
             factory = function () { return resolveForwardRef(provider.useValue); };
         }
-        else if (isExistingProvider(provider)) {
-            factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
-        }
         else if (isFactoryProvider(provider)) {
             factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
+        }
+        else if (isExistingProvider(provider)) {
+            factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
         }
         else {
             var classRef_1 = resolveForwardRef(provider &&
@@ -19633,7 +19633,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+483.sha-23cf11a');
+var VERSION = new Version('9.0.0-rc.1+488.sha-28b4f4a');
 
 /**
  * @license
