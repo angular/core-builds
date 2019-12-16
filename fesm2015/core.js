@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+421.sha-7cd465a.with-local-changes
+ * @license Angular v9.0.0-rc.1+422.sha-a719656.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7520,9 +7520,7 @@ function (prop, value, mode) {
     /** @type {?} */
     let doSanitizeValue = true;
     if (mode & 1 /* ValidateProperty */) {
-        doSanitizeValue = prop === 'background-image' || prop === 'background' ||
-            prop === 'border-image' || prop === 'filter' || prop === 'list-style' ||
-            prop === 'list-style-image' || prop === 'clip-path';
+        doSanitizeValue = stylePropNeedsSanitization(prop);
     }
     if (mode & 2 /* SanitizeOnly */) {
         return doSanitizeValue ? ɵɵsanitizeStyle(value) : unwrapSafeValue(value);
@@ -7531,6 +7529,15 @@ function (prop, value, mode) {
         return doSanitizeValue;
     }
 }))));
+/**
+ * @param {?} prop
+ * @return {?}
+ */
+function stylePropNeedsSanitization(prop) {
+    return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
+        prop === 'filter' || prop === 'list-style' || prop === 'list-style-image' ||
+        prop === 'clip-path';
+}
 /**
  * @param {?} name
  * @return {?}
@@ -8893,6 +8900,36 @@ if (false) {
      * @type {?}
      */
     TNode.prototype.classes;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the class bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "class" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     * @type {?}
+     */
+    TNode.prototype.classBindings;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the style bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "style" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     * @type {?}
+     */
+    TNode.prototype.styleBindings;
 }
 /**
  * Static data for an element
@@ -11331,6 +11368,599 @@ function createProxy(handler) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/styling.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * A static-level representation of all style or class bindings/values
+ * associated with a `TNode`.
+ *
+ * The `TStylingContext` unites all template styling bindings (i.e.
+ * `[class]` and `[style]` bindings) as well as all host-level
+ * styling bindings (for components and directives) together into
+ * a single manifest
+ *
+ * The styling context is stored on a `TNode` on and there are
+ * two instances of it: one for classes and another for styles.
+ *
+ * ```typescript
+ * tNode.styles = [ ... a context only for styles ... ];
+ * tNode.classes = [ ... a context only for classes ... ];
+ * ```
+ *
+ * The styling context is created each time there are one or more
+ * styling bindings (style or class bindings) present for an element,
+ * but is only created once per `TNode`.
+ *
+ * `tNode.styles` and `tNode.classes` can be an instance of the following:
+ *
+ * ```typescript
+ * tNode.styles = null; // no static styling or styling bindings active
+ * tNode.styles = StylingMapArray; // only static values present (e.g. `<div style="width:200">`)
+ * tNode.styles = TStylingContext; // one or more styling bindings present (e.g. `<div
+ * [style.width]>`)
+ * ```
+ *
+ * Both `tNode.styles` and `tNode.classes` are instantiated when anything
+ * styling-related is active on an element. They are first created from
+ * from the any of the element-level instructions (e.g. `element`,
+ * `elementStart`, `elementHostAttrs`). When any static style/class
+ * values are encountered they are registered on the `tNode.styles`
+ * and `tNode.classes` data-structures. By default (when any static
+ * values are encountered) the `tNode.styles` or `tNode.classes` values
+ * are instances of a `StylingMapArray`. Only when style/class bindings
+ * are detected then that styling map is converted into an instance of
+ * `TStylingContext`.
+ *
+ * Due to the fact the the `TStylingContext` is stored on a `TNode`
+ * this means that all data within the context is static. Instead of
+ * storing actual styling binding values, the lView binding index values
+ * are stored within the context. (static nature means it is more compact.)
+ *
+ * The code below shows a breakdown of two instances of `TStylingContext`
+ * (one for `tNode.styles` and another for `tNode.classes`):
+ *
+ * ```typescript
+ * // <div [class.active]="c"  // lView binding index = 20
+ * //      [style.width]="x"   // lView binding index = 21
+ * //      [style.height]="y"> // lView binding index = 22
+ * //  ...
+ * // </div>
+ * tNode.styles = [
+ *   1,         // the total amount of sources present (only `1` b/c there are only template
+ * bindings)
+ *   [null],    // initial values array (an instance of `StylingMapArray`)
+ *
+ *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
+ *   0b010,     // template guard mask for height
+ *   0,         // host bindings guard mask for height
+ *   'height',  // the property name
+ *   22,        // the binding location for the "y" binding in the lView
+ *   null,      // the default value for height
+ *
+ *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
+ *   0b001,     // template guard mask for width
+ *   0,         // host bindings guard mask for width
+ *   'width',   // the property name
+ *   21,        // the binding location for the "x" binding in the lView
+ *   null,      // the default value for width
+ * ];
+ *
+ * tNode.classes = [
+ *   0,         // the context config value (see `TStylingContextConfig`)
+ *   1,         // the total amount of sources present (only `1` b/c there are only template
+ * bindings)
+ *   [null],    // initial values array (an instance of `StylingMapArray`)
+ *
+ *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
+ *   0b001,     // template guard mask for width
+ *   0,         // host bindings guard mask for width
+ *   'active',  // the property name
+ *   20,        // the binding location for the "c" binding in the lView
+ *   null,      // the default value for the `active` class
+ * ];
+ * ```
+ *
+ * Entry value present in an entry (called a tuple) within the
+ * styling context is as follows:
+ *
+ * ```typescript
+ * context = [
+ *   //...
+ *   configValue,
+ *   templateGuardMask,
+ *   hostBindingsGuardMask,
+ *   propName,
+ *   ...bindingIndices...,
+ *   defaultValue
+ *   //...
+ * ];
+ * ```
+ *
+ * Below is a breakdown of each value:
+ *
+ * - **configValue**:
+ *   Property-specific configuration values. The only config setting
+ *   that is implemented right now is whether or not to sanitize the
+ *   value.
+ *
+ * - **templateGuardMask**:
+ *   A numeric value where each bit represents a binding index
+ *   location. Each binding index location is assigned based on
+ *   a local counter value that increments each time an instruction
+ *   is called:
+ *
+ * ```
+ * <div [style.width]="x"   // binding index = 21 (counter index = 0)
+ *      [style.height]="y"> // binding index = 22 (counter index = 1)
+ * ```
+ *
+ *   In the example code above, if the `width` value where to change
+ *   then the first bit in the local bit mask value would be flipped
+ *   (and the second bit for when `height`).
+ *
+ *   If and when there are more than 32 binding sources in the context
+ *   (more than 32 `[style/class]` bindings) then the bit masking will
+ *   overflow and we are left with a situation where a `-1` value will
+ *   represent the bit mask. Due to the way that JavaScript handles
+ *   negative values, when the bit mask is `-1` then all bits within
+ *   that value will be automatically flipped (this is a quick and
+ *   efficient way to flip all bits on the mask when a special kind
+ *   of caching scenario occurs or when there are more than 32 bindings).
+ *
+ * - **hostBindingsGuardMask**:
+ *   Another instance of a guard mask that is specific to host bindings.
+ *   This behaves exactly the same way as does the `templateGuardMask`,
+ *   but will not contain any binding information processed in the template.
+ *   The reason why there are two instances of guard masks (one for the
+ *   template and another for host bindings) is because the template bindings
+ *   are processed before host bindings and the state information is not
+ *   carried over into the host bindings code. As soon as host bindings are
+ *   processed for an element the counter and state-based bit mask values are
+ *   set to `0`.
+ *
+ * ```
+ * <div [style.width]="x"   // binding index = 21 (counter index = 0)
+ *      [style.height]="y"  // binding index = 22 (counter index = 1)
+ *      dir-that-sets-width  // binding index = 30 (counter index = 0)
+ *      dir-that-sets-width> // binding index = 31 (counter index = 1)
+ * ```
+ *
+ * - **propName**:
+ *   The CSS property name or class name (e.g `width` or `active`).
+ *
+ * - **bindingIndices...**:
+ *   A series of numeric binding values that reflect where in the
+ *   lView to find the style/class values associated with the property.
+ *   Each value is in order in terms of priority (templates are first,
+ *   then directives and then components). When the context is flushed
+ *   and the style/class values are applied to the element (this happens
+ *   inside of the `stylingApply` instruction) then the flushing code
+ *   will keep checking each binding index against the associated lView
+ *   to find the first style/class value that is non-null.
+ *
+ * - **defaultValue**:
+ *   This is the default that will always be applied to the element if
+ *   and when all other binding sources return a result that is null.
+ *   Usually this value is `null` but it can also be a static value that
+ *   is intercepted when the tNode is first constructured (e.g.
+ *   `<div style="width:200px">` has a default value of `200px` for
+ *   the `width` property).
+ *
+ * Each time a new binding is encountered it is registered into the
+ * context. The context then is continually updated until the first
+ * styling apply call has been called (which is automatically scheduled
+ * to be called once an element exits during change detection). Note that
+ * each entry in the context is stored in alphabetical order.
+ *
+ * Once styling has been flushed for the first time for an element the
+ * context will set as locked (this prevents bindings from being added
+ * to the context later on).
+ *
+ * # How Styles/Classes are Rendered
+ * Each time a styling instruction (e.g. `[class.name]`, `[style.prop]`,
+ * etc...) is executed, the associated `lView` for the view is updated
+ * at the current binding location. Also, when this happens, a local
+ * counter value is incremented. If the binding value has changed then
+ * a local `bitMask` variable is updated with the specific bit based
+ * on the counter value.
+ *
+ * Below is a lightweight example of what happens when a single style
+ * property is updated (i.e. `<div [style.prop]="val">`):
+ *
+ * ```typescript
+ * function updateStyleProp(prop: string, value: string) {
+ *   const lView = getLView();
+ *   const bindingIndex = BINDING_INDEX++;
+ *
+ *   // update the local counter value
+ *   const indexForStyle = stylingState.stylesCount++;
+ *   if (lView[bindingIndex] !== value) {
+ *     lView[bindingIndex] = value;
+ *
+ *     // tell the local state that we have updated a style value
+ *     // by updating the bit mask
+ *     stylingState.bitMaskForStyles |= 1 << indexForStyle;
+ *   }
+ * }
+ * ```
+ *
+ * Once all the bindings have updated a `bitMask` value will be populated.
+ * This `bitMask` value is used in the apply algorithm (which is called
+ * context resolution).
+ *
+ * ## The Apply Algorithm (Context Resolution)
+ * As explained above, each time a binding updates its value, the resulting
+ * value is stored in the `lView` array. These styling values have yet to
+ * be flushed to the element.
+ *
+ * Once all the styling instructions have been evaluated, then the styling
+ * context(s) are flushed to the element. When this happens, the context will
+ * be iterated over (property by property) and each binding source will be
+ * examined and the first non-null value will be applied to the element.
+ *
+ * Let's say that we the following template code:
+ *
+ * ```html
+ * <div [style.width]="w1" dir-that-set-width="w2"></div>
+ * ```
+ *
+ * There are two styling bindings in the code above and they both write
+ * to the `width` property. When styling is flushed on the element, the
+ * algorithm will try and figure out which one of these values to write
+ * to the element.
+ *
+ * In order to figure out which value to apply, the following
+ * binding prioritization is adhered to:
+ *
+ *   1. First template-level styling bindings are applied (if present).
+ *      This includes things like `[style.width]` and `[class.active]`.
+ *
+ *   2. Second are styling-level host bindings present in directives.
+ *      (if there are sub/super directives present then the sub directives
+ *      are applied first).
+ *
+ *   3. Third are styling-level host bindings present in components.
+ *      (if there are sub/super components present then the sub directives
+ *      are applied first).
+ *
+ * This means that in the code above the styling binding present in the
+ * template is applied first and, only if its falsy, then the directive
+ * styling binding for width will be applied.
+ *
+ * ### What about map-based styling bindings?
+ * Map-based styling bindings are activated when there are one or more
+ * `[style]` and/or `[class]` bindings present on an element. When this
+ * code is activated, the apply algorithm will iterate over each map
+ * entry and apply each styling value to the element with the same
+ * prioritization rules as above.
+ *
+ * For the algorithm to apply styling values efficiently, the
+ * styling map entries must be applied in sync (property by property)
+ * with prop-based bindings. (The map-based algorithm is described
+ * more inside of the `render3/styling/map_based_bindings.ts` file.)
+ *
+ * ## Sanitization
+ * Sanitization is used to prevent invalid style values from being applied to
+ * the element.
+ *
+ * It is enabled in two cases:
+ *
+ *   1. The `styleSanitizer(sanitizerFn)` instruction was called (just before any other
+ *      styling instructions are run).
+ *
+ *   2. The component/directive `LView` instance has a sanitizer object attached to it
+ *      (this happens when `renderComponent` is executed with a `sanitizer` value or
+ *      if the ngModule contains a sanitizer provider attached to it).
+ *
+ * If and when sanitization is active then all property/value entries will be evaluated
+ * through the active sanitizer before they are applied to the element (or the styling
+ * debug handler).
+ *
+ * If a `Sanitizer` object is used (via the `LView[SANITIZER]` value) then that object
+ * will be used for every property.
+ *
+ * If a `StyleSanitizerFn` function is used (via the `styleSanitizer`) then it will be
+ * called in two ways:
+ *
+ *   1. property validation mode: this will be called early to mark whether a property
+ *      should be sanitized or not at during the flushing stage.
+ *
+ *   2. value sanitization mode: this will be called during the flushing stage and will
+ *      run the sanitizer function against the value before applying it to the element.
+ *
+ * If sanitization returns an empty value then that empty value will be applied
+ * to the element.
+ * @record
+ */
+function TStylingContext() { }
+if (false) {
+    /* Skipping unnamed member:
+    [TStylingContextIndex.TotalSourcesPosition]: number;*/
+    /* Skipping unnamed member:
+    [TStylingContextIndex.InitialStylingValuePosition]: StylingMapArray;*/
+}
+/** @enum {number} */
+const TStylingContextIndex = {
+    TotalSourcesPosition: 0,
+    InitialStylingValuePosition: 1,
+    ValuesStartPosition: 2,
+    // each tuple entry in the context
+    // (config, templateBitGuard, hostBindingBitGuard, prop, ...bindings||default-value)
+    ConfigOffset: 0,
+    TemplateBitGuardOffset: 1,
+    HostBindingsBitGuardOffset: 2,
+    PropOffset: 3,
+    BindingsStartOffset: 4,
+};
+/** @enum {number} */
+const TStylingContextPropConfigFlags = {
+    Default: 0,
+    SanitizationRequired: 1,
+    TotalBits: 1,
+    Mask: 1,
+};
+/**
+ * A function used to apply or remove styling from an element for a given property.
+ * @record
+ */
+function ApplyStylingFn() { }
+/**
+ * Array-based representation of a key/value array.
+ *
+ * The format of the array is "property", "value", "property2",
+ * "value2", etc...
+ *
+ * The first value in the array is reserved to store the instance
+ * of the key/value array that was used to populate the property/
+ * value entries that take place in the remainder of the array.
+ * @record
+ */
+function StylingMapArray() { }
+if (false) {
+    /* Skipping unnamed member:
+    [StylingMapArrayIndex.RawValuePosition]: {}|string|number|null|undefined;*/
+}
+/** @enum {number} */
+const StylingMapArrayIndex = {
+    /** Where the values start in the array */
+    ValuesStartPosition: 1,
+    /** The location of the raw key/value map instance used last to populate the array entries */
+    RawValuePosition: 0,
+    /** The size of each property/value entry */
+    TupleSize: 2,
+    /** The offset for the property entry in the tuple */
+    PropOffset: 0,
+    /** The offset for the value entry in the tuple */
+    ValueOffset: 1,
+};
+/**
+ * Used to apply/traverse across all map-based styling entries up to the provided `targetProp`
+ * value.
+ *
+ * When called, each of the map-based `StylingMapArray` entries (which are stored in
+ * the provided `LStylingData` array) will be iterated over. Depending on the provided
+ * `mode` value, each prop/value entry may be applied or skipped over.
+ *
+ * If `targetProp` value is provided the iteration code will stop once it reaches
+ * the property (if found). Otherwise if the target property is not encountered then
+ * it will stop once it reaches the next value that appears alphabetically after it.
+ *
+ * If a `defaultValue` is provided then it will be applied to the element only if the
+ * `targetProp` property value is encountered and the value associated with the target
+ * property is `null`. The reason why the `defaultValue` is needed is to avoid having the
+ * algorithm apply a `null` value and then apply a default value afterwards (this would
+ * end up being two style property writes).
+ *
+ * @return whether or not the target property was reached and its value was
+ *  applied to the element.
+ * @record
+ */
+function SyncStylingMapsFn() { }
+/** @enum {number} */
+const StylingMapsSyncMode = {
+    /** Only traverse values (no prop/value styling entries get applied) */
+    TraverseValues: 0,
+    /** Apply every prop/value styling entry to the element */
+    ApplyAllValues: 1,
+    /** Only apply the target prop/value entry */
+    ApplyTargetProp: 2,
+    /** Skip applying the target prop/value entry */
+    SkipTargetProp: 4,
+    /** Iterate over inner maps map values in the context */
+    RecurseInnerMaps: 8,
+    /** Only check to see if a value was set somewhere in each map */
+    CheckValuesOnly: 16,
+};
+/**
+ * Simplified `TNode` interface for styling-related code.
+ *
+ * The styling algorithm code only needs access to `flags`.
+ * @record
+ */
+function TStylingNode() { }
+if (false) {
+    /** @type {?} */
+    TStylingNode.prototype.flags;
+}
+/**
+ * For performance reasons we want to make sure that all subclasses have the same shape object.
+ *
+ * See subclasses for implementation details.
+ * @record
+ */
+function TStylingKeyShape() { }
+if (false) {
+    /** @type {?} */
+    TStylingKeyShape.prototype.key;
+    /** @type {?} */
+    TStylingKeyShape.prototype.extra;
+}
+/**
+ * Used in the case of `ɵɵstyleProp('width', exp, 'px')`.
+ * @record
+ */
+function TStylingSuffixKey() { }
+if (false) {
+    /** @type {?} */
+    TStylingSuffixKey.prototype.key;
+    /** @type {?} */
+    TStylingSuffixKey.prototype.extra;
+}
+/**
+ * Used in the case of `ɵɵstyleProp('url', exp, styleSanitizationFn)`.
+ * @record
+ */
+function TStylingSanitizationKey() { }
+if (false) {
+    /** @type {?} */
+    TStylingSanitizationKey.prototype.key;
+    /** @type {?} */
+    TStylingSanitizationKey.prototype.extra;
+}
+/**
+ * Used in the case of `ɵɵstyleMap()`/`ɵɵclassMap()`.
+ * @record
+ */
+function TStylingMapKey() { }
+if (false) {
+    /** @type {?} */
+    TStylingMapKey.prototype.key;
+    /** @type {?} */
+    TStylingMapKey.prototype.extra;
+}
+/**
+ * This is a branded number which contains previous and next index.
+ *
+ * When we come across styling instructions we need to store the `TStylingKey` in the correct
+ * order so that we can re-concatenate the styling value in the desired priority.
+ *
+ * The insertion can happen either at the:
+ * - end of template as in the case of coming across additional styling instruction in the template
+ * - in front of the template in the case of coming across additional instruction in the
+ *   `hostBindings`.
+ *
+ * We use `TStylingRange` to store the previous and next index into the `TData` where the template
+ * bindings can be found.
+ *
+ * - bit 0 is used to mark that the previous index has a duplicate for current value.
+ * - bit 1 is used to mark that the next index has a duplicate for the current value.
+ * - bits 2-16 are used to encode the next/tail of the template.
+ * - bits 17-32 are used to encode the previous/head of template.
+ *
+ * NODE: *duplicate* false implies that it is statically known that this binding will not collide
+ * with other bindings and therefore there is no need to check other bindings. For example the
+ * bindings in `<div [style.color]="exp" [style.width]="exp">` will never collide and will have
+ * their bits set accordingly. Previous duplicate means that we may need to check previous if the
+ * current binding is `null`. Next duplicate means that we may need to check next bindings if the
+ * current binding is not `null`.
+ *
+ * NOTE: `0` has special significance and represents `null` as in no additional pointer.
+ * @record
+ */
+function TStylingRange() { }
+if (false) {
+    /** @type {?} */
+    TStylingRange.prototype.__brand__;
+}
+/** @enum {number} */
+const StylingRange = {
+    /// Number of bits to shift for the previous pointer
+    PREV_SHIFT: 18,
+    /// Previous pointer mask.
+    PREV_MASK: 4294705152,
+    /// Number of bits to shift for the next pointer
+    NEXT_SHIFT: 2,
+    /// Next pointer mask.
+    NEXT_MASK: 16380,
+    /**
+     * This bit is set if the previous bindings contains a binding which could possibly cause a
+     * duplicate. For example: `<div [style]="map" [style.width]="width">`, the `width` binding will
+     * have previous duplicate set. The implication is that if `width` binding becomes `null`, it is
+     * necessary to defer the value to `map.width`. (Because `width` overwrites `map.width`.)
+     */
+    PREV_DUPLICATE: 2,
+    /**
+     * This bit is set to if the next binding contains a binding which could possibly cause a
+     * duplicate. For example: `<div [style]="map" [style.width]="width">`, the `map` binding will
+     * have next duplicate set. The implication is that if `map.width` binding becomes not `null`, it
+     * is necessary to defer the value to `width`. (Because `width` overwrites `map.width`.)
+     */
+    NEXT_DUPLICATE: 1,
+};
+/**
+ * @param {?} prev
+ * @param {?} next
+ * @return {?}
+ */
+function toTStylingRange(prev, next) {
+    return (/** @type {?} */ ((prev << 18 /* PREV_SHIFT */ | next << 2 /* NEXT_SHIFT */)));
+}
+/**
+ * @param {?} tStylingRange
+ * @return {?}
+ */
+function getTStylingRangePrev(tStylingRange) {
+    return ((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) >> 18 /* PREV_SHIFT */;
+}
+/**
+ * @param {?} tStylingRange
+ * @return {?}
+ */
+function getTStylingRangePrevDuplicate(tStylingRange) {
+    return (((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) & 2 /* PREV_DUPLICATE */) ==
+        2 /* PREV_DUPLICATE */;
+}
+/**
+ * @param {?} tStylingRange
+ * @param {?} previous
+ * @return {?}
+ */
+function setTStylingRangePrev(tStylingRange, previous) {
+    return (/** @type {?} */ (((((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) & ~4294705152 /* PREV_MASK */) |
+        (previous << 18 /* PREV_SHIFT */))));
+}
+/**
+ * @param {?} tStylingRange
+ * @return {?}
+ */
+function setTStylingRangePrevDuplicate(tStylingRange) {
+    return (/** @type {?} */ ((((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) | 2 /* PREV_DUPLICATE */)));
+}
+/**
+ * @param {?} tStylingRange
+ * @return {?}
+ */
+function getTStylingRangeNext(tStylingRange) {
+    return (((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) & 16380 /* NEXT_MASK */) >> 2 /* NEXT_SHIFT */;
+}
+/**
+ * @param {?} tStylingRange
+ * @param {?} next
+ * @return {?}
+ */
+function setTStylingRangeNext(tStylingRange, next) {
+    return (/** @type {?} */ (((((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) & ~16380 /* NEXT_MASK */) | //
+        next << 2 /* NEXT_SHIFT */)));
+}
+/**
+ * @param {?} tStylingRange
+ * @return {?}
+ */
+function getTStylingRangeNextDuplicate(tStylingRange) {
+    return (((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) & 1 /* NEXT_DUPLICATE */) ===
+        1 /* NEXT_DUPLICATE */;
+}
+/**
+ * @param {?} tStylingRange
+ * @return {?}
+ */
+function setTStylingRangeNextDuplicate(tStylingRange) {
+    return (/** @type {?} */ ((((/** @type {?} */ ((/** @type {?} */ (tStylingRange))))) | 1 /* NEXT_DUPLICATE */)));
+}
+
+/**
+ * @fileoverview added by tsickle
  * Generated from: packages/core/src/render3/util/debug_utils.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -12420,6 +13050,30 @@ function buildConfig(tNode, isClassBased) {
         allowDirectStyling: allowDirectStyling$1,
     };
 }
+/**
+ * Find the head of the styling binding linked list.
+ * @param {?} tData
+ * @param {?} tNode
+ * @param {?} isClassBinding
+ * @return {?}
+ */
+function getStylingBindingHead(tData, tNode, isClassBinding) {
+    /** @type {?} */
+    let index = getTStylingRangePrev(isClassBinding ? tNode.classBindings : tNode.styleBindings);
+    while (true) {
+        /** @type {?} */
+        const tStylingRange = (/** @type {?} */ (tData[index + 1]));
+        /** @type {?} */
+        const prev = getTStylingRangePrev(tStylingRange);
+        if (prev === 0) {
+            // found head exit.
+            return index;
+        }
+        else {
+            index = prev;
+        }
+    }
+}
 
 /**
  * @fileoverview added by tsickle
@@ -12665,6 +13319,8 @@ const TNodeConstructor = class TNode {
      * @param {?} projection
      * @param {?} styles
      * @param {?} classes
+     * @param {?} classBindings
+     * @param {?} styleBindings
      */
     constructor(tView_, //
     type, //
@@ -12688,7 +13344,9 @@ const TNodeConstructor = class TNode {
     parent, //
     projection, //
     styles, //
-    classes) {
+    classes, //
+    classBindings, //
+    styleBindings) {
         this.tView_ = tView_;
         this.type = type;
         this.index = index;
@@ -12712,6 +13370,8 @@ const TNodeConstructor = class TNode {
         this.projection = projection;
         this.styles = styles;
         this.classes = classes;
+        this.classBindings = classBindings;
+        this.styleBindings = styleBindings;
     }
     /**
      * @return {?}
@@ -14284,7 +14944,7 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
     tParent, // parent: TElementNode|TContainerNode|null
     null, // projection: number|(ITNode|RNode[])[]|null
     null, // styles: TStylingContext|null
-    null) :
+    null, (/** @type {?} */ (0)), (/** @type {?} */ (0))) :
         {
             type: type,
             index: adjustedIndex,
@@ -14308,6 +14968,8 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
             projection: null,
             styles: null,
             classes: null,
+            classBindings: (/** @type {?} */ (0)),
+            styleBindings: (/** @type {?} */ (0)),
         };
 }
 /**
@@ -28447,7 +29109,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+421.sha-7cd465a.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+422.sha-a719656.with-local-changes');
 
 /**
  * @fileoverview added by tsickle

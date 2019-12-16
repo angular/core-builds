@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+421.sha-7cd465a.with-local-changes
+ * @license Angular v9.0.0-rc.1+422.sha-a719656.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6428,7 +6428,7 @@ declare interface TContainerNode extends TNode {
  *
  * Injector bloom filters are also stored here.
  */
-declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
+declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
 
 /** Static data for an <ng-container> */
 declare interface TElementContainerNode extends TNode {
@@ -6925,6 +6925,34 @@ declare interface TNode {
      * will be placed into the initial styling slot in the newly created `TStylingContext`.
      */
     classes: StylingMapArray | TStylingContext | null;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the class bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "class" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     */
+    classBindings: TStylingRange;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the style bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "style" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     */
+    styleBindings: TStylingRange;
 }
 
 /**
@@ -7629,6 +7657,90 @@ declare const enum TStylingContextIndex {
     HostBindingsBitGuardOffset = 2,
     PropOffset = 3,
     BindingsStartOffset = 4
+}
+
+/**
+ * Value stored in the `TData` which is needed to re-concatenate the styling.
+ *
+ * - `string`: Stores the property name. Used with `ɵɵstyleProp`/`ɵɵclassProp` instruction which
+ * don't have suffix or don't need sanitization.
+ */
+declare type TStylingKey = string | TStylingSuffixKey | TStylingSanitizationKey | TStylingMapKey;
+
+/**
+ * For performance reasons we want to make sure that all subclasses have the same shape object.
+ *
+ * See subclasses for implementation details.
+ */
+declare interface TStylingKeyShape {
+    key: string | null;
+    extra: string | SanitizerFn | TStylingMapFn;
+}
+
+/**
+ * Invoke this function to process the styling value which is non-primitive (Map/Array)
+ * This is implemented this way so that the logic associated with `ɵɵstyleMap()`/`ɵɵclassMap()`
+ * can be tree shaken away. Internally the function will break the `Map`/`Array` down into
+ * parts and call `appendStyling` on parts.
+ *
+ * See: `CLASS_MAP_STYLING_KEY` and `STYLE_MAP_STYLING_KEY` for details.
+ */
+declare type TStylingMapFn = (text: string, value: any, hasPreviousDuplicate: boolean) => string;
+
+/**
+ * Used in the case of `ɵɵstyleMap()`/`ɵɵclassMap()`.
+ */
+declare interface TStylingMapKey extends TStylingKeyShape {
+    key: null;
+    extra: TStylingMapFn;
+}
+
+/**
+ * This is a branded number which contains previous and next index.
+ *
+ * When we come across styling instructions we need to store the `TStylingKey` in the correct
+ * order so that we can re-concatenate the styling value in the desired priority.
+ *
+ * The insertion can happen either at the:
+ * - end of template as in the case of coming across additional styling instruction in the template
+ * - in front of the template in the case of coming across additional instruction in the
+ *   `hostBindings`.
+ *
+ * We use `TStylingRange` to store the previous and next index into the `TData` where the template
+ * bindings can be found.
+ *
+ * - bit 0 is used to mark that the previous index has a duplicate for current value.
+ * - bit 1 is used to mark that the next index has a duplicate for the current value.
+ * - bits 2-16 are used to encode the next/tail of the template.
+ * - bits 17-32 are used to encode the previous/head of template.
+ *
+ * NODE: *duplicate* false implies that it is statically known that this binding will not collide
+ * with other bindings and therefore there is no need to check other bindings. For example the
+ * bindings in `<div [style.color]="exp" [style.width]="exp">` will never collide and will have
+ * their bits set accordingly. Previous duplicate means that we may need to check previous if the
+ * current binding is `null`. Next duplicate means that we may need to check next bindings if the
+ * current binding is not `null`.
+ *
+ * NOTE: `0` has special significance and represents `null` as in no additional pointer.
+ */
+declare interface TStylingRange {
+    __brand__: 'TStylingRange';
+}
+
+/**
+ * Used in the case of `ɵɵstyleProp('url', exp, styleSanitizationFn)`.
+ */
+declare interface TStylingSanitizationKey extends TStylingKeyShape {
+    key: string;
+    extra: SanitizerFn;
+}
+
+/**
+ * Used in the case of `ɵɵstyleProp('width', exp, 'px')`.
+ */
+declare interface TStylingSuffixKey extends TStylingKeyShape {
+    key: string;
+    extra: string;
 }
 
 /** Static data for a text node */

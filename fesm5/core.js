@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+421.sha-7cd465a.with-local-changes
+ * @license Angular v9.0.0-rc.1+422.sha-a719656.with-local-changes
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4963,9 +4963,7 @@ var ɵɵdefaultStyleSanitizer = function (prop, value, mode) {
     mode = mode || 3 /* ValidateAndSanitize */;
     var doSanitizeValue = true;
     if (mode & 1 /* ValidateProperty */) {
-        doSanitizeValue = prop === 'background-image' || prop === 'background' ||
-            prop === 'border-image' || prop === 'filter' || prop === 'list-style' ||
-            prop === 'list-style-image' || prop === 'clip-path';
+        doSanitizeValue = stylePropNeedsSanitization(prop);
     }
     if (mode & 2 /* SanitizeOnly */) {
         return doSanitizeValue ? ɵɵsanitizeStyle(value) : unwrapSafeValue(value);
@@ -4974,6 +4972,11 @@ var ɵɵdefaultStyleSanitizer = function (prop, value, mode) {
         return doSanitizeValue;
     }
 };
+function stylePropNeedsSanitization(prop) {
+    return prop === 'background-image' || prop === 'background' || prop === 'border-image' ||
+        prop === 'filter' || prop === 'list-style' || prop === 'list-style-image' ||
+        prop === 'clip-path';
+}
 function validateAgainstEventProperties(name) {
     if (name.toLowerCase().startsWith('on')) {
         var msg = "Binding to event property '" + name + "' is disallowed for security reasons, " +
@@ -7011,6 +7014,38 @@ function createProxy(handler) {
     return new g.Proxy({}, handler);
 }
 
+function toTStylingRange(prev, next) {
+    return (prev << 18 /* PREV_SHIFT */ | next << 2 /* NEXT_SHIFT */);
+}
+function getTStylingRangePrev(tStylingRange) {
+    return tStylingRange >> 18 /* PREV_SHIFT */;
+}
+function getTStylingRangePrevDuplicate(tStylingRange) {
+    return (tStylingRange & 2 /* PREV_DUPLICATE */) ==
+        2 /* PREV_DUPLICATE */;
+}
+function setTStylingRangePrev(tStylingRange, previous) {
+    return ((tStylingRange & ~4294705152 /* PREV_MASK */) |
+        (previous << 18 /* PREV_SHIFT */));
+}
+function setTStylingRangePrevDuplicate(tStylingRange) {
+    return (tStylingRange | 2 /* PREV_DUPLICATE */);
+}
+function getTStylingRangeNext(tStylingRange) {
+    return (tStylingRange & 16380 /* NEXT_MASK */) >> 2 /* NEXT_SHIFT */;
+}
+function setTStylingRangeNext(tStylingRange, next) {
+    return ((tStylingRange & ~16380 /* NEXT_MASK */) | //
+        next << 2 /* NEXT_SHIFT */);
+}
+function getTStylingRangeNextDuplicate(tStylingRange) {
+    return (tStylingRange & 1 /* NEXT_DUPLICATE */) ===
+        1 /* NEXT_DUPLICATE */;
+}
+function setTStylingRangeNextDuplicate(tStylingRange) {
+    return (tStylingRange | 1 /* NEXT_DUPLICATE */);
+}
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7673,6 +7708,23 @@ function buildConfig(tNode, isClassBased) {
         allowDirectStyling: allowDirectStyling$1,
     };
 }
+/**
+ * Find the head of the styling binding linked list.
+ */
+function getStylingBindingHead(tData, tNode, isClassBinding) {
+    var index = getTStylingRangePrev(isClassBinding ? tNode.classBindings : tNode.styleBindings);
+    while (true) {
+        var tStylingRange = tData[index + 1];
+        var prev = getTStylingRangePrev(tStylingRange);
+        if (prev === 0) {
+            // found head exit.
+            return index;
+        }
+        else {
+            index = prev;
+        }
+    }
+}
 
 /**
  * @license
@@ -7857,7 +7909,9 @@ var TNodeConstructor = /** @class */ (function () {
     parent, //
     projection, //
     styles, //
-    classes) {
+    classes, //
+    classBindings, //
+    styleBindings) {
         this.tView_ = tView_;
         this.type = type;
         this.index = index;
@@ -7881,6 +7935,8 @@ var TNodeConstructor = /** @class */ (function () {
         this.projection = projection;
         this.styles = styles;
         this.classes = classes;
+        this.classBindings = classBindings;
+        this.styleBindings = styleBindings;
     }
     Object.defineProperty(TNode.prototype, "type_", {
         get: function () {
@@ -9113,7 +9169,9 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
     tParent, // parent: TElementNode|TContainerNode|null
     null, // projection: number|(ITNode|RNode[])[]|null
     null, // styles: TStylingContext|null
-    null) :
+    null, // classes: TStylingContext|null
+    0, // classBindings: TStylingRange;
+    0) :
         {
             type: type,
             index: adjustedIndex,
@@ -9137,6 +9195,8 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
             projection: null,
             styles: null,
             classes: null,
+            classBindings: 0,
+            styleBindings: 0,
         };
 }
 function generatePropertyAliases(inputAliasMap, directiveDefIdx, propStore) {
@@ -19642,7 +19702,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+421.sha-7cd465a.with-local-changes');
+var VERSION = new Version('9.0.0-rc.1+422.sha-a719656.with-local-changes');
 
 /**
  * @license
