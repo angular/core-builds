@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.6+68.sha-82dce68
+ * @license Angular v9.0.0-rc.6+72.sha-1ebb405
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5726,17 +5726,6 @@
     function throwMultipleComponentError(tNode) {
         throw new Error("Multiple components match node with tagname " + tNode.tagName);
     }
-    /** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-    function throwErrorIfNoChangesMode(creationMode, oldValue, currValue) {
-        var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (creationMode) {
-            msg +=
-                " It seems like the view has been created after its parent and its children have been dirty checked." +
-                    " Has it been created in a change detection hook ?";
-        }
-        // TODO: include debug context
-        throw new Error(msg);
-    }
     function throwMixedMultiProviderError() {
         throw new Error("Cannot mix multi providers and regular providers");
     }
@@ -5748,6 +5737,69 @@
                 " - only instances of Provider and Type are allowed, got: [" + providerDetail.join(', ') + "]";
         }
         throw new Error("Invalid provider for the NgModule '" + stringify(ngModuleType) + "'" + ngModuleDetail);
+    }
+    /** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
+    function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
+        var field = propName ? " for '" + propName + "'" : '';
+        var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value" + field + ": '" + oldValue + "'. Current value: '" + currValue + "'.";
+        if (creationMode) {
+            msg +=
+                " It seems like the view has been created after its parent and its children have been dirty checked." +
+                    " Has it been created in a change detection hook?";
+        }
+        // TODO: include debug context, see `viewDebugError` function in
+        // `packages/core/src/view/errors.ts` for reference.
+        throw new Error(msg);
+    }
+    function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
+        var _a = __read(meta.split(INTERPOLATION_DELIMITER)), propName = _a[0], prefix = _a[1], chunks = _a.slice(2);
+        var oldValue = prefix, newValue = prefix;
+        for (var i = 0; i < chunks.length; i++) {
+            var slotIdx = rootIndex + i;
+            oldValue += "" + lView[slotIdx] + chunks[i];
+            newValue += "" + (slotIdx === expressionIndex ? changedValue : lView[slotIdx]) + chunks[i];
+        }
+        return { propName: propName, oldValue: oldValue, newValue: newValue };
+    }
+    /**
+     * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
+     * - property name (for property bindings or interpolations)
+     * - old and new values, enriched using information from metadata
+     *
+     * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
+     * function description.
+     */
+    function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
+        var tData = lView[TVIEW].data;
+        var metadata = tData[bindingIndex];
+        if (typeof metadata === 'string') {
+            // metadata for property interpolation
+            if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
+                return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
+            }
+            // metadata for property binding
+            return { propName: metadata, oldValue: oldValue, newValue: newValue };
+        }
+        // metadata is not available for this expression, check if this expression is a part of the
+        // property interpolation by going from the current binding index left and look for a string that
+        // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
+        // [..., 'id�Prefix � and � suffix', null, null, null, ...]
+        if (metadata === null) {
+            var idx = bindingIndex - 1;
+            while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
+                idx--;
+            }
+            var meta = tData[idx];
+            if (typeof meta === 'string') {
+                var matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
+                // first interpolation delimiter separates property name from interpolation parts (in case of
+                // property interpolations), so we subtract one from total number of found delimiters
+                if (matches && (matches.length - 1) > bindingIndex - idx) {
+                    return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
+                }
+            }
+        }
+        return { propName: undefined, oldValue: oldValue, newValue: newValue };
     }
 
     // Note: This hack is necessary so we don't erroneously get a circular dependency
@@ -14565,7 +14617,8 @@
                 // (before the change detection was run).
                 var oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
                 if (!devModeEqual$1(oldValueToCompare, value)) {
-                    throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
+                    var details = getExpressionChangedErrorDetails(lView, bindingIndex, oldValueToCompare, value);
+                    throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName);
                 }
             }
             lView[bindingIndex] = value;
@@ -15553,7 +15606,8 @@
         if (ngDevMode && getCheckNoChangesMode()) {
             var oldValue = getValue(lView, bindingIndex);
             if (hasValueChangedUnwrapSafeValue(oldValue, value)) {
-                throwErrorIfNoChangesMode(false, oldValue, value);
+                var field = isClassBased ? "class." + prop : "style." + prop;
+                throwErrorIfNoChangesMode(false, oldValue, value, field);
             }
         }
         // Direct Apply Case: bypass context resolution and apply the
@@ -15704,7 +15758,10 @@
         // For this reason, the checkNoChanges situation must also be handled here
         // as well.
         if (ngDevMode && valueHasChanged && getCheckNoChangesMode()) {
-            throwErrorIfNoChangesMode(false, oldValue, value);
+            // check if the value is a StylingMapArray, in which case take the first value (which stores raw
+            // value) from the array
+            var previousValue = isStylingMapArray(oldValue) ? oldValue[0 /* RawValuePosition */] : oldValue;
+            throwErrorIfNoChangesMode(false, previousValue, value);
         }
         // Direct Apply Case: bypass context resolution and apply the
         // style/class map values directly to the element
@@ -19786,7 +19843,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.6+68.sha-82dce68');
+    var VERSION = new Version('9.0.0-rc.6+72.sha-1ebb405');
 
     /**
      * @license
