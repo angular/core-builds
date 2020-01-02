@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+422.sha-a719656.with-local-changes
+ * @license Angular v9.0.0-rc.1+524.sha-f004195
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -385,17 +385,34 @@ function getOwnDefinition(type, def) {
  * `ɵprov` on an ancestor only.
  */
 function getInheritedInjectableDef(type) {
-    const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
+    // See `jit/injectable.ts#compileInjectable` for context on NG_PROV_DEF_FALLBACK.
+    const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF] ||
+        (type[NG_PROV_DEF_FALLBACK] && type[NG_PROV_DEF_FALLBACK]()));
     if (def) {
+        const typeName = getTypeName(type);
         // TODO(FW-1307): Re-add ngDevMode when closure can handle it
         // ngDevMode &&
-        console.warn(`DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
-            `This will become an error in v10. Please add @Injectable() to the "${type.name}" class.`);
+        console.warn(`DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+            `This will become an error in v10. Please add @Injectable() to the "${typeName}" class.`);
         return def;
     }
     else {
         return null;
     }
+}
+/** Gets the name of a type, accounting for some cross-browser differences. */
+function getTypeName(type) {
+    // `Function.prototype.name` behaves differently between IE and other browsers. In most browsers
+    // it'll always return the name of the function itself, no matter how many other functions it
+    // inherits from. On IE the function doesn't have its own `name` property, but it takes it from
+    // the lowest level in the prototype chain. E.g. if we have `class Foo extends Parent` most
+    // browsers will evaluate `Foo.name` to `Foo` while IE will return `Parent`. We work around
+    // the issue by converting the function to a string and parsing its name out that way via a regex.
+    if (type.hasOwnProperty('name')) {
+        return type.name;
+    }
+    const match = ('' + type).match(/^function\s*([^\s(]+)/);
+    return match === null ? '' : match[1];
 }
 /**
  * Read the injector def type in a way which is immune to accidentally reading inherited value.
@@ -409,6 +426,13 @@ function getInjectorDef(type) {
 }
 const NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
 const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
+// On IE10 properties defined via `defineProperty` won't be inherited by child classes,
+// which will break inheriting the injectable definition from a grandparent through an
+// undecorated parent class. We work around it by defining a fallback method which will be
+// used to retrieve the definition. This should only be a problem in JIT mode, because in
+// AOT TypeScript seems to have a workaround for static properties. When inheriting from an
+// undecorated parent is no longer supported in v10, this can safely be removed.
+const NG_PROV_DEF_FALLBACK = getClosureSafeProperty({ ɵprovFallback: getClosureSafeProperty });
 // We need to keep these around so we can read off old defs if new defs are unavailable
 const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
 const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
@@ -6595,26 +6619,26 @@ class InertBodyHelper {
     constructor(defaultDoc) {
         this.defaultDoc = defaultDoc;
         this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
-        this.inertBodyElement = this.inertDocument.body;
-        if (this.inertBodyElement == null) {
+        /** @type {?} */
+        let inertBodyElement = this.inertDocument.body;
+        if (inertBodyElement == null) {
             // usually there should be only one body element in the document, but IE doesn't have any, so
             // we need to create one.
             /** @type {?} */
             const inertHtml = this.inertDocument.createElement('html');
             this.inertDocument.appendChild(inertHtml);
-            this.inertBodyElement = this.inertDocument.createElement('body');
-            inertHtml.appendChild(this.inertBodyElement);
+            inertBodyElement = this.inertDocument.createElement('body');
+            inertHtml.appendChild(inertBodyElement);
         }
-        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
-        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+        inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+        if (inertBodyElement.querySelector && !inertBodyElement.querySelector('svg')) {
             // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
             // so use the XHR strategy.
             this.getInertBodyElement = this.getInertBodyElement_XHR;
             return;
         }
-        this.inertBodyElement.innerHTML =
-            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+        inertBodyElement.innerHTML = '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+        if (inertBodyElement.querySelector && inertBodyElement.querySelector('svg img')) {
             // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
             // so use the DOMParser strategy, if it is available.
             // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
@@ -6699,13 +6723,22 @@ class InertBodyHelper {
             templateEl.innerHTML = html;
             return templateEl;
         }
-        this.inertBodyElement.innerHTML = html;
+        // Note that previously we used to do something like `this.inertDocument.body.innerHTML = html`
+        // and we returned the inert `body` node. This was changed, because IE seems to treat setting
+        // `innerHTML` on an inserted element differently, compared to one that hasn't been inserted
+        // yet. In particular, IE appears to split some of the text into multiple text nodes rather
+        // than keeping them in a single one which ends up messing with Ivy's i18n parsing further
+        // down the line. This has been worked around by creating a new inert `body` and using it as
+        // the root node in which we insert the HTML.
+        /** @type {?} */
+        const inertBody = this.inertDocument.createElement('body');
+        inertBody.innerHTML = html;
         // Support: IE 9-11 only
         // strip custom-namespaced attributes on IE<=11
         if (((/** @type {?} */ (this.defaultDoc))).documentMode) {
-            this.stripCustomNsAttrs(this.inertBodyElement);
+            this.stripCustomNsAttrs(inertBody);
         }
-        return this.inertBodyElement;
+        return inertBody;
     }
     /**
      * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
@@ -6741,11 +6774,6 @@ class InertBodyHelper {
     }
 }
 if (false) {
-    /**
-     * @type {?}
-     * @private
-     */
-    InertBodyHelper.prototype.inertBodyElement;
     /**
      * @type {?}
      * @private
@@ -8308,24 +8336,6 @@ function throwMultipleComponentError(tNode) {
     throw new Error(`Multiple components match node with tagname ${tNode.tagName}`);
 }
 /**
- * Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on.
- * @param {?} creationMode
- * @param {?} oldValue
- * @param {?} currValue
- * @return {?}
- */
-function throwErrorIfNoChangesMode(creationMode, oldValue, currValue) {
-    /** @type {?} */
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
-    if (creationMode) {
-        msg +=
-            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                ` Has it been created in a change detection hook ?`;
-    }
-    // TODO: include debug context
-    throw new Error(msg);
-}
-/**
  * @return {?}
  */
 function throwMixedMultiProviderError() {
@@ -8351,6 +8361,100 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
             ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
     }
     throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+}
+/**
+ * Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on.
+ * @param {?} creationMode
+ * @param {?} oldValue
+ * @param {?} currValue
+ * @param {?=} propName
+ * @return {?}
+ */
+function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
+    /** @type {?} */
+    const field = propName ? ` for '${propName}'` : '';
+    /** @type {?} */
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.`;
+    if (creationMode) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook?`;
+    }
+    // TODO: include debug context, see `viewDebugError` function in
+    // `packages/core/src/view/errors.ts` for reference.
+    throw new Error(msg);
+}
+/**
+ * @param {?} lView
+ * @param {?} rootIndex
+ * @param {?} expressionIndex
+ * @param {?} meta
+ * @param {?} changedValue
+ * @return {?}
+ */
+function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
+    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
+    /** @type {?} */
+    let oldValue = prefix;
+    /** @type {?} */
+    let newValue = prefix;
+    for (let i = 0; i < chunks.length; i++) {
+        /** @type {?} */
+        const slotIdx = rootIndex + i;
+        oldValue += `${lView[slotIdx]}${chunks[i]}`;
+        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
+    }
+    return { propName, oldValue, newValue };
+}
+/**
+ * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
+ * - property name (for property bindings or interpolations)
+ * - old and new values, enriched using information from metadata
+ *
+ * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
+ * function description.
+ * @param {?} lView
+ * @param {?} bindingIndex
+ * @param {?} oldValue
+ * @param {?} newValue
+ * @return {?}
+ */
+function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
+    /** @type {?} */
+    const tData = lView[TVIEW].data;
+    /** @type {?} */
+    const metadata = tData[bindingIndex];
+    if (typeof metadata === 'string') {
+        // metadata for property interpolation
+        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
+            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
+        }
+        // metadata for property binding
+        return { propName: metadata, oldValue, newValue };
+    }
+    // metadata is not available for this expression, check if this expression is a part of the
+    // property interpolation by going from the current binding index left and look for a string that
+    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
+    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
+    if (metadata === null) {
+        /** @type {?} */
+        let idx = bindingIndex - 1;
+        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
+            idx--;
+        }
+        /** @type {?} */
+        const meta = tData[idx];
+        if (typeof meta === 'string') {
+            /** @type {?} */
+            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
+            // first interpolation delimiter separates property name from interpolation parts (in case of
+            // property interpolations), so we subtract one from total number of found delimiters
+            if (matches && (matches.length - 1) > bindingIndex - idx) {
+                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
+            }
+        }
+    }
+    return { propName: undefined, oldValue, newValue };
 }
 
 /**
@@ -11336,38 +11440,6 @@ const unusedValueExportToPlacateAjd$6 = 1;
 
 /**
  * @fileoverview added by tsickle
- * Generated from: packages/core/src/debug/proxy.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * Used to inform TS about the `Proxy` class existing globally.
- * @record
- */
-function GlobalWithProxy() { }
-if (false) {
-    /** @type {?} */
-    GlobalWithProxy.prototype.Proxy;
-}
-/**
- * Creates an instance of a `Proxy` and creates with an empty target object and binds it to the
- * provided handler.
- *
- * The reason why this function exists is because IE doesn't support
- * the `Proxy` class. For this reason an error must be thrown.
- * @param {?} handler
- * @return {?}
- */
-function createProxy(handler) {
-    /** @type {?} */
-    const g = (/** @type {?} */ ((/** @type {?} */ (_global))));
-    if (!g.Proxy) {
-        throw new Error('Proxy is not supported in this browser');
-    }
-    return new g.Proxy({}, handler);
-}
-
-/**
- * @fileoverview added by tsickle
  * Generated from: packages/core/src/render3/interfaces/styling.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -12832,8 +12904,6 @@ class NodeStylingDebug {
         /** @type {?} */
         const config = this.config;
         /** @type {?} */
-        const isClassBased = this._isClassBased;
-        /** @type {?} */
         let data = this._data;
         // the direct pass code doesn't convert [style] or [class] values
         // into StylingMapArray instances. For this reason, the values
@@ -12853,54 +12923,7 @@ class NodeStylingDebug {
         (prop, value, bindingIndex) => {
             entries[prop] = { prop, value, bindingIndex };
         }));
-        // because the styling algorithm runs into two different
-        // modes: direct and context-resolution, the output of the entries
-        // object is different because the removed values are not
-        // saved between updates. For this reason a proxy is created
-        // so that the behavior is the same when examining values
-        // that are no longer active on the element.
-        return createProxy({
-            /**
-             * @param {?} target
-             * @param {?} prop
-             * @return {?}
-             */
-            get(target, prop) {
-                /** @type {?} */
-                let value = entries[prop];
-                if (!value) {
-                    value = {
-                        prop,
-                        value: isClassBased ? false : null,
-                        bindingIndex: null,
-                    };
-                }
-                return value;
-            },
-            /**
-             * @param {?} target
-             * @param {?} prop
-             * @param {?} value
-             * @return {?}
-             */
-            set(target, prop, value) { return false; },
-            /**
-             * @return {?}
-             */
-            ownKeys() { return Object.keys(entries); },
-            /**
-             * @param {?} k
-             * @return {?}
-             */
-            getOwnPropertyDescriptor(k) {
-                // we use a special property descriptor here so that enumeration operations
-                // such as `Object.keys` will work on this proxy.
-                return {
-                    enumerable: true,
-                    configurable: true,
-                };
-            },
-        });
+        return entries;
     }
     /**
      * @return {?}
@@ -15209,8 +15232,13 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
 function validateProperty(hostView, element, propName, tNode) {
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    return matchingSchemas(hostView, tNode.tagName) || propName in element ||
-        isAnimationProp(propName) || typeof Node !== 'function' || !(element instanceof Node);
+    if (matchingSchemas(hostView, tNode.tagName) || propName in element ||
+        isAnimationProp(propName)) {
+        return true;
+    }
+    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
+    // need to account for both here, while being careful for `typeof null` also returning 'object'.
+    return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
 /**
  * @param {?} hostView
@@ -15553,7 +15581,7 @@ function saveNameToExportMap(index, def, exportsMap) {
                 exportsMap[def.exportAs[i]] = index;
             }
         }
-        if (((/** @type {?} */ (def))).template)
+        if (isComponentDef(def))
             exportsMap[''] = index;
     }
 }
@@ -18642,16 +18670,18 @@ function reflectDependency(compiler, dep) {
                 // param may be undefined if type of dep is not set by ngtsc
                 continue;
             }
-            else if (param instanceof Optional || param.__proto__.ngMetadataName === 'Optional') {
+            /** @type {?} */
+            const proto = Object.getPrototypeOf(param);
+            if (param instanceof Optional || proto.ngMetadataName === 'Optional') {
                 meta.optional = true;
             }
-            else if (param instanceof SkipSelf || param.__proto__.ngMetadataName === 'SkipSelf') {
+            else if (param instanceof SkipSelf || proto.ngMetadataName === 'SkipSelf') {
                 meta.skipSelf = true;
             }
-            else if (param instanceof Self || param.__proto__.ngMetadataName === 'Self') {
+            else if (param instanceof Self || proto.ngMetadataName === 'Self') {
                 meta.self = true;
             }
-            else if (param instanceof Host || param.__proto__.ngMetadataName === 'Host') {
+            else if (param instanceof Host || proto.ngMetadataName === 'Host') {
                 meta.host = true;
             }
             else if (param instanceof Inject) {
@@ -18713,6 +18743,18 @@ function compileInjectable(type, srcMeta) {
                 return ngInjectableDef;
             }),
         });
+        // On IE10 properties defined via `defineProperty` won't be inherited by child classes,
+        // which will break inheriting the injectable definition from a grandparent through an
+        // undecorated parent class. We work around it by defining a method which should be used
+        // as a fallback. This should only be a problem in JIT mode, because in AOT TypeScript
+        // seems to have a workaround for static properties. When inheriting from an undecorated
+        // parent is no longer supported in v10, this can safely be removed.
+        if (!type.hasOwnProperty(NG_PROV_DEF_FALLBACK)) {
+            ((/** @type {?} */ (type)))[NG_PROV_DEF_FALLBACK] = (/**
+             * @return {?}
+             */
+            () => ((/** @type {?} */ (type)))[NG_PROV_DEF]);
+        }
     }
     // if NG_FACTORY_DEF is already defined on this class then don't overwrite it
     if (!type.hasOwnProperty(NG_FACTORY_DEF)) {
@@ -19554,17 +19596,17 @@ function providerToFactory(provider, ngModuleType, providers) {
              */
             () => resolveForwardRef(provider.useValue));
         }
-        else if (isExistingProvider(provider)) {
-            factory = (/**
-             * @return {?}
-             */
-            () => ɵɵinject(resolveForwardRef(provider.useExisting)));
-        }
         else if (isFactoryProvider(provider)) {
             factory = (/**
              * @return {?}
              */
             () => provider.useFactory(...injectArgs(provider.deps || [])));
+        }
+        else if (isExistingProvider(provider)) {
+            factory = (/**
+             * @return {?}
+             */
+            () => ɵɵinject(resolveForwardRef(provider.useExisting)));
         }
         else {
             /** @type {?} */
@@ -22308,7 +22350,9 @@ function bindingUpdated(lView, bindingIndex, value) {
             /** @type {?} */
             const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
             if (!devModeEqual$1(oldValueToCompare, value)) {
-                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, oldValueToCompare, value);
+                /** @type {?} */
+                const details = getExpressionChangedErrorDetails(lView, bindingIndex, oldValueToCompare, value);
+                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName);
             }
         }
         lView[bindingIndex] = value;
@@ -23576,7 +23620,9 @@ function stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, value, i
         /** @type {?} */
         const oldValue = getValue(lView, bindingIndex);
         if (hasValueChangedUnwrapSafeValue(oldValue, value)) {
-            throwErrorIfNoChangesMode(false, oldValue, value);
+            /** @type {?} */
+            const field = isClassBased ? `class.${prop}` : `style.${prop}`;
+            throwErrorIfNoChangesMode(false, oldValue, value, field);
         }
     }
     // Direct Apply Case: bypass context resolution and apply the
@@ -23764,7 +23810,11 @@ function stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, value,
     // For this reason, the checkNoChanges situation must also be handled here
     // as well.
     if (ngDevMode && valueHasChanged && getCheckNoChangesMode()) {
-        throwErrorIfNoChangesMode(false, oldValue, value);
+        // check if the value is a StylingMapArray, in which case take the first value (which stores raw
+        // value) from the array
+        /** @type {?} */
+        const previousValue = isStylingMapArray(oldValue) ? oldValue[0 /* RawValuePosition */] : oldValue;
+        throwErrorIfNoChangesMode(false, previousValue, value);
     }
     // Direct Apply Case: bypass context resolution and apply the
     // style/class map values directly to the element
@@ -24327,7 +24377,11 @@ function validateElement(hostView, element, tNode, hasDirectives) {
         // as a custom element. Note that unknown elements with a dash in their name won't be instances
         // of HTMLUnknownElement in browsers that support web components.
         /** @type {?} */
-        const isUnknown = (typeof HTMLUnknownElement === 'function' && element instanceof HTMLUnknownElement) ||
+        const isUnknown = 
+        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
+        // because while most browsers return 'function', IE returns 'object'.
+        (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
+            element instanceof HTMLUnknownElement) ||
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(hostView, tagName)) {
@@ -29109,7 +29163,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+422.sha-a719656.with-local-changes');
+const VERSION = new Version('9.0.0-rc.1+524.sha-f004195');
 
 /**
  * @fileoverview added by tsickle
@@ -40473,7 +40527,9 @@ function extendsDirectlyFromObject(type) {
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
     /** @type {?} */
-    const propMetadata = getReflect().ownPropMetadata(type);
+    const reflect = getReflect();
+    /** @type {?} */
+    const propMetadata = reflect.ownPropMetadata(type);
     return {
         name: type.name,
         type: type,
@@ -40485,7 +40541,7 @@ function directiveMetadata(type, metadata) {
         inputs: metadata.inputs || EMPTY_ARRAY,
         outputs: metadata.outputs || EMPTY_ARRAY,
         queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
-        lifecycle: { usesOnChanges: usesLifecycleHook(type, 'ngOnChanges') },
+        lifecycle: { usesOnChanges: reflect.hasLifecycleHook(type, 'ngOnChanges') },
         typeSourceSpan: (/** @type {?} */ (null)),
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: extractExportAs(metadata.exportAs),
@@ -40502,7 +40558,7 @@ function addDirectiveDefToUndecoratedParents(type) {
     /** @type {?} */
     const objPrototype = Object.prototype;
     /** @type {?} */
-    let parent = Object.getPrototypeOf(type);
+    let parent = Object.getPrototypeOf(type.prototype).constructor;
     // Go up the prototype until we hit `Object`.
     while (parent && parent !== objPrototype) {
         // Since inheritance works if the class was annotated already, we only need to add
@@ -40612,16 +40668,6 @@ function splitByComma(value) {
      */
     piece => piece.trim()));
 }
-/**
- * @param {?} type
- * @param {?} name
- * @return {?}
- */
-function usesLifecycleHook(type, name) {
-    /** @type {?} */
-    const prototype = type.prototype;
-    return prototype && prototype.hasOwnProperty(name);
-}
 /** @type {?} */
 const LIFECYCLE_HOOKS = [
     'ngOnChanges', 'ngOnInit', 'ngOnDestroy', 'ngDoCheck', 'ngAfterViewInit', 'ngAfterViewChecked',
@@ -40632,15 +40678,17 @@ const LIFECYCLE_HOOKS = [
  * @return {?}
  */
 function shouldAddAbstractDirective(type) {
+    /** @type {?} */
+    const reflect = getReflect();
     if (LIFECYCLE_HOOKS.some((/**
      * @param {?} hookName
      * @return {?}
      */
-    hookName => usesLifecycleHook(type, hookName)))) {
+    hookName => reflect.hasLifecycleHook(type, hookName)))) {
         return true;
     }
     /** @type {?} */
-    const propMetadata = getReflect().ownPropMetadata(type);
+    const propMetadata = reflect.propMetadata(type);
     for (const field in propMetadata) {
         /** @type {?} */
         const annotations = propMetadata[field];
@@ -44522,10 +44570,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         for (let i = 0; i < eAttrs.length; i++) {
             /** @type {?} */
             const attr = eAttrs[i];
+            /** @type {?} */
+            const lowercaseName = attr.name.toLowerCase();
             // Make sure that we don't assign the same attribute both in its
             // case-sensitive form and the lower-cased one from the browser.
-            if (lowercaseTNodeAttrs.indexOf(attr.name) === -1) {
-                attributes[attr.name] = attr.value;
+            if (lowercaseTNodeAttrs.indexOf(lowercaseName) === -1) {
+                // Save the lowercase name to align the behavior between browsers.
+                // IE preserves the case, while all other browser convert it to lower case.
+                attributes[lowercaseName] = attr.value;
             }
         }
         return attributes;
@@ -44543,51 +44595,18 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
      * @return {?}
      */
     get classes() {
-        if (!this._classesProxy) {
-            /** @type {?} */
-            const element = this.nativeElement;
-            // we use a proxy here because VE code expects `.classes` to keep
-            // track of which classes have been added and removed. Because we
-            // do not make use of a debug renderer anymore, the return value
-            // must always be `false` in the event that a class does not exist
-            // on the element (even if it wasn't added and removed beforehand).
-            this._classesProxy = createProxy({
-                /**
-                 * @param {?} target
-                 * @param {?} prop
-                 * @return {?}
-                 */
-                get(target, prop) {
-                    return element ? element.classList.contains(prop) : false;
-                },
-                /**
-                 * @param {?} target
-                 * @param {?} prop
-                 * @param {?} value
-                 * @return {?}
-                 */
-                set(target, prop, value) {
-                    return element ? element.classList.toggle(prop, !!value) : false;
-                },
-                /**
-                 * @return {?}
-                 */
-                ownKeys() { return element ? Array.from(element.classList).sort() : []; },
-                /**
-                 * @param {?} k
-                 * @return {?}
-                 */
-                getOwnPropertyDescriptor(k) {
-                    // we use a special property descriptor here so that enumeration operations
-                    // such as `Object.keys` will work on this proxy.
-                    return {
-                        enumerable: true,
-                        configurable: true,
-                    };
-                },
-            });
-        }
-        return this._classesProxy;
+        /** @type {?} */
+        const result = {};
+        /** @type {?} */
+        const element = (/** @type {?} */ (this.nativeElement));
+        /** @type {?} */
+        const classNames = element.className.split(' ');
+        classNames.forEach((/**
+         * @param {?} value
+         * @return {?}
+         */
+        (value) => result[value] = true));
+        return result;
     }
     /**
      * @return {?}
@@ -44691,13 +44710,6 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             }));
         }
     }
-}
-if (false) {
-    /**
-     * @type {?}
-     * @private
-     */
-    DebugElement__POST_R3__.prototype._classesProxy;
 }
 /**
  * @param {?} element
