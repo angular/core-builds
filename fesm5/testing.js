@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.7+2.sha-ca8b584
+ * @license Angular v9.0.0-rc.7+36.sha-6b68f40
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1359,24 +1359,25 @@ var R3TestBedCompiler = /** @class */ (function () {
             }
             // Apply provider overrides to imported modules recursively
             var moduleDef = moduleType[ɵNG_MOD_DEF];
+            var imports = maybeUnwrapFn(moduleDef.imports);
             try {
-                for (var _c = __values(moduleDef.imports), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var importedModule = _d.value;
+                for (var imports_1 = __values(imports), imports_1_1 = imports_1.next(); !imports_1_1.done; imports_1_1 = imports_1.next()) {
+                    var importedModule = imports_1_1.value;
                     this.applyProviderOverridesToModule(importedModule);
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
             finally {
                 try {
-                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                    if (imports_1_1 && !imports_1_1.done && (_a = imports_1.return)) _a.call(imports_1);
                 }
                 finally { if (e_1) throw e_1.error; }
             }
             try {
                 // Also override the providers on any ModuleWithProviders imports since those don't appear in
                 // the moduleDef.
-                for (var _e = __values(flatten(injectorDef.imports)), _f = _e.next(); !_f.done; _f = _e.next()) {
-                    var importedModule = _f.value;
+                for (var _c = __values(flatten(injectorDef.imports)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var importedModule = _d.value;
                     if (isModuleWithProviders(importedModule)) {
                         this.defCleanupOps.push({
                             object: importedModule,
@@ -1390,7 +1391,7 @@ var R3TestBedCompiler = /** @class */ (function () {
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
-                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                    if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
                 }
                 finally { if (e_2) throw e_2.error; }
             }
