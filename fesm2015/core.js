@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.7+36.sha-6b68f40
+ * @license Angular v9.0.0-rc.7+37.sha-e549846
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28509,7 +28509,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.7+36.sha-6b68f40');
+const VERSION = new Version('9.0.0-rc.7+37.sha-e549846');
 
 /**
  * @fileoverview added by tsickle
