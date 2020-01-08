@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+524.sha-f004195
+ * @license Angular v9.0.0-rc.1+558.sha-d1c7ca7
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18900,6 +18900,7 @@ function getSuperType(type) {
  */
 function ɵɵInheritDefinitionFeature(definition) {
     var superType = getSuperType(definition.type);
+    var shouldInheritFields = true;
     while (superType) {
         var superDef = undefined;
         if (isComponentDef(definition)) {
@@ -18914,34 +18915,36 @@ function ɵɵInheritDefinitionFeature(definition) {
             superDef = superType.ɵdir;
         }
         if (superDef) {
-            // Some fields in the definition may be empty, if there were no values to put in them that
-            // would've justified object creation. Unwrap them if necessary.
-            var writeableDef = definition;
-            writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
-            writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
-            writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
-            // Merge hostBindings
-            var superHostBindings = superDef.hostBindings;
-            superHostBindings && inheritHostBindings(definition, superHostBindings);
-            // Merge queries
-            var superViewQuery = superDef.viewQuery;
-            var superContentQueries = superDef.contentQueries;
-            superViewQuery && inheritViewQuery(definition, superViewQuery);
-            superContentQueries && inheritContentQueries(definition, superContentQueries);
-            // Merge inputs and outputs
-            fillProperties(definition.inputs, superDef.inputs);
-            fillProperties(definition.declaredInputs, superDef.declaredInputs);
-            fillProperties(definition.outputs, superDef.outputs);
-            // Inherit hooks
-            // Assume super class inheritance feature has already run.
-            definition.afterContentChecked =
-                definition.afterContentChecked || superDef.afterContentChecked;
-            definition.afterContentInit = definition.afterContentInit || superDef.afterContentInit;
-            definition.afterViewChecked = definition.afterViewChecked || superDef.afterViewChecked;
-            definition.afterViewInit = definition.afterViewInit || superDef.afterViewInit;
-            definition.doCheck = definition.doCheck || superDef.doCheck;
-            definition.onDestroy = definition.onDestroy || superDef.onDestroy;
-            definition.onInit = definition.onInit || superDef.onInit;
+            if (shouldInheritFields) {
+                // Some fields in the definition may be empty, if there were no values to put in them that
+                // would've justified object creation. Unwrap them if necessary.
+                var writeableDef = definition;
+                writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
+                writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
+                writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
+                // Merge hostBindings
+                var superHostBindings = superDef.hostBindings;
+                superHostBindings && inheritHostBindings(definition, superHostBindings);
+                // Merge queries
+                var superViewQuery = superDef.viewQuery;
+                var superContentQueries = superDef.contentQueries;
+                superViewQuery && inheritViewQuery(definition, superViewQuery);
+                superContentQueries && inheritContentQueries(definition, superContentQueries);
+                // Merge inputs and outputs
+                fillProperties(definition.inputs, superDef.inputs);
+                fillProperties(definition.declaredInputs, superDef.declaredInputs);
+                fillProperties(definition.outputs, superDef.outputs);
+                // Inherit hooks
+                // Assume super class inheritance feature has already run.
+                definition.afterContentChecked =
+                    definition.afterContentChecked || superDef.afterContentChecked;
+                definition.afterContentInit = definition.afterContentInit || superDef.afterContentInit;
+                definition.afterViewChecked = definition.afterViewChecked || superDef.afterViewChecked;
+                definition.afterViewInit = definition.afterViewInit || superDef.afterViewInit;
+                definition.doCheck = definition.doCheck || superDef.doCheck;
+                definition.onDestroy = definition.onDestroy || superDef.onDestroy;
+                definition.onInit = definition.onInit || superDef.onInit;
+            }
             // Run parent features
             var features = superDef.features;
             if (features) {
@@ -18949,6 +18952,16 @@ function ɵɵInheritDefinitionFeature(definition) {
                     var feature = features[i];
                     if (feature && feature.ngInherit) {
                         feature(definition);
+                    }
+                    // If `InheritDefinitionFeature` is a part of the current `superDef`, it means that this
+                    // def already has all the necessary information inherited from its super class(es), so we
+                    // can stop merging fields from super classes. However we need to iterate through the
+                    // prototype chain to look for classes that might contain other "features" (like
+                    // NgOnChanges), which we should invoke for the original `definition`. We set the
+                    // `shouldInheritFields` flag to indicate that, essentially skipping fields inheritance
+                    // logic and only invoking functions from the "features" list.
+                    if (feature === ɵɵInheritDefinitionFeature) {
+                        shouldInheritFields = false;
                     }
                 }
             }
@@ -18993,19 +19006,14 @@ function inheritContentQueries(definition, superContentQueries) {
 }
 function inheritHostBindings(definition, superHostBindings) {
     var prevHostBindings = definition.hostBindings;
-    // If the subclass does not have a host bindings function, we set the subclass host binding
-    // function to be the superclass's (in this feature). We should check if they're the same here
-    // to ensure we don't inherit it twice.
-    if (superHostBindings !== prevHostBindings) {
-        if (prevHostBindings) {
-            definition.hostBindings = function (rf, ctx, elementIndex) {
-                superHostBindings(rf, ctx, elementIndex);
-                prevHostBindings(rf, ctx, elementIndex);
-            };
-        }
-        else {
-            definition.hostBindings = superHostBindings;
-        }
+    if (prevHostBindings) {
+        definition.hostBindings = function (rf, ctx, elementIndex) {
+            superHostBindings(rf, ctx, elementIndex);
+            prevHostBindings(rf, ctx, elementIndex);
+        };
+    }
+    else {
+        definition.hostBindings = superHostBindings;
     }
 }
 
@@ -19751,7 +19759,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+524.sha-f004195');
+var VERSION = new Version('9.0.0-rc.1+558.sha-d1c7ca7');
 
 /**
  * @license
