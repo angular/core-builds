@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+18.sha-f295240
+ * @license Angular v9.0.0-rc.8+29.sha-f7a2ed7
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14505,8 +14505,12 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
  */
 function ɵɵattribute(name, value, sanitizer, namespace) {
     var lView = getLView();
-    if (bindingUpdated(lView, nextBindingIndex(), value)) {
-        elementAttributeInternal(getSelectedIndex(), name, value, lView, sanitizer, namespace);
+    var bindingIndex = nextBindingIndex();
+    if (bindingUpdated(lView, bindingIndex, value)) {
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, name, value, lView, sanitizer, namespace);
+        ngDevMode &&
+            storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + name, bindingIndex);
     }
     return ɵɵattribute;
 }
@@ -14676,7 +14680,9 @@ function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, name
     var lView = getLView();
     var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵattributeInterpolate1;
 }
@@ -14710,7 +14716,9 @@ function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitiz
     var lView = getLView();
     var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix);
     }
     return ɵɵattributeInterpolate2;
 }
@@ -14747,7 +14755,9 @@ function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix,
     var lView = getLView();
     var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
     return ɵɵattributeInterpolate3;
 }
@@ -14786,7 +14796,9 @@ function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
     return ɵɵattributeInterpolate4;
 }
@@ -14827,7 +14839,9 @@ function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
     return ɵɵattributeInterpolate5;
 }
@@ -14870,7 +14884,9 @@ function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
     return ɵɵattributeInterpolate6;
 }
@@ -14912,11 +14928,12 @@ function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
  * @codeGenApi
  */
 function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer, namespace) {
-    var index = getSelectedIndex();
     var lView = getLView();
     var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(index, attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
     return ɵɵattributeInterpolate7;
 }
@@ -14963,7 +14980,9 @@ function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolatedValue, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, lView, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
     return ɵɵattributeInterpolate8;
 }
@@ -14997,7 +15016,16 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
     var lView = getLView();
     var interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
-        elementAttributeInternal(getSelectedIndex(), attrName, interpolated, lView, sanitizer, namespace);
+        var nodeIndex = getSelectedIndex();
+        elementAttributeInternal(nodeIndex, attrName, interpolated, lView, sanitizer, namespace);
+        if (ngDevMode) {
+            var interpolationInBetween = [values[0]]; // prefix
+            for (var i = 2; i < values.length; i += 2) {
+                interpolationInBetween.push(values[i]);
+            }
+            storePropertyBindingMetadata.apply(void 0, __spread([lView[TVIEW].data, nodeIndex, 'attr.' + attrName,
+                getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+        }
     }
     return ɵɵattributeInterpolateV;
 }
@@ -16803,9 +16831,9 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     var lView = getLView();
     var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        elementPropertyInternal(lView, getSelectedIndex(), propName, interpolatedValue, sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(lView[TVIEW].data, getSelectedIndex(), propName, getBindingIndex() - 1, prefix, suffix);
+        var nodeIndex = getSelectedIndex();
+        elementPropertyInternal(lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        ngDevMode && storePropertyBindingMetadata(lView[TVIEW].data, nodeIndex, propName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵpropertyInterpolate1;
 }
@@ -19698,7 +19726,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.8+18.sha-f295240');
+var VERSION = new Version('9.0.0-rc.8+29.sha-f7a2ed7');
 
 /**
  * @license
