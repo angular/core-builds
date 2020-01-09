@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.7+39.sha-186d310
+ * @license Angular v9.0.0-rc.8+18.sha-f295240
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15837,7 +15837,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
         registerInitialStylingOnTNode(tNode, attrs, 0);
     }
     var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && validateElement(lView, native, tNode, hasDirectives);
+    ngDevMode && warnAboutUnknownElement(lView, native, tNode, hasDirectives);
     if (tView.queries !== null) {
         tView.queries.elementStart(tView, tNode);
     }
@@ -16019,7 +16019,7 @@ function setDirectiveStylingInput(context, lView, stylingInputs, propName) {
     // be (Jira Issue = FW-1467).
     setInputsForProperty(lView, stylingInputs, propName, value);
 }
-function validateElement(hostView, element, tNode, hasDirectives) {
+function warnAboutUnknownElement(hostView, element, tNode, hasDirectives) {
     var schemas = hostView[TVIEW].schemas;
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
@@ -16041,18 +16041,18 @@ function validateElement(hostView, element, tNode, hasDirectives) {
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(hostView, tagName)) {
-            var errorMessage = "'" + tagName + "' is not a known element:\n";
-            errorMessage +=
+            var warning = "'" + tagName + "' is not a known element:\n";
+            warning +=
                 "1. If '" + tagName + "' is an Angular component, then verify that it is part of this module.\n";
             if (tagName && tagName.indexOf('-') > -1) {
-                errorMessage +=
+                warning +=
                     "2. If '" + tagName + "' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.";
             }
             else {
-                errorMessage +=
+                warning +=
                     "2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.";
             }
-            throw new Error(errorMessage);
+            console.warn(warning);
         }
     }
 }
@@ -19698,7 +19698,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.7+39.sha-186d310');
+var VERSION = new Version('9.0.0-rc.8+18.sha-f295240');
 
 /**
  * @license
