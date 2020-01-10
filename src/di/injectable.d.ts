@@ -7,7 +7,6 @@
  */
 import { Type } from '../interface/type';
 import { TypeDecorator } from '../util/decorators';
-import { ɵɵInjectableDef } from './interface/defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './interface/provider';
 import { compileInjectable as render3CompileInjectable } from './jit/injectable';
 /**
@@ -75,12 +74,4 @@ export interface Injectable {
  * @publicApi
  */
 export declare const Injectable: InjectableDecorator;
-/**
- * Type representing injectable service.
- *
- * @publicApi
- */
-export interface InjectableType<T> extends Type<T> {
-    ɵprov: ɵɵInjectableDef<T>;
-}
 export declare const SWITCH_COMPILE_INJECTABLE__POST_R3__: typeof render3CompileInjectable;
