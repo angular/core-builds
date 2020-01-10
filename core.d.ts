@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+558.sha-d1c7ca7
+ * @license Angular v0.0.0
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3621,7 +3621,7 @@ declare interface LContainer extends Array<any> {
      * The host could be an LView if this container is on a component node.
      * In that case, the component LView is its HOST.
      */
-    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bg;
+    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bm;
     /**
      * This is a type field which allows us to differentiate `LContainer` from `StylingContext` in an
      * efficient way. The value is always set to `true`
@@ -3646,18 +3646,18 @@ declare interface LContainer extends Array<any> {
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
      */
-    [PARENT]: ɵangular_packages_core_core_bg;
+    [PARENT]: ɵangular_packages_core_core_bm;
     /**
      * This allows us to jump from a container to a sibling container or component
      * view with the same parent, so we can remove listeners efficiently.
      */
-    [NEXT]: ɵangular_packages_core_core_bg | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_bm | LContainer | null;
     /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since
      * queries collect matches from the embedded view declaration point and _not_ the insertion point.
      */
-    [MOVED_VIEWS]: ɵangular_packages_core_core_bg[] | null;
+    [MOVED_VIEWS]: ɵangular_packages_core_core_bm[] | null;
     /**
      * Pointer to the `TNode` which represents the host of the container.
      */
@@ -3694,7 +3694,7 @@ declare interface LFrame {
      * An array of nodes (text, element, container, etc), pipes, their bindings, and
      * any local variables that need to be stored between invocations.
      */
-    lView: ɵangular_packages_core_core_bg;
+    lView: ɵangular_packages_core_core_bm;
     /**
      * Used to set the parent property when nodes are created and track query results.
      *
@@ -3723,7 +3723,7 @@ declare interface LFrame {
      *
      * e.g. const inner = x().$implicit; const outer = x().$implicit;
      */
-    contextLView: ɵangular_packages_core_core_bg;
+    contextLView: ɵangular_packages_core_core_bm;
     /**
      * Store the element depth count. This is used to identify the root elements of the template
      * so that we can then attach patch data `LView` to only those elements. We know that those
@@ -3794,7 +3794,7 @@ export declare const LOCALE_ID: InjectionToken<string>;
  * - `<div #nativeDivEl>` - `nativeDivEl` should point to the native `<div>` element;
  * - `<ng-template #tplRef>` - `tplRef` should point to the `TemplateRef` instance;
  */
-declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_bg) => any;
+declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_bm) => any;
 
 /**
  * lQueries represent a collection of individual LQuery objects tracked in a given view.
@@ -6395,7 +6395,7 @@ declare interface TContainerNode extends TNode {
      * - They are the first node of a component or embedded view
      * - They are dynamically created
      */
-    parent: ɵangular_packages_core_core_bb | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bc | TElementContainerNode | null;
     tViews: TView | TView[] | null;
     projection: null;
 }
@@ -6433,8 +6433,8 @@ declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponent
 declare interface TElementContainerNode extends TNode {
     /** Index in the LView[] array. */
     index: number;
-    child: ɵangular_packages_core_core_bb | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
-    parent: ɵangular_packages_core_core_bb | TElementContainerNode | null;
+    child: ɵangular_packages_core_core_bc | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
+    parent: ɵangular_packages_core_core_bc | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -6845,7 +6845,7 @@ declare interface TNode {
      *
      * If this is an inline view node (V), the parent will be its container.
      */
-    parent: ɵangular_packages_core_core_bb | TContainerNode | null;
+    parent: ɵangular_packages_core_core_bc | TContainerNode | null;
     /**
      * List of projected TNodes for a given component host element OR index into the said nodes.
      *
@@ -7122,7 +7122,7 @@ declare const enum TNodeType {
 /**
  * Type representing a set of TNodes that can have local refs (`#foo`) placed on them.
  */
-declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bb | TElementContainerNode;
+declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bc | TElementContainerNode;
 
 /** Static data for an LProjectionNode  */
 declare interface TProjectionNode extends TNode {
@@ -7133,7 +7133,7 @@ declare interface TProjectionNode extends TNode {
      * or embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bb | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bc | TElementContainerNode | null;
     tViews: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
@@ -7752,7 +7752,7 @@ declare interface TTextNode extends TNode {
      * embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bb | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bc | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -7782,7 +7782,7 @@ declare interface TView {
      * This is a blueprint used to generate LView instances for this TView. Copying this
      * blueprint is faster than creating a new LView from scratch.
      */
-    blueprint: ɵangular_packages_core_core_bg;
+    blueprint: ɵangular_packages_core_core_bm;
     /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
@@ -7807,7 +7807,7 @@ declare interface TView {
      * different host TNodes, depending on where the component is being used. These host
      * TNodes cannot be shared (due to different indices, etc).
      */
-    node: TViewNode | ɵangular_packages_core_core_bb | null;
+    node: TViewNode | ɵangular_packages_core_core_bc | null;
     /** Whether or not this template has been processed in creation mode. */
     firstCreatePass: boolean;
     /** Whether or not the first update for this template has been processed. */
@@ -7993,7 +7993,7 @@ declare interface TView {
 declare interface TViewNode extends TNode {
     /** If -1, it's a dynamically created view. Otherwise, it is the view block ID. */
     index: number;
-    child: ɵangular_packages_core_core_bb | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
+    child: ɵangular_packages_core_core_bc | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
     parent: TContainerNode | null;
     tViews: null;
     projection: null;
@@ -8520,14 +8520,14 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      *
      * @internal
      */
-    _lView: ɵangular_packages_core_core_bg, 
+    _lView: ɵangular_packages_core_core_bm, 
     /**
      * This represents the `LView` associated with the point where `ChangeDetectorRef` was
      * requested.
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: ɵangular_packages_core_core_bg | undefined);
+    _cdRefInjectingView?: ɵangular_packages_core_core_bm | undefined);
     readonly context: T;
     readonly destroyed: boolean;
     destroy(): void;
@@ -8811,19 +8811,21 @@ export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | Injec
 
 export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
-export declare function ɵangular_packages_core_core_ba<T = any>(level: number): T;
+export declare function ɵangular_packages_core_core_ba(): number;
+
+export declare function ɵangular_packages_core_core_bb<T = any>(level: number): T;
 
 /** Static data for an element  */
-export declare interface ɵangular_packages_core_core_bb extends TNode {
+export declare interface ɵangular_packages_core_core_bc extends TNode {
     /** Index in the data[] array */
     index: number;
-    child: ɵangular_packages_core_core_bb | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
+    child: ɵangular_packages_core_core_bc | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
     /**
      * Element nodes will have parents unless they are the first node of a component or
      * embedded view (which means their parent is in a different view and must be
      * retrieved using viewData[HOST_NODE]).
      */
-    parent: ɵangular_packages_core_core_bb | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bc | TElementContainerNode | null;
     tViews: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
@@ -8834,20 +8836,100 @@ export declare interface ɵangular_packages_core_core_bb extends TNode {
 }
 
 /**
+ * If the value of the provided exp has changed, calls the pure function to return
+ * an updated value. Or if the value has not changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn Function that returns an updated value
+ * @param exp Updated expression value
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bd(lView: ɵangular_packages_core_core_bm, bindingRoot: number, slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_be(lView: ɵangular_packages_core_core_bm, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bf(lView: ɵangular_packages_core_core_bm, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ *
+ */
+export declare function ɵangular_packages_core_core_bg(lView: ɵangular_packages_core_core_bm, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
+
+/**
+ * pureFunction instruction that can support any number of bindings.
+ *
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn A pure function that takes binding values and builds an object or array
+ * containing those values.
+ * @param exps An array of binding values
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bh(lView: ɵangular_packages_core_core_bm, bindingRoot: number, slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
+
+/**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
  *
  * The rules are based on the RESOURCE_URL context config from
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function ɵangular_packages_core_core_bc(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
+export declare function ɵangular_packages_core_core_bi(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 
-export declare function ɵangular_packages_core_core_bd(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
+export declare function ɵangular_packages_core_core_bj(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
 
-export declare function ɵangular_packages_core_core_be(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
+export declare function ɵangular_packages_core_core_bk(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
 
 
-export declare function ɵangular_packages_core_core_bf<T>(objWithPropertyToExtract: T): string;
+export declare function ɵangular_packages_core_core_bl<T>(objWithPropertyToExtract: T): string;
 
 /**
  * `LView` stores all of the information needed to process the instructions as
@@ -8859,7 +8941,7 @@ export declare function ɵangular_packages_core_core_bf<T>(objWithPropertyToExtr
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-export declare interface ɵangular_packages_core_core_bg extends Array<any> {
+export declare interface ɵangular_packages_core_core_bm extends Array<any> {
     /**
      * The host node for this LView instance, if this is a component view.
      * If this is an embedded view, HOST will be null.
@@ -8882,7 +8964,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
      *
      * `LContainer` - The current view is part of a container, and is an embedded view.
      */
-    [PARENT]: ɵangular_packages_core_core_bg | LContainer | null;
+    [PARENT]: ɵangular_packages_core_core_bm | LContainer | null;
     /**
      *
      * The next sibling LView or LContainer.
@@ -8892,7 +8974,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
      * views in the same container. We need a way to link component views and views
      * across containers as well.
      */
-    [NEXT]: ɵangular_packages_core_core_bg | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_bm | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
     /**
@@ -8905,7 +8987,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
      *
      * If null, this is the root view of an application (root component is in this view).
      */
-    [T_HOST]: TViewNode | ɵangular_packages_core_core_bb | null;
+    [T_HOST]: TViewNode | ɵangular_packages_core_core_bc | null;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with
@@ -8938,14 +9020,14 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
      * Necessary to store this so views can traverse through their nested views
      * to remove listeners and call onDestroy callbacks.
      */
-    [CHILD_HEAD]: ɵangular_packages_core_core_bg | LContainer | null;
+    [CHILD_HEAD]: ɵangular_packages_core_core_bm | LContainer | null;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
      * without having to propagate starting from the first child.
      */
-    [CHILD_TAIL]: ɵangular_packages_core_core_bg | LContainer | null;
+    [CHILD_TAIL]: ɵangular_packages_core_core_bm | LContainer | null;
     /**
      * View where this view's template was declared.
      *
@@ -8970,7 +9052,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
      * template function during change detection, we need the declaration view to get inherited
      * context.
      */
-    [DECLARATION_VIEW]: ɵangular_packages_core_core_bg | null;
+    [DECLARATION_VIEW]: ɵangular_packages_core_core_bm | null;
     /**
      * Points to the declaration component view, used to track transplanted `LView`s.
      *
@@ -9040,7 +9122,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
      *   - `LView[DECLARATION_LCONTAINER]` similar problem for queries
      *   - `LContainer[MOVED_VIEWS]` similar problem for queries
      */
-    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bg;
+    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bm;
     /**
      * A declaration point of embedded views (ones instantiated based on the content of a
      * <ng-template>), null for other types of views.
@@ -9066,7 +9148,7 @@ export declare interface ɵangular_packages_core_core_bg extends Array<any> {
  * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
  * compiler.
  */
-export declare function ɵangular_packages_core_core_bh(fn: () => void): string;
+export declare function ɵangular_packages_core_core_bn(fn: () => void): string;
 
 /**
  * Returns the `RootContext` instance that is associated with
@@ -9075,7 +9157,7 @@ export declare function ɵangular_packages_core_core_bh(fn: () => void): string;
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_bi(viewOrComponent: ɵangular_packages_core_core_bg | {}): RootContext;
+export declare function ɵangular_packages_core_core_bo(viewOrComponent: ɵangular_packages_core_core_bm | {}): RootContext;
 
 export declare class ɵangular_packages_core_core_c implements Injector {
     get(token: any, notFoundValue?: any): any;
@@ -9133,7 +9215,7 @@ export declare function ɵangular_packages_core_core_g(): string;
  * @param view The view to which the node belongs
  * @returns The ElementRef instance to use
  */
-export declare function ɵangular_packages_core_core_h(ElementRefToken: typeof ElementRef, tNode: TNode, view: ɵangular_packages_core_core_bg): ElementRef;
+export declare function ɵangular_packages_core_core_h(ElementRefToken: typeof ElementRef, tNode: TNode, view: ɵangular_packages_core_core_bm): ElementRef;
 
 /**
  * Creates a TemplateRef and stores it on the injector.
@@ -9144,7 +9226,7 @@ export declare function ɵangular_packages_core_core_h(ElementRefToken: typeof E
  * @param hostView The view to which the node belongs
  * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
  */
-export declare function ɵangular_packages_core_core_i<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef, hostTNode: TNode, hostView: ɵangular_packages_core_core_bg): TemplateRef<T> | null;
+export declare function ɵangular_packages_core_core_i<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef, hostTNode: TNode, hostView: ɵangular_packages_core_core_bm): TemplateRef<T> | null;
 
 export declare function ɵangular_packages_core_core_j(id: string): NgModuleFactory<any>;
 
@@ -9290,7 +9372,7 @@ export declare const ɵangular_packages_core_core_x: InstructionState;
  * The return value can be `null` if the method is called outside of template. This can happen if
  * directive is instantiated by module injector (rather than by node injector.)
  */
-export declare function ɵangular_packages_core_core_y(): ɵangular_packages_core_core_bg;
+export declare function ɵangular_packages_core_core_y(): ɵangular_packages_core_core_bm;
 
 export declare function ɵangular_packages_core_core_z(): TNode;
 
@@ -9314,6 +9396,14 @@ export declare const enum ɵArgumentType {
  * items are not regular attributes and the processing should be adapted accordingly.
  */
 export declare const enum ɵAttributeMarker {
+    /**
+     * An implicit marker which indicates that the value in the array are of `attributeKey`,
+     * `attributeValue` format.
+     *
+     * NOTE: This is implicit as it is the type when no marker is present in array. We indicate that
+     * it should not be present at runtime by the negative number.
+     */
+    ImplicitAttributes = -1,
     /**
      * Marker indicates that the following 3 values in the attributes array are:
      * namespaceUri, attributeName, attributeValue
@@ -9852,9 +9942,47 @@ export declare interface ɵDirectiveDef<T> {
     /**
      * Refreshes host bindings on the associated directive.
      */
-    hostBindings: HostBindingsFunction<T> | null;
+    readonly hostBindings: HostBindingsFunction<T> | null;
+    /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    readonly hostVars: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    readonly hostAttrs: TAttributes | null;
     /** Token representing the directive. Used by DI. */
-    type: Type<T>;
+    readonly type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
     providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
@@ -9867,15 +9995,15 @@ export declare interface ɵDirectiveDef<T> {
      * Factory function used to create a new directive instance. Will be null initially.
      * Populated when the factory is first requested by directive instantiation logic.
      */
-    factory: FactoryFn<T> | null;
-    onChanges: (() => void) | null;
-    onInit: (() => void) | null;
-    doCheck: (() => void) | null;
-    afterContentInit: (() => void) | null;
-    afterContentChecked: (() => void) | null;
-    afterViewInit: (() => void) | null;
-    afterViewChecked: (() => void) | null;
-    onDestroy: (() => void) | null;
+    readonly factory: FactoryFn<T> | null;
+    readonly onChanges: (() => void) | null;
+    readonly onInit: (() => void) | null;
+    readonly doCheck: (() => void) | null;
+    readonly afterContentInit: (() => void) | null;
+    readonly afterContentChecked: (() => void) | null;
+    readonly afterViewInit: (() => void) | null;
+    readonly afterViewChecked: (() => void) | null;
+    readonly onDestroy: (() => void) | null;
     /**
      * The features applied to this directive
      */
@@ -10056,7 +10184,7 @@ export declare interface ɵLContext {
     /**
      * The component's parent view data.
      */
-    lView: ɵangular_packages_core_core_bg;
+    lView: ɵangular_packages_core_core_bm;
     /**
      * The index instance of the node.
      */
@@ -10566,7 +10694,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     hostView: ViewRef_2<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bg, _tNode: ɵangular_packages_core_core_bb | TContainerNode | TElementContainerNode);
+    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bm, _tNode: ɵangular_packages_core_core_bc | TContainerNode | TElementContainerNode);
     readonly injector: Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
@@ -10871,16 +10999,6 @@ export declare function ɵwhenRendered(component: any): Promise<null>;
   * @codeGenApi
   */
 export declare function ɵɵadvance(delta: number): void;
-
-
-/**
- * Allocates the necessary amount of slots for host vars.
- *
- * @param count Amount of vars to be allocated
- *
- * @codeGenApi
- */
-export declare function ɵɵallocHostVars(count: number): void;
 
 /**
  * Updates the value of or removes a bound attribute on an Element.
@@ -11710,6 +11828,44 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      */
     hostBindings?: HostBindingsFunction<T>;
     /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: TAttributes;
+    /**
      * Function to create instances of content queries associated with a given directive.
      */
     contentQueries?: ContentQueriesFunction<T>;
@@ -11903,6 +12059,44 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
     hostBindings?: HostBindingsFunction<T> | undefined;
+    /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number | undefined;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: (string | (string | SelectorFlags)[] | ɵAttributeMarker)[] | undefined;
     /**
      * Function to create instances of content queries associated with a given directive.
      */
@@ -12127,47 +12321,6 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  * @codeGenApi
  */
 export declare function ɵɵelementEnd(): void;
-
-/**
- * Assign static attribute values to a host element.
- *
- * This instruction will assign static attribute values as well as class and style
- * values to an element within the host bindings function. Since attribute values
- * can consist of different types of values, the `attrs` array must include the values in
- * the following format:
- *
- * attrs = [
- *   // static attributes (like `title`, `name`, `id`...)
- *   attr1, value1, attr2, value,
- *
- *   // a single namespace value (like `x:id`)
- *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
- *
- *   // another single namespace value (like `x:name`)
- *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
- *
- *   // a series of CSS classes that will be applied to the element (no spaces)
- *   CLASSES_MARKER, class1, class2, class3,
- *
- *   // a series of CSS styles (property + value) that will be applied to the element
- *   STYLES_MARKER, prop1, value1, prop2, value2
- * ]
- *
- * All non-class and non-style attributes must be defined at the start of the list
- * first before all class and style values are set. When there is a change in value
- * type (like when classes and styles are introduced) a marker must be used to separate
- * the entries. The marker values themselves are set via entries found in the
- * [AttributeMarker] enum.
- *
- * NOTE: This instruction is meant to used from `hostBindings` function only.
- *
- * @param directive A directive instance the styling is associated with.
- * @param attrs An array of static values (attributes, classes and styles) with the correct marker
- * values.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -13151,7 +13304,6 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  */
 export declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: ɵDirectiveDef<T>) => void;
 
-
 /**
  * Bindings for pure functions are stored after regular bindings.
  *
@@ -13977,7 +14129,7 @@ export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplat
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bg): TemplateRef<unknown> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bm): TemplateRef<unknown> | null;
 
 /**
  * Create static text node
