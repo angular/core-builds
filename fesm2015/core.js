@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+585.sha-9c5510b
+ * @license Angular v9.0.0-rc.1+586.sha-25eaff4
  * (c) 2010-2019 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18300,18 +18300,6 @@ const ɵ0$8 = /**
  */
 const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (ɵ0$8));
 /**
- * Type representing injectable service.
- *
- * \@publicApi
- * @record
- * @template T
- */
-function InjectableType() { }
-if (false) {
-    /** @type {?} */
-    InjectableType.prototype.ɵprov;
-}
-/**
  * Supports \@Injectable() in JIT mode for Render2.
  * @param {?} injectableType
  * @param {?=} options
@@ -28548,7 +28536,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+585.sha-9c5510b');
+const VERSION = new Version('9.0.0-rc.1+586.sha-25eaff4');
 
 /**
  * @fileoverview added by tsickle
