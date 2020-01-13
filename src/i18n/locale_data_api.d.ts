@@ -14,6 +14,17 @@ export declare function registerLocaleData(data: any, localeId?: string | any, e
  */
 export declare function findLocaleData(locale: string): any;
 /**
+ * Retrieves the default currency code for the given locale.
+ *
+ * The default is defined as the first currency which is still in use.
+ *
+ * @param locale The code of the locale whose currency code we want.
+ * @returns The code of the default currency for the given locale.
+ *
+ * @publicApi
+ */
+export declare function getLocaleCurrencyCode(locale: string): string | null;
+/**
  * Retrieves the plural function used by ICU expressions to determine the plural case to use
  * for a given locale.
  * @param locale A locale code for the locale format rules to use.
@@ -50,12 +61,13 @@ export declare enum LocaleDataIndex {
     DateTimeFormat = 12,
     NumberSymbols = 13,
     NumberFormats = 14,
-    CurrencySymbol = 15,
-    CurrencyName = 16,
-    Currencies = 17,
-    Directionality = 18,
-    PluralCase = 19,
-    ExtraData = 20
+    CurrencyCode = 15,
+    CurrencySymbol = 16,
+    CurrencyName = 17,
+    Currencies = 18,
+    Directionality = 19,
+    PluralCase = 20,
+    ExtraData = 21
 }
 /**
  * Index of each type of locale data from the extra locale data array
