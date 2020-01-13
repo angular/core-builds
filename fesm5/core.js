@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+88.sha-ff02ddf
+ * @license Angular v9.0.0-rc.8+89.sha-f1cdb8f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19734,7 +19734,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.8+88.sha-ff02ddf');
+var VERSION = new Version('9.0.0-rc.8+89.sha-f1cdb8f');
 
 /**
  * @license
@@ -29139,9 +29139,16 @@ function isPrimitiveValue(value) {
         value === null;
 }
 function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
-    var context = loadLContext(parentElement.nativeNode);
-    var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
-    _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
+    var context = loadLContext(parentElement.nativeNode, false);
+    if (context !== null) {
+        var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
+        _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
+    }
+    else {
+        // If the context is null, then `parentElement` was either created with Renderer2 or native DOM
+        // APIs.
+        _queryNativeNodeDescendants(parentElement.nativeNode, predicate, matches, elementsOnly);
+    }
 }
 /**
  * Recursively match the current TNode against the predicate, and goes on with the next ones.
