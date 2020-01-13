@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+641.sha-ebcd59a
+ * @license Angular v9.0.0-rc.1+642.sha-8de3c20
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8916,15 +8916,15 @@
         if ((flags & 256 /* Destroyed */) === 256 /* Destroyed */)
             return;
         enterView(lView, lView[T_HOST]);
+        var checkNoChangesMode = getCheckNoChangesMode();
         try {
             resetPreOrderHookFlags(lView);
             setBindingIndex(tView.bindingStartIndex);
             if (templateFn !== null) {
                 executeTemplate(lView, templateFn, 2 /* Update */, context);
             }
-            var checkNoChangesMode = getCheckNoChangesMode();
             var hooksInitPhaseCompleted = (flags & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
-            // execute pre-order hooks (OnInit, OnChanges, DoChanges)
+            // execute pre-order hooks (OnInit, OnChanges, DoCheck)
             // PERF WARNING: do NOT extract this to a separate function without running benchmarks
             if (!checkNoChangesMode) {
                 if (hooksInitPhaseCompleted) {
@@ -8998,7 +8998,15 @@
             if (tView.firstUpdatePass === true) {
                 tView.firstUpdatePass = false;
             }
-            lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
+            // Do not reset the dirty state when running in check no changes mode. We don't want components
+            // to behave differently depending on whether check no changes is enabled or not. For example:
+            // Marking an OnPush component as dirty from within the `ngAfterViewInit` hook in order to
+            // refresh a `NgClass` binding should work. If we would reset the dirty state in the check
+            // no changes cycle, the component would be not be dirty for the next update pass. This would
+            // be different in production mode where the component dirty state is not reset.
+            if (!checkNoChangesMode) {
+                lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
+            }
             leaveViewProcessExit();
         }
     }
@@ -19848,7 +19856,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+641.sha-ebcd59a');
+    var VERSION = new Version('9.0.0-rc.1+642.sha-8de3c20');
 
     /**
      * @license
