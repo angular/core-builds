@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+91.sha-7305b02
+ * @license Angular v9.0.0-rc.8+112.sha-b1d213b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -516,12 +516,20 @@ declare class InjectionToken<T> {
 }
 
 /**
- * Concrete injectors implement this interface.
+ * Concrete injectors implement this interface. Injectors are configured
+ * with [providers](guide/glossary#provider) that associate
+ * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see `StaticProvider`
  *
  * @usageNotes
- * ### Example
+ *
+ *  The following example creates a service injector instance.
+ *
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * ### Usage example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
@@ -549,6 +557,18 @@ declare abstract class Injector {
      * @deprecated from v5 use the new signature Injector.create(options)
      */
     static create(providers: StaticProvider[], parent?: Injector): Injector;
+    /**
+     * Creates a new injector instance that provides one or more dependencies,
+     * according to a given type or types of `StaticProvider`.
+     *
+     * @param options An object with the following properties:
+     * * `providers`: An array of providers of the [StaticProvider type](api/core/StaticProvider).
+     * * `parent`: (optional) A parent injector.
+     * * `name`: (optional) A developer-defined identifying name for the new injector.
+     *
+     * @returns The new injector instance.
+     *
+     */
     static create(options: {
         providers: StaticProvider[];
         parent?: Injector;
@@ -771,8 +791,11 @@ declare interface StaticClassSansProvider {
 }
 
 /**
- * Describes how the `Injector` should be configured as static (that is, without reflection).
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * Describes how an `Injector` should be configured as static (that is, without reflection).
+ * A static provider provides tokens to an injector for various types of dependencies.
+ *
+ * @see [Injector.create()](/api/core/Injector#create).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
  */

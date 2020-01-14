@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+91.sha-7305b02
+ * @license Angular v9.0.0-rc.8+112.sha-b1d213b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6084,6 +6084,79 @@
             return true;
         }
         return false;
+    }
+    function maybeWrapInNotSelector(isNegativeMode, chunk) {
+        return isNegativeMode ? ':not(' + chunk.trim() + ')' : chunk;
+    }
+    function stringifyCSSSelector(selector) {
+        var result = selector[0];
+        var i = 1;
+        var mode = 2 /* ATTRIBUTE */;
+        var currentChunk = '';
+        var isNegativeMode = false;
+        while (i < selector.length) {
+            var valueOrMarker = selector[i];
+            if (typeof valueOrMarker === 'string') {
+                if (mode & 2 /* ATTRIBUTE */) {
+                    var attrValue = selector[++i];
+                    currentChunk +=
+                        '[' + valueOrMarker + (attrValue.length > 0 ? '="' + attrValue + '"' : '') + ']';
+                }
+                else if (mode & 8 /* CLASS */) {
+                    currentChunk += '.' + valueOrMarker;
+                }
+                else if (mode & 4 /* ELEMENT */) {
+                    currentChunk += ' ' + valueOrMarker;
+                }
+            }
+            else {
+                //
+                // Append current chunk to the final result in case we come across SelectorFlag, which
+                // indicates that the previous section of a selector is over. We need to accumulate content
+                // between flags to make sure we wrap the chunk later in :not() selector if needed, e.g.
+                // ```
+                //  ['', Flags.CLASS, '.classA', Flags.CLASS | Flags.NOT, '.classB', '.classC']
+                // ```
+                // should be transformed to `.classA :not(.classB .classC)`.
+                //
+                // Note: for negative selector part, we accumulate content between flags until we find the
+                // next negative flag. This is needed to support a case where `:not()` rule contains more than
+                // one chunk, e.g. the following selector:
+                // ```
+                //  ['', Flags.ELEMENT | Flags.NOT, 'p', Flags.CLASS, 'foo', Flags.CLASS | Flags.NOT, 'bar']
+                // ```
+                // should be stringified to `:not(p.foo) :not(.bar)`
+                //
+                if (currentChunk !== '' && !isPositive(valueOrMarker)) {
+                    result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+                    currentChunk = '';
+                }
+                mode = valueOrMarker;
+                // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+                // mode is maintained for remaining chunks of a selector.
+                isNegativeMode = isNegativeMode || !isPositive(mode);
+            }
+            i++;
+        }
+        if (currentChunk !== '') {
+            result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+        }
+        return result;
+    }
+    /**
+     * Generates string representation of CSS selector in parsed form.
+     *
+     * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
+     * additional parsing at runtime (for example, for directive matching). However in some cases (for
+     * example, while bootstrapping a component), a string version of the selector is required to query
+     * for the host element on the page. This function takes the parsed form of a selector and returns
+     * its string representation.
+     *
+     * @param selectorList selector in parsed form
+     * @returns string representation of a given selector
+     */
+    function stringifyCSSSelectorList(selectorList) {
+        return selectorList.map(stringifyCSSSelector).join(',');
     }
 
     // these values will get filled in the very first time this is accessed...
@@ -12926,12 +12999,20 @@
     }
     var INJECTOR_IMPL = INJECTOR_IMPL__PRE_R3__;
     /**
-     * Concrete injectors implement this interface.
+     * Concrete injectors implement this interface. Injectors are configured
+     * with [providers](guide/glossary#provider) that associate
+     * dependencies of various types with [injection tokens](guide/glossary#di-token).
      *
-     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     * @see ["DI Providers"](guide/dependency-injection-providers).
+     * @see `StaticProvider`
      *
      * @usageNotes
-     * ### Example
+     *
+     *  The following example creates a service injector instance.
+     *
+     * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     *
+     * ### Usage example
      *
      * {@example core/di/ts/injector_spec.ts region='Injector'}
      *
@@ -12944,14 +13025,6 @@
     var Injector = /** @class */ (function () {
         function Injector() {
         }
-        /**
-         * Create a new Injector which is configure using `StaticProvider`s.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-         */
         Injector.create = function (options, parent) {
             if (Array.isArray(options)) {
                 return INJECTOR_IMPL(options, parent, '');
@@ -19887,7 +19960,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.8+91.sha-7305b02');
+    var VERSION = new Version('9.0.0-rc.8+112.sha-b1d213b');
 
     /**
      * @license
@@ -22858,8 +22931,7 @@
             _this.componentDef = componentDef;
             _this.ngModule = ngModule;
             _this.componentType = componentDef.type;
-            // default to 'div' in case this component has an attribute selector
-            _this.selector = componentDef.selectors[0][0] || 'div';
+            _this.selector = stringifyCSSSelectorList(componentDef.selectors);
             _this.ngContentSelectors =
                 componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
             _this.isBoundToModule = !!ngModule;
@@ -22886,7 +22958,10 @@
             var sanitizer = rootViewInjector.get(Sanitizer, null);
             var hostRNode = rootSelectorOrNode ?
                 locateHostElement(rendererFactory, rootSelectorOrNode, this.componentDef.encapsulation) :
-                elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
+                // Determine a tag name used for creating host elements when this component is created
+                // dynamically. Default to 'div' if this component did not specify any tag name in its
+                // selector.
+                elementCreate(this.componentDef.selectors[0][0] || 'div', rendererFactory.createRenderer(null, this.componentDef), null);
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
             // Check whether this Component needs to be isolated from other components, i.e. whether it
@@ -23037,7 +23112,9 @@
         return 5;
     }
     var localeEn = [
-        'en', [['a', 'p'], ['AM', 'PM'], u], [['AM', 'PM'], u, u],
+        'en',
+        [['a', 'p'], ['AM', 'PM'], u],
+        [['AM', 'PM'], u, u],
         [
             ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
             ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -23052,11 +23129,20 @@
                 'October', 'November', 'December'
             ]
         ],
-        u, [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']], 0, [6, 0],
+        u,
+        [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']],
+        0,
+        [6, 0],
         ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
-        ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'], ['{1}, {0}', u, '{1} \'at\' {0}', u],
+        ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'],
+        ['{1}, {0}', u, '{1} \'at\' {0}', u],
         ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
-        ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'], '$', 'US Dollar', {}, plural
+        ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'],
+        'USD',
+        '$',
+        'US Dollar',
+        {},
+        plural
     ];
 
     /**
@@ -23112,6 +23198,20 @@
         throw new Error("Missing locale data for the locale \"" + locale + "\".");
     }
     /**
+     * Retrieves the default currency code for the given locale.
+     *
+     * The default is defined as the first currency which is still in use.
+     *
+     * @param locale The code of the locale whose currency code we want.
+     * @returns The code of the default currency for the given locale.
+     *
+     * @publicApi
+     */
+    function getLocaleCurrencyCode(locale) {
+        var data = findLocaleData(locale);
+        return data[exports.ɵLocaleDataIndex.CurrencyCode] || null;
+    }
+    /**
      * Retrieves the plural function used by ICU expressions to determine the plural case to use
      * for a given locale.
      * @param locale A locale code for the locale format rules to use.
@@ -23156,11 +23256,12 @@
         LocaleDataIndex[LocaleDataIndex["DateTimeFormat"] = 12] = "DateTimeFormat";
         LocaleDataIndex[LocaleDataIndex["NumberSymbols"] = 13] = "NumberSymbols";
         LocaleDataIndex[LocaleDataIndex["NumberFormats"] = 14] = "NumberFormats";
-        LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 15] = "CurrencySymbol";
-        LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 16] = "CurrencyName";
-        LocaleDataIndex[LocaleDataIndex["Currencies"] = 17] = "Currencies";
-        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 18] = "PluralCase";
-        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 19] = "ExtraData";
+        LocaleDataIndex[LocaleDataIndex["CurrencyCode"] = 15] = "CurrencyCode";
+        LocaleDataIndex[LocaleDataIndex["CurrencySymbol"] = 16] = "CurrencySymbol";
+        LocaleDataIndex[LocaleDataIndex["CurrencyName"] = 17] = "CurrencyName";
+        LocaleDataIndex[LocaleDataIndex["Currencies"] = 18] = "Currencies";
+        LocaleDataIndex[LocaleDataIndex["PluralCase"] = 19] = "PluralCase";
+        LocaleDataIndex[LocaleDataIndex["ExtraData"] = 20] = "ExtraData";
     })(exports.ɵLocaleDataIndex || (exports.ɵLocaleDataIndex = {}));
     /**
      * Returns the canonical form of a locale name - lowercase with `_` replaced with `-`.
@@ -23200,6 +23301,11 @@
      * The locale id that the application is using by default (for translations and ICU expressions).
      */
     var DEFAULT_LOCALE_ID = 'en-US';
+    /**
+     * USD currency code that the application uses by default for CurrencyPipe when no
+     * DEFAULT_CURRENCY_CODE is provided.
+     */
+    var USD_CURRENCY_CODE = 'USD';
 
     var MARKER = "\uFFFD";
     var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
@@ -27128,6 +27234,45 @@
      */
     var LOCALE_ID$1 = new InjectionToken('LocaleId');
     /**
+     * Provide this token to set the default currency code your application uses for
+     * CurrencyPipe when there is no currency code passed into it. This is only used by
+     * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
+     *
+     * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+     *
+     * <div class="alert is-helpful">
+     *
+     * **Deprecation notice:**
+     *
+     * The default currency code is currently always `USD` but this is deprecated from v9.
+     *
+     * **In v10 the default currency code will be taken from the current locale.**
+     *
+     * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
+     * your application `NgModule`:
+     *
+     * ```ts
+     * {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'}
+     * ```
+     *
+     * </div>
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```typescript
+     * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+     * import { AppModule } from './app/app.module';
+     *
+     * platformBrowserDynamic().bootstrapModule(AppModule, {
+     *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
+     * });
+     * ```
+     *
+     * @publicApi
+     */
+    var DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode');
+    /**
      * Use this token at bootstrap to provide the content of your translation file (`xtb`,
      * `xlf` or `xlf2`) when you want to translate your application in another language.
      *
@@ -29584,6 +29729,7 @@
                 DEFAULT_LOCALE_ID;
         }
     }
+    var ɵ0$g = USD_CURRENCY_CODE;
     /**
      * A built-in [dependency injection token](guide/glossary#di-token)
      * that is used to configure the root injector for bootstrapping.
@@ -29609,6 +29755,7 @@
             useFactory: _localeFactory,
             deps: [[new Inject(LOCALE_ID$1), new Optional(), new SkipSelf()]]
         },
+        { provide: DEFAULT_CURRENCY_CODE, useValue: ɵ0$g },
     ];
     /**
      * Schedule work at next available slot.
@@ -32031,6 +32178,7 @@
     exports.ComponentRef = ComponentRef;
     exports.ContentChild = ContentChild;
     exports.ContentChildren = ContentChildren;
+    exports.DEFAULT_CURRENCY_CODE = DEFAULT_CURRENCY_CODE;
     exports.DebugElement = DebugElement;
     exports.DebugEventListener = DebugEventListener;
     exports.DebugNode = DebugNode;
@@ -32159,19 +32307,20 @@
     exports.ɵand = anchorDef;
     exports.ɵangular_packages_core_core_a = isForwardRef;
     exports.ɵangular_packages_core_core_b = injectInjectorOnly;
-    exports.ɵangular_packages_core_core_ba = getBindingRoot;
-    exports.ɵangular_packages_core_core_bb = nextContextImpl;
-    exports.ɵangular_packages_core_core_bd = pureFunction1Internal;
-    exports.ɵangular_packages_core_core_be = pureFunction2Internal;
-    exports.ɵangular_packages_core_core_bf = pureFunction3Internal;
-    exports.ɵangular_packages_core_core_bg = pureFunction4Internal;
-    exports.ɵangular_packages_core_core_bh = pureFunctionVInternal;
-    exports.ɵangular_packages_core_core_bi = getUrlSanitizer;
-    exports.ɵangular_packages_core_core_bj = makeParamDecorator;
-    exports.ɵangular_packages_core_core_bk = makePropDecorator;
-    exports.ɵangular_packages_core_core_bl = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_bn = noSideEffects;
-    exports.ɵangular_packages_core_core_bo = getRootContext;
+    exports.ɵangular_packages_core_core_ba = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bb = getBindingRoot;
+    exports.ɵangular_packages_core_core_bc = nextContextImpl;
+    exports.ɵangular_packages_core_core_be = pureFunction1Internal;
+    exports.ɵangular_packages_core_core_bf = pureFunction2Internal;
+    exports.ɵangular_packages_core_core_bg = pureFunction3Internal;
+    exports.ɵangular_packages_core_core_bh = pureFunction4Internal;
+    exports.ɵangular_packages_core_core_bi = pureFunctionVInternal;
+    exports.ɵangular_packages_core_core_bj = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bk = makeParamDecorator;
+    exports.ɵangular_packages_core_core_bl = makePropDecorator;
+    exports.ɵangular_packages_core_core_bm = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bo = noSideEffects;
+    exports.ɵangular_packages_core_core_bp = getRootContext;
     exports.ɵangular_packages_core_core_c = NullInjector;
     exports.ɵangular_packages_core_core_d = ReflectiveInjector_;
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
@@ -32189,13 +32338,13 @@
     exports.ɵangular_packages_core_core_q = _localeFactory;
     exports.ɵangular_packages_core_core_r = APPLICATION_MODULE_PROVIDERS;
     exports.ɵangular_packages_core_core_s = zoneSchedulerFactory;
-    exports.ɵangular_packages_core_core_t = _def;
-    exports.ɵangular_packages_core_core_u = DebugContext;
-    exports.ɵangular_packages_core_core_v = SCHEDULER;
-    exports.ɵangular_packages_core_core_w = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_x = instructionState;
-    exports.ɵangular_packages_core_core_y = getLView;
-    exports.ɵangular_packages_core_core_z = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_t = USD_CURRENCY_CODE;
+    exports.ɵangular_packages_core_core_u = _def;
+    exports.ɵangular_packages_core_core_v = DebugContext;
+    exports.ɵangular_packages_core_core_w = SCHEDULER;
+    exports.ɵangular_packages_core_core_x = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_y = instructionState;
+    exports.ɵangular_packages_core_core_z = getLView;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
