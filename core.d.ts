@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+658.sha-2776810
+ * @license Angular v9.0.0-rc.1+659.sha-280aae6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2956,13 +2956,13 @@ export declare const inject: typeof ɵɵinject;
 export declare interface Injectable {
     /**
      * Determines which injectors will provide the injectable,
-     * by either associating it with an @NgModule or other `InjectorType`,
-     * or by specifying that this injectable should be provided in the:
-     * - 'root' injector, which will be the application-level injector in most apps.
-     * - 'platform' injector, which would be the special singleton platform injector shared by all
+     * by either associating it with an `@NgModule` or other `InjectorType`,
+     * or by specifying that this injectable should be provided in one of the following injectors:
+     * - 'root' : The application-level injector in most apps.
+     * - 'platform' : A special singleton platform injector shared by all
      * applications on the page.
-     * - 'any' injector, which would be the injector which receives the resolution. (Note this only
-     * works on NgModule Injectors and not on Element Injector)
+     * - 'any' : The NgModule injector that receives the resolution.
+     *
      */
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
 }
@@ -3152,12 +3152,20 @@ export declare class InjectionToken<T> {
 export declare const INJECTOR: InjectionToken<Injector>;
 
 /**
- * Concrete injectors implement this interface.
+ * Concrete injectors implement this interface. Injectors are configured
+ * with [providers](guide/glossary#provider) that associate
+ * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see `StaticProvider`
  *
  * @usageNotes
- * ### Example
+ *
+ *  The following example creates a service injector instance.
+ *
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * ### Usage example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
@@ -3185,6 +3193,18 @@ export declare abstract class Injector {
      * @deprecated from v5 use the new signature Injector.create(options)
      */
     static create(providers: StaticProvider[], parent?: Injector): Injector;
+    /**
+     * Creates a new injector instance that provides one or more dependencies,
+     * according to a given type or types of `StaticProvider`.
+     *
+     * @param options An object with the following properties:
+     * * `providers`: An array of providers of the [StaticProvider type](api/core/StaticProvider).
+     * * `parent`: (optional) A parent injector.
+     * * `name`: (optional) A developer-defined identifying name for the new injector.
+     *
+     * @returns The new injector instance.
+     *
+     */
     static create(options: {
         providers: StaticProvider[];
         parent?: Injector;
@@ -6293,8 +6313,11 @@ export declare interface StaticClassSansProvider {
 }
 
 /**
- * Describes how the `Injector` should be configured as static (that is, without reflection).
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * Describes how an `Injector` should be configured as static (that is, without reflection).
+ * A static provider provides tokens to an injector for various types of dependencies.
+ *
+ * @see [Injector.create()](/api/core/Injector#create).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
  */
