@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+658.sha-2776810
+ * @license Angular v9.0.0-rc.1+659.sha-280aae6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12975,12 +12975,20 @@
     }
     var INJECTOR_IMPL = INJECTOR_IMPL__POST_R3__;
     /**
-     * Concrete injectors implement this interface.
+     * Concrete injectors implement this interface. Injectors are configured
+     * with [providers](guide/glossary#provider) that associate
+     * dependencies of various types with [injection tokens](guide/glossary#di-token).
      *
-     * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+     * @see ["DI Providers"](guide/dependency-injection-providers).
+     * @see `StaticProvider`
      *
      * @usageNotes
-     * ### Example
+     *
+     *  The following example creates a service injector instance.
+     *
+     * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     *
+     * ### Usage example
      *
      * {@example core/di/ts/injector_spec.ts region='Injector'}
      *
@@ -12993,14 +13001,6 @@
     var Injector = /** @class */ (function () {
         function Injector() {
         }
-        /**
-         * Create a new Injector which is configure using `StaticProvider`s.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-         */
         Injector.create = function (options, parent) {
             if (Array.isArray(options)) {
                 return INJECTOR_IMPL(options, parent, '');
@@ -19929,7 +19929,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+658.sha-2776810');
+    var VERSION = new Version('9.0.0-rc.1+659.sha-280aae6');
 
     /**
      * @license
