@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+112.sha-b1d213b
+ * @license Angular v9.0.0-rc.8+115.sha-e100bbc
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -225,7 +225,15 @@ export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: Component
 export declare const APP_ID: InjectionToken<string>;
 
 /**
- * A function that will be executed when an application is initialized.
+ * An injection token that allows you to provide one or more initialization functions.
+ * These function are injected at application startup and executed during
+ * app initialization. If any of these functions returns a Promise, initialization
+ * does not complete until the Promise is resolved.
+ *
+ * You can, for example, create a factory function that loads language data
+ * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
+ * That way, the function is executed during the application bootstrap process,
+ * and the needed data is available on startup.
  *
  * @publicApi
  */
