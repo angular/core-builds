@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+668.sha-ec147bd
+ * @license Angular v9.0.0-rc.1+670.sha-84c659e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19960,7 +19960,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+668.sha-ec147bd');
+    var VERSION = new Version('9.0.0-rc.1+670.sha-84c659e');
 
     /**
      * @license
@@ -27068,7 +27068,15 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * A function that will be executed when an application is initialized.
+     * An injection token that allows you to provide one or more initialization functions.
+     * These function are injected at application startup and executed during
+     * app initialization. If any of these functions returns a Promise, initialization
+     * does not complete until the Promise is resolved.
+     *
+     * You can, for example, create a factory function that loads language data
+     * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
+     * That way, the function is executed during the application bootstrap process,
+     * and the needed data is available on startup.
      *
      * @publicApi
      */
