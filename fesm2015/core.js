@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+657.sha-1a45387
+ * @license Angular v9.0.0-rc.1+658.sha-2776810
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9525,6 +9525,95 @@ function isSelectorInSelectorList(selector, list) {
         return true;
     }
     return false;
+}
+/**
+ * @param {?} isNegativeMode
+ * @param {?} chunk
+ * @return {?}
+ */
+function maybeWrapInNotSelector(isNegativeMode, chunk) {
+    return isNegativeMode ? ':not(' + chunk.trim() + ')' : chunk;
+}
+/**
+ * @param {?} selector
+ * @return {?}
+ */
+function stringifyCSSSelector(selector) {
+    /** @type {?} */
+    let result = (/** @type {?} */ (selector[0]));
+    /** @type {?} */
+    let i = 1;
+    /** @type {?} */
+    let mode = 2 /* ATTRIBUTE */;
+    /** @type {?} */
+    let currentChunk = '';
+    /** @type {?} */
+    let isNegativeMode = false;
+    while (i < selector.length) {
+        /** @type {?} */
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode & 2 /* ATTRIBUTE */) {
+                /** @type {?} */
+                const attrValue = (/** @type {?} */ (selector[++i]));
+                currentChunk +=
+                    '[' + valueOrMarker + (attrValue.length > 0 ? '="' + attrValue + '"' : '') + ']';
+            }
+            else if (mode & 8 /* CLASS */) {
+                currentChunk += '.' + valueOrMarker;
+            }
+            else if (mode & 4 /* ELEMENT */) {
+                currentChunk += ' ' + valueOrMarker;
+            }
+        }
+        else {
+            //
+            // Append current chunk to the final result in case we come across SelectorFlag, which
+            // indicates that the previous section of a selector is over. We need to accumulate content
+            // between flags to make sure we wrap the chunk later in :not() selector if needed, e.g.
+            // ```
+            //  ['', Flags.CLASS, '.classA', Flags.CLASS | Flags.NOT, '.classB', '.classC']
+            // ```
+            // should be transformed to `.classA :not(.classB .classC)`.
+            //
+            // Note: for negative selector part, we accumulate content between flags until we find the
+            // next negative flag. This is needed to support a case where `:not()` rule contains more than
+            // one chunk, e.g. the following selector:
+            // ```
+            //  ['', Flags.ELEMENT | Flags.NOT, 'p', Flags.CLASS, 'foo', Flags.CLASS | Flags.NOT, 'bar']
+            // ```
+            // should be stringified to `:not(p.foo) :not(.bar)`
+            //
+            if (currentChunk !== '' && !isPositive(valueOrMarker)) {
+                result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+                currentChunk = '';
+            }
+            mode = valueOrMarker;
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector.
+            isNegativeMode = isNegativeMode || !isPositive(mode);
+        }
+        i++;
+    }
+    if (currentChunk !== '') {
+        result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+    }
+    return result;
+}
+/**
+ * Generates string representation of CSS selector in parsed form.
+ *
+ * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
+ * additional parsing at runtime (for example, for directive matching). However in some cases (for
+ * example, while bootstrapping a component), a string version of the selector is required to query
+ * for the host element on the page. This function takes the parsed form of a selector and returns
+ * its string representation.
+ *
+ * @param {?} selectorList selector in parsed form
+ * @return {?} string representation of a given selector
+ */
+function stringifyCSSSelectorList(selectorList) {
+    return selectorList.map(stringifyCSSSelector).join(',');
 }
 
 /**
@@ -28527,7 +28616,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+657.sha-1a45387');
+const VERSION = new Version('9.0.0-rc.1+658.sha-2776810');
 
 /**
  * @fileoverview added by tsickle
@@ -34274,8 +34363,7 @@ class ComponentFactory$1 extends ComponentFactory {
         this.componentDef = componentDef;
         this.ngModule = ngModule;
         this.componentType = componentDef.type;
-        // default to 'div' in case this component has an attribute selector
-        this.selector = (/** @type {?} */ (componentDef.selectors[0][0])) || 'div';
+        this.selector = stringifyCSSSelectorList(componentDef.selectors);
         this.ngContentSelectors =
             componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
         this.isBoundToModule = !!ngModule;
@@ -34310,7 +34398,10 @@ class ComponentFactory$1 extends ComponentFactory {
         /** @type {?} */
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(rendererFactory, rootSelectorOrNode, this.componentDef.encapsulation) :
-            elementCreate(this.selector, rendererFactory.createRenderer(null, this.componentDef), null);
+            // Determine a tag name used for creating host elements when this component is created
+            // dynamically. Default to 'div' if this component did not specify any tag name in its
+            // selector.
+            elementCreate((/** @type {?} */ (this.componentDef.selectors[0][0])) || 'div', rendererFactory.createRenderer(null, this.componentDef), null);
         /** @type {?} */
         const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;

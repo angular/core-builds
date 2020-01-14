@@ -26,3 +26,16 @@ export declare function getProjectAsAttrValue(tNode: TNode): CssSelector | null;
  * @param list List in which to look for the selector.
  */
 export declare function isSelectorInSelectorList(selector: CssSelector, list: CssSelectorList): boolean;
+/**
+ * Generates string representation of CSS selector in parsed form.
+ *
+ * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
+ * additional parsing at runtime (for example, for directive matching). However in some cases (for
+ * example, while bootstrapping a component), a string version of the selector is required to query
+ * for the host element on the page. This function takes the parsed form of a selector and returns
+ * its string representation.
+ *
+ * @param selectorList selector in parsed form
+ * @returns string representation of a given selector
+ */
+export declare function stringifyCSSSelectorList(selectorList: CssSelectorList): string;
