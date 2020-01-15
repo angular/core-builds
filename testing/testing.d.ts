@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+119.sha-fa39a8c
+ * @license Angular v9.0.0-rc.8+132.sha-76a84bf
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -712,8 +712,8 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
         deps?: any[];
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
-    private readonly compiler;
-    private readonly testModuleRef;
+    private get compiler();
+    private get testModuleRef();
     private assertNotInstantiated;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
@@ -750,7 +750,7 @@ export declare class ɵMetadataOverrider {
  * @publicApi
  */
 export declare class ɵTestingCompiler extends Compiler {
-    readonly injector: Injector;
+    get injector(): Injector;
     overrideModule(module: Type<any>, overrides: MetadataOverride<NgModule>): void;
     overrideDirective(directive: Type<any>, overrides: MetadataOverride<Directive>): void;
     overrideComponent(component: Type<any>, overrides: MetadataOverride<Component>): void;

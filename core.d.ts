@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.8+119.sha-fa39a8c
+ * @license Angular v9.0.0-rc.8+132.sha-76a84bf
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -430,7 +430,7 @@ export declare class ApplicationRef {
     /**
      * Returns the number of attached views.
      */
-    readonly viewCount: number;
+    get viewCount(): number;
 }
 
 /**
@@ -1085,26 +1085,26 @@ declare abstract class ComponentFactory<C> {
     /**
      * The component's HTML selector.
      */
-    abstract readonly selector: string;
+    abstract get selector(): string;
     /**
      * The type of component the factory will create.
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Selector for all <ng-content> elements in the component.
      */
-    abstract readonly ngContentSelectors: string[];
+    abstract get ngContentSelectors(): string[];
     /**
      * The inputs of the component.
      */
-    abstract readonly inputs: {
+    abstract get inputs(): {
         propName: string;
         templateName: string;
     }[];
     /**
      * The outputs of the component.
      */
-    abstract readonly outputs: {
+    abstract get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -1147,28 +1147,28 @@ export declare abstract class ComponentRef<C> {
     /**
      * The host or anchor [element](guide/glossary#element) for this component instance.
      */
-    abstract readonly location: ElementRef;
+    abstract get location(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this component instance.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
      * This component instance.
      */
-    abstract readonly instance: C;
+    abstract get instance(): C;
     /**
      * The [host view](guide/glossary#view-tree) defined by the template
      * for this component instance.
      */
-    abstract readonly hostView: ViewRef;
+    abstract get hostView(): ViewRef;
     /**
      * The change detector for this component instance.
      */
-    abstract readonly changeDetectorRef: ChangeDetectorRef;
+    abstract get changeDetectorRef(): ChangeDetectorRef;
     /**
      * The type of this component (as created by a `ComponentFactory` class).
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -1509,8 +1509,8 @@ export declare const DebugElement: {
 
 declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements DebugElement {
     constructor(nativeNode: Element);
-    readonly nativeElement: Element | null;
-    readonly name: string;
+    get nativeElement(): Element | null;
+    get name(): string;
     /**
      *  Gets a map of property names to property values for an element.
      *
@@ -1523,20 +1523,20 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
      *  - input property bindings (e.g. `[myCustomInput]="value"`)
      *  - attribute bindings (e.g. `[attr.role]="menu"`)
      */
-    readonly properties: {
+    get properties(): {
         [key: string]: any;
     };
-    readonly attributes: {
+    get attributes(): {
         [key: string]: string | null;
     };
-    readonly styles: {
+    get styles(): {
         [key: string]: string | null;
     };
-    readonly classes: {
+    get classes(): {
         [key: string]: boolean;
     };
-    readonly childNodes: DebugNode[];
-    readonly children: DebugElement[];
+    get childNodes(): DebugNode[];
+    get children(): DebugElement[];
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
@@ -1578,15 +1578,15 @@ export declare const DebugNode: {
 declare class DebugNode__POST_R3__ implements DebugNode {
     readonly nativeNode: Node;
     constructor(nativeNode: Node);
-    readonly parent: DebugElement | null;
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly listeners: DebugEventListener[];
-    readonly references: {
+    get parent(): DebugElement | null;
+    get injector(): Injector;
+    get componentInstance(): any;
+    get context(): any;
+    get listeners(): DebugEventListener[];
+    get references(): {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
 
 declare const DECLARATION_COMPONENT_VIEW = 16;
@@ -1667,7 +1667,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     diff(collection: NgIterable<V> | null | undefined): DefaultIterableDiffer<V> | null;
     onDestroy(): void;
     check(collection: NgIterable<V>): boolean;
-    readonly isDirty: boolean;
+    get isDirty(): boolean;
     private _addToRemovals;
 }
 
@@ -2207,11 +2207,11 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract readonly context: C;
+    abstract get context(): C;
     /**
      * The root nodes for this embedded view.
      */
-    abstract readonly rootNodes: any[];
+    abstract get rootNodes(): any[];
 }
 
 /**
@@ -4277,7 +4277,7 @@ declare interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDe
  * @publicApi
  */
 export declare abstract class NgModuleFactory<T> {
-    abstract readonly moduleType: Type<T>;
+    abstract get moduleType(): Type<T>;
     abstract create(parentInjector: Injector | null): NgModuleRef<T>;
 }
 
@@ -4312,16 +4312,16 @@ export declare abstract class NgModuleRef<T> {
     /**
      * The injector that contains all of the providers of the NgModule.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
      * declared in the `entryComponents` property of the module.
      */
-    abstract readonly componentFactoryResolver: ComponentFactoryResolver;
+    abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
      * The NgModule instance.
      */
-    abstract readonly instance: T;
+    abstract get instance(): T;
     /**
      * Destroys the module instance and all of the data structures associated with it.
      */
@@ -4989,12 +4989,12 @@ export declare class PlatformRef {
      * Retrieve the platform {@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
      */
-    readonly injector: Injector;
+    get injector(): Injector;
     /**
      * Destroy the Angular platform and all Angular applications on the page.
      */
     destroy(): void;
-    readonly destroyed: boolean;
+    get destroyed(): boolean;
 }
 
 declare interface PlatformReflectionCapabilities {
@@ -5316,7 +5316,7 @@ declare class R3Injector {
     /**
      * Flag indicating that this injector was previously destroyed.
      */
-    readonly destroyed: boolean;
+    get destroyed(): boolean;
     private _destroyed;
     constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector, source?: string | null);
     /**
@@ -5487,7 +5487,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
      * -->
      */
-    abstract readonly parent: Injector | null;
+    abstract get parent(): Injector | null;
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -5629,7 +5629,7 @@ export declare class ReflectiveKey {
     /**
      * @returns the number of keys registered in the system.
      */
-    static readonly numberOfKeys: number;
+    static get numberOfKeys(): number;
 }
 
 /**
@@ -5672,7 +5672,7 @@ export declare abstract class Renderer2 {
      * as an object containing key-value pairs.
      * This is useful for renderers that delegate to other renderers.
      */
-    abstract readonly data: {
+    abstract get data(): {
         [key: string]: any;
     };
     /**
@@ -6540,7 +6540,7 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    abstract readonly elementRef: ElementRef;
+    abstract get elementRef(): ElementRef;
     /**
      * Instantiates an embedded view based on this template,
      * and attaches it to the view container.
@@ -8260,13 +8260,13 @@ export declare abstract class ViewContainerRef {
      *
      * <!-- TODO: rename to anchorElement -->
      */
-    abstract readonly element: ElementRef;
+    abstract get element(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this view container.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /** @deprecated No replacement */
-    abstract readonly parentInjector: Injector;
+    abstract get parentInjector(): Injector;
     /**
      * Destroys all views in this container.
      */
@@ -8281,7 +8281,7 @@ export declare abstract class ViewContainerRef {
      * Reports how many views are currently attached to this container.
      * @returns The number of views.
      */
-    abstract readonly length: number;
+    abstract get length(): number;
     /**
      * Instantiates an embedded view and inserts it
      * into this container.
@@ -8446,7 +8446,7 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * Reports whether this view has been destroyed.
      * @returns True after the `destroy()` method has been called, false otherwise.
      */
-    abstract readonly destroyed: boolean;
+    abstract get destroyed(): boolean;
     /**
      * A lifecycle hook that provides additional developer-defined cleanup
      * functionality for views.
@@ -8466,7 +8466,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
     private _cdRefInjectingView?;
     private _appRef;
     private _viewContainerRef;
-    readonly rootNodes: any[];
+    get rootNodes(): any[];
     constructor(
     /**
      * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
@@ -8487,8 +8487,8 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
     _cdRefInjectingView?: ɵangular_packages_core_core_bn | undefined);
-    readonly context: T;
-    readonly destroyed: boolean;
+    get context(): T;
+    get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
     /**
@@ -9145,7 +9145,7 @@ export declare class ɵangular_packages_core_core_d implements ReflectiveInjecto
     private _getByReflectiveDependency;
     private _getByKey;
     private _getObjByKeyId;
-    readonly displayName: string;
+    get displayName(): string;
     toString(): string;
 }
 
@@ -9197,13 +9197,13 @@ export declare class ɵangular_packages_core_core_k {
     readonly nativeNode: any;
     private readonly _debugContext;
     constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_v);
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly references: {
+    get injector(): Injector;
+    get componentInstance(): any;
+    get context(): any;
+    get references(): {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
 
 export declare class ɵangular_packages_core_core_l extends ɵangular_packages_core_core_k implements DebugElement {
@@ -9230,7 +9230,7 @@ export declare class ɵangular_packages_core_core_l extends ɵangular_packages_c
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    readonly children: DebugElement[];
+    get children(): DebugElement[];
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 
@@ -9278,17 +9278,17 @@ export declare const ɵangular_packages_core_core_t = "USD";
 export declare function ɵangular_packages_core_core_u(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
 
 export declare abstract class ɵangular_packages_core_core_v {
-    abstract readonly view: ViewData;
-    abstract readonly nodeIndex: number | null;
-    abstract readonly injector: Injector;
-    abstract readonly component: any;
-    abstract readonly providerTokens: any[];
-    abstract readonly references: {
+    abstract get view(): ViewData;
+    abstract get nodeIndex(): number | null;
+    abstract get injector(): Injector;
+    abstract get component(): any;
+    abstract get providerTokens(): any[];
+    abstract get references(): {
         [key: string]: any;
     };
-    abstract readonly context: any;
-    abstract readonly componentRenderElement: any;
-    abstract readonly renderNode: any;
+    abstract get context(): any;
+    abstract get componentRenderElement(): any;
+    abstract get renderNode(): any;
     abstract logError(console: Console, ...values: any[]): void;
 }
 
@@ -10580,11 +10580,11 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
     componentType: Type<any>;
     ngContentSelectors: string[];
     isBoundToModule: boolean;
-    readonly inputs: {
+    get inputs(): {
         propName: string;
         templateName: string;
     }[];
-    readonly outputs: {
+    get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -10614,7 +10614,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
     constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bn, _tNode: ɵangular_packages_core_core_bd | TContainerNode | TElementContainerNode);
-    readonly injector: Injector;
+    get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
@@ -10628,7 +10628,7 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     destroyCbs: (() => void)[] | null;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    readonly componentFactoryResolver: ComponentFactoryResolver;
+    get componentFactoryResolver(): ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
@@ -11884,7 +11884,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors?: (string | SelectorFlags)[][] | undefined;
+    selectors?: ɵCssSelectorList | undefined;
     /**
      * A map of input names.
      *
