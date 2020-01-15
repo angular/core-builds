@@ -22,7 +22,7 @@ export declare class DefaultKeyValueDiffer<K, V> implements KeyValueDiffer<K, V>
     private _additionsTail;
     private _removalsHead;
     private _removalsTail;
-    readonly isDirty: boolean;
+    get isDirty(): boolean;
     forEachItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
     forEachPreviousItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
     forEachChangedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;

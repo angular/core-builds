@@ -26,9 +26,9 @@ export declare class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
     private _viewContainerRef;
     private _appRef;
     constructor(_view: ViewData);
-    readonly rootNodes: any[];
-    readonly context: any;
-    readonly destroyed: boolean;
+    get rootNodes(): any[];
+    get context(): any;
+    get destroyed(): boolean;
     markForCheck(): void;
     detach(): void;
     detectChanges(): void;

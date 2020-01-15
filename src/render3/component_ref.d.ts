@@ -40,11 +40,11 @@ export declare class ComponentFactory<T> extends viewEngine_ComponentFactory<T> 
     componentType: Type<any>;
     ngContentSelectors: string[];
     isBoundToModule: boolean;
-    readonly inputs: {
+    get inputs(): {
         propName: string;
         templateName: string;
     }[];
-    readonly outputs: {
+    get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -81,7 +81,7 @@ export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
     changeDetectorRef: ViewEngine_ChangeDetectorRef;
     componentType: Type<T>;
     constructor(componentType: Type<T>, instance: T, location: viewEngine_ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
-    readonly injector: Injector;
+    get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }

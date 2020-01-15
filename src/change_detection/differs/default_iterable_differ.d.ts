@@ -43,7 +43,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     diff(collection: NgIterable<V> | null | undefined): DefaultIterableDiffer<V> | null;
     onDestroy(): void;
     check(collection: NgIterable<V>): boolean;
-    readonly isDirty: boolean;
+    get isDirty(): boolean;
     private _addToRemovals;
 }
 export declare class IterableChangeRecord_<V> implements IterableChangeRecord<V> {

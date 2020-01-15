@@ -12,7 +12,7 @@ import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
 import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { TConstants } from './interfaces/node';
-import { CssSelectorList, SelectorFlags } from './interfaces/projection';
+import { CssSelectorList } from './interfaces/projection';
 import { NgModuleType } from './ng_module_ref';
 /**
  * Create a component definition object.
@@ -293,7 +293,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors?: (string | SelectorFlags)[][] | undefined;
+    selectors?: CssSelectorList | undefined;
     /**
      * A map of input names.
      *

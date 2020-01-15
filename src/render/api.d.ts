@@ -105,7 +105,7 @@ export declare abstract class Renderer2 {
      * as an object containing key-value pairs.
      * This is useful for renderers that delegate to other renderers.
      */
-    abstract readonly data: {
+    abstract get data(): {
         [key: string]: any;
     };
     /**

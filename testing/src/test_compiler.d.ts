@@ -14,7 +14,7 @@ import * as i0 from "@angular/core";
  * @publicApi
  */
 export declare class TestingCompiler extends Compiler {
-    readonly injector: Injector;
+    get injector(): Injector;
     overrideModule(module: Type<any>, overrides: MetadataOverride<NgModule>): void;
     overrideDirective(directive: Type<any>, overrides: MetadataOverride<Directive>): void;
     overrideComponent(component: Type<any>, overrides: MetadataOverride<Component>): void;

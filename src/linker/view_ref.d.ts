@@ -26,7 +26,7 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * Reports whether this view has been destroyed.
      * @returns True after the `destroy()` method has been called, false otherwise.
      */
-    abstract readonly destroyed: boolean;
+    abstract get destroyed(): boolean;
     /**
      * A lifecycle hook that provides additional developer-defined cleanup
      * functionality for views.
@@ -92,11 +92,11 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract readonly context: C;
+    abstract get context(): C;
     /**
      * The root nodes for this embedded view.
      */
-    abstract readonly rootNodes: any[];
+    abstract get rootNodes(): any[];
 }
 export interface InternalViewRef extends ViewRef {
     detachFromAppRef(): void;

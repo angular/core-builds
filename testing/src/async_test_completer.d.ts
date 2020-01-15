@@ -14,5 +14,5 @@ export declare class AsyncTestCompleter {
     private _promise;
     done(value?: any): void;
     fail(error?: any, stackTrace?: string): void;
-    readonly promise: Promise<any>;
+    get promise(): Promise<any>;
 }

@@ -442,17 +442,17 @@ export interface RootData {
     sanitizer: Sanitizer;
 }
 export declare abstract class DebugContext {
-    abstract readonly view: ViewData;
-    abstract readonly nodeIndex: number | null;
-    abstract readonly injector: Injector;
-    abstract readonly component: any;
-    abstract readonly providerTokens: any[];
-    abstract readonly references: {
+    abstract get view(): ViewData;
+    abstract get nodeIndex(): number | null;
+    abstract get injector(): Injector;
+    abstract get component(): any;
+    abstract get providerTokens(): any[];
+    abstract get references(): {
         [key: string]: any;
     };
-    abstract readonly context: any;
-    abstract readonly componentRenderElement: any;
-    abstract readonly renderNode: any;
+    abstract get context(): any;
+    abstract get componentRenderElement(): any;
+    abstract get renderNode(): any;
     abstract logError(console: Console, ...values: any[]): void;
 }
 export declare const enum CheckType {

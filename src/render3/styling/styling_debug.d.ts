@@ -131,13 +131,13 @@ declare class TStylingContextDebug implements DebugStylingContext {
     private _tNode;
     private _isClassBased;
     constructor(context: TStylingContext, _tNode: TStylingNode, _isClassBased: boolean);
-    readonly config: DebugStylingConfig;
+    get config(): DebugStylingConfig;
     /**
      * Returns a detailed summary of each styling entry in the context.
      *
      * See `DebugStylingContextEntry`.
      */
-    readonly entries: {
+    get entries(): {
         [prop: string]: DebugStylingContextEntry;
     };
     /**
@@ -163,7 +163,7 @@ export declare class NodeStylingDebug implements DebugNodeStyling {
     private _sanitizer;
     private _debugContext;
     constructor(context: TStylingContext | DebugStylingContext, _tNode: TStylingNode, _data: LStylingData, _isClassBased: boolean);
-    readonly context: DebugStylingContext;
+    get context(): DebugStylingContext;
     /**
      * Overrides the sanitizer used to process styles.
      */
@@ -174,14 +174,14 @@ export declare class NodeStylingDebug implements DebugNodeStyling {
      *
      * See `LStylingSummary`.
      */
-    readonly summary: {
+    get summary(): {
         [key: string]: DebugNodeStylingEntry;
     };
-    readonly config: DebugStylingConfig;
+    get config(): DebugStylingConfig;
     /**
      * Returns a key/value map of all the styles/classes that were last applied to the element.
      */
-    readonly values: {
+    get values(): {
         [key: string]: any;
     };
     private _convertMapBindingsToStylingMapArrays;

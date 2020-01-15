@@ -36,13 +36,13 @@ export declare class DebugNode__PRE_R3__ {
     readonly nativeNode: any;
     private readonly _debugContext;
     constructor(nativeNode: any, parent: DebugNode | null, _debugContext: DebugContext);
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly references: {
+    get injector(): Injector;
+    get componentInstance(): any;
+    get context(): any;
+    get references(): {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
 /**
  * @publicApi
@@ -93,7 +93,7 @@ export declare class DebugElement__PRE_R3__ extends DebugNode__PRE_R3__ implemen
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    readonly children: DebugElement[];
+    get children(): DebugElement[];
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 /**
@@ -103,20 +103,20 @@ export declare function asNativeElements(debugEls: DebugElement[]): any;
 declare class DebugNode__POST_R3__ implements DebugNode {
     readonly nativeNode: Node;
     constructor(nativeNode: Node);
-    readonly parent: DebugElement | null;
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly listeners: DebugEventListener[];
-    readonly references: {
+    get parent(): DebugElement | null;
+    get injector(): Injector;
+    get componentInstance(): any;
+    get context(): any;
+    get listeners(): DebugEventListener[];
+    get references(): {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
 declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements DebugElement {
     constructor(nativeNode: Element);
-    readonly nativeElement: Element | null;
-    readonly name: string;
+    get nativeElement(): Element | null;
+    get name(): string;
     /**
      *  Gets a map of property names to property values for an element.
      *
@@ -129,20 +129,20 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
      *  - input property bindings (e.g. `[myCustomInput]="value"`)
      *  - attribute bindings (e.g. `[attr.role]="menu"`)
      */
-    readonly properties: {
+    get properties(): {
         [key: string]: any;
     };
-    readonly attributes: {
+    get attributes(): {
         [key: string]: string | null;
     };
-    readonly styles: {
+    get styles(): {
         [key: string]: string | null;
     };
-    readonly classes: {
+    get classes(): {
         [key: string]: boolean;
     };
-    readonly childNodes: DebugNode[];
-    readonly children: DebugElement[];
+    get childNodes(): DebugNode[];
+    get children(): DebugElement[];
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];

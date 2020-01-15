@@ -160,12 +160,12 @@ export declare class PlatformRef {
      * Retrieve the platform {@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
      */
-    readonly injector: Injector;
+    get injector(): Injector;
     /**
      * Destroy the Angular platform and all Angular applications on the page.
      */
     destroy(): void;
-    readonly destroyed: boolean;
+    get destroyed(): boolean;
     static ɵfac: i0.ɵɵFactoryDef<PlatformRef>;
     static ɵprov: i0.ɵɵInjectableDef<PlatformRef>;
 }
@@ -331,7 +331,7 @@ export declare class ApplicationRef {
     /**
      * Returns the number of attached views.
      */
-    readonly viewCount: number;
+    get viewCount(): number;
     static ɵfac: i0.ɵɵFactoryDef<ApplicationRef>;
     static ɵprov: i0.ɵɵInjectableDef<ApplicationRef>;
 }

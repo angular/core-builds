@@ -134,7 +134,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
      * -->
      */
-    abstract readonly parent: Injector | null;
+    abstract get parent(): Injector | null;
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -262,6 +262,6 @@ export declare class ReflectiveInjector_ implements ReflectiveInjector {
     private _getByReflectiveDependency;
     private _getByKey;
     private _getObjByKeyId;
-    readonly displayName: string;
+    get displayName(): string;
     toString(): string;
 }

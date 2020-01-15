@@ -24,7 +24,7 @@ export declare class NgModuleRef<T> extends viewEngine_NgModuleRef<T> implements
     destroyCbs: (() => void)[] | null;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    readonly componentFactoryResolver: viewEngine_ComponentFactoryResolver;
+    get componentFactoryResolver(): viewEngine_ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }

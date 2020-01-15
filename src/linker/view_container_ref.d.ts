@@ -41,13 +41,13 @@ export declare abstract class ViewContainerRef {
      *
      * <!-- TODO: rename to anchorElement -->
      */
-    abstract readonly element: ElementRef;
+    abstract get element(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this view container.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /** @deprecated No replacement */
-    abstract readonly parentInjector: Injector;
+    abstract get parentInjector(): Injector;
     /**
      * Destroys all views in this container.
      */
@@ -62,7 +62,7 @@ export declare abstract class ViewContainerRef {
      * Reports how many views are currently attached to this container.
      * @returns The number of views.
      */
-    abstract readonly length: number;
+    abstract get length(): number;
     /**
      * Instantiates an embedded view and inserts it
      * into this container.

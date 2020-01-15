@@ -137,8 +137,8 @@ export declare class TestBedRender3 implements TestBed {
         deps?: any[];
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
-    private readonly compiler;
-    private readonly testModuleRef;
+    private get compiler();
+    private get testModuleRef();
     private assertNotInstantiated;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.

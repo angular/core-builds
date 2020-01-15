@@ -38,7 +38,7 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    abstract readonly elementRef: ElementRef;
+    abstract get elementRef(): ElementRef;
     /**
      * Instantiates an embedded view based on this template,
      * and attaches it to the view container.

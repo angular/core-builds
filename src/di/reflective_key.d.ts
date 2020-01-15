@@ -38,10 +38,10 @@ export declare class ReflectiveKey {
     /**
      * @returns the number of keys registered in the system.
      */
-    static readonly numberOfKeys: number;
+    static get numberOfKeys(): number;
 }
 export declare class KeyRegistry {
     private _allKeys;
     get(token: Object): ReflectiveKey;
-    readonly numberOfKeys: number;
+    get numberOfKeys(): number;
 }

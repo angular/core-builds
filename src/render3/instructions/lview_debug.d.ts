@@ -8,14 +8,14 @@
 import { AttributeMarker, ComponentTemplate } from '..';
 import { SchemaMetadata } from '../../core';
 import { LContainer } from '../interfaces/container';
-import { ViewQueriesFunction } from '../interfaces/definition';
+import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
-import { PropertyAliases, TContainerNode, TElementNode, TNode as ITNode, TNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
 import { TStylingContext } from '../interfaces/styling';
-import { ExpandoInstructions, LView, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
+import { ExpandoInstructions, HookData, LView, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
 import { DebugNodeStyling } from '../styling/styling_debug';
 /**
  * This function clones a blueprint and creates LView.
@@ -29,7 +29,7 @@ export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[], bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: (number | (() => void))[] | null, preOrderCheckHooks: (number | (() => void))[] | null, contentHooks: (number | (() => void))[] | null, contentCheckHooks: (number | (() => void))[] | null, viewHooks: (number | (() => void))[] | null, viewCheckHooks: (number | (() => void))[] | null, destroyHooks: (number | (() => void))[] | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null, pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: (string | (string | (string | SelectorFlags)[] | AttributeMarker)[])[] | null): {
+    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: HookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null): {
         type: TViewType;
         id: number;
         blueprint: LView;
@@ -37,7 +37,7 @@ export declare const TViewConstructor: {
         queries: TQueries | null;
         viewQuery: ViewQueriesFunction<{}> | null;
         node: TElementNode | TViewNode | null;
-        data: (string | number | import("@angular/core/src/core").Type<any> | ITNode | import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any> | import("@angular/core/src/core").ɵPipeDef<any> | I18nUpdateOpCodes | import("@angular/core/src/render3/interfaces/i18n").TI18n | import("@angular/core/src/core").InjectionToken<any> | null)[];
+        data: TData;
         bindingStartIndex: number;
         expandoStartIndex: number;
         expandoInstructions: ExpandoInstructions | null;
@@ -45,26 +45,26 @@ export declare const TViewConstructor: {
         firstUpdatePass: boolean;
         staticViewQueries: boolean;
         staticContentQueries: boolean;
-        preOrderHooks: (number | (() => void))[] | null;
-        preOrderCheckHooks: (number | (() => void))[] | null;
-        contentHooks: (number | (() => void))[] | null;
-        contentCheckHooks: (number | (() => void))[] | null;
-        viewHooks: (number | (() => void))[] | null;
-        viewCheckHooks: (number | (() => void))[] | null;
-        destroyHooks: (number | (() => void))[] | null;
+        preOrderHooks: HookData | null;
+        preOrderCheckHooks: HookData | null;
+        contentHooks: HookData | null;
+        contentCheckHooks: HookData | null;
+        viewHooks: HookData | null;
+        viewCheckHooks: HookData | null;
+        destroyHooks: HookData | null;
         cleanup: any[] | null;
         contentQueries: number[] | null;
         components: number[] | null;
-        directiveRegistry: (import("@angular/core/src/core").ɵDirectiveDef<any> | import("@angular/core/src/core").ɵComponentDef<any>)[] | null;
-        pipeRegistry: import("@angular/core/src/core").ɵPipeDef<any>[] | null;
+        directiveRegistry: DirectiveDefList | null;
+        pipeRegistry: PipeDefList | null;
         firstChild: ITNode | null;
         schemas: SchemaMetadata[] | null;
-        consts: (string | (string | (string | SelectorFlags)[] | AttributeMarker)[])[] | null;
+        consts: TConstants | null;
         readonly template_: string;
     };
 };
 export declare const TNodeConstructor: {
-    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyBindings: number[] | null, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null, outputs: PropertyAliases | null, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, projection: number | (ITNode | RNode[])[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
+    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyBindings: number[] | null, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null, outputs: PropertyAliases | null, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, projection: number | (ITNode | RNode[])[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
         tView_: ITView;
         type: TNodeType;
         index: number;
@@ -75,7 +75,7 @@ export declare const TNodeConstructor: {
         flags: TNodeFlags;
         providerIndexes: TNodeProviderIndexes;
         tagName: string | null;
-        attrs: (string | (string | SelectorFlags)[] | AttributeMarker)[] | null;
+        attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null;
         localNames: (string | number)[] | null;
         initialInputs: (string[] | null)[] | null | undefined;
         inputs: PropertyAliases | null;
@@ -118,7 +118,7 @@ export declare class LViewDebug {
     /**
      * Flags associated with the `LView` unpacked into a more readable state.
      */
-    readonly flags: {
+    get flags(): {
         __raw__flags__: LViewFlags;
         initPhaseState: number;
         creationMode: boolean;
@@ -130,32 +130,32 @@ export declare class LViewDebug {
         isRoot: boolean;
         indexWithinInitPhase: number;
     };
-    readonly parent: LViewDebug | LContainerDebug | null;
-    readonly host: string | null;
-    readonly html: string;
-    readonly context: {} | null;
+    get parent(): LViewDebug | LContainerDebug | null;
+    get host(): string | null;
+    get html(): string;
+    get context(): {} | null;
     /**
      * The tree of nodes associated with the current `LView`. The nodes have been normalized into
      * a
      * tree structure with relevant details pulled out for readability.
      */
-    readonly nodes: DebugNode[] | null;
-    readonly tView: ITView;
-    readonly cleanup: any[] | null;
-    readonly injector: import("@angular/core/src/core").Injector | null;
-    readonly rendererFactory: import("@angular/core/src/render3/interfaces/renderer").RendererFactory3;
-    readonly renderer: import("@angular/core/src/render3/interfaces/renderer").ObjectOrientedRenderer3 | import("@angular/core/src/render3/interfaces/renderer").ProceduralRenderer3;
-    readonly sanitizer: import("@angular/core/src/core").Sanitizer | null;
-    readonly childHead: LViewDebug | LContainerDebug | null;
-    readonly next: LViewDebug | LContainerDebug | null;
-    readonly childTail: LViewDebug | LContainerDebug | null;
-    readonly declarationView: LViewDebug | null;
-    readonly queries: import("@angular/core/src/render3/interfaces/query").LQueries | null;
-    readonly tHost: TElementNode | TViewNode | null;
+    get nodes(): DebugNode[] | null;
+    get tView(): ITView;
+    get cleanup(): any[] | null;
+    get injector(): import("@angular/core/src/core").Injector | null;
+    get rendererFactory(): import("@angular/core/src/render3/interfaces/renderer").RendererFactory3;
+    get renderer(): import("@angular/core/src/render3/interfaces/renderer").ObjectOrientedRenderer3 | import("@angular/core/src/render3/interfaces/renderer").ProceduralRenderer3;
+    get sanitizer(): import("@angular/core/src/core").Sanitizer | null;
+    get childHead(): LViewDebug | LContainerDebug | null;
+    get next(): LViewDebug | LContainerDebug | null;
+    get childTail(): LViewDebug | LContainerDebug | null;
+    get declarationView(): LViewDebug | null;
+    get queries(): import("@angular/core/src/render3/interfaces/query").LQueries | null;
+    get tHost(): TElementNode | TViewNode | null;
     /**
      * Normalized view of child views (and containers) attached at this location.
      */
-    readonly childViews: Array<LViewDebug | LContainerDebug>;
+    get childViews(): Array<LViewDebug | LContainerDebug>;
 }
 export interface DebugNode {
     html: string | null;
@@ -176,14 +176,14 @@ export declare function buildDebugNode(tNode: TNode, lView: LView, nodeIndex: nu
 export declare class LContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);
-    readonly activeIndex: number;
-    readonly hasTransplantedViews: boolean;
-    readonly views: LViewDebug[];
-    readonly parent: LViewDebug | LContainerDebug | null;
-    readonly movedViews: LView[] | null;
-    readonly host: RElement | RComment | LView;
-    readonly native: RComment;
-    readonly next: LViewDebug | LContainerDebug | null;
+    get activeIndex(): number;
+    get hasTransplantedViews(): boolean;
+    get views(): LViewDebug[];
+    get parent(): LViewDebug | LContainerDebug | null;
+    get movedViews(): LView[] | null;
+    get host(): RElement | RComment | LView;
+    get native(): RComment;
+    get next(): LViewDebug | LContainerDebug | null;
 }
 /**
  * Return an `LView` value if found.
@@ -197,7 +197,7 @@ export declare class I18NDebugItem {
     nodeIndex: number;
     type: string;
     [key: string]: any;
-    readonly tNode: ITNode;
+    get tNode(): ITNode;
     constructor(__raw_opCode: any, _lView: LView, nodeIndex: number, type: string);
 }
 /**
@@ -216,7 +216,7 @@ export declare class I18nMutateOpCodesDebug implements I18nOpCodesDebug {
     /**
      * A list of operation information about how the OpCodes will act on the view.
      */
-    readonly operations: any[];
+    get operations(): any[];
 }
 export declare class I18nUpdateOpCodesDebug implements I18nOpCodesDebug {
     private readonly __raw_opCodes;
@@ -226,7 +226,7 @@ export declare class I18nUpdateOpCodesDebug implements I18nOpCodesDebug {
     /**
      * A list of operation information about how the OpCodes will act on the view.
      */
-    readonly operations: any[];
+    get operations(): any[];
 }
 export interface I18nOpCodesDebug {
     operations: any[];

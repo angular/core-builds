@@ -22,7 +22,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
     private _cdRefInjectingView?;
     private _appRef;
     private _viewContainerRef;
-    readonly rootNodes: any[];
+    get rootNodes(): any[];
     constructor(
     /**
      * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
@@ -43,8 +43,8 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
     _cdRefInjectingView?: LView | undefined);
-    readonly context: T;
-    readonly destroyed: boolean;
+    get context(): T;
+    get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
     /**

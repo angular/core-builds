@@ -72,7 +72,7 @@ export declare class R3TestBedCompiler {
     private restoreComponentResolutionQueue;
     restoreOriginalState(): void;
     private compileTestModule;
-    readonly injector: Injector;
+    get injector(): Injector;
     private getSingleProviderOverrides;
     private getProviderOverrides;
     private getOverriddenProviders;

@@ -21,22 +21,22 @@ export interface Resolver<T> {
 declare abstract class OverrideResolver<T> implements Resolver<T> {
     private overrides;
     private resolved;
-    abstract readonly type: any;
+    abstract get type(): any;
     addOverride(type: Type<any>, override: MetadataOverride<T>): void;
     setOverrides(overrides: Array<[Type<any>, MetadataOverride<T>]>): void;
     getAnnotation(type: Type<any>): T | null;
     resolve(type: Type<any>): T | null;
 }
 export declare class DirectiveResolver extends OverrideResolver<Directive> {
-    readonly type: import("@angular/core").DirectiveDecorator;
+    get type(): import("@angular/core").DirectiveDecorator;
 }
 export declare class ComponentResolver extends OverrideResolver<Component> {
-    readonly type: import("@angular/core").ComponentDecorator;
+    get type(): import("@angular/core").ComponentDecorator;
 }
 export declare class PipeResolver extends OverrideResolver<Pipe> {
-    readonly type: import("@angular/core").PipeDecorator;
+    get type(): import("@angular/core").PipeDecorator;
 }
 export declare class NgModuleResolver extends OverrideResolver<NgModule> {
-    readonly type: import("@angular/core").NgModuleDecorator;
+    get type(): import("@angular/core").NgModuleDecorator;
 }
 export {};
