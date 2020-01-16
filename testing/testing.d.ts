@@ -712,6 +712,8 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
         deps?: any[];
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
+    private get compiler();
+    private get testModuleRef();
     private assertNotInstantiated;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
