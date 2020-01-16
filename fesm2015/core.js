@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+695.sha-9d66345
+ * @license Angular v9.0.0-rc.1+696.sha-32e1dc7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28635,7 +28635,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+695.sha-9d66345');
+const VERSION = new Version('9.0.0-rc.1+696.sha-32e1dc7');
 
 /**
  * @fileoverview added by tsickle
