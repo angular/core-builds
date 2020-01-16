@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+711.sha-3102dc8
+ * @license Angular v9.0.0-rc.1+717.sha-f2df1c7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1307,58 +1307,64 @@ function newArray(size, value) {
  */
 function assertNumber(actual, msg) {
     if (typeof actual != 'number') {
-        throwError(msg);
+        throwError(msg, typeof actual, 'number', '===');
+    }
+}
+function assertString(actual, msg) {
+    if (typeof actual != 'string') {
+        throwError(msg, actual === null ? 'null' : typeof actual, 'string', '===');
     }
 }
 function assertEqual(actual, expected, msg) {
     if (actual != expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '==');
     }
 }
 function assertNotEqual(actual, expected, msg) {
     if (actual == expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '!=');
     }
 }
 function assertSame(actual, expected, msg) {
     if (actual !== expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '===');
     }
 }
 function assertNotSame(actual, expected, msg) {
     if (actual === expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '!==');
     }
 }
 function assertLessThan(actual, expected, msg) {
     if (actual >= expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '<');
     }
 }
 function assertLessThanOrEqual(actual, expected, msg) {
     if (actual > expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '<=');
     }
 }
 function assertGreaterThan(actual, expected, msg) {
     if (actual <= expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '>');
     }
 }
 function assertNotDefined(actual, msg) {
     if (actual != null) {
-        throwError(msg);
+        throwError(msg, actual, null, '==');
     }
 }
 function assertDefined(actual, msg) {
     if (actual == null) {
-        throwError(msg);
+        throwError(msg, actual, null, '!=');
     }
 }
-function throwError(msg) {
+function throwError(msg, actual, expected, comparison) {
     // tslint:disable-next-line
     debugger; // Left intentionally for better debugger experience.
-    throw new Error(`ASSERTION ERROR: ${msg}`);
+    throw new Error(`ASSERTION ERROR: ${msg}` +
+        (comparison == null ? '' : ` [Expected=> ${expected} ${comparison} ${actual} <=Actual]`));
 }
 function assertDomNode(node) {
     // If we're in a worker, `Node` will not be defined.
@@ -17197,8 +17203,7 @@ let R3ElementRef;
  */
 function createElementRef(ElementRefToken, tNode, view) {
     if (!R3ElementRef) {
-        // TODO: Fix class name, should be ElementRef, but there appears to be a rollup bug
-        R3ElementRef = class ElementRef_ extends ElementRefToken {
+        R3ElementRef = class ElementRef extends ElementRefToken {
         };
     }
     return new R3ElementRef((/** @type {?} */ (getNativeByTNode(tNode, view))));
@@ -17228,8 +17233,7 @@ function injectTemplateRef(TemplateRefToken, ElementRefToken) {
  */
 function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostView) {
     if (!R3TemplateRef) {
-        // TODO: Fix class name, should be TemplateRef, but there appears to be a rollup bug
-        R3TemplateRef = class TemplateRef_ extends TemplateRefToken {
+        R3TemplateRef = class TemplateRef extends TemplateRefToken {
             /**
              * @param {?} _declarationView
              * @param {?} _declarationTContainer
@@ -17301,8 +17305,7 @@ function injectViewContainerRef(ViewContainerRefToken, ElementRefToken) {
  */
 function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, hostView) {
     if (!R3ViewContainerRef) {
-        // TODO: Fix class name, should be ViewContainerRef, but there appears to be a rollup bug
-        R3ViewContainerRef = class ViewContainerRef_ extends ViewContainerRefToken {
+        R3ViewContainerRef = class ViewContainerRef extends ViewContainerRefToken {
             /**
              * @param {?} _lContainer
              * @param {?} _hostTNode
