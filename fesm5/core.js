@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+715.sha-63c9c2d
+ * @license Angular v9.0.0-rc.1+717.sha-f2df1c7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1077,58 +1077,64 @@ function newArray(size, value) {
  */
 function assertNumber(actual, msg) {
     if (typeof actual != 'number') {
-        throwError(msg);
+        throwError(msg, typeof actual, 'number', '===');
+    }
+}
+function assertString(actual, msg) {
+    if (typeof actual != 'string') {
+        throwError(msg, actual === null ? 'null' : typeof actual, 'string', '===');
     }
 }
 function assertEqual(actual, expected, msg) {
     if (actual != expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '==');
     }
 }
 function assertNotEqual(actual, expected, msg) {
     if (actual == expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '!=');
     }
 }
 function assertSame(actual, expected, msg) {
     if (actual !== expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '===');
     }
 }
 function assertNotSame(actual, expected, msg) {
     if (actual === expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '!==');
     }
 }
 function assertLessThan(actual, expected, msg) {
     if (actual >= expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '<');
     }
 }
 function assertLessThanOrEqual(actual, expected, msg) {
     if (actual > expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '<=');
     }
 }
 function assertGreaterThan(actual, expected, msg) {
     if (actual <= expected) {
-        throwError(msg);
+        throwError(msg, actual, expected, '>');
     }
 }
 function assertNotDefined(actual, msg) {
     if (actual != null) {
-        throwError(msg);
+        throwError(msg, actual, null, '==');
     }
 }
 function assertDefined(actual, msg) {
     if (actual == null) {
-        throwError(msg);
+        throwError(msg, actual, null, '!=');
     }
 }
-function throwError(msg) {
+function throwError(msg, actual, expected, comparison) {
     // tslint:disable-next-line
     debugger; // Left intentionally for better debugger experience.
-    throw new Error("ASSERTION ERROR: " + msg);
+    throw new Error("ASSERTION ERROR: " + msg +
+        (comparison == null ? '' : " [Expected=> " + expected + " " + comparison + " " + actual + " <=Actual]"));
 }
 function assertDomNode(node) {
     // If we're in a worker, `Node` will not be defined.
@@ -11422,13 +11428,12 @@ var R3ElementRef;
  */
 function createElementRef(ElementRefToken, tNode, view) {
     if (!R3ElementRef) {
-        // TODO: Fix class name, should be ElementRef, but there appears to be a rollup bug
         R3ElementRef = /** @class */ (function (_super) {
-            __extends(ElementRef_, _super);
-            function ElementRef_() {
+            __extends(ElementRef, _super);
+            function ElementRef() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
-            return ElementRef_;
+            return ElementRef;
         }(ElementRefToken));
     }
     return new R3ElementRef(getNativeByTNode(tNode, view));
@@ -11453,17 +11458,16 @@ function injectTemplateRef(TemplateRefToken, ElementRefToken) {
  */
 function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostView) {
     if (!R3TemplateRef) {
-        // TODO: Fix class name, should be TemplateRef, but there appears to be a rollup bug
         R3TemplateRef = /** @class */ (function (_super) {
-            __extends(TemplateRef_, _super);
-            function TemplateRef_(_declarationView, _declarationTContainer, elementRef) {
+            __extends(TemplateRef, _super);
+            function TemplateRef(_declarationView, _declarationTContainer, elementRef) {
                 var _this = _super.call(this) || this;
                 _this._declarationView = _declarationView;
                 _this._declarationTContainer = _declarationTContainer;
                 _this.elementRef = elementRef;
                 return _this;
             }
-            TemplateRef_.prototype.createEmbeddedView = function (context) {
+            TemplateRef.prototype.createEmbeddedView = function (context) {
                 var embeddedTView = this._declarationTContainer.tViews;
                 var lView = createLView(this._declarationView, embeddedTView, context, 16 /* CheckAlways */, null, embeddedTView.node);
                 var declarationLContainer = this._declarationView[this._declarationTContainer.index];
@@ -11478,7 +11482,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
                 viewRef._tViewNode = lView[T_HOST];
                 return viewRef;
             };
-            return TemplateRef_;
+            return TemplateRef;
         }(TemplateRefToken));
     }
     if (hostTNode.type === 0 /* Container */) {
@@ -11511,29 +11515,28 @@ function injectViewContainerRef(ViewContainerRefToken, ElementRefToken) {
  */
 function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, hostView) {
     if (!R3ViewContainerRef) {
-        // TODO: Fix class name, should be ViewContainerRef, but there appears to be a rollup bug
         R3ViewContainerRef = /** @class */ (function (_super) {
-            __extends(ViewContainerRef_, _super);
-            function ViewContainerRef_(_lContainer, _hostTNode, _hostView) {
+            __extends(ViewContainerRef, _super);
+            function ViewContainerRef(_lContainer, _hostTNode, _hostView) {
                 var _this = _super.call(this) || this;
                 _this._lContainer = _lContainer;
                 _this._hostTNode = _hostTNode;
                 _this._hostView = _hostView;
                 return _this;
             }
-            Object.defineProperty(ViewContainerRef_.prototype, "element", {
+            Object.defineProperty(ViewContainerRef.prototype, "element", {
                 get: function () {
                     return createElementRef(ElementRefToken, this._hostTNode, this._hostView);
                 },
                 enumerable: true,
                 configurable: true
             });
-            Object.defineProperty(ViewContainerRef_.prototype, "injector", {
+            Object.defineProperty(ViewContainerRef.prototype, "injector", {
                 get: function () { return new NodeInjector(this._hostTNode, this._hostView); },
                 enumerable: true,
                 configurable: true
             });
-            Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
+            Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
                 /** @deprecated No replacement */
                 get: function () {
                     var parentLocation = getParentInjectorLocation(this._hostTNode, this._hostView);
@@ -11546,25 +11549,25 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 enumerable: true,
                 configurable: true
             });
-            ViewContainerRef_.prototype.clear = function () {
+            ViewContainerRef.prototype.clear = function () {
                 while (this.length > 0) {
                     this.remove(this.length - 1);
                 }
             };
-            ViewContainerRef_.prototype.get = function (index) {
+            ViewContainerRef.prototype.get = function (index) {
                 return this._lContainer[VIEW_REFS] !== null && this._lContainer[VIEW_REFS][index] || null;
             };
-            Object.defineProperty(ViewContainerRef_.prototype, "length", {
+            Object.defineProperty(ViewContainerRef.prototype, "length", {
                 get: function () { return this._lContainer.length - CONTAINER_HEADER_OFFSET; },
                 enumerable: true,
                 configurable: true
             });
-            ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+            ViewContainerRef.prototype.createEmbeddedView = function (templateRef, context, index) {
                 var viewRef = templateRef.createEmbeddedView(context || {});
                 this.insert(viewRef, index);
                 return viewRef;
             };
-            ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
+            ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
                 var contextInjector = injector || this.parentInjector;
                 if (!ngModuleRef && componentFactory.ngModule == null && contextInjector) {
                     // DO NOT REFACTOR. The code here used to have a `value || undefined` expression
@@ -11579,7 +11582,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 this.insert(componentRef.hostView, index);
                 return componentRef;
             };
-            ViewContainerRef_.prototype.insert = function (viewRef, index) {
+            ViewContainerRef.prototype.insert = function (viewRef, index) {
                 var lView = viewRef._lView;
                 if (viewRef.destroyed) {
                     throw new Error('Cannot insert a destroyed View in a ViewContainer!');
@@ -11612,30 +11615,30 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 addToArray(this._lContainer[VIEW_REFS], adjustedIdx, viewRef);
                 return viewRef;
             };
-            ViewContainerRef_.prototype.move = function (viewRef, newIndex) {
+            ViewContainerRef.prototype.move = function (viewRef, newIndex) {
                 if (viewRef.destroyed) {
                     throw new Error('Cannot move a destroyed View in a ViewContainer!');
                 }
                 return this.insert(viewRef, newIndex);
             };
-            ViewContainerRef_.prototype.indexOf = function (viewRef) {
+            ViewContainerRef.prototype.indexOf = function (viewRef) {
                 var viewRefsArr = this._lContainer[VIEW_REFS];
                 return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
             };
-            ViewContainerRef_.prototype.remove = function (index) {
+            ViewContainerRef.prototype.remove = function (index) {
                 this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index, -1);
                 removeView(this._lContainer, adjustedIdx);
                 removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx);
             };
-            ViewContainerRef_.prototype.detach = function (index) {
+            ViewContainerRef.prototype.detach = function (index) {
                 this.allocateContainerIfNeeded();
                 var adjustedIdx = this._adjustIndex(index, -1);
                 var view = detachView(this._lContainer, adjustedIdx);
                 var wasDetached = view && removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx) != null;
                 return wasDetached ? new ViewRef(view) : null;
             };
-            ViewContainerRef_.prototype._adjustIndex = function (index, shift) {
+            ViewContainerRef.prototype._adjustIndex = function (index, shift) {
                 if (shift === void 0) { shift = 0; }
                 if (index == null) {
                     return this.length + shift;
@@ -11647,12 +11650,12 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 }
                 return index;
             };
-            ViewContainerRef_.prototype.allocateContainerIfNeeded = function () {
+            ViewContainerRef.prototype.allocateContainerIfNeeded = function () {
                 if (this._lContainer[VIEW_REFS] === null) {
                     this._lContainer[VIEW_REFS] = [];
                 }
             };
-            return ViewContainerRef_;
+            return ViewContainerRef;
         }(ViewContainerRefToken));
     }
     ngDevMode && assertNodeOfPossibleTypes(hostTNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
