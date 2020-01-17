@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.9+21.sha-762c531
+ * @license Angular v9.0.0-rc.9+31.sha-21a9a41
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3232,6 +3232,8 @@ class TestBedRender3 {
         return fixture;
     }
     /**
+     * \@internal strip this from published d.ts files due to
+     * https://github.com/microsoft/TypeScript/issues/36216
      * @private
      * @return {?}
      */
@@ -3242,6 +3244,8 @@ class TestBedRender3 {
         return this._compiler;
     }
     /**
+     * \@internal strip this from published d.ts files due to
+     * https://github.com/microsoft/TypeScript/issues/36216
      * @private
      * @return {?}
      */
