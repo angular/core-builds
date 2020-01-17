@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.9+31.sha-21a9a41
+ * @license Angular v9.0.0-rc.9+32.sha-7643913
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -42663,12 +42663,6 @@ class PlatformRef {
             if (!exceptionHandler) {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
-            // If the `LOCALE_ID` provider is defined at bootstrap we set the value for runtime i18n (ivy)
-            if (ivyEnabled) {
-                /** @type {?} */
-                const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
-                setLocaleId(localeId || DEFAULT_LOCALE_ID);
-            }
             moduleRef.onDestroy((/**
              * @return {?}
              */
@@ -42692,6 +42686,12 @@ class PlatformRef {
                  * @return {?}
                  */
                 () => {
+                    if (ivyEnabled) {
+                        // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
+                        /** @type {?} */
+                        const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
+                        setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                    }
                     this._moduleDoBootstrap(moduleRef);
                     return moduleRef;
                 }));
