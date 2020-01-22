@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+740.sha-0d83095
+ * @license Angular v9.0.0-rc.1+746.sha-e7cf37d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15552,25 +15552,6 @@
      * --------
      */
     /**
-     * Sets the current style sanitizer function which will then be used
-     * within all follow-up prop and map-based style binding instructions
-     * for the given element.
-     *
-     * Note that once styling has been applied to the element (i.e. once
-     * `advance(n)` is executed or the hostBindings/template function exits)
-     * then the active `sanitizerFn` will be set to `null`. This means that
-     * once styling is applied to another element then a another call to
-     * `styleSanitizer` will need to be made.
-     *
-     * @param sanitizerFn The sanitization function that will be used to
-     *       process style prop/value entries.
-     *
-     * @codeGenApi
-     */
-    function ɵɵstyleSanitizer(sanitizer) {
-        setCurrentStyleSanitizer(sanitizer);
-    }
-    /**
      * Update a style binding on an element with the provided value.
      *
      * If the style value is falsy then it will be removed from the element
@@ -15591,8 +15572,8 @@
      *
      * @codeGenApi
      */
-    function ɵɵstyleProp(prop, value, suffix) {
-        stylePropInternal(getSelectedIndex(), prop, value, suffix);
+    function ɵɵstyleProp(prop, value, suffixOrSanitizer) {
+        stylePropInternal(getSelectedIndex(), prop, value, suffixOrSanitizer);
         return ɵɵstyleProp;
     }
     /**
@@ -15601,7 +15582,7 @@
      * The reason why this function has been separated from `ɵɵstyleProp` is because
      * it is also called from `ɵɵstylePropInterpolate`.
      */
-    function stylePropInternal(elementIndex, prop, value, suffix) {
+    function stylePropInternal(elementIndex, prop, value, suffixOrSanitizer) {
         // if a value is interpolated then it may render a `NO_CHANGE` value.
         // in this case we do not need to do anything, but the binding index
         // still needs to be incremented because all styling binding values
@@ -15617,7 +15598,10 @@
             patchConfig(tNode, 32768 /* hasStylePropBindings */);
             patchHostStylingFlag(tNode, isHostStyling(), false);
         }
-        var updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, resolveStylePropValue(value, suffix), false);
+        var isString = typeof suffixOrSanitizer === 'string';
+        var suffix = isString ? suffixOrSanitizer : null;
+        var sanitizer = isString ? null : suffixOrSanitizer;
+        var updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, resolveStylePropValue(value, suffix), false, sanitizer);
         if (ngDevMode) {
             ngDevMode.styleProp++;
             if (updated) {
@@ -15657,7 +15641,7 @@
             patchConfig(tNode, 1024 /* hasClassPropBindings */);
             patchHostStylingFlag(tNode, isHostStyling(), true);
         }
-        var updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, className, value, true);
+        var updated = stylingProp(tNode, firstUpdatePass, lView, bindingIndex, className, value, true, null);
         if (ngDevMode) {
             ngDevMode.classProp++;
             if (updated) {
@@ -15676,11 +15660,13 @@
      * bindings or whether or not there are map-based bindings and property bindings
      * present together).
      */
-    function stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, value, isClassBased) {
+    function stylingProp(tNode, firstUpdatePass, lView, bindingIndex, prop, value, isClassBased, sanitizer) {
         var updated = false;
+        if (sanitizer) {
+            setCurrentStyleSanitizer(sanitizer);
+        }
         var native = getNativeByTNode(tNode, lView);
         var context = isClassBased ? getClassesContext(tNode) : getStylesContext(tNode);
-        var sanitizer = isClassBased ? null : getCurrentStyleSanitizer();
         // [style.prop] and [class.name] bindings do not use `bind()` and will
         // therefore manage accessing and updating the new value in the lView directly.
         // For this reason, the checkNoChanges situation must also be handled here
@@ -15766,7 +15752,7 @@
             patchConfig(tNode, 16384 /* hasStyleMapBindings */);
             patchHostStylingFlag(tNode, isHostStyling(), false);
         }
-        stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, styles, false, hasDirectiveInput);
+        stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, styles, false, hasDirectiveInput, ɵɵdefaultStyleSanitizer);
     }
     /**
      * Update class bindings using an object literal or class-string on an element.
@@ -15821,7 +15807,7 @@
             patchConfig(tNode, 512 /* hasClassMapBindings */);
             patchHostStylingFlag(tNode, isHostStyling(), true);
         }
-        stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, classes, true, hasDirectiveInput);
+        stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, classes, true, hasDirectiveInput, null);
     }
     /**
      * Shared function used to update a map-based styling binding for an element.
@@ -15829,11 +15815,11 @@
      * When this function is called it will activate support for `[style]` and
      * `[class]` bindings in Angular.
      */
-    function stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, value, isClassBased, hasDirectiveInput) {
+    function stylingMap(context, tNode, firstUpdatePass, lView, bindingIndex, value, isClassBased, hasDirectiveInput, sanitizer) {
         var directiveIndex = getActiveDirectiveId();
         var native = getNativeByTNode(tNode, lView);
         var oldValue = getValue(lView, bindingIndex);
-        var sanitizer = getCurrentStyleSanitizer();
+        setCurrentStyleSanitizer(ɵɵdefaultStyleSanitizer);
         var valueHasChanged = hasValueChanged(oldValue, value);
         // [style] and [class] bindings do not use `bind()` and will therefore
         // manage accessing and updating the new value in the lView directly.
@@ -19932,7 +19918,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+740.sha-0d83095');
+    var VERSION = new Version('9.0.0-rc.1+746.sha-e7cf37d');
 
     /**
      * @license
@@ -26063,7 +26049,6 @@
         'ɵɵstylePropInterpolate7': ɵɵstylePropInterpolate7,
         'ɵɵstylePropInterpolate8': ɵɵstylePropInterpolate8,
         'ɵɵstylePropInterpolateV': ɵɵstylePropInterpolateV,
-        'ɵɵstyleSanitizer': ɵɵstyleSanitizer,
         'ɵɵclassProp': ɵɵclassProp,
         'ɵɵselect': ɵɵselect,
         'ɵɵadvance': ɵɵadvance,
@@ -32466,7 +32451,6 @@
     exports.ɵɵstylePropInterpolate7 = ɵɵstylePropInterpolate7;
     exports.ɵɵstylePropInterpolate8 = ɵɵstylePropInterpolate8;
     exports.ɵɵstylePropInterpolateV = ɵɵstylePropInterpolateV;
-    exports.ɵɵstyleSanitizer = ɵɵstyleSanitizer;
     exports.ɵɵtemplate = ɵɵtemplate;
     exports.ɵɵtemplateRefExtractor = ɵɵtemplateRefExtractor;
     exports.ɵɵtext = ɵɵtext;

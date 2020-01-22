@@ -19,23 +19,6 @@ import { NO_CHANGE } from '../tokens';
  * --------
  */
 /**
- * Sets the current style sanitizer function which will then be used
- * within all follow-up prop and map-based style binding instructions
- * for the given element.
- *
- * Note that once styling has been applied to the element (i.e. once
- * `advance(n)` is executed or the hostBindings/template function exits)
- * then the active `sanitizerFn` will be set to `null`. This means that
- * once styling is applied to another element then a another call to
- * `styleSanitizer` will need to be made.
- *
- * @param sanitizerFn The sanitization function that will be used to
- *       process style prop/value entries.
- *
- * @codeGenApi
- */
-export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
-/**
  * Update a style binding on an element with the provided value.
  *
  * If the style value is falsy then it will be removed from the element
@@ -56,14 +39,14 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffix?: string | null): typeof ɵɵstyleProp;
+export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffixOrSanitizer?: StyleSanitizeFn | string | null): typeof ɵɵstyleProp;
 /**
  * Internal function for applying a single style to an element.
  *
  * The reason why this function has been separated from `ɵɵstyleProp` is because
  * it is also called from `ɵɵstylePropInterpolate`.
  */
-export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | SafeValue | null, suffix?: string | null | undefined): void;
+export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | SafeValue | null, suffixOrSanitizer?: StyleSanitizeFn | string | null): void;
 /**
  * Update a class binding on an element with the provided value.
  *

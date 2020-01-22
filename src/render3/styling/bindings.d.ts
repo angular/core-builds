@@ -31,7 +31,7 @@ export declare function updateClassViaContext(context: TStylingContext, tNode: T
  * state each time it's called (which then allows the `TStylingContext`
  * and the bit mask values to be in sync).
  */
-export declare function updateStyleViaContext(context: TStylingContext, tNode: TStylingNode, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
+export declare function updateStyleViaContext(context: TStylingContext, tNode: TStylingNode, data: LStylingData, element: RElement, directiveIndex: number, prop: string | null, bindingIndex: number, value: string | number | SafeValue | null | undefined | StylingMapArray | NO_CHANGE, sanitizer: StyleSanitizeFn | null | undefined, forceUpdate: boolean, firstUpdatePass: boolean): boolean;
 /**
  * Registers the provided binding (prop + bindingIndex) into the context.
  *
