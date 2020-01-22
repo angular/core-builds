@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+750.sha-e1fc44f
+ * @license Angular v9.0.0-rc.1+755.sha-92c411f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19963,7 +19963,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+750.sha-e1fc44f');
+    var VERSION = new Version('9.0.0-rc.1+755.sha-92c411f');
 
     /**
      * @license
@@ -29321,8 +29321,11 @@
             get: function () {
                 var result = {};
                 var element = this.nativeElement;
-                var classNames = element.className.split(' ');
-                classNames.forEach(function (value) { return result[value] = true; });
+                // SVG elements return an `SVGAnimatedString` instead of a plain string for the `className`.
+                var className = element.className;
+                var classes = className && typeof className !== 'string' ? className.baseVal.split(' ') :
+                    className.split(' ');
+                classes.forEach(function (value) { return result[value] = true; });
                 return result;
             },
             enumerable: true,
