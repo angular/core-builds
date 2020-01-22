@@ -1,6 +1,6 @@
 /**
- * @license Angular v9.0.0-rc.1+636.sha-142363a
- * (c) 2010-2019 Google LLC. https://angular.io/
+ * @license Angular v0.0.0
+ * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -171,26 +171,26 @@ declare abstract class ComponentFactory<C> {
     /**
      * The component's HTML selector.
      */
-    abstract readonly selector: string;
+    abstract get selector(): string;
     /**
      * The type of component the factory will create.
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Selector for all <ng-content> elements in the component.
      */
-    abstract readonly ngContentSelectors: string[];
+    abstract get ngContentSelectors(): string[];
     /**
      * The inputs of the component.
      */
-    abstract readonly inputs: {
+    abstract get inputs(): {
         propName: string;
         templateName: string;
     }[];
     /**
      * The outputs of the component.
      */
-    abstract readonly outputs: {
+    abstract get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -229,28 +229,28 @@ declare abstract class ComponentRef<C> {
     /**
      * The host or anchor [element](guide/glossary#element) for this component instance.
      */
-    abstract readonly location: ElementRef;
+    abstract get location(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this component instance.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
      * This component instance.
      */
-    abstract readonly instance: C;
+    abstract get instance(): C;
     /**
      * The [host view](guide/glossary#view-tree) defined by the template
      * for this component instance.
      */
-    abstract readonly hostView: ViewRef;
+    abstract get hostView(): ViewRef;
     /**
      * The change detector for this component instance.
      */
-    abstract readonly changeDetectorRef: ChangeDetectorRef;
+    abstract get changeDetectorRef(): ChangeDetectorRef;
     /**
      * The type of this component (as created by a `ComponentFactory` class).
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -516,12 +516,20 @@ declare class InjectionToken<T> {
 }
 
 /**
- * Concrete injectors implement this interface.
+ * Concrete injectors implement this interface. Injectors are configured
+ * with [providers](guide/glossary#provider) that associate
+ * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see `StaticProvider`
  *
  * @usageNotes
- * ### Example
+ *
+ *  The following example creates a service injector instance.
+ *
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * ### Usage example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
@@ -549,6 +557,18 @@ declare abstract class Injector {
      * @deprecated from v5 use the new signature Injector.create(options)
      */
     static create(providers: StaticProvider[], parent?: Injector): Injector;
+    /**
+     * Creates a new injector instance that provides one or more dependencies,
+     * according to a given type or types of `StaticProvider`.
+     *
+     * @param options An object with the following properties:
+     * * `providers`: An array of providers of the [StaticProvider type](api/core/StaticProvider).
+     * * `parent`: (optional) A parent injector.
+     * * `name`: (optional) A developer-defined identifying name for the new injector.
+     *
+     * @returns The new injector instance.
+     *
+     */
     static create(options: {
         providers: StaticProvider[];
         parent?: Injector;
@@ -637,7 +657,7 @@ export declare class NgModuleFactory<T> extends NgModuleFactory_2<T> {
  * @publicApi
  */
 declare abstract class NgModuleFactory_2<T> {
-    abstract readonly moduleType: Type<T>;
+    abstract get moduleType(): Type<T>;
     abstract create(parentInjector: Injector | null): NgModuleRef<T>;
 }
 
@@ -653,16 +673,16 @@ declare abstract class NgModuleRef<T> {
     /**
      * The injector that contains all of the providers of the NgModule.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
      * declared in the `entryComponents` property of the module.
      */
-    abstract readonly componentFactoryResolver: ComponentFactoryResolver;
+    abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
      * The NgModule instance.
      */
-    abstract readonly instance: T;
+    abstract get instance(): T;
     /**
      * Destroys the module instance and all of the data structures associated with it.
      */
@@ -771,8 +791,11 @@ declare interface StaticClassSansProvider {
 }
 
 /**
- * Describes how the `Injector` should be configured as static (that is, without reflection).
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * Describes how an `Injector` should be configured as static (that is, without reflection).
+ * A static provider provides tokens to an injector for various types of dependencies.
+ *
+ * @see [Injector.create()](/api/core/Injector#create).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
  */
@@ -854,7 +877,7 @@ declare abstract class ViewRef extends ChangeDetectorRef {
      * Reports whether this view has been destroyed.
      * @returns True after the `destroy()` method has been called, false otherwise.
      */
-    abstract readonly destroyed: boolean;
+    abstract get destroyed(): boolean;
     /**
      * A lifecycle hook that provides additional developer-defined cleanup
      * functionality for views.
