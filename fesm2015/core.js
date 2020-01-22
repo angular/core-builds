@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.10+9.sha-20dc436
+ * @license Angular v9.0.0-rc.10+14.sha-34c30ae
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28638,7 +28638,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.10+9.sha-20dc436');
+const VERSION = new Version('9.0.0-rc.10+14.sha-34c30ae');
 
 /**
  * @fileoverview added by tsickle
@@ -44208,9 +44208,13 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         const result = {};
         /** @type {?} */
         const element = (/** @type {?} */ (this.nativeElement));
+        // SVG elements return an `SVGAnimatedString` instead of a plain string for the `className`.
         /** @type {?} */
-        const classNames = element.className.split(' ');
-        classNames.forEach((/**
+        const className = (/** @type {?} */ (element.className));
+        /** @type {?} */
+        const classes = className && typeof className !== 'string' ? className.baseVal.split(' ') :
+            className.split(' ');
+        classes.forEach((/**
          * @param {?} value
          * @return {?}
          */
