@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+740.sha-0d83095
+ * @license Angular v9.0.0-rc.1+746.sha-e7cf37d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7654,12 +7654,14 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
  *
  * It is enabled in two cases:
  *
- *   1. The `styleSanitizer(sanitizerFn)` instruction was called (just before any other
- *      styling instructions are run).
+ *   1. One or more styleProp instructions are generated (a sanitizer is passed in to each one).
  *
- *   2. The component/directive `LView` instance has a sanitizer object attached to it
- *      (this happens when `renderComponent` is executed with a `sanitizer` value or
- *      if the ngModule contains a sanitizer provider attached to it).
+ *   2. the `styleMap` instruction runs (it uses it by default internally).
+ *
+ * Sanitization can be enabled in the cases above, however, if a sanitizer is attached
+ * in the `LView` then that sanitizer can be used to override whatever sanitizer is
+ * passed in the examples above (this happens when `renderComponent` is executed with a
+ * `sanitizer` value or if the ngModule contains a sanitizer provider attached to it).
  *
  * If and when sanitization is active then all property/value entries will be evaluated
  * through the active sanitizer before they are applied to the element (or the styling
@@ -7667,18 +7669,6 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
  *
  * If a `Sanitizer` object is used (via the `LView[SANITIZER]` value) then that object
  * will be used for every property.
- *
- * If a `StyleSanitizerFn` function is used (via the `styleSanitizer`) then it will be
- * called in two ways:
- *
- *   1. property validation mode: this will be called early to mark whether a property
- *      should be sanitized or not at during the flushing stage.
- *
- *   2. value sanitization mode: this will be called during the flushing stage and will
- *      run the sanitizer function against the value before applying it to the element.
- *
- * If sanitization returns an empty value then that empty value will be applied
- * to the element.
  */
 declare interface TStylingContext extends Array<number | string | number | boolean | null | StylingMapArray | {}> {
     /** The total amount of sources present in the context */
@@ -13634,6 +13624,15 @@ export declare function ɵɵstyleMap(styles: {
 } | ɵNO_CHANGE | null): void;
 
 /**
+ * --------
+ *
+ * This file contains the core logic for how styling instructions are processed in Angular.
+ *
+ * To learn more about the algorithm see `TStylingContext`.
+ *
+ * --------
+ */
+/**
  * Update a style binding on an element with the provided value.
  *
  * If the style value is falsy then it will be removed from the element
@@ -13654,7 +13653,7 @@ export declare function ɵɵstyleMap(styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): typeof ɵɵstyleProp;
+export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffixOrSanitizer?: StyleSanitizeFn | string | null): typeof ɵɵstyleProp;
 
 /**
  *
@@ -13969,33 +13968,6 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
  * @codeGenApi
  */
 export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;
-
-/**
- * --------
- *
- * This file contains the core logic for how styling instructions are processed in Angular.
- *
- * To learn more about the algorithm see `TStylingContext`.
- *
- * --------
- */
-/**
- * Sets the current style sanitizer function which will then be used
- * within all follow-up prop and map-based style binding instructions
- * for the given element.
- *
- * Note that once styling has been applied to the element (i.e. once
- * `advance(n)` is executed or the hostBindings/template function exits)
- * then the active `sanitizerFn` will be set to `null`. This means that
- * once styling is applied to another element then a another call to
- * `styleSanitizer` will need to be made.
- *
- * @param sanitizerFn The sanitization function that will be used to
- *       process style prop/value entries.
- *
- * @codeGenApi
- */
-export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
