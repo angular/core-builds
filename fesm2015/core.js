@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+760.sha-d15cf60
+ * @license Angular v9.0.0-rc.1+761.sha-32b72f3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28638,7 +28638,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+760.sha-d15cf60');
+const VERSION = new Version('9.0.0-rc.1+761.sha-32b72f3');
 
 /**
  * @fileoverview added by tsickle
@@ -44305,7 +44305,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             if (listener.name === eventName) {
                 /** @type {?} */
                 const callback = listener.callback;
-                callback(eventObj);
+                callback.call(node, eventObj);
                 invokedListeners.push(callback);
             }
         }));
@@ -44313,16 +44313,25 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         // that Zone.js only adds to `EventTarget` in browser environments.
         if (typeof node.eventListeners === 'function') {
             // Note that in Ivy we wrap event listeners with a call to `event.preventDefault` in some
-            // cases. We use `Function` as a special token that gives us access to the actual event
+            // cases. We use '__ngUnwrap__' as a special token that gives us access to the actual event
             // listener.
             node.eventListeners(eventName).forEach((/**
              * @param {?} listener
              * @return {?}
              */
             (listener) => {
-                /** @type {?} */
-                const unwrappedListener = listener(Function);
-                return invokedListeners.indexOf(unwrappedListener) === -1 && unwrappedListener(eventObj);
+                // In order to ensure that we can detect the special __ngUnwrap__ token described above, we
+                // use `toString` on the listener and see if it contains the token. We use this approach to
+                // ensure that it still worked with compiled code since it cannot remove or rename string
+                // literals. We also considered using a special function name (i.e. if(listener.name ===
+                // special)) but that was more cumbersome and we were also concerned the compiled code could
+                // strip the name, turning the condition in to ("" === "") and always returning true.
+                if (listener.toString().indexOf('__ngUnwrap__') !== -1) {
+                    /** @type {?} */
+                    const unwrappedListener = listener('__ngUnwrap__');
+                    return invokedListeners.indexOf(unwrappedListener) === -1 &&
+                        unwrappedListener.call(node, eventObj);
+                }
             }));
         }
     }
