@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+777.sha-4ba4782
+ * @license Angular v9.0.0-rc.1+778.sha-055533b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19932,7 +19932,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+777.sha-4ba4782');
+    var VERSION = new Version('9.0.0-rc.1+778.sha-055533b');
 
     /**
      * @license
@@ -23170,7 +23170,6 @@
      * @param locale The code of the locale whose currency code we want.
      * @returns The code of the default currency for the given locale.
      *
-     * @publicApi
      */
     function getLocaleCurrencyCode(locale) {
         var data = findLocaleData(locale);
@@ -32298,6 +32297,7 @@
     exports.ɵgetHostElement = getHostElement;
     exports.ɵgetInjectableDef = getInjectableDef;
     exports.ɵgetLContext = getLContext;
+    exports.ɵgetLocaleCurrencyCode = getLocaleCurrencyCode;
     exports.ɵgetLocalePluralCase = getLocalePluralCase;
     exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
     exports.ɵgetSanitizationBypassType = getSanitizationBypassType;
