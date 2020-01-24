@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.10+52.sha-65354fb
+ * @license Angular v9.0.0-rc.10+54.sha-622737c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10029,6 +10029,17 @@ export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> |
  * @param target Component, Directive or DOM Node.
  */
 export declare function ɵgetLContext(target: any): ɵLContext | null;
+
+/**
+ * Retrieves the default currency code for the given locale.
+ *
+ * The default is defined as the first currency which is still in use.
+ *
+ * @param locale The code of the locale whose currency code we want.
+ * @returns The code of the default currency for the given locale.
+ *
+ */
+export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
 
 /**
  * Retrieves the plural function used by ICU expressions to determine the plural case to use

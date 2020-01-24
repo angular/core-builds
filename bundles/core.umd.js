@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.10+52.sha-65354fb
+ * @license Angular v9.0.0-rc.10+54.sha-622737c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10012,7 +10012,9 @@
                     var embeddedLView = viewOrContainer[i];
                     var embeddedTView = embeddedLView[TVIEW];
                     ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
-                    refreshView(embeddedLView, embeddedTView, embeddedTView.template, embeddedLView[CONTEXT]);
+                    if (viewAttachedToChangeDetector(embeddedLView)) {
+                        refreshView(embeddedLView, embeddedTView, embeddedTView.template, embeddedLView[CONTEXT]);
+                    }
                 }
                 if ((activeIndexFlag & 1 /* HAS_TRANSPLANTED_VIEWS */) !== 0) {
                     // We should only CD moved views if the component where they were inserted does not match
@@ -19963,7 +19965,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.10+52.sha-65354fb');
+    var VERSION = new Version('9.0.0-rc.10+54.sha-622737c');
 
     /**
      * @license
@@ -23208,7 +23210,6 @@
      * @param locale The code of the locale whose currency code we want.
      * @returns The code of the default currency for the given locale.
      *
-     * @publicApi
      */
     function getLocaleCurrencyCode(locale) {
         var data = findLocaleData(locale);
@@ -32399,6 +32400,7 @@
     exports.ɵgetHostElement = getHostElement;
     exports.ɵgetInjectableDef = getInjectableDef;
     exports.ɵgetLContext = getLContext;
+    exports.ɵgetLocaleCurrencyCode = getLocaleCurrencyCode;
     exports.ɵgetLocalePluralCase = getLocalePluralCase;
     exports.ɵgetModuleFactory__POST_R3__ = getModuleFactory__POST_R3__;
     exports.ɵgetSanitizationBypassType = getSanitizationBypassType;
