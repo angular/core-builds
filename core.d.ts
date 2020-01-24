@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.10+54.sha-622737c
+ * @license Angular v9.0.0-rc.10+67.sha-2e1a16b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -431,6 +431,22 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     get viewCount(): number;
+}
+
+/**
+ * `ArrayMap` is an array where even positions contain keys and odd positions contain values.
+ *
+ * `ArrayMap` provides a very efficient way of iterating over its contents. For small
+ * sets (~10) the cost of binary searching an `ArrayMap` has about the same performance
+ * characteristics that of a `Map` with significantly better memory footprint.
+ *
+ * If used as a `Map` the keys are stored in alphabetical order so that they can be binary searched
+ * for retrieval.
+ *
+ * See: `arrayMapSet`, `arrayMapGet`, `arrayMapIndexOf`, `arrayMapDelete`.
+ */
+declare interface ArrayMap<VALUE> extends Array<VALUE | string> {
+    __brand__: 'array-map';
 }
 
 /**
@@ -3381,12 +3397,6 @@ declare interface InstructionState {
      * Necessary to support ChangeDetectorRef.checkNoChanges().
      */
     checkNoChangesMode: boolean;
-    /**
-     * Function to be called when the element is exited.
-     *
-     * NOTE: The function is here for tree shakable purposes since it is only needed by styling.
-     */
-    elementExitFn: (() => void) | null;
 }
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
@@ -3766,7 +3776,7 @@ declare interface LFrame {
     /**
      * Used to set the parent property when nodes are created and track query results.
      *
-     * This is used in conjection with `isParent`.
+     * This is used in conjunction with `isParent`.
      */
     previousOrParentTNode: TNode;
     /**
@@ -3807,18 +3817,6 @@ declare interface LFrame {
      * Current sanitizer
      */
     currentSanitizer: StyleSanitizeFn | null;
-    /**
-     * Used when processing host bindings.
-     */
-    currentDirectiveDef: ɵDirectiveDef<any> | ɵComponentDef<any> | null;
-    /**
-     * Used as the starting directive id value.
-     *
-     * All subsequent directives are incremented from this value onwards.
-     * The reason why this value is `1` instead of `0` is because the `0`
-     * value is reserved for the template.
-     */
-    activeDirectiveId: number;
     /**
      * The root index from which pure function instructions should calculate their binding
      * indices. In component views, this is TView.bindingStartIndex. In a host binding
@@ -6367,39 +6365,6 @@ declare const enum StyleSanitizeMode {
 }
 
 /**
- * Array-based representation of a key/value array.
- *
- * The format of the array is "property", "value", "property2",
- * "value2", etc...
- *
- * The first value in the array is reserved to store the instance
- * of the key/value array that was used to populate the property/
- * value entries that take place in the remainder of the array.
- */
-declare interface StylingMapArray extends Array<{} | string | number | null | undefined> {
-    /**
-     * The last raw value used to generate the entries in the map.
-     */
-    [StylingMapArrayIndex.RawValuePosition]: {} | string | number | null | undefined;
-}
-
-/**
- * An index of position and offset points for any data stored within a `StylingMapArray` instance.
- */
-declare const enum StylingMapArrayIndex {
-    /** Where the values start in the array */
-    ValuesStartPosition = 1,
-    /** The location of the raw key/value map instance used last to populate the array entries */
-    RawValuePosition = 0,
-    /** The size of each property/value entry */
-    TupleSize = 2,
-    /** The offset for the property entry in the tuple */
-    PropOffset = 0,
-    /** The offset for the value entry in the tuple */
-    ValueOffset = 1
-}
-
-/**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * @publicApi
  * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
@@ -6498,7 +6463,7 @@ declare interface TContainerNode extends TNode {
  *
  * Injector bloom filters are also stored here.
  */
-declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
+declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
 
 /** Static data for an <ng-container> */
 declare interface TElementContainerNode extends TNode {
@@ -6833,6 +6798,18 @@ declare interface TNode {
      */
     attrs: TAttributes | null;
     /**
+     * Same as `TNode.attrs` but contains merged data across all directive host bindings.
+     *
+     * We need to keep `attrs` as unmerged so that it can be used for attribute selectors.
+     * We merge attrs here so that it can be used in a performant way for initial rendering.
+     *
+     * The `attrs` are merged in first pass in following order:
+     * - Component's `hostAttrs`
+     * - Directives' `hostAttrs`
+     * - Template `TNode.attrs` associated with the current `TNode`.
+     */
+    mergedAttrs: TAttributes | null;
+    /**
      * A set of local names under which a given element is exported in a template and
      * visible to queries. An entry in this array can be created for different reasons:
      * - an element itself is referenced, ex.: `<div #foo>`
@@ -6963,38 +6940,70 @@ declare interface TNode {
      * This field will be populated if and when:
      *
      * - There are one or more initial styles on an element (e.g. `<div style="width:200px">`)
-     * - There are one or more style bindings on an element (e.g. `<div [style.width]="w">`)
-     *
-     * If and when there are only initial styles (no bindings) then an instance of `StylingMapArray`
-     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
-     * are one or more style bindings on an element.
-     *
-     * During element creation this value is likely to be populated with an instance of
-     * `StylingMapArray` and only when the bindings are evaluated (which happens during
-     * update mode) then it will be converted to a `TStylingContext` if any style bindings
-     * are encountered. If and when this happens then the existing `StylingMapArray` value
-     * will be placed into the initial styling slot in the newly created `TStylingContext`.
      */
-    styles: StylingMapArray | TStylingContext | null;
+    styles: string | null;
+    /**
+     * An `ArrayMap` version of `styles.
+     *
+     * We need this when style bindings are resolving. This gets populated only if there are styling
+     * binding instructions. The laziness is important since we don't want to allocate the memory
+     * because most styling is static. For tree shaking purposes the code to create these only comes
+     * with styling.
+     *
+     * - `undefined': not initialized.
+     * - `null`: initialized but `styles` is `null`
+     * - `ArrayMap`: parsed version of `styles`.
+     */
+    stylesMap: ArrayMap<any> | undefined | null;
     /**
      * A collection of all class bindings and/or static class values for an element.
      *
      * This field will be populated if and when:
      *
      * - There are one or more initial classes on an element (e.g. `<div class="one two three">`)
-     * - There are one or more class bindings on an element (e.g. `<div [class.foo]="f">`)
-     *
-     * If and when there are only initial classes (no bindings) then an instance of `StylingMapArray`
-     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
-     * are one or more class bindings on an element.
-     *
-     * During element creation this value is likely to be populated with an instance of
-     * `StylingMapArray` and only when the bindings are evaluated (which happens during
-     * update mode) then it will be converted to a `TStylingContext` if any class bindings
-     * are encountered. If and when this happens then the existing `StylingMapArray` value
-     * will be placed into the initial styling slot in the newly created `TStylingContext`.
      */
-    classes: StylingMapArray | TStylingContext | null;
+    classes: string | null;
+    /**
+     * An `ArrayMap` version of `classes`.
+     *
+     * We need this when style bindings are resolving. This gets populated only if there are styling
+     * binding instructions. The laziness is important since we don't want to allocate the memory
+     * because most styling is static. For tree shaking purposes the code to create these only comes
+     * with styling.
+     *
+     * - `undefined': not initialized.
+     * - `null`: initialized but `classes` is `null`
+     * - `ArrayMap`: parsed version of `S`.
+     */
+    classesMap: ArrayMap<any> | undefined | null;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the class bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "class" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     */
+    classBindings: TStylingRange;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the style bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "style" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     */
+    styleBindings: TStylingRange;
 }
 
 /**
@@ -7025,99 +7034,7 @@ declare const enum TNodeFlags {
      * This flags allows us to guard host-binding logic and invoke it only on nodes
      * that actually have directives with host bindings.
      */
-    hasHostBindings = 128,
-    /** Bit #9 - This bit is set if the node has initial styling */
-    hasInitialStyling = 256,
-    /**
-     * Bit #10 - Whether or not there are class-based map bindings present.
-     *
-     * Examples include:
-     * 1. `<div [class]="x">`
-     * 2. `@HostBinding('class') x`
-     */
-    hasClassMapBindings = 512,
-    /**
-     * Bit #11 - Whether or not there are any class-based prop bindings present.
-     *
-     * Examples include:
-     * 1. `<div [class.name]="x">`
-     * 2. `@HostBinding('class.name') x`
-     */
-    hasClassPropBindings = 1024,
-    /**
-     * Bit #12 - whether or not there are any active [class] and [class.name] bindings
-     */
-    hasClassPropAndMapBindings = 1536,
-    /**
-     * Bit #13 - Whether or not the context contains one or more class-based template bindings.
-     *
-     * Examples include:
-     * 1. `<div [class]="x">`
-     * 2. `<div [class.name]="x">`
-     */
-    hasTemplateClassBindings = 2048,
-    /**
-     * Bit #14 - Whether or not the context contains one or more class-based host bindings.
-     *
-     * Examples include:
-     * 1. `@HostBinding('class') x`
-     * 2. `@HostBinding('class.name') x`
-     */
-    hasHostClassBindings = 4096,
-    /**
-     * Bit #15 - Whether or not there are two or more sources for a class property in the context.
-     *
-     * Examples include:
-     * 1. prop + prop: `<div [class.active]="x" dir-that-sets-active-class>`
-     * 2. map + prop: `<div [class]="x" [class.foo]>`
-     * 3. map + map: `<div [class]="x" dir-that-sets-class>`
-     */
-    hasDuplicateClassBindings = 8192,
-    /**
-     * Bit #16 - Whether or not there are style-based map bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style]="x">`
-     * 2. `@HostBinding('style') x`
-     */
-    hasStyleMapBindings = 16384,
-    /**
-     * Bit #17 - Whether or not there are any style-based prop bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style.prop]="x">`
-     * 2. `@HostBinding('style.prop') x`
-     */
-    hasStylePropBindings = 32768,
-    /**
-     * Bit #18 - whether or not there are any active [style] and [style.prop] bindings
-     */
-    hasStylePropAndMapBindings = 49152,
-    /**
-     * Bit #19 - Whether or not the context contains one or more style-based template bindings.
-     *
-     * Examples include:
-     * 1. `<div [style]="x">`
-     * 2. `<div [style.prop]="x">`
-     */
-    hasTemplateStyleBindings = 65536,
-    /**
-     * Bit #20 - Whether or not the context contains one or more style-based host bindings.
-     *
-     * Examples include:
-     * 1. `@HostBinding('style') x`
-     * 2. `@HostBinding('style.prop') x`
-     */
-    hasHostStyleBindings = 131072,
-    /**
-     * Bit #21 - Whether or not there are two or more sources for a style property in the context.
-     *
-     * Examples include:
-     * 1. prop + prop: `<div [style.width]="x" dir-that-sets-width>`
-     * 2. map + prop: `<div [style]="x" [style.prop]>`
-     * 3. map + map: `<div [style]="x" dir-that-sets-style>`
-     */
-    hasDuplicateStyleBindings = 262144
+    hasHostBindings = 128
 }
 
 /**
@@ -7370,335 +7287,48 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
-/**
- * --------
- *
- * This file contains the core interfaces for styling in Angular.
- *
- * To learn more about the algorithm see `TStylingContext`.
- *
- * --------
- */
-/**
- * A static-level representation of all style or class bindings/values
- * associated with a `TNode`.
- *
- * The `TStylingContext` unites all template styling bindings (i.e.
- * `[class]` and `[style]` bindings) as well as all host-level
- * styling bindings (for components and directives) together into
- * a single manifest
- *
- * The styling context is stored on a `TNode` on and there are
- * two instances of it: one for classes and another for styles.
- *
- * ```typescript
- * tNode.styles = [ ... a context only for styles ... ];
- * tNode.classes = [ ... a context only for classes ... ];
- * ```
- *
- * The styling context is created each time there are one or more
- * styling bindings (style or class bindings) present for an element,
- * but is only created once per `TNode`.
- *
- * `tNode.styles` and `tNode.classes` can be an instance of the following:
- *
- * ```typescript
- * tNode.styles = null; // no static styling or styling bindings active
- * tNode.styles = StylingMapArray; // only static values present (e.g. `<div style="width:200">`)
- * tNode.styles = TStylingContext; // one or more styling bindings present (e.g. `<div
- * [style.width]>`)
- * ```
- *
- * Both `tNode.styles` and `tNode.classes` are instantiated when anything
- * styling-related is active on an element. They are first created from
- * from the any of the element-level instructions (e.g. `element`,
- * `elementStart`, `elementHostAttrs`). When any static style/class
- * values are encountered they are registered on the `tNode.styles`
- * and `tNode.classes` data-structures. By default (when any static
- * values are encountered) the `tNode.styles` or `tNode.classes` values
- * are instances of a `StylingMapArray`. Only when style/class bindings
- * are detected then that styling map is converted into an instance of
- * `TStylingContext`.
- *
- * Due to the fact the the `TStylingContext` is stored on a `TNode`
- * this means that all data within the context is static. Instead of
- * storing actual styling binding values, the lView binding index values
- * are stored within the context. (static nature means it is more compact.)
- *
- * The code below shows a breakdown of two instances of `TStylingContext`
- * (one for `tNode.styles` and another for `tNode.classes`):
- *
- * ```typescript
- * // <div [class.active]="c"  // lView binding index = 20
- * //      [style.width]="x"   // lView binding index = 21
- * //      [style.height]="y"> // lView binding index = 22
- * //  ...
- * // </div>
- * tNode.styles = [
- *   1,         // the total amount of sources present (only `1` b/c there are only template
- * bindings)
- *   [null],    // initial values array (an instance of `StylingMapArray`)
- *
- *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
- *   0b010,     // template guard mask for height
- *   0,         // host bindings guard mask for height
- *   'height',  // the property name
- *   22,        // the binding location for the "y" binding in the lView
- *   null,      // the default value for height
- *
- *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
- *   0b001,     // template guard mask for width
- *   0,         // host bindings guard mask for width
- *   'width',   // the property name
- *   21,        // the binding location for the "x" binding in the lView
- *   null,      // the default value for width
- * ];
- *
- * tNode.classes = [
- *   0,         // the context config value (see `TStylingContextConfig`)
- *   1,         // the total amount of sources present (only `1` b/c there are only template
- * bindings)
- *   [null],    // initial values array (an instance of `StylingMapArray`)
- *
- *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
- *   0b001,     // template guard mask for width
- *   0,         // host bindings guard mask for width
- *   'active',  // the property name
- *   20,        // the binding location for the "c" binding in the lView
- *   null,      // the default value for the `active` class
- * ];
- * ```
- *
- * Entry value present in an entry (called a tuple) within the
- * styling context is as follows:
- *
- * ```typescript
- * context = [
- *   //...
- *   configValue,
- *   templateGuardMask,
- *   hostBindingsGuardMask,
- *   propName,
- *   ...bindingIndices...,
- *   defaultValue
- *   //...
- * ];
- * ```
- *
- * Below is a breakdown of each value:
- *
- * - **configValue**:
- *   Property-specific configuration values. The only config setting
- *   that is implemented right now is whether or not to sanitize the
- *   value.
- *
- * - **templateGuardMask**:
- *   A numeric value where each bit represents a binding index
- *   location. Each binding index location is assigned based on
- *   a local counter value that increments each time an instruction
- *   is called:
- *
- * ```
- * <div [style.width]="x"   // binding index = 21 (counter index = 0)
- *      [style.height]="y"> // binding index = 22 (counter index = 1)
- * ```
- *
- *   In the example code above, if the `width` value where to change
- *   then the first bit in the local bit mask value would be flipped
- *   (and the second bit for when `height`).
- *
- *   If and when there are more than 32 binding sources in the context
- *   (more than 32 `[style/class]` bindings) then the bit masking will
- *   overflow and we are left with a situation where a `-1` value will
- *   represent the bit mask. Due to the way that JavaScript handles
- *   negative values, when the bit mask is `-1` then all bits within
- *   that value will be automatically flipped (this is a quick and
- *   efficient way to flip all bits on the mask when a special kind
- *   of caching scenario occurs or when there are more than 32 bindings).
- *
- * - **hostBindingsGuardMask**:
- *   Another instance of a guard mask that is specific to host bindings.
- *   This behaves exactly the same way as does the `templateGuardMask`,
- *   but will not contain any binding information processed in the template.
- *   The reason why there are two instances of guard masks (one for the
- *   template and another for host bindings) is because the template bindings
- *   are processed before host bindings and the state information is not
- *   carried over into the host bindings code. As soon as host bindings are
- *   processed for an element the counter and state-based bit mask values are
- *   set to `0`.
- *
- * ```
- * <div [style.width]="x"   // binding index = 21 (counter index = 0)
- *      [style.height]="y"  // binding index = 22 (counter index = 1)
- *      dir-that-sets-width  // binding index = 30 (counter index = 0)
- *      dir-that-sets-width> // binding index = 31 (counter index = 1)
- * ```
- *
- * - **propName**:
- *   The CSS property name or class name (e.g `width` or `active`).
- *
- * - **bindingIndices...**:
- *   A series of numeric binding values that reflect where in the
- *   lView to find the style/class values associated with the property.
- *   Each value is in order in terms of priority (templates are first,
- *   then directives and then components). When the context is flushed
- *   and the style/class values are applied to the element (this happens
- *   inside of the `stylingApply` instruction) then the flushing code
- *   will keep checking each binding index against the associated lView
- *   to find the first style/class value that is non-null.
- *
- * - **defaultValue**:
- *   This is the default that will always be applied to the element if
- *   and when all other binding sources return a result that is null.
- *   Usually this value is `null` but it can also be a static value that
- *   is intercepted when the tNode is first constructured (e.g.
- *   `<div style="width:200px">` has a default value of `200px` for
- *   the `width` property).
- *
- * Each time a new binding is encountered it is registered into the
- * context. The context then is continually updated until the first
- * styling apply call has been called (which is automatically scheduled
- * to be called once an element exits during change detection). Note that
- * each entry in the context is stored in alphabetical order.
- *
- * Once styling has been flushed for the first time for an element the
- * context will set as locked (this prevents bindings from being added
- * to the context later on).
- *
- * # How Styles/Classes are Rendered
- * Each time a styling instruction (e.g. `[class.name]`, `[style.prop]`,
- * etc...) is executed, the associated `lView` for the view is updated
- * at the current binding location. Also, when this happens, a local
- * counter value is incremented. If the binding value has changed then
- * a local `bitMask` variable is updated with the specific bit based
- * on the counter value.
- *
- * Below is a lightweight example of what happens when a single style
- * property is updated (i.e. `<div [style.prop]="val">`):
- *
- * ```typescript
- * function updateStyleProp(prop: string, value: string) {
- *   const lView = getLView();
- *   const bindingIndex = BINDING_INDEX++;
- *
- *   // update the local counter value
- *   const indexForStyle = stylingState.stylesCount++;
- *   if (lView[bindingIndex] !== value) {
- *     lView[bindingIndex] = value;
- *
- *     // tell the local state that we have updated a style value
- *     // by updating the bit mask
- *     stylingState.bitMaskForStyles |= 1 << indexForStyle;
- *   }
- * }
- * ```
- *
- * Once all the bindings have updated a `bitMask` value will be populated.
- * This `bitMask` value is used in the apply algorithm (which is called
- * context resolution).
- *
- * ## The Apply Algorithm (Context Resolution)
- * As explained above, each time a binding updates its value, the resulting
- * value is stored in the `lView` array. These styling values have yet to
- * be flushed to the element.
- *
- * Once all the styling instructions have been evaluated, then the styling
- * context(s) are flushed to the element. When this happens, the context will
- * be iterated over (property by property) and each binding source will be
- * examined and the first non-null value will be applied to the element.
- *
- * Let's say that we the following template code:
- *
- * ```html
- * <div [style.width]="w1" dir-that-set-width="w2"></div>
- * ```
- *
- * There are two styling bindings in the code above and they both write
- * to the `width` property. When styling is flushed on the element, the
- * algorithm will try and figure out which one of these values to write
- * to the element.
- *
- * In order to figure out which value to apply, the following
- * binding prioritization is adhered to:
- *
- *   1. First template-level styling bindings are applied (if present).
- *      This includes things like `[style.width]` and `[class.active]`.
- *
- *   2. Second are styling-level host bindings present in directives.
- *      (if there are sub/super directives present then the sub directives
- *      are applied first).
- *
- *   3. Third are styling-level host bindings present in components.
- *      (if there are sub/super components present then the sub directives
- *      are applied first).
- *
- * This means that in the code above the styling binding present in the
- * template is applied first and, only if its falsy, then the directive
- * styling binding for width will be applied.
- *
- * ### What about map-based styling bindings?
- * Map-based styling bindings are activated when there are one or more
- * `[style]` and/or `[class]` bindings present on an element. When this
- * code is activated, the apply algorithm will iterate over each map
- * entry and apply each styling value to the element with the same
- * prioritization rules as above.
- *
- * For the algorithm to apply styling values efficiently, the
- * styling map entries must be applied in sync (property by property)
- * with prop-based bindings. (The map-based algorithm is described
- * more inside of the `render3/styling/map_based_bindings.ts` file.)
- *
- * ## Sanitization
- * Sanitization is used to prevent invalid style values from being applied to
- * the element.
- *
- * It is enabled in two cases:
- *
- *   1. The `styleSanitizer(sanitizerFn)` instruction was called (just before any other
- *      styling instructions are run).
- *
- *   2. The component/directive `LView` instance has a sanitizer object attached to it
- *      (this happens when `renderComponent` is executed with a `sanitizer` value or
- *      if the ngModule contains a sanitizer provider attached to it).
- *
- * If and when sanitization is active then all property/value entries will be evaluated
- * through the active sanitizer before they are applied to the element (or the styling
- * debug handler).
- *
- * If a `Sanitizer` object is used (via the `LView[SANITIZER]` value) then that object
- * will be used for every property.
- *
- * If a `StyleSanitizerFn` function is used (via the `styleSanitizer`) then it will be
- * called in two ways:
- *
- *   1. property validation mode: this will be called early to mark whether a property
- *      should be sanitized or not at during the flushing stage.
- *
- *   2. value sanitization mode: this will be called during the flushing stage and will
- *      run the sanitizer function against the value before applying it to the element.
- *
- * If sanitization returns an empty value then that empty value will be applied
- * to the element.
- */
-declare interface TStylingContext extends Array<number | string | number | boolean | null | StylingMapArray | {}> {
-    /** The total amount of sources present in the context */
-    [TStylingContextIndex.TotalSourcesPosition]: number;
-    /** Initial value position for static styles */
-    [TStylingContextIndex.InitialStylingValuePosition]: StylingMapArray;
-}
 
 /**
- * An index of position and offset values used to navigate the `TStylingContext`.
+ * Value stored in the `TData` which is needed to re-concatenate the styling.
+ *
+ * - `string`: Stores the property name. Used with `ɵɵstyleProp`/`ɵɵclassProp` instruction.
+ * - `null`: Represents map, so there is no name. Used with `ɵɵstyleMap`/`ɵɵclassMap`.
+ * - `false`: Represents an ignore case. This happens when `ɵɵstyleProp`/`ɵɵclassProp` instruction
+ *   is combined with directive which shadows its input `@Input('class')`. That way the binding
+ *   should not participate in the styling resolution.
  */
-declare const enum TStylingContextIndex {
-    TotalSourcesPosition = 0,
-    InitialStylingValuePosition = 1,
-    ValuesStartPosition = 2,
-    ConfigOffset = 0,
-    TemplateBitGuardOffset = 1,
-    HostBindingsBitGuardOffset = 2,
-    PropOffset = 3,
-    BindingsStartOffset = 4
+declare type TStylingKey = string | null | false;
+
+/**
+ * This is a branded number which contains previous and next index.
+ *
+ * When we come across styling instructions we need to store the `TStylingKey` in the correct
+ * order so that we can re-concatenate the styling value in the desired priority.
+ *
+ * The insertion can happen either at the:
+ * - end of template as in the case of coming across additional styling instruction in the template
+ * - in front of the template in the case of coming across additional instruction in the
+ *   `hostBindings`.
+ *
+ * We use `TStylingRange` to store the previous and next index into the `TData` where the template
+ * bindings can be found.
+ *
+ * - bit 0 is used to mark that the previous index has a duplicate for current value.
+ * - bit 1 is used to mark that the next index has a duplicate for the current value.
+ * - bits 2-16 are used to encode the next/tail of the template.
+ * - bits 17-32 are used to encode the previous/head of template.
+ *
+ * NODE: *duplicate* false implies that it is statically known that this binding will not collide
+ * with other bindings and therefore there is no need to check other bindings. For example the
+ * bindings in `<div [style.color]="exp" [style.width]="exp">` will never collide and will have
+ * their bits set accordingly. Previous duplicate means that we may need to check previous if the
+ * current binding is `null`. Next duplicate means that we may need to check next bindings if the
+ * current binding is not `null`.
+ *
+ * NOTE: `0` has special significance and represents `null` as in no additional pointer.
+ */
+declare interface TStylingRange {
+    __brand__: 'TStylingRange';
 }
 
 /** Static data for a text node */
@@ -7769,7 +7399,17 @@ declare interface TView {
     node: TViewNode | ɵangular_packages_core_core_bd | null;
     /** Whether or not this template has been processed in creation mode. */
     firstCreatePass: boolean;
-    /** Whether or not the first update for this template has been processed. */
+    /**
+     *  Whether or not this template has been processed in update mode (e.g. change detected)
+     *
+     * `firstUpdatePass` is used by styling to set up `TData` to contain metadata about the styling
+     * instructions. (Mainly to build up a linked list of styling priority order.)
+     *
+     * Typically this function gets cleared after first execution. If exception is thrown then this
+     * flag can remain turned un until there is first successful (no exception) pass. This means that
+     * individual styling instructions keep track of if they have already been added to the linked
+     * list to prevent double adding.
+     */
     firstUpdatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes, PipeDefInternal or TI18n. */
     data: TData;
@@ -9362,6 +9002,14 @@ export declare const enum ɵArgumentType {
  */
 export declare const enum ɵAttributeMarker {
     /**
+     * An implicit marker which indicates that the value in the array are of `attributeKey`,
+     * `attributeValue` format.
+     *
+     * NOTE: This is implicit as it is the type when no marker is present in array. We indicate that
+     * it should not be present at runtime by the negative number.
+     */
+    ImplicitAttributes = -1,
+    /**
      * Marker indicates that the following 3 values in the attributes array are:
      * namespaceUri, attributeName, attributeValue
      * in that order.
@@ -9899,9 +9547,47 @@ export declare interface ɵDirectiveDef<T> {
     /**
      * Refreshes host bindings on the associated directive.
      */
-    hostBindings: HostBindingsFunction<T> | null;
+    readonly hostBindings: HostBindingsFunction<T> | null;
+    /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    readonly hostVars: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    readonly hostAttrs: TAttributes | null;
     /** Token representing the directive. Used by DI. */
-    type: Type<T>;
+    readonly type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
     providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
@@ -9914,15 +9600,15 @@ export declare interface ɵDirectiveDef<T> {
      * Factory function used to create a new directive instance. Will be null initially.
      * Populated when the factory is first requested by directive instantiation logic.
      */
-    factory: FactoryFn<T> | null;
-    onChanges: (() => void) | null;
-    onInit: (() => void) | null;
-    doCheck: (() => void) | null;
-    afterContentInit: (() => void) | null;
-    afterContentChecked: (() => void) | null;
-    afterViewInit: (() => void) | null;
-    afterViewChecked: (() => void) | null;
-    onDestroy: (() => void) | null;
+    readonly factory: FactoryFn<T> | null;
+    readonly onChanges: (() => void) | null;
+    readonly onInit: (() => void) | null;
+    readonly doCheck: (() => void) | null;
+    readonly afterContentInit: (() => void) | null;
+    readonly afterContentChecked: (() => void) | null;
+    readonly afterViewInit: (() => void) | null;
+    readonly afterViewChecked: (() => void) | null;
+    readonly onDestroy: (() => void) | null;
     /**
      * The features applied to this directive
      */
@@ -10309,7 +9995,7 @@ export declare interface ɵNgModuleType<T = any> extends Type<T> {
 
 
 export declare interface ɵNO_CHANGE {
-    brand: 'NO_CHANGE';
+    __brand__: 'NO_CHANGE';
 }
 
 /** A special value which designates that a value has not changed. */
@@ -10930,16 +10616,6 @@ export declare function ɵwhenRendered(component: any): Promise<null>;
   */
 export declare function ɵɵadvance(delta: number): void;
 
-
-/**
- * Allocates the necessary amount of slots for host vars.
- *
- * @param count Amount of vars to be allocated
- *
- * @codeGenApi
- */
-export declare function ɵɵallocHostVars(count: number): void;
-
 /**
  * Updates the value of or removes a bound attribute on an Element.
  *
@@ -11272,8 +10948,8 @@ export declare function ɵɵattributeInterpolateV(attrName: string, values: any[
  * @codeGenApi
  */
 export declare function ɵɵclassMap(classes: {
-    [className: string]: any;
-} | ɵNO_CHANGE | string | null): void;
+    [className: string]: boolean | undefined | null;
+} | Map<string, boolean | undefined | null> | Set<string> | string[] | string | undefined | null): void;
 
 
 /**
@@ -11562,7 +11238,7 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(className: string, value: boolean | null): typeof ɵɵclassProp;
+export declare function ɵɵclassProp(className: string, value: boolean | undefined | null): typeof ɵɵclassProp;
 
 /**
  * @codeGenApi
@@ -11768,6 +11444,44 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      */
     hostBindings?: HostBindingsFunction<T>;
     /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: TAttributes;
+    /**
      * Function to create instances of content queries associated with a given directive.
      */
     contentQueries?: ContentQueriesFunction<T>;
@@ -11961,6 +11675,44 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      * Function executed by the parent template to allow child directive to apply host bindings.
      */
     hostBindings?: HostBindingsFunction<T> | undefined;
+    /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number | undefined;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: TAttributes | undefined;
     /**
      * Function to create instances of content queries associated with a given directive.
      */
@@ -12186,46 +11938,6 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  */
 export declare function ɵɵelementEnd(): void;
 
-/**
- * Assign static attribute values to a host element.
- *
- * This instruction will assign static attribute values as well as class and style
- * values to an element within the host bindings function. Since attribute values
- * can consist of different types of values, the `attrs` array must include the values in
- * the following format:
- *
- * attrs = [
- *   // static attributes (like `title`, `name`, `id`...)
- *   attr1, value1, attr2, value,
- *
- *   // a single namespace value (like `x:id`)
- *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
- *
- *   // another single namespace value (like `x:name`)
- *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
- *
- *   // a series of CSS classes that will be applied to the element (no spaces)
- *   CLASSES_MARKER, class1, class2, class3,
- *
- *   // a series of CSS styles (property + value) that will be applied to the element
- *   STYLES_MARKER, prop1, value1, prop2, value2
- * ]
- *
- * All non-class and non-style attributes must be defined at the start of the list
- * first before all class and style values are set. When there is a change in value
- * type (like when classes and styles are introduced) a marker must be used to separate
- * the entries. The marker values themselves are set via entries found in the
- * [AttributeMarker] enum.
- *
- * NOTE: This instruction is meant to used from `hostBindings` function only.
- *
- * @param directive A directive instance the styling is associated with.
- * @param attrs An array of static values (attributes, classes and styles) with the correct marker
- * values.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -13641,7 +13353,7 @@ export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], 
  */
 export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
-} | ɵNO_CHANGE | null): void;
+} | Map<string, string | number | null | undefined> | string | undefined | null): void;
 
 /**
  * Update a style binding on an element with the provided value.
@@ -13664,7 +13376,8 @@ export declare function ɵɵstyleMap(styles: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): typeof ɵɵstyleProp;
+export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | undefined | null, suffix?: string | null): typeof ɵɵstyleProp;
+
 
 /**
  *
@@ -13980,15 +13693,6 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
  */
 export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;
 
-/**
- * --------
- *
- * This file contains the core logic for how styling instructions are processed in Angular.
- *
- * To learn more about the algorithm see `TStylingContext`.
- *
- * --------
- */
 /**
  * Sets the current style sanitizer function which will then be used
  * within all follow-up prop and map-based style binding instructions
