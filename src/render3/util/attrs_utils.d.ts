@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { AttributeMarker, TAttributes } from '../interfaces/node';
 import { CssSelector } from '../interfaces/projection';
 import { RElement, Renderer3 } from '../interfaces/renderer';
@@ -45,3 +38,22 @@ export declare function setUpAttributes(renderer: Renderer3, native: RElement, a
  */
 export declare function isNameOnlyAttributeMarker(marker: string | AttributeMarker | CssSelector): boolean;
 export declare function isAnimationProp(name: string): boolean;
+/**
+ * Merges `src` `TAttributes` into `dst` `TAttributes` removing any duplicates in the process.
+ *
+ * This merge function keeps the order of attrs same.
+ *
+ * @param dst Location of where the merged `TAttributes` should end up.
+ * @param src `TAttributes` which should be appended to `dst`
+ */
+export declare function mergeHostAttrs(dst: TAttributes | null, src: TAttributes | null): TAttributes | null;
+/**
+ * Append `key`/`value` to existing `TAttributes` taking region marker and duplicates into account.
+ *
+ * @param dst `TAttributes` to append to.
+ * @param marker Region where the `key`/`value` should be added.
+ * @param key1 Key to add to `TAttributes`
+ * @param key2 Key to add to `TAttributes` (in case of `AttributeMarker.NamespaceURI`)
+ * @param value Value to add or to overwrite to `TAttributes` Only used if `marker` is not Class.
+ */
+export declare function mergeHostAttribute(dst: TAttributes, marker: AttributeMarker, key1: string, key2: string | null, value: string | null): void;

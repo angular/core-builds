@@ -77,17 +77,17 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  * @param rNode Render host element.
  * @param def ComponentDef
  * @param rootView The parent view where the host node is stored
- * @param renderer The current renderer
+ * @param hostRenderer The current renderer
  * @param sanitizer The sanitizer, if provided
  *
  * @returns Component view created
  */
-export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LView, rendererFactory: RendererFactory3, renderer: Renderer3, sanitizer?: Sanitizer | null): LView;
+export declare function createRootComponentView(rNode: RElement | null, def: ComponentDef<any>, rootView: LView, rendererFactory: RendererFactory3, hostRenderer: Renderer3, addVersion: string | null, sanitizer: Sanitizer | null): LView;
 /**
  * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-export declare function createRootComponent<T>(componentView: LView, componentDef: ComponentDef<T>, rootView: LView, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
+export declare function createRootComponent<T>(componentView: LView, componentDef: ComponentDef<T>, rootLView: LView, rootContext: RootContext, hostFeatures: HostFeature[] | null): any;
 export declare function createRootContext(scheduler?: (workFn: () => void) => void, playerHandler?: PlayerHandler | null): RootContext;
 /**
  * Used to enable lifecycle hooks on the root component.

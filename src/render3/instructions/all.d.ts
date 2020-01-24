@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export * from './alloc_host_vars';
 export * from './attribute';
 export * from './attribute_interpolation';
 export * from './change_detection';

@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
-import { ComponentDef, DirectiveDef } from './interfaces/definition';
 import { TNode } from './interfaces/node';
 import { LView, OpaqueViewState } from './interfaces/view';
 /**
@@ -35,7 +34,7 @@ interface LFrame {
     /**
      * Used to set the parent property when nodes are created and track query results.
      *
-     * This is used in conjection with `isParent`.
+     * This is used in conjunction with `isParent`.
      */
     previousOrParentTNode: TNode;
     /**
@@ -76,18 +75,6 @@ interface LFrame {
      * Current sanitizer
      */
     currentSanitizer: StyleSanitizeFn | null;
-    /**
-     * Used when processing host bindings.
-     */
-    currentDirectiveDef: DirectiveDef<any> | ComponentDef<any> | null;
-    /**
-     * Used as the starting directive id value.
-     *
-     * All subsequent directives are incremented from this value onwards.
-     * The reason why this value is `1` instead of `0` is because the `0`
-     * value is reserved for the template.
-     */
-    activeDirectiveId: number;
     /**
      * The root index from which pure function instructions should calculate their binding
      * indices. In component views, this is TView.bindingStartIndex. In a host binding
@@ -141,19 +128,11 @@ interface InstructionState {
      * Necessary to support ChangeDetectorRef.checkNoChanges().
      */
     checkNoChangesMode: boolean;
-    /**
-     * Function to be called when the element is exited.
-     *
-     * NOTE: The function is here for tree shakable purposes since it is only needed by styling.
-     */
-    elementExitFn: (() => void) | null;
 }
 export declare const instructionState: InstructionState;
 export declare function getElementDepthCount(): number;
 export declare function increaseElementDepthCount(): void;
 export declare function decreaseElementDepthCount(): void;
-export declare function getCurrentDirectiveDef(): DirectiveDef<any> | ComponentDef<any> | null;
-export declare function setCurrentDirectiveDef(def: DirectiveDef<any> | ComponentDef<any> | null): void;
 export declare function getBindingsEnabled(): boolean;
 /**
  * Enables directive matching on elements.
@@ -203,84 +182,14 @@ export declare function ɵɵdisableBindings(): void;
  */
 export declare function getLView(): LView;
 /**
- * Flags used for an active element during change detection.
- *
- * These flags are used within other instructions to inform cleanup or
- * exit operations to run when an element is being processed.
- *
- * Note that these flags are reset each time an element changes (whether it
- * happens when `advance()` is run or when change detection exits out of a template
- * function or when all host bindings are processed for an element).
- */
-export declare const enum ActiveElementFlags {
-    Initial = 0,
-    RunExitFn = 1,
-    Size = 1
-}
-/**
- * Determines whether or not a flag is currently set for the active element.
- */
-export declare function hasActiveElementFlag(flag: ActiveElementFlags): boolean;
-/**
  * Sets the active directive host element and resets the directive id value
  * (when the provided elementIndex value has changed).
  *
  * @param elementIndex the element index value for the host element where
  *                     the directive/component instance lives
  */
-export declare function setActiveHostElement(elementIndex: number | null): void;
-export declare function executeElementExitFn(): void;
-/**
- * Queues a function to be run once the element is "exited" in CD.
- *
- * Change detection will focus on an element either when the `advance()`
- * instruction is called or when the template or host bindings instruction
- * code is invoked. The element is then "exited" when the next element is
- * selected or when change detection for the template or host bindings is
- * complete. When this occurs (the element change operation) then an exit
- * function will be invoked if it has been set. This function can be used
- * to assign that exit function.
- *
- * @param fn
- */
-export declare function setElementExitFn(fn: () => void): void;
-/**
- * Returns the current id value of the current directive.
- *
- * For example we have an element that has two directives on it:
- * <div dir-one dir-two></div>
- *
- * dirOne->hostBindings() (id == 1)
- * dirTwo->hostBindings() (id == 2)
- *
- * Note that this is only active when `hostBinding` functions are being processed.
- *
- * Note that directive id values are specific to an element (this means that
- * the same id value could be present on another element with a completely
- * different set of directives).
- */
-export declare function getActiveDirectiveId(): number;
-/**
- * Increments the current directive id value.
- *
- * For example we have an element that has two directives on it:
- * <div dir-one dir-two></div>
- *
- * dirOne->hostBindings() (index = 1)
- * // increment
- * dirTwo->hostBindings() (index = 2)
- *
- * Depending on whether or not a previous directive had any inherited
- * directives present, that value will be incremented in addition
- * to the id jumping up by one.
- *
- * Note that this is only active when `hostBinding` functions are being processed.
- *
- * Note that directive id values are specific to an element (this means that
- * the same id value could be present on another element with a completely
- * different set of directives).
- */
-export declare function incrementActiveDirectiveId(): void;
+export declare function setActiveHostElement(elementIndex: number): void;
+export declare function clearActiveHostElement(): void;
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
@@ -314,7 +223,7 @@ export declare function incrementBindingIndex(count: number): number;
  * 0 index and we just shift the root so that they match next available location in the LView.
  * @param value
  */
-export declare function setBindingRoot(value: number): void;
+export declare function setBindingRootForHostBindings(value: number): void;
 export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;
 /**
@@ -342,11 +251,10 @@ export declare const leaveDI: typeof leaveView;
  * @returns the previously active lView;
  */
 export declare function enterView(newView: LView, tNode: TNode | null): void;
-export declare function leaveViewProcessExit(): void;
 export declare function leaveView(): void;
 export declare function nextContextImpl<T = any>(level: number): T;
 /**
- * Gets the most recent index passed to {@link select}
+ * Gets the currently selected element index.
  *
  * Used with {@link property} instruction (and more in the future) to identify the index in the
  * current `LView` to act on.

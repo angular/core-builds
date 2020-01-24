@@ -45,17 +45,6 @@ declare global {
         rendererAppendChild: number;
         rendererInsertBefore: number;
         rendererCreateComment: number;
-        styleMap: number;
-        styleMapCacheMiss: number;
-        classMap: number;
-        classMapCacheMiss: number;
-        styleProp: number;
-        stylePropCacheMiss: number;
-        classProp: number;
-        classPropCacheMiss: number;
-        flushStyling: number;
-        classesApplied: number;
-        stylesApplied: number;
     }
 }
 export declare function ngDevModeResetPerfCounters(): NgDevModePerfCounters;

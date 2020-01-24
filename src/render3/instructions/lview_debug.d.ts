@@ -7,16 +7,16 @@
  */
 import { AttributeMarker, ComponentTemplate } from '..';
 import { SchemaMetadata } from '../../core';
+import { ArrayMap } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
-import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
-import { TStylingContext } from '../interfaces/styling';
+import { TStylingKey, TStylingRange } from '../interfaces/styling';
 import { ExpandoInstructions, HookData, LView, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
-import { DebugNodeStyling } from '../styling/styling_debug';
 /**
  * This function clones a blueprint and creates LView.
  *
@@ -63,36 +63,83 @@ export declare const TViewConstructor: {
         readonly template_: string;
     };
 };
-export declare const TNodeConstructor: {
-    new (tView_: ITView, type: TNodeType, index: number, injectorIndex: number, directiveStart: number, directiveEnd: number, propertyBindings: number[] | null, flags: TNodeFlags, providerIndexes: TNodeProviderIndexes, tagName: string | null, attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null, localNames: (string | number)[] | null, initialInputs: (string[] | null)[] | null | undefined, inputs: PropertyAliases | null, outputs: PropertyAliases | null, tViews: ITView | ITView[] | null, next: ITNode | null, projectionNext: ITNode | null, child: ITNode | null, parent: TElementNode | TContainerNode | null, projection: number | (ITNode | RNode[])[] | null, styles: TStylingContext | null, classes: TStylingContext | null): {
-        tView_: ITView;
-        type: TNodeType;
-        index: number;
-        injectorIndex: number;
-        directiveStart: number;
-        directiveEnd: number;
-        propertyBindings: number[] | null;
-        flags: TNodeFlags;
-        providerIndexes: TNodeProviderIndexes;
-        tagName: string | null;
-        attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null;
-        localNames: (string | number)[] | null;
-        initialInputs: (string[] | null)[] | null | undefined;
-        inputs: PropertyAliases | null;
-        outputs: PropertyAliases | null;
-        tViews: ITView | ITView[] | null;
-        next: ITNode | null;
-        projectionNext: ITNode | null;
-        child: ITNode | null;
-        parent: TElementNode | TContainerNode | null;
-        projection: number | (ITNode | RNode[])[] | null;
-        styles: TStylingContext | null;
-        classes: TStylingContext | null;
-        readonly type_: string;
-        readonly flags_: string;
-        readonly template_: string;
-    };
-};
+declare class TNode implements ITNode {
+    tView_: TView;
+    type: TNodeType;
+    index: number;
+    injectorIndex: number;
+    directiveStart: number;
+    directiveEnd: number;
+    propertyBindings: number[] | null;
+    flags: TNodeFlags;
+    providerIndexes: TNodeProviderIndexes;
+    tagName: string | null;
+    attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null;
+    mergedAttrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null;
+    localNames: (string | number)[] | null;
+    initialInputs: (string[] | null)[] | null | undefined;
+    inputs: PropertyAliases | null;
+    outputs: PropertyAliases | null;
+    tViews: ITView | ITView[] | null;
+    next: ITNode | null;
+    projectionNext: ITNode | null;
+    child: ITNode | null;
+    parent: TElementNode | TContainerNode | null;
+    projection: number | (ITNode | RNode[])[] | null;
+    styles: string | null;
+    stylesMap: ArrayMap<any> | undefined | null;
+    classes: string | null;
+    classesMap: ArrayMap<any> | undefined | null;
+    classBindings: TStylingRange;
+    styleBindings: TStylingRange;
+    constructor(tView_: TView, //
+    type: TNodeType, //
+    index: number, //
+    injectorIndex: number, //
+    directiveStart: number, //
+    directiveEnd: number, //
+    propertyBindings: number[] | null, //
+    flags: TNodeFlags, //
+    providerIndexes: TNodeProviderIndexes, //
+    tagName: string | null, //
+    attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null, //
+    mergedAttrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null, //
+    localNames: (string | number)[] | null, //
+    initialInputs: (string[] | null)[] | null | undefined, //
+    inputs: PropertyAliases | null, //
+    outputs: PropertyAliases | null, //
+    tViews: ITView | ITView[] | null, //
+    next: ITNode | null, //
+    projectionNext: ITNode | null, //
+    child: ITNode | null, //
+    parent: TElementNode | TContainerNode | null, //
+    projection: number | (ITNode | RNode[])[] | null, //
+    styles: string | null, //
+    stylesMap: ArrayMap<any> | undefined | null, //
+    classes: string | null, //
+    classesMap: ArrayMap<any> | undefined | null, //
+    classBindings: TStylingRange, //
+    styleBindings: TStylingRange);
+    get type_(): string;
+    get flags_(): string;
+    get template_(): string;
+    get styleBindings_(): DebugStyleBindings;
+    get classBindings_(): DebugStyleBindings;
+}
+export declare const TNodeDebug: typeof TNode;
+export declare type TNodeDebug = TNode;
+export interface DebugStyleBindings extends Array<DebugStyleBinding | string | null> {
+    [0]: string | null;
+}
+export interface DebugStyleBinding {
+    key: TStylingKey;
+    index: number;
+    isTemplate: boolean;
+    prevDuplicate: boolean;
+    nextDuplicate: boolean;
+    prevIndex: number;
+    nextIndex: number;
+}
 /**
  * This function clones a blueprint and creates TData.
  *
@@ -160,8 +207,6 @@ export declare class LViewDebug {
 export interface DebugNode {
     html: string | null;
     native: Node;
-    styles: DebugNodeStyling | null;
-    classes: DebugNodeStyling | null;
     nodes: DebugNode[] | null;
     component: LViewDebug | null;
 }
@@ -171,8 +216,8 @@ export interface DebugNode {
  * @param tNode
  * @param lView
  */
-export declare function toDebugNodes(tNode: TNode | null, lView: LView): DebugNode[] | null;
-export declare function buildDebugNode(tNode: TNode, lView: LView, nodeIndex: number): DebugNode;
+export declare function toDebugNodes(tNode: ITNode | null, lView: LView): DebugNode[] | null;
+export declare function buildDebugNode(tNode: ITNode, lView: LView, nodeIndex: number): DebugNode;
 export declare class LContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);
@@ -231,3 +276,4 @@ export declare class I18nUpdateOpCodesDebug implements I18nOpCodesDebug {
 export interface I18nOpCodesDebug {
     operations: any[];
 }
+export {};

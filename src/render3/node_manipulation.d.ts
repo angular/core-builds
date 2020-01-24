@@ -146,3 +146,36 @@ export declare function nativeRemoveNode(renderer: Renderer3, rNode: RNode, isHo
  * @param tProjectionNode node to project
  */
 export declare function applyProjection(lView: LView, tProjectionNode: TProjectionNode): void;
+/**
+ * Writes class/style to element.
+ *
+ * @param renderer Renderer to use.
+ * @param isClassBased `true` if it should be written to `class` (`false` to write to `style`)
+ * @param rNode The Node to write to.
+ * @param prop Property to write to. This would be the class/style name.
+ * @param value Value to wiret. If `null`/`undefined`/`false` this is consider a remove (set/add
+ * otherwise).
+ */
+export declare function applyStyling(renderer: Renderer3, isClassBased: boolean, rNode: RElement, prop: string, value: any): void;
+/**
+ * Write `cssText` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+export declare function writeDirectStyle(renderer: Renderer3, element: RElement, newValue: string): void;
+/**
+ * Write `className` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+export declare function writeDirectClass(renderer: Renderer3, element: RElement, newValue: string): void;

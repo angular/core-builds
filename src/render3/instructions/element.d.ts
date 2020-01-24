@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { TAttributes } from '../interfaces/node';
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -38,43 +37,3 @@ export declare function ɵɵelementEnd(): void;
  * @codeGenApi
  */
 export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
-/**
- * Assign static attribute values to a host element.
- *
- * This instruction will assign static attribute values as well as class and style
- * values to an element within the host bindings function. Since attribute values
- * can consist of different types of values, the `attrs` array must include the values in
- * the following format:
- *
- * attrs = [
- *   // static attributes (like `title`, `name`, `id`...)
- *   attr1, value1, attr2, value,
- *
- *   // a single namespace value (like `x:id`)
- *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
- *
- *   // another single namespace value (like `x:name`)
- *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
- *
- *   // a series of CSS classes that will be applied to the element (no spaces)
- *   CLASSES_MARKER, class1, class2, class3,
- *
- *   // a series of CSS styles (property + value) that will be applied to the element
- *   STYLES_MARKER, prop1, value1, prop2, value2
- * ]
- *
- * All non-class and non-style attributes must be defined at the start of the list
- * first before all class and style values are set. When there is a change in value
- * type (like when classes and styles are introduced) a marker must be used to separate
- * the entries. The marker values themselves are set via entries found in the
- * [AttributeMarker] enum.
- *
- * NOTE: This instruction is meant to used from `hostBindings` function only.
- *
- * @param directive A directive instance the styling is associated with.
- * @param attrs An array of static values (attributes, classes and styles) with the correct marker
- * values.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;

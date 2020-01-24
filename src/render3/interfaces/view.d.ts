@@ -17,6 +17,7 @@ import { TConstants, TElementNode, TNode, TViewNode } from './node';
 import { PlayerHandler } from './player';
 import { LQueries, TQueries } from './query';
 import { RElement, Renderer3, RendererFactory3 } from './renderer';
+import { TStylingKey, TStylingRange } from './styling';
 export declare const HOST = 0;
 export declare const TVIEW = 1;
 export declare const FLAGS = 2;
@@ -411,7 +412,17 @@ export interface TView {
     node: TViewNode | TElementNode | null;
     /** Whether or not this template has been processed in creation mode. */
     firstCreatePass: boolean;
-    /** Whether or not the first update for this template has been processed. */
+    /**
+     *  Whether or not this template has been processed in update mode (e.g. change detected)
+     *
+     * `firstUpdatePass` is used by styling to set up `TData` to contain metadata about the styling
+     * instructions. (Mainly to build up a linked list of styling priority order.)
+     *
+     * Typically this function gets cleared after first execution. If exception is thrown then this
+     * flag can remain turned un until there is first successful (no exception) pass. This means that
+     * individual styling instructions keep track of if they have already been added to the linked
+     * list to prevent double adding.
+     */
     firstUpdatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes, PipeDefInternal or TI18n. */
     data: TData;
@@ -664,5 +675,5 @@ export declare type HookData = (number | (() => void))[];
  *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
+export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
 export declare const unusedValueExportToPlacateAjd = 1;

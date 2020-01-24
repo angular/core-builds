@@ -111,5 +111,6 @@ export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string
  * @publicApi
  */
 export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
+export declare function stylePropNeedsSanitization(prop: string): boolean;
 export declare function validateAgainstEventProperties(name: string): void;
 export declare function validateAgainstEventAttributes(name: string): void;

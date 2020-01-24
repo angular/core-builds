@@ -7,17 +7,10 @@
 */
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
-import { TAttributes, TNode } from '../interfaces/node';
+import { ArrayMap } from '../../util/array_utils';
+import { TNode } from '../interfaces/node';
+import { SanitizerFn } from '../interfaces/sanitization';
 import { NO_CHANGE } from '../tokens';
-/**
- * --------
- *
- * This file contains the core logic for how styling instructions are processed in Angular.
- *
- * To learn more about the algorithm see `TStylingContext`.
- *
- * --------
- */
 /**
  * Sets the current style sanitizer function which will then be used
  * within all follow-up prop and map-based style binding instructions
@@ -56,14 +49,7 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | null, suffix?: string | null): typeof ɵɵstyleProp;
-/**
- * Internal function for applying a single style to an element.
- *
- * The reason why this function has been separated from `ɵɵstyleProp` is because
- * it is also called from `ɵɵstylePropInterpolate`.
- */
-export declare function stylePropInternal(elementIndex: number, prop: string, value: string | number | SafeValue | null, suffix?: string | null | undefined): void;
+export declare function ɵɵstyleProp(prop: string, value: string | number | SafeValue | undefined | null, suffix?: string | null): typeof ɵɵstyleProp;
 /**
  * Update a class binding on an element with the provided value.
  *
@@ -79,7 +65,7 @@ export declare function stylePropInternal(elementIndex: number, prop: string, va
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(className: string, value: boolean | null): typeof ɵɵclassProp;
+export declare function ɵɵclassProp(className: string, value: boolean | undefined | null): typeof ɵɵclassProp;
 /**
  * Update style bindings using an object literal on an element.
  *
@@ -101,7 +87,17 @@ export declare function ɵɵclassProp(className: string, value: boolean | null):
  */
 export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
-} | NO_CHANGE | null): void;
+} | Map<string, string | number | null | undefined> | string | undefined | null): void;
+/**
+ * Parse text as style and add values to ArrayMap.
+ *
+ * This code is pulled out to a separate function so that it can be tree shaken away if it is not
+ * needed. It is only reference from `ɵɵstyleMap`.
+ *
+ * @param arrayMap ArrayMap to add parsed values to.
+ * @param text text to parse.
+ */
+export declare function styleStringParser(arrayMap: ArrayMap<any>, text: string): void;
 /**
  * Update class bindings using an object literal or class-string on an element.
  *
@@ -121,19 +117,77 @@ export declare function ɵɵstyleMap(styles: {
  * @codeGenApi
  */
 export declare function ɵɵclassMap(classes: {
-    [className: string]: any;
-} | NO_CHANGE | string | null): void;
+    [className: string]: boolean | undefined | null;
+} | Map<string, boolean | undefined | null> | Set<string> | string[] | string | undefined | null): void;
 /**
- * Internal function for applying a class string or key/value map of classes to an element.
+ * Parse text as class and add values to ArrayMap.
  *
- * The reason why this function has been separated from `ɵɵclassMap` is because
- * it is also called from `ɵɵclassMapInterpolate`.
+ * This code is pulled out to a separate function so that it can be tree shaken away if it is not
+ * needed. It is only reference from `ɵɵclassMap`.
+ *
+ * @param arrayMap ArrayMap to add parsed values to.
+ * @param text text to parse.
  */
-export declare function classMapInternal(elementIndex: number, classes: {
-    [className: string]: any;
-} | NO_CHANGE | string | null): void;
+export declare function classStringParser(arrayMap: ArrayMap<any>, text: string): void;
 /**
- * Searches and assigns provided all static style/class entries (found in the `attrs` value)
- * and registers them in their respective styling contexts.
+ * Common code between `ɵɵclassProp` and `ɵɵstyleProp`.
+ *
+ * @param prop property name.
+ * @param value binding value.
+ * @param suffixOrSanitizer suffix or sanitization function
+ * @param isClassBased `true` if `class` change (`false` if `style`)
  */
-export declare function registerInitialStylingOnTNode(tNode: TNode, attrs: TAttributes, startIndex: number): boolean;
+export declare function checkStylingProperty(prop: string, value: any | NO_CHANGE, suffixOrSanitizer: SanitizerFn | string | undefined | null, isClassBased: boolean): void;
+/**
+* Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
+*
+* @param tStylingMapKey See `STYLE_MAP_STYLING_KEY` and `CLASS_MAP_STYLING_KEY`.
+* @param value binding value.
+* @param isClassBased `true` if `class` change (`false` if `style`)
+*/
+export declare function checkStylingMap(arrayMapSet: (arrayMap: ArrayMap<any>, key: string, value: any) => void, stringParser: (styleArrayMap: ArrayMap<any>, text: string) => void, value: any | NO_CHANGE, isClassBased: boolean): void;
+/**
+ * Convert user input to `ArrayMap`.
+ *
+ * This function takes user input which could be `string`, Object literal, or iterable and converts
+ * it into a consistent representation. The output of this is `ArrayMap` (which is an array where
+ * even indexes contain keys and odd indexes contain values for those keys).
+ *
+ * The advantage of converting to `ArrayMap` is that we can perform diff in a input independent way.
+ * (ie we can compare `foo bar` to `['bar', 'baz'] and determine a set of changes which need to be
+ * applied)
+ *
+ * The fact that `ArrayMap` is sorted is very important because it allows us to compute the
+ * difference in linear fashion without the need to allocate any additional data.
+ *
+ * For example if we kept this as a `Map` we would have to iterate over previous `Map` to determine
+ * which values need to be delete, over the new `Map` to determine additions, and we would have to
+ * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
+ *
+ * @param stringParser The parser is passed in so that it will be tree shakable. See
+ *        `styleStringParser` and `classStringParser`
+ * @param value The value to parse/convert to `ArrayMap`
+ */
+export declare function toStylingArrayMap(arrayMapSet: (arrayMap: ArrayMap<any>, key: string, value: any) => void, stringParser: (styleArrayMap: ArrayMap<any>, text: string) => void, value: string | string[] | {
+    [key: string]: any;
+} | Map<any, any> | Set<any> | null | undefined): ArrayMap<any>;
+/**
+ * Lazily computes `tNode.classesMap`/`tNode.stylesMap`.
+ *
+ * This code is here because we don't want to included it in `elementStart` as it would make hello
+ * world bigger even if no styling would be present. Instead we initialize the values here so that
+ * tree shaking will only bring it in if styling is present.
+ *
+ * @param tNode `TNode` to initialize.
+ */
+export declare function initializeStylingStaticArrayMap(tNode: TNode): void;
+/**
+ * Tests if the `TNode` has input shadow.
+ *
+ * An input shadow is when a directive steals (shadows) the input by using `@Input('style')` or
+ * `@Input('class')` as input.
+ *
+ * @param tNode `TNode` which we would like to see if it has shadow.
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+export declare function hasStylingInputShadow(tNode: TNode, isClassBased: boolean): boolean;

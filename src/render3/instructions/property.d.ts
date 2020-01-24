@@ -1,4 +1,6 @@
+import { TNode } from '../interfaces/node';
 import { SanitizerFn } from '../interfaces/sanitization';
+import { LView } from '../interfaces/view';
 /**
  * Update a property on a selected element.
  *
@@ -18,3 +20,8 @@ import { SanitizerFn } from '../interfaces/sanitization';
  * @codeGenApi
  */
 export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵproperty;
+/**
+ * Given `<div style="..." my-dir>` and `MyDir` with `@Input('style')` we need to write to
+ * directive input.
+ */
+export declare function setDirectiveInputsWhichShadowsStyling(tNode: TNode, lView: LView, value: any, isClassBased: boolean): void;

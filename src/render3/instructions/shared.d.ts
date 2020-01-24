@@ -14,9 +14,14 @@ import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactor
 import { LocalRefExtractor, PropertyAliasValue, TAttributes, TConstants, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
-import { ExpandoInstructions, LView, LViewFlags, RootContext, RootContextFlags, TData, TView, TViewType } from '../interfaces/view';
-/** Sets the host bindings for the current view. */
-export declare function setHostBindings(tView: TView, lView: LView): void;
+import { LView, LViewFlags, RootContext, RootContextFlags, TData, TView, TViewType } from '../interfaces/view';
+/**
+ * Process the `TVIew.expandoInstructions`. (Execute the `hostBindings`.)
+ *
+ * @param tView `TView` containing the `expandoInstructions`
+ * @param lView `LView` associated with the `TView`
+ */
+export declare function setHostBindingsByExecutingExpandoInstructions(tView: TView, lView: LView): void;
 /**
  * Creates a native element from a tag name, using a renderer.
  * @param name the tag name
@@ -110,7 +115,7 @@ export declare function createTView(type: TViewType, viewIndex: number, template
  * @param elementOrSelector Render element or CSS selector to locate the element.
  * @param encapsulation View Encapsulation defined for component that requests host element.
  */
-export declare function locateHostElement(rendererFactory: RendererFactory3, elementOrSelector: RElement | string, encapsulation: ViewEncapsulation): RElement;
+export declare function locateHostElement(renderer: Renderer3, elementOrSelector: RElement | string, encapsulation: ViewEncapsulation): RElement;
 /**
  * Saves context for this cleanup function in LView.cleanupInstances.
  *
@@ -151,13 +156,39 @@ export declare function instantiateRootComponent<T>(tView: TView, lView: LView, 
  * Resolve the matched directives on a node.
  */
 export declare function resolveDirectives(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null): boolean;
-export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, expando: ExpandoInstructions, directive: any, tNode: TNode, firstCreatePass: boolean): void;
 /**
-* Generates a new block in TView.expandoInstructions for this node.
-*
-* Each expando block starts with the element index (turned negative so we can distinguish
-* it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
-*/
+ * Add `hostBindings` to the `TView.expandoInstructions`.
+ *
+ * @param tView `TView` to which the `hostBindings` should be added.
+ * @param def `ComponentDef`/`DirectiveDef`, which contains the `hostVars`/`hostBindings` to add.
+ */
+export declare function addHostBindingsToExpandoInstructions(tView: TView, def: ComponentDef<any> | DirectiveDef<any>): void;
+/**
+ * Grow the `LView`, blueprint and `TView.data` to accommodate the `hostBindings`.
+ *
+ * To support locality we don't know ahead of time how many `hostVars` of the containing directives
+ * we need to allocate. For this reason we allow growing these data structures as we discover more
+ * directives to accommodate them.
+ *
+ * @param tView `TView` which needs to be grown.
+ * @param lView `LView` which needs to be grown.
+ * @param count Size by which we need to grow the data structures.
+ */
+export declare function growHostVarsSpace(tView: TView, lView: LView, count: number): void;
+/**
+ * Invoke the host bindings in creation mode.
+ *
+ * @param def `DirectiveDef` which may contain the `hostBindings` function.
+ * @param directive Instance of directive.
+ * @param tNode Associated `TNode`.
+ */
+export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, directive: any, tNode: TNode): void;
+/**
+ * Generates a new block in TView.expandoInstructions for this node.
+ *
+ * Each expando block starts with the element index (turned negative so we can distinguish
+ * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
+ */
 export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNode, directiveCount: number): void;
 /**
  * Marks a given TNode as a component's host. This consists of:
@@ -170,7 +201,7 @@ export declare function markAsComponentHost(tView: TView, hostTNode: TNode): voi
  * the directive count to 0, and adding the isComponent flag.
  * @param index the initial index
  */
-export declare function initNodeFlags(tNode: TNode, index: number, numberOfDirectives: number): void;
+export declare function initTNodeFlags(tNode: TNode, index: number, numberOfDirectives: number): void;
 export declare function elementAttributeInternal(index: number, name: string, value: any, lView: LView, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
@@ -282,13 +313,3 @@ export declare function setInputsForProperty(lView: LView, inputs: PropertyAlias
  * Updates a text binding at a given index in a given LView.
  */
 export declare function textBindingInternal(lView: LView, index: number, value: string): void;
-/**
- * Renders all initial styling (class and style values) on to the element from the tNode.
- *
- * All initial styling data (i.e. any values extracted from the `style` or `class` attributes
- * on an element) are collected into the `tNode.styles` and `tNode.classes` data structures.
- * These values are populated during the creation phase of an element and are then later
- * applied once the element is instantiated. This function applies each of the static
- * style and class entries to the element.
- */
-export declare function renderInitialStyling(renderer: Renderer3, native: RElement, tNode: TNode, append: boolean): void;
