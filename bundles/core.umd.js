@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+804.sha-0eaf874
+ * @license Angular v9.0.0-rc.1+806.sha-9bd9590
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8558,7 +8558,9 @@
                     var embeddedLView = viewOrContainer[i];
                     var embeddedTView = embeddedLView[TVIEW];
                     ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
-                    refreshView(embeddedLView, embeddedTView, embeddedTView.template, embeddedLView[CONTEXT]);
+                    if (viewAttachedToChangeDetector(embeddedLView)) {
+                        refreshView(embeddedLView, embeddedTView, embeddedTView.template, embeddedLView[CONTEXT]);
+                    }
                 }
                 if ((activeIndexFlag & 1 /* HAS_TRANSPLANTED_VIEWS */) !== 0) {
                     // We should only CD moved views if the component where they were inserted does not match
@@ -19259,7 +19261,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+804.sha-0eaf874');
+    var VERSION = new Version('9.0.0-rc.1+806.sha-9bd9590');
 
     /**
      * @license
