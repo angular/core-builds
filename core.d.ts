@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+828.sha-7069a83
+ * @license Angular v9.0.0-rc.1+829.sha-304584c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2620,7 +2620,7 @@ export declare interface HostBindingDecorator {
     new (hostPropertyName?: string): any;
 }
 
-declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U, elementIndex: number) => void;
+declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
  * Type of the Host decorator / constructor function.
