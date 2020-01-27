@@ -381,7 +381,7 @@ export declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | Direc
 export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[];
 export declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
 export declare type DirectiveTypeList = (DirectiveType<any> | ComponentType<any> | Type<any>)[];
-export declare type HostBindingsFunction<T> = <U extends T>(rf: RenderFlags, ctx: U, elementIndex: number) => void;
+export declare type HostBindingsFunction<T> = <U extends T>(rf: RenderFlags, ctx: U) => void;
 /**
  * Type used for PipeDefs on component definition.
  *

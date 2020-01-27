@@ -180,9 +180,8 @@ export declare function growHostVarsSpace(tView: TView, lView: LView, count: num
  *
  * @param def `DirectiveDef` which may contain the `hostBindings` function.
  * @param directive Instance of directive.
- * @param tNode Associated `TNode`.
  */
-export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, directive: any, tNode: TNode): void;
+export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, directive: any): void;
 /**
  * Generates a new block in TView.expandoInstructions for this node.
  *

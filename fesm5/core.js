@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+828.sha-7069a83
+ * @license Angular v9.0.0-rc.1+829.sha-304584c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7094,7 +7094,7 @@ function setHostBindingsByExecutingExpandoInstructions(tView, lView) {
                     if (instruction !== null) {
                         setBindingRootForHostBindings(bindingRootIndex);
                         var hostCtx = lView[currentDirectiveIndex];
-                        instruction(2 /* Update */, hostCtx, currentElementIndex);
+                        instruction(2 /* Update */, hostCtx);
                     }
                     // TODO(misko): PERF Relying on incrementing the `currentDirectiveIndex` here is
                     // sub-optimal. The implications are that if we have a lot of directives but none of them
@@ -8109,7 +8109,7 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
             var def = tView.data[i];
             var directive = lView[i];
             if (def.hostBindings !== null || def.hostVars !== 0 || def.hostAttrs !== null) {
-                invokeHostBindingsInCreationMode(def, directive, tNode);
+                invokeHostBindingsInCreationMode(def, directive);
             }
             else if (firstCreatePass) {
                 expando.push(null);
@@ -8125,12 +8125,10 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
  *
  * @param def `DirectiveDef` which may contain the `hostBindings` function.
  * @param directive Instance of directive.
- * @param tNode Associated `TNode`.
  */
-function invokeHostBindingsInCreationMode(def, directive, tNode) {
+function invokeHostBindingsInCreationMode(def, directive) {
     if (def.hostBindings !== null) {
-        var elementIndex = tNode.index - HEADER_OFFSET;
-        def.hostBindings(1 /* Create */, directive, elementIndex);
+        def.hostBindings(1 /* Create */, directive);
     }
 }
 /**
@@ -18121,7 +18119,7 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
         var rootTView = rootLView[TVIEW];
         addHostBindingsToExpandoInstructions(rootTView, componentDef);
         growHostVarsSpace(rootTView, rootLView, componentDef.hostVars);
-        invokeHostBindingsInCreationMode(componentDef, component, rootTNode);
+        invokeHostBindingsInCreationMode(componentDef, component);
     }
     return component;
 }
@@ -18322,9 +18320,9 @@ function inheritContentQueries(definition, superContentQueries) {
 function inheritHostBindings(definition, superHostBindings) {
     var prevHostBindings = definition.hostBindings;
     if (prevHostBindings) {
-        definition.hostBindings = function (rf, ctx, elementIndex) {
-            superHostBindings(rf, ctx, elementIndex);
-            prevHostBindings(rf, ctx, elementIndex);
+        definition.hostBindings = function (rf, ctx) {
+            superHostBindings(rf, ctx);
+            prevHostBindings(rf, ctx);
         };
     }
     else {
@@ -19077,7 +19075,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+828.sha-7069a83');
+var VERSION = new Version('9.0.0-rc.1+829.sha-304584c');
 
 /**
  * @license
