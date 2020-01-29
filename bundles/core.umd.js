@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+855.sha-519e9e1
+ * @license Angular v9.0.0-rc.1+857.sha-a892054
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9822,8 +9822,10 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Unwraps a parent injector location number to find the view offset from the current injector,
-     * then walks up the declaration view tree until the TNode of the parent injector is found.
+     * If `startTNode.parent` exists and has an injector, returns TNode for that injector.
+     * Otherwise, unwraps a parent injector location number to find the view offset from the current
+     * injector, then walks up the declaration view tree until the TNode of the parent injector is
+     * found.
      *
      * @param location The location of the parent injector, which contains the view offset
      * @param startView The LView instance from which to start walking up the view tree
@@ -9831,14 +9833,17 @@
      * @returns The TNode of the parent injector
      */
     function getParentInjectorTNode(location, startView, startTNode) {
+        // If there is an injector on the parent TNode, retrieve the TNode for that injector.
         if (startTNode.parent && startTNode.parent.injectorIndex !== -1) {
             // view offset is 0
             var injectorIndex = startTNode.parent.injectorIndex;
-            var parentTNode_1 = startTNode.parent;
-            while (parentTNode_1.parent != null && injectorIndex == parentTNode_1.injectorIndex) {
-                parentTNode_1 = parentTNode_1.parent;
+            var tNode = startTNode.parent;
+            // If tNode.injectorIndex === tNode.parent.injectorIndex, then the index belongs to a parent
+            // injector.
+            while (tNode.parent != null && injectorIndex == tNode.parent.injectorIndex) {
+                tNode = tNode.parent;
             }
-            return parentTNode_1;
+            return tNode;
         }
         var viewOffset = getParentInjectorViewOffset(location);
         // view offset is 1
@@ -19228,7 +19233,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+855.sha-519e9e1');
+    var VERSION = new Version('9.0.0-rc.1+857.sha-a892054');
 
     /**
      * @license

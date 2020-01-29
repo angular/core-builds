@@ -9,8 +9,10 @@ import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LView } from './interfaces/view';
 /**
- * Unwraps a parent injector location number to find the view offset from the current injector,
- * then walks up the declaration view tree until the TNode of the parent injector is found.
+ * If `startTNode.parent` exists and has an injector, returns TNode for that injector.
+ * Otherwise, unwraps a parent injector location number to find the view offset from the current
+ * injector, then walks up the declaration view tree until the TNode of the parent injector is
+ * found.
  *
  * @param location The location of the parent injector, which contains the view offset
  * @param startView The LView instance from which to start walking up the view tree
