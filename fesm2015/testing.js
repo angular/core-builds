@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.11+47.sha-e554f2d
+ * @license Angular v9.0.0-rc.11+53.sha-eaa4a5a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2077,19 +2077,9 @@ class R3TestBedCompiler {
         /** @type {?} */
         const injectorDef = ((/** @type {?} */ (moduleType)))[ɵNG_INJ_DEF];
         if (this.providerOverridesByToken.size > 0) {
-            // Extract the list of providers from ModuleWithProviders, so we can define the final list of
-            // providers that might have overrides.
-            // Note: second `flatten` operation is needed to convert an array of providers
-            // (e.g. `[[], []]`) into one flat list, also eliminating empty arrays.
-            /** @type {?} */
-            const providersFromModules = flatten(flatten(injectorDef.imports, (/**
-             * @param {?} imported
-             * @return {?}
-             */
-            (imported) => isModuleWithProviders(imported) ? imported.providers : [])));
             /** @type {?} */
             const providers = [
-                ...providersFromModules, ...injectorDef.providers,
+                ...injectorDef.providers,
                 ...(this.providerOverridesByModule.get((/** @type {?} */ (moduleType))) || [])
             ];
             if (this.hasProviderOverrides(providers)) {
