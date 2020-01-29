@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+850.sha-8fd2a97
+ * @license Angular v9.0.0-rc.1+855.sha-519e9e1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1543,14 +1543,7 @@
             this.moduleProvidersOverridden.add(moduleType);
             var injectorDef = moduleType[core.ɵNG_INJ_DEF];
             if (this.providerOverridesByToken.size > 0) {
-                // Extract the list of providers from ModuleWithProviders, so we can define the final list of
-                // providers that might have overrides.
-                // Note: second `flatten` operation is needed to convert an array of providers
-                // (e.g. `[[], []]`) into one flat list, also eliminating empty arrays.
-                var providersFromModules = flatten(flatten(injectorDef.imports, function (imported) {
-                    return isModuleWithProviders(imported) ? imported.providers : [];
-                }));
-                var providers = __spread(providersFromModules, injectorDef.providers, (this.providerOverridesByModule.get(moduleType) || []));
+                var providers = __spread(injectorDef.providers, (this.providerOverridesByModule.get(moduleType) || []));
                 if (this.hasProviderOverrides(providers)) {
                     this.maybeStoreNgDef(core.ɵNG_INJ_DEF, moduleType);
                     this.storeFieldOfDefOnType(moduleType, core.ɵNG_INJ_DEF, 'providers');
