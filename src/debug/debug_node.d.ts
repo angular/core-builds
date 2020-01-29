@@ -155,6 +155,9 @@ export declare function getDebugNode__POST_R3__(nativeNode: null): null;
  * @publicApi
  */
 export declare const getDebugNode: (nativeNode: any) => DebugNode | null;
+export declare function getDebugNodeR2__PRE_R3__(nativeNode: any): DebugNode | null;
+export declare function getDebugNodeR2__POST_R3__(_nativeNode: any): DebugNode | null;
+export declare const getDebugNodeR2: (nativeNode: any) => DebugNode | null;
 export declare function getAllDebugNodes(): DebugNode[];
 export declare function indexDebugNode(node: DebugNode): void;
 export declare function removeDebugNodeFromIndex(node: DebugNode): void;

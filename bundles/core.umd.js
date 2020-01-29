@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+840.sha-bd61cd0
+ * @license Angular v9.0.0-rc.1+844.sha-669df70
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19228,7 +19228,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+840.sha-bd61cd0');
+    var VERSION = new Version('9.0.0-rc.1+844.sha-669df70');
 
     /**
      * @license
@@ -28889,6 +28889,13 @@
      * @publicApi
      */
     var getDebugNode$1 = getDebugNode__POST_R3__;
+    function getDebugNodeR2__PRE_R3__(nativeNode) {
+        return getDebugNode__PRE_R3__(nativeNode);
+    }
+    function getDebugNodeR2__POST_R3__(_nativeNode) {
+        return null;
+    }
+    var getDebugNodeR2 = getDebugNodeR2__POST_R3__;
     function getAllDebugNodes() {
         return Array.from(_nativeNodeToDebugNode.values());
     }
@@ -31581,6 +31588,7 @@
     exports.ɵfindLocaleData = findLocaleData;
     exports.ɵflushModuleScopingQueueAsMuchAsPossible = flushModuleScopingQueueAsMuchAsPossible;
     exports.ɵgetComponentViewDefinitionFactory = getComponentViewDefinitionFactory;
+    exports.ɵgetDebugNodeR2 = getDebugNodeR2;
     exports.ɵgetDebugNode__POST_R3__ = getDebugNode__POST_R3__;
     exports.ɵgetDirectives = getDirectives;
     exports.ɵgetHostElement = getHostElement;
