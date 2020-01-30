@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+867.sha-d72cfc9
+ * @license Angular v9.0.0-rc.1+869.sha-cd9ae66
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13777,13 +13777,7 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
+ * This function triggers change detection in a synchronous way on a component.
  *
  * @param component The component which the change detection should be performed on.
  */
@@ -13792,20 +13786,13 @@ function detectChanges(component) {
     detectChangesInternal(view, component);
 }
 /**
- * Mark the component as dirty (needing change detection).
+ * Marks the component as dirty (needing change detection). Marking a component dirty will
+ * schedule a change detection on it at some point in the future.
  *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent`, a scheduler
- * can be provided.
+ * Marking an already dirty component as dirty won't do anything. Only one outstanding change
+ * detection can be scheduled per component tree.
  *
  * @param component Component to mark as dirty.
- *
- * @publicApi
  */
 function markDirty(component) {
     ngDevMode && assertDefined(component, 'component');
@@ -17885,28 +17872,32 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Returns the component instance associated with a given DOM host element.
- * Elements which don't represent components return `null`.
+ * Retrieves the component instance associated with a given DOM element.
  *
- * @param element Host DOM element from which the component should be retrieved.
- *
- * ```
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```html
  * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
- * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
+ *   <div>
+ *     <child-comp></child-comp>
+ *   </div>
+ * </my-app>
  * ```
+ * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
+ * associated with this DOM element.
+ *
+ * Calling the function on `<my-app>` will return the `MyApp` instance.
+ *
+ *
+ * @param element DOM element from which the component should be retrieved.
+ * @returns Component instance associated with the element or `null` if there
+ *    is no component associated with it.
  *
  * @publicApi
+ * @globalApi ng
  */
 function getComponent(element) {
-    if (!(element instanceof Node))
-        throw new Error('Expecting instance of DOM Node');
+    assertDomElement(element);
     var context = loadLContext(element, false);
     if (context === null)
         return null;
@@ -17916,55 +17907,39 @@ function getComponent(element) {
     return context.component;
 }
 /**
- * Returns the component instance associated with a given DOM host element.
- * Elements which don't represent components return `null`.
+ * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
+ * view that the element is part of. Otherwise retrieves the instance of the component whose view
+ * owns the element (in this case, the result is the same as calling `getOwningComponent`).
  *
- * @param element Host DOM element from which the component should be retrieved.
- *
- * ```
- * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getComponent(<child-comp>) instanceof ChildComponent).toBeTruthy();
- * expect(getComponent(<my-app>) instanceof MyApp).toBeTruthy();
- * ```
+ * @param element Element for which to get the surrounding component instance.
+ * @returns Instance of the component that is around the element or null if the element isn't
+ *    inside any component.
  *
  * @publicApi
+ * @globalApi ng
  */
 function getContext(element) {
-    if (!(element instanceof Node))
-        throw new Error('Expecting instance of DOM Node');
+    assertDomElement(element);
     var context = loadLContext(element, false);
-    if (context === null)
-        return null;
-    return context.lView[CONTEXT];
+    return context === null ? null : context.lView[CONTEXT];
 }
 /**
- * Returns the component instance associated with view which owns the DOM element (`null`
- * otherwise).
+ * Retrieves the component instance whose view contains the DOM element.
  *
- * @param element DOM element which is owned by an existing component's view.
+ * For example, if `<child-comp>` is used in the template of `<app-comp>`
+ * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
+ * would return `<app-comp>`.
  *
- * ```
- * <my-app>
- *   #VIEW
- *     <div>
- *       <child-comp></child-comp>
- *     </div>
- * </mp-app>
- *
- * expect(getViewComponent(<child-comp>) instanceof MyApp).toBeTruthy();
- * expect(getViewComponent(<my-app>)).toEqual(null);
- * ```
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Component instance whose view owns the DOM element or null if the element is not
+ *    part of a component view.
  *
  * @publicApi
+ * @globalApi ng
  */
-function getViewComponent(element) {
-    var context = loadLContext(element, false);
+function getOwningComponent(elementOrDir) {
+    var context = loadLContext(elementOrDir, false);
     if (context === null)
         return null;
     var lView = context.lView;
@@ -17977,26 +17952,31 @@ function getViewComponent(element) {
     return lView[FLAGS] & 512 /* IsRoot */ ? null : lView[CONTEXT];
 }
 /**
- * Retrieve all root components.
- *
+ * Retrieves all root components associated with a DOM element, directive or component instance.
  * Root components are those which have been bootstrapped by Angular.
  *
- * @param target A DOM element, component or directive instance.
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Root components associated with the target object.
  *
  * @publicApi
+ * @globalApi ng
  */
-function getRootComponents(target) {
-    return __spread(getRootContext(target).components);
+function getRootComponents(elementOrDir) {
+    return __spread(getRootContext(elementOrDir).components);
 }
 /**
- * Retrieves an `Injector` associated with the element, component or directive.
+ * Retrieves an `Injector` associated with an element, component or directive instance.
  *
- * @param target A DOM element, component or directive instance.
+ * @param elementOrDir DOM element, component or directive instance for which to
+ *    retrieve the injector.
+ * @returns Injector associated with the element, component or directive instance.
  *
  * @publicApi
+ * @globalApi ng
  */
-function getInjector(target) {
-    var context = loadLContext(target, false);
+function getInjector(elementOrDir) {
+    var context = loadLContext(elementOrDir, false);
     if (context === null)
         return Injector.NULL;
     var tNode = context.lView[TVIEW].data[context.nodeIndex];
@@ -18006,7 +17986,6 @@ function getInjector(target) {
  * Retrieve a set of injection tokens at a given DOM node.
  *
  * @param element Element for which the injection tokens should be retrieved.
- * @publicApi
  */
 function getInjectionTokens(element) {
     var context = loadLContext(element, false);
@@ -18032,18 +18011,36 @@ function getInjectionTokens(element) {
     return providerTokens;
 }
 /**
- * Retrieves directives associated with a given DOM host element.
+ * Retrieves directive instances associated with a given DOM element. Does not include
+ * component instances.
  *
- * @param target A DOM element, component or directive instance.
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```
+ * <my-app>
+ *   <button my-button></button>
+ *   <my-comp></my-comp>
+ * </my-app>
+ * ```
+ * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
+ * directive that is associated with the DOM element.
+ *
+ * Calling `getDirectives` on `<my-comp>` will return an empty array.
+ *
+ * @param element DOM element for which to get the directives.
+ * @returns Array of directives associated with the element.
  *
  * @publicApi
+ * @globalApi ng
  */
-function getDirectives(target) {
-    var context = loadLContext(target);
+function getDirectives(element) {
+    var context = loadLContext(element);
     if (context.directives === undefined) {
         context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
     }
-    return context.directives || [];
+    // The `directives` in this case are a named array called `LComponentView`. Clone the
+    // result so we don't expose an internal data structure in the user's console.
+    return context.directives === null ? [] : __spread(context.directives);
 }
 function loadLContext(target, throwOnNotFound) {
     if (throwOnNotFound === void 0) { throwOnNotFound = true; }
@@ -18059,9 +18056,8 @@ function loadLContext(target, throwOnNotFound) {
  *
  * The references are retrieved as a map of local reference name to element or directive instance.
  *
- * @param target A DOM element, component or directive instance.
- *
- * @publicApi
+ * @param target DOM element, component or directive instance for which to retrieve
+ *    the local references.
  */
 function getLocalRefs(target) {
     var context = loadLContext(target, false);
@@ -18073,17 +18069,18 @@ function getLocalRefs(target) {
     return context.localRefs || {};
 }
 /**
- * Retrieve the host element of the component.
+ * Retrieves the host element of a component or directive instance.
+ * The host element is the DOM element that matched the selector of the directive.
  *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param directive Component or Directive for which the host element should be retrieved.
+ * @param componentOrDirective Component or directive instance for which the host
+ *     element should be retrieved.
+ * @returns Host element of the target.
  *
  * @publicApi
+ * @globalApi ng
  */
-function getHostElement(directive) {
-    return getLContext(directive).native;
+function getHostElement(componentOrDirective) {
+    return getLContext(componentOrDirective).native;
 }
 /**
  * Retrieves the rendered text for a given component.
@@ -18101,37 +18098,40 @@ function getRenderedText(component) {
 }
 function loadLContextFromNode(node) {
     if (!(node instanceof Node))
-        throw new Error('Expecting instance of DOM Node');
+        throw new Error('Expecting instance of DOM Element');
     return loadLContext(node);
 }
-function isBrowserEvents(listener) {
-    // Browser events are those which don't have `useCapture` as boolean.
-    return typeof listener.useCapture === 'boolean';
-}
 /**
- * Retrieves a list of DOM listeners.
+ * Retrieves a list of event listeners associated with a DOM element. The list does include host
+ * listeners, but it does not include event listeners defined outside of the Angular context
+ * (e.g. through `addEventListener`).
  *
+ * @usageNotes
+ * Given the following DOM structure:
  * ```
  * <my-app>
- *   #VIEW
- *     <div (click)="doSomething()">
- *     </div>
- * </mp-app>
+ *   <div (click)="doSomething()"></div>
+ * </my-app>
  *
- * expect(getListeners(<div>)).toEqual({
+ * ```
+ * Calling `getListeners` on `<div>` will return an object that looks as follows:
+ * ```
+ * {
  *   name: 'click',
  *   element: <div>,
  *   callback: () => doSomething(),
  *   useCapture: false
- * });
+ * }
  * ```
  *
  * @param element Element for which the DOM listeners should be retrieved.
+ * @returns Array of event listeners on the DOM element.
+ *
  * @publicApi
+ * @globalApi ng
  */
 function getListeners(element) {
-    if (!(element instanceof Node))
-        throw new Error('Expecting instance of DOM Node');
+    assertDomElement(element);
     var lContext = loadLContext(element, false);
     if (lContext === null)
         return [];
@@ -18152,11 +18152,10 @@ function getListeners(element) {
                 // if useCaptureOrIndx is boolean then report it as is.
                 // if useCaptureOrIndx is positive number then it in unsubscribe method
                 // if useCaptureOrIndx is negative number then it is a Subscription
-                var useCapture = typeof useCaptureOrIndx === 'boolean' ?
-                    useCaptureOrIndx :
-                    (useCaptureOrIndx >= 0 ? false : null);
+                var type = (typeof useCaptureOrIndx === 'boolean' || useCaptureOrIndx >= 0) ? 'dom' : 'output';
+                var useCapture = typeof useCaptureOrIndx === 'boolean' ? useCaptureOrIndx : false;
                 if (element == listenerElement) {
-                    listeners.push({ element: element, name: name_1, callback: callback, useCapture: useCapture });
+                    listeners.push({ element: element, name: name_1, callback: callback, useCapture: useCapture, type: type });
                 }
             }
         }
@@ -18181,8 +18180,6 @@ function isDirectiveDefHack(obj) {
  * Returns the attached `DebugNode` instance for an element in the DOM.
  *
  * @param element DOM element which is owned by an existing component's view.
- *
- * @publicApi
  */
 function getDebugNode(element) {
     var debugNode = null;
@@ -18205,7 +18202,7 @@ function getDebugNode(element) {
  * NOTE: `LView` is a private and should not be leaked outside.
  *       Don't export this method to `ng.*` on window.
  *
- * @param target Component or Element instance.
+ * @param target DOM element or component instance for which to retrieve the LView.
  */
 function getComponentLView(target) {
     var lContext = loadLContext(target);
@@ -18215,6 +18212,12 @@ function getComponentLView(target) {
     ngDevMode && assertLView(componentLView);
     return componentLView;
 }
+/** Asserts that a value is a DOM Element. */
+function assertDomElement(value) {
+    if (typeof Element !== 'undefined' && !(value instanceof Element)) {
+        throw new Error('Expecting instance of DOM Element');
+    }
+}
 
 /**
  * @license
@@ -18223,6 +18226,19 @@ function getComponentLView(target) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Marks a component for check (in case of OnPush components) and synchronously
+ * performs change detection on the application this component belongs to.
+ *
+ * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function applyChanges(component) {
+    markDirty(component);
+    getRootComponents(component).forEach(function (rootComponent) { return detectChanges(rootComponent); });
+}
 
 /**
  * @license
@@ -18260,13 +18276,12 @@ function publishDefaultGlobalUtils() {
         publishGlobalUtil('getComponent', getComponent);
         publishGlobalUtil('getContext', getContext);
         publishGlobalUtil('getListeners', getListeners);
-        publishGlobalUtil('getViewComponent', getViewComponent);
+        publishGlobalUtil('getOwningComponent', getOwningComponent);
         publishGlobalUtil('getHostElement', getHostElement);
         publishGlobalUtil('getInjector', getInjector);
         publishGlobalUtil('getRootComponents', getRootComponents);
         publishGlobalUtil('getDirectives', getDirectives);
-        publishGlobalUtil('getDebugNode', getDebugNode);
-        publishGlobalUtil('markDirty', markDirty);
+        publishGlobalUtil('applyChanges', applyChanges);
     }
 }
 /**
@@ -19382,7 +19397,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0-rc.1+867.sha-d72cfc9');
+var VERSION = new Version('9.0.0-rc.1+869.sha-cd9ae66');
 
 /**
  * @license
@@ -24484,8 +24499,6 @@ function ɵɵpipe(index, pipeName) {
  * @param name Name of pipe to resolve
  * @param registry Full list of available pipes
  * @returns Matching PipeDef
- *
- * @publicApi
  */
 function getPipeDef$1(name, registry) {
     if (registry) {
@@ -28600,7 +28613,7 @@ var DebugNode__POST_R3__ = /** @class */ (function () {
         get: function () {
             var nativeElement = this.nativeNode;
             return nativeElement &&
-                (getComponent(nativeElement) || getViewComponent(nativeElement));
+                (getComponent(nativeElement) || getOwningComponent(nativeElement));
         },
         enumerable: true,
         configurable: true
@@ -28614,7 +28627,7 @@ var DebugNode__POST_R3__ = /** @class */ (function () {
     });
     Object.defineProperty(DebugNode__POST_R3__.prototype, "listeners", {
         get: function () {
-            return getListeners(this.nativeNode).filter(isBrowserEvents);
+            return getListeners(this.nativeNode).filter(function (listener) { return listener.type === 'dom'; });
         },
         enumerable: true,
         configurable: true
