@@ -8,8 +8,11 @@
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { ArrayMap } from '../../util/array_utils';
+import { DirectiveDef } from '../interfaces/definition';
 import { TNode } from '../interfaces/node';
 import { SanitizerFn } from '../interfaces/sanitization';
+import { TStylingKey } from '../interfaces/styling';
+import { TData } from '../interfaces/view';
 import { NO_CHANGE } from '../tokens';
 /**
  * Sets the current style sanitizer function which will then be used
@@ -146,6 +149,28 @@ export declare function checkStylingProperty(prop: string, value: any | NO_CHANG
 * @param isClassBased `true` if `class` change (`false` if `style`)
 */
 export declare function checkStylingMap(arrayMapSet: (arrayMap: ArrayMap<any>, key: string, value: any) => void, stringParser: (styleArrayMap: ArrayMap<any>, text: string) => void, value: any | NO_CHANGE, isClassBased: boolean): void;
+/**
+ * Adds static styling information to the binding if applicable.
+ *
+ * The linked list of styles not only stores the list and keys, but also stores static styling
+ * information on some of the keys. This function determines if the key should contain the styling
+ * information and computes it.
+ *
+ * See `TStylingStatic` for more details.
+ *
+ * @param tData `TData` where the linked list is stored.
+ * @param tNode `TNode` for which the styling is being computed.
+ * @param stylingKey `TStylingKeyPrimitive` which may need to be wrapped into `TStylingKey`
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+export declare function wrapInStaticStylingKey(tData: TData, tNode: TNode, stylingKey: TStylingKey, isClassBased: boolean): TStylingKey;
+/**
+ * Retrieve the current `DirectiveDef` which is active when `hostBindings` style instruction is
+ * being executed (or `null` if we are in `template`.)
+ *
+ * @param tData Current `TData` where the `DirectiveDef` will be looked up at.
+ */
+export declare function getHostDirectiveDef(tData: TData): DirectiveDef<any> | null;
 /**
  * Convert user input to `ArrayMap`.
  *

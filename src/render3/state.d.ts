@@ -86,6 +86,12 @@ interface LFrame {
      * We iterate over the list of Queries and increment current query index at every step.
      */
     currentQueryIndex: number;
+    /**
+     * When host binding is executing this points to the directive index.
+     * `TView.data[currentDirectiveIndex]` is `DirectiveDef`
+     * `LView[currentDirectiveIndex]` is directive instance.
+     */
+    currentDirectiveIndex: number;
 }
 /**
  * All implicit instruction state is stored here.
@@ -221,9 +227,18 @@ export declare function incrementBindingIndex(count: number): number;
  * Bindings inside the host template are 0 index. But because we don't know ahead of time
  * how many host bindings we have we can't pre-compute them. For this reason they are all
  * 0 index and we just shift the root so that they match next available location in the LView.
- * @param value
+ *
+ * @param bindingRootIndex Root index for `hostBindings`
+ * @param currentDirectiveIndex `TData[currentDirectiveIndex]` will point to the current directive
+ *        whose `hostBindings` are being processed.
  */
-export declare function setBindingRootForHostBindings(value: number): void;
+export declare function setBindingRootForHostBindings(bindingRootIndex: number, currentDirectiveIndex: number): void;
+/**
+ * When host binding is executing this points to the directive index.
+ * `TView.data[getCurrentDirectiveIndex()]` is `DirectiveDef`
+ * `LView[getCurrentDirectiveIndex()]` is directive instance.
+ */
+export declare function getCurrentDirectiveIndex(): number;
 export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;
 /**

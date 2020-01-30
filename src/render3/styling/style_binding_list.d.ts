@@ -28,4 +28,4 @@ import { TData } from '../interfaces/view';
  * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
  *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
  */
-export declare function insertTStylingBinding(tData: TData, tNode: TNode, tStylingKey: TStylingKey, index: number, isHostBinding: boolean, isClassBinding: boolean): void;
+export declare function insertTStylingBinding(tData: TData, tNode: TNode, tStylingKeyWithStatic: TStylingKey, index: number, isHostBinding: boolean, isClassBinding: boolean): void;
