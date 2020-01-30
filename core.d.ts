@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.11+64.sha-7bca243
+ * @license Angular v9.0.0-rc.11+67.sha-36dfca9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9610,17 +9610,11 @@ export declare const enum ɵDepFlags {
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
+ * This function triggers change detection in a synchronous way on a component.
  *
  * @param component The component which the change detection should be performed on.
  */
-export declare function ɵdetectChanges<T>(component: T): void;
+export declare function ɵdetectChanges(component: {}): void;
 
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;
@@ -9804,25 +9798,42 @@ export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
 export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
 
 /**
- * Retrieves directives associated with a given DOM host element.
+ * Retrieves directive instances associated with a given DOM element. Does not include
+ * component instances.
  *
- * @param target A DOM element, component or directive instance.
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```
+ * <my-app>
+ *   <button my-button></button>
+ *   <my-comp></my-comp>
+ * </my-app>
+ * ```
+ * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
+ * directive that is associated with the DOM element.
+ *
+ * Calling `getDirectives` on `<my-comp>` will return an empty array.
+ *
+ * @param element DOM element for which to get the directives.
+ * @returns Array of directives associated with the element.
  *
  * @publicApi
+ * @globalApi ng
  */
-export declare function ɵgetDirectives(target: {}): Array<{}>;
+export declare function ɵgetDirectives(element: Element): {}[];
 
 /**
- * Retrieve the host element of the component.
+ * Retrieves the host element of a component or directive instance.
+ * The host element is the DOM element that matched the selector of the directive.
  *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param directive Component or Directive for which the host element should be retrieved.
+ * @param componentOrDirective Component or directive instance for which the host
+ *     element should be retrieved.
+ * @returns Host element of the target.
  *
  * @publicApi
+ * @globalApi ng
  */
-export declare function ɵgetHostElement<T>(directive: T): Element;
+export declare function ɵgetHostElement(componentOrDirective: {}): Element;
 
 /**
  * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -10018,22 +10029,15 @@ export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]
 };
 
 /**
- * Mark the component as dirty (needing change detection).
+ * Marks the component as dirty (needing change detection). Marking a component dirty will
+ * schedule a change detection on it at some point in the future.
  *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent`, a scheduler
- * can be provided.
+ * Marking an already dirty component as dirty won't do anything. Only one outstanding change
+ * detection can be scheduled per component tree.
  *
  * @param component Component to mark as dirty.
- *
- * @publicApi
  */
-export declare function ɵmarkDirty<T>(component: T): void;
+export declare function ɵmarkDirty(component: {}): void;
 
 export declare type ɵMethodFn = (obj: any, args: any[]) => any;
 
