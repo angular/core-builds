@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.11+61.sha-19c4895
+ * @license Angular v9.0.0-rc.11+62.sha-36b8c03
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1421,8 +1421,6 @@ function arraySplice(array, index, count) {
  * removed. This causes memory pressure and slows down code when most of the time we don't
  * care about the deleted items array.
  *
- * https://jsperf.com/fast-array-splice (About 20x faster)
- *
  * @param array Array to splice.
  * @param index Index in array where the `value` should be added.
  * @param value Value to add to array.
@@ -1443,8 +1441,6 @@ function arrayInsert(array, index, value) {
  * `Array.splice()` is not fast because it has to allocate an array for the elements which were
  * removed. This causes memory pressure and slows down code when most of the time we don't
  * care about the deleted items array.
- *
- * https://jsperf.com/fast-array-splice (About 20x faster)
  *
  * @param array Array to splice.
  * @param index Index in array where the `value` should be added.
@@ -1534,66 +1530,66 @@ function arrayIndexOfSorted(array, value) {
 /**
  * Set a `value` for a `key`.
  *
- * @param arrayMap to modify.
+ * @param keyValueArray to modify.
  * @param key The key to locate or create.
  * @param value The value to set for a `key`.
  * @returns index (always even) of where the value vas set.
  */
-function arrayMapSet(arrayMap, key, value) {
-    let index = arrayMapIndexOf(arrayMap, key);
+function keyValueArraySet(keyValueArray, key, value) {
+    let index = keyValueArrayIndexOf(keyValueArray, key);
     if (index >= 0) {
         // if we found it set it.
-        arrayMap[index | 1] = value;
+        keyValueArray[index | 1] = value;
     }
     else {
         index = ~index;
-        arrayInsert2(arrayMap, index, key, value);
+        arrayInsert2(keyValueArray, index, key, value);
     }
     return index;
 }
 /**
  * Retrieve a `value` for a `key` (on `undefined` if not found.)
  *
- * @param arrayMap to search.
+ * @param keyValueArray to search.
  * @param key The key to locate.
  * @return The `value` stored at the `key` location or `undefined if not found.
  */
-function arrayMapGet(arrayMap, key) {
-    const index = arrayMapIndexOf(arrayMap, key);
+function keyValueArrayGet(keyValueArray, key) {
+    const index = keyValueArrayIndexOf(keyValueArray, key);
     if (index >= 0) {
         // if we found it retrieve it.
-        return arrayMap[index | 1];
+        return keyValueArray[index | 1];
     }
     return undefined;
 }
 /**
  * Retrieve a `key` index value in the array or `-1` if not found.
  *
- * @param arrayMap to search.
+ * @param keyValueArray to search.
  * @param key The key to locate.
  * @returns index of where the key is (or should have been.)
  *   - positive (even) index if key found.
  *   - negative index if key not found. (`~index` (even) to get the index where it should have
  *     been inserted.)
  */
-function arrayMapIndexOf(arrayMap, key) {
-    return _arrayIndexOfSorted(arrayMap, key, 1);
+function keyValueArrayIndexOf(keyValueArray, key) {
+    return _arrayIndexOfSorted(keyValueArray, key, 1);
 }
 /**
- * Delete a `key` (and `value`) from the `ArrayMap`.
+ * Delete a `key` (and `value`) from the `KeyValueArray`.
  *
- * @param arrayMap to modify.
+ * @param keyValueArray to modify.
  * @param key The key to locate or delete (if exist).
  * @returns index of where the key was (or should have been.)
  *   - positive (even) index if key found and deleted.
  *   - negative index if key not found. (`~index` (even) to get the index where it should have
  *     been.)
  */
-function arrayMapDelete(arrayMap, key) {
-    const index = arrayMapIndexOf(arrayMap, key);
+function keyValueArrayDelete(keyValueArray, key) {
+    const index = keyValueArrayIndexOf(keyValueArray, key);
     if (index >= 0) {
         // if we found it remove it.
-        arraySplice(arrayMap, index, 2);
+        arraySplice(keyValueArray, index, 2);
     }
     return index;
 }
@@ -3265,23 +3261,6 @@ function getLView() {
     return lFrame === null ? (/** @type {?} */ (null)) : lFrame.lView;
 }
 /**
- * Sets the active directive host element and resets the directive id value
- * (when the provided elementIndex value has changed).
- *
- * @param {?} elementIndex the element index value for the host element where
- *                     the directive/component instance lives
- * @return {?}
- */
-function setActiveHostElement(elementIndex) {
-    setSelectedIndex(elementIndex);
-}
-/**
- * @return {?}
- */
-function clearActiveHostElement() {
-    setSelectedIndex(-1);
-}
-/**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
  * Used in conjunction with the getCurrentView() instruction to save a snapshot
@@ -3670,11 +3649,6 @@ function getCurrentStyleSanitizer() {
     const lFrame = instructionState.lFrame;
     return lFrame === null ? null : lFrame.currentSanitizer;
 }
-/** @enum {number} */
-const BindingChanged = {
-    CLASS_SHIFT: 16,
-    STYLE_MASK: 65535,
-};
 
 /**
  * @fileoverview added by tsickle
@@ -8565,7 +8539,7 @@ if (false) {
      */
     TNode.prototype.styles;
     /**
-     * An `ArrayMap` version of residual `styles`.
+     * A `KeyValueArray` version of residual `styles`.
      *
      * When there are styling instructions than each instruction stores the static styling
      * which is of lower priority than itself. This means that there may be a higher priority styling
@@ -8589,7 +8563,7 @@ if (false) {
      *
      * - `undefined': not initialized.
      * - `null`: initialized but `styles` is `null`
-     * - `ArrayMap`: parsed version of `styles`.
+     * - `KeyValueArray`: parsed version of `styles`.
      * @type {?}
      */
     TNode.prototype.residualStyles;
@@ -8603,13 +8577,13 @@ if (false) {
      */
     TNode.prototype.classes;
     /**
-     * An `ArrayMap` version of residual `classes`.
+     * A `KeyValueArray` version of residual `classes`.
      *
      * Same as `TNode.residualStyles` but for classes.
      *
      * - `undefined': not initialized.
      * - `null`: initialized but `classes` is `null`
-     * - `ArrayMap`: parsed version of `S`.
+     * - `KeyValueArray`: parsed version of `classes`.
      * @type {?}
      */
     TNode.prototype.residualClasses;
@@ -9917,7 +9891,7 @@ const unusedValueExportToPlacateAjd$6 = 1;
 /**
  * Store the static values for the styling binding.
  *
- * The `TStylingStatic` is just `ArrayMap` where key `""` (stored at location 0) contains the
+ * The `TStylingStatic` is just `KeyValueArray` where key `""` (stored at location 0) contains the
  * `TStylingKey` (stored at location 1). In other words this wraps the `TStylingKey` such that the
  * `""` contains the wrapped value.
  *
@@ -11328,7 +11302,7 @@ const ɵ0$4 = /**
  */
 const _CLEAN_PROMISE = ((ɵ0$4))();
 /**
- * Process the `TVIew.expandoInstructions`. (Execute the `hostBindings`.)
+ * Process the `TView.expandoInstructions`. (Execute the `hostBindings`.)
  *
  * @param {?} tView `TView` containing the `expandoInstructions`
  * @param {?} lView `LView` associated with the `TView`
@@ -11346,7 +11320,7 @@ function setHostBindingsByExecutingExpandoInstructions(tView, lView) {
             let currentDirectiveIndex = -1;
             /** @type {?} */
             let currentElementIndex = -1;
-            // TODO(misko): PERF It is possible to get here with `TVIew.expandoInstructions` containing no
+            // TODO(misko): PERF It is possible to get here with `TView.expandoInstructions` containing no
             // functions to execute. This is wasteful as there is no work to be done, but we still need
             // to iterate over the instructions.
             // In example of this is in this test: `host_binding_spec.ts`
@@ -11366,7 +11340,7 @@ function setHostBindingsByExecutingExpandoInstructions(tView, lView) {
                         // TODO(misko): PERF This should be refactored to use `~instruction` as that does not
                         // suffer from `-0` and it is faster/more compact.
                         currentElementIndex = 0 - instruction;
-                        setActiveHostElement(currentElementIndex);
+                        setSelectedIndex(currentElementIndex);
                         // Injector block and providers are taken into account.
                         /** @type {?} */
                         const providerCount = ((/** @type {?} */ (expandoInstructions[++i])));
@@ -11400,7 +11374,7 @@ function setHostBindingsByExecutingExpandoInstructions(tView, lView) {
         }
     }
     finally {
-        clearActiveHostElement();
+        setSelectedIndex(-1);
     }
 }
 /**
@@ -11854,7 +11828,7 @@ function executeTemplate(lView, templateFn, rf, context) {
     /** @type {?} */
     const prevSelectedIndex = getSelectedIndex();
     try {
-        clearActiveHostElement();
+        setSelectedIndex(-1);
         if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
             // When we're updating, inherently select 0 so we don't
             // have to generate that instruction for most update blocks.
@@ -12691,7 +12665,7 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
     /** @type {?} */
     const elementIndex = tNode.index - HEADER_OFFSET;
     try {
-        setActiveHostElement(elementIndex);
+        setSelectedIndex(elementIndex);
         for (let i = start; i < end; i++) {
             /** @type {?} */
             const def = (/** @type {?} */ (tView.data[i]));
@@ -12706,7 +12680,7 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
         }
     }
     finally {
-        clearActiveHostElement();
+        setSelectedIndex(-1);
     }
 }
 /**
@@ -14529,15 +14503,16 @@ function applyContainer(renderer, action, lContainer, renderParent, beforeNode) 
  * @param {?} isClassBased `true` if it should be written to `class` (`false` to write to `style`)
  * @param {?} rNode The Node to write to.
  * @param {?} prop Property to write to. This would be the class/style name.
- * @param {?} value Value to wiret. If `null`/`undefined`/`false` this is consider a remove (set/add
- * otherwise).
+ * @param {?} value Value to write. If `null`/`undefined`/`false` this is considered a remove (set/add
+ *        otherwise).
  * @return {?}
  */
 function applyStyling(renderer, isClassBased, rNode, prop, value) {
     /** @type {?} */
     const isProcedural = isProceduralRenderer(renderer);
     if (isClassBased) {
-        if (!value) { // We actually want JS falseness here
+        // We actually want JS true/false here because any truthy value should add the class
+        if (!value) {
             ngDevMode && ngDevMode.rendererRemoveClass++;
             if (isProcedural) {
                 ((/** @type {?} */ (renderer))).removeClass(rNode, prop);
@@ -14562,7 +14537,7 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
         // different order which causes failures. Using direct constant as workaround for now.
         /** @type {?} */
         const flags = prop.indexOf('-') == -1 ? undefined : 2 /* RendererStyleFlags2.DashCase */;
-        if (value === null || value === undefined) {
+        if (value == null /** || value === undefined */) {
             ngDevMode && ngDevMode.rendererRemoveStyle++;
             if (isProcedural) {
                 ((/** @type {?} */ (renderer))).removeStyle(rNode, prop, flags);
@@ -22504,10 +22479,11 @@ function insertTStylingBinding(tData, tNode, tStylingKeyWithStatic, index, isHos
     if (Array.isArray(tStylingKeyWithStatic)) {
         // We are case when the `TStylingKey` contains static fields as well.
         /** @type {?} */
-        const staticArrayMap = (/** @type {?} */ (tStylingKeyWithStatic));
-        tStylingKey = staticArrayMap[1]; // unwrap.
+        const staticKeyValueArray = (/** @type {?} */ (tStylingKeyWithStatic));
+        tStylingKey = staticKeyValueArray[1]; // unwrap.
         // We need to check if our key is present in the static so that we can mark it as duplicate.
-        if (tStylingKey === null || arrayMapIndexOf(staticArrayMap, (/** @type {?} */ (tStylingKey))) > 0) {
+        if (tStylingKey === null ||
+            keyValueArrayIndexOf(staticKeyValueArray, (/** @type {?} */ (tStylingKey))) > 0) {
             // tStylingKey is present in the statics, need to mark it as duplicate.
             isKeyDuplicateOfStatic = true;
         }
@@ -22594,7 +22570,7 @@ function markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClas
     /** @type {?} */
     const residual = isClassBinding ? tNode.residualClasses : tNode.residualStyles;
     if (residual != null /* or undefined */ && typeof tStylingKey == 'string' &&
-        arrayMapIndexOf(residual, tStylingKey) >= 0) {
+        keyValueArrayIndexOf(residual, tStylingKey) >= 0) {
         // We have duplicate in the residual so mark ourselves as duplicate.
         tData[index + 1] = setTStylingRangeNextDuplicate((/** @type {?} */ (tData[index + 1])));
     }
@@ -22723,9 +22699,10 @@ function isStylingMatch(tStylingKeyCursor, tStylingKey) {
         return true;
     }
     else if (Array.isArray(tStylingKeyCursor) && typeof tStylingKey === 'string') {
-        // if we did not find a match, but `tStylingKeyCursor` is `ArrayMap` that means cursor has
+        // if we did not find a match, but `tStylingKeyCursor` is `KeyValueArray` that means cursor has
         // statics and we need to check those as well.
-        return arrayMapIndexOf(tStylingKeyCursor, tStylingKey) >= 0; // see if we are matching the key
+        return keyValueArrayIndexOf(tStylingKeyCursor, tStylingKey) >=
+            0; // see if we are matching the key
     }
     return false;
 }
@@ -23148,21 +23125,21 @@ function ɵɵclassProp(className, value) {
  * @return {?}
  */
 function ɵɵstyleMap(styles) {
-    checkStylingMap(styleArrayMapSet, styleStringParser, styles, false);
+    checkStylingMap(styleKeyValueArraySet, styleStringParser, styles, false);
 }
 /**
- * Parse text as style and add values to ArrayMap.
+ * Parse text as style and add values to KeyValueArray.
  *
  * This code is pulled out to a separate function so that it can be tree shaken away if it is not
- * needed. It is only reference from `ɵɵstyleMap`.
+ * needed. It is only referenced from `ɵɵstyleMap`.
  *
- * @param {?} arrayMap ArrayMap to add parsed values to.
+ * @param {?} keyValueArray KeyValueArray to add parsed values to.
  * @param {?} text text to parse.
  * @return {?}
  */
-function styleStringParser(arrayMap, text) {
+function styleStringParser(keyValueArray, text) {
     for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i)) {
-        styleArrayMapSet(arrayMap, getLastParsedKey(text), getLastParsedValue(text));
+        styleKeyValueArraySet(keyValueArray, getLastParsedKey(text), getLastParsedValue(text));
     }
 }
 /**
@@ -23185,21 +23162,21 @@ function styleStringParser(arrayMap, text) {
  * @return {?}
  */
 function ɵɵclassMap(classes) {
-    checkStylingMap(arrayMapSet, classStringParser, classes, true);
+    checkStylingMap(keyValueArraySet, classStringParser, classes, true);
 }
 /**
- * Parse text as class and add values to ArrayMap.
+ * Parse text as class and add values to KeyValueArray.
  *
  * This code is pulled out to a separate function so that it can be tree shaken away if it is not
- * needed. It is only reference from `ɵɵclassMap`.
+ * needed. It is only referenced from `ɵɵclassMap`.
  *
- * @param {?} arrayMap ArrayMap to add parsed values to.
+ * @param {?} keyValueArray KeyValueArray to add parsed values to.
  * @param {?} text text to parse.
  * @return {?}
  */
-function classStringParser(arrayMap, text) {
+function classStringParser(keyValueArray, text) {
     for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
-        arrayMapSet(arrayMap, getLastParsedKey(text), true);
+        keyValueArraySet(keyValueArray, getLastParsedKey(text), true);
     }
 }
 /**
@@ -23222,7 +23199,7 @@ function checkStylingProperty(prop, value, suffixOrSanitizer, isClassBased) {
     /** @type {?} */
     const bindingIndex = incrementBindingIndex(2);
     if (tView.firstUpdatePass) {
-        stylingPropertyFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
+        stylingFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
     }
     if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
         // This is a work around. Once PR#34480 lands the sanitizer is passed explicitly and this line
@@ -23242,13 +23219,17 @@ function checkStylingProperty(prop, value, suffixOrSanitizer, isClassBased) {
 /**
  * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
  *
- * @param {?} arrayMapSet
- * @param {?} stringParser
- * @param {?} value binding value.
+ * @param {?} keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+ * function so that
+ *        `style` can pass in version which does sanitization. This is done for tree shaking
+ *        purposes.
+ * @param {?} stringParser Parser used to parse `value` if `string`. (Passed in as `style` and `class`
+ *        have different parsers.)
+ * @param {?} value bound value from application
  * @param {?} isClassBased `true` if `class` change (`false` if `style`)
  * @return {?}
  */
-function checkStylingMap(arrayMapSet, stringParser, value, isClassBased) {
+function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
@@ -23256,7 +23237,7 @@ function checkStylingMap(arrayMapSet, stringParser, value, isClassBased) {
     /** @type {?} */
     const bindingIndex = incrementBindingIndex(2);
     if (tView.firstUpdatePass) {
-        stylingPropertyFirstUpdatePass(tView, null, bindingIndex, isClassBased);
+        stylingFirstUpdatePass(tView, null, bindingIndex, isClassBased);
     }
     if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
         // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
@@ -23275,8 +23256,8 @@ function checkStylingMap(arrayMapSet, stringParser, value, isClassBased) {
             // Instead VE just ignores the static completely if dynamic binding is present.
             // Because of locality we have already set the static portion because we don't know if there
             // is a dynamic portion until later. If we would ignore the static portion it would look like
-            // tha the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
-            // thing as it would think tha the static portion was removed. For this reason we
+            // the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
+            // thing as it would think that the static portion was removed. For this reason we
             // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
             /** @type {?} */
             let staticPrefix = isClassBased ? tNode.classes : tNode.styles;
@@ -23290,7 +23271,7 @@ function checkStylingMap(arrayMapSet, stringParser, value, isClassBased) {
             setDirectiveInputsWhichShadowsStyling(tNode, lView, value, isClassBased);
         }
         else {
-            updateStylingMap(tView, tNode, lView, lView[RENDERER], lView[bindingIndex + 1], lView[bindingIndex + 1] = toStylingArrayMap(arrayMapSet, stringParser, value), isClassBased, bindingIndex);
+            updateStylingMap(tView, tNode, lView, lView[RENDERER], lView[bindingIndex + 1], lView[bindingIndex + 1] = toStylingKeyValueArray(keyValueArraySet, stringParser, value), isClassBased, bindingIndex);
         }
     }
 }
@@ -23310,12 +23291,12 @@ function isInHostBindings(tView, bindingIndex) {
  * using `insertTStylingBinding`.
  *
  * @param {?} tView `TView` where the binding linked list will be stored.
- * @param {?} tStylingKey
+ * @param {?} tStylingKey Property/key of the binding.
  * @param {?} bindingIndex Index of binding associated with the `prop`
  * @param {?} isClassBased `true` if `class` change (`false` if `style`)
  * @return {?}
  */
-function stylingPropertyFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) {
+function stylingFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) {
     ngDevMode && assertFirstUpdatePass(tView);
     /** @type {?} */
     const tData = tView.data;
@@ -23471,7 +23452,8 @@ function collectResidual(tNode, isClassBased) {
         for (let i = directives[0 /* STYLING_CURSOR */] + 1; i < directives.length; i++) {
             /** @type {?} */
             const attrs = ((/** @type {?} */ (directives[i]))).hostAttrs;
-            residual = (/** @type {?} */ (collectStylingFromTAttrs(residual, attrs, isClassBased)));
+            residual =
+                (/** @type {?} */ (collectStylingFromTAttrs(residual, attrs, isClassBased)));
         }
     }
     return (/** @type {?} */ (collectStylingFromTAttrs(residual, tNode.attrs, isClassBased)));
@@ -23543,7 +23525,7 @@ function collectStylingFromTAttrs(stylingKey, attrs, isClassBased) {
                     if (!Array.isArray(stylingKey)) {
                         stylingKey = stylingKey === undefined ? [] : (/** @type {?} */ (['', stylingKey]));
                     }
-                    arrayMapSet((/** @type {?} */ (stylingKey)), item, isClassBased ? true : attrs[++i]);
+                    keyValueArraySet((/** @type {?} */ (stylingKey)), item, isClassBased ? true : attrs[++i]);
                 }
             }
         }
@@ -23563,37 +23545,43 @@ function getHostDirectiveDef(tData) {
     return currentDirectiveIndex === -1 ? null : (/** @type {?} */ (tData[currentDirectiveIndex]));
 }
 /**
- * Convert user input to `ArrayMap`.
+ * Convert user input to `KeyValueArray`.
  *
  * This function takes user input which could be `string`, Object literal, or iterable and converts
- * it into a consistent representation. The output of this is `ArrayMap` (which is an array where
+ * it into a consistent representation. The output of this is `KeyValueArray` (which is an array
+ * where
  * even indexes contain keys and odd indexes contain values for those keys).
  *
- * The advantage of converting to `ArrayMap` is that we can perform diff in a input independent way.
+ * The advantage of converting to `KeyValueArray` is that we can perform diff in an input
+ * independent
+ * way.
  * (ie we can compare `foo bar` to `['bar', 'baz'] and determine a set of changes which need to be
  * applied)
  *
- * The fact that `ArrayMap` is sorted is very important because it allows us to compute the
+ * The fact that `KeyValueArray` is sorted is very important because it allows us to compute the
  * difference in linear fashion without the need to allocate any additional data.
  *
  * For example if we kept this as a `Map` we would have to iterate over previous `Map` to determine
- * which values need to be delete, over the new `Map` to determine additions, and we would have to
+ * which values need to be deleted, over the new `Map` to determine additions, and we would have to
  * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
  *
- * @param {?} arrayMapSet
+ * @param {?} keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+ * function so that
+ *        `style` can pass in version which does sanitization. This is done for tree shaking
+ *        purposes.
  * @param {?} stringParser The parser is passed in so that it will be tree shakable. See
  *        `styleStringParser` and `classStringParser`
- * @param {?} value The value to parse/convert to `ArrayMap`
+ * @param {?} value The value to parse/convert to `KeyValueArray`
  * @return {?}
  */
-function toStylingArrayMap(arrayMapSet, stringParser, value) {
-    if (value === null || value === undefined || value === '')
+function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
+    if (value == null /*|| value === undefined */ || value === '')
         return (/** @type {?} */ (EMPTY_ARRAY$3));
     /** @type {?} */
-    const styleArrayMap = (/** @type {?} */ ([]));
+    const styleKeyValueArray = (/** @type {?} */ ([]));
     if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
-            arrayMapSet(styleArrayMap, value[i], true);
+            keyValueArraySet(styleKeyValueArray, value[i], true);
         }
     }
     else if (typeof value === 'object') {
@@ -23603,46 +23591,46 @@ function toStylingArrayMap(arrayMapSet, stringParser, value) {
              * @param {?} k
              * @return {?}
              */
-            (v, k) => arrayMapSet(styleArrayMap, k, v)));
+            (v, k) => keyValueArraySet(styleKeyValueArray, k, v)));
         }
         else if (value instanceof Set) {
             value.forEach((/**
              * @param {?} k
              * @return {?}
              */
-            (k) => arrayMapSet(styleArrayMap, k, true)));
+            (k) => keyValueArraySet(styleKeyValueArray, k, true)));
         }
         else {
             for (const key in value) {
                 if (value.hasOwnProperty(key)) {
-                    arrayMapSet(styleArrayMap, key, value[key]);
+                    keyValueArraySet(styleKeyValueArray, key, value[key]);
                 }
             }
         }
     }
     else if (typeof value === 'string') {
-        stringParser(styleArrayMap, value);
+        stringParser(styleKeyValueArray, value);
     }
     else {
-        ngDevMode && throwError('Unsupported styling type ' + typeof value);
+        ngDevMode && throwError('Unsupported styling type ' + typeof value + ': ' + value);
     }
-    return styleArrayMap;
+    return styleKeyValueArray;
 }
 /**
  * Set a `value` for a `key` taking style sanitization into account.
  *
- * See: `arrayMapSet` for details
+ * See: `keyValueArraySet` for details
  *
- * @param {?} arrayMap ArrayMap to add to.
+ * @param {?} keyValueArray KeyValueArray to add to.
  * @param {?} key Style key to add. (This key will be checked if it needs sanitization)
  * @param {?} value The value to set (If key needs sanitization it will be sanitized)
  * @return {?}
  */
-function styleArrayMapSet(arrayMap, key, value) {
+function styleKeyValueArraySet(keyValueArray, key, value) {
     if (stylePropNeedsSanitization(key)) {
         value = ɵɵsanitizeStyle(value);
     }
-    arrayMapSet(arrayMap, key, value);
+    keyValueArraySet(keyValueArray, key, value);
 }
 /**
  * Update map based styling.
@@ -23650,39 +23638,40 @@ function styleArrayMapSet(arrayMap, key, value) {
  * Map based styling could be anything which contains more than one binding. For example `string`,
  * `Map`, `Set` or object literal. Dealing with all of these types would complicate the logic so
  * instead this function expects that the complex input is first converted into normalized
- * `ArrayMap`. The advantage of normalization is that we get the values sorted, which makes it very
+ * `KeyValueArray`. The advantage of normalization is that we get the values sorted, which makes it
+ * very
  * cheap to compute deltas between the previous and current value.
  *
  * @param {?} tView Associated `TView.data` contains the linked list of binding priorities.
  * @param {?} tNode `TNode` where the binding is located.
  * @param {?} lView `LView` contains the values associated with other styling binding at this `TNode`.
  * @param {?} renderer Renderer to use if any updates.
- * @param {?} oldArrayMap Previous value represented as `ArrayMap`
- * @param {?} newArrayMap Current value represented as `ArrayMap`
+ * @param {?} oldKeyValueArray Previous value represented as `KeyValueArray`
+ * @param {?} newKeyValueArray Current value represented as `KeyValueArray`
  * @param {?} isClassBased `true` if `class` (`false` if `style`)
  * @param {?} bindingIndex Binding index of the binding.
  * @return {?}
  */
-function updateStylingMap(tView, tNode, lView, renderer, oldArrayMap, newArrayMap, isClassBased, bindingIndex) {
-    if ((/** @type {?} */ (oldArrayMap)) === NO_CHANGE) {
-        // ON first execution the oldArrayMap is NO_CHANGE => treat is as empty ArrayMap.
-        oldArrayMap = (/** @type {?} */ (EMPTY_ARRAY$3));
+function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
+    if ((/** @type {?} */ (oldKeyValueArray)) === NO_CHANGE) {
+        // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
+        oldKeyValueArray = (/** @type {?} */ (EMPTY_ARRAY$3));
     }
     /** @type {?} */
     let oldIndex = 0;
     /** @type {?} */
     let newIndex = 0;
     /** @type {?} */
-    let oldKey = 0 < oldArrayMap.length ? oldArrayMap[0] : null;
+    let oldKey = 0 < oldKeyValueArray.length ? oldKeyValueArray[0] : null;
     /** @type {?} */
-    let newKey = 0 < newArrayMap.length ? newArrayMap[0] : null;
+    let newKey = 0 < newKeyValueArray.length ? newKeyValueArray[0] : null;
     while (oldKey !== null || newKey !== null) {
         ngDevMode && assertLessThan(oldIndex, 999, 'Are we stuck in infinite loop?');
         ngDevMode && assertLessThan(newIndex, 999, 'Are we stuck in infinite loop?');
         /** @type {?} */
-        const oldValue = oldIndex < oldArrayMap.length ? oldArrayMap[oldIndex + 1] : undefined;
+        const oldValue = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex + 1] : undefined;
         /** @type {?} */
-        const newValue = newIndex < newArrayMap.length ? newArrayMap[newIndex + 1] : undefined;
+        const newValue = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex + 1] : undefined;
         /** @type {?} */
         let setKey = null;
         /** @type {?} */
@@ -23697,12 +23686,17 @@ function updateStylingMap(tView, tNode, lView, renderer, oldArrayMap, newArrayMa
             }
         }
         else if (newKey === null || oldKey !== null && oldKey < (/** @type {?} */ (newKey))) {
-            // DELETE: oldKey key is missing or we did not find the oldKey in the newValue.
+            // DELETE: oldKey key is missing or we did not find the oldKey in the newValue
+            // (because the keyValueArray is sorted and `newKey` is found later alphabetically).
+            // `"background" < "color"` so we need to delete `"background"` because it is not found in the
+            // new array.
             oldIndex += 2;
             setKey = oldKey;
         }
         else {
-            // CREATE: newKey is less than oldKey (or no oldKey) => we have new key.
+            // CREATE: newKey's is earlier alphabetically than oldKey's (or no oldKey) => we have new key.
+            // `"color" > "background"` so we need to add `color` because it is in new array but not in
+            // old array.
             ngDevMode && assertDefined(newKey, 'Expecting to have a valid key');
             newIndex += 2;
             setKey = newKey;
@@ -23711,8 +23705,8 @@ function updateStylingMap(tView, tNode, lView, renderer, oldArrayMap, newArrayMa
         if (setKey !== null) {
             updateStyling(tView, tNode, lView, renderer, setKey, setValue, isClassBased, bindingIndex);
         }
-        oldKey = oldIndex < oldArrayMap.length ? oldArrayMap[oldIndex] : null;
-        newKey = newIndex < newArrayMap.length ? newArrayMap[newIndex] : null;
+        oldKey = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex] : null;
+        newKey = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex] : null;
     }
 }
 /**
@@ -23728,7 +23722,7 @@ function updateStylingMap(tView, tNode, lView, renderer, oldArrayMap, newArrayMa
  * @param {?} lView `LView` contains the values associated with other styling binding at this `TNode`.
  * @param {?} renderer Renderer to use if any updates.
  * @param {?} prop Either style property name or a class name.
- * @param {?} value Either style vale for `prop` or `true`/`false` if `prop` is class.
+ * @param {?} value Either style value for `prop` or `true`/`false` if `prop` is class.
  * @param {?} isClassBased `true` if `class` (`false` if `style`)
  * @param {?} bindingIndex Binding index of the binding.
  * @return {?}
@@ -23762,20 +23756,22 @@ function updateStyling(tView, tNode, lView, renderer, prop, value, isClassBased,
     }
 }
 /**
- * Search for styling value with higher priority which is overwriting current value.
+ * Search for styling value with higher priority which is overwriting current value, or a
+ * value of lower priority to which we should fall back if the value is `undefined`.
  *
- * When value is being applied at a location related values need to be consulted.
+ * When value is being applied at a location, related values need to be consulted.
  * - If there is a higher priority binding, we should be using that one instead.
  *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp1`
  *   requires that we check `exp2` to see if it is set to value other than `undefined`.
  * - If there is a lower priority binding and we are changing to `undefined`
  *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp2` to
- *   `undefined` requires that we check `exp` (and static values) and use that as new value.
+ *   `undefined` requires that we check `exp1` (and static values) and use that as new value.
  *
  * NOTE: The styling stores two values.
  * 1. The raw value which came from the application is stored at `index + 0` location. (This value
  *    is used for dirty checking).
- * 2. The normalized value (converted to `ArrayMap` if map and sanitized) is stored at `index + 1`.
+ * 2. The normalized value (converted to `KeyValueArray` if map and sanitized) is stored at `index +
+ * 1`.
  *    The advantage of storing the sanitized value is that once the value is written we don't need
  *    to worry about sanitizing it later or keeping track of the sanitizer.
  *
@@ -23792,6 +23788,13 @@ function updateStyling(tView, tNode, lView, renderer, prop, value, isClassBased,
  * @return {?}
  */
 function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
+    // `TNode` to use for resolving static styling. Also controls search direction.
+    //   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
+    //      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
+    //   - `null` search prev and go all the way to end. Return last value where
+    //     `isStylingValuePresent(value)` is true.
+    /** @type {?} */
+    const isPrevDirection = tNode === null;
     /** @type {?} */
     let value = undefined;
     while (index > 0) {
@@ -23803,20 +23806,20 @@ function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
         /** @type {?} */
         const key = containsStatics ? ((/** @type {?} */ (rawKey)))[1] : rawKey;
         /** @type {?} */
-        let currentValue = key === null ? arrayMapGet(lView[index + 1], prop) :
+        let currentValue = key === null ? keyValueArrayGet(lView[index + 1], prop) :
             key === prop ? lView[index + 1] : undefined;
         if (containsStatics && !isStylingValuePresent(currentValue)) {
-            currentValue = arrayMapGet((/** @type {?} */ (rawKey)), prop);
+            currentValue = keyValueArrayGet((/** @type {?} */ (rawKey)), prop);
         }
         if (isStylingValuePresent(currentValue)) {
             value = currentValue;
-            if (tNode === null) {
+            if (isPrevDirection) {
                 return value;
             }
         }
         /** @type {?} */
         const tRange = (/** @type {?} */ (tData[index + 1]));
-        index = tNode === null ? getTStylingRangePrev(tRange) : getTStylingRangeNext(tRange);
+        index = isPrevDirection ? getTStylingRangePrev(tRange) : getTStylingRangeNext(tRange);
     }
     if (tNode !== null) {
         // in case where we are going in next direction AND we did not find anything, we need to
@@ -23824,7 +23827,7 @@ function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
         /** @type {?} */
         let residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
         if (residual != null /** OR residual !=== undefined */) {
-            value = arrayMapGet((/** @type {?} */ (residual)), prop);
+            value = keyValueArrayGet((/** @type {?} */ (residual)), prop);
         }
     }
     return value;
@@ -23844,45 +23847,6 @@ function isStylingValuePresent(value) {
     return value !== undefined;
 }
 /**
- * Lazily computes `tNode.classesMap`/`tNode.stylesMap`.
- *
- * This code is here because we don't want to included it in `elementStart` as it would make hello
- * world bigger even if no styling would be present. Instead we initialize the values here so that
- * tree shaking will only bring it in if styling is present.
- *
- * @param {?} tNode `TNode` to initialize.
- * @return {?}
- */
-function initializeStylingStaticArrayMap(tNode) {
-    ngDevMode && assertEqual(tNode.residualClasses, undefined, 'Already initialized!');
-    ngDevMode && assertEqual(tNode.residualStyles, undefined, 'Already initialized!');
-    /** @type {?} */
-    let styleMap = null;
-    /** @type {?} */
-    let classMap = null;
-    /** @type {?} */
-    const mergeAttrs = tNode.mergedAttrs || (/** @type {?} */ (EMPTY_ARRAY$3));
-    /** @type {?} */
-    let mode = -1 /* ImplicitAttributes */;
-    for (let i = 0; i < mergeAttrs.length; i++) {
-        /** @type {?} */
-        let item = mergeAttrs[i];
-        if (typeof item === 'number') {
-            mode = item;
-        }
-        else if (mode === 1 /* Classes */) {
-            classMap = classMap || (/** @type {?} */ ([]));
-            arrayMapSet((/** @type {?} */ (classMap)), (/** @type {?} */ (item)), true);
-        }
-        else if (mode === 2 /* Styles */) {
-            styleMap = styleMap || (/** @type {?} */ ([]));
-            arrayMapSet((/** @type {?} */ (styleMap)), (/** @type {?} */ (item)), (/** @type {?} */ (mergeAttrs[++i])));
-        }
-    }
-    tNode.residualClasses = classMap;
-    tNode.residualStyles = styleMap;
-}
-/**
  * Sanitizes or adds suffix to the value.
  *
  * If value is `null`/`undefined` no suffix is added
@@ -23891,7 +23855,7 @@ function initializeStylingStaticArrayMap(tNode) {
  * @return {?}
  */
 function normalizeAndApplySuffixOrSanitizer(value, suffixOrSanitizer) {
-    if (value === null || value === undefined) {
+    if (value == null /** || value === undefined */) {
         // do nothing
     }
     else if (typeof suffixOrSanitizer === 'function') {
@@ -24370,7 +24334,7 @@ function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24401,7 +24365,7 @@ function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24435,7 +24399,7 @@ function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24471,7 +24435,7 @@ function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24509,7 +24473,7 @@ function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, su
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24549,7 +24513,7 @@ function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24591,7 +24555,7 @@ function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  *
@@ -24635,7 +24599,7 @@ function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 /**
  * Update an interpolated class on an element with 8 or more bound values surrounded by text.
@@ -24666,7 +24630,7 @@ function ɵɵclassMapInterpolateV(values) {
     const lView = getLView();
     /** @type {?} */
     const interpolatedValue = interpolationV(lView, values);
-    checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+    checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 
 /**
@@ -25832,7 +25796,7 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
         (componentDef.hostBindings !== null || componentDef.hostAttrs !== null)) {
         /** @type {?} */
         const elementIndex = rootTNode.index - HEADER_OFFSET;
-        setActiveHostElement(elementIndex);
+        setSelectedIndex(elementIndex);
         /** @type {?} */
         const rootTView = rootLView[TVIEW];
         addHostBindingsToExpandoInstructions(rootTView, componentDef);
@@ -27471,7 +27435,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.11+61.sha-19c4895');
+const VERSION = new Version('9.0.0-rc.11+62.sha-36b8c03');
 
 /**
  * @fileoverview added by tsickle

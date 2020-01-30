@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.11+61.sha-19c4895
+ * @license Angular v9.0.0-rc.11+62.sha-36b8c03
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -431,22 +431,6 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     get viewCount(): number;
-}
-
-/**
- * `ArrayMap` is an array where even positions contain keys and odd positions contain values.
- *
- * `ArrayMap` provides a very efficient way of iterating over its contents. For small
- * sets (~10) the cost of binary searching an `ArrayMap` has about the same performance
- * characteristics that of a `Map` with significantly better memory footprint.
- *
- * If used as a `Map` the keys are stored in alphabetical order so that they can be binary searched
- * for retrieval.
- *
- * See: `arrayMapSet`, `arrayMapGet`, `arrayMapIndexOf`, `arrayMapDelete`.
- */
-declare interface ArrayMap<VALUE> extends Array<VALUE | string> {
-    __brand__: 'array-map';
 }
 
 /**
@@ -3559,6 +3543,22 @@ export declare class IterableDiffers {
      */
     static extend(factories: IterableDifferFactory[]): StaticProvider;
     find(iterable: any): IterableDifferFactory;
+}
+
+/**
+ * `KeyValueArray` is an array where even positions contain keys and odd positions contain values.
+ *
+ * `KeyValueArray` provides a very efficient way of iterating over its contents. For small
+ * sets (~10) the cost of binary searching an `KeyValueArray` has about the same performance
+ * characteristics that of a `Map` with significantly better memory footprint.
+ *
+ * If used as a `Map` the keys are stored in alphabetical order so that they can be binary searched
+ * for retrieval.
+ *
+ * See: `keyValueArraySet`, `keyValueArrayGet`, `keyValueArrayIndexOf`, `keyValueArrayDelete`.
+ */
+declare interface KeyValueArray<VALUE> extends Array<VALUE | string> {
+    __brand__: 'array-map';
 }
 
 /**
@@ -6994,7 +6994,7 @@ declare interface TNode {
      */
     styles: string | null;
     /**
-     * An `ArrayMap` version of residual `styles`.
+     * A `KeyValueArray` version of residual `styles`.
      *
      * When there are styling instructions than each instruction stores the static styling
      * which is of lower priority than itself. This means that there may be a higher priority styling
@@ -7018,9 +7018,9 @@ declare interface TNode {
      *
      * - `undefined': not initialized.
      * - `null`: initialized but `styles` is `null`
-     * - `ArrayMap`: parsed version of `styles`.
+     * - `KeyValueArray`: parsed version of `styles`.
      */
-    residualStyles: ArrayMap<any> | undefined | null;
+    residualStyles: KeyValueArray<any> | undefined | null;
     /**
      * A collection of all class static values for an element.
      *
@@ -7030,15 +7030,15 @@ declare interface TNode {
      */
     classes: string | null;
     /**
-     * An `ArrayMap` version of residual `classes`.
+     * A `KeyValueArray` version of residual `classes`.
      *
      * Same as `TNode.residualStyles` but for classes.
      *
      * - `undefined': not initialized.
      * - `null`: initialized but `classes` is `null`
-     * - `ArrayMap`: parsed version of `S`.
+     * - `KeyValueArray`: parsed version of `classes`.
      */
-    residualClasses: ArrayMap<any> | undefined | null;
+    residualClasses: KeyValueArray<any> | undefined | null;
     /**
      * Stores the head/tail index of the class bindings.
      *
@@ -7404,7 +7404,7 @@ declare interface TStylingRange {
 /**
  * Store the static values for the styling binding.
  *
- * The `TStylingStatic` is just `ArrayMap` where key `""` (stored at location 0) contains the
+ * The `TStylingStatic` is just `KeyValueArray` where key `""` (stored at location 0) contains the
  * `TStylingKey` (stored at location 1). In other words this wraps the `TStylingKey` such that the
  * `""` contains the wrapped value.
  *
@@ -7461,7 +7461,7 @@ declare interface TStylingRange {
  *
  * This means that it is safe to add class.
  */
-declare interface TStylingStatic extends ArrayMap<any> {
+declare interface TStylingStatic extends KeyValueArray<any> {
 }
 
 /** Static data for a text node */
