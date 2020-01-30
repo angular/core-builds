@@ -42,8 +42,6 @@ export declare function arraySplice(array: any[], index: number, count: number):
  * removed. This causes memory pressure and slows down code when most of the time we don't
  * care about the deleted items array.
  *
- * https://jsperf.com/fast-array-splice (About 20x faster)
- *
  * @param array Array to splice.
  * @param index Index in array where the `value` should be added.
  * @param value Value to add to array.
@@ -55,8 +53,6 @@ export declare function arrayInsert(array: any[], index: number, value: any): vo
  * `Array.splice()` is not fast because it has to allocate an array for the elements which were
  * removed. This causes memory pressure and slows down code when most of the time we don't
  * care about the deleted items array.
- *
- * https://jsperf.com/fast-array-splice (About 20x faster)
  *
  * @param array Array to splice.
  * @param index Index in array where the `value` should be added.
@@ -105,56 +101,56 @@ export declare function arrayRemoveSorted(array: string[], value: string): numbe
  */
 export declare function arrayIndexOfSorted(array: string[], value: string): number;
 /**
- * `ArrayMap` is an array where even positions contain keys and odd positions contain values.
+ * `KeyValueArray` is an array where even positions contain keys and odd positions contain values.
  *
- * `ArrayMap` provides a very efficient way of iterating over its contents. For small
- * sets (~10) the cost of binary searching an `ArrayMap` has about the same performance
+ * `KeyValueArray` provides a very efficient way of iterating over its contents. For small
+ * sets (~10) the cost of binary searching an `KeyValueArray` has about the same performance
  * characteristics that of a `Map` with significantly better memory footprint.
  *
  * If used as a `Map` the keys are stored in alphabetical order so that they can be binary searched
  * for retrieval.
  *
- * See: `arrayMapSet`, `arrayMapGet`, `arrayMapIndexOf`, `arrayMapDelete`.
+ * See: `keyValueArraySet`, `keyValueArrayGet`, `keyValueArrayIndexOf`, `keyValueArrayDelete`.
  */
-export interface ArrayMap<VALUE> extends Array<VALUE | string> {
+export interface KeyValueArray<VALUE> extends Array<VALUE | string> {
     __brand__: 'array-map';
 }
 /**
  * Set a `value` for a `key`.
  *
- * @param arrayMap to modify.
+ * @param keyValueArray to modify.
  * @param key The key to locate or create.
  * @param value The value to set for a `key`.
  * @returns index (always even) of where the value vas set.
  */
-export declare function arrayMapSet<V>(arrayMap: ArrayMap<V>, key: string, value: V): number;
+export declare function keyValueArraySet<V>(keyValueArray: KeyValueArray<V>, key: string, value: V): number;
 /**
  * Retrieve a `value` for a `key` (on `undefined` if not found.)
  *
- * @param arrayMap to search.
+ * @param keyValueArray to search.
  * @param key The key to locate.
  * @return The `value` stored at the `key` location or `undefined if not found.
  */
-export declare function arrayMapGet<V>(arrayMap: ArrayMap<V>, key: string): V | undefined;
+export declare function keyValueArrayGet<V>(keyValueArray: KeyValueArray<V>, key: string): V | undefined;
 /**
  * Retrieve a `key` index value in the array or `-1` if not found.
  *
- * @param arrayMap to search.
+ * @param keyValueArray to search.
  * @param key The key to locate.
  * @returns index of where the key is (or should have been.)
  *   - positive (even) index if key found.
  *   - negative index if key not found. (`~index` (even) to get the index where it should have
  *     been inserted.)
  */
-export declare function arrayMapIndexOf<V>(arrayMap: ArrayMap<V>, key: string): number;
+export declare function keyValueArrayIndexOf<V>(keyValueArray: KeyValueArray<V>, key: string): number;
 /**
- * Delete a `key` (and `value`) from the `ArrayMap`.
+ * Delete a `key` (and `value`) from the `KeyValueArray`.
  *
- * @param arrayMap to modify.
+ * @param keyValueArray to modify.
  * @param key The key to locate or delete (if exist).
  * @returns index of where the key was (or should have been.)
  *   - positive (even) index if key found and deleted.
  *   - negative index if key not found. (`~index` (even) to get the index where it should have
  *     been.)
  */
-export declare function arrayMapDelete<V>(arrayMap: ArrayMap<V>, key: string): number;
+export declare function keyValueArrayDelete<V>(keyValueArray: KeyValueArray<V>, key: string): number;

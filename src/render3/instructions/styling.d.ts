@@ -7,9 +7,12 @@
 */
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
-import { ArrayMap } from '../../util/array_utils';
+import { KeyValueArray } from '../../util/array_utils';
+import { DirectiveDef } from '../interfaces/definition';
 import { TNode } from '../interfaces/node';
 import { SanitizerFn } from '../interfaces/sanitization';
+import { TStylingKey } from '../interfaces/styling';
+import { TData } from '../interfaces/view';
 import { NO_CHANGE } from '../tokens';
 /**
  * Sets the current style sanitizer function which will then be used
@@ -89,15 +92,15 @@ export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
 } | Map<string, string | number | null | undefined> | string | undefined | null): void;
 /**
- * Parse text as style and add values to ArrayMap.
+ * Parse text as style and add values to KeyValueArray.
  *
  * This code is pulled out to a separate function so that it can be tree shaken away if it is not
- * needed. It is only reference from `ɵɵstyleMap`.
+ * needed. It is only referenced from `ɵɵstyleMap`.
  *
- * @param arrayMap ArrayMap to add parsed values to.
+ * @param keyValueArray KeyValueArray to add parsed values to.
  * @param text text to parse.
  */
-export declare function styleStringParser(arrayMap: ArrayMap<any>, text: string): void;
+export declare function styleStringParser(keyValueArray: KeyValueArray<any>, text: string): void;
 /**
  * Update class bindings using an object literal or class-string on an element.
  *
@@ -120,15 +123,15 @@ export declare function ɵɵclassMap(classes: {
     [className: string]: boolean | undefined | null;
 } | Map<string, boolean | undefined | null> | Set<string> | string[] | string | undefined | null): void;
 /**
- * Parse text as class and add values to ArrayMap.
+ * Parse text as class and add values to KeyValueArray.
  *
  * This code is pulled out to a separate function so that it can be tree shaken away if it is not
- * needed. It is only reference from `ɵɵclassMap`.
+ * needed. It is only referenced from `ɵɵclassMap`.
  *
- * @param arrayMap ArrayMap to add parsed values to.
+ * @param keyValueArray KeyValueArray to add parsed values to.
  * @param text text to parse.
  */
-export declare function classStringParser(arrayMap: ArrayMap<any>, text: string): void;
+export declare function classStringParser(keyValueArray: KeyValueArray<any>, text: string): void;
 /**
  * Common code between `ɵɵclassProp` and `ɵɵstyleProp`.
  *
@@ -139,48 +142,72 @@ export declare function classStringParser(arrayMap: ArrayMap<any>, text: string)
  */
 export declare function checkStylingProperty(prop: string, value: any | NO_CHANGE, suffixOrSanitizer: SanitizerFn | string | undefined | null, isClassBased: boolean): void;
 /**
-* Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
-*
-* @param tStylingMapKey See `STYLE_MAP_STYLING_KEY` and `CLASS_MAP_STYLING_KEY`.
-* @param value binding value.
-* @param isClassBased `true` if `class` change (`false` if `style`)
-*/
-export declare function checkStylingMap(arrayMapSet: (arrayMap: ArrayMap<any>, key: string, value: any) => void, stringParser: (styleArrayMap: ArrayMap<any>, text: string) => void, value: any | NO_CHANGE, isClassBased: boolean): void;
+ * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
+ *
+ * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+ * function so that
+ *        `style` can pass in version which does sanitization. This is done for tree shaking
+ *        purposes.
+ * @param stringParser Parser used to parse `value` if `string`. (Passed in as `style` and `class`
+ *        have different parsers.)
+ * @param value bound value from application
+ * @param isClassBased `true` if `class` change (`false` if `style`)
+ */
+export declare function checkStylingMap(keyValueArraySet: (keyValueArray: KeyValueArray<any>, key: string, value: any) => void, stringParser: (styleKeyValueArray: KeyValueArray<any>, text: string) => void, value: any | NO_CHANGE, isClassBased: boolean): void;
 /**
- * Convert user input to `ArrayMap`.
+ * Adds static styling information to the binding if applicable.
+ *
+ * The linked list of styles not only stores the list and keys, but also stores static styling
+ * information on some of the keys. This function determines if the key should contain the styling
+ * information and computes it.
+ *
+ * See `TStylingStatic` for more details.
+ *
+ * @param tData `TData` where the linked list is stored.
+ * @param tNode `TNode` for which the styling is being computed.
+ * @param stylingKey `TStylingKeyPrimitive` which may need to be wrapped into `TStylingKey`
+ * @param isClassBased `true` if `class` (`false` if `style`)
+ */
+export declare function wrapInStaticStylingKey(tData: TData, tNode: TNode, stylingKey: TStylingKey, isClassBased: boolean): TStylingKey;
+/**
+ * Retrieve the current `DirectiveDef` which is active when `hostBindings` style instruction is
+ * being executed (or `null` if we are in `template`.)
+ *
+ * @param tData Current `TData` where the `DirectiveDef` will be looked up at.
+ */
+export declare function getHostDirectiveDef(tData: TData): DirectiveDef<any> | null;
+/**
+ * Convert user input to `KeyValueArray`.
  *
  * This function takes user input which could be `string`, Object literal, or iterable and converts
- * it into a consistent representation. The output of this is `ArrayMap` (which is an array where
+ * it into a consistent representation. The output of this is `KeyValueArray` (which is an array
+ * where
  * even indexes contain keys and odd indexes contain values for those keys).
  *
- * The advantage of converting to `ArrayMap` is that we can perform diff in a input independent way.
+ * The advantage of converting to `KeyValueArray` is that we can perform diff in an input
+ * independent
+ * way.
  * (ie we can compare `foo bar` to `['bar', 'baz'] and determine a set of changes which need to be
  * applied)
  *
- * The fact that `ArrayMap` is sorted is very important because it allows us to compute the
+ * The fact that `KeyValueArray` is sorted is very important because it allows us to compute the
  * difference in linear fashion without the need to allocate any additional data.
  *
  * For example if we kept this as a `Map` we would have to iterate over previous `Map` to determine
- * which values need to be delete, over the new `Map` to determine additions, and we would have to
+ * which values need to be deleted, over the new `Map` to determine additions, and we would have to
  * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
  *
+ * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+ * function so that
+ *        `style` can pass in version which does sanitization. This is done for tree shaking
+ *        purposes.
  * @param stringParser The parser is passed in so that it will be tree shakable. See
  *        `styleStringParser` and `classStringParser`
- * @param value The value to parse/convert to `ArrayMap`
+ * @param value The value to parse/convert to `KeyValueArray`
  */
-export declare function toStylingArrayMap(arrayMapSet: (arrayMap: ArrayMap<any>, key: string, value: any) => void, stringParser: (styleArrayMap: ArrayMap<any>, text: string) => void, value: string | string[] | {
+export declare function toStylingKeyValueArray(keyValueArraySet: (keyValueArray: KeyValueArray<any>, key: string, value: any) => void, stringParser: (styleKeyValueArray: KeyValueArray<any>, text: string) => void, value: string | string[] | {
     [key: string]: any;
-} | Map<any, any> | Set<any> | null | undefined): ArrayMap<any>;
-/**
- * Lazily computes `tNode.classesMap`/`tNode.stylesMap`.
- *
- * This code is here because we don't want to included it in `elementStart` as it would make hello
- * world bigger even if no styling would be present. Instead we initialize the values here so that
- * tree shaking will only bring it in if styling is present.
- *
- * @param tNode `TNode` to initialize.
- */
-export declare function initializeStylingStaticArrayMap(tNode: TNode): void;
+} | Map<any, any> | Set<any> | null | undefined): KeyValueArray<any>;
 /**
  * Tests if the `TNode` has input shadow.
  *

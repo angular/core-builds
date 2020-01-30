@@ -16,7 +16,7 @@ import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/r
 import { SanitizerFn } from '../interfaces/sanitization';
 import { LView, LViewFlags, RootContext, RootContextFlags, TData, TView, TViewType } from '../interfaces/view';
 /**
- * Process the `TVIew.expandoInstructions`. (Execute the `hostBindings`.)
+ * Process the `TView.expandoInstructions`. (Execute the `hostBindings`.)
  *
  * @param tView `TView` containing the `expandoInstructions`
  * @param lView `LView` associated with the `TView`

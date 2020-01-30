@@ -7,11 +7,11 @@
  */
 import { AttributeMarker, ComponentTemplate } from '..';
 import { SchemaMetadata } from '../../core';
-import { ArrayMap } from '../../util/array_utils';
+import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
-import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { PropertyAliases, TConstants, TContainerNode, TDirectiveDefs, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
@@ -87,11 +87,12 @@ declare class TNode implements ITNode {
     parent: TElementNode | TContainerNode | null;
     projection: number | (ITNode | RNode[])[] | null;
     styles: string | null;
-    stylesMap: ArrayMap<any> | undefined | null;
+    residualStyles: KeyValueArray<any> | undefined | null;
     classes: string | null;
-    classesMap: ArrayMap<any> | undefined | null;
+    residualClasses: KeyValueArray<any> | undefined | null;
     classBindings: TStylingRange;
     styleBindings: TStylingRange;
+    directives: TDirectiveDefs | null;
     constructor(tView_: TView, //
     type: TNodeType, //
     index: number, //
@@ -115,11 +116,12 @@ declare class TNode implements ITNode {
     parent: TElementNode | TContainerNode | null, //
     projection: number | (ITNode | RNode[])[] | null, //
     styles: string | null, //
-    stylesMap: ArrayMap<any> | undefined | null, //
+    residualStyles: KeyValueArray<any> | undefined | null, //
     classes: string | null, //
-    classesMap: ArrayMap<any> | undefined | null, //
+    residualClasses: KeyValueArray<any> | undefined | null, //
     classBindings: TStylingRange, //
-    styleBindings: TStylingRange);
+    styleBindings: TStylingRange, //
+    directives: TDirectiveDefs | null);
     get type_(): string;
     get flags_(): string;
     get template_(): string;
@@ -128,8 +130,7 @@ declare class TNode implements ITNode {
 }
 export declare const TNodeDebug: typeof TNode;
 export declare type TNodeDebug = TNode;
-export interface DebugStyleBindings extends Array<DebugStyleBinding | string | null> {
-    [0]: string | null;
+export interface DebugStyleBindings extends Array<KeyValueArray<any> | DebugStyleBinding | string | null> {
 }
 export interface DebugStyleBinding {
     key: TStylingKey;
