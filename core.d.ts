@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.11+59.sha-0390d20
+ * @license Angular v9.0.0-rc.11+61.sha-19c4895
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2018,6 +2018,14 @@ declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
  */
 declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
 
+/**
+ * Constant enums for accessing data in the `TDirectiveDefs`
+ */
+declare const enum DirectiveDefs {
+    STYLING_CURSOR = 0,
+    HEADER_OFFSET = 1
+}
+
 declare type DirectiveInstance = {};
 
 declare type DirectiveTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | Type<any>)[];
@@ -3828,6 +3836,12 @@ declare interface LFrame {
      * We iterate over the list of Queries and increment current query index at every step.
      */
     currentQueryIndex: number;
+    /**
+     * When host binding is executing this points to the directive index.
+     * `TView.data[currentDirectiveIndex]` is `DirectiveDef`
+     * `LView[currentDirectiveIndex]` is directive instance.
+     */
+    currentDirectiveIndex: number;
 }
 
 /**
@@ -6465,6 +6479,39 @@ declare interface TContainerNode extends TNode {
  */
 declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
 
+/**
+ * Stores `DirectiveDefs` associated with the current `TNode` as well as styling cursor.
+ */
+declare interface TDirectiveDefs extends Array<number | ɵDirectiveDef<any>> {
+    /**
+     * As styling instructions (`ɵɵstyleProp`/`ɵɵclassProp`/`ɵɵstyleMap`/`ɵɵclassMap`) are executing
+     * they also need to get a hold of the `DirectiveDef.hostAttrs` and so that they know what
+     * static styling values to use. The styling instructions need this information so that they can
+     * lazily create `TStylingStatic`.
+     *
+     * When styling is executing it can get a hold of its `DirectiveDefs` but that alone is not
+     * sufficient for two reasons:
+     * 1. Styling instruction needs to coalesce other directives which came before it and which have
+     *    static value but may not have a styling instruction to attach the static values to.
+     * 2. There may be more than one styling instruction per `hostBindings` and only the first
+     *    styling instruction should create the `TStylingStatic`.
+     *
+     * The algorithm for doing this is:
+     * - look up the current `DirectiveDef` associated with the current instruction.
+     * - If `STYLING_CURSOR === 0 || tDirectiveDefs[stylingCursor] !== currentDirectiveDef` than
+     *   create `TStylingStatic` and:
+     *   - iterate over `TDirectiveDefs[++stylingCursor]` and insert them into the `TStylingStatic`
+     *     until you reach `DirectiveDef` associated with the current instruction.
+     * - If new `TStylingStatic` was created, recompute the residual styling values.
+     *
+     * The above algorithm will ensure that the styling instructions consume static styling values
+     * associated until a given instruction. After consuming instructions, it is always important to
+     * clear the residual (See `TNode.residualClass`/`TNode.residualStyle`), since this may be the
+     * last styling instruction, and we need to lazily recreate the residual value on as needed basis.
+     */
+    [DirectiveDefs.STYLING_CURSOR]: number;
+}
+
 /** Static data for an <ng-container> */
 declare interface TElementContainerNode extends TNode {
     /** Index in the LView[] array. */
@@ -6810,6 +6857,10 @@ declare interface TNode {
      */
     mergedAttrs: TAttributes | null;
     /**
+     * Stores the directive defs matched on the current TNode (along with style cursor.)
+     */
+    directives: TDirectiveDefs | null;
+    /**
      * A set of local names under which a given element is exported in a template and
      * visible to queries. An entry in this array can be created for different reasons:
      * - an element itself is referenced, ex.: `<div #foo>`
@@ -6935,7 +6986,7 @@ declare interface TNode {
      */
     projection: (TNode | RNode[])[] | number | null;
     /**
-     * A collection of all style bindings and/or static style values for an element.
+     * A collection of all style static values for an element.
      *
      * This field will be populated if and when:
      *
@@ -6943,20 +6994,35 @@ declare interface TNode {
      */
     styles: string | null;
     /**
-     * An `ArrayMap` version of `styles.
+     * An `ArrayMap` version of residual `styles`.
      *
-     * We need this when style bindings are resolving. This gets populated only if there are styling
-     * binding instructions. The laziness is important since we don't want to allocate the memory
-     * because most styling is static. For tree shaking purposes the code to create these only comes
-     * with styling.
+     * When there are styling instructions than each instruction stores the static styling
+     * which is of lower priority than itself. This means that there may be a higher priority styling
+     * than the instruction.
+     *
+     * Imagine:
+     * ```
+     * <div style="color: highest;" my-dir>
+     *
+     * @Directive({
+     *   host: {
+     *     style: 'color: lowest; ',
+     *     '[styles.color]': 'exp' // ɵɵstyleProp('color', ctx.exp);
+     *   }
+     * })
+     * ```
+     *
+     * In the above case:
+     * - `color: lowest` is stored with `ɵɵstyleProp('color', ctx.exp);` instruction
+     * -  `color: highest` is the residual and is stored here.
      *
      * - `undefined': not initialized.
      * - `null`: initialized but `styles` is `null`
      * - `ArrayMap`: parsed version of `styles`.
      */
-    stylesMap: ArrayMap<any> | undefined | null;
+    residualStyles: ArrayMap<any> | undefined | null;
     /**
-     * A collection of all class bindings and/or static class values for an element.
+     * A collection of all class static values for an element.
      *
      * This field will be populated if and when:
      *
@@ -6964,18 +7030,15 @@ declare interface TNode {
      */
     classes: string | null;
     /**
-     * An `ArrayMap` version of `classes`.
+     * An `ArrayMap` version of residual `classes`.
      *
-     * We need this when style bindings are resolving. This gets populated only if there are styling
-     * binding instructions. The laziness is important since we don't want to allocate the memory
-     * because most styling is static. For tree shaking purposes the code to create these only comes
-     * with styling.
+     * Same as `TNode.residualStyles` but for classes.
      *
      * - `undefined': not initialized.
      * - `null`: initialized but `classes` is `null`
      * - `ArrayMap`: parsed version of `S`.
      */
-    classesMap: ArrayMap<any> | undefined | null;
+    residualClasses: ArrayMap<any> | undefined | null;
     /**
      * Stores the head/tail index of the class bindings.
      *
@@ -7287,9 +7350,16 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
-
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
+ *
+ * See: `TStylingKeyPrimitive` and `TStylingStatic`
+ */
+declare type TStylingKey = TStylingKeyPrimitive | TStylingStatic;
+
+/**
+ * The primitive portion (`TStylingStatic` removed) of the value stored in the `TData` which is
+ * needed to re-concatenate the styling.
  *
  * - `string`: Stores the property name. Used with `ɵɵstyleProp`/`ɵɵclassProp` instruction.
  * - `null`: Represents map, so there is no name. Used with `ɵɵstyleMap`/`ɵɵclassMap`.
@@ -7297,7 +7367,7 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
  *   is combined with directive which shadows its input `@Input('class')`. That way the binding
  *   should not participate in the styling resolution.
  */
-declare type TStylingKey = string | null | false;
+declare type TStylingKeyPrimitive = string | null | false;
 
 /**
  * This is a branded number which contains previous and next index.
@@ -7329,6 +7399,69 @@ declare type TStylingKey = string | null | false;
  */
 declare interface TStylingRange {
     __brand__: 'TStylingRange';
+}
+
+/**
+ * Store the static values for the styling binding.
+ *
+ * The `TStylingStatic` is just `ArrayMap` where key `""` (stored at location 0) contains the
+ * `TStylingKey` (stored at location 1). In other words this wraps the `TStylingKey` such that the
+ * `""` contains the wrapped value.
+ *
+ * When instructions are resolving styling they may need to look forward or backwards in the linked
+ * list to resolve the value. For this reason we have to make sure that he linked list also contains
+ * the static values. However the list only has space for one item per styling instruction. For this
+ * reason we store the static values here as part of the `TStylingKey`. This means that the
+ * resolution function when looking for a value needs to first look at the binding value, and than
+ * at `TStylingKey` (if it exists).
+ *
+ * Imagine we have:
+ *
+ * ```
+ * <div class="TEMPLATE" my-dir>
+ *
+ * @Directive({
+ *   host: {
+ *     class: 'DIR',
+ *     '[class.dynamic]': 'exp' // ɵɵclassProp('dynamic', ctx.exp);
+ *   }
+ * })
+ * ```
+ *
+ * In the above case the linked list will contain one item:
+ *
+ * ```
+ *   // assume binding location: 10 for `ɵɵclassProp('dynamic', ctx.exp);`
+ *   tData[10] = <TStylingStatic>[
+ *     '': 'dynamic', // This is the wrapped value of `TStylingKey`
+ *     'DIR': true,   // This is the default static value of directive binding.
+ *   ];
+ *   tData[10 + 1] = 0; // We don't have prev/next.
+ *
+ *   lView[10] = undefined;     // assume `ctx.exp` is `undefined`
+ *   lView[10 + 1] = undefined; // Just normalized `lView[10]`
+ * ```
+ *
+ * So when the function is resolving styling value, it first needs to look into the linked list
+ * (there is none) and than into the static `TStylingStatic` too see if there is a default value for
+ * `dynamic` (there is not). Therefore it is safe to remove it.
+ *
+ * If setting `true` case:
+ * ```
+ *   lView[10] = true;     // assume `ctx.exp` is `true`
+ *   lView[10 + 1] = true; // Just normalized `lView[10]`
+ * ```
+ * So when the function is resolving styling value, it first needs to look into the linked list
+ * (there is none) and than into `TNode.residualClass` (TNode.residualStyle) which contains
+ * ```
+ *   tNode.residualClass = [
+ *     'TEMPLATE': true,
+ *   ];
+ * ```
+ *
+ * This means that it is safe to add class.
+ */
+declare interface TStylingStatic extends ArrayMap<any> {
 }
 
 /** Static data for a text node */
