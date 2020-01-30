@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+862.sha-1765052
+ * @license Angular v9.0.0-rc.1+865.sha-c1cf46c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1201,48 +1201,58 @@
      * found in the LICENSE file at https://angular.io/license
      */
     function assertNumber(actual, msg) {
-        if (typeof actual != 'number') {
+        if (!(typeof actual === 'number')) {
             throwError(msg, typeof actual, 'number', '===');
         }
     }
+    function assertNumberInRange(actual, minInclusive, maxInclusive) {
+        assertNumber(actual, 'Expected a number');
+        assertLessThanOrEqual(actual, maxInclusive, 'Expected number to be less than or equal to');
+        assertGreaterThanOrEqual(actual, minInclusive, 'Expected number to be greater than or equal to');
+    }
     function assertString(actual, msg) {
-        if (typeof actual != 'string') {
+        if (!(typeof actual === 'string')) {
             throwError(msg, actual === null ? 'null' : typeof actual, 'string', '===');
         }
     }
     function assertEqual(actual, expected, msg) {
-        if (actual != expected) {
+        if (!(actual == expected)) {
             throwError(msg, actual, expected, '==');
         }
     }
     function assertNotEqual(actual, expected, msg) {
-        if (actual == expected) {
+        if (!(actual != expected)) {
             throwError(msg, actual, expected, '!=');
         }
     }
     function assertSame(actual, expected, msg) {
-        if (actual !== expected) {
+        if (!(actual === expected)) {
             throwError(msg, actual, expected, '===');
         }
     }
     function assertNotSame(actual, expected, msg) {
-        if (actual === expected) {
+        if (!(actual !== expected)) {
             throwError(msg, actual, expected, '!==');
         }
     }
     function assertLessThan(actual, expected, msg) {
-        if (actual >= expected) {
+        if (!(actual < expected)) {
             throwError(msg, actual, expected, '<');
         }
     }
     function assertLessThanOrEqual(actual, expected, msg) {
-        if (actual > expected) {
+        if (!(actual <= expected)) {
             throwError(msg, actual, expected, '<=');
         }
     }
     function assertGreaterThan(actual, expected, msg) {
-        if (actual <= expected) {
+        if (!(actual > expected)) {
             throwError(msg, actual, expected, '>');
+        }
+    }
+    function assertGreaterThanOrEqual(actual, expected, msg) {
+        if (!(actual >= expected)) {
+            throwError(msg, actual, expected, '>=');
         }
     }
     function assertNotDefined(actual, msg) {
@@ -1371,8 +1381,6 @@
      * removed. This causes memory pressure and slows down code when most of the time we don't
      * care about the deleted items array.
      *
-     * https://jsperf.com/fast-array-splice (About 20x faster)
-     *
      * @param array Array to splice.
      * @param index Index in array where the `value` should be added.
      * @param value Value to add to array.
@@ -1393,8 +1401,6 @@
      * `Array.splice()` is not fast because it has to allocate an array for the elements which were
      * removed. This causes memory pressure and slows down code when most of the time we don't
      * care about the deleted items array.
-     *
-     * https://jsperf.com/fast-array-splice (About 20x faster)
      *
      * @param array Array to splice.
      * @param index Index in array where the `value` should be added.
@@ -1484,66 +1490,66 @@
     /**
      * Set a `value` for a `key`.
      *
-     * @param arrayMap to modify.
+     * @param keyValueArray to modify.
      * @param key The key to locate or create.
      * @param value The value to set for a `key`.
      * @returns index (always even) of where the value vas set.
      */
-    function arrayMapSet(arrayMap, key, value) {
-        var index = arrayMapIndexOf(arrayMap, key);
+    function keyValueArraySet(keyValueArray, key, value) {
+        var index = keyValueArrayIndexOf(keyValueArray, key);
         if (index >= 0) {
             // if we found it set it.
-            arrayMap[index | 1] = value;
+            keyValueArray[index | 1] = value;
         }
         else {
             index = ~index;
-            arrayInsert2(arrayMap, index, key, value);
+            arrayInsert2(keyValueArray, index, key, value);
         }
         return index;
     }
     /**
      * Retrieve a `value` for a `key` (on `undefined` if not found.)
      *
-     * @param arrayMap to search.
+     * @param keyValueArray to search.
      * @param key The key to locate.
      * @return The `value` stored at the `key` location or `undefined if not found.
      */
-    function arrayMapGet(arrayMap, key) {
-        var index = arrayMapIndexOf(arrayMap, key);
+    function keyValueArrayGet(keyValueArray, key) {
+        var index = keyValueArrayIndexOf(keyValueArray, key);
         if (index >= 0) {
             // if we found it retrieve it.
-            return arrayMap[index | 1];
+            return keyValueArray[index | 1];
         }
         return undefined;
     }
     /**
      * Retrieve a `key` index value in the array or `-1` if not found.
      *
-     * @param arrayMap to search.
+     * @param keyValueArray to search.
      * @param key The key to locate.
      * @returns index of where the key is (or should have been.)
      *   - positive (even) index if key found.
      *   - negative index if key not found. (`~index` (even) to get the index where it should have
      *     been inserted.)
      */
-    function arrayMapIndexOf(arrayMap, key) {
-        return _arrayIndexOfSorted(arrayMap, key, 1);
+    function keyValueArrayIndexOf(keyValueArray, key) {
+        return _arrayIndexOfSorted(keyValueArray, key, 1);
     }
     /**
-     * Delete a `key` (and `value`) from the `ArrayMap`.
+     * Delete a `key` (and `value`) from the `KeyValueArray`.
      *
-     * @param arrayMap to modify.
+     * @param keyValueArray to modify.
      * @param key The key to locate or delete (if exist).
      * @returns index of where the key was (or should have been.)
      *   - positive (even) index if key found and deleted.
      *   - negative index if key not found. (`~index` (even) to get the index where it should have
      *     been.)
      */
-    function arrayMapDelete(arrayMap, key) {
-        var index = arrayMapIndexOf(arrayMap, key);
+    function keyValueArrayDelete(keyValueArray, key) {
+        var index = keyValueArrayIndexOf(keyValueArray, key);
         if (index >= 0) {
             // if we found it remove it.
-            arraySplice(arrayMap, index, 2);
+            arraySplice(keyValueArray, index, 2);
         }
         return index;
     }
@@ -2287,19 +2293,6 @@
         return lFrame === null ? null : lFrame.lView;
     }
     /**
-     * Sets the active directive host element and resets the directive id value
-     * (when the provided elementIndex value has changed).
-     *
-     * @param elementIndex the element index value for the host element where
-     *                     the directive/component instance lives
-     */
-    function setActiveHostElement(elementIndex) {
-        setSelectedIndex(elementIndex);
-    }
-    function clearActiveHostElement() {
-        setSelectedIndex(-1);
-    }
-    /**
      * Restores `contextViewData` to the given OpaqueViewState instance.
      *
      * Used in conjunction with the getCurrentView() instruction to save a snapshot
@@ -2370,11 +2363,23 @@
      * Bindings inside the host template are 0 index. But because we don't know ahead of time
      * how many host bindings we have we can't pre-compute them. For this reason they are all
      * 0 index and we just shift the root so that they match next available location in the LView.
-     * @param value
+     *
+     * @param bindingRootIndex Root index for `hostBindings`
+     * @param currentDirectiveIndex `TData[currentDirectiveIndex]` will point to the current directive
+     *        whose `hostBindings` are being processed.
      */
-    function setBindingRootForHostBindings(value) {
-        var lframe = instructionState.lFrame;
-        lframe.bindingIndex = lframe.bindingRootIndex = value;
+    function setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex) {
+        var lFrame = instructionState.lFrame;
+        lFrame.bindingIndex = lFrame.bindingRootIndex = bindingRootIndex;
+        lFrame.currentDirectiveIndex = currentDirectiveIndex;
+    }
+    /**
+     * When host binding is executing this points to the directive index.
+     * `TView.data[getCurrentDirectiveIndex()]` is `DirectiveDef`
+     * `LView[getCurrentDirectiveIndex()]` is directive instance.
+     */
+    function getCurrentDirectiveIndex() {
+        return instructionState.lFrame.currentDirectiveIndex;
     }
     function getCurrentQueryIndex() {
         return instructionState.lFrame.currentQueryIndex;
@@ -2434,6 +2439,7 @@
         newLFrame.selectedIndex = 0;
         newLFrame.contextLView = newView;
         newLFrame.elementDepthCount = 0;
+        newLFrame.currentDirectiveIndex = -1;
         newLFrame.currentNamespace = null;
         newLFrame.currentSanitizer = null;
         newLFrame.bindingRootIndex = -1;
@@ -2459,6 +2465,7 @@
             elementDepthCount: 0,
             currentNamespace: null,
             currentSanitizer: null,
+            currentDirectiveIndex: -1,
             bindingRootIndex: -1,
             bindingIndex: -1,
             currentQueryIndex: 0,
@@ -6322,37 +6329,50 @@
     * found in the LICENSE file at https://angular.io/license
     */
     function toTStylingRange(prev, next) {
-        return (prev << 18 /* PREV_SHIFT */ | next << 2 /* NEXT_SHIFT */);
+        ngDevMode && assertNumberInRange(prev, 0, 32767 /* UNSIGNED_MASK */);
+        ngDevMode && assertNumberInRange(next, 0, 32767 /* UNSIGNED_MASK */);
+        return (prev << 17 /* PREV_SHIFT */ | next << 2 /* NEXT_SHIFT */);
     }
     function getTStylingRangePrev(tStylingRange) {
-        return tStylingRange >> 18 /* PREV_SHIFT */;
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
+        return (tStylingRange >> 17 /* PREV_SHIFT */) & 32767 /* UNSIGNED_MASK */;
     }
     function getTStylingRangePrevDuplicate(tStylingRange) {
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
         return (tStylingRange & 2 /* PREV_DUPLICATE */) ==
             2 /* PREV_DUPLICATE */;
     }
     function setTStylingRangePrev(tStylingRange, previous) {
-        return ((tStylingRange & ~4294705152 /* PREV_MASK */) |
-            (previous << 18 /* PREV_SHIFT */));
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
+        ngDevMode && assertNumberInRange(previous, 0, 32767 /* UNSIGNED_MASK */);
+        return ((tStylingRange & ~4294836224 /* PREV_MASK */) |
+            (previous << 17 /* PREV_SHIFT */));
     }
     function setTStylingRangePrevDuplicate(tStylingRange) {
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
         return (tStylingRange | 2 /* PREV_DUPLICATE */);
     }
     function getTStylingRangeNext(tStylingRange) {
-        return (tStylingRange & 16380 /* NEXT_MASK */) >> 2 /* NEXT_SHIFT */;
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
+        return (tStylingRange & 131068 /* NEXT_MASK */) >> 2 /* NEXT_SHIFT */;
     }
     function setTStylingRangeNext(tStylingRange, next) {
-        return ((tStylingRange & ~16380 /* NEXT_MASK */) | //
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
+        ngDevMode && assertNumberInRange(next, 0, 32767 /* UNSIGNED_MASK */);
+        return ((tStylingRange & ~131068 /* NEXT_MASK */) | //
             next << 2 /* NEXT_SHIFT */);
     }
     function getTStylingRangeNextDuplicate(tStylingRange) {
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
         return (tStylingRange & 1 /* NEXT_DUPLICATE */) ===
             1 /* NEXT_DUPLICATE */;
     }
     function setTStylingRangeNextDuplicate(tStylingRange) {
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
         return (tStylingRange | 1 /* NEXT_DUPLICATE */);
     }
     function getTStylingRangeTail(tStylingRange) {
+        ngDevMode && assertNumber(tStylingRange, 'expected number');
         var next = getTStylingRangeNext(tStylingRange);
         return next === 0 ? getTStylingRangePrev(tStylingRange) : next;
     }
@@ -6552,11 +6572,12 @@
         parent, //
         projection, //
         styles, //
-        stylesMap, //
+        residualStyles, //
         classes, //
-        classesMap, //
+        residualClasses, //
         classBindings, //
-        styleBindings) {
+        styleBindings, //
+        directives) {
             this.tView_ = tView_;
             this.type = type;
             this.index = index;
@@ -6580,11 +6601,12 @@
             this.parent = parent;
             this.projection = projection;
             this.styles = styles;
-            this.stylesMap = stylesMap;
+            this.residualStyles = residualStyles;
             this.classes = classes;
-            this.classesMap = classesMap;
+            this.residualClasses = residualClasses;
             this.classBindings = classBindings;
             this.styleBindings = styleBindings;
+            this.directives = directives;
         }
         Object.defineProperty(TNode.prototype, "type_", {
             get: function () {
@@ -6691,7 +6713,7 @@
                 isTemplate = false;
             cursor = getTStylingRangePrev(itemRange);
         }
-        bindings.unshift(isClassBased ? tNode.classes : tNode.styles);
+        bindings.push((isClassBased ? tNode.residualClasses : tNode.residualStyles) || null);
         return bindings;
     }
     function processTNodeChildren(tNode, buf) {
@@ -7208,7 +7230,7 @@
      */
     var _CLEAN_PROMISE = (ɵ0$4)();
     /**
-     * Process the `TVIew.expandoInstructions`. (Execute the `hostBindings`.)
+     * Process the `TView.expandoInstructions`. (Execute the `hostBindings`.)
      *
      * @param tView `TView` containing the `expandoInstructions`
      * @param lView `LView` associated with the `TView`
@@ -7221,7 +7243,7 @@
                 var bindingRootIndex = tView.expandoStartIndex;
                 var currentDirectiveIndex = -1;
                 var currentElementIndex = -1;
-                // TODO(misko): PERF It is possible to get here with `TVIew.expandoInstructions` containing no
+                // TODO(misko): PERF It is possible to get here with `TView.expandoInstructions` containing no
                 // functions to execute. This is wasteful as there is no work to be done, but we still need
                 // to iterate over the instructions.
                 // In example of this is in this test: `host_binding_spec.ts`
@@ -7240,7 +7262,7 @@
                             // TODO(misko): PERF This should be refactored to use `~instruction` as that does not
                             // suffer from `-0` and it is faster/more compact.
                             currentElementIndex = 0 - instruction;
-                            setActiveHostElement(currentElementIndex);
+                            setSelectedIndex(currentElementIndex);
                             // Injector block and providers are taken into account.
                             var providerCount = expandoInstructions[++i];
                             bindingRootIndex += INJECTOR_BLOOM_PARENT_SIZE + providerCount;
@@ -7256,7 +7278,7 @@
                     else {
                         // If it's not a number, it's a host binding function that needs to be executed.
                         if (instruction !== null) {
-                            setBindingRootForHostBindings(bindingRootIndex);
+                            setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex);
                             var hostCtx = lView[currentDirectiveIndex];
                             instruction(2 /* Update */, hostCtx);
                         }
@@ -7272,7 +7294,7 @@
             }
         }
         finally {
-            clearActiveHostElement();
+            setSelectedIndex(-1);
         }
     }
     /** Refreshes all content queries declared by directives in a given view */
@@ -7610,7 +7632,7 @@
     function executeTemplate(lView, templateFn, rf, context) {
         var prevSelectedIndex = getSelectedIndex();
         try {
-            clearActiveHostElement();
+            setSelectedIndex(-1);
             if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
                 // When we're updating, inherently select 0 so we don't
                 // have to generate that instruction for most update blocks.
@@ -7871,11 +7893,12 @@
         tParent, // parent: TElementNode|TContainerNode|null
         null, // projection: number|(ITNode|RNode[])[]|null
         null, // styles: string|null
-        undefined, // stylesMap: string|null
+        undefined, // residualStyles: string|null
         null, // classes: string|null
-        undefined, // classesMap: string|null
+        undefined, // residualClasses: string|null
         0, // classBindings: TStylingRange;
-        0) :
+        0, // styleBindings: TStylingRange;
+        null) :
             {
                 type: type,
                 index: adjustedIndex,
@@ -7899,11 +7922,12 @@
                 parent: tParent,
                 projection: null,
                 styles: null,
-                stylesMap: undefined,
+                residualStyles: undefined,
                 classes: null,
-                classesMap: undefined,
+                residualClasses: undefined,
                 classBindings: 0,
                 styleBindings: 0,
+                directives: null
             };
     }
     function generatePropertyAliases(inputAliasMap, directiveDefIdx, propStore) {
@@ -8135,6 +8159,7 @@
             var directiveDefs = findDirectiveDefMatches(tView, lView, tNode);
             var exportsMap = localRefs === null ? null : { '': -1 };
             if (directiveDefs !== null) {
+                tNode.directives = [0 /* INITIAL_STYLING_CURSOR_VALUE */];
                 var totalDirectiveHostVars = 0;
                 hasDirectives = true;
                 initTNodeFlags(tNode, tView.data.length, directiveDefs.length);
@@ -8154,6 +8179,7 @@
                 var preOrderCheckHooksFound = false;
                 for (var i = 0; i < directiveDefs.length; i++) {
                     var def = directiveDefs[i];
+                    tNode.directives.push(def);
                     // Merge the attrs in the order of matches. This assumes that the first directive is the
                     // component itself, so that the component has the least priority.
                     tNode.mergedAttrs = mergeHostAttrs(tNode.mergedAttrs, def.hostAttrs);
@@ -8268,7 +8294,7 @@
         var firstCreatePass = tView.firstCreatePass;
         var elementIndex = tNode.index - HEADER_OFFSET;
         try {
-            setActiveHostElement(elementIndex);
+            setSelectedIndex(elementIndex);
             for (var i = start; i < end; i++) {
                 var def = tView.data[i];
                 var directive = lView[i];
@@ -8281,7 +8307,7 @@
             }
         }
         finally {
-            clearActiveHostElement();
+            setSelectedIndex(-1);
         }
     }
     /**
@@ -9722,13 +9748,14 @@
      * @param isClassBased `true` if it should be written to `class` (`false` to write to `style`)
      * @param rNode The Node to write to.
      * @param prop Property to write to. This would be the class/style name.
-     * @param value Value to wiret. If `null`/`undefined`/`false` this is consider a remove (set/add
-     * otherwise).
+     * @param value Value to write. If `null`/`undefined`/`false` this is considered a remove (set/add
+     *        otherwise).
      */
     function applyStyling(renderer, isClassBased, rNode, prop, value) {
         var isProcedural = isProceduralRenderer(renderer);
         if (isClassBased) {
-            if (!value) { // We actually want JS falseness here
+            // We actually want JS true/false here because any truthy value should add the class
+            if (!value) {
                 ngDevMode && ngDevMode.rendererRemoveClass++;
                 if (isProcedural) {
                     renderer.removeClass(rNode, prop);
@@ -9752,7 +9779,7 @@
             // TODO(misko): Can't import RendererStyleFlags2.DashCase as it causes imports to be resolved in
             // different order which causes failures. Using direct constant as workaround for now.
             var flags = prop.indexOf('-') == -1 ? undefined : 2 /* RendererStyleFlags2.DashCase */;
-            if (value === null || value === undefined) {
+            if (value == null /** || value === undefined */) {
                 ngDevMode && ngDevMode.rendererRemoveStyle++;
                 if (isProcedural) {
                     renderer.removeStyle(rNode, prop, flags);
@@ -15529,6 +15556,412 @@
     }
 
     /**
+    * @license
+    * Copyright Google Inc. All Rights Reserved.
+    *
+    * Use of this source code is governed by an MIT-style license that can be
+    * found in the LICENSE file at https://angular.io/license
+    */
+    /**
+     * NOTE: The word `styling` is used interchangeably as style or class styling.
+     *
+     * This file contains code to link styling instructions together so that they can be replayed in
+     * priority order. The file exists because Ivy styling instruction execution order does not match
+     * that of the priority order. The purpose of this code is to create a linked list so that the
+     * instructions can be traversed in priority order when computing the styles.
+     *
+     * Assume we are dealing with the following code:
+     * ```
+     * @Component({
+     *   template: `
+     *     <my-cmp [style]=" {color: '#001'} "
+     *             [style.color]=" #002 "
+     *             dir-style-color-1
+     *             dir-style-color-2> `
+     * })
+     * class ExampleComponent {
+     *   static ngComp = ... {
+     *     ...
+     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
+     *     ɵɵstyleMap({color: '#001'});
+     *     ɵɵstyleProp('color', '#002');
+     *     ...
+     *   }
+     * }
+     *
+     * @Directive({
+     *   selector: `[dir-style-color-1]',
+     * })
+     * class Style1Directive {
+     *   @HostBinding('style') style = {color: '#005'};
+     *   @HostBinding('style.color') color = '#006';
+     *
+     *   static ngDir = ... {
+     *     ...
+     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
+     *     ɵɵstyleMap({color: '#005'});
+     *     ɵɵstyleProp('color', '#006');
+     *     ...
+     *   }
+     * }
+     *
+     * @Directive({
+     *   selector: `[dir-style-color-2]',
+     * })
+     * class Style2Directive {
+     *   @HostBinding('style') style = {color: '#007'};
+     *   @HostBinding('style.color') color = '#008';
+     *
+     *   static ngDir = ... {
+     *     ...
+     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
+     *     ɵɵstyleMap({color: '#007'});
+     *     ɵɵstyleProp('color', '#008');
+     *     ...
+     *   }
+     * }
+     *
+     * @Directive({
+     *   selector: `my-cmp',
+     * })
+     * class MyComponent {
+     *   @HostBinding('style') style = {color: '#003'};
+     *   @HostBinding('style.color') color = '#004';
+     *
+     *   static ngComp = ... {
+     *     ...
+     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
+     *     ɵɵstyleMap({color: '#003'});
+     *     ɵɵstyleProp('color', '#004');
+     *     ...
+     *   }
+     * }
+     * ```
+     *
+     * The Order of instruction execution is:
+     *
+     * NOTE: the comment binding location is for illustrative purposes only.
+     *
+     * ```
+     * // Template: (ExampleComponent)
+     *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
+     *     ɵɵstyleProp('color', '#002');  // Binding index: 12
+     * // MyComponent
+     *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
+     *     ɵɵstyleProp('color', '#004');  // Binding index: 22
+     * // Style1Directive
+     *     ɵɵstyleMap({color: '#005'});   // Binding index: 24
+     *     ɵɵstyleProp('color', '#006');  // Binding index: 26
+     * // Style2Directive
+     *     ɵɵstyleMap({color: '#007'});   // Binding index: 28
+     *     ɵɵstyleProp('color', '#008');  // Binding index: 30
+     * ```
+     *
+     * The correct priority order of concatenation is:
+     *
+     * ```
+     * // MyComponent
+     *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
+     *     ɵɵstyleProp('color', '#004');  // Binding index: 22
+     * // Style1Directive
+     *     ɵɵstyleMap({color: '#005'});   // Binding index: 24
+     *     ɵɵstyleProp('color', '#006');  // Binding index: 26
+     * // Style2Directive
+     *     ɵɵstyleMap({color: '#007'});   // Binding index: 28
+     *     ɵɵstyleProp('color', '#008');  // Binding index: 30
+     * // Template: (ExampleComponent)
+     *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
+     *     ɵɵstyleProp('color', '#002');  // Binding index: 12
+     * ```
+     *
+     * What color should be rendered?
+     *
+     * Once the items are correctly sorted in the list, the answer is simply the last item in the
+     * concatenation list which is `#002`.
+     *
+     * To do so we keep a linked list of all of the bindings which pertain to this element.
+     * Notice that the bindings are inserted in the order of execution, but the `TView.data` allows
+     * us to traverse them in the order of priority.
+     *
+     * |Idx|`TView.data`|`LView`          | Notes
+     * |---|------------|-----------------|--------------
+     * |...|            |                 |
+     * |10 |`null`      |`{color: '#001'}`| `ɵɵstyleMap('color', {color: '#001'})`
+     * |11 |`30 | 12`   | ...             |
+     * |12 |`color`     |`'#002'`         | `ɵɵstyleProp('color', '#002')`
+     * |13 |`10 | 0`    | ...             |
+     * |...|            |                 |
+     * |20 |`null`      |`{color: '#003'}`| `ɵɵstyleMap('color', {color: '#003'})`
+     * |21 |`0 | 22`    | ...             |
+     * |22 |`color`     |`'#004'`         | `ɵɵstyleProp('color', '#004')`
+     * |23 |`20 | 24`   | ...             |
+     * |24 |`null`      |`{color: '#005'}`| `ɵɵstyleMap('color', {color: '#005'})`
+     * |25 |`22 | 26`   | ...             |
+     * |26 |`color`     |`'#006'`         | `ɵɵstyleProp('color', '#006')`
+     * |27 |`24 | 28`   | ...             |
+     * |28 |`null`      |`{color: '#007'}`| `ɵɵstyleMap('color', {color: '#007'})`
+     * |29 |`26 | 30`   | ...             |
+     * |30 |`color`     |`'#008'`         | `ɵɵstyleProp('color', '#008')`
+     * |31 |`28 | 10`   | ...             |
+     *
+     * The above data structure allows us to re-concatenate the styling no matter which data binding
+     * changes.
+     *
+     * NOTE: in addition to keeping track of next/previous index the `TView.data` also stores prev/next
+     * duplicate bit. The duplicate bit if true says there either is a binding with the same name or
+     * there is a map (which may contain the name). This information is useful in knowing if other
+     * styles with higher priority need to be searched for overwrites.
+     *
+     * NOTE: See `should support example in 'tnode_linked_list.ts' documentation` in
+     * `tnode_linked_list_spec.ts` for working example.
+     */
+    var __unused_const_as_closure_does_not_like_standalone_comment_blocks__;
+    /**
+     * Insert new `tStyleValue` at `TData` and link existing style bindings such that we maintain linked
+     * list of styles and compute the duplicate flag.
+     *
+     * Note: this function is executed during `firstUpdatePass` only to populate the `TView.data`.
+     *
+     * The function works by keeping track of `tStylingRange` which contains two pointers pointing to
+     * the head/tail of the template portion of the styles.
+     *  - if `isHost === false` (we are template) then insertion is at tail of `TStylingRange`
+     *  - if `isHost === true` (we are host binding) then insertion is at head of `TStylingRange`
+     *
+     * @param tData The `TData` to insert into.
+     * @param tNode `TNode` associated with the styling element.
+     * @param tStylingKey See `TStylingKey`.
+     * @param index location of where `tStyleValue` should be stored (and linked into list.)
+     * @param isHostBinding `true` if the insertion is for a `hostBinding`. (insertion is in front of
+     *               template.)
+     * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
+     *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
+     */
+    function insertTStylingBinding(tData, tNode, tStylingKeyWithStatic, index, isHostBinding, isClassBinding) {
+        ngDevMode && assertFirstUpdatePass(getLView()[TVIEW]);
+        var tBindings = isClassBinding ? tNode.classBindings : tNode.styleBindings;
+        var tmplHead = getTStylingRangePrev(tBindings);
+        var tmplTail = getTStylingRangeNext(tBindings);
+        tData[index] = tStylingKeyWithStatic;
+        var isKeyDuplicateOfStatic = false;
+        var tStylingKey;
+        if (Array.isArray(tStylingKeyWithStatic)) {
+            // We are case when the `TStylingKey` contains static fields as well.
+            var staticKeyValueArray = tStylingKeyWithStatic;
+            tStylingKey = staticKeyValueArray[1]; // unwrap.
+            // We need to check if our key is present in the static so that we can mark it as duplicate.
+            if (tStylingKey === null ||
+                keyValueArrayIndexOf(staticKeyValueArray, tStylingKey) > 0) {
+                // tStylingKey is present in the statics, need to mark it as duplicate.
+                isKeyDuplicateOfStatic = true;
+            }
+        }
+        else {
+            tStylingKey = tStylingKeyWithStatic;
+        }
+        if (isHostBinding) {
+            // We are inserting host bindings
+            // If we don't have template bindings then `tail` is 0.
+            var hasTemplateBindings = tmplTail !== 0;
+            // This is important to know because that means that the `head` can't point to the first
+            // template bindings (there are none.) Instead the head points to the tail of the template.
+            if (hasTemplateBindings) {
+                // template head's "prev" will point to last host binding or to 0 if no host bindings yet
+                var previousNode = getTStylingRangePrev(tData[tmplHead + 1]);
+                tData[index + 1] = toTStylingRange(previousNode, tmplHead);
+                // if a host binding has already been registered, we need to update the next of that host
+                // binding to point to this one
+                if (previousNode !== 0) {
+                    // We need to update the template-tail value to point to us.
+                    tData[previousNode + 1] =
+                        setTStylingRangeNext(tData[previousNode + 1], index);
+                }
+                // The "previous" of the template binding head should point to this host binding
+                tData[tmplHead + 1] = setTStylingRangePrev(tData[tmplHead + 1], index);
+            }
+            else {
+                tData[index + 1] = toTStylingRange(tmplHead, 0);
+                // if a host binding has already been registered, we need to update the next of that host
+                // binding to point to this one
+                if (tmplHead !== 0) {
+                    // We need to update the template-tail value to point to us.
+                    tData[tmplHead + 1] = setTStylingRangeNext(tData[tmplHead + 1], index);
+                }
+                // if we don't have template, the head points to template-tail, and needs to be advanced.
+                tmplHead = index;
+            }
+        }
+        else {
+            // We are inserting in template section.
+            // We need to set this binding's "previous" to the current template tail
+            tData[index + 1] = toTStylingRange(tmplTail, 0);
+            ngDevMode && assertEqual(tmplHead !== 0 && tmplTail === 0, false, 'Adding template bindings after hostBindings is not allowed.');
+            if (tmplHead === 0) {
+                tmplHead = index;
+            }
+            else {
+                // We need to update the previous value "next" to point to this binding
+                tData[tmplTail + 1] = setTStylingRangeNext(tData[tmplTail + 1], index);
+            }
+            tmplTail = index;
+        }
+        // Now we need to update / compute the duplicates.
+        // Starting with our location search towards head (least priority)
+        if (isKeyDuplicateOfStatic) {
+            tData[index + 1] = setTStylingRangePrevDuplicate(tData[index + 1]);
+        }
+        markDuplicates(tData, tStylingKey, index, true, isClassBinding);
+        markDuplicates(tData, tStylingKey, index, false, isClassBinding);
+        markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding);
+        tBindings = toTStylingRange(tmplHead, tmplTail);
+        if (isClassBinding) {
+            tNode.classBindings = tBindings;
+        }
+        else {
+            tNode.styleBindings = tBindings;
+        }
+    }
+    /**
+     * Look into the residual styling to see if the current `tStylingKey` is duplicate of residual.
+     *
+     * @param tNode `TNode` where the residual is stored.
+     * @param tStylingKey `TStylingKey` to store.
+     * @param tData `TData` associated with the current `LView`.
+     * @param index location of where `tStyleValue` should be stored (and linked into list.)
+     * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
+     *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
+     */
+    function markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding) {
+        var residual = isClassBinding ? tNode.residualClasses : tNode.residualStyles;
+        if (residual != null /* or undefined */ && typeof tStylingKey == 'string' &&
+            keyValueArrayIndexOf(residual, tStylingKey) >= 0) {
+            // We have duplicate in the residual so mark ourselves as duplicate.
+            tData[index + 1] = setTStylingRangeNextDuplicate(tData[index + 1]);
+        }
+    }
+    /**
+     * Marks `TStyleValue`s as duplicates if another style binding in the list has the same
+     * `TStyleValue`.
+     *
+     * NOTE: this function is intended to be called twice once with `isPrevDir` set to `true` and once
+     * with it set to `false` to search both the previous as well as next items in the list.
+     *
+     * No duplicate case
+     * ```
+     *   [style.color]
+     *   [style.width.px] <<- index
+     *   [style.height.px]
+     * ```
+     *
+     * In the above case adding `[style.width.px]` to the existing `[style.color]` produces no
+     * duplicates because `width` is not found in any other part of the linked list.
+     *
+     * Duplicate case
+     * ```
+     *   [style.color]
+     *   [style.width.em]
+     *   [style.width.px] <<- index
+     * ```
+     * In the above case adding `[style.width.px]` will produce a duplicate with `[style.width.em]`
+     * because `width` is found in the chain.
+     *
+     * Map case 1
+     * ```
+     *   [style.width.px]
+     *   [style.color]
+     *   [style]  <<- index
+     * ```
+     * In the above case adding `[style]` will produce a duplicate with any other bindings because
+     * `[style]` is a Map and as such is fully dynamic and could produce `color` or `width`.
+     *
+     * Map case 2
+     * ```
+     *   [style]
+     *   [style.width.px]
+     *   [style.color]  <<- index
+     * ```
+     * In the above case adding `[style.color]` will produce a duplicate because there is already a
+     * `[style]` binding which is a Map and as such is fully dynamic and could produce `color` or
+     * `width`.
+     *
+     * NOTE: Once `[style]` (Map) is added into the system all things are mapped as duplicates.
+     * NOTE: We use `style` as example, but same logic is applied to `class`es as well.
+     *
+     * @param tData `TData` where the linked list is stored.
+     * @param tStylingKey `TStylingKeyPrimitive` which contains the value to compare to other keys in
+     *        the linked list.
+     * @param index Starting location in the linked list to search from
+     * @param isPrevDir Direction.
+     *        - `true` for previous (lower priority);
+     *        - `false` for next (higher priority).
+     */
+    function markDuplicates(tData, tStylingKey, index, isPrevDir, isClassBinding) {
+        var tStylingAtIndex = tData[index + 1];
+        var isMap = tStylingKey === null;
+        var cursor = isPrevDir ? getTStylingRangePrev(tStylingAtIndex) : getTStylingRangeNext(tStylingAtIndex);
+        var foundDuplicate = false;
+        // We keep iterating as long as we have a cursor
+        // AND either:
+        // - we found what we are looking for, OR
+        // - we are a map in which case we have to continue searching even after we find what we were
+        //   looking for since we are a wild card and everything needs to be flipped to duplicate.
+        while (cursor !== 0 && (foundDuplicate === false || isMap)) {
+            ngDevMode && assertDataInRange(tData, cursor);
+            var tStylingValueAtCursor = tData[cursor];
+            var tStyleRangeAtCursor = tData[cursor + 1];
+            if (isStylingMatch(tStylingValueAtCursor, tStylingKey)) {
+                foundDuplicate = true;
+                tData[cursor + 1] = isPrevDir ? setTStylingRangeNextDuplicate(tStyleRangeAtCursor) :
+                    setTStylingRangePrevDuplicate(tStyleRangeAtCursor);
+            }
+            cursor = isPrevDir ? getTStylingRangePrev(tStyleRangeAtCursor) :
+                getTStylingRangeNext(tStyleRangeAtCursor);
+        }
+        if (foundDuplicate) {
+            // if we found a duplicate, than mark ourselves.
+            tData[index + 1] = isPrevDir ? setTStylingRangePrevDuplicate(tStylingAtIndex) :
+                setTStylingRangeNextDuplicate(tStylingAtIndex);
+        }
+    }
+    /**
+     * Determines if two `TStylingKey`s are a match.
+     *
+     * When computing weather a binding contains a duplicate, we need to compare if the instruction
+     * `TStylingKey` has a match.
+     *
+     * Here are examples of `TStylingKey`s which match given `tStylingKeyCursor` is:
+     * - `color`
+     *    - `color`    // Match another color
+     *    - `null`     // That means that `tStylingKey` is a `classMap`/`styleMap` instruction
+     *    - `['', 'color', 'other', true]` // wrapped `color` so match
+     *    - `['', null, 'other', true]`       // wrapped `null` so match
+     *    - `['', 'width', 'color', 'value']` // wrapped static value contains a match on `'color'`
+     * - `null`       // `tStylingKeyCursor` always match as it is `classMap`/`styleMap` instruction
+     *
+     * @param tStylingKeyCursor
+     * @param tStylingKey
+     */
+    function isStylingMatch(tStylingKeyCursor, tStylingKey) {
+        ngDevMode &&
+            assertNotEqual(Array.isArray(tStylingKey), true, 'Expected that \'tStylingKey\' has been unwrapped');
+        if (tStylingKeyCursor === null || // If the cursor is `null` it means that we have map at that
+            // location so we must assume that we have a match.
+            tStylingKey == null || // If `tStylingKey` is `null` then it is a map therefor assume that it
+            // contains a match.
+            (Array.isArray(tStylingKeyCursor) ? tStylingKeyCursor[1] : tStylingKeyCursor) ===
+                tStylingKey // If the keys match explicitly than we are a match.
+        ) {
+            return true;
+        }
+        else if (Array.isArray(tStylingKeyCursor) && typeof tStylingKey === 'string') {
+            // if we did not find a match, but `tStylingKeyCursor` is `KeyValueArray` that means cursor has
+            // statics and we need to check those as well.
+            return keyValueArrayIndexOf(tStylingKeyCursor, tStylingKey) >=
+                0; // see if we are matching the key
+        }
+        return false;
+    }
+
+    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -15800,356 +16233,6 @@
     * found in the LICENSE file at https://angular.io/license
     */
     /**
-     * NOTE: The word `styling` is used interchangeably as style or class styling.
-     *
-     * This file contains code to link styling instructions together so that they can be replayed in
-     * priority order. The file exists because Ivy styling instruction execution order does not match
-     * that of the priority order. The purpose of this code is to create a linked list so that the
-     * instructions can be traversed in priority order when computing the styles.
-     *
-     * Assume we are dealing with the following code:
-     * ```
-     * @Component({
-     *   template: `
-     *     <my-cmp [style]=" {color: '#001'} "
-     *             [style.color]=" #002 "
-     *             dir-style-color-1
-     *             dir-style-color-2> `
-     * })
-     * class ExampleComponent {
-     *   static ngComp = ... {
-     *     ...
-     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
-     *     ɵɵstyleMap({color: '#001'});
-     *     ɵɵstyleProp('color', '#002');
-     *     ...
-     *   }
-     * }
-     *
-     * @Directive({
-     *   selector: `[dir-style-color-1]',
-     * })
-     * class Style1Directive {
-     *   @HostBinding('style') style = {color: '#005'};
-     *   @HostBinding('style.color') color = '#006';
-     *
-     *   static ngDir = ... {
-     *     ...
-     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
-     *     ɵɵstyleMap({color: '#005'});
-     *     ɵɵstyleProp('color', '#006');
-     *     ...
-     *   }
-     * }
-     *
-     * @Directive({
-     *   selector: `[dir-style-color-2]',
-     * })
-     * class Style2Directive {
-     *   @HostBinding('style') style = {color: '#007'};
-     *   @HostBinding('style.color') color = '#008';
-     *
-     *   static ngDir = ... {
-     *     ...
-     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
-     *     ɵɵstyleMap({color: '#007'});
-     *     ɵɵstyleProp('color', '#008');
-     *     ...
-     *   }
-     * }
-     *
-     * @Directive({
-     *   selector: `my-cmp',
-     * })
-     * class MyComponent {
-     *   @HostBinding('style') style = {color: '#003'};
-     *   @HostBinding('style.color') color = '#004';
-     *
-     *   static ngComp = ... {
-     *     ...
-     *     // Compiler ensures that `ɵɵstyleProp` is after `ɵɵstyleMap`
-     *     ɵɵstyleMap({color: '#003'});
-     *     ɵɵstyleProp('color', '#004');
-     *     ...
-     *   }
-     * }
-     * ```
-     *
-     * The Order of instruction execution is:
-     *
-     * NOTE: the comment binding location is for illustrative purposes only.
-     *
-     * ```
-     * // Template: (ExampleComponent)
-     *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
-     *     ɵɵstyleProp('color', '#002');  // Binding index: 12
-     * // MyComponent
-     *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
-     *     ɵɵstyleProp('color', '#004');  // Binding index: 22
-     * // Style1Directive
-     *     ɵɵstyleMap({color: '#005'});   // Binding index: 24
-     *     ɵɵstyleProp('color', '#006');  // Binding index: 26
-     * // Style2Directive
-     *     ɵɵstyleMap({color: '#007'});   // Binding index: 28
-     *     ɵɵstyleProp('color', '#008');  // Binding index: 30
-     * ```
-     *
-     * The correct priority order of concatenation is:
-     *
-     * ```
-     * // MyComponent
-     *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
-     *     ɵɵstyleProp('color', '#004');  // Binding index: 22
-     * // Style1Directive
-     *     ɵɵstyleMap({color: '#005'});   // Binding index: 24
-     *     ɵɵstyleProp('color', '#006');  // Binding index: 26
-     * // Style2Directive
-     *     ɵɵstyleMap({color: '#007'});   // Binding index: 28
-     *     ɵɵstyleProp('color', '#008');  // Binding index: 30
-     * // Template: (ExampleComponent)
-     *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
-     *     ɵɵstyleProp('color', '#002');  // Binding index: 12
-     * ```
-     *
-     * What color should be rendered?
-     *
-     * Once the items are correctly sorted in the list, the answer is simply the last item in the
-     * concatenation list which is `#002`.
-     *
-     * To do so we keep a linked list of all of the bindings which pertain to this element.
-     * Notice that the bindings are inserted in the order of execution, but the `TView.data` allows
-     * us to traverse them in the order of priority.
-     *
-     * |Idx|`TView.data`|`LView`          | Notes
-     * |---|------------|-----------------|--------------
-     * |...|            |                 |
-     * |10 |`null`      |`{color: '#001'}`| `ɵɵstyleMap('color', {color: '#001'})`
-     * |11 |`30 | 12`   | ...             |
-     * |12 |`color`     |`'#002'`         | `ɵɵstyleProp('color', '#002')`
-     * |13 |`10 | 0`    | ...             |
-     * |...|            |                 |
-     * |20 |`null`      |`{color: '#003'}`| `ɵɵstyleMap('color', {color: '#003'})`
-     * |21 |`0 | 22`    | ...             |
-     * |22 |`color`     |`'#004'`         | `ɵɵstyleProp('color', '#004')`
-     * |23 |`20 | 24`   | ...             |
-     * |24 |`null`      |`{color: '#005'}`| `ɵɵstyleMap('color', {color: '#005'})`
-     * |25 |`22 | 26`   | ...             |
-     * |26 |`color`     |`'#006'`         | `ɵɵstyleProp('color', '#006')`
-     * |27 |`24 | 28`   | ...             |
-     * |28 |`null`      |`{color: '#007'}`| `ɵɵstyleMap('color', {color: '#007'})`
-     * |29 |`26 | 30`   | ...             |
-     * |30 |`color`     |`'#008'`         | `ɵɵstyleProp('color', '#008')`
-     * |31 |`28 | 10`   | ...             |
-     *
-     * The above data structure allows us to re-concatenate the styling no matter which data binding
-     * changes.
-     *
-     * NOTE: in addition to keeping track of next/previous index the `TView.data` also stores prev/next
-     * duplicate bit. The duplicate bit if true says there either is a binding with the same name or
-     * there is a map (which may contain the name). This information is useful in knowing if other
-     * styles with higher priority need to be searched for overwrites.
-     *
-     * NOTE: See `should support example in 'tnode_linked_list.ts' documentation` in
-     * `tnode_linked_list_spec.ts` for working example.
-     */
-    var __unused_const_as_closure_does_not_like_standalone_comment_blocks__;
-    /**
-     * Insert new `tStyleValue` at `TData` and link existing style bindings such that we maintain linked
-     * list of styles and compute the duplicate flag.
-     *
-     * Note: this function is executed during `firstUpdatePass` only to populate the `TView.data`.
-     *
-     * The function works by keeping track of `tStylingRange` which contains two pointers pointing to
-     * the head/tail of the template portion of the styles.
-     *  - if `isHost === false` (we are template) then insertion is at tail of `TStylingRange`
-     *  - if `isHost === true` (we are host binding) then insertion is at head of `TStylingRange`
-     *
-     * @param tData The `TData` to insert into.
-     * @param tNode `TNode` associated with the styling element.
-     * @param tStylingKey See `TStylingKey`.
-     * @param index location of where `tStyleValue` should be stored (and linked into list.)
-     * @param isHostBinding `true` if the insertion is for a `hostBinding`. (insertion is in front of
-     *               template.)
-     * @param isClassBinding True if the associated `tStylingKey` as a `class` styling.
-     *                       `tNode.classBindings` should be used (or `tNode.styleBindings` otherwise.)
-     */
-    function insertTStylingBinding(tData, tNode, tStylingKey, index, isHostBinding, isClassBinding) {
-        ngDevMode && assertFirstUpdatePass(getLView()[TVIEW]);
-        var tBindings = isClassBinding ? tNode.classBindings : tNode.styleBindings;
-        var tmplHead = getTStylingRangePrev(tBindings);
-        var tmplTail = getTStylingRangeNext(tBindings);
-        tData[index] = tStylingKey;
-        if (isHostBinding) {
-            // We are inserting host bindings
-            // If we don't have template bindings then `tail` is 0.
-            var hasTemplateBindings = tmplTail !== 0;
-            // This is important to know because that means that the `head` can't point to the first
-            // template bindings (there are none.) Instead the head points to the tail of the template.
-            if (hasTemplateBindings) {
-                // template head's "prev" will point to last host binding or to 0 if no host bindings yet
-                var previousNode = getTStylingRangePrev(tData[tmplHead + 1]);
-                tData[index + 1] = toTStylingRange(previousNode, tmplHead);
-                // if a host binding has already been registered, we need to update the next of that host
-                // binding to point to this one
-                if (previousNode !== 0) {
-                    // We need to update the template-tail value to point to us.
-                    tData[previousNode + 1] =
-                        setTStylingRangeNext(tData[previousNode + 1], index);
-                }
-                // The "previous" of the template binding head should point to this host binding
-                tData[tmplHead + 1] = setTStylingRangePrev(tData[tmplHead + 1], index);
-            }
-            else {
-                tData[index + 1] = toTStylingRange(tmplHead, 0);
-                // if a host binding has already been registered, we need to update the next of that host
-                // binding to point to this one
-                if (tmplHead !== 0) {
-                    // We need to update the template-tail value to point to us.
-                    tData[tmplHead + 1] = setTStylingRangeNext(tData[tmplHead + 1], index);
-                }
-                // if we don't have template, the head points to template-tail, and needs to be advanced.
-                tmplHead = index;
-            }
-        }
-        else {
-            // We are inserting in template section.
-            // We need to set this binding's "previous" to the current template tail
-            tData[index + 1] = toTStylingRange(tmplTail, 0);
-            ngDevMode && assertEqual(tmplHead !== 0 && tmplTail === 0, false, 'Adding template bindings after hostBindings is not allowed.');
-            if (tmplHead === 0) {
-                tmplHead = index;
-            }
-            else {
-                // We need to update the previous value "next" to point to this binding
-                tData[tmplTail + 1] = setTStylingRangeNext(tData[tmplTail + 1], index);
-            }
-            tmplTail = index;
-        }
-        // Now we need to update / compute the duplicates.
-        // Starting with our location search towards head (least priority)
-        markDuplicates(tData, tStylingKey, index, (isClassBinding ? tNode.classes : tNode.styles) || '', true, isClassBinding);
-        markDuplicates(tData, tStylingKey, index, '', false, isClassBinding);
-        tBindings = toTStylingRange(tmplHead, tmplTail);
-        if (isClassBinding) {
-            tNode.classBindings = tBindings;
-        }
-        else {
-            tNode.styleBindings = tBindings;
-        }
-    }
-    /**
-     * Marks `TStyleValue`s as duplicates if another style binding in the list has the same
-     * `TStyleValue`.
-     *
-     * NOTE: this function is intended to be called twice once with `isPrevDir` set to `true` and once
-     * with it set to `false` to search both the previous as well as next items in the list.
-     *
-     * No duplicate case
-     * ```
-     *   [style.color]
-     *   [style.width.px] <<- index
-     *   [style.height.px]
-     * ```
-     *
-     * In the above case adding `[style.width.px]` to the existing `[style.color]` produces no
-     * duplicates because `width` is not found in any other part of the linked list.
-     *
-     * Duplicate case
-     * ```
-     *   [style.color]
-     *   [style.width.em]
-     *   [style.width.px] <<- index
-     * ```
-     * In the above case adding `[style.width.px]` will produce a duplicate with `[style.width.em]`
-     * because `width` is found in the chain.
-     *
-     * Map case 1
-     * ```
-     *   [style.width.px]
-     *   [style.color]
-     *   [style]  <<- index
-     * ```
-     * In the above case adding `[style]` will produce a duplicate with any other bindings because
-     * `[style]` is a Map and as such is fully dynamic and could produce `color` or `width`.
-     *
-     * Map case 2
-     * ```
-     *   [style]
-     *   [style.width.px]
-     *   [style.color]  <<- index
-     * ```
-     * In the above case adding `[style.color]` will produce a duplicate because there is already a
-     * `[style]` binding which is a Map and as such is fully dynamic and could produce `color` or
-     * `width`.
-     *
-     * NOTE: Once `[style]` (Map) is added into the system all things are mapped as duplicates.
-     * NOTE: We use `style` as example, but same logic is applied to `class`es as well.
-     *
-     * @param tData
-     * @param tStylingKey
-     * @param index
-     * @param staticValues
-     * @param isPrevDir
-     */
-    function markDuplicates(tData, tStylingKey, index, staticValues, isPrevDir, isClassBinding) {
-        var tStylingAtIndex = tData[index + 1];
-        var isMap = tStylingKey === null;
-        var cursor = isPrevDir ? getTStylingRangePrev(tStylingAtIndex) : getTStylingRangeNext(tStylingAtIndex);
-        var foundDuplicate = false;
-        // We keep iterating as long as we have a cursor
-        // AND either: We found what we are looking for, or we are a map in which case we have to
-        // continue searching even after we find what we were looking for since we are a wild card
-        // and everything needs to be flipped to duplicate.
-        while (cursor !== 0 && (foundDuplicate === false || isMap)) {
-            var tStylingValueAtCursor = tData[cursor];
-            var tStyleRangeAtCursor = tData[cursor + 1];
-            if (tStylingValueAtCursor === null || tStylingKey == null ||
-                tStylingValueAtCursor === tStylingKey) {
-                foundDuplicate = true;
-                tData[cursor + 1] = isPrevDir ? setTStylingRangeNextDuplicate(tStyleRangeAtCursor) :
-                    setTStylingRangePrevDuplicate(tStyleRangeAtCursor);
-            }
-            cursor = isPrevDir ? getTStylingRangePrev(tStyleRangeAtCursor) :
-                getTStylingRangeNext(tStyleRangeAtCursor);
-        }
-        // We also need to process the static values.
-        if (staticValues !== '' && // If we have static values to search
-            !foundDuplicate // If we have duplicate don't bother since we are already marked as
-        // duplicate
-        ) {
-            if (isMap) {
-                // if we are a Map (and we have statics) we must assume duplicate
-                foundDuplicate = true;
-            }
-            else if (staticValues != null) {
-                // If we found non-map then we iterate over its keys to determine if any of them match ours
-                // If we find a match than we mark it as duplicate.
-                for (var i = isClassBinding ? parseClassName(staticValues) : parseStyle(staticValues); //
-                 i >= 0; //
-                 i = isClassBinding ? parseClassNameNext(staticValues, i) :
-                    parseStyleNext(staticValues, i)) {
-                    if (getLastParsedKey(staticValues) === tStylingKey) {
-                        foundDuplicate = true;
-                        break;
-                    }
-                }
-            }
-        }
-        if (foundDuplicate) {
-            // if we found a duplicate, than mark ourselves.
-            tData[index + 1] = isPrevDir ? setTStylingRangePrevDuplicate(tStylingAtIndex) :
-                setTStylingRangeNextDuplicate(tStylingAtIndex);
-        }
-    }
-
-    /**
-    * @license
-    * Copyright Google Inc. All Rights Reserved.
-    *
-    * Use of this source code is governed by an MIT-style license that can be
-    * found in the LICENSE file at https://angular.io/license
-    */
-    /**
      * Sets the current style sanitizer function which will then be used
      * within all follow-up prop and map-based style binding instructions
      * for the given element.
@@ -16232,20 +16315,20 @@
      * @codeGenApi
      */
     function ɵɵstyleMap(styles) {
-        checkStylingMap(styleArrayMapSet, styleStringParser, styles, false);
+        checkStylingMap(styleKeyValueArraySet, styleStringParser, styles, false);
     }
     /**
-     * Parse text as style and add values to ArrayMap.
+     * Parse text as style and add values to KeyValueArray.
      *
      * This code is pulled out to a separate function so that it can be tree shaken away if it is not
-     * needed. It is only reference from `ɵɵstyleMap`.
+     * needed. It is only referenced from `ɵɵstyleMap`.
      *
-     * @param arrayMap ArrayMap to add parsed values to.
+     * @param keyValueArray KeyValueArray to add parsed values to.
      * @param text text to parse.
      */
-    function styleStringParser(arrayMap, text) {
+    function styleStringParser(keyValueArray, text) {
         for (var i = parseStyle(text); i >= 0; i = parseStyleNext(text, i)) {
-            styleArrayMapSet(arrayMap, getLastParsedKey(text), getLastParsedValue(text));
+            styleKeyValueArraySet(keyValueArray, getLastParsedKey(text), getLastParsedValue(text));
         }
     }
     /**
@@ -16267,20 +16350,20 @@
      * @codeGenApi
      */
     function ɵɵclassMap(classes) {
-        checkStylingMap(arrayMapSet, classStringParser, classes, true);
+        checkStylingMap(keyValueArraySet, classStringParser, classes, true);
     }
     /**
-     * Parse text as class and add values to ArrayMap.
+     * Parse text as class and add values to KeyValueArray.
      *
      * This code is pulled out to a separate function so that it can be tree shaken away if it is not
-     * needed. It is only reference from `ɵɵclassMap`.
+     * needed. It is only referenced from `ɵɵclassMap`.
      *
-     * @param arrayMap ArrayMap to add parsed values to.
+     * @param keyValueArray KeyValueArray to add parsed values to.
      * @param text text to parse.
      */
-    function classStringParser(arrayMap, text) {
+    function classStringParser(keyValueArray, text) {
         for (var i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
-            arrayMapSet(arrayMap, getLastParsedKey(text), true);
+            keyValueArraySet(keyValueArray, getLastParsedKey(text), true);
         }
     }
     /**
@@ -16299,7 +16382,7 @@
         // 2. one for the intermittent-value / TStylingRange
         var bindingIndex = incrementBindingIndex(2);
         if (tView.firstUpdatePass) {
-            stylingPropertyFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
+            stylingFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
         }
         if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
             // This is a work around. Once PR#34480 lands the sanitizer is passed explicitly and this line
@@ -16315,30 +16398,41 @@
         }
     }
     /**
-    * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
-    *
-    * @param tStylingMapKey See `STYLE_MAP_STYLING_KEY` and `CLASS_MAP_STYLING_KEY`.
-    * @param value binding value.
-    * @param isClassBased `true` if `class` change (`false` if `style`)
-    */
-    function checkStylingMap(arrayMapSet, stringParser, value, isClassBased) {
+     * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
+     *
+     * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+     * function so that
+     *        `style` can pass in version which does sanitization. This is done for tree shaking
+     *        purposes.
+     * @param stringParser Parser used to parse `value` if `string`. (Passed in as `style` and `class`
+     *        have different parsers.)
+     * @param value bound value from application
+     * @param isClassBased `true` if `class` change (`false` if `style`)
+     */
+    function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
         var lView = getLView();
         var tView = lView[TVIEW];
         var bindingIndex = incrementBindingIndex(2);
         if (tView.firstUpdatePass) {
-            stylingPropertyFirstUpdatePass(tView, null, bindingIndex, isClassBased);
+            stylingFirstUpdatePass(tView, null, bindingIndex, isClassBased);
         }
         if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
             // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
             // if so as not to read unnecessarily.
             var tNode = tView.data[getSelectedIndex() + HEADER_OFFSET];
             if (hasStylingInputShadow(tNode, isClassBased) && !isInHostBindings(tView, bindingIndex)) {
+                if (ngDevMode) {
+                    // verify that if we are shadowing then `TData` is appropriately marked so that we skip
+                    // processing this binding in styling resolution.
+                    var tStylingKey = tView.data[bindingIndex];
+                    assertEqual(Array.isArray(tStylingKey) ? tStylingKey[1] : tStylingKey, false, 'Styling linked list shadow input should be marked as \'false\'');
+                }
                 // VE does not concatenate the static portion like we are doing here.
                 // Instead VE just ignores the static completely if dynamic binding is present.
                 // Because of locality we have already set the static portion because we don't know if there
                 // is a dynamic portion until later. If we would ignore the static portion it would look like
-                // tha the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
-                // thing as it would think tha the static portion was removed. For this reason we
+                // the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
+                // thing as it would think that the static portion was removed. For this reason we
                 // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
                 var staticPrefix = isClassBased ? tNode.classes : tNode.styles;
                 ngDevMode && isClassBased === false && staticPrefix !== null &&
@@ -16351,7 +16445,7 @@
                 setDirectiveInputsWhichShadowsStyling(tNode, lView, value, isClassBased);
             }
             else {
-                updateStylingMap(tView, tNode, lView, lView[RENDERER], lView[bindingIndex + 1], lView[bindingIndex + 1] = toStylingArrayMap(arrayMapSet, stringParser, value), isClassBased, bindingIndex);
+                updateStylingMap(tView, tNode, lView, lView[RENDERER], lView[bindingIndex + 1], lView[bindingIndex + 1] = toStylingKeyValueArray(keyValueArraySet, stringParser, value), isClassBased, bindingIndex);
             }
         }
     }
@@ -16370,12 +16464,11 @@
     * using `insertTStylingBinding`.
     *
     * @param tView `TView` where the binding linked list will be stored.
-    * @param prop Property/key of the binding.
-    * @param suffix Optional suffix or Sanitization function.
+    * @param tStylingKey Property/key of the binding.
     * @param bindingIndex Index of binding associated with the `prop`
     * @param isClassBased `true` if `class` change (`false` if `style`)
     */
-    function stylingPropertyFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) {
+    function stylingFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) {
         ngDevMode && assertFirstUpdatePass(tView);
         var tData = tView.data;
         if (tData[bindingIndex + 1] === null) {
@@ -16393,77 +16486,274 @@
                 // We turn this into a noop by setting the key to `false`
                 tStylingKey = false;
             }
+            tStylingKey = wrapInStaticStylingKey(tData, tNode, tStylingKey, isClassBased);
             insertTStylingBinding(tData, tNode, tStylingKey, bindingIndex, isHostBindings, isClassBased);
         }
     }
     /**
-     * Convert user input to `ArrayMap`.
+     * Adds static styling information to the binding if applicable.
+     *
+     * The linked list of styles not only stores the list and keys, but also stores static styling
+     * information on some of the keys. This function determines if the key should contain the styling
+     * information and computes it.
+     *
+     * See `TStylingStatic` for more details.
+     *
+     * @param tData `TData` where the linked list is stored.
+     * @param tNode `TNode` for which the styling is being computed.
+     * @param stylingKey `TStylingKeyPrimitive` which may need to be wrapped into `TStylingKey`
+     * @param isClassBased `true` if `class` (`false` if `style`)
+     */
+    function wrapInStaticStylingKey(tData, tNode, stylingKey, isClassBased) {
+        var hostDirectiveDef = getHostDirectiveDef(tData);
+        var residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
+        if (hostDirectiveDef === null) {
+            // We are in template node.
+            // If template node already had styling instruction then it has already collected the static
+            // styling and there is no need to collect them again. We know that we are the first styling
+            // instruction because the `TNode.*Bindings` points to 0 (nothing has been inserted yet).
+            var isFirstStylingInstructionInTemplate = (isClassBased ? tNode.classBindings : tNode.styleBindings) === 0;
+            if (isFirstStylingInstructionInTemplate) {
+                // It would be nice to be able to get the statics from `mergeAttrs`, however, at this point
+                // they are already merged and it would not be possible to figure which property belongs where
+                // in the priority.
+                stylingKey = collectStylingFromDirectives(null, tData, tNode, stylingKey, isClassBased);
+                stylingKey = collectStylingFromTAttrs(stylingKey, tNode.attrs, isClassBased);
+                // We know that if we have styling binding in template we can't have residual.
+                residual = null;
+            }
+        }
+        else {
+            // We are in host binding node and there was no binding instruction in template node.
+            // This means that we need to compute the residual.
+            var directives = tNode.directives;
+            var isFirstStylingInstructionInHostBinding = directives !== null &&
+                directives[directives[0 /* STYLING_CURSOR */]] !== hostDirectiveDef;
+            if (isFirstStylingInstructionInHostBinding) {
+                stylingKey =
+                    collectStylingFromDirectives(hostDirectiveDef, tData, tNode, stylingKey, isClassBased);
+                if (residual === null) {
+                    // - If `null` than either:
+                    //    - Template styling instruction already ran and it has consumed the static
+                    //      styling into its `TStylingKey` and so there is no need to update residual. Instead
+                    //      we need to update the `TStylingKey` associated with the first template node
+                    //      instruction. OR
+                    //    - Some other styling instruction ran and determined that there are no residuals
+                    var templateStylingKey = getTemplateHeadTStylingKey(tData, tNode, isClassBased);
+                    if (templateStylingKey !== undefined && Array.isArray(templateStylingKey)) {
+                        // Only recompute if `templateStylingKey` had static values. (If no static value found
+                        // then there is nothing to do since this operation can only produce less static keys, not
+                        // more.)
+                        templateStylingKey = collectStylingFromDirectives(null, tData, tNode, templateStylingKey[1] /* unwrap previous statics */, isClassBased);
+                        templateStylingKey =
+                            collectStylingFromTAttrs(templateStylingKey, tNode.attrs, isClassBased);
+                        setTemplateHeadTStylingKey(tData, tNode, isClassBased, templateStylingKey);
+                    }
+                }
+                else {
+                    // We only need to recompute residual if it is not `null`.
+                    // - If existing residual (implies there was no template styling). This means that some of
+                    //   the statics may have moved from the residual to the `stylingKey` and so we have to
+                    //   recompute.
+                    // - If `undefined` this is the first time we are running.
+                    residual = collectResidual(tNode, isClassBased);
+                }
+            }
+        }
+        if (residual !== undefined) {
+            isClassBased ? (tNode.residualClasses = residual) : (tNode.residualStyles = residual);
+        }
+        return stylingKey;
+    }
+    /**
+     * Retrieve the `TStylingKey` for the template styling instruction.
+     *
+     * This is needed since `hostBinding` styling instructions are inserted after the template
+     * instruction. While the template instruction needs to update the residual in `TNode` the
+     * `hostBinding` instructions need to update the `TStylingKey` of the template instruction because
+     * the template instruction is downstream from the `hostBindings` instructions.
+     *
+     * @param tData `TData` where the linked list is stored.
+     * @param tNode `TNode` for which the styling is being computed.
+     * @param isClassBased `true` if `class` (`false` if `style`)
+     * @return `TStylingKey` if found or `undefined` if not found.
+     */
+    function getTemplateHeadTStylingKey(tData, tNode, isClassBased) {
+        var bindings = isClassBased ? tNode.classBindings : tNode.styleBindings;
+        if (getTStylingRangeNext(bindings) === 0) {
+            // There does not seem to be a styling instruction in the `template`.
+            return undefined;
+        }
+        return tData[getTStylingRangePrev(bindings)];
+    }
+    function setTemplateHeadTStylingKey(tData, tNode, isClassBased, tStylingKey) {
+        var bindings = isClassBased ? tNode.classBindings : tNode.styleBindings;
+        ngDevMode && assertNotEqual(getTStylingRangeNext(bindings), 0, 'Expecting to have at least one template styling binding.');
+        tData[getTStylingRangePrev(bindings)] = tStylingKey;
+    }
+    function collectResidual(tNode, isClassBased) {
+        var residual = undefined;
+        var directives = tNode.directives;
+        if (directives) {
+            for (var i = directives[0 /* STYLING_CURSOR */] + 1; i < directives.length; i++) {
+                var attrs = directives[i].hostAttrs;
+                residual =
+                    collectStylingFromTAttrs(residual, attrs, isClassBased);
+            }
+        }
+        return collectStylingFromTAttrs(residual, tNode.attrs, isClassBased);
+    }
+    /**
+     * Collect the static styling information with lower priority than `hostDirectiveDef`.
+     *
+     * (This is opposite of residual styling.)
+     *
+     * @param hostDirectiveDef `DirectiveDef` for which we want to collect lower priority static
+     *        styling. (Or `null` if template styling)
+     * @param tData `TData` where the linked list is stored.
+     * @param tNode `TNode` for which the styling is being computed.
+     * @param stylingKey Existing `TStylingKey` to update or wrap.
+     * @param isClassBased `true` if `class` (`false` if `style`)
+     */
+    function collectStylingFromDirectives(hostDirectiveDef, tData, tNode, stylingKey, isClassBased) {
+        var directives = tNode.directives;
+        if (directives != null) {
+            ngDevMode && hostDirectiveDef &&
+                assertGreaterThanOrEqual(directives.indexOf(hostDirectiveDef, directives[0 /* STYLING_CURSOR */]), 0, 'Expecting that the current directive is in the directive list');
+            // We need to loop because there can be directives which have `hostAttrs` but don't have
+            // `hostBindings` so this loop catches up up to the current directive..
+            var currentDirective = null;
+            var index = directives[0 /* STYLING_CURSOR */];
+            while (index + 1 < directives.length) {
+                index++;
+                currentDirective = directives[index];
+                ngDevMode && assertDefined(currentDirective, 'expected to be defined');
+                stylingKey = collectStylingFromTAttrs(stylingKey, currentDirective.hostAttrs, isClassBased);
+                if (currentDirective === hostDirectiveDef)
+                    break;
+            }
+            if (hostDirectiveDef !== null) {
+                // we only advance the styling cursor if we are collecting data from host bindings.
+                // Template executes before host bindings and so if we would update the index,
+                // host bindings would not get their statics.
+                directives[0 /* STYLING_CURSOR */] = index;
+            }
+        }
+        return stylingKey;
+    }
+    /**
+     * Convert `TAttrs` into `TStylingStatic`.
+     *
+     * @param stylingKey existing `TStylingKey` to update or wrap.
+     * @param attrs `TAttributes` to process.
+     * @param isClassBased `true` if `class` (`false` if `style`)
+     */
+    function collectStylingFromTAttrs(stylingKey, attrs, isClassBased) {
+        var desiredMarker = isClassBased ? 1 /* Classes */ : 2 /* Styles */;
+        var currentMarker = -1 /* ImplicitAttributes */;
+        if (attrs !== null) {
+            for (var i = 0; i < attrs.length; i++) {
+                var item = attrs[i];
+                if (typeof item === 'number') {
+                    currentMarker = item;
+                }
+                else {
+                    if (currentMarker === desiredMarker) {
+                        if (!Array.isArray(stylingKey)) {
+                            stylingKey = stylingKey === undefined ? [] : ['', stylingKey];
+                        }
+                        keyValueArraySet(stylingKey, item, isClassBased ? true : attrs[++i]);
+                    }
+                }
+            }
+        }
+        return stylingKey === undefined ? null : stylingKey;
+    }
+    /**
+     * Retrieve the current `DirectiveDef` which is active when `hostBindings` style instruction is
+     * being executed (or `null` if we are in `template`.)
+     *
+     * @param tData Current `TData` where the `DirectiveDef` will be looked up at.
+     */
+    function getHostDirectiveDef(tData) {
+        var currentDirectiveIndex = getCurrentDirectiveIndex();
+        return currentDirectiveIndex === -1 ? null : tData[currentDirectiveIndex];
+    }
+    /**
+     * Convert user input to `KeyValueArray`.
      *
      * This function takes user input which could be `string`, Object literal, or iterable and converts
-     * it into a consistent representation. The output of this is `ArrayMap` (which is an array where
+     * it into a consistent representation. The output of this is `KeyValueArray` (which is an array
+     * where
      * even indexes contain keys and odd indexes contain values for those keys).
      *
-     * The advantage of converting to `ArrayMap` is that we can perform diff in a input independent way.
+     * The advantage of converting to `KeyValueArray` is that we can perform diff in an input
+     * independent
+     * way.
      * (ie we can compare `foo bar` to `['bar', 'baz'] and determine a set of changes which need to be
      * applied)
      *
-     * The fact that `ArrayMap` is sorted is very important because it allows us to compute the
+     * The fact that `KeyValueArray` is sorted is very important because it allows us to compute the
      * difference in linear fashion without the need to allocate any additional data.
      *
      * For example if we kept this as a `Map` we would have to iterate over previous `Map` to determine
-     * which values need to be delete, over the new `Map` to determine additions, and we would have to
+     * which values need to be deleted, over the new `Map` to determine additions, and we would have to
      * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
      *
+     * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
+     * function so that
+     *        `style` can pass in version which does sanitization. This is done for tree shaking
+     *        purposes.
      * @param stringParser The parser is passed in so that it will be tree shakable. See
      *        `styleStringParser` and `classStringParser`
-     * @param value The value to parse/convert to `ArrayMap`
+     * @param value The value to parse/convert to `KeyValueArray`
      */
-    function toStylingArrayMap(arrayMapSet, stringParser, value) {
-        if (value === null || value === undefined || value === '')
+    function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
+        if (value == null /*|| value === undefined */ || value === '')
             return EMPTY_ARRAY$3;
-        var styleArrayMap = [];
+        var styleKeyValueArray = [];
         if (Array.isArray(value)) {
             for (var i = 0; i < value.length; i++) {
-                arrayMapSet(styleArrayMap, value[i], true);
+                keyValueArraySet(styleKeyValueArray, value[i], true);
             }
         }
         else if (typeof value === 'object') {
             if (value instanceof Map) {
-                value.forEach(function (v, k) { return arrayMapSet(styleArrayMap, k, v); });
+                value.forEach(function (v, k) { return keyValueArraySet(styleKeyValueArray, k, v); });
             }
             else if (value instanceof Set) {
-                value.forEach(function (k) { return arrayMapSet(styleArrayMap, k, true); });
+                value.forEach(function (k) { return keyValueArraySet(styleKeyValueArray, k, true); });
             }
             else {
                 for (var key in value) {
                     if (value.hasOwnProperty(key)) {
-                        arrayMapSet(styleArrayMap, key, value[key]);
+                        keyValueArraySet(styleKeyValueArray, key, value[key]);
                     }
                 }
             }
         }
         else if (typeof value === 'string') {
-            stringParser(styleArrayMap, value);
+            stringParser(styleKeyValueArray, value);
         }
         else {
-            ngDevMode && throwError('Unsupported styling type ' + typeof value);
+            ngDevMode && throwError('Unsupported styling type ' + typeof value + ': ' + value);
         }
-        return styleArrayMap;
+        return styleKeyValueArray;
     }
     /**
      * Set a `value` for a `key` taking style sanitization into account.
      *
-     * See: `arrayMapSet` for details
+     * See: `keyValueArraySet` for details
      *
-     * @param arrayMap ArrayMap to add to.
+     * @param keyValueArray KeyValueArray to add to.
      * @param key Style key to add. (This key will be checked if it needs sanitization)
      * @param value The value to set (If key needs sanitization it will be sanitized)
      */
-    function styleArrayMapSet(arrayMap, key, value) {
+    function styleKeyValueArraySet(keyValueArray, key, value) {
         if (stylePropNeedsSanitization(key)) {
             value = ɵɵsanitizeStyle(value);
         }
-        arrayMapSet(arrayMap, key, value);
+        keyValueArraySet(keyValueArray, key, value);
     }
     /**
      * Update map based styling.
@@ -16471,32 +16761,33 @@
      * Map based styling could be anything which contains more than one binding. For example `string`,
      * `Map`, `Set` or object literal. Dealing with all of these types would complicate the logic so
      * instead this function expects that the complex input is first converted into normalized
-     * `ArrayMap`. The advantage of normalization is that we get the values sorted, which makes it very
+     * `KeyValueArray`. The advantage of normalization is that we get the values sorted, which makes it
+     * very
      * cheap to compute deltas between the previous and current value.
      *
      * @param tView Associated `TView.data` contains the linked list of binding priorities.
      * @param tNode `TNode` where the binding is located.
      * @param lView `LView` contains the values associated with other styling binding at this `TNode`.
      * @param renderer Renderer to use if any updates.
-     * @param oldArrayMap Previous value represented as `ArrayMap`
-     * @param newArrayMap Current value represented as `ArrayMap`
+     * @param oldKeyValueArray Previous value represented as `KeyValueArray`
+     * @param newKeyValueArray Current value represented as `KeyValueArray`
      * @param isClassBased `true` if `class` (`false` if `style`)
      * @param bindingIndex Binding index of the binding.
      */
-    function updateStylingMap(tView, tNode, lView, renderer, oldArrayMap, newArrayMap, isClassBased, bindingIndex) {
-        if (oldArrayMap === NO_CHANGE) {
-            // ON first execution the oldArrayMap is NO_CHANGE => treat is as empty ArrayMap.
-            oldArrayMap = EMPTY_ARRAY$3;
+    function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
+        if (oldKeyValueArray === NO_CHANGE) {
+            // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
+            oldKeyValueArray = EMPTY_ARRAY$3;
         }
         var oldIndex = 0;
         var newIndex = 0;
-        var oldKey = 0 < oldArrayMap.length ? oldArrayMap[0] : null;
-        var newKey = 0 < newArrayMap.length ? newArrayMap[0] : null;
+        var oldKey = 0 < oldKeyValueArray.length ? oldKeyValueArray[0] : null;
+        var newKey = 0 < newKeyValueArray.length ? newKeyValueArray[0] : null;
         while (oldKey !== null || newKey !== null) {
             ngDevMode && assertLessThan(oldIndex, 999, 'Are we stuck in infinite loop?');
             ngDevMode && assertLessThan(newIndex, 999, 'Are we stuck in infinite loop?');
-            var oldValue = oldIndex < oldArrayMap.length ? oldArrayMap[oldIndex + 1] : undefined;
-            var newValue = newIndex < newArrayMap.length ? newArrayMap[newIndex + 1] : undefined;
+            var oldValue = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex + 1] : undefined;
+            var newValue = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex + 1] : undefined;
             var setKey = null;
             var setValue = undefined;
             if (oldKey === newKey) {
@@ -16509,12 +16800,17 @@
                 }
             }
             else if (newKey === null || oldKey !== null && oldKey < newKey) {
-                // DELETE: oldKey key is missing or we did not find the oldKey in the newValue.
+                // DELETE: oldKey key is missing or we did not find the oldKey in the newValue
+                // (because the keyValueArray is sorted and `newKey` is found later alphabetically).
+                // `"background" < "color"` so we need to delete `"background"` because it is not found in the
+                // new array.
                 oldIndex += 2;
                 setKey = oldKey;
             }
             else {
-                // CREATE: newKey is less than oldKey (or no oldKey) => we have new key.
+                // CREATE: newKey's is earlier alphabetically than oldKey's (or no oldKey) => we have new key.
+                // `"color" > "background"` so we need to add `color` because it is in new array but not in
+                // old array.
                 ngDevMode && assertDefined(newKey, 'Expecting to have a valid key');
                 newIndex += 2;
                 setKey = newKey;
@@ -16523,8 +16819,8 @@
             if (setKey !== null) {
                 updateStyling(tView, tNode, lView, renderer, setKey, setValue, isClassBased, bindingIndex);
             }
-            oldKey = oldIndex < oldArrayMap.length ? oldArrayMap[oldIndex] : null;
-            newKey = newIndex < newArrayMap.length ? newArrayMap[newIndex] : null;
+            oldKey = oldIndex < oldKeyValueArray.length ? oldKeyValueArray[oldIndex] : null;
+            newKey = newIndex < newKeyValueArray.length ? newKeyValueArray[newIndex] : null;
         }
     }
     /**
@@ -16540,7 +16836,7 @@
      * @param lView `LView` contains the values associated with other styling binding at this `TNode`.
      * @param renderer Renderer to use if any updates.
      * @param prop Either style property name or a class name.
-     * @param value Either style vale for `prop` or `true`/`false` if `prop` is class.
+     * @param value Either style value for `prop` or `true`/`false` if `prop` is class.
      * @param isClassBased `true` if `class` (`false` if `style`)
      * @param bindingIndex Binding index of the binding.
      */
@@ -16553,7 +16849,7 @@
         var tData = tView.data;
         var tRange = tData[bindingIndex + 1];
         var higherPriorityValue = getTStylingRangeNextDuplicate(tRange) ?
-            findStylingValue(tData, null, lView, prop, getTStylingRangeNext(tRange), isClassBased) :
+            findStylingValue(tData, tNode, lView, prop, getTStylingRangeNext(tRange), isClassBased) :
             undefined;
         if (!isStylingValuePresent(higherPriorityValue)) {
             // We don't have a next duplicate, or we did not find a duplicate value.
@@ -16561,8 +16857,7 @@
                 // We should delete current value or restore to lower priority value.
                 if (getTStylingRangePrevDuplicate(tRange)) {
                     // We have a possible prev duplicate, let's retrieve it.
-                    value =
-                        findStylingValue(tData, tNode, lView, prop, getTStylingRangePrev(tRange), isClassBased);
+                    value = findStylingValue(tData, null, lView, prop, bindingIndex, isClassBased);
                 }
             }
             var rNode = getNativeByIndex(getSelectedIndex(), lView);
@@ -16570,28 +16865,30 @@
         }
     }
     /**
-     * Search for styling value with higher priority which is overwriting current value.
+     * Search for styling value with higher priority which is overwriting current value, or a
+     * value of lower priority to which we should fall back if the value is `undefined`.
      *
-     * When value is being applied at a location related values need to be consulted.
+     * When value is being applied at a location, related values need to be consulted.
      * - If there is a higher priority binding, we should be using that one instead.
      *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp1`
      *   requires that we check `exp2` to see if it is set to value other than `undefined`.
      * - If there is a lower priority binding and we are changing to `undefined`
      *   For example `<div  [style]="{color:exp1}" [style.color]="exp2">` change to `exp2` to
-     *   `undefined` requires that we check `exp` (and static values) and use that as new value.
+     *   `undefined` requires that we check `exp1` (and static values) and use that as new value.
      *
      * NOTE: The styling stores two values.
      * 1. The raw value which came from the application is stored at `index + 0` location. (This value
      *    is used for dirty checking).
-     * 2. The normalized value (converted to `ArrayMap` if map and sanitized) is stored at `index + 1`.
+     * 2. The normalized value (converted to `KeyValueArray` if map and sanitized) is stored at `index +
+     * 1`.
      *    The advantage of storing the sanitized value is that once the value is written we don't need
      *    to worry about sanitizing it later or keeping track of the sanitizer.
      *
      * @param tData `TData` used for traversing the priority.
      * @param tNode `TNode` to use for resolving static styling. Also controls search direction.
-     *   - `TNode` search previous and quit as soon as `isStylingValuePresent(value)` is true.
-     *      If no value found consult `tNode.styleMap`/`tNode.classMap` for default value.
-     *   - `null` search next and go all the way to end. Return last value where
+     *   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
+     *      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
+     *   - `null` search prev and go all the way to end. Return last value where
      *     `isStylingValuePresent(value)` is true.
      * @param lView `LView` used for retrieving the actual values.
      * @param prop Property which we are interested in.
@@ -16599,31 +16896,38 @@
      * @param isClassBased `true` if `class` (`false` if `style`)
      */
     function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
+        // `TNode` to use for resolving static styling. Also controls search direction.
+        //   - `TNode` search next and quit as soon as `isStylingValuePresent(value)` is true.
+        //      If no value found consult `tNode.residualStyle`/`tNode.residualClass` for default value.
+        //   - `null` search prev and go all the way to end. Return last value where
+        //     `isStylingValuePresent(value)` is true.
+        var isPrevDirection = tNode === null;
         var value = undefined;
         while (index > 0) {
-            var key = tData[index];
-            var currentValue = key === null ? arrayMapGet(lView[index + 1], prop) :
+            var rawKey = tData[index];
+            var containsStatics = Array.isArray(rawKey);
+            // Unwrap the key if we contain static values.
+            var key = containsStatics ? rawKey[1] : rawKey;
+            var currentValue = key === null ? keyValueArrayGet(lView[index + 1], prop) :
                 key === prop ? lView[index + 1] : undefined;
+            if (containsStatics && !isStylingValuePresent(currentValue)) {
+                currentValue = keyValueArrayGet(rawKey, prop);
+            }
             if (isStylingValuePresent(currentValue)) {
                 value = currentValue;
-                if (tNode !== null) {
+                if (isPrevDirection) {
                     return value;
                 }
             }
             var tRange = tData[index + 1];
-            index = tNode !== null ? getTStylingRangePrev(tRange) : getTStylingRangeNext(tRange);
+            index = isPrevDirection ? getTStylingRangePrev(tRange) : getTStylingRangeNext(tRange);
         }
         if (tNode !== null) {
-            // in case where we are going in previous direction AND we did not find anything, we need to
-            // consult static styling
-            var staticArrayMap = isClassBased ? tNode.classesMap : tNode.stylesMap;
-            if (staticArrayMap === undefined) {
-                // This is the first time we are here, and we need to initialize it.
-                initializeStylingStaticArrayMap(tNode);
-                staticArrayMap = isClassBased ? tNode.classesMap : tNode.stylesMap;
-            }
-            if (staticArrayMap !== null) {
-                value = arrayMapGet(staticArrayMap, prop);
+            // in case where we are going in next direction AND we did not find anything, we need to
+            // consult residual styling
+            var residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
+            if (residual != null /** OR residual !=== undefined */) {
+                value = keyValueArrayGet(residual, prop);
             }
         }
         return value;
@@ -16642,39 +16946,6 @@
         return value !== undefined;
     }
     /**
-     * Lazily computes `tNode.classesMap`/`tNode.stylesMap`.
-     *
-     * This code is here because we don't want to included it in `elementStart` as it would make hello
-     * world bigger even if no styling would be present. Instead we initialize the values here so that
-     * tree shaking will only bring it in if styling is present.
-     *
-     * @param tNode `TNode` to initialize.
-     */
-    function initializeStylingStaticArrayMap(tNode) {
-        ngDevMode && assertEqual(tNode.classesMap, undefined, 'Already initialized!');
-        ngDevMode && assertEqual(tNode.stylesMap, undefined, 'Already initialized!');
-        var styleMap = null;
-        var classMap = null;
-        var mergeAttrs = tNode.mergedAttrs || EMPTY_ARRAY$3;
-        var mode = -1 /* ImplicitAttributes */;
-        for (var i = 0; i < mergeAttrs.length; i++) {
-            var item = mergeAttrs[i];
-            if (typeof item === 'number') {
-                mode = item;
-            }
-            else if (mode === 1 /* Classes */) {
-                classMap = classMap || [];
-                arrayMapSet(classMap, item, true);
-            }
-            else if (mode === 2 /* Styles */) {
-                styleMap = styleMap || [];
-                arrayMapSet(styleMap, item, mergeAttrs[++i]);
-            }
-        }
-        tNode.classesMap = classMap;
-        tNode.stylesMap = styleMap;
-    }
-    /**
      * Sanitizes or adds suffix to the value.
      *
      * If value is `null`/`undefined` no suffix is added
@@ -16682,7 +16953,7 @@
      * @param suffixOrSanitizer
      */
     function normalizeAndApplySuffixOrSanitizer(value, suffixOrSanitizer) {
-        if (value === null || value === undefined) {
+        if (value == null /** || value === undefined */) {
             // do nothing
         }
         else if (typeof suffixOrSanitizer === 'function') {
@@ -17060,7 +17331,7 @@
     function ɵɵclassMapInterpolate1(prefix, v0, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17088,7 +17359,7 @@
     function ɵɵclassMapInterpolate2(prefix, v0, i0, v1, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17119,7 +17390,7 @@
     function ɵɵclassMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17152,7 +17423,7 @@
     function ɵɵclassMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17187,7 +17458,7 @@
     function ɵɵclassMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17224,7 +17495,7 @@
     function ɵɵclassMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17263,7 +17534,7 @@
     function ɵɵclassMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      *
@@ -17304,7 +17575,7 @@
     function ɵɵclassMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
         var lView = getLView();
         var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
      * Update an interpolated class on an element with 8 or more bound values surrounded by text.
@@ -17332,7 +17603,7 @@
     function ɵɵclassMapInterpolateV(values) {
         var lView = getLView();
         var interpolatedValue = interpolationV(lView, values);
-        checkStylingMap(arrayMapSet, classStringParser, interpolatedValue, true);
+        checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
 
     /**
@@ -18309,7 +18580,7 @@
         if (tView.firstCreatePass &&
             (componentDef.hostBindings !== null || componentDef.hostAttrs !== null)) {
             var elementIndex = rootTNode.index - HEADER_OFFSET;
-            setActiveHostElement(elementIndex);
+            setSelectedIndex(elementIndex);
             var rootTView = rootLView[TVIEW];
             addHostBindingsToExpandoInstructions(rootTView, componentDef);
             growHostVarsSpace(rootTView, rootLView, componentDef.hostVars);
@@ -19264,7 +19535,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.0-rc.1+862.sha-1765052');
+    var VERSION = new Version('9.0.0-rc.1+865.sha-c1cf46c');
 
     /**
      * @license
