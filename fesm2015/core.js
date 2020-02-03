@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.13+6.sha-6a771d9
+ * @license Angular v9.0.0-rc.13+10.sha-22357d4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23835,8 +23835,22 @@ function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
         /** @type {?} */
         const key = containsStatics ? ((/** @type {?} */ (rawKey)))[1] : rawKey;
         /** @type {?} */
-        let currentValue = key === null ? keyValueArrayGet(lView[index + 1], prop) :
-            key === prop ? lView[index + 1] : undefined;
+        const isStylingMap = key === null;
+        /** @type {?} */
+        let valueAtLViewIndex = lView[index + 1];
+        if (valueAtLViewIndex === NO_CHANGE) {
+            // In firstUpdatePass the styling instructions create a linked list of styling.
+            // On subsequent passes it is possible for a styling instruction to try to read a binding
+            // which
+            // has not yet executed. In that case we will find `NO_CHANGE` and we should assume that
+            // we have `undefined` (or empty array in case of styling-map instruction) instead. This
+            // allows the resolution to apply the value (which may later be overwritten when the
+            // binding actually executes.)
+            valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY$3 : undefined;
+        }
+        /** @type {?} */
+        let currentValue = isStylingMap ? keyValueArrayGet(valueAtLViewIndex, prop) :
+            key === prop ? valueAtLViewIndex : undefined;
         if (containsStatics && !isStylingValuePresent(currentValue)) {
             currentValue = keyValueArrayGet((/** @type {?} */ (rawKey)), prop);
         }
@@ -27506,7 +27520,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.13+6.sha-6a771d9');
+const VERSION = new Version('9.0.0-rc.13+10.sha-22357d4');
 
 /**
  * @fileoverview added by tsickle
