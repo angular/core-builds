@@ -11,7 +11,7 @@ import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
-import { PropertyAliases, TConstants, TContainerNode, TDirectiveDefs, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { TQueries } from '../interfaces/query';
 import { RComment, RElement, RNode } from '../interfaces/renderer';
@@ -70,6 +70,7 @@ declare class TNode implements ITNode {
     injectorIndex: number;
     directiveStart: number;
     directiveEnd: number;
+    directiveStylingLast: number;
     propertyBindings: number[] | null;
     flags: TNodeFlags;
     providerIndexes: TNodeProviderIndexes;
@@ -92,13 +93,13 @@ declare class TNode implements ITNode {
     residualClasses: KeyValueArray<any> | undefined | null;
     classBindings: TStylingRange;
     styleBindings: TStylingRange;
-    directives: TDirectiveDefs | null;
     constructor(tView_: TView, //
     type: TNodeType, //
     index: number, //
     injectorIndex: number, //
     directiveStart: number, //
     directiveEnd: number, //
+    directiveStylingLast: number, //
     propertyBindings: number[] | null, //
     flags: TNodeFlags, //
     providerIndexes: TNodeProviderIndexes, //
@@ -120,8 +121,7 @@ declare class TNode implements ITNode {
     classes: string | null, //
     residualClasses: KeyValueArray<any> | undefined | null, //
     classBindings: TStylingRange, //
-    styleBindings: TStylingRange, //
-    directives: TDirectiveDefs | null);
+    styleBindings: TStylingRange);
     get type_(): string;
     get flags_(): string;
     get template_(): string;
