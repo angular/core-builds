@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+919.sha-7fb66ec
+ * @license Angular v9.0.0-rc.1+925.sha-491654d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3773,6 +3773,13 @@ declare interface LFrame {
      * any local variables that need to be stored between invocations.
      */
     lView: ɵangular_packages_core_core_bo;
+    /**
+     * Current `TView` associated with the `LFrame.lView`.
+     *
+     * One can get `TView` from `lFrame[TVIEW]` however because it is so common it makes sense to
+     * store it in `LFrame` for perf reasons.
+     */
+    tView: TView;
     /**
      * Used to set the parent property when nodes are created and track query results.
      *
@@ -8516,10 +8523,7 @@ export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | Injec
 export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
- * Return the current LView.
- *
- * The return value can be `null` if the method is called outside of template. This can happen if
- * directive is instantiated by module injector (rather than by node injector.)
+ * Return the current `LView`.
  */
 export declare function ɵangular_packages_core_core_ba(): ɵangular_packages_core_core_bo;
 
@@ -10596,7 +10600,7 @@ export declare function ɵsetLocaleId(localeId: string): void;
 export declare type ɵSetterFn = (obj: any, value: any) => void;
 
 /** Store a value in the `data` at a given `index`. */
-export declare function ɵstore<T>(index: number, value: T): void;
+export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_core_bo, index: number, value: T): void;
 
 
 export declare function ɵstringify(token: any): string;
