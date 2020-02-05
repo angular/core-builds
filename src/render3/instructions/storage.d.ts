@@ -1,5 +1,13 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { LView, TView } from '../interfaces/view';
 /** Store a value in the `data` at a given `index`. */
-export declare function store<T>(index: number, value: T): void;
+export declare function store<T>(tView: TView, lView: LView, index: number, value: T): void;
 /**
  * Retrieves a local reference from the current contextViewData.
  *

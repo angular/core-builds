@@ -1,4 +1,4 @@
-import { LView } from '../interfaces/view';
+import { LView, TView } from '../interfaces/view';
 /**
  * Advances to an element for later binding instructions.
  *
@@ -29,4 +29,4 @@ export declare function ɵɵadvance(delta: number): void;
  * @codeGenApi
  */
 export declare function ɵɵselect(index: number): void;
-export declare function selectIndexInternal(lView: LView, index: number, checkNoChangesMode: boolean): void;
+export declare function selectIndexInternal(tView: TView, lView: LView, index: number, checkNoChangesMode: boolean): void;

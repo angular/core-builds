@@ -55,10 +55,11 @@ export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode 
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
  * template passes.
  *
- * @param view The LView containing the blueprint to adjust
+ * @param tView `TView` associated with `LView`
+ * @param view The `LView` containing the blueprint to adjust
  * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
  */
-export declare function allocExpando(view: LView, numSlotsToAlloc: number): void;
+export declare function allocExpando(tView: TView, lView: LView, numSlotsToAlloc: number): void;
 /**
  * Processes a view in the creation mode. This includes a number of steps in a specific order:
  * - creating view query functions (if any);
@@ -66,7 +67,7 @@ export declare function allocExpando(view: LView, numSlotsToAlloc: number): void
  * - updating static queries (if any);
  * - creating child components defined in a given view.
  */
-export declare function renderView<T>(lView: LView, tView: TView, context: T): void;
+export declare function renderView<T>(tView: TView, lView: LView, context: T): void;
 /**
  * Processes a view in update mode. This includes a number of steps in a specific order:
  * - executing a template function in update mode;
@@ -75,8 +76,8 @@ export declare function renderView<T>(lView: LView, tView: TView, context: T): v
  * - setting host bindings;
  * - refreshing child (embedded and component) views.
  */
-export declare function refreshView<T>(lView: LView, tView: TView, templateFn: ComponentTemplate<{}> | null, context: T): void;
-export declare function renderComponentOrTemplate<T>(hostView: LView, templateFn: ComponentTemplate<{}> | null, context: T): void;
+export declare function refreshView<T>(tView: TView, lView: LView, templateFn: ComponentTemplate<{}> | null, context: T): void;
+export declare function renderComponentOrTemplate<T>(tView: TView, lView: LView, templateFn: ComponentTemplate<{}> | null, context: T): void;
 export declare function executeContentQueries(tView: TView, tNode: TNode, lView: LView): void;
 /**
  * Creates directive instances.
@@ -123,7 +124,7 @@ export declare function locateHostElement(renderer: Renderer3, elementOrSelector
  * - Cleanup function
  * - Index of context we just saved in LView.cleanupInstances
  */
-export declare function storeCleanupWithContext(lView: LView, context: any, cleanupFn: Function): void;
+export declare function storeCleanupWithContext(tView: TView, lView: LView, context: any, cleanupFn: Function): void;
 /**
  * Saves the cleanup function itself in LView.cleanupInstances.
  *
@@ -132,7 +133,7 @@ export declare function storeCleanupWithContext(lView: LView, context: any, clea
  *
  * On the first template pass, the index of the cleanup function is saved in TView.
  */
-export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
+export declare function storeCleanupFn(tView: TView, lView: LView, cleanupFn: Function): void;
 /**
  * Constructs a TNode object from the arguments.
  *
@@ -145,9 +146,9 @@ export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
  * @returns the TNode object
  */
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
-export declare function elementPropertyInternal<T>(lView: LView, index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
+export declare function elementPropertyInternal<T>(tView: TView, lView: LView, index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
 export declare function setNgReflectProperties(lView: LView, element: RElement | RComment, type: TNodeType, dataValue: PropertyAliasValue, value: any): void;
-export declare function matchingSchemas(hostView: LView, tagName: string | null): boolean;
+export declare function matchingSchemas(tView: TView, lView: LView, tagName: string | null): boolean;
 /**
  * Instantiate a root component.
  */
@@ -201,7 +202,7 @@ export declare function markAsComponentHost(tView: TView, hostTNode: TNode): voi
  * @param index the initial index
  */
 export declare function initTNodeFlags(tNode: TNode, index: number, numberOfDirectives: number): void;
-export declare function elementAttributeInternal(index: number, name: string, value: any, lView: LView, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function elementAttributeInternal(index: number, name: string, value: any, tView: TView, lView: LView, sanitizer?: SanitizerFn | null, namespace?: string): void;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -250,14 +251,14 @@ export declare function markViewDirty(lView: LView): LView | null;
  */
 export declare function scheduleTick(rootContext: RootContext, flags: RootContextFlags): void;
 export declare function tickRootContext(rootContext: RootContext): void;
-export declare function detectChangesInternal<T>(view: LView, context: T): void;
+export declare function detectChangesInternal<T>(tView: TView, lView: LView, context: T): void;
 /**
  * Synchronously perform change detection on a root view and its components.
  *
  * @param lView The view which the change detection should be performed on.
  */
 export declare function detectChangesInRootView(lView: LView): void;
-export declare function checkNoChangesInternal<T>(view: LView, context: T): void;
+export declare function checkNoChangesInternal<T>(tView: TView, view: LView, context: T): void;
 /**
  * Checks the change detector on a root view and its components, and throws if any changes are
  * detected.
@@ -291,7 +292,7 @@ export declare function checkNoChangesInRootView(lView: LView): void;
  */
 export declare function storePropertyBindingMetadata(tData: TData, nodeIndex: number, propertyName: string, bindingIndex: number, ...interpolationParts: string[]): void;
 export declare const CLEAN_PROMISE: Promise<null>;
-export declare function getCleanup(view: LView): any[];
+export declare function getLCleanup(view: LView): any[];
 /**
  * There are cases where the sub component's renderer needs to be included
  * instead of the current renderer (see the componentSyntheticHost* instructions).
@@ -302,12 +303,13 @@ export declare function handleError(lView: LView, error: any): void;
 /**
  * Set the inputs of directives at the current node to corresponding value.
  *
+ * @param tView The current TView
  * @param lView the `LView` which contains the directives.
  * @param inputs mapping between the public "input" name and privately-known,
- * possibly minified, property names to write to.
+ *        possibly minified, property names to write to.
  * @param value Value to set.
  */
-export declare function setInputsForProperty(lView: LView, inputs: PropertyAliasValue, publicName: string, value: any): void;
+export declare function setInputsForProperty(tView: TView, lView: LView, inputs: PropertyAliasValue, publicName: string, value: any): void;
 /**
  * Updates a text binding at a given index in a given LView.
  */

@@ -9,7 +9,7 @@ import { LContainer } from '../interfaces/container';
 import { LContext } from '../interfaces/context';
 import { TConstants, TNode } from '../interfaces/node';
 import { RNode } from '../interfaces/renderer';
-import { LView, TData } from '../interfaces/view';
+import { LView, TData, TView } from '../interfaces/view';
 /**
  * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
  * in same location in `LView`. This is because we don't want to pre-allocate space for it
@@ -64,7 +64,7 @@ export declare function getNativeByTNode(tNode: TNode, lView: LView): RNode;
  * @param lView
  */
 export declare function getNativeByTNodeOrNull(tNode: TNode, lView: LView): RNode | null;
-export declare function getTNode(index: number, view: LView): TNode;
+export declare function getTNode(tView: TView, index: number): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function load<T>(view: LView | TData, index: number): T;
 export declare function getComponentLViewByIndex(nodeIndex: number, hostView: LView): LView;

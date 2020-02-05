@@ -7,7 +7,7 @@
  */
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { TNode } from './interfaces/node';
-import { LView, OpaqueViewState } from './interfaces/view';
+import { LView, OpaqueViewState, TView } from './interfaces/view';
 /**
  *
  */
@@ -31,6 +31,13 @@ interface LFrame {
      * any local variables that need to be stored between invocations.
      */
     lView: LView;
+    /**
+     * Current `TView` associated with the `LFrame.lView`.
+     *
+     * One can get `TView` from `lFrame[TVIEW]` however because it is so common it makes sense to
+     * store it in `LFrame` for perf reasons.
+     */
+    tView: TView;
     /**
      * Used to set the parent property when nodes are created and track query results.
      *
@@ -181,12 +188,13 @@ export declare function ɵɵenableBindings(): void;
  */
 export declare function ɵɵdisableBindings(): void;
 /**
- * Return the current LView.
- *
- * The return value can be `null` if the method is called outside of template. This can happen if
- * directive is instantiated by module injector (rather than by node injector.)
+ * Return the current `LView`.
  */
 export declare function getLView(): LView;
+/**
+ * Return the current `TView`.
+ */
+export declare function getTView(): TView;
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
