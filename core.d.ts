@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0+19.sha-14fc181
+ * @license Angular v9.0.0+30.sha-dce230e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2969,7 +2969,8 @@ export declare interface Injectable {
      * - 'root' : The application-level injector in most apps.
      * - 'platform' : A special singleton platform injector shared by all
      * applications on the page.
-     * - 'any' : The NgModule injector that receives the resolution.
+     * - 'any' : Provides a unique instance in every module (including lazy modules) that injects the
+     * token.
      *
      */
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;

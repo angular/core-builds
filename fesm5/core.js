@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0+19.sha-14fc181
+ * @license Angular v9.0.0+30.sha-dce230e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11253,9 +11253,6 @@ var R3Injector = /** @class */ (function () {
         if (def == null) {
             return false;
         }
-        // Track the InjectorType and add a provider for it.
-        this.injectorDefTypes.add(defType);
-        this.records.set(defType, makeRecord(def.factory, NOT_YET));
         // Add providers in the same way that @NgModule resolution did:
         // First, include providers from any imports.
         if (def.imports != null && !isDuplicate) {
@@ -11293,6 +11290,10 @@ var R3Injector = /** @class */ (function () {
                 }
             }
         }
+        // Track the InjectorType and add a provider for it. It's important that this is done after the
+        // def's imports.
+        this.injectorDefTypes.add(defType);
+        this.records.set(defType, makeRecord(def.factory, NOT_YET));
         // Next, include providers listed on the definition itself.
         var defProviders = def.providers;
         if (defProviders != null && !isDuplicate) {
@@ -19501,7 +19502,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0+19.sha-14fc181');
+var VERSION = new Version('9.0.0+30.sha-dce230e');
 
 /**
  * @license
