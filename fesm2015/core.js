@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0-rc.1+972.sha-d5d9971
+ * @license Angular v9.0.0-rc.1+973.sha-ae0253f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3020,6 +3020,23 @@ function assertDirectiveDef(obj) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/namespaces.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @type {?} */
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+/** @type {?} */
+const MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
+
+/**
+ * @fileoverview added by tsickle
  * Generated from: packages/core/src/render3/state.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -3603,7 +3620,7 @@ function setSelectedIndex(index) {
  * @return {?}
  */
 function ɵɵnamespaceSVG() {
-    instructionState.lFrame.currentNamespace = 'http://www.w3.org/2000/svg';
+    instructionState.lFrame.currentNamespace = SVG_NAMESPACE;
 }
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
@@ -3612,7 +3629,7 @@ function ɵɵnamespaceSVG() {
  * @return {?}
  */
 function ɵɵnamespaceMathML() {
-    instructionState.lFrame.currentNamespace = 'http://www.w3.org/1998/MathML/';
+    instructionState.lFrame.currentNamespace = MATH_ML_NAMESPACE;
 }
 /**
  * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -27599,7 +27616,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.0-rc.1+972.sha-d5d9971');
+const VERSION = new Version('9.0.0-rc.1+973.sha-ae0253f');
 
 /**
  * @fileoverview added by tsickle
@@ -33292,6 +33309,15 @@ function toRefArray(map) {
     return array;
 }
 /**
+ * @param {?} elementName
+ * @return {?}
+ */
+function getNamespace$1(elementName) {
+    /** @type {?} */
+    const name = elementName.toLowerCase();
+    return name === 'svg' ? SVG_NAMESPACE : (name === 'math' ? MATH_ML_NAMESPACE : null);
+}
+/**
  * A change detection scheduler token for {\@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {\@link ROOT_CONTEXT} token.
  * @type {?}
@@ -33381,13 +33407,14 @@ class ComponentFactory$1 extends ComponentFactory {
         const sanitizer = rootViewInjector.get(Sanitizer, null);
         /** @type {?} */
         const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
+        // Determine a tag name used for creating host elements when this component is created
+        // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
+        /** @type {?} */
+        const elementName = (/** @type {?} */ (this.componentDef.selectors[0][0])) || 'div';
         /** @type {?} */
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
-            // Determine a tag name used for creating host elements when this component is created
-            // dynamically. Default to 'div' if this component did not specify any tag name in its
-            // selector.
-            elementCreate((/** @type {?} */ (this.componentDef.selectors[0][0])) || 'div', rendererFactory.createRenderer(null, this.componentDef), null);
+            elementCreate(elementName, rendererFactory.createRenderer(null, this.componentDef), getNamespace$1(elementName));
         /** @type {?} */
         const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
