@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.0+36.sha-18ed9dc
+ * @license Angular v9.0.0+37.sha-480a4c3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2052,6 +2052,16 @@ function assertDirectiveDef(obj) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+var MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var instructionState = {
     lFrame: createLFrame(null),
     bindingsEnabled: true,
@@ -2353,7 +2363,7 @@ function setSelectedIndex(index) {
  * @codeGenApi
  */
 function ɵɵnamespaceSVG() {
-    instructionState.lFrame.currentNamespace = 'http://www.w3.org/2000/svg';
+    instructionState.lFrame.currentNamespace = SVG_NAMESPACE;
 }
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/1998/MathML/'` in global state.
@@ -2361,7 +2371,7 @@ function ɵɵnamespaceSVG() {
  * @codeGenApi
  */
 function ɵɵnamespaceMathML() {
-    instructionState.lFrame.currentNamespace = 'http://www.w3.org/1998/MathML/';
+    instructionState.lFrame.currentNamespace = MATH_ML_NAMESPACE;
 }
 /**
  * Sets the namespace used to create elements to `null`, which forces element creation to use
@@ -19502,7 +19512,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.0+36.sha-18ed9dc');
+var VERSION = new Version('9.0.0+37.sha-480a4c3');
 
 /**
  * @license
@@ -22434,6 +22444,10 @@ function toRefArray(map) {
     }
     return array;
 }
+function getNamespace$1(elementName) {
+    var name = elementName.toLowerCase();
+    return name === 'svg' ? SVG_NAMESPACE : (name === 'math' ? MATH_ML_NAMESPACE : null);
+}
 /**
  * A change detection scheduler token for {@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
@@ -22499,12 +22513,12 @@ var ComponentFactory$1 = /** @class */ (function (_super) {
         var rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
         var sanitizer = rootViewInjector.get(Sanitizer, null);
         var hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
+        // Determine a tag name used for creating host elements when this component is created
+        // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
+        var elementName = this.componentDef.selectors[0][0] || 'div';
         var hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
-            // Determine a tag name used for creating host elements when this component is created
-            // dynamically. Default to 'div' if this component did not specify any tag name in its
-            // selector.
-            elementCreate(this.componentDef.selectors[0][0] || 'div', rendererFactory.createRenderer(null, this.componentDef), null);
+            elementCreate(elementName, rendererFactory.createRenderer(null, this.componentDef), getNamespace$1(elementName));
         var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
         // Check whether this Component needs to be isolated from other components, i.e. whether it
