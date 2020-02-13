@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.1+6.sha-a84093a
+ * @license Angular v9.0.1+7.sha-a30fd29
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8750,7 +8750,7 @@ function getTViewCleanup(tView) {
  * instead of the current renderer (see the componentSyntheticHost* instructions).
  */
 function loadComponentRenderer(tNode, lView) {
-    var componentLView = lView[tNode.index];
+    var componentLView = unwrapLView(lView[tNode.index]);
     return componentLView[RENDERER];
 }
 /** Handles an error thrown in an LView. */
@@ -19512,7 +19512,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.1+6.sha-a84093a');
+var VERSION = new Version('9.0.1+7.sha-a30fd29');
 
 /**
  * @license
