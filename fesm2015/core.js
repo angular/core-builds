@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+5.sha-a6aa35e
+ * @license Angular v9.1.0-next.0+7.sha-d6bc63f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13453,7 +13453,7 @@ function getTViewCleanup(tView) {
  */
 function loadComponentRenderer(tNode, lView) {
     /** @type {?} */
-    const componentLView = (/** @type {?} */ (lView[tNode.index]));
+    const componentLView = (/** @type {?} */ (unwrapLView(lView[tNode.index])));
     return componentLView[RENDERER];
 }
 /**
@@ -27599,7 +27599,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.0+5.sha-a6aa35e');
+const VERSION = new Version('9.1.0-next.0+7.sha-d6bc63f');
 
 /**
  * @fileoverview added by tsickle
