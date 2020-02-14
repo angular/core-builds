@@ -247,12 +247,6 @@ export declare function setCurrentQueryIndex(value: number): void;
  */
 export declare function enterDI(newView: LView, tNode: TNode): void;
 /**
- * This is a light weight version of the `leaveView` which is needed by the DI system.
- *
- * Because the implementation is same it is only an alias
- */
-export declare const leaveDI: typeof leaveView;
-/**
  * Swap the current lView with a new lView.
  *
  * For performance reasons we store the lView in the top level of the module.
@@ -265,6 +259,21 @@ export declare const leaveDI: typeof leaveView;
  * @returns the previously active lView;
  */
 export declare function enterView(newView: LView, tNode: TNode | null): void;
+/**
+ * This is a lightweight version of the `leaveView` which is needed by the DI system.
+ *
+ * NOTE: this function is an alias so that we can change the type of the function to have `void`
+ * return type.
+ */
+export declare const leaveDI: () => void;
+/**
+ * Leave the current `LView`
+ *
+ * This pops the `LFrame` with the associated `LView` from the stack.
+ *
+ * IMPORTANT: We must zero out the `LFrame` values here otherwise they will be retained. This is
+ * because for performance reasons we don't release `LFrame` but rather keep it for next use.
+ */
 export declare function leaveView(): void;
 export declare function nextContextImpl<T = any>(level: number): T;
 /**
