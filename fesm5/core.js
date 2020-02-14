@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+24.sha-be5e75c
+ * @license Angular v9.1.0-next.0+25.sha-8c75f21
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16332,8 +16332,9 @@ function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
             var staticPrefix = isClassBased ? tNode.classes : tNode.styles;
             ngDevMode && isClassBased === false && staticPrefix !== null &&
                 assertEqual(staticPrefix.endsWith(';'), true, 'Expecting static portion to end with \';\'');
-            if (typeof value === 'string') {
-                value = concatStringsWithSpace(staticPrefix, value);
+            if (staticPrefix !== null) {
+                // We want to make sure that falsy values of `value` become empty strings.
+                value = concatStringsWithSpace(staticPrefix, value ? value : '');
             }
             // Given `<div [style] my-dir>` such that `my-dir` has `@Input('style')`.
             // This takes over the `[style]` binding. (Same for `[class]`)
@@ -19531,7 +19532,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.0-next.0+24.sha-be5e75c');
+var VERSION = new Version('9.1.0-next.0+25.sha-8c75f21');
 
 /**
  * @license
