@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+21.sha-b9b512f
+ * @license Angular v9.1.0-next.0+23.sha-2ca7984
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11068,7 +11068,7 @@ export declare function ɵɵattributeInterpolateV(attrName: string, values: any[
  */
 export declare function ɵɵclassMap(classes: {
     [className: string]: boolean | undefined | null;
-} | Map<string, boolean | undefined | null> | Set<string> | string[] | string | undefined | null): void;
+} | string | undefined | null): void;
 
 
 /**
@@ -13472,7 +13472,7 @@ export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], 
  */
 export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
-} | Map<string, string | number | null | undefined> | string | undefined | null): void;
+} | string | undefined | null): void;
 
 /**
  * Update a style binding on an element with the provided value.
