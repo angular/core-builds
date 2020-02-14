@@ -90,7 +90,7 @@ export declare function ɵɵclassProp(className: string, value: boolean | undefi
  */
 export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
-} | Map<string, string | number | null | undefined> | string | undefined | null): void;
+} | string | undefined | null): void;
 /**
  * Parse text as style and add values to KeyValueArray.
  *
@@ -121,7 +121,7 @@ export declare function styleStringParser(keyValueArray: KeyValueArray<any>, tex
  */
 export declare function ɵɵclassMap(classes: {
     [className: string]: boolean | undefined | null;
-} | Map<string, boolean | undefined | null> | Set<string> | string[] | string | undefined | null): void;
+} | string | undefined | null): void;
 /**
  * Parse text as class and add values to KeyValueArray.
  *
@@ -207,7 +207,7 @@ export declare function getHostDirectiveDef(tData: TData): DirectiveDef<any> | n
  */
 export declare function toStylingKeyValueArray(keyValueArraySet: (keyValueArray: KeyValueArray<any>, key: string, value: any) => void, stringParser: (styleKeyValueArray: KeyValueArray<any>, text: string) => void, value: string | string[] | {
     [key: string]: any;
-} | Map<any, any> | Set<any> | null | undefined): KeyValueArray<any>;
+} | null | undefined): KeyValueArray<any>;
 /**
  * Tests if the `TNode` has input shadow.
  *

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+21.sha-b9b512f
+ * @license Angular v9.1.0-next.0+23.sha-2ca7984
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23720,26 +23720,9 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
         }
     }
     else if (typeof value === 'object') {
-        if (value instanceof Map) {
-            value.forEach((/**
-             * @param {?} v
-             * @param {?} k
-             * @return {?}
-             */
-            (v, k) => keyValueArraySet(styleKeyValueArray, k, v)));
-        }
-        else if (value instanceof Set) {
-            value.forEach((/**
-             * @param {?} k
-             * @return {?}
-             */
-            (k) => keyValueArraySet(styleKeyValueArray, k, true)));
-        }
-        else {
-            for (const key in value) {
-                if (value.hasOwnProperty(key)) {
-                    keyValueArraySet(styleKeyValueArray, key, value[key]);
-                }
+        for (const key in value) {
+            if (value.hasOwnProperty(key)) {
+                keyValueArraySet(styleKeyValueArray, key, value[key]);
             }
         }
     }
@@ -23771,11 +23754,10 @@ function styleKeyValueArraySet(keyValueArray, key, value) {
  * Update map based styling.
  *
  * Map based styling could be anything which contains more than one binding. For example `string`,
- * `Map`, `Set` or object literal. Dealing with all of these types would complicate the logic so
+ * or object literal. Dealing with all of these types would complicate the logic so
  * instead this function expects that the complex input is first converted into normalized
  * `KeyValueArray`. The advantage of normalization is that we get the values sorted, which makes it
- * very
- * cheap to compute deltas between the previous and current value.
+ * very cheap to compute deltas between the previous and current value.
  *
  * @param {?} tView Associated `TView.data` contains the linked list of binding priorities.
  * @param {?} tNode `TNode` where the binding is located.
@@ -27627,7 +27609,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.0+21.sha-b9b512f');
+const VERSION = new Version('9.1.0-next.0+23.sha-2ca7984');
 
 /**
  * @fileoverview added by tsickle
