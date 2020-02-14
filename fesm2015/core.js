@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.1+20.sha-4f8d303
+ * @license Angular v9.0.1+24.sha-eee8c7f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3452,27 +3452,7 @@ function enterDI(newView, tNode) {
     instructionState.lFrame = newLFrame;
     newLFrame.previousOrParentTNode = (/** @type {?} */ (tNode));
     newLFrame.lView = newView;
-    if (ngDevMode) {
-        // resetting for safety in dev mode only.
-        newLFrame.isParent = DEV_MODE_VALUE;
-        newLFrame.selectedIndex = DEV_MODE_VALUE;
-        newLFrame.contextLView = DEV_MODE_VALUE;
-        newLFrame.elementDepthCount = DEV_MODE_VALUE;
-        newLFrame.currentNamespace = DEV_MODE_VALUE;
-        newLFrame.currentSanitizer = DEV_MODE_VALUE;
-        newLFrame.bindingRootIndex = DEV_MODE_VALUE;
-        newLFrame.currentQueryIndex = DEV_MODE_VALUE;
-    }
 }
-/** @type {?} */
-const DEV_MODE_VALUE = 'Value indicating that DI is trying to read value which it should not need to know about.';
-/**
- * This is a light weight version of the `leaveView` which is needed by the DI system.
- *
- * Because the implementation is same it is only an alias
- * @type {?}
- */
-const leaveDI = leaveView;
 /**
  * Swap the current lView with a new lView.
  *
@@ -3489,22 +3469,26 @@ function enterView(newView, tNode) {
     ngDevMode && assertLViewOrUndefined(newView);
     /** @type {?} */
     const newLFrame = allocLFrame();
+    if (ngDevMode) {
+        assertEqual(newLFrame.isParent, true, 'Expected clean LFrame');
+        assertEqual(newLFrame.lView, null, 'Expected clean LFrame');
+        assertEqual(newLFrame.tView, null, 'Expected clean LFrame');
+        assertEqual(newLFrame.selectedIndex, 0, 'Expected clean LFrame');
+        assertEqual(newLFrame.elementDepthCount, 0, 'Expected clean LFrame');
+        assertEqual(newLFrame.currentDirectiveIndex, -1, 'Expected clean LFrame');
+        assertEqual(newLFrame.currentNamespace, null, 'Expected clean LFrame');
+        assertEqual(newLFrame.currentSanitizer, null, 'Expected clean LFrame');
+        assertEqual(newLFrame.bindingRootIndex, -1, 'Expected clean LFrame');
+        assertEqual(newLFrame.currentQueryIndex, 0, 'Expected clean LFrame');
+    }
     /** @type {?} */
     const tView = newView[TVIEW];
     instructionState.lFrame = newLFrame;
     newLFrame.previousOrParentTNode = (/** @type {?} */ (tNode));
-    newLFrame.isParent = true;
     newLFrame.lView = newView;
     newLFrame.tView = tView;
-    newLFrame.selectedIndex = 0;
     newLFrame.contextLView = (/** @type {?} */ (newView));
-    newLFrame.elementDepthCount = 0;
-    newLFrame.currentDirectiveIndex = -1;
-    newLFrame.currentNamespace = null;
-    newLFrame.currentSanitizer = null;
-    newLFrame.bindingRootIndex = -1;
     newLFrame.bindingIndex = tView.bindingStartIndex;
-    newLFrame.currentQueryIndex = 0;
 }
 /**
  * Allocates next free LFrame. This function tries to reuse the `LFrame`s to lower memory pressure.
@@ -3560,10 +3544,54 @@ function createLFrame(parent) {
     return lFrame;
 }
 /**
+ * A lightweight version of leave which is used with DI.
+ *
+ * This function only resets `previousOrParentTNode` and `LView` as those are the only properties
+ * used with DI (`enterDI()`).
+ *
+ * NOTE: This function is reexported as `leaveDI`. However `leaveDI` has return type of `void` where
+ * as `leaveViewLight` has `LFrame`. This is so that `leaveViewLight` can be used in `leaveView`.
+ * @return {?}
+ */
+function leaveViewLight() {
+    /** @type {?} */
+    const oldLFrame = instructionState.lFrame;
+    instructionState.lFrame = oldLFrame.parent;
+    oldLFrame.previousOrParentTNode = (/** @type {?} */ (null));
+    oldLFrame.lView = (/** @type {?} */ (null));
+    return oldLFrame;
+}
+/**
+ * This is a lightweight version of the `leaveView` which is needed by the DI system.
+ *
+ * NOTE: this function is an alias so that we can change the type of the function to have `void`
+ * return type.
+ * @type {?}
+ */
+const leaveDI = leaveViewLight;
+/**
+ * Leave the current `LView`
+ *
+ * This pops the `LFrame` with the associated `LView` from the stack.
+ *
+ * IMPORTANT: We must zero out the `LFrame` values here otherwise they will be retained. This is
+ * because for performance reasons we don't release `LFrame` but rather keep it for next use.
  * @return {?}
  */
 function leaveView() {
-    instructionState.lFrame = instructionState.lFrame.parent;
+    /** @type {?} */
+    const oldLFrame = leaveViewLight();
+    oldLFrame.isParent = true;
+    oldLFrame.tView = (/** @type {?} */ (null));
+    oldLFrame.selectedIndex = 0;
+    oldLFrame.contextLView = (/** @type {?} */ (null));
+    oldLFrame.elementDepthCount = 0;
+    oldLFrame.currentDirectiveIndex = -1;
+    oldLFrame.currentNamespace = null;
+    oldLFrame.currentSanitizer = null;
+    oldLFrame.bindingRootIndex = -1;
+    oldLFrame.bindingIndex = -1;
+    oldLFrame.currentQueryIndex = 0;
 }
 /**
  * @template T
@@ -23708,26 +23736,9 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
         }
     }
     else if (typeof value === 'object') {
-        if (value instanceof Map) {
-            value.forEach((/**
-             * @param {?} v
-             * @param {?} k
-             * @return {?}
-             */
-            (v, k) => keyValueArraySet(styleKeyValueArray, k, v)));
-        }
-        else if (value instanceof Set) {
-            value.forEach((/**
-             * @param {?} k
-             * @return {?}
-             */
-            (k) => keyValueArraySet(styleKeyValueArray, k, true)));
-        }
-        else {
-            for (const key in value) {
-                if (value.hasOwnProperty(key)) {
-                    keyValueArraySet(styleKeyValueArray, key, value[key]);
-                }
+        for (const key in value) {
+            if (value.hasOwnProperty(key)) {
+                keyValueArraySet(styleKeyValueArray, key, value[key]);
             }
         }
     }
@@ -23759,11 +23770,10 @@ function styleKeyValueArraySet(keyValueArray, key, value) {
  * Update map based styling.
  *
  * Map based styling could be anything which contains more than one binding. For example `string`,
- * `Map`, `Set` or object literal. Dealing with all of these types would complicate the logic so
+ * or object literal. Dealing with all of these types would complicate the logic so
  * instead this function expects that the complex input is first converted into normalized
  * `KeyValueArray`. The advantage of normalization is that we get the values sorted, which makes it
- * very
- * cheap to compute deltas between the previous and current value.
+ * very cheap to compute deltas between the previous and current value.
  *
  * @param {?} tView Associated `TView.data` contains the linked list of binding priorities.
  * @param {?} tNode `TNode` where the binding is located.
@@ -27616,7 +27626,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.1+20.sha-4f8d303');
+const VERSION = new Version('9.0.1+24.sha-eee8c7f');
 
 /**
  * @fileoverview added by tsickle
