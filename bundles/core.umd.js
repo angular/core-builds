@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.1+24.sha-eee8c7f
+ * @license Angular v9.0.1+27.sha-c9d80b2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16490,8 +16490,9 @@
                 var staticPrefix = isClassBased ? tNode.classes : tNode.styles;
                 ngDevMode && isClassBased === false && staticPrefix !== null &&
                     assertEqual(staticPrefix.endsWith(';'), true, 'Expecting static portion to end with \';\'');
-                if (typeof value === 'string') {
-                    value = concatStringsWithSpace(staticPrefix, value);
+                if (staticPrefix !== null) {
+                    // We want to make sure that falsy values of `value` become empty strings.
+                    value = concatStringsWithSpace(staticPrefix, value ? value : '');
                 }
                 // Given `<div [style] my-dir>` such that `my-dir` has `@Input('style')`.
                 // This takes over the `[style]` binding. (Same for `[class]`)
@@ -19684,7 +19685,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.1+24.sha-eee8c7f');
+    var VERSION = new Version('9.0.1+27.sha-c9d80b2');
 
     /**
      * @license
