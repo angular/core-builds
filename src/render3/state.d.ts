@@ -208,7 +208,7 @@ export declare function getTView(): TView;
  */
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 export declare function getPreviousOrParentTNode(): TNode;
-export declare function setPreviousOrParentTNode(tNode: TNode, _isParent: boolean): void;
+export declare function setPreviousOrParentTNode(tNode: TNode, isParent: boolean): void;
 export declare function getIsParent(): boolean;
 export declare function setIsNotParent(): void;
 export declare function setIsParent(): void;
