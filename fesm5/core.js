@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.1+27.sha-c9d80b2
+ * @license Angular v9.0.1+37.sha-45c7b23
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2152,9 +2152,9 @@ function ɵɵrestoreView(viewToRestore) {
 function getPreviousOrParentTNode() {
     return instructionState.lFrame.previousOrParentTNode;
 }
-function setPreviousOrParentTNode(tNode, _isParent) {
+function setPreviousOrParentTNode(tNode, isParent) {
     instructionState.lFrame.previousOrParentTNode = tNode;
-    instructionState.lFrame.isParent = _isParent;
+    instructionState.lFrame.isParent = isParent;
 }
 function getIsParent() {
     return instructionState.lFrame.isParent;
@@ -19532,7 +19532,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.1+27.sha-c9d80b2');
+var VERSION = new Version('9.0.1+37.sha-45c7b23');
 
 /**
  * @license
@@ -23165,10 +23165,19 @@ function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
     parentIndexStack[parentIndexPointer] = parentIndex;
     var createOpCodes = [];
     // If the previous node wasn't the direct parent then we have a translation without top level
-    // element and we need to keep a reference of the previous element if there is one
+    // element and we need to keep a reference of the previous element if there is one. We should also
+    // keep track whether an element was a parent node or not, so that the logic that consumes
+    // the generated `I18nMutateOpCode`s can leverage this information to properly set TNode state
+    // (whether it's a parent or sibling).
     if (index > 0 && previousOrParentTNode !== parentTNode) {
+        var previousTNodeIndex = previousOrParentTNode.index - HEADER_OFFSET;
+        // If current TNode is a sibling node, encode it using a negative index. This information is
+        // required when the `Select` action is processed (see the `readCreateOpCodes` function).
+        if (!getIsParent()) {
+            previousTNodeIndex = ~previousTNodeIndex;
+        }
         // Create an OpCode to select the previous TNode
-        createOpCodes.push(previousOrParentTNode.index << 3 /* SHIFT_REF */ | 0 /* Select */);
+        createOpCodes.push(previousTNodeIndex << 3 /* SHIFT_REF */ | 0 /* Select */);
     }
     var updateOpCodes = [];
     var icuExpressions = [];
@@ -23188,9 +23197,13 @@ function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
             }
             else {
                 var phIndex = parseInt(value.substr(1), 10);
-                // The value represents a placeholder that we move to the designated index
-                createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                if (value.charAt(0) === "#" /* ELEMENT */) {
+                var isElement = value.charAt(0) === "#" /* ELEMENT */;
+                // The value represents a placeholder that we move to the designated index.
+                // Note: positive indicies indicate that a TNode with a given index should also be marked as
+                // parent while executing `Select` instruction.
+                createOpCodes.push((isElement ? phIndex : ~phIndex) << 3 /* SHIFT_REF */ |
+                    0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                if (isElement) {
                     parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
                 }
             }
@@ -23488,12 +23501,15 @@ function readCreateOpCodes(index, createOpCodes, tView, lView) {
                         appendI18nNode(tView, currentTNode, destinationTNode, previousTNode, lView);
                     break;
                 case 0 /* Select */:
-                    var nodeIndex = opCode >>> 3 /* SHIFT_REF */;
+                    // Negative indicies indicate that a given TNode is a sibling node, not a parent node
+                    // (see `i18nStartFirstPass` for additional information).
+                    var isParent = opCode >= 0;
+                    var nodeIndex = (isParent ? opCode : ~opCode) >>> 3 /* SHIFT_REF */;
                     visitedNodes.push(nodeIndex);
                     previousTNode = currentTNode;
                     currentTNode = getTNode(tView, nodeIndex);
                     if (currentTNode) {
-                        setPreviousOrParentTNode(currentTNode, currentTNode.type === 3 /* Element */);
+                        setPreviousOrParentTNode(currentTNode, isParent);
                     }
                     break;
                 case 5 /* ElementEnd */:
