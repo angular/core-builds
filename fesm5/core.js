@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+37.sha-183a862
+ * @license Angular v9.1.0-next.0+38.sha-5fbfe69
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19054,19 +19054,13 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
         var beginIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
         var endIndex = tNode.directiveStart;
         var cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
-        if (isClassProvider(provider) || isTypeProvider(provider)) {
-            var prototype = (provider.useClass || provider).prototype;
-            var ngOnDestroy = prototype.ngOnDestroy;
-            if (ngOnDestroy) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
-            }
-        }
         if (isTypeProvider(provider) || !provider.multi) {
             // Single provider case: the factory is created and pushed immediately
             var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
             var existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
-            if (existingFactoryIndex == -1) {
+            if (existingFactoryIndex === -1) {
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, token);
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -19116,6 +19110,7 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
                 if (!isViewProvider && doesViewProvidersFactoryExist) {
                     lInjectablesBlueprint[existingViewProvidersFactoryIndex].providerFactory = factory;
                 }
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -19127,11 +19122,30 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
             }
             else {
                 // Cases 1.b and 2.b
+                registerDestroyHooksIfSupported(tView, provider, existingProvidersFactoryIndex > -1 ?
+                    existingProvidersFactoryIndex :
+                    existingViewProvidersFactoryIndex);
                 multiFactoryAdd(lInjectablesBlueprint[isViewProvider ? existingViewProvidersFactoryIndex : existingProvidersFactoryIndex], providerFactory, !isViewProvider && isComponent);
             }
             if (!isViewProvider && isComponent && doesViewProvidersFactoryExist) {
                 lInjectablesBlueprint[existingViewProvidersFactoryIndex].componentProviders++;
             }
+        }
+    }
+}
+/**
+ * Registers the `ngOnDestroy` hook of a provider, if the provider supports destroy hooks.
+ * @param tView `TView` in which to register the hook.
+ * @param provider Provider whose hook should be registered.
+ * @param contextIndex Index under which to find the context for the hook when it's being invoked.
+ */
+function registerDestroyHooksIfSupported(tView, provider, contextIndex) {
+    var providerIsTypeProvider = isTypeProvider(provider);
+    if (providerIsTypeProvider || isClassProvider(provider)) {
+        var prototype = (provider.useClass || provider).prototype;
+        var ngOnDestroy = prototype.ngOnDestroy;
+        if (ngOnDestroy) {
+            (tView.destroyHooks || (tView.destroyHooks = [])).push(contextIndex, ngOnDestroy);
         }
     }
 }
@@ -19532,7 +19546,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.0-next.0+37.sha-183a862');
+var VERSION = new Version('9.1.0-next.0+38.sha-5fbfe69');
 
 /**
  * @license
