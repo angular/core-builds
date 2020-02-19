@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.1+37.sha-45c7b23
+ * @license Angular v9.0.1+43.sha-c305b5c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9414,6 +9414,50 @@ function stringifyCSSSelector(selector) {
  */
 function stringifyCSSSelectorList(selectorList) {
     return selectorList.map(stringifyCSSSelector).join(',');
+}
+/**
+ * Extracts attributes and classes information from a given CSS selector.
+ *
+ * This function is used while creating a component dynamically. In this case, the host element
+ * (that is created dynamically) should contain attributes and classes specified in component's CSS
+ * selector.
+ *
+ * @param {?} selector CSS selector in parsed form (in a form of array)
+ * @return {?} object with `attrs` and `classes` fields that contain extracted information
+ */
+function extractAttrsAndClassesFromSelector(selector) {
+    /** @type {?} */
+    const attrs = [];
+    /** @type {?} */
+    const classes = [];
+    /** @type {?} */
+    let i = 1;
+    /** @type {?} */
+    let mode = 2 /* ATTRIBUTE */;
+    while (i < selector.length) {
+        /** @type {?} */
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode === 2 /* ATTRIBUTE */) {
+                if (valueOrMarker !== '') {
+                    attrs.push(valueOrMarker, (/** @type {?} */ (selector[++i])));
+                }
+            }
+            else if (mode === 8 /* CLASS */) {
+                classes.push(valueOrMarker);
+            }
+        }
+        else {
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector. Since attributes and classes are
+            // extracted only for "positive" part of the selector, we can stop here.
+            if (!isPositive(mode))
+                break;
+            mode = valueOrMarker;
+        }
+        i++;
+    }
+    return { attrs, classes };
 }
 
 /**
@@ -25888,7 +25932,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
         if (rendererFactory.begin)
             rendererFactory.begin();
         /** @type {?} */
-        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, null, sanitizer);
+        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
         component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
         // create mode pass
         renderView(rootTView, rootView, null);
@@ -25910,12 +25954,11 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
  * @param {?} rootView The parent view where the host node is stored
  * @param {?} rendererFactory
  * @param {?} hostRenderer The current renderer
- * @param {?} addVersion
- * @param {?} sanitizer The sanitizer, if provided
+ * @param {?=} sanitizer The sanitizer, if provided
  *
  * @return {?} Component view created
  */
-function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, addVersion, sanitizer) {
+function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, sanitizer) {
     /** @type {?} */
     const tView = rootView[TVIEW];
     ngDevMode && assertDataInRange(rootView, 0 + HEADER_OFFSET);
@@ -25938,12 +25981,6 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     }
     /** @type {?} */
     const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    if (rNode !== null && addVersion) {
-        ngDevMode && ngDevMode.rendererSetAttribute++;
-        isProceduralRenderer(hostRenderer) ?
-            hostRenderer.setAttribute(rNode, 'ng-version', addVersion) :
-            rNode.setAttribute('ng-version', addVersion);
-    }
     /** @type {?} */
     const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, viewRenderer, sanitizer);
     if (tView.firstCreatePass) {
@@ -26585,23 +26622,15 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
         const endIndex = tNode.directiveStart;
         /** @type {?} */
         const cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
-        if (isClassProvider(provider) || isTypeProvider(provider)) {
-            /** @type {?} */
-            const prototype = (((/** @type {?} */ (provider))).useClass || provider).prototype;
-            /** @type {?} */
-            const ngOnDestroy = prototype.ngOnDestroy;
-            if (ngOnDestroy) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
-            }
-        }
         if (isTypeProvider(provider) || !provider.multi) {
             // Single provider case: the factory is created and pushed immediately
             /** @type {?} */
             const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
             /** @type {?} */
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
-            if (existingFactoryIndex == -1) {
+            if (existingFactoryIndex === -1) {
                 diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView), tView, token);
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -26656,6 +26685,7 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
                 if (!isViewProvider && doesViewProvidersFactoryExist) {
                     lInjectablesBlueprint[existingViewProvidersFactoryIndex].providerFactory = factory;
                 }
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -26667,11 +26697,34 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
             }
             else {
                 // Cases 1.b and 2.b
+                registerDestroyHooksIfSupported(tView, provider, existingProvidersFactoryIndex > -1 ?
+                    existingProvidersFactoryIndex :
+                    existingViewProvidersFactoryIndex);
                 multiFactoryAdd((/** @type {?} */ (lInjectablesBlueprint))[isViewProvider ? existingViewProvidersFactoryIndex : existingProvidersFactoryIndex], providerFactory, !isViewProvider && isComponent);
             }
             if (!isViewProvider && isComponent && doesViewProvidersFactoryExist) {
                 (/** @type {?} */ (lInjectablesBlueprint[existingViewProvidersFactoryIndex].componentProviders))++;
             }
+        }
+    }
+}
+/**
+ * Registers the `ngOnDestroy` hook of a provider, if the provider supports destroy hooks.
+ * @param {?} tView `TView` in which to register the hook.
+ * @param {?} provider Provider whose hook should be registered.
+ * @param {?} contextIndex Index under which to find the context for the hook when it's being invoked.
+ * @return {?}
+ */
+function registerDestroyHooksIfSupported(tView, provider, contextIndex) {
+    /** @type {?} */
+    const providerIsTypeProvider = isTypeProvider(provider);
+    if (providerIsTypeProvider || isClassProvider(provider)) {
+        /** @type {?} */
+        const prototype = (((/** @type {?} */ (provider))).useClass || provider).prototype;
+        /** @type {?} */
+        const ngOnDestroy = prototype.ngOnDestroy;
+        if (ngOnDestroy) {
+            (tView.destroyHooks || (tView.destroyHooks = [])).push(contextIndex, ngOnDestroy);
         }
     }
 }
@@ -27627,7 +27680,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.1+37.sha-45c7b23');
+const VERSION = new Version('9.0.1+43.sha-c305b5c');
 
 /**
  * @fileoverview added by tsickle
@@ -33443,8 +33496,6 @@ class ComponentFactory$1 extends ComponentFactory {
         const rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
         /** @type {?} */
         const rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector);
-        /** @type {?} */
-        const addVersion = rootSelectorOrNode && hostRNode ? VERSION.full : null;
         // rootView is the parent when bootstrapping
         // TODO(misko): it looks like we are entering view here but we don't really need to as
         // `renderView` does that. However as the code is written it is needed because
@@ -33457,7 +33508,24 @@ class ComponentFactory$1 extends ComponentFactory {
         let tElementNode;
         try {
             /** @type {?} */
-            const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, hostRenderer, addVersion, null);
+            const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, hostRenderer);
+            if (hostRNode) {
+                if (rootSelectorOrNode) {
+                    setUpAttributes(hostRenderer, hostRNode, ['ng-version', VERSION.full]);
+                }
+                else {
+                    // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
+                    // is not defined), also apply attributes and classes extracted from component selector.
+                    // Extract attributes and classes from the first selector only to match VE behavior.
+                    const { attrs, classes } = extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
+                    if (attrs) {
+                        setUpAttributes(hostRenderer, hostRNode, attrs);
+                    }
+                    if (classes && classes.length > 0) {
+                        writeDirectClass(hostRenderer, hostRNode, classes.join(' '));
+                    }
+                }
+            }
             tElementNode = (/** @type {?} */ (getTNode(rootLView[TVIEW], 0)));
             if (projectableNodes) {
                 // projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
@@ -37606,7 +37674,25 @@ class TQuery_ {
      */
     isApplyingToNode(tNode) {
         if (this._appliesToNextNode && this.metadata.descendants === false) {
-            return this._declarationNodeIndex === (tNode.parent ? tNode.parent.index : -1);
+            /** @type {?} */
+            const declarationNodeIdx = this._declarationNodeIndex;
+            /** @type {?} */
+            let parent = tNode.parent;
+            // Determine if a given TNode is a "direct" child of a node on which a content query was
+            // declared (only direct children of query's host node can match with the descendants: false
+            // option). There are 3 main use-case / conditions to consider here:
+            // - <needs-target><i #target></i></needs-target>: here <i #target> parent node is a query
+            // host node;
+            // - <needs-target><ng-template [ngIf]="true"><i #target></i></ng-template></needs-target>:
+            // here <i #target> parent node is null;
+            // - <needs-target><ng-container><i #target></i></ng-container></needs-target>: here we need
+            // to go past `<ng-container>` to determine <i #target> parent node (but we shouldn't traverse
+            // up past the query's host node!).
+            while (parent !== null && parent.type === 4 /* ElementContainer */ &&
+                parent.index !== declarationNodeIdx) {
+                parent = parent.parent;
+            }
+            return declarationNodeIdx === (parent !== null ? parent.index : -1);
         }
         return this._appliesToNextNode;
     }
