@@ -39,3 +39,17 @@ export declare function isSelectorInSelectorList(selector: CssSelector, list: Cs
  * @returns string representation of a given selector
  */
 export declare function stringifyCSSSelectorList(selectorList: CssSelectorList): string;
+/**
+ * Extracts attributes and classes information from a given CSS selector.
+ *
+ * This function is used while creating a component dynamically. In this case, the host element
+ * (that is created dynamically) should contain attributes and classes specified in component's CSS
+ * selector.
+ *
+ * @param selector CSS selector in parsed form (in a form of array)
+ * @returns object with `attrs` and `classes` fields that contain extracted information
+ */
+export declare function extractAttrsAndClassesFromSelector(selector: CssSelector): {
+    attrs: string[];
+    classes: string[];
+};
