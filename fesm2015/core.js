@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+39.sha-3f4e02b
+ * @license Angular v9.1.0-next.0+43.sha-d0d36a5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9414,6 +9414,50 @@ function stringifyCSSSelector(selector) {
  */
 function stringifyCSSSelectorList(selectorList) {
     return selectorList.map(stringifyCSSSelector).join(',');
+}
+/**
+ * Extracts attributes and classes information from a given CSS selector.
+ *
+ * This function is used while creating a component dynamically. In this case, the host element
+ * (that is created dynamically) should contain attributes and classes specified in component's CSS
+ * selector.
+ *
+ * @param {?} selector CSS selector in parsed form (in a form of array)
+ * @return {?} object with `attrs` and `classes` fields that contain extracted information
+ */
+function extractAttrsAndClassesFromSelector(selector) {
+    /** @type {?} */
+    const attrs = [];
+    /** @type {?} */
+    const classes = [];
+    /** @type {?} */
+    let i = 1;
+    /** @type {?} */
+    let mode = 2 /* ATTRIBUTE */;
+    while (i < selector.length) {
+        /** @type {?} */
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode === 2 /* ATTRIBUTE */) {
+                if (valueOrMarker !== '') {
+                    attrs.push(valueOrMarker, (/** @type {?} */ (selector[++i])));
+                }
+            }
+            else if (mode === 8 /* CLASS */) {
+                classes.push(valueOrMarker);
+            }
+        }
+        else {
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector. Since attributes and classes are
+            // extracted only for "positive" part of the selector, we can stop here.
+            if (!isPositive(mode))
+                break;
+            mode = valueOrMarker;
+        }
+        i++;
+    }
+    return { attrs, classes };
 }
 
 /**
@@ -25888,7 +25932,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
         if (rendererFactory.begin)
             rendererFactory.begin();
         /** @type {?} */
-        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, null, sanitizer);
+        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
         component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
         // create mode pass
         renderView(rootTView, rootView, null);
@@ -25910,12 +25954,11 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
  * @param {?} rootView The parent view where the host node is stored
  * @param {?} rendererFactory
  * @param {?} hostRenderer The current renderer
- * @param {?} addVersion
- * @param {?} sanitizer The sanitizer, if provided
+ * @param {?=} sanitizer The sanitizer, if provided
  *
  * @return {?} Component view created
  */
-function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, addVersion, sanitizer) {
+function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, sanitizer) {
     /** @type {?} */
     const tView = rootView[TVIEW];
     ngDevMode && assertDataInRange(rootView, 0 + HEADER_OFFSET);
@@ -25938,12 +25981,6 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     }
     /** @type {?} */
     const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    if (rNode !== null && addVersion) {
-        ngDevMode && ngDevMode.rendererSetAttribute++;
-        isProceduralRenderer(hostRenderer) ?
-            hostRenderer.setAttribute(rNode, 'ng-version', addVersion) :
-            rNode.setAttribute('ng-version', addVersion);
-    }
     /** @type {?} */
     const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, viewRenderer, sanitizer);
     if (tView.firstCreatePass) {
@@ -27643,7 +27680,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.0+39.sha-3f4e02b');
+const VERSION = new Version('9.1.0-next.0+43.sha-d0d36a5');
 
 /**
  * @fileoverview added by tsickle
@@ -33459,8 +33496,6 @@ class ComponentFactory$1 extends ComponentFactory {
         const rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
         /** @type {?} */
         const rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector);
-        /** @type {?} */
-        const addVersion = rootSelectorOrNode && hostRNode ? VERSION.full : null;
         // rootView is the parent when bootstrapping
         // TODO(misko): it looks like we are entering view here but we don't really need to as
         // `renderView` does that. However as the code is written it is needed because
@@ -33473,7 +33508,24 @@ class ComponentFactory$1 extends ComponentFactory {
         let tElementNode;
         try {
             /** @type {?} */
-            const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, hostRenderer, addVersion, null);
+            const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, hostRenderer);
+            if (hostRNode) {
+                if (rootSelectorOrNode) {
+                    setUpAttributes(hostRenderer, hostRNode, ['ng-version', VERSION.full]);
+                }
+                else {
+                    // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
+                    // is not defined), also apply attributes and classes extracted from component selector.
+                    // Extract attributes and classes from the first selector only to match VE behavior.
+                    const { attrs, classes } = extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
+                    if (attrs) {
+                        setUpAttributes(hostRenderer, hostRNode, attrs);
+                    }
+                    if (classes && classes.length > 0) {
+                        writeDirectClass(hostRenderer, hostRNode, classes.join(' '));
+                    }
+                }
+            }
             tElementNode = (/** @type {?} */ (getTNode(rootLView[TVIEW], 0)));
             if (projectableNodes) {
                 // projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
