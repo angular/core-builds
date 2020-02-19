@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.0+37.sha-183a862
+ * @license Angular v9.1.0-next.0+39.sha-3f4e02b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26585,23 +26585,15 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
         const endIndex = tNode.directiveStart;
         /** @type {?} */
         const cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
-        if (isClassProvider(provider) || isTypeProvider(provider)) {
-            /** @type {?} */
-            const prototype = (((/** @type {?} */ (provider))).useClass || provider).prototype;
-            /** @type {?} */
-            const ngOnDestroy = prototype.ngOnDestroy;
-            if (ngOnDestroy) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(tInjectables.length, ngOnDestroy);
-            }
-        }
         if (isTypeProvider(provider) || !provider.multi) {
             // Single provider case: the factory is created and pushed immediately
             /** @type {?} */
             const factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
             /** @type {?} */
             const existingFactoryIndex = indexOf(token, tInjectables, isViewProvider ? beginIndex : beginIndex + cptViewProvidersCount, endIndex);
-            if (existingFactoryIndex == -1) {
+            if (existingFactoryIndex === -1) {
                 diPublicInInjector(getOrCreateNodeInjectorForNode((/** @type {?} */ (tNode)), lView), tView, token);
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -26656,6 +26648,7 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
                 if (!isViewProvider && doesViewProvidersFactoryExist) {
                     lInjectablesBlueprint[existingViewProvidersFactoryIndex].providerFactory = factory;
                 }
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -26667,11 +26660,34 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
             }
             else {
                 // Cases 1.b and 2.b
+                registerDestroyHooksIfSupported(tView, provider, existingProvidersFactoryIndex > -1 ?
+                    existingProvidersFactoryIndex :
+                    existingViewProvidersFactoryIndex);
                 multiFactoryAdd((/** @type {?} */ (lInjectablesBlueprint))[isViewProvider ? existingViewProvidersFactoryIndex : existingProvidersFactoryIndex], providerFactory, !isViewProvider && isComponent);
             }
             if (!isViewProvider && isComponent && doesViewProvidersFactoryExist) {
                 (/** @type {?} */ (lInjectablesBlueprint[existingViewProvidersFactoryIndex].componentProviders))++;
             }
+        }
+    }
+}
+/**
+ * Registers the `ngOnDestroy` hook of a provider, if the provider supports destroy hooks.
+ * @param {?} tView `TView` in which to register the hook.
+ * @param {?} provider Provider whose hook should be registered.
+ * @param {?} contextIndex Index under which to find the context for the hook when it's being invoked.
+ * @return {?}
+ */
+function registerDestroyHooksIfSupported(tView, provider, contextIndex) {
+    /** @type {?} */
+    const providerIsTypeProvider = isTypeProvider(provider);
+    if (providerIsTypeProvider || isClassProvider(provider)) {
+        /** @type {?} */
+        const prototype = (((/** @type {?} */ (provider))).useClass || provider).prototype;
+        /** @type {?} */
+        const ngOnDestroy = prototype.ngOnDestroy;
+        if (ngOnDestroy) {
+            (tView.destroyHooks || (tView.destroyHooks = [])).push(contextIndex, ngOnDestroy);
         }
     }
 }
@@ -27627,7 +27643,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.0+37.sha-183a862');
+const VERSION = new Version('9.1.0-next.0+39.sha-3f4e02b');
 
 /**
  * @fileoverview added by tsickle
@@ -37609,7 +37625,25 @@ class TQuery_ {
      */
     isApplyingToNode(tNode) {
         if (this._appliesToNextNode && this.metadata.descendants === false) {
-            return this._declarationNodeIndex === (tNode.parent ? tNode.parent.index : -1);
+            /** @type {?} */
+            const declarationNodeIdx = this._declarationNodeIndex;
+            /** @type {?} */
+            let parent = tNode.parent;
+            // Determine if a given TNode is a "direct" child of a node on which a content query was
+            // declared (only direct children of query's host node can match with the descendants: false
+            // option). There are 3 main use-case / conditions to consider here:
+            // - <needs-target><i #target></i></needs-target>: here <i #target> parent node is a query
+            // host node;
+            // - <needs-target><ng-template [ngIf]="true"><i #target></i></ng-template></needs-target>:
+            // here <i #target> parent node is null;
+            // - <needs-target><ng-container><i #target></i></ng-container></needs-target>: here we need
+            // to go past `<ng-container>` to determine <i #target> parent node (but we shouldn't traverse
+            // up past the query's host node!).
+            while (parent !== null && parent.type === 4 /* ElementContainer */ &&
+                parent.index !== declarationNodeIdx) {
+                parent = parent.parent;
+            }
+            return declarationNodeIdx === (parent !== null ? parent.index : -1);
         }
         return this._appliesToNextNode;
     }
