@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2
+ * @license Angular v9.0.2+3.sha-3a97972
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26160,6 +26160,15 @@ function ɵɵInheritDefinitionFeature(definition) {
                 fillProperties(definition.inputs, superDef.inputs);
                 fillProperties(definition.declaredInputs, superDef.declaredInputs);
                 fillProperties(definition.outputs, superDef.outputs);
+                // Merge animations metadata.
+                // If `superDef` is a Component, the `data` field is present (defaults to an empty object).
+                if (isComponentDef(superDef) && superDef.data.animation) {
+                    // If super def is a Component, the `definition` is also a Component, since Directives can
+                    // not inherit Components (we throw an error above and cannot reach this code).
+                    /** @type {?} */
+                    const defData = ((/** @type {?} */ (definition))).data;
+                    defData.animation = (defData.animation || []).concat(superDef.data.animation);
+                }
                 // Inherit hooks
                 // Assume super class inheritance feature has already run.
                 writeableDef.afterContentChecked =
@@ -27680,7 +27689,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.2');
+const VERSION = new Version('9.0.2+3.sha-3a97972');
 
 /**
  * @fileoverview added by tsickle
