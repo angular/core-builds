@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2+10.sha-72664ca
+ * @license Angular v9.0.2+19.sha-824d9a8
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -656,10 +656,13 @@ function _getFakeAsyncZoneSpec() {
  *
  * \@publicApi
  * @param {?=} millis
+ * @param {?=} tickOptions
  * @return {?}
  */
-function tickFallback(millis = 0) {
-    _getFakeAsyncZoneSpec().tick(millis);
+function tickFallback(millis = 0, tickOptions = {
+    processNewMacroTasksSynchronously: true
+}) {
+    _getFakeAsyncZoneSpec().tick(millis, null, tickOptions);
 }
 /**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
@@ -759,14 +762,17 @@ function fakeAsync(fn) {
  *
  * \@publicApi
  * @param {?=} millis
+ * @param {?=} tickOptions
  * @return {?}
  */
-function tick(millis = 0) {
+function tick(millis = 0, tickOptions = {
+    processNewMacroTasksSynchronously: true
+}) {
     if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.tick(millis);
+        return fakeAsyncTestModule.tick(millis, tickOptions);
     }
     else {
-        return tickFallback(millis);
+        return tickFallback(millis, tickOptions);
     }
 }
 /**
