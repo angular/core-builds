@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+11.sha-646655d
+ * @license Angular v9.1.0-next.1+22.sha-8cb1f65
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -445,9 +445,12 @@
      *
      * @publicApi
      */
-    function tickFallback(millis) {
+    function tickFallback(millis, tickOptions) {
         if (millis === void 0) { millis = 0; }
-        _getFakeAsyncZoneSpec().tick(millis);
+        if (tickOptions === void 0) { tickOptions = {
+            processNewMacroTasksSynchronously: true
+        }; }
+        _getFakeAsyncZoneSpec().tick(millis, null, tickOptions);
     }
     /**
      * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
@@ -541,15 +544,56 @@
      *
      * {@example core/testing/ts/fake_async.ts region='basic'}
      *
+     * @param millis, the number of millisecond to advance the virtual timer
+     * @param tickOptions, the options of tick with a flag called
+     * processNewMacroTasksSynchronously, whether to invoke the new macroTasks, by default is
+     * false, means the new macroTasks will be invoked
+     *
+     * For example,
+     *
+     * it ('test with nested setTimeout', fakeAsync(() => {
+     *   let nestedTimeoutInvoked = false;
+     *   function funcWithNestedTimeout() {
+     *     setTimeout(() => {
+     *       nestedTimeoutInvoked = true;
+     *     });
+     *   };
+     *   setTimeout(funcWithNestedTimeout);
+     *   tick();
+     *   expect(nestedTimeoutInvoked).toBe(true);
+     * }));
+     *
+     * in this case, we have a nested timeout (new macroTask), when we tick, both the
+     * funcWithNestedTimeout and the nested timeout both will be invoked.
+     *
+     * it ('test with nested setTimeout', fakeAsync(() => {
+     *   let nestedTimeoutInvoked = false;
+     *   function funcWithNestedTimeout() {
+     *     setTimeout(() => {
+     *       nestedTimeoutInvoked = true;
+     *     });
+     *   };
+     *   setTimeout(funcWithNestedTimeout);
+     *   tick(0, {processNewMacroTasksSynchronously: false});
+     *   expect(nestedTimeoutInvoked).toBe(false);
+     * }));
+     *
+     * if we pass the tickOptions with processNewMacroTasksSynchronously to be false, the nested timeout
+     * will not be invoked.
+     *
+     *
      * @publicApi
      */
-    function tick(millis) {
+    function tick(millis, tickOptions) {
         if (millis === void 0) { millis = 0; }
+        if (tickOptions === void 0) { tickOptions = {
+            processNewMacroTasksSynchronously: true
+        }; }
         if (fakeAsyncTestModule) {
-            return fakeAsyncTestModule.tick(millis);
+            return fakeAsyncTestModule.tick(millis, tickOptions);
         }
         else {
-            return tickFallback(millis);
+            return tickFallback(millis, tickOptions);
         }
     }
     /**

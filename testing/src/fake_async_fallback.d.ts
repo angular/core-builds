@@ -45,7 +45,9 @@ export declare function fakeAsyncFallback(fn: Function): (...args: any[]) => any
  *
  * @publicApi
  */
-export declare function tickFallback(millis?: number): void;
+export declare function tickFallback(millis?: number, tickOptions?: {
+    processNewMacroTasksSynchronously: boolean;
+}): void;
 /**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
  * draining the macrotask queue until it is empty. The returned value is the milliseconds

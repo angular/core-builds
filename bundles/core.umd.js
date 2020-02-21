@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+11.sha-646655d
+ * @license Angular v9.1.0-next.1+22.sha-8cb1f65
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13948,9 +13948,9 @@
         return ɵɵattributeInterpolate8;
     }
     /**
-     * Update an interpolated attribute on an element with 8 or more bound values surrounded by text.
+     * Update an interpolated attribute on an element with 9 or more bound values surrounded by text.
      *
-     * Used when the number of interpolated values exceeds 7.
+     * Used when the number of interpolated values exceeds 8.
      *
      * ```html
      * <div
@@ -13966,7 +13966,7 @@
      * ```
      *
      * @param attrName The name of the attribute to update.
-     * @param values The a collection of values and the strings in-between those values, beginning with
+     * @param values The collection of values and the strings in-between those values, beginning with
      * a string prefix and ending with a string suffix.
      * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
      * @param sanitizer An optional sanitizer function
@@ -15545,9 +15545,9 @@
         return ɵɵpropertyInterpolate8;
     }
     /**
-     * Update an interpolated property on an element with 8 or more bound values surrounded by text.
+     * Update an interpolated property on an element with 9 or more bound values surrounded by text.
      *
-     * Used when the number of interpolated values exceeds 7.
+     * Used when the number of interpolated values exceeds 8.
      *
      * ```html
      * <div
@@ -15567,7 +15567,7 @@
      * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
      *
      * @param propName The name of the property to update.
-     * @param values The a collection of values and the strings inbetween those values, beginning with a
+     * @param values The collection of values and the strings inbetween those values, beginning with a
      * string prefix and ending with a string suffix.
      * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
      * @param sanitizer An optional sanitizer function
@@ -17414,7 +17414,7 @@
      *  'suffix']);
      * ```
      *.
-     * @param values The a collection of values and the strings in between those values, beginning with
+     * @param values The collection of values and the strings in between those values, beginning with
      * a string prefix and ending with a string suffix.
      * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
      *
@@ -17708,9 +17708,9 @@
         checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
     }
     /**
-     * Update an interpolated class on an element with 8 or more bound values surrounded by text.
+     * Update an interpolated class on an element with 9 or more bound values surrounded by text.
      *
-     * Used when the number of interpolated values exceeds 7.
+     * Used when the number of interpolated values exceeds 8.
      *
      * ```html
      * <div
@@ -17725,7 +17725,7 @@
      *  'suffix']);
      * ```
      *.
-     * @param values The a collection of values and the strings in-between those values, beginning with
+     * @param values The collection of values and the strings in-between those values, beginning with
      * a string prefix and ending with a string suffix.
      * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
      * @codeGenApi
@@ -17734,6 +17734,319 @@
         var lView = getLView();
         var interpolatedValue = interpolationV(lView, values);
         checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     *
+     * Update an interpolated style on an element with single bound value surrounded by text.
+     *
+     * Used when the value passed to a property has 1 interpolated value in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate1('key: ', v0, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate1(prefix, v0, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 2 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 2 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key1: {{v1}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate2('key: ', v0, '; key1: ', v1, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate2(prefix, v0, i0, v1, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 3 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 3 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key2: {{v1}}; key2: {{v2}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate3(
+     *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 4 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 4 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate4(
+     *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 5 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 5 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate5(
+     *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 6 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 6 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}};
+     *             key5: {{v5}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate6(
+     *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+     *    'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 7 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 7 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+     *             key6: {{v6}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate7(
+     *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+     *    '; key6: ', v6, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     *
+     * Update an interpolated style on an element with 8 bound values surrounded by text.
+     *
+     * Used when the value passed to a property has 8 interpolated values in it:
+     *
+     * ```html
+     * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+     *             key6: {{v6}}; key7: {{v7}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolate8(
+     *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+     *    '; key6: ', v6, '; key7: ', v7, 'suffix');
+     * ```
+     *
+     * @param prefix Static value used for concatenation only.
+     * @param v0 Value checked for change.
+     * @param i0 Static value used for concatenation only.
+     * @param v1 Value checked for change.
+     * @param i1 Static value used for concatenation only.
+     * @param v2 Value checked for change.
+     * @param i2 Static value used for concatenation only.
+     * @param v3 Value checked for change.
+     * @param i3 Static value used for concatenation only.
+     * @param v4 Value checked for change.
+     * @param i4 Static value used for concatenation only.
+     * @param v5 Value checked for change.
+     * @param i5 Static value used for concatenation only.
+     * @param v6 Value checked for change.
+     * @param i6 Static value used for concatenation only.
+     * @param v7 Value checked for change.
+     * @param suffix Static value used for concatenation only.
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+        var lView = getLView();
+        var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+        ɵɵstyleMap(interpolatedValue);
+    }
+    /**
+     * Update an interpolated style on an element with 9 or more bound values surrounded by text.
+     *
+     * Used when the number of interpolated values exceeds 8.
+     *
+     * ```html
+     * <div
+     *  class="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+     *         key6: {{v6}}; key7: {{v7}}; key8: {{v8}}; key9: {{v9}}suffix"></div>
+     * ```
+     *
+     * Its compiled representation is:
+     *
+     * ```ts
+     * ɵɵstyleMapInterpolateV(
+     *    ['key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+     *     '; key6: ', v6, '; key7: ', v7, '; key8: ', v8, '; key9: ', v9, 'suffix']);
+     * ```
+     *.
+     * @param values The collection of values and the strings in-between those values, beginning with
+     * a string prefix and ending with a string suffix.
+     * (e.g. `['prefix', value0, '; key2: ', value1, '; key2: ', value2, ..., value99, 'suffix']`)
+     * @codeGenApi
+     */
+    function ɵɵstyleMapInterpolateV(values) {
+        var lView = getLView();
+        var interpolatedValue = interpolationV(lView, values);
+        ɵɵstyleMap(interpolatedValue);
     }
 
     /**
@@ -18058,10 +18371,10 @@
         return ɵɵstylePropInterpolate8;
     }
     /**
-     * Update an interpolated style property on an element with 8 or more bound values surrounded by
+     * Update an interpolated style property on an element with 9 or more bound values surrounded by
      * text.
      *
-     * Used when the number of interpolated values exceeds 7.
+     * Used when the number of interpolated values exceeds 8.
      *
      * ```html
      * <div
@@ -18080,7 +18393,7 @@
      * @param styleIndex Index of style to update. This index value refers to the
      *        index of the style in the style bindings array that was passed into
      *        `styling`..
-     * @param values The a collection of values and the strings in-between those values, beginning with
+     * @param values The collection of values and the strings in-between those values, beginning with
      * a string prefix and ending with a string suffix.
      * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
      * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
@@ -19709,7 +20022,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.1+11.sha-646655d');
+    var VERSION = new Version('9.1.0-next.1+22.sha-8cb1f65');
 
     /**
      * @license
@@ -25873,6 +26186,15 @@
         'ɵɵclassMapInterpolate8': ɵɵclassMapInterpolate8,
         'ɵɵclassMapInterpolateV': ɵɵclassMapInterpolateV,
         'ɵɵstyleMap': ɵɵstyleMap,
+        'ɵɵstyleMapInterpolate1': ɵɵstyleMapInterpolate1,
+        'ɵɵstyleMapInterpolate2': ɵɵstyleMapInterpolate2,
+        'ɵɵstyleMapInterpolate3': ɵɵstyleMapInterpolate3,
+        'ɵɵstyleMapInterpolate4': ɵɵstyleMapInterpolate4,
+        'ɵɵstyleMapInterpolate5': ɵɵstyleMapInterpolate5,
+        'ɵɵstyleMapInterpolate6': ɵɵstyleMapInterpolate6,
+        'ɵɵstyleMapInterpolate7': ɵɵstyleMapInterpolate7,
+        'ɵɵstyleMapInterpolate8': ɵɵstyleMapInterpolate8,
+        'ɵɵstyleMapInterpolateV': ɵɵstyleMapInterpolateV,
         'ɵɵstyleProp': ɵɵstyleProp,
         'ɵɵstylePropInterpolate1': ɵɵstylePropInterpolate1,
         'ɵɵstylePropInterpolate2': ɵɵstylePropInterpolate2,
@@ -32295,6 +32617,15 @@
     exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
     exports.ɵɵstaticViewQuery = ɵɵstaticViewQuery;
     exports.ɵɵstyleMap = ɵɵstyleMap;
+    exports.ɵɵstyleMapInterpolate1 = ɵɵstyleMapInterpolate1;
+    exports.ɵɵstyleMapInterpolate2 = ɵɵstyleMapInterpolate2;
+    exports.ɵɵstyleMapInterpolate3 = ɵɵstyleMapInterpolate3;
+    exports.ɵɵstyleMapInterpolate4 = ɵɵstyleMapInterpolate4;
+    exports.ɵɵstyleMapInterpolate5 = ɵɵstyleMapInterpolate5;
+    exports.ɵɵstyleMapInterpolate6 = ɵɵstyleMapInterpolate6;
+    exports.ɵɵstyleMapInterpolate7 = ɵɵstyleMapInterpolate7;
+    exports.ɵɵstyleMapInterpolate8 = ɵɵstyleMapInterpolate8;
+    exports.ɵɵstyleMapInterpolateV = ɵɵstyleMapInterpolateV;
     exports.ɵɵstyleProp = ɵɵstyleProp;
     exports.ɵɵstylePropInterpolate1 = ɵɵstylePropInterpolate1;
     exports.ɵɵstylePropInterpolate2 = ɵɵstylePropInterpolate2;

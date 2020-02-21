@@ -209,6 +209,16 @@ export declare function toStylingKeyValueArray(keyValueArraySet: (keyValueArray:
     [key: string]: any;
 } | null | undefined): KeyValueArray<any>;
 /**
+ * Set a `value` for a `key` taking style sanitization into account.
+ *
+ * See: `keyValueArraySet` for details
+ *
+ * @param keyValueArray KeyValueArray to add to.
+ * @param key Style key to add. (This key will be checked if it needs sanitization)
+ * @param value The value to set (If key needs sanitization it will be sanitized)
+ */
+export declare function styleKeyValueArraySet(keyValueArray: KeyValueArray<any>, key: string, value: any): void;
+/**
  * Tests if the `TNode` has input shadow.
  *
  * An input shadow is when a directive steals (shadows) the input by using `@Input('style')` or
