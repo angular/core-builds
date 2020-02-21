@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+30.sha-4253662
+ * @license Angular v9.1.0-next.1+31.sha-e17bde9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19900,7 +19900,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.0-next.1+30.sha-4253662');
+var VERSION = new Version('9.1.0-next.1+31.sha-e17bde9');
 
 /**
  * @license
@@ -25027,7 +25027,9 @@ function ɵɵpipe(index, pipeName) {
         pipeDef = tView.data[adjustedIndex];
     }
     var pipeFactory = pipeDef.factory || (pipeDef.factory = getFactoryDef(pipeDef.type, true));
+    var previousInjectImplementation = setInjectImplementation(ɵɵdirectiveInject);
     var pipeInstance = pipeFactory();
+    setInjectImplementation(previousInjectImplementation);
     store(tView, getLView(), index, pipeInstance);
     return pipeInstance;
 }
