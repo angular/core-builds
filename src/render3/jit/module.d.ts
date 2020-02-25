@@ -37,15 +37,10 @@ export declare function patchComponentDefWithScope<C>(componentDef: ComponentDef
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * By default this operation is memoized and the result is cached on the module's definition. You
- * can avoid memoization and previously stored results (if available) by providing the second
- * argument with the `true` value (forcing transitive scopes recalculation).
- *
- * This function can be called on modules with components that have not fully compiled yet, but the
- * result should not be used until they have.
+ * This operation is memoized and the result is cached on the module's definition. This function can
+ * be called on modules with components that have not fully compiled yet, but the result should not
+ * be used until they have.
  *
  * @param moduleType module that transitive scope should be calculated for.
- * @param forceRecalc flag that indicates whether previously calculated and memoized values should
- * be ignored and transitive scope to be fully recalculated.
  */
-export declare function transitiveScopesFor<T>(moduleType: Type<T>, forceRecalc?: boolean): NgModuleTransitiveScopes;
+export declare function transitiveScopesFor<T>(moduleType: Type<T>): NgModuleTransitiveScopes;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+57.sha-c414f45
+ * @license Angular v9.1.0-next.1+60.sha-294e56d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28010,7 +28010,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.1+57.sha-c414f45');
+const VERSION = new Version('9.1.0-next.1+60.sha-294e56d');
 
 /**
  * @fileoverview added by tsickle
@@ -39245,26 +39245,21 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * By default this operation is memoized and the result is cached on the module's definition. You
- * can avoid memoization and previously stored results (if available) by providing the second
- * argument with the `true` value (forcing transitive scopes recalculation).
- *
- * This function can be called on modules with components that have not fully compiled yet, but the
- * result should not be used until they have.
+ * This operation is memoized and the result is cached on the module's definition. This function can
+ * be called on modules with components that have not fully compiled yet, but the result should not
+ * be used until they have.
  *
  * @template T
  * @param {?} moduleType module that transitive scope should be calculated for.
- * @param {?=} forceRecalc flag that indicates whether previously calculated and memoized values should
- * be ignored and transitive scope to be fully recalculated.
  * @return {?}
  */
-function transitiveScopesFor(moduleType, forceRecalc = false) {
+function transitiveScopesFor(moduleType) {
     if (!isNgModule(moduleType)) {
         throw new Error(`${moduleType.name} does not have a module def (ɵmod property)`);
     }
     /** @type {?} */
     const def = (/** @type {?} */ (getNgModuleDef(moduleType)));
-    if (!forceRecalc && def.transitiveCompileScopes !== null) {
+    if (def.transitiveCompileScopes !== null) {
         return def.transitiveCompileScopes;
     }
     /** @type {?} */
@@ -39310,7 +39305,7 @@ function transitiveScopesFor(moduleType, forceRecalc = false) {
         // When this module imports another, the imported module's exported directives and pipes are
         // added to the compilation scope of this module.
         /** @type {?} */
-        const importedScope = transitiveScopesFor(importedType, forceRecalc);
+        const importedScope = transitiveScopesFor(importedType);
         importedScope.exported.directives.forEach((/**
          * @param {?} entry
          * @return {?}
@@ -39336,7 +39331,7 @@ function transitiveScopesFor(moduleType, forceRecalc = false) {
             // When this module exports another, the exported module's exported directives and pipes are
             // added to both the compilation and exported scopes of this module.
             /** @type {?} */
-            const exportedScope = transitiveScopesFor(exportedType, forceRecalc);
+            const exportedScope = transitiveScopesFor(exportedType);
             exportedScope.exported.directives.forEach((/**
              * @param {?} entry
              * @return {?}
@@ -39361,9 +39356,7 @@ function transitiveScopesFor(moduleType, forceRecalc = false) {
             scopes.exported.directives.add(exportedType);
         }
     }));
-    if (!forceRecalc) {
-        def.transitiveCompileScopes = scopes;
-    }
+    def.transitiveCompileScopes = scopes;
     return scopes;
 }
 /**
