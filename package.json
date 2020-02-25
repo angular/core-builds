@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "9.1.0-next.1+61.sha-1e20b2c",
+  "version": "9.1.0-next.1+59.sha-8e354da",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./fesm5/core.js",
@@ -19,8 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/angular/angular.git",
-    "directory": "packages/core"
+    "url": "https://github.com/angular/angular.git"
   },
   "ng-update": {
     "migrations": "./schematics/migrations.json",
