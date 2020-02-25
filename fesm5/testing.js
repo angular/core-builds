@@ -1,10 +1,10 @@
 /**
- * @license Angular v9.0.2+47.sha-8cac5fe
+ * @license Angular v9.0.2+54.sha-d690488
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ApplicationInitStatus, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __read, __extends, __spread, __awaiter, __generator, __values, __assign, __decorate } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -1353,8 +1353,11 @@ var R3TestBedCompiler = /** @class */ (function () {
                 // are present, always re-calculate transitive scopes to have the most up-to-date
                 // information available. The `moduleToScope` map avoids repeated re-calculation of
                 // scopes for the same module.
-                var forceRecalc = !isTestingModule && _this.hasModuleOverrides;
-                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType, forceRecalc));
+                if (!isTestingModule && _this.hasModuleOverrides) {
+                    _this.storeFieldOfDefOnType(moduleType, ɵNG_MOD_DEF, 'transitiveCompileScopes');
+                    moduleType[ɵNG_MOD_DEF].transitiveCompileScopes = null;
+                }
+                moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType));
             }
             return moduleToScope.get(moduleType);
         };

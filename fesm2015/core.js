@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2+47.sha-8cac5fe
+ * @license Angular v9.0.2+54.sha-d690488
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28027,7 +28027,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.2+47.sha-8cac5fe');
+const VERSION = new Version('9.0.2+54.sha-d690488');
 
 /**
  * @fileoverview added by tsickle
@@ -35958,12 +35958,6 @@ if (false) {
     /** @type {?} */
     NgModuleType.prototype.ɵmod;
 }
-/** @type {?} */
-const COMPONENT_FACTORY_RESOLVER = {
-    provide: ComponentFactoryResolver,
-    useClass: ComponentFactoryResolver$1,
-    deps: [NgModuleRef],
-};
 /**
  * @template T
  */
@@ -35979,24 +35973,24 @@ class NgModuleRef$1 extends NgModuleRef {
         this._bootstrapComponents = [];
         this.injector = this;
         this.destroyCbs = [];
+        // When bootstrapping a module we have a dependency graph that looks like this:
+        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
+        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
+        // circular dependency which will result in a runtime error, because the injector doesn't
+        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
+        // and providing it, rather than letting the injector resolve it.
+        this.componentFactoryResolver = new ComponentFactoryResolver$1(this);
         /** @type {?} */
         const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
         /** @type {?} */
         const ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
-        if (ngLocaleIdDef) {
-            setLocaleId(ngLocaleIdDef);
-        }
+        ngLocaleIdDef && setLocaleId(ngLocaleIdDef);
         this._bootstrapComponents = maybeUnwrapFn((/** @type {?} */ (ngModuleDef)).bootstrap);
-        /** @type {?} */
-        const additionalProviders = [
-            {
-                provide: NgModuleRef,
-                useValue: this,
-            },
-            COMPONENT_FACTORY_RESOLVER
-        ];
-        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, additionalProviders, stringify(ngModuleType))));
+        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, [
+            { provide: NgModuleRef, useValue: this },
+            { provide: ComponentFactoryResolver, useValue: this.componentFactoryResolver }
+        ], stringify(ngModuleType))));
         this.instance = this.get(ngModuleType);
     }
     /**
@@ -36010,12 +36004,6 @@ class NgModuleRef$1 extends NgModuleRef {
             return this;
         }
         return this._r3Injector.get(token, notFoundValue, injectFlags);
-    }
-    /**
-     * @return {?}
-     */
-    get componentFactoryResolver() {
-        return this.get(ComponentFactoryResolver);
     }
     /**
      * @return {?}
@@ -36052,6 +36040,8 @@ if (false) {
     NgModuleRef$1.prototype.instance;
     /** @type {?} */
     NgModuleRef$1.prototype.destroyCbs;
+    /** @type {?} */
+    NgModuleRef$1.prototype.componentFactoryResolver;
     /** @type {?} */
     NgModuleRef$1.prototype._parent;
 }
@@ -39261,26 +39251,21 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * By default this operation is memoized and the result is cached on the module's definition. You
- * can avoid memoization and previously stored results (if available) by providing the second
- * argument with the `true` value (forcing transitive scopes recalculation).
- *
- * This function can be called on modules with components that have not fully compiled yet, but the
- * result should not be used until they have.
+ * This operation is memoized and the result is cached on the module's definition. This function can
+ * be called on modules with components that have not fully compiled yet, but the result should not
+ * be used until they have.
  *
  * @template T
  * @param {?} moduleType module that transitive scope should be calculated for.
- * @param {?=} forceRecalc flag that indicates whether previously calculated and memoized values should
- * be ignored and transitive scope to be fully recalculated.
  * @return {?}
  */
-function transitiveScopesFor(moduleType, forceRecalc = false) {
+function transitiveScopesFor(moduleType) {
     if (!isNgModule(moduleType)) {
         throw new Error(`${moduleType.name} does not have a module def (ɵmod property)`);
     }
     /** @type {?} */
     const def = (/** @type {?} */ (getNgModuleDef(moduleType)));
-    if (!forceRecalc && def.transitiveCompileScopes !== null) {
+    if (def.transitiveCompileScopes !== null) {
         return def.transitiveCompileScopes;
     }
     /** @type {?} */
@@ -39326,7 +39311,7 @@ function transitiveScopesFor(moduleType, forceRecalc = false) {
         // When this module imports another, the imported module's exported directives and pipes are
         // added to the compilation scope of this module.
         /** @type {?} */
-        const importedScope = transitiveScopesFor(importedType, forceRecalc);
+        const importedScope = transitiveScopesFor(importedType);
         importedScope.exported.directives.forEach((/**
          * @param {?} entry
          * @return {?}
@@ -39352,7 +39337,7 @@ function transitiveScopesFor(moduleType, forceRecalc = false) {
             // When this module exports another, the exported module's exported directives and pipes are
             // added to both the compilation and exported scopes of this module.
             /** @type {?} */
-            const exportedScope = transitiveScopesFor(exportedType, forceRecalc);
+            const exportedScope = transitiveScopesFor(exportedType);
             exportedScope.exported.directives.forEach((/**
              * @param {?} entry
              * @return {?}
@@ -39377,9 +39362,7 @@ function transitiveScopesFor(moduleType, forceRecalc = false) {
             scopes.exported.directives.add(exportedType);
         }
     }));
-    if (!forceRecalc) {
-        def.transitiveCompileScopes = scopes;
-    }
+    def.transitiveCompileScopes = scopes;
     return scopes;
 }
 /**

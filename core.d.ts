@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2+47.sha-8cac5fe
+ * @license Angular v9.0.2+54.sha-d690488
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1132,6 +1132,15 @@ export declare abstract class ComponentFactoryResolver {
      * @param component The component type.
      */
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
+}
+
+declare class ComponentFactoryResolver_2 extends ComponentFactoryResolver {
+    private ngModule?;
+    /**
+     * @param ngModule The NgModuleRef to which all resolved factories are bound.
+     */
+    constructor(ngModule?: NgModuleRef<any> | undefined);
+    resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 
 declare type ComponentInstance = {};
@@ -10441,9 +10450,9 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     injector: Injector;
     instance: T;
     destroyCbs: (() => void)[] | null;
+    readonly componentFactoryResolver: ComponentFactoryResolver_2;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    get componentFactoryResolver(): ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
@@ -10633,18 +10642,13 @@ export declare function ɵted(checkIndex: number, ngContentIndex: number | null,
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * By default this operation is memoized and the result is cached on the module's definition. You
- * can avoid memoization and previously stored results (if available) by providing the second
- * argument with the `true` value (forcing transitive scopes recalculation).
- *
- * This function can be called on modules with components that have not fully compiled yet, but the
- * result should not be used until they have.
+ * This operation is memoized and the result is cached on the module's definition. This function can
+ * be called on modules with components that have not fully compiled yet, but the result should not
+ * be used until they have.
  *
  * @param moduleType module that transitive scope should be calculated for.
- * @param forceRecalc flag that indicates whether previously calculated and memoized values should
- * be ignored and transitive scope to be fully recalculated.
  */
-export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, forceRecalc?: boolean): ɵNgModuleTransitiveScopes;
+export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>): ɵNgModuleTransitiveScopes;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
