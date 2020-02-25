@@ -9,9 +9,9 @@ import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/interface/injector';
 import { R3Injector } from '../di/r3_injector';
 import { Type } from '../interface/type';
-import { ComponentFactoryResolver as viewEngine_ComponentFactoryResolver } from '../linker/component_factory_resolver';
 import { InternalNgModuleRef, NgModuleFactory as viewEngine_NgModuleFactory, NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
 import { NgModuleDef } from '../metadata/ng_module';
+import { ComponentFactoryResolver } from './component_ref';
 export interface NgModuleType<T = any> extends Type<T> {
     ɵmod: NgModuleDef<T>;
 }
@@ -22,9 +22,9 @@ export declare class NgModuleRef<T> extends viewEngine_NgModuleRef<T> implements
     injector: Injector;
     instance: T;
     destroyCbs: (() => void)[] | null;
+    readonly componentFactoryResolver: ComponentFactoryResolver;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    get componentFactoryResolver(): viewEngine_ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
