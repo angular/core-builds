@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+59.sha-8e354da
+ * @license Angular v9.1.0-next.1+62.sha-835618c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28027,7 +28027,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.1+59.sha-8e354da');
+const VERSION = new Version('9.1.0-next.1+62.sha-835618c');
 
 /**
  * @fileoverview added by tsickle
@@ -35961,12 +35961,6 @@ if (false) {
     /** @type {?} */
     NgModuleType.prototype.ɵmod;
 }
-/** @type {?} */
-const COMPONENT_FACTORY_RESOLVER = {
-    provide: ComponentFactoryResolver,
-    useClass: ComponentFactoryResolver$1,
-    deps: [NgModuleRef],
-};
 /**
  * @template T
  */
@@ -35982,24 +35976,24 @@ class NgModuleRef$1 extends NgModuleRef {
         this._bootstrapComponents = [];
         this.injector = this;
         this.destroyCbs = [];
+        // When bootstrapping a module we have a dependency graph that looks like this:
+        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
+        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
+        // circular dependency which will result in a runtime error, because the injector doesn't
+        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
+        // and providing it, rather than letting the injector resolve it.
+        this.componentFactoryResolver = new ComponentFactoryResolver$1(this);
         /** @type {?} */
         const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode && assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
         /** @type {?} */
         const ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
-        if (ngLocaleIdDef) {
-            setLocaleId(ngLocaleIdDef);
-        }
+        ngLocaleIdDef && setLocaleId(ngLocaleIdDef);
         this._bootstrapComponents = maybeUnwrapFn((/** @type {?} */ (ngModuleDef)).bootstrap);
-        /** @type {?} */
-        const additionalProviders = [
-            {
-                provide: NgModuleRef,
-                useValue: this,
-            },
-            COMPONENT_FACTORY_RESOLVER
-        ];
-        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, additionalProviders, stringify(ngModuleType))));
+        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, [
+            { provide: NgModuleRef, useValue: this },
+            { provide: ComponentFactoryResolver, useValue: this.componentFactoryResolver }
+        ], stringify(ngModuleType))));
         this.instance = this.get(ngModuleType);
     }
     /**
@@ -36013,12 +36007,6 @@ class NgModuleRef$1 extends NgModuleRef {
             return this;
         }
         return this._r3Injector.get(token, notFoundValue, injectFlags);
-    }
-    /**
-     * @return {?}
-     */
-    get componentFactoryResolver() {
-        return this.get(ComponentFactoryResolver);
     }
     /**
      * @return {?}
@@ -36055,6 +36043,8 @@ if (false) {
     NgModuleRef$1.prototype.instance;
     /** @type {?} */
     NgModuleRef$1.prototype.destroyCbs;
+    /** @type {?} */
+    NgModuleRef$1.prototype.componentFactoryResolver;
     /** @type {?} */
     NgModuleRef$1.prototype._parent;
 }

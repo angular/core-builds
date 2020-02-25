@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+59.sha-8e354da
+ * @license Angular v9.1.0-next.1+62.sha-835618c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1132,6 +1132,15 @@ export declare abstract class ComponentFactoryResolver {
      * @param component The component type.
      */
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
+}
+
+declare class ComponentFactoryResolver_2 extends ComponentFactoryResolver {
+    private ngModule?;
+    /**
+     * @param ngModule The NgModuleRef to which all resolved factories are bound.
+     */
+    constructor(ngModule?: NgModuleRef<any> | undefined);
+    resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 
 declare type ComponentInstance = {};
@@ -10442,9 +10451,9 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     injector: Injector;
     instance: T;
     destroyCbs: (() => void)[] | null;
+    readonly componentFactoryResolver: ComponentFactoryResolver_2;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    get componentFactoryResolver(): ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
