@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2+55.sha-406ce8c
+ * @license Angular v9.0.2+73.sha-79aaaa3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11662,7 +11662,8 @@
     function providerToFactory(provider, ngModuleType, providers) {
         var factory = undefined;
         if (isTypeProvider(provider)) {
-            return injectableDefOrInjectorDefFactory(resolveForwardRef(provider));
+            var unwrappedProvider = resolveForwardRef(provider);
+            return getFactoryDef(unwrappedProvider) || injectableDefOrInjectorDefFactory(unwrappedProvider);
         }
         else {
             if (isValueProvider(provider)) {
@@ -11684,7 +11685,7 @@
                     factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
                 }
                 else {
-                    return injectableDefOrInjectorDefFactory(classRef_1);
+                    return getFactoryDef(classRef_1) || injectableDefOrInjectorDefFactory(classRef_1);
                 }
             }
         }
@@ -16869,23 +16870,25 @@
         if (value == null /*|| value === undefined */ || value === '')
             return EMPTY_ARRAY$3;
         var styleKeyValueArray = [];
-        if (Array.isArray(value)) {
-            for (var i = 0; i < value.length; i++) {
-                keyValueArraySet(styleKeyValueArray, value[i], true);
+        var unwrappedValue = unwrapSafeValue(value);
+        if (Array.isArray(unwrappedValue)) {
+            for (var i = 0; i < unwrappedValue.length; i++) {
+                keyValueArraySet(styleKeyValueArray, unwrappedValue[i], true);
             }
         }
-        else if (typeof value === 'object') {
-            for (var key in value) {
-                if (value.hasOwnProperty(key)) {
-                    keyValueArraySet(styleKeyValueArray, key, value[key]);
+        else if (typeof unwrappedValue === 'object') {
+            for (var key in unwrappedValue) {
+                if (unwrappedValue.hasOwnProperty(key)) {
+                    keyValueArraySet(styleKeyValueArray, key, unwrappedValue[key]);
                 }
             }
         }
-        else if (typeof value === 'string') {
-            stringParser(styleKeyValueArray, value);
+        else if (typeof unwrappedValue === 'string') {
+            stringParser(styleKeyValueArray, unwrappedValue);
         }
         else {
-            ngDevMode && throwError('Unsupported styling type ' + typeof value + ': ' + value);
+            ngDevMode &&
+                throwError('Unsupported styling type ' + typeof unwrappedValue + ': ' + unwrappedValue);
         }
         return styleKeyValueArray;
     }
@@ -20053,7 +20056,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.0.2+55.sha-406ce8c');
+    var VERSION = new Version('9.0.2+73.sha-79aaaa3');
 
     /**
      * @license

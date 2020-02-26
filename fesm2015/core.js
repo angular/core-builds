@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2+55.sha-406ce8c
+ * @license Angular v9.0.2+73.sha-79aaaa3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16989,7 +16989,9 @@ function providerToFactory(provider, ngModuleType, providers) {
     /** @type {?} */
     let factory = undefined;
     if (isTypeProvider(provider)) {
-        return injectableDefOrInjectorDefFactory(resolveForwardRef(provider));
+        /** @type {?} */
+        const unwrappedProvider = resolveForwardRef(provider);
+        return getFactoryDef(unwrappedProvider) || injectableDefOrInjectorDefFactory(unwrappedProvider);
     }
     else {
         if (isValueProvider(provider)) {
@@ -17024,7 +17026,7 @@ function providerToFactory(provider, ngModuleType, providers) {
                 () => new (classRef)(...injectArgs(provider.deps)));
             }
             else {
-                return injectableDefOrInjectorDefFactory(classRef);
+                return getFactoryDef(classRef) || injectableDefOrInjectorDefFactory(classRef);
             }
         }
     }
@@ -23775,23 +23777,26 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
         return (/** @type {?} */ (EMPTY_ARRAY$3));
     /** @type {?} */
     const styleKeyValueArray = (/** @type {?} */ ([]));
-    if (Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-            keyValueArraySet(styleKeyValueArray, value[i], true);
+    /** @type {?} */
+    const unwrappedValue = (/** @type {?} */ (unwrapSafeValue(value)));
+    if (Array.isArray(unwrappedValue)) {
+        for (let i = 0; i < unwrappedValue.length; i++) {
+            keyValueArraySet(styleKeyValueArray, unwrappedValue[i], true);
         }
     }
-    else if (typeof value === 'object') {
-        for (const key in value) {
-            if (value.hasOwnProperty(key)) {
-                keyValueArraySet(styleKeyValueArray, key, value[key]);
+    else if (typeof unwrappedValue === 'object') {
+        for (const key in unwrappedValue) {
+            if (unwrappedValue.hasOwnProperty(key)) {
+                keyValueArraySet(styleKeyValueArray, key, unwrappedValue[key]);
             }
         }
     }
-    else if (typeof value === 'string') {
-        stringParser(styleKeyValueArray, value);
+    else if (typeof unwrappedValue === 'string') {
+        stringParser(styleKeyValueArray, unwrappedValue);
     }
     else {
-        ngDevMode && throwError('Unsupported styling type ' + typeof value + ': ' + value);
+        ngDevMode &&
+            throwError('Unsupported styling type ' + typeof unwrappedValue + ': ' + unwrappedValue);
     }
     return styleKeyValueArray;
 }
@@ -27810,7 +27815,7 @@ if (false) {
      * @abstract
      * @param {?} parent The parent node.
      * @param {?} newChild The new child nodes.
-     * @param {?} refChild The existing child node that should precede the new node.
+     * @param {?} refChild The existing child node before which `newChild` is inserted.
      * @return {?}
      */
     Renderer2.prototype.insertBefore = function (parent, newChild, refChild) { };
@@ -28027,7 +28032,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.2+55.sha-406ce8c');
+const VERSION = new Version('9.0.2+73.sha-79aaaa3');
 
 /**
  * @fileoverview added by tsickle

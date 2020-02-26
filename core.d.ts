@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.2+55.sha-406ce8c
+ * @license Angular v9.0.2+73.sha-79aaaa3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4667,7 +4667,7 @@ export declare interface OnChanges {
 export declare interface OnDestroy {
     /**
      * A callback method that performs custom clean-up, invoked immediately
-     * after a directive, pipe, or service instance is destroyed.
+     * before a directive, pipe, or service instance is destroyed.
      */
     ngOnDestroy(): void;
 }
@@ -5735,7 +5735,7 @@ export declare abstract class Renderer2 {
      * in the host element DOM.
      * @param parent The parent node.
      * @param newChild The new child nodes.
-     * @param refChild The existing child node that should precede the new node.
+     * @param refChild The existing child node before which `newChild` is inserted.
      */
     abstract insertBefore(parent: any, newChild: any, refChild: any): void;
     /**
