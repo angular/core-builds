@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.1+64.sha-6f68eae
+ * @license Angular v9.1.0-next.1+65.sha-8fbb966
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4667,7 +4667,7 @@ export declare interface OnChanges {
 export declare interface OnDestroy {
     /**
      * A callback method that performs custom clean-up, invoked immediately
-     * after a directive, pipe, or service instance is destroyed.
+     * before a directive, pipe, or service instance is destroyed.
      */
     ngOnDestroy(): void;
 }
