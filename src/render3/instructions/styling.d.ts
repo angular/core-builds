@@ -207,7 +207,7 @@ export declare function getHostDirectiveDef(tData: TData): DirectiveDef<any> | n
  */
 export declare function toStylingKeyValueArray(keyValueArraySet: (keyValueArray: KeyValueArray<any>, key: string, value: any) => void, stringParser: (styleKeyValueArray: KeyValueArray<any>, text: string) => void, value: string | string[] | {
     [key: string]: any;
-} | null | undefined): KeyValueArray<any>;
+} | SafeValue | null | undefined): KeyValueArray<any>;
 /**
  * Set a `value` for a `key` taking style sanitization into account.
  *
