@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+21.sha-40039d8
+ * @license Angular v9.1.0-next.2+23.sha-4003538
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1266,8 +1266,6 @@
         }
     }
     function throwError(msg, actual, expected, comparison) {
-        // tslint:disable-next-line
-        debugger; // Left intentionally for better debugger experience.
         throw new Error("ASSERTION ERROR: " + msg +
             (comparison == null ? '' : " [Expected=> " + expected + " " + comparison + " " + actual + " <=Actual]"));
     }
@@ -5691,8 +5689,6 @@
         }
         // TODO: include debug context, see `viewDebugError` function in
         // `packages/core/src/view/errors.ts` for reference.
-        // tslint:disable-next-line
-        debugger; // Left intentionally for better debugger experience.
         throw new Error(msg);
     }
     function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
@@ -20056,7 +20052,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.2+21.sha-40039d8');
+    var VERSION = new Version('9.1.0-next.2+23.sha-4003538');
 
     /**
      * @license
