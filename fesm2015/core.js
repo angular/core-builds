@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+23.sha-4003538
+ * @license Angular v9.1.0-next.2+24.sha-ef75875
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28011,7 +28011,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.2+23.sha-4003538');
+const VERSION = new Version('9.1.0-next.2+24.sha-ef75875');
 
 /**
  * @fileoverview added by tsickle
@@ -35079,7 +35079,8 @@ function i18nEndFirstPass(tView, lView) {
         // Check if an element has any local refs and skip them
         /** @type {?} */
         const tNode = getTNode(tView, index);
-        if (tNode && (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) &&
+        if (tNode && (tNode.type === 0 /* Container */ || tNode.type === 3 /* Element */ ||
+            tNode.type === 4 /* ElementContainer */) &&
             tNode.localNames !== null) {
             // Divide by 2 to get the number of local refs,
             // since they are stored as an array that also includes directive indexes,
