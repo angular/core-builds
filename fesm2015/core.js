@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.4+10.sha-fcad075
+ * @license Angular v9.0.4+14.sha-e13fcba
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1306,8 +1306,6 @@ function assertDefined(actual, msg) {
     }
 }
 function throwError(msg, actual, expected, comparison) {
-    // tslint:disable-next-line
-    debugger; // Left intentionally for better debugger experience.
     throw new Error(`ASSERTION ERROR: ${msg}` +
         (comparison == null ? '' : ` [Expected=> ${expected} ${comparison} ${actual} <=Actual]`));
 }
@@ -8068,8 +8066,6 @@ function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) 
     }
     // TODO: include debug context, see `viewDebugError` function in
     // `packages/core/src/view/errors.ts` for reference.
-    // tslint:disable-next-line
-    debugger; // Left intentionally for better debugger experience.
     throw new Error(msg);
 }
 /**
@@ -28032,7 +28028,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.4+10.sha-fcad075');
+const VERSION = new Version('9.0.4+14.sha-e13fcba');
 
 /**
  * @fileoverview added by tsickle
@@ -35098,7 +35094,8 @@ function i18nEndFirstPass(tView, lView) {
         // Check if an element has any local refs and skip them
         /** @type {?} */
         const tNode = getTNode(tView, index);
-        if (tNode && (tNode.type === 3 /* Element */ || tNode.type === 4 /* ElementContainer */) &&
+        if (tNode && (tNode.type === 0 /* Container */ || tNode.type === 3 /* Element */ ||
+            tNode.type === 4 /* ElementContainer */) &&
             tNode.localNames !== null) {
             // Divide by 2 to get the number of local refs,
             // since they are stored as an array that also includes directive indexes,
