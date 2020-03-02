@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.4+14.sha-e13fcba
+ * @license Angular v9.0.4+22.sha-48025eb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7883,7 +7883,7 @@ function initializeInputAndOutputAliases(tView, tNode) {
         outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
     }
     if (inputsStore !== null) {
-        if (inputsStore.hasOwnProperty('class') || inputsStore.hasOwnProperty('className')) {
+        if (inputsStore.hasOwnProperty('class')) {
             tNode.flags |= 16 /* hasClassInput */;
         }
         if (inputsStore.hasOwnProperty('style')) {
@@ -14191,8 +14191,7 @@ function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isCla
     var inputs = tNode.inputs;
     var property = isClassBased ? 'class' : 'style';
     // We support both 'class' and `className` hence the fallback.
-    var stylingInputs = inputs[property] || (isClassBased && inputs['className']);
-    setInputsForProperty(tView, lView, stylingInputs, property, value);
+    setInputsForProperty(tView, lView, inputs[property], property, value);
 }
 
 /**
@@ -19899,7 +19898,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.4+14.sha-e13fcba');
+var VERSION = new Version('9.0.4+22.sha-48025eb');
 
 /**
  * @license
