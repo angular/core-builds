@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+36.sha-44e47da
+ * @license Angular v9.1.0-next.2+37.sha-5652fb1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19867,7 +19867,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.0-next.2+36.sha-44e47da');
+var VERSION = new Version('9.1.0-next.2+37.sha-5652fb1');
 
 /**
  * @license
@@ -25707,9 +25707,7 @@ function collectQueryResults(tView, lView, queryIndex, result) {
         for (var i = 0; i < tQueryMatches.length; i += 2) {
             var tNodeIdx = tQueryMatches[i];
             if (tNodeIdx > 0) {
-                var viewResult = lViewResults[i / 2];
-                ngDevMode && assertDefined(viewResult, 'materialized query result should be defined');
-                result.push(viewResult);
+                result.push(lViewResults[i / 2]);
             }
             else {
                 var childQueryIndex = tQueryMatches[i + 1];
