@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+33.sha-40da51f
+ * @license Angular v9.1.0-next.2+35.sha-a153b61
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12323,7 +12323,7 @@ function initializeInputAndOutputAliases(tView, tNode) {
         outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
     }
     if (inputsStore !== null) {
-        if (inputsStore.hasOwnProperty('class') || inputsStore.hasOwnProperty('className')) {
+        if (inputsStore.hasOwnProperty('class')) {
             tNode.flags |= 16 /* hasClassInput */;
         }
         if (inputsStore.hasOwnProperty('style')) {
@@ -20930,9 +20930,7 @@ function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isCla
     /** @type {?} */
     const property = isClassBased ? 'class' : 'style';
     // We support both 'class' and `className` hence the fallback.
-    /** @type {?} */
-    const stylingInputs = inputs[property] || (isClassBased && inputs['className']);
-    setInputsForProperty(tView, lView, stylingInputs, property, value);
+    setInputsForProperty(tView, lView, inputs[property], property, value);
 }
 
 /**
@@ -28028,7 +28026,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.2+33.sha-40da51f');
+const VERSION = new Version('9.1.0-next.2+35.sha-a153b61');
 
 /**
  * @fileoverview added by tsickle
