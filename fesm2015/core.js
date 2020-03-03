@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.4+38.sha-12e52a7
+ * @license Angular v9.0.4+44.sha-218e82e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12397,7 +12397,7 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
             validateAgainstEventProperties(propName);
             if (!validateProperty(tView, lView, element, propName, tNode)) {
                 // Return here since we only log warnings for unknown properties.
-                warnAboutUnknownProperty(propName, tNode);
+                logUnknownPropertyError(propName, tNode);
                 return;
             }
             ngDevMode.rendererSetProperty++;
@@ -12419,7 +12419,7 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
         if (ngDevMode && !matchingSchemas(tView, lView, tNode.tagName)) {
-            warnAboutUnknownProperty(propName, tNode);
+            logUnknownPropertyError(propName, tNode);
         }
     }
 }
@@ -12537,13 +12537,13 @@ function matchingSchemas(tView, lView, tagName) {
     return false;
 }
 /**
- * Logs a warning that a property is not supported on an element.
+ * Logs an error that a property is not supported on an element.
  * @param {?} propName Name of the invalid property.
  * @param {?} tNode Node on which we encountered the property.
  * @return {?}
  */
-function warnAboutUnknownProperty(propName, tNode) {
-    console.warn(`Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
+function logUnknownPropertyError(propName, tNode) {
+    console.error(`Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
 }
 /**
  * Instantiate a root component.
@@ -16467,8 +16467,23 @@ if (false) {
  * @return {?}
  */
 function createInjector(defType, parent = null, additionalProviders = null, name) {
-    parent = parent || getNullInjector();
-    return new R3Injector(defType, additionalProviders, parent, name);
+    /** @type {?} */
+    const injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
+    injector._resolveInjectorDefTypes();
+    return injector;
+}
+/**
+ * Creates a new injector without eagerly resolving its injector types. Can be used in places
+ * where resolving the injector types immediately can lead to an infinite loop. The injector types
+ * should be resolved at a later point by calling `_resolveInjectorDefTypes`.
+ * @param {?} defType
+ * @param {?=} parent
+ * @param {?=} additionalProviders
+ * @param {?=} name
+ * @return {?}
+ */
+function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name) {
+    return new R3Injector(defType, additionalProviders, parent || getNullInjector(), name);
 }
 class R3Injector {
     /**
@@ -16516,12 +16531,6 @@ class R3Injector {
         /** @type {?} */
         const record = this.records.get(INJECTOR_SCOPE);
         this.scope = record != null ? record.value : null;
-        // Eagerly instantiate the InjectorType classes themselves.
-        this.injectorDefTypes.forEach((/**
-         * @param {?} defType
-         * @return {?}
-         */
-        defType => this.get(defType)));
         // Source name, used for debugging
         this.source = source || (typeof def === 'object' ? null : stringify(def));
     }
@@ -16628,6 +16637,15 @@ class R3Injector {
             setCurrentInjector(previousInjector);
         }
     }
+    /**
+     * \@internal
+     * @return {?}
+     */
+    _resolveInjectorDefTypes() { this.injectorDefTypes.forEach((/**
+     * @param {?} defType
+     * @return {?}
+     */
+    defType => this.get(defType))); }
     /**
      * @return {?}
      */
@@ -20959,7 +20977,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
     /** @type {?} */
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && warnAboutUnknownElement(tView, lView, native, tNode, hasDirectives);
+    ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
     if (tNode.mergedAttrs !== null) {
         computeStaticStyling(tNode, tNode.mergedAttrs);
     }
@@ -21093,7 +21111,7 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
  * @param {?} hasDirectives
  * @return {?}
  */
-function warnAboutUnknownElement(tView, lView, element, tNode, hasDirectives) {
+function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
     /** @type {?} */
     const schemas = tView.schemas;
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
@@ -21119,18 +21137,18 @@ function warnAboutUnknownElement(tView, lView, element, tNode, hasDirectives) {
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(tView, lView, tagName)) {
             /** @type {?} */
-            let warning = `'${tagName}' is not a known element:\n`;
-            warning +=
+            let message = `'${tagName}' is not a known element:\n`;
+            message +=
                 `1. If '${tagName}' is an Angular component, then verify that it is part of this module.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
-                warning +=
+                message +=
                     `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.`;
             }
             else {
-                warning +=
+                message +=
                     `2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.`;
             }
-            console.warn(warning);
+            console.error(message);
         }
     }
 }
@@ -28026,7 +28044,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.4+38.sha-12e52a7');
+const VERSION = new Version('9.0.4+44.sha-218e82e');
 
 /**
  * @fileoverview added by tsickle
@@ -35987,10 +36005,14 @@ class NgModuleRef$1 extends NgModuleRef {
         const ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
         ngLocaleIdDef && setLocaleId(ngLocaleIdDef);
         this._bootstrapComponents = maybeUnwrapFn((/** @type {?} */ (ngModuleDef)).bootstrap);
-        this._r3Injector = (/** @type {?} */ (createInjector(ngModuleType, _parent, [
+        this._r3Injector = (/** @type {?} */ (createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
             { provide: NgModuleRef, useValue: this },
             { provide: ComponentFactoryResolver, useValue: this.componentFactoryResolver }
         ], stringify(ngModuleType))));
+        // We need to resolve the injector types separately from the injector creation, because
+        // the module might be trying to use this ref in its contructor for DI which will cause a
+        // circular error that will eventually error out, because the injector isn't created yet.
+        this._r3Injector._resolveInjectorDefTypes();
         this.instance = this.get(ngModuleType);
     }
     /**
