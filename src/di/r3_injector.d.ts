@@ -22,6 +22,12 @@ declare type SingleProvider = TypeProvider | ValueProvider | ClassProvider | Con
  * @publicApi
  */
 export declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null, name?: string): Injector;
+/**
+ * Creates a new injector without eagerly resolving its injector types. Can be used in places
+ * where resolving the injector types immediately can lead to an infinite loop. The injector types
+ * should be resolved at a later point by calling `_resolveInjectorDefTypes`.
+ */
+export declare function createInjectorWithoutInjectorInstances(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null, name?: string): R3Injector;
 export declare class R3Injector {
     readonly parent: Injector;
     /**

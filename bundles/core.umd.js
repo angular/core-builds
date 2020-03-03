@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+56.sha-17cf04e
+ * @license Angular v9.1.0-next.2+57.sha-1f8a243
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11293,8 +11293,19 @@
     function createInjector(defType, parent, additionalProviders, name) {
         if (parent === void 0) { parent = null; }
         if (additionalProviders === void 0) { additionalProviders = null; }
-        parent = parent || getNullInjector();
-        return new R3Injector(defType, additionalProviders, parent, name);
+        var injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
+        injector._resolveInjectorDefTypes();
+        return injector;
+    }
+    /**
+     * Creates a new injector without eagerly resolving its injector types. Can be used in places
+     * where resolving the injector types immediately can lead to an infinite loop. The injector types
+     * should be resolved at a later point by calling `_resolveInjectorDefTypes`.
+     */
+    function createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name) {
+        if (parent === void 0) { parent = null; }
+        if (additionalProviders === void 0) { additionalProviders = null; }
+        return new R3Injector(defType, additionalProviders, parent || getNullInjector(), name);
     }
     var R3Injector = /** @class */ (function () {
         function R3Injector(def, additionalProviders, parent, source) {
@@ -11328,8 +11339,6 @@
             // any injectable scoped to APP_ROOT_SCOPE.
             var record = this.records.get(INJECTOR_SCOPE);
             this.scope = record != null ? record.value : null;
-            // Eagerly instantiate the InjectorType classes themselves.
-            this.injectorDefTypes.forEach(function (defType) { return _this.get(defType); });
             // Source name, used for debugging
             this.source = source || (typeof def === 'object' ? null : stringify(def));
         }
@@ -11423,6 +11432,11 @@
                 // Lastly, clean up the state by restoring the previous injector.
                 setCurrentInjector(previousInjector);
             }
+        };
+        /** @internal */
+        R3Injector.prototype._resolveInjectorDefTypes = function () {
+            var _this = this;
+            this.injectorDefTypes.forEach(function (defType) { return _this.get(defType); });
         };
         R3Injector.prototype.toString = function () {
             var tokens = [], records = this.records;
@@ -20027,7 +20041,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.2+56.sha-17cf04e');
+    var VERSION = new Version('9.1.0-next.2+57.sha-1f8a243');
 
     /**
      * @license
@@ -24637,10 +24651,14 @@
             var ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
             ngLocaleIdDef && setLocaleId(ngLocaleIdDef);
             _this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
-            _this._r3Injector = createInjector(ngModuleType, _parent, [
+            _this._r3Injector = createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
                 { provide: NgModuleRef, useValue: _this },
                 { provide: ComponentFactoryResolver, useValue: _this.componentFactoryResolver }
             ], stringify(ngModuleType));
+            // We need to resolve the injector types separately from the injector creation, because
+            // the module might be trying to use this ref in its contructor for DI which will cause a
+            // circular error that will eventually error out, because the injector isn't created yet.
+            _this._r3Injector._resolveInjectorDefTypes();
             _this.instance = _this.get(ngModuleType);
             return _this;
         }
