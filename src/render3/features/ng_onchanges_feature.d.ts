@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { DirectiveDefFeature } from '../interfaces/definition';
+import { DirectiveDef } from '../interfaces/definition';
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
  * lifecycle hook, so it should be included in any component that implements
@@ -22,10 +22,10 @@ import { DirectiveDefFeature } from '../interfaces/definition';
  * static ɵcmp = defineComponent({
  *   ...
  *   inputs: {name: 'publicName'},
- *   features: [NgOnChangesFeature()]
+ *   features: [NgOnChangesFeature]
  * });
  * ```
  *
  * @codeGenApi
  */
-export declare function ɵɵNgOnChangesFeature<T>(): DirectiveDefFeature;
+export declare function ɵɵNgOnChangesFeature<T>(definition: DirectiveDef<T>): void;

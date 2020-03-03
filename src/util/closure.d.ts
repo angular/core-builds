@@ -14,4 +14,4 @@
  * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
  * compiler.
  */
-export declare function noSideEffects(fn: () => void): string;
+export declare function noSideEffects<T>(fn: () => T): T;
