@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+59.sha-ed44073
+ * @license Angular v9.1.0-next.2+60.sha-00f3c58
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8105,7 +8105,7 @@
                 validateAgainstEventProperties(propName);
                 if (!validateProperty(tView, lView, element, propName, tNode)) {
                     // Return here since we only log warnings for unknown properties.
-                    warnAboutUnknownProperty(propName, tNode);
+                    logUnknownPropertyError(propName, tNode);
                     return;
                 }
                 ngDevMode.rendererSetProperty++;
@@ -8126,7 +8126,7 @@
             // If the node is a container and the property didn't
             // match any of the inputs or schemas we should throw.
             if (ngDevMode && !matchingSchemas(tView, lView, tNode.tagName)) {
-                warnAboutUnknownProperty(propName, tNode);
+                logUnknownPropertyError(propName, tNode);
             }
         }
     }
@@ -8204,12 +8204,12 @@
         return false;
     }
     /**
-     * Logs a warning that a property is not supported on an element.
+     * Logs an error that a property is not supported on an element.
      * @param propName Name of the invalid property.
      * @param tNode Node on which we encountered the property.
      */
-    function warnAboutUnknownProperty(propName, tNode) {
-        console.warn("Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
+    function logUnknownPropertyError(propName, tNode) {
+        console.error("Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.tagName + "'.");
     }
     /**
      * Instantiate a root component.
@@ -14388,7 +14388,7 @@
         var attrs = getConstant(tViewConsts, attrsIndex);
         var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
         var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-        ngDevMode && warnAboutUnknownElement(tView, lView, native, tNode, hasDirectives);
+        ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
         if (tNode.mergedAttrs !== null) {
             computeStaticStyling(tNode, tNode.mergedAttrs);
         }
@@ -14499,7 +14499,7 @@
         ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
         ɵɵelementEnd();
     }
-    function warnAboutUnknownElement(tView, lView, element, tNode, hasDirectives) {
+    function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
         var schemas = tView.schemas;
         // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
         // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
@@ -14521,18 +14521,18 @@
                 (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                     !customElements.get(tagName));
             if (isUnknown && !matchingSchemas(tView, lView, tagName)) {
-                var warning = "'" + tagName + "' is not a known element:\n";
-                warning +=
+                var message = "'" + tagName + "' is not a known element:\n";
+                message +=
                     "1. If '" + tagName + "' is an Angular component, then verify that it is part of this module.\n";
                 if (tagName && tagName.indexOf('-') > -1) {
-                    warning +=
+                    message +=
                         "2. If '" + tagName + "' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.";
                 }
                 else {
-                    warning +=
+                    message +=
                         "2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.";
                 }
-                console.warn(warning);
+                console.error(message);
             }
         }
     }
@@ -20072,7 +20072,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.2+59.sha-ed44073');
+    var VERSION = new Version('9.1.0-next.2+60.sha-00f3c58');
 
     /**
      * @license
