@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.4+44.sha-218e82e
+ * @license Angular v9.0.4+45.sha-d2d4225
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12397,7 +12397,7 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
             validateAgainstEventProperties(propName);
             if (!validateProperty(tView, lView, element, propName, tNode)) {
                 // Return here since we only log warnings for unknown properties.
-                logUnknownPropertyError(propName, tNode);
+                warnAboutUnknownProperty(propName, tNode);
                 return;
             }
             ngDevMode.rendererSetProperty++;
@@ -12419,7 +12419,7 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
         if (ngDevMode && !matchingSchemas(tView, lView, tNode.tagName)) {
-            logUnknownPropertyError(propName, tNode);
+            warnAboutUnknownProperty(propName, tNode);
         }
     }
 }
@@ -12537,13 +12537,13 @@ function matchingSchemas(tView, lView, tagName) {
     return false;
 }
 /**
- * Logs an error that a property is not supported on an element.
+ * Logs a warning that a property is not supported on an element.
  * @param {?} propName Name of the invalid property.
  * @param {?} tNode Node on which we encountered the property.
  * @return {?}
  */
-function logUnknownPropertyError(propName, tNode) {
-    console.error(`Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
+function warnAboutUnknownProperty(propName, tNode) {
+    console.warn(`Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
 }
 /**
  * Instantiate a root component.
@@ -20977,7 +20977,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
     /** @type {?} */
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
+    ngDevMode && warnAboutUnknownElement(tView, lView, native, tNode, hasDirectives);
     if (tNode.mergedAttrs !== null) {
         computeStaticStyling(tNode, tNode.mergedAttrs);
     }
@@ -21111,7 +21111,7 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
  * @param {?} hasDirectives
  * @return {?}
  */
-function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
+function warnAboutUnknownElement(tView, lView, element, tNode, hasDirectives) {
     /** @type {?} */
     const schemas = tView.schemas;
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
@@ -21137,18 +21137,18 @@ function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(tView, lView, tagName)) {
             /** @type {?} */
-            let message = `'${tagName}' is not a known element:\n`;
-            message +=
+            let warning = `'${tagName}' is not a known element:\n`;
+            warning +=
                 `1. If '${tagName}' is an Angular component, then verify that it is part of this module.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
-                message +=
+                warning +=
                     `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.`;
             }
             else {
-                message +=
+                warning +=
                     `2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.`;
             }
-            console.error(message);
+            console.warn(warning);
         }
     }
 }
@@ -28044,7 +28044,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.4+44.sha-218e82e');
+const VERSION = new Version('9.0.4+45.sha-d2d4225');
 
 /**
  * @fileoverview added by tsickle
