@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.5+30.sha-83d7819
+ * @license Angular v9.0.5+43.sha-20dd0ac
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28050,7 +28050,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.5+30.sha-83d7819');
+const VERSION = new Version('9.0.5+43.sha-20dd0ac');
 
 /**
  * @fileoverview added by tsickle
@@ -39305,23 +39305,6 @@ function transitiveScopesFor(moduleType) {
             pipes: new Set(),
         },
     };
-    maybeUnwrapFn(def.declarations).forEach((/**
-     * @param {?} declared
-     * @return {?}
-     */
-    declared => {
-        /** @type {?} */
-        const declaredWithDefs = (/** @type {?} */ (declared));
-        if (getPipeDef(declaredWithDefs)) {
-            scopes.compilation.pipes.add(declared);
-        }
-        else {
-            // Either declared has a ɵcmp or ɵdir, or it's a component which hasn't
-            // had its template compiled yet. In either case, it gets added to the compilation's
-            // directives.
-            scopes.compilation.directives.add(declared);
-        }
-    }));
     maybeUnwrapFn(def.imports).forEach((/**
      * @template I
      * @param {?} imported
@@ -39347,6 +39330,23 @@ function transitiveScopesFor(moduleType) {
          * @return {?}
          */
         entry => scopes.compilation.pipes.add(entry)));
+    }));
+    maybeUnwrapFn(def.declarations).forEach((/**
+     * @param {?} declared
+     * @return {?}
+     */
+    declared => {
+        /** @type {?} */
+        const declaredWithDefs = (/** @type {?} */ (declared));
+        if (getPipeDef(declaredWithDefs)) {
+            scopes.compilation.pipes.add(declared);
+        }
+        else {
+            // Either declared has a ɵcmp or ɵdir, or it's a component which hasn't
+            // had its template compiled yet. In either case, it gets added to the compilation's
+            // directives.
+            scopes.compilation.directives.add(declared);
+        }
     }));
     maybeUnwrapFn(def.exports).forEach((/**
      * @template E
