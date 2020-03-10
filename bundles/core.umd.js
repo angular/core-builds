@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+125.sha-0bf6e58
+ * @license Angular v9.1.0-next.2+124.sha-191e4d1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20072,7 +20072,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.2+125.sha-0bf6e58');
+    var VERSION = new Version('9.1.0-next.2+124.sha-191e4d1');
 
     /**
      * @license
@@ -26684,17 +26684,6 @@
                 pipes: new Set(),
             },
         };
-        maybeUnwrapFn(def.imports).forEach(function (imported) {
-            var importedType = imported;
-            if (!isNgModule(importedType)) {
-                throw new Error("Importing " + importedType.name + " which does not have a \u0275mod property");
-            }
-            // When this module imports another, the imported module's exported directives and pipes are
-            // added to the compilation scope of this module.
-            var importedScope = transitiveScopesFor(importedType);
-            importedScope.exported.directives.forEach(function (entry) { return scopes.compilation.directives.add(entry); });
-            importedScope.exported.pipes.forEach(function (entry) { return scopes.compilation.pipes.add(entry); });
-        });
         maybeUnwrapFn(def.declarations).forEach(function (declared) {
             var declaredWithDefs = declared;
             if (getPipeDef(declaredWithDefs)) {
@@ -26706,6 +26695,17 @@
                 // directives.
                 scopes.compilation.directives.add(declared);
             }
+        });
+        maybeUnwrapFn(def.imports).forEach(function (imported) {
+            var importedType = imported;
+            if (!isNgModule(importedType)) {
+                throw new Error("Importing " + importedType.name + " which does not have a \u0275mod property");
+            }
+            // When this module imports another, the imported module's exported directives and pipes are
+            // added to the compilation scope of this module.
+            var importedScope = transitiveScopesFor(importedType);
+            importedScope.exported.directives.forEach(function (entry) { return scopes.compilation.directives.add(entry); });
+            importedScope.exported.pipes.forEach(function (entry) { return scopes.compilation.pipes.add(entry); });
         });
         maybeUnwrapFn(def.exports).forEach(function (exported) {
             var exportedType = exported;
