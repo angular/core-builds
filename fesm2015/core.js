@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.2+128.sha-c98c6e8
+ * @license Angular v9.1.0-next.2+129.sha-95c729f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27597,9 +27597,7 @@ class ElementRef {
     /**
      * @param {?} nativeElement
      */
-    constructor(nativeElement) {
-        this.nativeElement = nativeElement;
-    }
+    constructor(nativeElement) { this.nativeElement = nativeElement; }
 }
 /**
  * \@internal
@@ -28050,7 +28048,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.2+128.sha-c98c6e8');
+const VERSION = new Version('9.1.0-next.2+129.sha-95c729f');
 
 /**
  * @fileoverview added by tsickle
@@ -29730,9 +29728,7 @@ class IterableDiffers {
     /**
      * @param {?} factories
      */
-    constructor(factories) {
-        this.factories = factories;
-    }
+    constructor(factories) { this.factories = factories; }
     /**
      * @param {?} factories
      * @param {?=} parent
@@ -29965,9 +29961,7 @@ class KeyValueDiffers {
     /**
      * @param {?} factories
      */
-    constructor(factories) {
-        this.factories = factories;
-    }
+    constructor(factories) { this.factories = factories; }
     /**
      * @template S
      * @param {?} factories
@@ -44368,8 +44362,7 @@ class ApplicationModule {
     /**
      * @param {?} appRef
      */
-    constructor(appRef) {
-    }
+    constructor(appRef) { }
 }
 ApplicationModule.decorators = [
     { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
