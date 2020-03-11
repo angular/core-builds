@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.4+1.sha-3aa5ae9
+ * @license Angular v9.1.0-next.4+4.sha-19cfaf7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20072,7 +20072,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.4+1.sha-3aa5ae9');
+    var VERSION = new Version('9.1.0-next.4+4.sha-19cfaf7');
 
     /**
      * @license
@@ -25055,6 +25055,18 @@
         return pureFunctionVInternal(getLView(), getBindingRoot(), slotOffset, pureFn, exps, thisArg);
     }
     /**
+     * Results of a pure function invocation are stored in LView in a dedicated slot that is initialized
+     * to NO_CHANGE. In rare situations a pure pipe might throw an exception on the very first
+     * invocation and not produce any valid results. In this case LView would keep holding the NO_CHANGE
+     * value. The NO_CHANGE is not something that we can use in expressions / bindings thus we convert
+     * it to `undefined`.
+     */
+    function getPureFunctionReturnValue(lView, returnValueIndex) {
+        ngDevMode && assertDataInRange(lView, returnValueIndex);
+        var lastReturnValue = lView[returnValueIndex];
+        return lastReturnValue === NO_CHANGE ? undefined : lastReturnValue;
+    }
+    /**
      * If the value of the provided exp has changed, calls the pure function to return
      * an updated value. Or if the value has not changed, returns cached value.
      *
@@ -25070,7 +25082,7 @@
         var bindingIndex = bindingRoot + slotOffset;
         return bindingUpdated(lView, bindingIndex, exp) ?
             updateBinding(lView, bindingIndex + 1, thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
-            getBinding(lView, bindingIndex + 1);
+            getPureFunctionReturnValue(lView, bindingIndex + 1);
     }
     /**
      * If the value of any provided exp has changed, calls the pure function to return
@@ -25089,7 +25101,7 @@
         var bindingIndex = bindingRoot + slotOffset;
         return bindingUpdated2(lView, bindingIndex, exp1, exp2) ?
             updateBinding(lView, bindingIndex + 2, thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
-            getBinding(lView, bindingIndex + 2);
+            getPureFunctionReturnValue(lView, bindingIndex + 2);
     }
     /**
      * If the value of any provided exp has changed, calls the pure function to return
@@ -25109,7 +25121,7 @@
         var bindingIndex = bindingRoot + slotOffset;
         return bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) ?
             updateBinding(lView, bindingIndex + 3, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
-            getBinding(lView, bindingIndex + 3);
+            getPureFunctionReturnValue(lView, bindingIndex + 3);
     }
     /**
      * If the value of any provided exp has changed, calls the pure function to return
@@ -25131,7 +25143,7 @@
         var bindingIndex = bindingRoot + slotOffset;
         return bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) ?
             updateBinding(lView, bindingIndex + 4, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
-            getBinding(lView, bindingIndex + 4);
+            getPureFunctionReturnValue(lView, bindingIndex + 4);
     }
     /**
      * pureFunction instruction that can support any number of bindings.
@@ -25155,7 +25167,7 @@
             bindingUpdated(lView, bindingIndex++, exps[i]) && (different = true);
         }
         return different ? updateBinding(lView, bindingIndex, pureFn.apply(thisArg, exps)) :
-            getBinding(lView, bindingIndex);
+            getPureFunctionReturnValue(lView, bindingIndex);
     }
 
     /**
