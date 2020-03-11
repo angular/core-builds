@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.4+5.sha-15f8afa
+ * @license Angular v9.1.0-next.4+8.sha-42375c4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2910,6 +2910,8 @@ function isRootView(target) {
  * Generated from: packages/core/src/render3/assert.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+// [Assert functions do not constraint type when they are guarded by a truthy
+// expression.](https://github.com/microsoft/TypeScript/issues/37295)
 /**
  * @param {?} tNode
  * @param {?} lView
@@ -3013,6 +3015,7 @@ function assertFirstUpdatePass(tView, errMessage) {
 /**
  * This is a basic sanity check that an object is probably a directive def. DirectiveDef is
  * an interface, so we can't do a direct instanceof check.
+ * @template T
  * @param {?} obj
  * @return {?}
  */
@@ -28048,7 +28051,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-next.4+5.sha-15f8afa');
+const VERSION = new Version('9.1.0-next.4+8.sha-42375c4');
 
 /**
  * @fileoverview added by tsickle
