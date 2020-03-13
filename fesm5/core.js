@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.6+28.sha-f699c96
+ * @license Angular v9.0.6+36.sha-a8cc6a2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19921,7 +19921,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.0.6+28.sha-f699c96');
+var VERSION = new Version('9.0.6+36.sha-a8cc6a2');
 
 /**
  * @license
@@ -23619,11 +23619,17 @@ function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
             for (var j = 0; j < parts.length; j++) {
                 if (j & 1) {
                     // Odd indexes are ICU expressions
+                    var icuExpression = parts[j];
+                    // Verify that ICU expression has the right shape. Translations might contain invalid
+                    // constructions (while original messages were correct), so ICU parsing at runtime may not
+                    // succeed (thus `icuExpression` remains a string).
+                    if (typeof icuExpression !== 'object') {
+                        throw new Error("Unable to parse ICU expression in \"" + templateTranslation + "\" message.");
+                    }
                     // Create the comment node that will anchor the ICU expression
                     var icuNodeIndex = startIndex + i18nVarsCount++;
                     createOpCodes.push(COMMENT_MARKER, ngDevMode ? "ICU " + icuNodeIndex : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     // Update codes for the ICU expression
-                    var icuExpression = parts[j];
                     var mask = getBindingMask(icuExpression);
                     icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
                     // Since this is recursive, the last TIcu that was pushed is the one we want

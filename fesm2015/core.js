@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.6+28.sha-f699c96
+ * @license Angular v9.0.6+36.sha-a8cc6a2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28053,7 +28053,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.6+28.sha-f699c96');
+const VERSION = new Version('9.0.6+36.sha-a8cc6a2');
 
 /**
  * @fileoverview added by tsickle
@@ -34823,13 +34823,19 @@ function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
             for (let j = 0; j < parts.length; j++) {
                 if (j & 1) {
                     // Odd indexes are ICU expressions
+                    /** @type {?} */
+                    const icuExpression = (/** @type {?} */ (parts[j]));
+                    // Verify that ICU expression has the right shape. Translations might contain invalid
+                    // constructions (while original messages were correct), so ICU parsing at runtime may not
+                    // succeed (thus `icuExpression` remains a string).
+                    if (typeof icuExpression !== 'object') {
+                        throw new Error(`Unable to parse ICU expression in "${templateTranslation}" message.`);
+                    }
                     // Create the comment node that will anchor the ICU expression
                     /** @type {?} */
                     const icuNodeIndex = startIndex + i18nVarsCount++;
                     createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
                     // Update codes for the ICU expression
-                    /** @type {?} */
-                    const icuExpression = (/** @type {?} */ (parts[j]));
                     /** @type {?} */
                     const mask = getBindingMask(icuExpression);
                     icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
