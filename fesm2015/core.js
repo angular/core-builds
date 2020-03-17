@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.0.6+41.sha-a52b5680
+ * @license Angular v9.0.6+42.sha-ec750ca
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3044,6 +3044,739 @@ const MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/context.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This property will be monkey-patched on elements, components and directives
+ * @type {?}
+ */
+const MONKEY_PATCH_KEY_NAME = '__ngContext__';
+/**
+ * The internal view context which is specific to a given DOM element, directive or
+ * component instance. Each value in here (besides the LView and element node details)
+ * can be present, null or undefined. If undefined then it implies the value has not been
+ * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
+ *
+ * Each value will get filled when the respective value is examined within the getContext
+ * function. The component, element and each directive instance will share the same instance
+ * of the context.
+ * @record
+ */
+function LContext() { }
+if (false) {
+    /**
+     * The component's parent view data.
+     * @type {?}
+     */
+    LContext.prototype.lView;
+    /**
+     * The index instance of the node.
+     * @type {?}
+     */
+    LContext.prototype.nodeIndex;
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     * @type {?}
+     */
+    LContext.prototype.native;
+    /**
+     * The instance of the Component node.
+     * @type {?}
+     */
+    LContext.prototype.component;
+    /**
+     * The list of active directives that exist on this element.
+     * @type {?}
+     */
+    LContext.prototype.directives;
+    /**
+     * The map of local references (local reference name => element or directive instance) that exist
+     * on this element.
+     * @type {?}
+     */
+    LContext.prototype.localRefs;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/document.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
+ * inject the `DOCUMENT` token and are done.
+ *
+ * Ivy is special because it does not rely upon the DI and must get hold of the document some other
+ * way.
+ *
+ * The solution is to define `getDocument()` and `setDocument()` top-level functions for ivy.
+ * Wherever ivy needs the global document, it calls `getDocument()` instead.
+ *
+ * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
+ * tell ivy what the global `document` is.
+ *
+ * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
+ * by calling `setDocument()` when providing the `DOCUMENT` token.
+ * @type {?}
+ */
+let DOCUMENT = undefined;
+/**
+ * Tell ivy what the `document` is for this platform.
+ *
+ * It is only necessary to call this if the current platform is not a browser.
+ *
+ * @param {?} document The object representing the global `document` in this environment.
+ * @return {?}
+ */
+function setDocument(document) {
+    DOCUMENT = document;
+}
+/**
+ * Access the object that represents the `document` for this platform.
+ *
+ * Ivy calls this whenever it needs to access the `document` object.
+ * For example to create the renderer or to do sanitization.
+ * @return {?}
+ */
+function getDocument() {
+    if (DOCUMENT !== undefined) {
+        return DOCUMENT;
+    }
+    else if (typeof document !== 'undefined') {
+        return document;
+    }
+    // No "document" can be found. This should only happen if we are running ivy outside Angular and
+    // the current platform is not a browser. Since this is not a supported scenario at the moment
+    // this should not happen in Angular apps.
+    // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
+    // public API. Meanwhile we just return `undefined` and let the application fail.
+    return (/** @type {?} */ (undefined));
+}
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/interfaces/renderer.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/** @enum {number} */
+const RendererStyleFlags3 = {
+    Important: 1,
+    DashCase: 2,
+};
+RendererStyleFlags3[RendererStyleFlags3.Important] = 'Important';
+RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
+/**
+ * Object Oriented style of API needed to create elements and text nodes.
+ *
+ * This is the native browser API style, e.g. operations are methods on individual objects
+ * like HTMLElement. With this style, no additional code is needed as a facade
+ * (reducing payload size).
+ *
+ * @record
+ */
+function ObjectOrientedRenderer3() { }
+if (false) {
+    /**
+     * @param {?} data
+     * @return {?}
+     */
+    ObjectOrientedRenderer3.prototype.createComment = function (data) { };
+    /**
+     * @param {?} tagName
+     * @return {?}
+     */
+    ObjectOrientedRenderer3.prototype.createElement = function (tagName) { };
+    /**
+     * @param {?} namespace
+     * @param {?} tagName
+     * @return {?}
+     */
+    ObjectOrientedRenderer3.prototype.createElementNS = function (namespace, tagName) { };
+    /**
+     * @param {?} data
+     * @return {?}
+     */
+    ObjectOrientedRenderer3.prototype.createTextNode = function (data) { };
+    /**
+     * @param {?} selectors
+     * @return {?}
+     */
+    ObjectOrientedRenderer3.prototype.querySelector = function (selectors) { };
+}
+/**
+ * Returns whether the `renderer` is a `ProceduralRenderer3`
+ * @param {?} renderer
+ * @return {?}
+ */
+function isProceduralRenderer(renderer) {
+    return !!(((/** @type {?} */ (renderer))).listen);
+}
+/**
+ * Procedural style of API needed to create elements and text nodes.
+ *
+ * In non-native browser environments (e.g. platforms such as web-workers), this is the
+ * facade that enables element manipulation. This also facilitates backwards compatibility
+ * with Renderer2.
+ * @record
+ */
+function ProceduralRenderer3() { }
+if (false) {
+    /**
+     * This property is allowed to be null / undefined,
+     * in which case the view engine won't call it.
+     * This is used as a performance optimization for production mode.
+     * @type {?|undefined}
+     */
+    ProceduralRenderer3.prototype.destroyNode;
+    /**
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.destroy = function () { };
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.createComment = function (value) { };
+    /**
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.createElement = function (name, namespace) { };
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.createText = function (value) { };
+    /**
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.appendChild = function (parent, newChild) { };
+    /**
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.insertBefore = function (parent, newChild, refChild) { };
+    /**
+     * @param {?} parent
+     * @param {?} oldChild
+     * @param {?=} isHostElement
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.removeChild = function (parent, oldChild, isHostElement) { };
+    /**
+     * @param {?} selectorOrNode
+     * @param {?=} preserveContent
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.selectRootElement = function (selectorOrNode, preserveContent) { };
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.parentNode = function (node) { };
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.nextSibling = function (node) { };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.setAttribute = function (el, name, value, namespace) { };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.removeAttribute = function (el, name, namespace) { };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.addClass = function (el, name) { };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.removeClass = function (el, name) { };
+    /**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?=} flags
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.setStyle = function (el, style, value, flags) { };
+    /**
+     * @param {?} el
+     * @param {?} style
+     * @param {?=} flags
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.removeStyle = function (el, style, flags) { };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.setProperty = function (el, name, value) { };
+    /**
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.setValue = function (node, value) { };
+    /**
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */
+    ProceduralRenderer3.prototype.listen = function (target, eventName, callback) { };
+}
+/**
+ * @record
+ */
+function RendererFactory3() { }
+if (false) {
+    /**
+     * @param {?} hostElement
+     * @param {?} rendererType
+     * @return {?}
+     */
+    RendererFactory3.prototype.createRenderer = function (hostElement, rendererType) { };
+    /**
+     * @return {?}
+     */
+    RendererFactory3.prototype.begin = function () { };
+    /**
+     * @return {?}
+     */
+    RendererFactory3.prototype.end = function () { };
+}
+const ɵ0$2 = /**
+ * @param {?} hostElement
+ * @param {?} rendererType
+ * @return {?}
+ */
+(hostElement, rendererType) => { return getDocument(); };
+/** @type {?} */
+const domRendererFactory3 = {
+    createRenderer: (ɵ0$2)
+};
+/**
+ * Subset of API needed for appending elements and text nodes.
+ * @record
+ */
+function RNode() { }
+if (false) {
+    /**
+     * Returns the parent Element, Document, or DocumentFragment
+     * @type {?}
+     */
+    RNode.prototype.parentNode;
+    /**
+     * Returns the parent Element if there is one
+     * @type {?}
+     */
+    RNode.prototype.parentElement;
+    /**
+     * Gets the Node immediately following this one in the parent's childNodes
+     * @type {?}
+     */
+    RNode.prototype.nextSibling;
+    /**
+     * Removes a child from the current node and returns the removed node
+     * @param {?} oldChild the child node to remove
+     * @return {?}
+     */
+    RNode.prototype.removeChild = function (oldChild) { };
+    /**
+     * Insert a child node.
+     *
+     * Used exclusively for adding View root nodes into ViewAnchor location.
+     * @param {?} newChild
+     * @param {?} refChild
+     * @param {?} isViewRoot
+     * @return {?}
+     */
+    RNode.prototype.insertBefore = function (newChild, refChild, isViewRoot) { };
+    /**
+     * Append a child node.
+     *
+     * Used exclusively for building up DOM which are static (ie not View roots)
+     * @param {?} newChild
+     * @return {?}
+     */
+    RNode.prototype.appendChild = function (newChild) { };
+}
+/**
+ * Subset of API needed for writing attributes, properties, and setting up
+ * listeners on Element.
+ * @record
+ */
+function RElement() { }
+if (false) {
+    /** @type {?} */
+    RElement.prototype.style;
+    /** @type {?} */
+    RElement.prototype.classList;
+    /** @type {?} */
+    RElement.prototype.className;
+    /** @type {?} */
+    RElement.prototype.textContent;
+    /**
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    RElement.prototype.setAttribute = function (name, value) { };
+    /**
+     * @param {?} name
+     * @return {?}
+     */
+    RElement.prototype.removeAttribute = function (name) { };
+    /**
+     * @param {?} namespaceURI
+     * @param {?} qualifiedName
+     * @param {?} value
+     * @return {?}
+     */
+    RElement.prototype.setAttributeNS = function (namespaceURI, qualifiedName, value) { };
+    /**
+     * @param {?} type
+     * @param {?} listener
+     * @param {?=} useCapture
+     * @return {?}
+     */
+    RElement.prototype.addEventListener = function (type, listener, useCapture) { };
+    /**
+     * @param {?} type
+     * @param {?=} listener
+     * @param {?=} options
+     * @return {?}
+     */
+    RElement.prototype.removeEventListener = function (type, listener, options) { };
+    /**
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    RElement.prototype.setProperty = function (name, value) { };
+}
+/**
+ * @record
+ */
+function RCssStyleDeclaration() { }
+if (false) {
+    /**
+     * @param {?} propertyName
+     * @return {?}
+     */
+    RCssStyleDeclaration.prototype.removeProperty = function (propertyName) { };
+    /**
+     * @param {?} propertyName
+     * @param {?} value
+     * @param {?=} priority
+     * @return {?}
+     */
+    RCssStyleDeclaration.prototype.setProperty = function (propertyName, value, priority) { };
+}
+/**
+ * @record
+ */
+function RDomTokenList() { }
+if (false) {
+    /**
+     * @param {?} token
+     * @return {?}
+     */
+    RDomTokenList.prototype.add = function (token) { };
+    /**
+     * @param {?} token
+     * @return {?}
+     */
+    RDomTokenList.prototype.remove = function (token) { };
+}
+/**
+ * @record
+ */
+function RText() { }
+if (false) {
+    /** @type {?} */
+    RText.prototype.textContent;
+}
+/**
+ * @record
+ */
+function RComment() { }
+if (false) {
+    /** @type {?} */
+    RComment.prototype.textContent;
+}
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+/** @type {?} */
+const unusedValueExportToPlacateAjd$2 = 1;
+
+/**
+ * @fileoverview added by tsickle
+ * Generated from: packages/core/src/render3/util/view_utils.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
+ * in same location in `LView`. This is because we don't want to pre-allocate space for it
+ * because the storage is sparse. This file contains utilities for dealing with such data types.
+ *
+ * How do we know what is stored at a given location in `LView`.
+ * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
+ * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
+ *   - `typeof value[TYPE] === 'object'` => `LView`
+ *      - This happens when we have a component at a given location
+ *   - `typeof value[TYPE] === true` => `LContainer`
+ *      - This happens when we have `LContainer` binding at a given location.
+ *
+ *
+ * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
+ */
+/**
+ * Returns `RNode`.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
+ * @return {?}
+ */
+function unwrapRNode(value) {
+    while (Array.isArray(value)) {
+        value = (/** @type {?} */ (value[HOST]));
+    }
+    return (/** @type {?} */ (value));
+}
+/**
+ * Returns `LView` or `null` if not found.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
+ * @return {?}
+ */
+function unwrapLView(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLView()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (typeof value[TYPE] === 'object')
+            return (/** @type {?} */ (value));
+        value = (/** @type {?} */ (value[HOST]));
+    }
+    return null;
+}
+/**
+ * Returns `LContainer` or `null` if not found.
+ * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
+ * @return {?}
+ */
+function unwrapLContainer(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLContainer()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (value[TYPE] === true)
+            return (/** @type {?} */ (value));
+        value = (/** @type {?} */ (value[HOST]));
+    }
+    return null;
+}
+/**
+ * Retrieves an element value from the provided `viewData`, by unwrapping
+ * from any containers, component views, or style contexts.
+ * @param {?} index
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByIndex(index, lView) {
+    return unwrapRNode(lView[index + HEADER_OFFSET]);
+}
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param {?} tNode
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByTNode(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    ngDevMode && assertDataInRange(lView, tNode.index);
+    /** @type {?} */
+    const node = unwrapRNode(lView[tNode.index]);
+    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
+    return node;
+}
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param {?} tNode
+ * @param {?} lView
+ * @return {?}
+ */
+function getNativeByTNodeOrNull(tNode, lView) {
+    /** @type {?} */
+    const index = tNode.index;
+    if (index !== -1) {
+        ngDevMode && assertTNodeForLView(tNode, lView);
+        /** @type {?} */
+        const node = unwrapRNode(lView[index]);
+        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
+        return node;
+    }
+    return null;
+}
+/**
+ * @param {?} tView
+ * @param {?} index
+ * @return {?}
+ */
+function getTNode(tView, index) {
+    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
+    ngDevMode && assertLessThan(index, tView.data.length, 'wrong index for TNode');
+    return (/** @type {?} */ (tView.data[index + HEADER_OFFSET]));
+}
+/**
+ * Retrieves a value from any `LView` or `TData`.
+ * @template T
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+function load(view, index) {
+    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+    return view[index + HEADER_OFFSET];
+}
+/**
+ * @param {?} nodeIndex
+ * @param {?} hostView
+ * @return {?}
+ */
+function getComponentLViewByIndex(nodeIndex, hostView) {
+    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
+    ngDevMode && assertDataInRange(hostView, nodeIndex);
+    /** @type {?} */
+    const slotValue = hostView[nodeIndex];
+    /** @type {?} */
+    const lView = isLView(slotValue) ? slotValue : slotValue[HOST];
+    return lView;
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ * @param {?} target
+ * @return {?}
+ */
+function readPatchedData(target) {
+    ngDevMode && assertDefined(target, 'Target expected');
+    return target[MONKEY_PATCH_KEY_NAME] || null;
+}
+/**
+ * @param {?} target
+ * @return {?}
+ */
+function readPatchedLView(target) {
+    /** @type {?} */
+    const value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : ((/** @type {?} */ (value))).lView;
+    }
+    return null;
+}
+/**
+ * Checks whether a given view is in creation mode
+ * @param {?} view
+ * @return {?}
+ */
+function isCreationMode(view) {
+    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/**
+ * Returns a boolean for whether the view is attached to a container.
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
+}
+/**
+ * Returns a constant from `TConstants` instance.
+ * @template T
+ * @param {?} consts
+ * @param {?} index
+ * @return {?}
+ */
+function getConstant(consts, index) {
+    return consts === null || index == null ? null : (/** @type {?} */ ((/** @type {?} */ (consts[index]))));
+}
+/**
+ * Resets the pre-order hook flags of the view.
+ * @param {?} lView the LView on which the flags are reset
+ * @return {?}
+ */
+function resetPreOrderHookFlags(lView) {
+    lView[PREORDER_HOOK_FLAGS] = 0;
+}
+/**
+ * @param {?} lContainer
+ * @return {?}
+ */
+function getLContainerActiveIndex(lContainer) {
+    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
+}
+/**
+ * @param {?} lContainer
+ * @param {?} index
+ * @return {?}
+ */
+function setLContainerActiveIndex(lContainer, index) {
+    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
+}
+
+/**
+ * @fileoverview added by tsickle
  * Generated from: packages/core/src/render3/state.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -3649,6 +4382,15 @@ function setSelectedIndex(index) {
     instructionState.lFrame.selectedIndex = index;
 }
 /**
+ * Gets the `tNode` that represents currently selected element.
+ * @return {?}
+ */
+function getSelectedTNode() {
+    /** @type {?} */
+    const lFrame = instructionState.lFrame;
+    return getTNode(lFrame.tView, lFrame.selectedIndex);
+}
+/**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
  *
  * \@codeGenApi
@@ -4200,7 +4942,7 @@ function isFactory(obj) {
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 /** @type {?} */
-const unusedValueExportToPlacateAjd$2 = 1;
+const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * @fileoverview added by tsickle
@@ -4250,448 +4992,6 @@ function typeName(type) {
         return 'ElementContainer';
     return '<unknown>';
 }
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/interfaces/document.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
- * inject the `DOCUMENT` token and are done.
- *
- * Ivy is special because it does not rely upon the DI and must get hold of the document some other
- * way.
- *
- * The solution is to define `getDocument()` and `setDocument()` top-level functions for ivy.
- * Wherever ivy needs the global document, it calls `getDocument()` instead.
- *
- * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
- * tell ivy what the global `document` is.
- *
- * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
- * by calling `setDocument()` when providing the `DOCUMENT` token.
- * @type {?}
- */
-let DOCUMENT = undefined;
-/**
- * Tell ivy what the `document` is for this platform.
- *
- * It is only necessary to call this if the current platform is not a browser.
- *
- * @param {?} document The object representing the global `document` in this environment.
- * @return {?}
- */
-function setDocument(document) {
-    DOCUMENT = document;
-}
-/**
- * Access the object that represents the `document` for this platform.
- *
- * Ivy calls this whenever it needs to access the `document` object.
- * For example to create the renderer or to do sanitization.
- * @return {?}
- */
-function getDocument() {
-    if (DOCUMENT !== undefined) {
-        return DOCUMENT;
-    }
-    else if (typeof document !== 'undefined') {
-        return document;
-    }
-    // No "document" can be found. This should only happen if we are running ivy outside Angular and
-    // the current platform is not a browser. Since this is not a supported scenario at the moment
-    // this should not happen in Angular apps.
-    // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
-    // public API. Meanwhile we just return `undefined` and let the application fail.
-    return (/** @type {?} */ (undefined));
-}
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/interfaces/renderer.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @enum {number} */
-const RendererStyleFlags3 = {
-    Important: 1,
-    DashCase: 2,
-};
-RendererStyleFlags3[RendererStyleFlags3.Important] = 'Important';
-RendererStyleFlags3[RendererStyleFlags3.DashCase] = 'DashCase';
-/**
- * Object Oriented style of API needed to create elements and text nodes.
- *
- * This is the native browser API style, e.g. operations are methods on individual objects
- * like HTMLElement. With this style, no additional code is needed as a facade
- * (reducing payload size).
- *
- * @record
- */
-function ObjectOrientedRenderer3() { }
-if (false) {
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createComment = function (data) { };
-    /**
-     * @param {?} tagName
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createElement = function (tagName) { };
-    /**
-     * @param {?} namespace
-     * @param {?} tagName
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createElementNS = function (namespace, tagName) { };
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.createTextNode = function (data) { };
-    /**
-     * @param {?} selectors
-     * @return {?}
-     */
-    ObjectOrientedRenderer3.prototype.querySelector = function (selectors) { };
-}
-/**
- * Returns whether the `renderer` is a `ProceduralRenderer3`
- * @param {?} renderer
- * @return {?}
- */
-function isProceduralRenderer(renderer) {
-    return !!(((/** @type {?} */ (renderer))).listen);
-}
-/**
- * Procedural style of API needed to create elements and text nodes.
- *
- * In non-native browser environments (e.g. platforms such as web-workers), this is the
- * facade that enables element manipulation. This also facilitates backwards compatibility
- * with Renderer2.
- * @record
- */
-function ProceduralRenderer3() { }
-if (false) {
-    /**
-     * This property is allowed to be null / undefined,
-     * in which case the view engine won't call it.
-     * This is used as a performance optimization for production mode.
-     * @type {?|undefined}
-     */
-    ProceduralRenderer3.prototype.destroyNode;
-    /**
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.destroy = function () { };
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.createComment = function (value) { };
-    /**
-     * @param {?} name
-     * @param {?=} namespace
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.createElement = function (name, namespace) { };
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.createText = function (value) { };
-    /**
-     * @param {?} parent
-     * @param {?} newChild
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.appendChild = function (parent, newChild) { };
-    /**
-     * @param {?} parent
-     * @param {?} newChild
-     * @param {?} refChild
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.insertBefore = function (parent, newChild, refChild) { };
-    /**
-     * @param {?} parent
-     * @param {?} oldChild
-     * @param {?=} isHostElement
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeChild = function (parent, oldChild, isHostElement) { };
-    /**
-     * @param {?} selectorOrNode
-     * @param {?=} preserveContent
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.selectRootElement = function (selectorOrNode, preserveContent) { };
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.parentNode = function (node) { };
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.nextSibling = function (node) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?} value
-     * @param {?=} namespace
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setAttribute = function (el, name, value, namespace) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?=} namespace
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeAttribute = function (el, name, namespace) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.addClass = function (el, name) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeClass = function (el, name) { };
-    /**
-     * @param {?} el
-     * @param {?} style
-     * @param {?} value
-     * @param {?=} flags
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setStyle = function (el, style, value, flags) { };
-    /**
-     * @param {?} el
-     * @param {?} style
-     * @param {?=} flags
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.removeStyle = function (el, style, flags) { };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setProperty = function (el, name, value) { };
-    /**
-     * @param {?} node
-     * @param {?} value
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.setValue = function (node, value) { };
-    /**
-     * @param {?} target
-     * @param {?} eventName
-     * @param {?} callback
-     * @return {?}
-     */
-    ProceduralRenderer3.prototype.listen = function (target, eventName, callback) { };
-}
-/**
- * @record
- */
-function RendererFactory3() { }
-if (false) {
-    /**
-     * @param {?} hostElement
-     * @param {?} rendererType
-     * @return {?}
-     */
-    RendererFactory3.prototype.createRenderer = function (hostElement, rendererType) { };
-    /**
-     * @return {?}
-     */
-    RendererFactory3.prototype.begin = function () { };
-    /**
-     * @return {?}
-     */
-    RendererFactory3.prototype.end = function () { };
-}
-const ɵ0$2 = /**
- * @param {?} hostElement
- * @param {?} rendererType
- * @return {?}
- */
-(hostElement, rendererType) => { return getDocument(); };
-/** @type {?} */
-const domRendererFactory3 = {
-    createRenderer: (ɵ0$2)
-};
-/**
- * Subset of API needed for appending elements and text nodes.
- * @record
- */
-function RNode() { }
-if (false) {
-    /**
-     * Returns the parent Element, Document, or DocumentFragment
-     * @type {?}
-     */
-    RNode.prototype.parentNode;
-    /**
-     * Returns the parent Element if there is one
-     * @type {?}
-     */
-    RNode.prototype.parentElement;
-    /**
-     * Gets the Node immediately following this one in the parent's childNodes
-     * @type {?}
-     */
-    RNode.prototype.nextSibling;
-    /**
-     * Removes a child from the current node and returns the removed node
-     * @param {?} oldChild the child node to remove
-     * @return {?}
-     */
-    RNode.prototype.removeChild = function (oldChild) { };
-    /**
-     * Insert a child node.
-     *
-     * Used exclusively for adding View root nodes into ViewAnchor location.
-     * @param {?} newChild
-     * @param {?} refChild
-     * @param {?} isViewRoot
-     * @return {?}
-     */
-    RNode.prototype.insertBefore = function (newChild, refChild, isViewRoot) { };
-    /**
-     * Append a child node.
-     *
-     * Used exclusively for building up DOM which are static (ie not View roots)
-     * @param {?} newChild
-     * @return {?}
-     */
-    RNode.prototype.appendChild = function (newChild) { };
-}
-/**
- * Subset of API needed for writing attributes, properties, and setting up
- * listeners on Element.
- * @record
- */
-function RElement() { }
-if (false) {
-    /** @type {?} */
-    RElement.prototype.style;
-    /** @type {?} */
-    RElement.prototype.classList;
-    /** @type {?} */
-    RElement.prototype.className;
-    /** @type {?} */
-    RElement.prototype.textContent;
-    /**
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    RElement.prototype.setAttribute = function (name, value) { };
-    /**
-     * @param {?} name
-     * @return {?}
-     */
-    RElement.prototype.removeAttribute = function (name) { };
-    /**
-     * @param {?} namespaceURI
-     * @param {?} qualifiedName
-     * @param {?} value
-     * @return {?}
-     */
-    RElement.prototype.setAttributeNS = function (namespaceURI, qualifiedName, value) { };
-    /**
-     * @param {?} type
-     * @param {?} listener
-     * @param {?=} useCapture
-     * @return {?}
-     */
-    RElement.prototype.addEventListener = function (type, listener, useCapture) { };
-    /**
-     * @param {?} type
-     * @param {?=} listener
-     * @param {?=} options
-     * @return {?}
-     */
-    RElement.prototype.removeEventListener = function (type, listener, options) { };
-    /**
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    RElement.prototype.setProperty = function (name, value) { };
-}
-/**
- * @record
- */
-function RCssStyleDeclaration() { }
-if (false) {
-    /**
-     * @param {?} propertyName
-     * @return {?}
-     */
-    RCssStyleDeclaration.prototype.removeProperty = function (propertyName) { };
-    /**
-     * @param {?} propertyName
-     * @param {?} value
-     * @param {?=} priority
-     * @return {?}
-     */
-    RCssStyleDeclaration.prototype.setProperty = function (propertyName, value, priority) { };
-}
-/**
- * @record
- */
-function RDomTokenList() { }
-if (false) {
-    /**
-     * @param {?} token
-     * @return {?}
-     */
-    RDomTokenList.prototype.add = function (token) { };
-    /**
-     * @param {?} token
-     * @return {?}
-     */
-    RDomTokenList.prototype.remove = function (token) { };
-}
-/**
- * @record
- */
-function RText() { }
-if (false) {
-    /** @type {?} */
-    RText.prototype.textContent;
-}
-/**
- * @record
- */
-function RComment() { }
-if (false) {
-    /** @type {?} */
-    RComment.prototype.textContent;
-}
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-/** @type {?} */
-const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * @fileoverview added by tsickle
@@ -7360,297 +7660,6 @@ function normalizeDebugBindingValue(value) {
     catch (e) {
         return '[ERROR] Exception while trying to serialize the value';
     }
-}
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/interfaces/context.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This property will be monkey-patched on elements, components and directives
- * @type {?}
- */
-const MONKEY_PATCH_KEY_NAME = '__ngContext__';
-/**
- * The internal view context which is specific to a given DOM element, directive or
- * component instance. Each value in here (besides the LView and element node details)
- * can be present, null or undefined. If undefined then it implies the value has not been
- * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
- *
- * Each value will get filled when the respective value is examined within the getContext
- * function. The component, element and each directive instance will share the same instance
- * of the context.
- * @record
- */
-function LContext() { }
-if (false) {
-    /**
-     * The component's parent view data.
-     * @type {?}
-     */
-    LContext.prototype.lView;
-    /**
-     * The index instance of the node.
-     * @type {?}
-     */
-    LContext.prototype.nodeIndex;
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     * @type {?}
-     */
-    LContext.prototype.native;
-    /**
-     * The instance of the Component node.
-     * @type {?}
-     */
-    LContext.prototype.component;
-    /**
-     * The list of active directives that exist on this element.
-     * @type {?}
-     */
-    LContext.prototype.directives;
-    /**
-     * The map of local references (local reference name => element or directive instance) that exist
-     * on this element.
-     * @type {?}
-     */
-    LContext.prototype.localRefs;
-}
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/src/render3/util/view_utils.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
- * in same location in `LView`. This is because we don't want to pre-allocate space for it
- * because the storage is sparse. This file contains utilities for dealing with such data types.
- *
- * How do we know what is stored at a given location in `LView`.
- * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
- * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
- *   - `typeof value[TYPE] === 'object'` => `LView`
- *      - This happens when we have a component at a given location
- *   - `typeof value[TYPE] === true` => `LContainer`
- *      - This happens when we have `LContainer` binding at a given location.
- *
- *
- * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
- */
-/**
- * Returns `RNode`.
- * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
- * @return {?}
- */
-function unwrapRNode(value) {
-    while (Array.isArray(value)) {
-        value = (/** @type {?} */ (value[HOST]));
-    }
-    return (/** @type {?} */ (value));
-}
-/**
- * Returns `LView` or `null` if not found.
- * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
- * @return {?}
- */
-function unwrapLView(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLView()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (typeof value[TYPE] === 'object')
-            return (/** @type {?} */ (value));
-        value = (/** @type {?} */ (value[HOST]));
-    }
-    return null;
-}
-/**
- * Returns `LContainer` or `null` if not found.
- * @param {?} value wrapped value of `RNode`, `LView`, `LContainer`
- * @return {?}
- */
-function unwrapLContainer(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLContainer()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (value[TYPE] === true)
-            return (/** @type {?} */ (value));
-        value = (/** @type {?} */ (value[HOST]));
-    }
-    return null;
-}
-/**
- * Retrieves an element value from the provided `viewData`, by unwrapping
- * from any containers, component views, or style contexts.
- * @param {?} index
- * @param {?} lView
- * @return {?}
- */
-function getNativeByIndex(index, lView) {
-    return unwrapRNode(lView[index + HEADER_OFFSET]);
-}
-/**
- * Retrieve an `RNode` for a given `TNode` and `LView`.
- *
- * This function guarantees in dev mode to retrieve a non-null `RNode`.
- *
- * @param {?} tNode
- * @param {?} lView
- * @return {?}
- */
-function getNativeByTNode(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    ngDevMode && assertDataInRange(lView, tNode.index);
-    /** @type {?} */
-    const node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
-    return node;
-}
-/**
- * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
- *
- * Some `TNode`s don't have associated `RNode`s. For example `Projection`
- *
- * @param {?} tNode
- * @param {?} lView
- * @return {?}
- */
-function getNativeByTNodeOrNull(tNode, lView) {
-    /** @type {?} */
-    const index = tNode.index;
-    if (index !== -1) {
-        ngDevMode && assertTNodeForLView(tNode, lView);
-        /** @type {?} */
-        const node = unwrapRNode(lView[index]);
-        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
-        return node;
-    }
-    return null;
-}
-/**
- * @param {?} tView
- * @param {?} index
- * @return {?}
- */
-function getTNode(tView, index) {
-    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
-    ngDevMode && assertLessThan(index, tView.data.length, 'wrong index for TNode');
-    return (/** @type {?} */ (tView.data[index + HEADER_OFFSET]));
-}
-/**
- * Retrieves a value from any `LView` or `TData`.
- * @template T
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-function load(view, index) {
-    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
-}
-/**
- * @param {?} nodeIndex
- * @param {?} hostView
- * @return {?}
- */
-function getComponentLViewByIndex(nodeIndex, hostView) {
-    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-    ngDevMode && assertDataInRange(hostView, nodeIndex);
-    /** @type {?} */
-    const slotValue = hostView[nodeIndex];
-    /** @type {?} */
-    const lView = isLView(slotValue) ? slotValue : slotValue[HOST];
-    return lView;
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- * @param {?} target
- * @return {?}
- */
-function readPatchedData(target) {
-    ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME] || null;
-}
-/**
- * @param {?} target
- * @return {?}
- */
-function readPatchedLView(target) {
-    /** @type {?} */
-    const value = readPatchedData(target);
-    if (value) {
-        return Array.isArray(value) ? value : ((/** @type {?} */ (value))).lView;
-    }
-    return null;
-}
-/**
- * Checks whether a given view is in creation mode
- * @param {?} view
- * @return {?}
- */
-function isCreationMode(view) {
-    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
-}
-/**
- * Returns a boolean for whether the view is attached to the change detection tree.
- *
- * Note: This determines whether a view should be checked, not whether it's inserted
- * into a container. For that, you'll want `viewAttachedToContainer` below.
- * @param {?} view
- * @return {?}
- */
-function viewAttachedToChangeDetector(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
-}
-/**
- * Returns a boolean for whether the view is attached to a container.
- * @param {?} view
- * @return {?}
- */
-function viewAttachedToContainer(view) {
-    return isLContainer(view[PARENT]);
-}
-/**
- * Returns a constant from `TConstants` instance.
- * @template T
- * @param {?} consts
- * @param {?} index
- * @return {?}
- */
-function getConstant(consts, index) {
-    return consts === null || index == null ? null : (/** @type {?} */ ((/** @type {?} */ (consts[index]))));
-}
-/**
- * Resets the pre-order hook flags of the view.
- * @param {?} lView the LView on which the flags are reset
- * @return {?}
- */
-function resetPreOrderHookFlags(lView) {
-    lView[PREORDER_HOOK_FLAGS] = 0;
-}
-/**
- * @param {?} lContainer
- * @return {?}
- */
-function getLContainerActiveIndex(lContainer) {
-    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
-}
-/**
- * @param {?} lContainer
- * @param {?} index
- * @return {?}
- */
-function setLContainerActiveIndex(lContainer, index) {
-    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
 }
 
 /**
@@ -12378,21 +12387,19 @@ function mapPropName(name) {
 /**
  * @template T
  * @param {?} tView
+ * @param {?} tNode
  * @param {?} lView
- * @param {?} index
  * @param {?} propName
  * @param {?} value
- * @param {?=} sanitizer
- * @param {?=} nativeOnly
- * @param {?=} loadRendererFn
+ * @param {?} renderer
+ * @param {?} sanitizer
+ * @param {?} nativeOnly
  * @return {?}
  */
-function elementPropertyInternal(tView, lView, index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
+function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly) {
     ngDevMode && assertNotSame(value, (/** @type {?} */ (NO_CHANGE)), 'Incoming value should never be NO_CHANGE.');
     /** @type {?} */
-    const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
-    /** @type {?} */
-    const tNode = getTNode(tView, index);
+    const element = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
     /** @type {?} */
     let inputData = tNode.inputs;
     /** @type {?} */
@@ -12400,7 +12407,7 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
     if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
         setInputsForProperty(tView, lView, dataValue, propName, value);
         if (isComponentHost(tNode))
-            markDirtyIfOnPush(lView, index + HEADER_OFFSET);
+            markDirtyIfOnPush(lView, tNode.index);
         if (ngDevMode) {
             setNgReflectProperties(lView, element, tNode.type, dataValue, value);
         }
@@ -12416,8 +12423,6 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
             }
             ngDevMode.rendererSetProperty++;
         }
-        /** @type {?} */
-        const renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
         // It is assumed that the sanitizer is only added when the compiler determines that the
         // property is risky, so sanitization can be done without further checks.
         value = sanitizer != null ? ((/** @type {?} */ (sanitizer(value, tNode.tagName || '', propName)))) : value;
@@ -12972,20 +12977,19 @@ function addComponentLogic(lView, hostTNode, def) {
     lView[hostTNode.index] = componentView;
 }
 /**
- * @param {?} index
+ * @param {?} tNode
+ * @param {?} lView
  * @param {?} name
  * @param {?} value
- * @param {?} tView
- * @param {?} lView
- * @param {?=} sanitizer
- * @param {?=} namespace
+ * @param {?} sanitizer
+ * @param {?} namespace
  * @return {?}
  */
-function elementAttributeInternal(index, name, value, tView, lView, sanitizer, namespace) {
+function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
     ngDevMode && assertNotSame(value, (/** @type {?} */ (NO_CHANGE)), 'Incoming value should never be NO_CHANGE.');
     ngDevMode && validateAgainstEventAttributes(name);
     /** @type {?} */
-    const element = (/** @type {?} */ (getNativeByIndex(index, lView)));
+    const element = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
     /** @type {?} */
     const renderer = lView[RENDERER];
     if (value == null) {
@@ -12995,8 +12999,6 @@ function elementAttributeInternal(index, name, value, tView, lView, sanitizer, n
     }
     else {
         ngDevMode && ngDevMode.rendererSetAttribute++;
-        /** @type {?} */
-        const tNode = getTNode(tView, index);
         /** @type {?} */
         const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
         if (isProceduralRenderer(renderer)) {
@@ -13488,19 +13490,17 @@ function executeViewQueryFn(flags, viewQueryFn, component) {
  * interpolated properties.
  *
  * @param {?} tData `TData` where meta-data will be saved;
- * @param {?} nodeIndex index of a `TNode` that is a target of the binding;
+ * @param {?} tNode `TNode` that is a target of the binding;
  * @param {?} propertyName bound property name;
  * @param {?} bindingIndex binding index in `LView`
  * @param {...?} interpolationParts static interpolation parts (for property interpolations)
  * @return {?}
  */
-function storePropertyBindingMetadata(tData, nodeIndex, propertyName, bindingIndex, ...interpolationParts) {
+function storePropertyBindingMetadata(tData, tNode, propertyName, bindingIndex, ...interpolationParts) {
     // Binding meta-data are stored only the first time a given property instruction is processed.
     // Since we don't have a concept of the "first update pass" we need to check for presence of the
     // binding meta-data to decide if one should be stored (or if was stored already).
     if (tData[bindingIndex] === null) {
-        /** @type {?} */
-        const tNode = (/** @type {?} */ (tData[nodeIndex + HEADER_OFFSET]));
         if (tNode.inputs == null || !tNode.inputs[propertyName]) {
             /** @type {?} */
             const propBindingIdxs = tNode.propertyBindings || (tNode.propertyBindings = []);
@@ -13612,7 +13612,7 @@ function textBindingInternal(lView, index, value) {
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd;
+const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd;
 /**
  * @param {?} tNode
  * @param {?} embeddedView
@@ -19851,11 +19851,11 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementAttributeInternal(nodeIndex, name, value, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + name, bindingIndex);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, 'attr.' + name, bindingIndex);
     }
     return ɵɵattribute;
 }
@@ -20146,12 +20146,10 @@ function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, name
     const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵattributeInterpolate1;
 }
@@ -20189,12 +20187,10 @@ function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitiz
     const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix);
     }
     return ɵɵattributeInterpolate2;
 }
@@ -20235,11 +20231,9 @@ function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix,
     const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
     return ɵɵattributeInterpolate3;
 }
@@ -20282,11 +20276,9 @@ function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
     return ɵɵattributeInterpolate4;
 }
@@ -20331,11 +20323,9 @@ function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
     return ɵɵattributeInterpolate5;
 }
@@ -20382,11 +20372,9 @@ function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
     return ɵɵattributeInterpolate6;
 }
@@ -20435,11 +20423,9 @@ function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
     return ɵɵattributeInterpolate7;
 }
@@ -20490,11 +20476,9 @@ function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
-        const tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
     return ɵɵattributeInterpolate8;
 }
@@ -20532,17 +20516,15 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
     const interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
         /** @type {?} */
-        const tView = getTView();
-        /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        elementAttributeInternal(nodeIndex, attrName, interpolated, tView, lView, sanitizer, namespace);
+        const tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolated, sanitizer, namespace);
         if (ngDevMode) {
             /** @type {?} */
             const interpolationInBetween = [values[0]];
             for (let i = 2; i < values.length; i += 2) {
                 interpolationInBetween.push(values[i]);
             }
-            storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
         }
     }
     return ɵɵattributeInterpolateV;
@@ -20938,11 +20920,11 @@ function ɵɵproperty(propName, value, sanitizer) {
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, bindingIndex);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵproperty;
 }
@@ -21999,11 +21981,11 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 1, prefix, suffix);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵpropertyInterpolate1;
 }
@@ -22044,11 +22026,11 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
     const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 2, prefix, i0, suffix);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix);
     }
     return ɵɵpropertyInterpolate2;
 }
@@ -22092,12 +22074,11 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
     const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
     return ɵɵpropertyInterpolate3;
 }
@@ -22143,12 +22124,12 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
     return ɵɵpropertyInterpolate4;
 }
@@ -22196,12 +22177,12 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
     return ɵɵpropertyInterpolate5;
 }
@@ -22251,11 +22232,12 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
     return ɵɵpropertyInterpolate6;
 }
@@ -22307,11 +22289,11 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
     return ɵɵpropertyInterpolate7;
 }
@@ -22365,11 +22347,11 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
     return ɵɵpropertyInterpolate8;
 }
@@ -22410,17 +22392,17 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     const interpolatedValue = interpolationV(lView, values);
     if (interpolatedValue !== NO_CHANGE) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         if (ngDevMode) {
             /** @type {?} */
             const interpolationInBetween = [values[0]];
             for (let i = 2; i < values.length; i += 2) {
                 interpolationInBetween.push(values[i]);
             }
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
         }
     }
     return ɵɵpropertyInterpolateV;
@@ -25577,11 +25559,11 @@ function ɵɵhostProperty(propName, value, sanitizer) {
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizer, true);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, bindingIndex);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, true);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵhostProperty;
 }
@@ -25614,11 +25596,13 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         /** @type {?} */
-        const nodeIndex = getSelectedIndex();
-        /** @type {?} */
         const tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizer, true, loadComponentRenderer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, bindingIndex);
+        /** @type {?} */
+        const tNode = getSelectedTNode();
+        /** @type {?} */
+        const renderer = loadComponentRenderer(tNode, lView);
+        elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵupdateSyntheticHostBinding;
 }
@@ -28053,7 +28037,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.0.6+41.sha-a52b5680');
+const VERSION = new Version('9.0.6+42.sha-ec750ca');
 
 /**
  * @fileoverview added by tsickle
@@ -35240,7 +35224,7 @@ function readCreateOpCodes(index, createOpCodes, tView, lView) {
                     const attrValue = (/** @type {?} */ (createOpCodes[++i]));
                     // This code is used for ICU expressions only, since we don't support
                     // directives/components in ICUs, we don't need to worry about inputs here
-                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, tView, lView);
+                    elementAttributeInternal(getTNode(tView, elementNodeIndex), lView, attrName, attrValue, null, null);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -35336,7 +35320,7 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                                 const propName = (/** @type {?} */ (updateOpCodes[++j]));
                                 /** @type {?} */
                                 const sanitizeFn = (/** @type {?} */ (updateOpCodes[++j]));
-                                elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizeFn);
+                                elementPropertyInternal(tView, getTNode(tView, nodeIndex), lView, propName, value, lView[RENDERER], sanitizeFn, false);
                                 break;
                             case 0 /* Text */:
                                 textBindingInternal(lView, nodeIndex, value);
@@ -35528,7 +35512,7 @@ function i18nAttributesFirstPass(lView, tView, index, values) {
                     // Set attributes for Elements only, for other types (like ElementContainer),
                     // only set inputs below
                     if (tNode.type === 3 /* Element */) {
-                        elementAttributeInternal(previousElementIndex, attrName, value, tView, lView);
+                        elementAttributeInternal(tNode, lView, attrName, value, null, null);
                     }
                     // Check if that attribute is a directive input
                     /** @type {?} */
@@ -37803,7 +37787,7 @@ const unusedValueExportToPlacateAjd$8 = 1;
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$8;
+const unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$8;
 /**
  * @template T
  */
