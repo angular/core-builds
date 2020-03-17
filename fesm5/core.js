@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.4+61.sha-e552591
+ * @license Angular v9.1.0-next.4+62.sha-168a393
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2068,6 +2068,266 @@ var MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * This property will be monkey-patched on elements, components and directives
+ */
+var MONKEY_PATCH_KEY_NAME = '__ngContext__';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
+ * inject the `DOCUMENT` token and are done.
+ *
+ * Ivy is special because it does not rely upon the DI and must get hold of the document some other
+ * way.
+ *
+ * The solution is to define `getDocument()` and `setDocument()` top-level functions for ivy.
+ * Wherever ivy needs the global document, it calls `getDocument()` instead.
+ *
+ * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
+ * tell ivy what the global `document` is.
+ *
+ * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
+ * by calling `setDocument()` when providing the `DOCUMENT` token.
+ */
+var DOCUMENT = undefined;
+/**
+ * Tell ivy what the `document` is for this platform.
+ *
+ * It is only necessary to call this if the current platform is not a browser.
+ *
+ * @param document The object representing the global `document` in this environment.
+ */
+function setDocument(document) {
+    DOCUMENT = document;
+}
+/**
+ * Access the object that represents the `document` for this platform.
+ *
+ * Ivy calls this whenever it needs to access the `document` object.
+ * For example to create the renderer or to do sanitization.
+ */
+function getDocument() {
+    if (DOCUMENT !== undefined) {
+        return DOCUMENT;
+    }
+    else if (typeof document !== 'undefined') {
+        return document;
+    }
+    // No "document" can be found. This should only happen if we are running ivy outside Angular and
+    // the current platform is not a browser. Since this is not a supported scenario at the moment
+    // this should not happen in Angular apps.
+    // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
+    // public API. Meanwhile we just return `undefined` and let the application fail.
+    return undefined;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// TODO: cleanup once the code is merged in angular/angular
+var RendererStyleFlags3;
+(function (RendererStyleFlags3) {
+    RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
+    RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
+})(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
+/** Returns whether the `renderer` is a `ProceduralRenderer3` */
+function isProceduralRenderer(renderer) {
+    return !!(renderer.listen);
+}
+var ɵ0$2 = function (hostElement, rendererType) { return getDocument(); };
+var domRendererFactory3 = {
+    createRenderer: ɵ0$2
+};
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+var unusedValueExportToPlacateAjd$2 = 1;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
+ * in same location in `LView`. This is because we don't want to pre-allocate space for it
+ * because the storage is sparse. This file contains utilities for dealing with such data types.
+ *
+ * How do we know what is stored at a given location in `LView`.
+ * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
+ * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
+ *   - `typeof value[TYPE] === 'object'` => `LView`
+ *      - This happens when we have a component at a given location
+ *   - `typeof value[TYPE] === true` => `LContainer`
+ *      - This happens when we have `LContainer` binding at a given location.
+ *
+ *
+ * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
+ */
+/**
+ * Returns `RNode`.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
+function unwrapRNode(value) {
+    while (Array.isArray(value)) {
+        value = value[HOST];
+    }
+    return value;
+}
+/**
+ * Returns `LView` or `null` if not found.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
+function unwrapLView(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLView()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (typeof value[TYPE] === 'object')
+            return value;
+        value = value[HOST];
+    }
+    return null;
+}
+/**
+ * Returns `LContainer` or `null` if not found.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
+function unwrapLContainer(value) {
+    while (Array.isArray(value)) {
+        // This check is same as `isLContainer()` but we don't call at as we don't want to call
+        // `Array.isArray()` twice and give JITer more work for inlining.
+        if (value[TYPE] === true)
+            return value;
+        value = value[HOST];
+    }
+    return null;
+}
+/**
+ * Retrieves an element value from the provided `viewData`, by unwrapping
+ * from any containers, component views, or style contexts.
+ */
+function getNativeByIndex(index, lView) {
+    return unwrapRNode(lView[index + HEADER_OFFSET]);
+}
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param tNode
+ * @param lView
+ */
+function getNativeByTNode(tNode, lView) {
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    ngDevMode && assertDataInRange(lView, tNode.index);
+    var node = unwrapRNode(lView[tNode.index]);
+    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
+    return node;
+}
+/**
+ * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
+ *
+ * Some `TNode`s don't have associated `RNode`s. For example `Projection`
+ *
+ * @param tNode
+ * @param lView
+ */
+function getNativeByTNodeOrNull(tNode, lView) {
+    var index = tNode.index;
+    if (index !== -1) {
+        ngDevMode && assertTNodeForLView(tNode, lView);
+        var node = unwrapRNode(lView[index]);
+        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
+        return node;
+    }
+    return null;
+}
+function getTNode(tView, index) {
+    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
+    ngDevMode && assertLessThan(index, tView.data.length, 'wrong index for TNode');
+    return tView.data[index + HEADER_OFFSET];
+}
+/** Retrieves a value from any `LView` or `TData`. */
+function load(view, index) {
+    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+    return view[index + HEADER_OFFSET];
+}
+function getComponentLViewByIndex(nodeIndex, hostView) {
+    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
+    ngDevMode && assertDataInRange(hostView, nodeIndex);
+    var slotValue = hostView[nodeIndex];
+    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
+    return lView;
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ */
+function readPatchedData(target) {
+    ngDevMode && assertDefined(target, 'Target expected');
+    return target[MONKEY_PATCH_KEY_NAME] || null;
+}
+function readPatchedLView(target) {
+    var value = readPatchedData(target);
+    if (value) {
+        return Array.isArray(value) ? value : value.lView;
+    }
+    return null;
+}
+/** Checks whether a given view is in creation mode */
+function isCreationMode(view) {
+    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
+}
+/**
+ * Returns a boolean for whether the view is attached to the change detection tree.
+ *
+ * Note: This determines whether a view should be checked, not whether it's inserted
+ * into a container. For that, you'll want `viewAttachedToContainer` below.
+ */
+function viewAttachedToChangeDetector(view) {
+    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
+}
+/** Returns a boolean for whether the view is attached to a container. */
+function viewAttachedToContainer(view) {
+    return isLContainer(view[PARENT]);
+}
+/** Returns a constant from `TConstants` instance. */
+function getConstant(consts, index) {
+    return consts === null || index == null ? null : consts[index];
+}
+/**
+ * Resets the pre-order hook flags of the view.
+ * @param lView the LView on which the flags are reset
+ */
+function resetPreOrderHookFlags(lView) {
+    lView[PREORDER_HOOK_FLAGS] = 0;
+}
+function getLContainerActiveIndex(lContainer) {
+    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
+}
+function setLContainerActiveIndex(lContainer, index) {
+    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var instructionState = {
     lFrame: createLFrame(null),
     bindingsEnabled: true,
@@ -2390,6 +2650,13 @@ function getSelectedIndex() {
  */
 function setSelectedIndex(index) {
     instructionState.lFrame.selectedIndex = index;
+}
+/**
+ * Gets the `tNode` that represents currently selected element.
+ */
+function getSelectedTNode() {
+    var lFrame = instructionState.lFrame;
+    return getTNode(lFrame.tView, lFrame.selectedIndex);
 }
 /**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
@@ -2784,7 +3051,7 @@ function isFactory(obj) {
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-var unusedValueExportToPlacateAjd$2 = 1;
+var unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * @license
@@ -2821,86 +3088,6 @@ function typeName(type) {
         return 'ElementContainer';
     return '<unknown>';
 }
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
- * inject the `DOCUMENT` token and are done.
- *
- * Ivy is special because it does not rely upon the DI and must get hold of the document some other
- * way.
- *
- * The solution is to define `getDocument()` and `setDocument()` top-level functions for ivy.
- * Wherever ivy needs the global document, it calls `getDocument()` instead.
- *
- * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
- * tell ivy what the global `document` is.
- *
- * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
- * by calling `setDocument()` when providing the `DOCUMENT` token.
- */
-var DOCUMENT = undefined;
-/**
- * Tell ivy what the `document` is for this platform.
- *
- * It is only necessary to call this if the current platform is not a browser.
- *
- * @param document The object representing the global `document` in this environment.
- */
-function setDocument(document) {
-    DOCUMENT = document;
-}
-/**
- * Access the object that represents the `document` for this platform.
- *
- * Ivy calls this whenever it needs to access the `document` object.
- * For example to create the renderer or to do sanitization.
- */
-function getDocument() {
-    if (DOCUMENT !== undefined) {
-        return DOCUMENT;
-    }
-    else if (typeof document !== 'undefined') {
-        return document;
-    }
-    // No "document" can be found. This should only happen if we are running ivy outside Angular and
-    // the current platform is not a browser. Since this is not a supported scenario at the moment
-    // this should not happen in Angular apps.
-    // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
-    // public API. Meanwhile we just return `undefined` and let the application fail.
-    return undefined;
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// TODO: cleanup once the code is merged in angular/angular
-var RendererStyleFlags3;
-(function (RendererStyleFlags3) {
-    RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
-    RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
-})(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
-/** Returns whether the `renderer` is a `ProceduralRenderer3` */
-function isProceduralRenderer(renderer) {
-    return !!(renderer.listen);
-}
-var ɵ0$2 = function (hostElement, rendererType) { return getDocument(); };
-var domRendererFactory3 = {
-    createRenderer: ɵ0$2
-};
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-var unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * Assigns all attribute values to the provided element via the inferred renderer.
@@ -5042,186 +5229,6 @@ function normalizeDebugBindingValue(value) {
     catch (e) {
         return '[ERROR] Exception while trying to serialize the value';
     }
-}
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This property will be monkey-patched on elements, components and directives
- */
-var MONKEY_PATCH_KEY_NAME = '__ngContext__';
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
- * in same location in `LView`. This is because we don't want to pre-allocate space for it
- * because the storage is sparse. This file contains utilities for dealing with such data types.
- *
- * How do we know what is stored at a given location in `LView`.
- * - `Array.isArray(value) === false` => `RNode` (The normal storage value)
- * - `Array.isArray(value) === true` => then the `value[0]` represents the wrapped value.
- *   - `typeof value[TYPE] === 'object'` => `LView`
- *      - This happens when we have a component at a given location
- *   - `typeof value[TYPE] === true` => `LContainer`
- *      - This happens when we have `LContainer` binding at a given location.
- *
- *
- * NOTE: it is assumed that `Array.isArray` and `typeof` operations are very efficient.
- */
-/**
- * Returns `RNode`.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapRNode(value) {
-    while (Array.isArray(value)) {
-        value = value[HOST];
-    }
-    return value;
-}
-/**
- * Returns `LView` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapLView(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLView()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (typeof value[TYPE] === 'object')
-            return value;
-        value = value[HOST];
-    }
-    return null;
-}
-/**
- * Returns `LContainer` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapLContainer(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLContainer()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (value[TYPE] === true)
-            return value;
-        value = value[HOST];
-    }
-    return null;
-}
-/**
- * Retrieves an element value from the provided `viewData`, by unwrapping
- * from any containers, component views, or style contexts.
- */
-function getNativeByIndex(index, lView) {
-    return unwrapRNode(lView[index + HEADER_OFFSET]);
-}
-/**
- * Retrieve an `RNode` for a given `TNode` and `LView`.
- *
- * This function guarantees in dev mode to retrieve a non-null `RNode`.
- *
- * @param tNode
- * @param lView
- */
-function getNativeByTNode(tNode, lView) {
-    ngDevMode && assertTNodeForLView(tNode, lView);
-    ngDevMode && assertDataInRange(lView, tNode.index);
-    var node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
-    return node;
-}
-/**
- * Retrieve an `RNode` or `null` for a given `TNode` and `LView`.
- *
- * Some `TNode`s don't have associated `RNode`s. For example `Projection`
- *
- * @param tNode
- * @param lView
- */
-function getNativeByTNodeOrNull(tNode, lView) {
-    var index = tNode.index;
-    if (index !== -1) {
-        ngDevMode && assertTNodeForLView(tNode, lView);
-        var node = unwrapRNode(lView[index]);
-        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
-        return node;
-    }
-    return null;
-}
-function getTNode(tView, index) {
-    ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
-    ngDevMode && assertLessThan(index, tView.data.length, 'wrong index for TNode');
-    return tView.data[index + HEADER_OFFSET];
-}
-/** Retrieves a value from any `LView` or `TData`. */
-function load(view, index) {
-    ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
-}
-function getComponentLViewByIndex(nodeIndex, hostView) {
-    // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-    ngDevMode && assertDataInRange(hostView, nodeIndex);
-    var slotValue = hostView[nodeIndex];
-    var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
-    return lView;
-}
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-function readPatchedData(target) {
-    ngDevMode && assertDefined(target, 'Target expected');
-    return target[MONKEY_PATCH_KEY_NAME] || null;
-}
-function readPatchedLView(target) {
-    var value = readPatchedData(target);
-    if (value) {
-        return Array.isArray(value) ? value : value.lView;
-    }
-    return null;
-}
-/** Checks whether a given view is in creation mode */
-function isCreationMode(view) {
-    return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
-}
-/**
- * Returns a boolean for whether the view is attached to the change detection tree.
- *
- * Note: This determines whether a view should be checked, not whether it's inserted
- * into a container. For that, you'll want `viewAttachedToContainer` below.
- */
-function viewAttachedToChangeDetector(view) {
-    return (view[FLAGS] & 128 /* Attached */) === 128 /* Attached */;
-}
-/** Returns a boolean for whether the view is attached to a container. */
-function viewAttachedToContainer(view) {
-    return isLContainer(view[PARENT]);
-}
-/** Returns a constant from `TConstants` instance. */
-function getConstant(consts, index) {
-    return consts === null || index == null ? null : consts[index];
-}
-/**
- * Resets the pre-order hook flags of the view.
- * @param lView the LView on which the flags are reset
- */
-function resetPreOrderHookFlags(lView) {
-    lView[PREORDER_HOOK_FLAGS] = 0;
-}
-function getLContainerActiveIndex(lContainer) {
-    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
-}
-function setLContainerActiveIndex(lContainer, index) {
-    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
 }
 
 /**
@@ -7929,16 +7936,15 @@ function mapPropName(name) {
         return 'tabIndex';
     return name;
 }
-function elementPropertyInternal(tView, lView, index, propName, value, sanitizer, nativeOnly, loadRendererFn) {
+function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    var element = getNativeByIndex(index, lView);
-    var tNode = getTNode(tView, index);
+    var element = getNativeByTNode(tNode, lView);
     var inputData = tNode.inputs;
     var dataValue;
     if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
         setInputsForProperty(tView, lView, dataValue, propName, value);
         if (isComponentHost(tNode))
-            markDirtyIfOnPush(lView, index + HEADER_OFFSET);
+            markDirtyIfOnPush(lView, tNode.index);
         if (ngDevMode) {
             setNgReflectProperties(lView, element, tNode.type, dataValue, value);
         }
@@ -7954,7 +7960,6 @@ function elementPropertyInternal(tView, lView, index, propName, value, sanitizer
             }
             ngDevMode.rendererSetProperty++;
         }
-        var renderer = loadRendererFn ? loadRendererFn(tNode, lView) : lView[RENDERER];
         // It is assumed that the sanitizer is only added when the compiler determines that the
         // property is risky, so sanitization can be done without further checks.
         value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
@@ -8364,10 +8369,10 @@ function addComponentLogic(lView, hostTNode, def) {
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
 }
-function elementAttributeInternal(index, name, value, tView, lView, sanitizer, namespace) {
+function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     ngDevMode && validateAgainstEventAttributes(name);
-    var element = getNativeByIndex(index, lView);
+    var element = getNativeByTNode(tNode, lView);
     var renderer = lView[RENDERER];
     if (value == null) {
         ngDevMode && ngDevMode.rendererRemoveAttribute++;
@@ -8376,7 +8381,6 @@ function elementAttributeInternal(index, name, value, tView, lView, sanitizer, n
     }
     else {
         ngDevMode && ngDevMode.rendererSetAttribute++;
-        var tNode = getTNode(tView, index);
         var strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
         if (isProceduralRenderer(renderer)) {
             renderer.setAttribute(element, name, strValue, namespace);
@@ -8783,12 +8787,12 @@ function executeViewQueryFn(flags, viewQueryFn, component) {
  * interpolated properties.
  *
  * @param tData `TData` where meta-data will be saved;
- * @param nodeIndex index of a `TNode` that is a target of the binding;
+ * @param tNode `TNode` that is a target of the binding;
  * @param propertyName bound property name;
  * @param bindingIndex binding index in `LView`
  * @param interpolationParts static interpolation parts (for property interpolations)
  */
-function storePropertyBindingMetadata(tData, nodeIndex, propertyName, bindingIndex) {
+function storePropertyBindingMetadata(tData, tNode, propertyName, bindingIndex) {
     var interpolationParts = [];
     for (var _i = 4; _i < arguments.length; _i++) {
         interpolationParts[_i - 4] = arguments[_i];
@@ -8797,7 +8801,6 @@ function storePropertyBindingMetadata(tData, nodeIndex, propertyName, bindingInd
     // Since we don't have a concept of the "first update pass" we need to check for presence of the
     // binding meta-data to decide if one should be stored (or if was stored already).
     if (tData[bindingIndex] === null) {
-        var tNode = tData[nodeIndex + HEADER_OFFSET];
         if (tNode.inputs == null || !tNode.inputs[propertyName]) {
             var propBindingIdxs = tNode.propertyBindings || (tNode.propertyBindings = []);
             propBindingIdxs.push(bindingIndex);
@@ -8876,7 +8879,7 @@ function textBindingInternal(lView, index, value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd;
+var unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd;
 function getLContainer(tNode, embeddedView) {
     ngDevMode && assertLView(embeddedView);
     var container = embeddedView[PARENT];
@@ -13351,10 +13354,10 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     var lView = getLView();
     var bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementAttributeInternal(nodeIndex, name, value, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + name, bindingIndex);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, 'attr.' + name, bindingIndex);
     }
     return ɵɵattribute;
 }
@@ -13524,11 +13527,10 @@ function ɵɵattributeInterpolate1(attrName, prefix, v0, suffix, sanitizer, name
     var lView = getLView();
     var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵattributeInterpolate1;
 }
@@ -13562,11 +13564,10 @@ function ɵɵattributeInterpolate2(attrName, prefix, v0, i0, v1, suffix, sanitiz
     var lView = getLView();
     var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix);
+            storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 2, prefix, i0, suffix);
     }
     return ɵɵattributeInterpolate2;
 }
@@ -13603,10 +13604,9 @@ function ɵɵattributeInterpolate3(attrName, prefix, v0, i0, v1, i1, v2, suffix,
     var lView = getLView();
     var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
     return ɵɵattributeInterpolate3;
 }
@@ -13645,10 +13645,9 @@ function ɵɵattributeInterpolate4(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
     return ɵɵattributeInterpolate4;
 }
@@ -13689,10 +13688,9 @@ function ɵɵattributeInterpolate5(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
     return ɵɵattributeInterpolate5;
 }
@@ -13735,10 +13733,9 @@ function ɵɵattributeInterpolate6(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
     return ɵɵattributeInterpolate6;
 }
@@ -13783,10 +13780,9 @@ function ɵɵattributeInterpolate7(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
     return ɵɵattributeInterpolate7;
 }
@@ -13833,10 +13829,9 @@ function ɵɵattributeInterpolate8(attrName, prefix, v0, i0, v1, i1, v2, i2, v3,
     var lView = getLView();
     var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
-        var tView = getTView();
-        elementAttributeInternal(nodeIndex, attrName, interpolatedValue, tView, lView, sanitizer, namespace);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolatedValue, sanitizer, namespace);
+        ngDevMode && storePropertyBindingMetadata(getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
     return ɵɵattributeInterpolate8;
 }
@@ -13870,15 +13865,14 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
     var lView = getLView();
     var interpolated = interpolationV(lView, values);
     if (interpolated !== NO_CHANGE) {
-        var tView = getTView();
-        var nodeIndex = getSelectedIndex();
-        elementAttributeInternal(nodeIndex, attrName, interpolated, tView, lView, sanitizer, namespace);
+        var tNode = getSelectedTNode();
+        elementAttributeInternal(tNode, lView, attrName, interpolated, sanitizer, namespace);
         if (ngDevMode) {
             var interpolationInBetween = [values[0]]; // prefix
             for (var i = 2; i < values.length; i += 2) {
                 interpolationInBetween.push(values[i]);
             }
-            storePropertyBindingMetadata.apply(void 0, __spread([tView.data, nodeIndex, 'attr.' + attrName,
+            storePropertyBindingMetadata.apply(void 0, __spread([getTView().data, tNode, 'attr.' + attrName,
                 getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
         }
     }
@@ -14200,10 +14194,10 @@ function ɵɵproperty(propName, value, sanitizer) {
     var lView = getLView();
     var bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, bindingIndex);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵproperty;
 }
@@ -15091,10 +15085,10 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     var lView = getLView();
     var interpolatedValue = interpolation1(lView, prefix, v0, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 1, prefix, suffix);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix);
     }
     return ɵɵpropertyInterpolate1;
 }
@@ -15132,10 +15126,10 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
     var lView = getLView();
     var interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 2, prefix, i0, suffix);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix);
     }
     return ɵɵpropertyInterpolate2;
 }
@@ -15176,11 +15170,10 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
     var lView = getLView();
     var interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
     return ɵɵpropertyInterpolate3;
 }
@@ -15223,11 +15216,11 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     var lView = getLView();
     var interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
     return ɵɵpropertyInterpolate4;
 }
@@ -15272,11 +15265,11 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     var lView = getLView();
     var interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         ngDevMode &&
-            storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
     return ɵɵpropertyInterpolate5;
 }
@@ -15323,10 +15316,11 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     var lView = getLView();
     var interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
     return ɵɵpropertyInterpolate6;
 }
@@ -15375,10 +15369,10 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     var lView = getLView();
     var interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
     return ɵɵpropertyInterpolate7;
 }
@@ -15429,10 +15423,10 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     var lView = getLView();
     var interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
     return ɵɵpropertyInterpolate8;
 }
@@ -15470,15 +15464,15 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     var lView = getLView();
     var interpolatedValue = interpolationV(lView, values);
     if (interpolatedValue !== NO_CHANGE) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, interpolatedValue, sanitizer);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
         if (ngDevMode) {
             var interpolationInBetween = [values[0]]; // prefix
             for (var i = 2; i < values.length; i += 2) {
                 interpolationInBetween.push(values[i]);
             }
-            storePropertyBindingMetadata.apply(void 0, __spread([tView.data, nodeIndex, propName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+            storePropertyBindingMetadata.apply(void 0, __spread([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
         }
     }
     return ɵɵpropertyInterpolateV;
@@ -18326,10 +18320,10 @@ function ɵɵhostProperty(propName, value, sanitizer) {
     var lView = getLView();
     var bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizer, true);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, bindingIndex);
+        var tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, true);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵhostProperty;
 }
@@ -18358,10 +18352,11 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
     var lView = getLView();
     var bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
-        var nodeIndex = getSelectedIndex();
         var tView = getTView();
-        elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizer, true, loadComponentRenderer);
-        ngDevMode && storePropertyBindingMetadata(tView.data, nodeIndex, propName, bindingIndex);
+        var tNode = getSelectedTNode();
+        var renderer = loadComponentRenderer(tNode, lView);
+        elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵupdateSyntheticHostBinding;
 }
@@ -19921,7 +19916,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.0-next.4+61.sha-e552591');
+var VERSION = new Version('9.1.0-next.4+62.sha-168a393');
 
 /**
  * @license
@@ -23937,7 +23932,7 @@ function readCreateOpCodes(index, createOpCodes, tView, lView) {
                     var attrValue = createOpCodes[++i];
                     // This code is used for ICU expressions only, since we don't support
                     // directives/components in ICUs, we don't need to worry about inputs here
-                    elementAttributeInternal(elementNodeIndex, attrName, attrValue, tView, lView);
+                    elementAttributeInternal(getTNode(tView, elementNodeIndex), lView, attrName, attrValue, null, null);
                     break;
                 default:
                     throw new Error("Unable to determine the type of mutate operation for \"" + opCode + "\"");
@@ -24007,7 +24002,7 @@ function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, 
                             case 1 /* Attr */:
                                 var propName = updateOpCodes[++j];
                                 var sanitizeFn = updateOpCodes[++j];
-                                elementPropertyInternal(tView, lView, nodeIndex, propName, value, sanitizeFn);
+                                elementPropertyInternal(tView, getTNode(tView, nodeIndex), lView, propName, value, lView[RENDERER], sanitizeFn, false);
                                 break;
                             case 0 /* Text */:
                                 textBindingInternal(lView, nodeIndex, value);
@@ -24161,7 +24156,7 @@ function i18nAttributesFirstPass(lView, tView, index, values) {
                     // Set attributes for Elements only, for other types (like ElementContainer),
                     // only set inputs below
                     if (tNode.type === 3 /* Element */) {
-                        elementAttributeInternal(previousElementIndex, attrName, value, tView, lView);
+                        elementAttributeInternal(tNode, lView, attrName, value, null, null);
                     }
                     // Check if that attribute is a directive input
                     var dataValue = tNode.inputs !== null && tNode.inputs[attrName];
@@ -25480,7 +25475,7 @@ var unusedValueExportToPlacateAjd$8 = 1;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$8;
+var unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$8;
 var LQuery_ = /** @class */ (function () {
     function LQuery_(queryList) {
         this.queryList = queryList;
