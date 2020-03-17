@@ -146,7 +146,7 @@ export declare function storeCleanupFn(tView: TView, lView: LView, cleanupFn: Fu
  * @returns the TNode object
  */
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
-export declare function elementPropertyInternal<T>(tView: TView, lView: LView, index: number, propName: string, value: T, sanitizer?: SanitizerFn | null, nativeOnly?: boolean, loadRendererFn?: ((tNode: TNode, lView: LView) => Renderer3) | null): void;
+export declare function elementPropertyInternal<T>(tView: TView, tNode: TNode, lView: LView, propName: string, value: T, renderer: Renderer3, sanitizer: SanitizerFn | null | undefined, nativeOnly: boolean): void;
 export declare function setNgReflectProperties(lView: LView, element: RElement | RComment, type: TNodeType, dataValue: PropertyAliasValue, value: any): void;
 export declare function matchingSchemas(tView: TView, lView: LView, tagName: string | null): boolean;
 /**
@@ -202,7 +202,7 @@ export declare function markAsComponentHost(tView: TView, hostTNode: TNode): voi
  * @param index the initial index
  */
 export declare function initTNodeFlags(tNode: TNode, index: number, numberOfDirectives: number): void;
-export declare function elementAttributeInternal(index: number, name: string, value: any, tView: TView, lView: LView, sanitizer?: SanitizerFn | null, namespace?: string): void;
+export declare function elementAttributeInternal(tNode: TNode, lView: LView, name: string, value: any, sanitizer: SanitizerFn | null | undefined, namespace: string | null | undefined): void;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -285,12 +285,12 @@ export declare function checkNoChangesInRootView(lView: LView): void;
  * interpolated properties.
  *
  * @param tData `TData` where meta-data will be saved;
- * @param nodeIndex index of a `TNode` that is a target of the binding;
+ * @param tNode `TNode` that is a target of the binding;
  * @param propertyName bound property name;
  * @param bindingIndex binding index in `LView`
  * @param interpolationParts static interpolation parts (for property interpolations)
  */
-export declare function storePropertyBindingMetadata(tData: TData, nodeIndex: number, propertyName: string, bindingIndex: number, ...interpolationParts: string[]): void;
+export declare function storePropertyBindingMetadata(tData: TData, tNode: TNode, propertyName: string, bindingIndex: number, ...interpolationParts: string[]): void;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare function getLCleanup(view: LView): any[];
 /**

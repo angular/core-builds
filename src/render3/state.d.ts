@@ -294,6 +294,10 @@ export declare function getSelectedIndex(): number;
  */
 export declare function setSelectedIndex(index: number): void;
 /**
+ * Gets the `tNode` that represents currently selected element.
+ */
+export declare function getSelectedTNode(): TNode;
+/**
  * Sets the namespace used to create elements to `'http://www.w3.org/2000/svg'` in global state.
  *
  * @codeGenApi
