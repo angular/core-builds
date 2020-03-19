@@ -9,6 +9,7 @@ export { ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵ
 export { compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, } from './render3/jit/directive';
 export { compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, transitiveScopesFor as ɵtransitiveScopesFor, } from './render3/jit/module';
 export { compilePipe as ɵcompilePipe, } from './render3/jit/pipe';
+export { resetJitOptions as ɵresetJitOptions, } from './render3/jit/jit_options';
 export { NgModuleDef as ɵNgModuleDef, ɵɵNgModuleDefWithMeta, NgModuleTransitiveScopes as ɵNgModuleTransitiveScopes, } from './metadata/ng_module';
 export { ɵɵsanitizeHtml, ɵɵsanitizeStyle, ɵɵdefaultStyleSanitizer, ɵɵsanitizeScript, ɵɵsanitizeUrl, ɵɵsanitizeResourceUrl, ɵɵsanitizeUrlOrResourceUrl, } from './sanitization/sanitization';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, } from './sanitization/bypass';

@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import './util/ng_jit_mode';
 import { Observable } from 'rxjs';
 import { InjectionToken, Injector, StaticProvider } from './di';
 import { Type } from './interface/type';

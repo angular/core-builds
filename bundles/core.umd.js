@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-next.5+7.sha-c0143cb
+ * @license Angular v9.1.0-next.5+9.sha-fb92f5d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20038,7 +20038,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.0-next.5+7.sha-c0143cb');
+    var VERSION = new Version('9.1.0-next.5+9.sha-fb92f5d');
 
     /**
      * @license
@@ -26272,6 +26272,29 @@
         'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
     }); })();
 
+    var jitOptions = null;
+    function setJitOptions(options) {
+        if (jitOptions !== null) {
+            if (options.defaultEncapsulation !== jitOptions.defaultEncapsulation) {
+                ngDevMode &&
+                    console.error('Provided value for `defaultEncapsulation` can not be changed once it has been set.');
+                return;
+            }
+            if (options.preserveWhitespaces !== jitOptions.preserveWhitespaces) {
+                ngDevMode &&
+                    console.error('Provided value for `preserveWhitespaces` can not be changed once it has been set.');
+                return;
+            }
+        }
+        jitOptions = options;
+    }
+    function getJitOptions() {
+        return jitOptions;
+    }
+    function resetJitOptions() {
+        jitOptions = null;
+    }
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -26764,8 +26787,27 @@
                         error.push("Did you run and wait for 'resolveComponentResources()'?");
                         throw new Error(error.join('\n'));
                     }
+                    var jitOptions = getJitOptions();
+                    var preserveWhitespaces = metadata.preserveWhitespaces;
+                    if (preserveWhitespaces === undefined) {
+                        if (jitOptions !== null && jitOptions.preserveWhitespaces !== undefined) {
+                            preserveWhitespaces = jitOptions.preserveWhitespaces;
+                        }
+                        else {
+                            preserveWhitespaces = false;
+                        }
+                    }
+                    var encapsulation = metadata.encapsulation;
+                    if (encapsulation === undefined) {
+                        if (jitOptions !== null && jitOptions.defaultEncapsulation !== undefined) {
+                            encapsulation = jitOptions.defaultEncapsulation;
+                        }
+                        else {
+                            encapsulation = exports.ViewEncapsulation.Emulated;
+                        }
+                    }
                     var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
-                    var meta = __assign(__assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: metadata.preserveWhitespaces || false, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: metadata.encapsulation || exports.ViewEncapsulation.Emulated, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    var meta = __assign(__assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     if (meta.usesInheritance) {
                         addDirectiveDefToUndecoratedParents(type);
                     }
@@ -27154,6 +27196,14 @@
     var SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule;
     var SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;
     var SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__POST_R3__;
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
 
     /**
      * @license
@@ -28222,11 +28272,20 @@
     }
     function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
         ngDevMode && assertNgModuleType(moduleType);
+        var compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
+        if (typeof ngJitMode === 'undefined' || ngJitMode) {
+            // Configure the compiler to use the provided options. This call may fail when multiple modules
+            // are bootstrapped with incompatible options, as a component can only be compiled according to
+            // a single set of options.
+            setJitOptions({
+                defaultEncapsulation: _lastDefined(compilerOptions.map(function (options) { return options.defaultEncapsulation; })),
+                preserveWhitespaces: _lastDefined(compilerOptions.map(function (options) { return options.preserveWhitespaces; })),
+            });
+        }
         var moduleFactory = new NgModuleFactory$1(moduleType);
         if (isComponentResourceResolutionQueueEmpty()) {
             return Promise.resolve(moduleFactory);
         }
-        var compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
         var compilerProviders = _mergeArrays(compilerOptions.map(function (o) { return o.providers; }));
         // In case there are no compiler providers, we just return the module factory as
         // there won't be any resource loader. This can happen with Ivy, because AOT compiled
@@ -28855,6 +28914,14 @@
         if (index > -1) {
             list.splice(index, 1);
         }
+    }
+    function _lastDefined(args) {
+        for (var i = args.length - 1; i >= 0; i--) {
+            if (args[i] !== undefined) {
+                return args[i];
+            }
+        }
+        return undefined;
     }
     function _mergeArrays(parts) {
         var result = [];
@@ -32505,6 +32572,7 @@
     exports.ɵregisterNgModuleType = registerNgModuleType;
     exports.ɵrenderComponent = renderComponent$1;
     exports.ɵresetCompiledComponents = resetCompiledComponents;
+    exports.ɵresetJitOptions = resetJitOptions;
     exports.ɵresolveComponentResources = resolveComponentResources;
     exports.ɵsetClassMetadata = setClassMetadata;
     exports.ɵsetCurrentInjector = setCurrentInjector;
