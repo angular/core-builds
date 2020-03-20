@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.0
+ * @license Angular v9.1.0-rc.0+1.sha-47bfec4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9916,7 +9916,7 @@ export declare function ɵisObservable(obj: any | Observable<any>): obj is Obser
 /**
  * Determine if the argument is shaped like a Promise
  */
-export declare function ɵisPromise(obj: any): obj is Promise<any>;
+export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
 
 export declare const ɵivyEnabled = false;
 
