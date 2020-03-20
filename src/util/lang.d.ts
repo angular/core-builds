@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 /**
  * Determine if the argument is shaped like a Promise
  */
-export declare function isPromise(obj: any): obj is Promise<any>;
+export declare function isPromise<T = any>(obj: any): obj is Promise<T>;
 /**
  * Determine if the argument is an Observable
  */
