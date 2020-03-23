@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.0+12.sha-528e25a
+ * @license Angular v9.1.0-rc.0+13.sha-0ce8ad3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19885,7 +19885,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.0-rc.0+12.sha-528e25a');
+var VERSION = new Version('9.1.0-rc.0+13.sha-0ce8ad3');
 
 /**
  * @license
@@ -26638,11 +26638,15 @@ function compileComponent(type, metadata) {
                     error.push("Did you run and wait for 'resolveComponentResources()'?");
                     throw new Error(error.join('\n'));
                 }
-                var jitOptions = getJitOptions();
+                // This const was called `jitOptions` previously but had to be renamed to `options` because
+                // of a bug with Terser that caused optimized JIT builds to throw a `ReferenceError`.
+                // This bug was investigated in https://github.com/angular/angular-cli/issues/17264.
+                // We should not rename it back until https://github.com/terser/terser/issues/615 is fixed.
+                var options = getJitOptions();
                 var preserveWhitespaces = metadata.preserveWhitespaces;
                 if (preserveWhitespaces === undefined) {
-                    if (jitOptions !== null && jitOptions.preserveWhitespaces !== undefined) {
-                        preserveWhitespaces = jitOptions.preserveWhitespaces;
+                    if (options !== null && options.preserveWhitespaces !== undefined) {
+                        preserveWhitespaces = options.preserveWhitespaces;
                     }
                     else {
                         preserveWhitespaces = false;
@@ -26650,8 +26654,8 @@ function compileComponent(type, metadata) {
                 }
                 var encapsulation = metadata.encapsulation;
                 if (encapsulation === undefined) {
-                    if (jitOptions !== null && jitOptions.defaultEncapsulation !== undefined) {
-                        encapsulation = jitOptions.defaultEncapsulation;
+                    if (options !== null && options.defaultEncapsulation !== undefined) {
+                        encapsulation = options.defaultEncapsulation;
                     }
                     else {
                         encapsulation = ViewEncapsulation$1.Emulated;
