@@ -35,7 +35,7 @@ export declare class TestingCompiler extends Compiler {
      * This can be used for errors created by compileModule...
      */
     getComponentFromError(error: Error): Type<any> | null;
-    static ɵfac: i0.ɵɵFactoryDef<TestingCompiler>;
+    static ɵfac: i0.ɵɵFactoryDef<TestingCompiler, never>;
     static ɵprov: i0.ɵɵInjectableDef<TestingCompiler>;
 }
 /**

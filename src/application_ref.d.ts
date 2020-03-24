@@ -167,7 +167,7 @@ export declare class PlatformRef {
      */
     destroy(): void;
     get destroyed(): boolean;
-    static ɵfac: i0.ɵɵFactoryDef<PlatformRef>;
+    static ɵfac: i0.ɵɵFactoryDef<PlatformRef, never>;
     static ɵprov: i0.ɵɵInjectableDef<PlatformRef>;
 }
 /**
@@ -333,6 +333,6 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     get viewCount(): number;
-    static ɵfac: i0.ɵɵFactoryDef<ApplicationRef>;
+    static ɵfac: i0.ɵɵFactoryDef<ApplicationRef, never>;
     static ɵprov: i0.ɵɵInjectableDef<ApplicationRef>;
 }

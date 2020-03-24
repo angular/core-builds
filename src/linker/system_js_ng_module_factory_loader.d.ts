@@ -33,6 +33,6 @@ export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     load(path: string): Promise<NgModuleFactory<any>>;
     private loadAndCompile;
     private loadFactory;
-    static ɵfac: i0.ɵɵFactoryDef<SystemJsNgModuleLoader>;
+    static ɵfac: i0.ɵɵFactoryDef<SystemJsNgModuleLoader, [null, { optional: true; }]>;
     static ɵprov: i0.ɵɵInjectableDef<SystemJsNgModuleLoader>;
 }

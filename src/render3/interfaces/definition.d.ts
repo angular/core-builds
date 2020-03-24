@@ -74,6 +74,34 @@ export interface PipeType<T> extends Type<T> {
     ɵpipe: never;
 }
 /**
+ * An object literal of this type is used to represent the metadata of a constructor dependency.
+ * The type itself is never referred to from generated code.
+ */
+export declare type CtorDependency = {
+    /**
+     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
+     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
+     * type.
+     */
+    attribute?: string | unknown;
+    /**
+     * If `@Optional()` is used, this key is set to true.
+     */
+    optional?: true;
+    /**
+     * If `@Host` is used, this key is set to true.
+     */
+    host?: true;
+    /**
+     * If `@Self` is used, this key is set to true.
+     */
+    self?: true;
+    /**
+     * If `@SkipSelf` is used, this key is set to true.
+     */
+    skipSelf?: true;
+} | null;
+/**
  * @codeGenApi
  */
 export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
@@ -207,11 +235,11 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = ComponentDef<T>;
+}, QueryFields extends string[], NgContentSelectors extends string[]> = ComponentDef<T>;
 /**
  * @codeGenApi
  */
-export declare type ɵɵFactoryDef<T> = () => T;
+export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
 /**
  * Runtime link information for Components.
  *

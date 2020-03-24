@@ -6,6 +6,6 @@ export declare class Log {
     fn(value: any /** TODO #9100 */): (a1?: any, a2?: any, a3?: any, a4?: any, a5?: any) => void;
     clear(): void;
     result(): string;
-    static ɵfac: i0.ɵɵFactoryDef<Log>;
+    static ɵfac: i0.ɵɵFactoryDef<Log, never>;
     static ɵprov: i0.ɵɵInjectableDef<Log>;
 }

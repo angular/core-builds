@@ -61,7 +61,7 @@ export declare class Compiler {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     getModuleId(moduleType: Type<any>): string | undefined;
-    static ɵfac: i0.ɵɵFactoryDef<Compiler>;
+    static ɵfac: i0.ɵɵFactoryDef<Compiler, never>;
     static ɵprov: i0.ɵɵInjectableDef<Compiler>;
 }
 /**
