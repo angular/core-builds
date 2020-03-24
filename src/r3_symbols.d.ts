@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.1+10.sha-c9c2408
+ * @license Angular v9.1.0-rc.1+13.sha-407fa42
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -311,6 +311,35 @@ declare interface ConstructorSansProvider {
      */
     deps?: any[];
 }
+
+/**
+ * An object literal of this type is used to represent the metadata of a constructor dependency.
+ * The type itself is never referred to from generated code.
+ */
+declare type CtorDependency = {
+    /**
+     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
+     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
+     * type.
+     */
+    attribute?: string | unknown;
+    /**
+     * If `@Optional()` is used, this key is set to true.
+     */
+    optional?: true;
+    /**
+     * If `@Host` is used, this key is set to true.
+     */
+    host?: true;
+    /**
+     * If `@Self` is used, this key is set to true.
+     */
+    self?: true;
+    /**
+     * If `@SkipSelf` is used, this key is set to true.
+     */
+    skipSelf?: true;
+} | null;
 
 /**
  * A wrapper around a native element inside of a View.
@@ -961,7 +990,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
 /**
  * @codeGenApi
  */
-export declare type ɵɵFactoryDef<T> = () => T;
+export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
 
 /**
  * Generated instruction: Injects a token from the currently active injector.

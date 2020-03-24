@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.1+10.sha-c9c2408
+ * @license Angular v9.1.0-rc.1+13.sha-407fa42
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1472,6 +1472,35 @@ export declare function createPlatformFactory(parentPlatformFactory: ((extraProv
  * See more examples in node_selector_matcher_spec.ts
  */
 declare type CssSelector = (string | SelectorFlags)[];
+
+/**
+ * An object literal of this type is used to represent the metadata of a constructor dependency.
+ * The type itself is never referred to from generated code.
+ */
+declare type CtorDependency = {
+    /**
+     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
+     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
+     * type.
+     */
+    attribute?: string | unknown;
+    /**
+     * If `@Optional()` is used, this key is set to true.
+     */
+    optional?: true;
+    /**
+     * If `@Host` is used, this key is set to true.
+     */
+    host?: true;
+    /**
+     * If `@Self` is used, this key is set to true.
+     */
+    self?: true;
+    /**
+     * If `@SkipSelf` is used, this key is set to true.
+     */
+    skipSelf?: true;
+} | null;
 
 /**
  * Defines a schema that allows an NgModule to contain the following:
@@ -11372,7 +11401,7 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = ɵComponentDef<T>;
+}, QueryFields extends string[], NgContentSelectors extends string[]> = ɵComponentDef<T>;
 
 /**
 * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
@@ -12121,7 +12150,7 @@ export declare function ɵɵenableBindings(): void;
 /**
  * @codeGenApi
  */
-export declare type ɵɵFactoryDef<T> = () => T;
+export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
 
 /**
  * Returns the current OpaqueViewState instance.
