@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.0+44.sha-1c385a1
+ * @license Angular v9.1.0-rc.0+53.sha-2d0847c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1453,12 +1453,14 @@
             this.componentToModuleScope.clear();
             var parentInjector = this.platform.injector;
             this.testModuleRef = new core.ɵRender3NgModuleRef(this.testModuleType, parentInjector);
-            // Set the locale ID, it can be overridden for the tests
-            var localeId = this.testModuleRef.injector.get(core.LOCALE_ID, core.ɵDEFAULT_LOCALE_ID);
-            core.ɵsetLocaleId(localeId);
             // ApplicationInitStatus.runInitializers() is marked @internal to core.
             // Cast it to any before accessing it.
             this.testModuleRef.injector.get(core.ApplicationInitStatus).runInitializers();
+            // Set locale ID after running app initializers, since locale information might be updated while
+            // running initializers. This is also consistent with the execution order while bootstrapping an
+            // app (see `packages/core/src/application_ref.ts` file).
+            var localeId = this.testModuleRef.injector.get(core.LOCALE_ID, core.ɵDEFAULT_LOCALE_ID);
+            core.ɵsetLocaleId(localeId);
             return this.testModuleRef;
         };
         /**
