@@ -21,11 +21,6 @@ var angular$packages$core$src$render3$util$global_utils = {};
 angular$packages$core$src$render3$util$global_utils.GlobalDevModeContainer;
 // externs from ERROR: getGeneratedExterns called without rootDir:
 /** @const */
-var angular$packages$core$src$linker$system_js_ng_module_factory_loader = {};
-/** @type {?} */
-var System;
-// externs from ERROR: getGeneratedExterns called without rootDir:
-/** @const */
 var angular$packages$core$src$testability$testability = {};
 /**
  * @record
@@ -53,6 +48,11 @@ angular$packages$core$src$testability$testability.PublicTestability.prototype.wh
  * @return {?}
  */
 angular$packages$core$src$testability$testability.PublicTestability.prototype.findProviders = function(using, provider, exactMatch) {};
+// externs from ERROR: getGeneratedExterns called without rootDir:
+/** @const */
+var angular$packages$core$src$linker$system_js_ng_module_factory_loader = {};
+/** @type {?} */
+var System;
 // externs from ERROR: getGeneratedExterns called without rootDir:
 /** @const */
 var angular$packages$core$src$application_module = {};

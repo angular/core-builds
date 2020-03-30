@@ -29,14 +29,14 @@ export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TElementNode | TViewNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: HookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null): {
+    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TViewNode | TElementNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: HookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null): {
         type: TViewType;
         id: number;
         blueprint: LView;
         template: ComponentTemplate<{}> | null;
         queries: TQueries | null;
         viewQuery: ViewQueriesFunction<{}> | null;
-        node: TElementNode | TViewNode | null;
+        node: TViewNode | TElementNode | null;
         data: TData;
         bindingStartIndex: number;
         expandoStartIndex: number;
@@ -199,7 +199,7 @@ export declare class LViewDebug {
     get childTail(): LViewDebug | LContainerDebug | null;
     get declarationView(): LViewDebug | null;
     get queries(): import("@angular/core/src/render3/interfaces/query").LQueries | null;
-    get tHost(): TElementNode | TViewNode | null;
+    get tHost(): TViewNode | TElementNode | null;
     /**
      * Normalized view of child views (and containers) attached at this location.
      */
