@@ -247,11 +247,11 @@ export class IterableDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ IterableDiffers.ɵprov = ɵɵdefineInjectable({
+IterableDiffers.ɵprov = ɵɵdefineInjectable({
     token: IterableDiffers,
     providedIn: 'root',
     factory: (/**
-     * @nocollapse @return {?}
+     * @return {?}
      */
     () => new IterableDiffers([new DefaultIterableDifferFactory()]))
 });
