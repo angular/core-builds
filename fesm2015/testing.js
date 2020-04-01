@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0+43.sha-cb0a2a0
+ * @license Angular v9.1.0+49.sha-c3ce190
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1942,7 +1942,7 @@ class R3TestBedCompiler {
          * @return {?}
          */
         (factories, declaration) => {
-            /** @nocollapse @type {?} */
+            /** @type {?} */
             const componentDef = ((/** @type {?} */ (declaration))).ɵcmp;
             componentDef && factories.push(new ɵRender3ComponentFactory(componentDef, (/** @type {?} */ (this.testModuleRef))));
             return factories;
@@ -2236,7 +2236,7 @@ class R3TestBedCompiler {
                     queueTypesFromModulesArrayRecur(value);
                 }
                 else if (hasNgModuleDef(value)) {
-                    /** @nocollapse @type {?} */
+                    /** @type {?} */
                     const def = value.ɵmod;
                     if (processedNgModuleDefs.has(def)) {
                         continue;
@@ -3202,7 +3202,7 @@ class TestBedRender3 {
         /** @type {?} */
         const rootElId = `root-ng-internal-isolated-${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
-        /** @nocollapse @type {?} */
+        /** @type {?} */
         const componentDef = ((/** @type {?} */ (type))).ɵcmp;
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ɵcmp' field`);

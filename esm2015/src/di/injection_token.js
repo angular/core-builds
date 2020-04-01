@@ -63,7 +63,7 @@ export class InjectionToken {
          * \@internal
          */
         this.ngMetadataName = 'InjectionToken';
-        /** @nocollapse */ this.ɵprov = undefined;
+        this.ɵprov = undefined;
         if (typeof options == 'number') {
             // This is a special hack to assign __NG_ELEMENT_ID__ to this instance.
             // __NG_ELEMENT_ID__ is Used by Ivy to determine bloom filter id.
@@ -71,7 +71,7 @@ export class InjectionToken {
             ((/** @type {?} */ (this))).__NG_ELEMENT_ID__ = options;
         }
         else if (options !== undefined) {
-            /** @nocollapse */ this.ɵprov = ɵɵdefineInjectable({
+            this.ɵprov = ɵɵdefineInjectable({
                 token: this,
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,

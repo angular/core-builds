@@ -380,7 +380,7 @@ export class TestBedRender3 {
         /** @type {?} */
         const rootElId = `root-ng-internal-isolated-${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
-        /** @nocollapse @type {?} */
+        /** @type {?} */
         const componentDef = ((/** @type {?} */ (type))).ɵcmp;
         if (!componentDef) {
             throw new Error(`It looks like '${stringify(type)}' has not been IVY compiled - it has no 'ɵcmp' field`);

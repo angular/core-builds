@@ -347,7 +347,7 @@ export class R3TestBedCompiler {
          * @return {?}
          */
         (factories, declaration) => {
-            /** @nocollapse @type {?} */
+            /** @type {?} */
             const componentDef = ((/** @type {?} */ (declaration))).ɵcmp;
             componentDef && factories.push(new ComponentFactory(componentDef, (/** @type {?} */ (this.testModuleRef))));
             return factories;
@@ -641,7 +641,7 @@ export class R3TestBedCompiler {
                     queueTypesFromModulesArrayRecur(value);
                 }
                 else if (hasNgModuleDef(value)) {
-                    /** @nocollapse @type {?} */
+                    /** @type {?} */
                     const def = value.ɵmod;
                     if (processedNgModuleDefs.has(def)) {
                         continue;

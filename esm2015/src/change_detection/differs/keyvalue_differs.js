@@ -211,11 +211,11 @@ export class KeyValueDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
+KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
     token: KeyValueDiffers,
     providedIn: 'root',
     factory: (/**
-     * @nocollapse @return {?}
+     * @return {?}
      */
     () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()]))
 });
