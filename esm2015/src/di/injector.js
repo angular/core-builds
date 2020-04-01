@@ -81,7 +81,7 @@ export class Injector {
 Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
 Injector.NULL = new NullInjector();
 /** @nocollapse */
-/** @nocollapse */ Injector.ɵprov = ɵɵdefineInjectable({
+Injector.ɵprov = ɵɵdefineInjectable({
     token: Injector,
     providedIn: (/** @type {?} */ ('any')),
     factory: (/**

@@ -20,11 +20,11 @@ import { ɵɵdefineInjectable } from '../di/interface/defs';
 export class Sanitizer {
 }
 /** @nocollapse */
-/** @nocollapse */ Sanitizer.ɵprov = ɵɵdefineInjectable({
+Sanitizer.ɵprov = ɵɵdefineInjectable({
     token: Sanitizer,
     providedIn: 'root',
     factory: (/**
-     * @nocollapse @return {?}
+     * @return {?}
      */
     () => null),
 });

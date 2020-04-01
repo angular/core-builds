@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.0+88.sha-a5eb0e5
+ * @license Angular v9.1.0-rc.0+90.sha-e9de281
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -796,7 +796,7 @@ class InjectionToken {
          * \@internal
          */
         this.ngMetadataName = 'InjectionToken';
-        /** @nocollapse */ this.ɵprov = undefined;
+        this.ɵprov = undefined;
         if (typeof options == 'number') {
             // This is a special hack to assign __NG_ELEMENT_ID__ to this instance.
             // __NG_ELEMENT_ID__ is Used by Ivy to determine bloom filter id.
@@ -804,7 +804,7 @@ class InjectionToken {
             ((/** @type {?} */ (this))).__NG_ELEMENT_ID__ = options;
         }
         else if (options !== undefined) {
-            /** @nocollapse */ this.ɵprov = ɵɵdefineInjectable({
+            this.ɵprov = ɵɵdefineInjectable({
                 token: this,
                 providedIn: options.providedIn || 'root',
                 factory: options.factory,
@@ -17191,7 +17191,7 @@ class Injector {
 Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
 Injector.NULL = new NullInjector();
 /** @nocollapse */
-/** @nocollapse */ Injector.ɵprov = ɵɵdefineInjectable({
+Injector.ɵprov = ɵɵdefineInjectable({
     token: Injector,
     providedIn: (/** @type {?} */ ('any')),
     factory: (/**
@@ -27953,11 +27953,11 @@ const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__POST_R3__;
 class Sanitizer {
 }
 /** @nocollapse */
-/** @nocollapse */ Sanitizer.ɵprov = ɵɵdefineInjectable({
+Sanitizer.ɵprov = ɵɵdefineInjectable({
     token: Sanitizer,
     providedIn: 'root',
     factory: (/**
-     * @nocollapse @return {?}
+     * @return {?}
      */
     () => null),
 });
@@ -28018,7 +28018,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-rc.0+88.sha-a5eb0e5');
+const VERSION = new Version('9.1.0-rc.0+90.sha-e9de281');
 
 /**
  * @fileoverview added by tsickle
@@ -29773,11 +29773,11 @@ class IterableDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ IterableDiffers.ɵprov = ɵɵdefineInjectable({
+IterableDiffers.ɵprov = ɵɵdefineInjectable({
     token: IterableDiffers,
     providedIn: 'root',
     factory: (/**
-     * @nocollapse @return {?}
+     * @return {?}
      */
     () => new IterableDiffers([new DefaultIterableDifferFactory()]))
 });
@@ -30005,11 +30005,11 @@ class KeyValueDiffers {
     }
 }
 /** @nocollapse */
-/** @nocollapse */ KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
+KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
     token: KeyValueDiffers,
     providedIn: 'root',
     factory: (/**
-     * @nocollapse @return {?}
+     * @return {?}
      */
     () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()]))
 });
