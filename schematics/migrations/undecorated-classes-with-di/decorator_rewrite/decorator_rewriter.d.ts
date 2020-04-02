@@ -9,8 +9,8 @@
 import { AotCompiler } from '@angular/compiler';
 import { PartialEvaluator } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
 import * as ts from 'typescript';
+import { ImportManager } from '../../../utils/import_manager';
 import { NgDecorator } from '../../../utils/ng_decorators';
-import { ImportManager } from '../import_manager';
 /**
  * Class that can be used to copy decorators to a new location. The rewriter ensures that
  * identifiers and imports are rewritten to work in the new file location. Fields in a

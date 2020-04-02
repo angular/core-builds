@@ -5,9 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/// <amd-module name="@angular/core/schematics/migrations/missing-injectable/import_manager" />
+/// <amd-module name="@angular/core/schematics/utils/import_manager" />
 import * as ts from 'typescript';
-import { UpdateRecorder } from './update_recorder';
+/** Update recorder for managing imports. */
+export interface ImportManagerUpdateRecorder {
+    addNewImport(start: number, importText: string): void;
+    updateExistingImport(namedBindings: ts.NamedImports, newNamedBindings: string): void;
+}
 /**
  * Import manager that can be used to add TypeScript imports to given source
  * files. The manager ensures that multiple transformations are applied properly
@@ -25,7 +29,7 @@ export declare class ImportManager {
      * the same identifier without checking the source-file again.
      */
     private importCache;
-    constructor(getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, printer: ts.Printer);
+    constructor(getUpdateRecorder: (sf: ts.SourceFile) => ImportManagerUpdateRecorder, printer: ts.Printer);
     /**
      * Adds an import to the given source-file and returns the TypeScript
      * identifier that can be used to access the newly imported symbol.
