@@ -6,15 +6,16 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AttributeMarker, ComponentTemplate } from '..';
-import { SchemaMetadata } from '../../core';
+import { Injector, SchemaMetadata } from '../../core';
+import { Sanitizer } from '../../sanitization/sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
 import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
 import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
-import { TQueries } from '../interfaces/query';
-import { RComment, RElement, RNode } from '../interfaces/renderer';
+import { LQueries, TQueries } from '../interfaces/query';
+import { RComment, RElement, RNode, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { TStylingKey, TStylingRange } from '../interfaces/styling';
 import { ExpandoInstructions, HookData, LView, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
 /**
@@ -190,15 +191,15 @@ export declare class LViewDebug {
     get nodes(): DebugNode[] | null;
     get tView(): ITView;
     get cleanup(): any[] | null;
-    get injector(): import("@angular/core/src/core").Injector | null;
-    get rendererFactory(): import("@angular/core/src/render3/interfaces/renderer").RendererFactory3;
-    get renderer(): import("@angular/core/src/render3/interfaces/renderer").ObjectOrientedRenderer3 | import("@angular/core/src/render3/interfaces/renderer").ProceduralRenderer3;
-    get sanitizer(): import("@angular/core/src/core").Sanitizer | null;
+    get injector(): Injector | null;
+    get rendererFactory(): RendererFactory3;
+    get renderer(): Renderer3;
+    get sanitizer(): Sanitizer | null;
     get childHead(): LViewDebug | LContainerDebug | null;
     get next(): LViewDebug | LContainerDebug | null;
     get childTail(): LViewDebug | LContainerDebug | null;
     get declarationView(): LViewDebug | null;
-    get queries(): import("@angular/core/src/render3/interfaces/query").LQueries | null;
+    get queries(): LQueries | null;
     get tHost(): TViewNode | TElementNode | null;
     /**
      * Normalized view of child views (and containers) attached at this location.
