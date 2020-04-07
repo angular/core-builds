@@ -7,7 +7,7 @@
  */
 import { LContainer } from './interfaces/container';
 import { TNode, TProjectionNode, TViewNode } from './interfaces/node';
-import { RElement, RNode, RText, Renderer3 } from './interfaces/renderer';
+import { RElement, Renderer3, RNode, RText } from './interfaces/renderer';
 import { LView, TView } from './interfaces/view';
 export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
 /**

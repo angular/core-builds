@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.0-rc.0+136.sha-e145fa1
+ * @license Angular v9.1.0-rc.0+137.sha-95fc3d4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2389,8 +2389,10 @@ const InitPhaseState = {
 };
 /** @enum {number} */
 const PreOrderHookFlags = {
-    /** The index of the next pre-order hook to be called in the hooks array, on the first 16
-       bits */
+    /**
+       The index of the next pre-order hook to be called in the hooks array, on the first 16
+       bits
+     */
     IndexOfTheNextPreOrderHookMaskMask: 65535,
     /**
      * The number of init hooks that have already been called, on the last 16 bits
@@ -2702,7 +2704,9 @@ if (false) {
 }
 /** @enum {number} */
 const RootContextFlags = {
-    Empty: 0, DetectChanges: 1, FlushPlayers: 2,
+    Empty: 0,
+    DetectChanges: 1,
+    FlushPlayers: 2,
 };
 /**
  * RootContext contains information which is shared for all components which
@@ -10612,11 +10616,15 @@ class TNode$1 {
     /**
      * @return {?}
      */
-    get styleBindings_() { return toDebugStyleBinding(this, false); }
+    get styleBindings_() {
+        return toDebugStyleBinding(this, false);
+    }
     /**
      * @return {?}
      */
-    get classBindings_() { return toDebugStyleBinding(this, true); }
+    get classBindings_() {
+        return toDebugStyleBinding(this, true);
+    }
 }
 if (false) {
     /** @type {?} */
@@ -10760,8 +10768,8 @@ function processTNodeChildren(tNode, buf) {
 const TViewData = NG_DEV_MODE && createNamedArrayType('TViewData') || (/** @type {?} */ ((/** @type {?} */ (null))));
 /** @type {?} */
 let TVIEWDATA_EMPTY;
-// can't initialize here or it will not be tree shaken, because `LView`
-// constructor could have side-effects.
+// can't initialize here or it will not be tree shaken, because
+// `LView` constructor could have side-effects.
 /**
  * This function clones a blueprint and creates TData.
  *
@@ -10882,23 +10890,31 @@ class LViewDebug {
     /**
      * @return {?}
      */
-    get parent() { return toDebug(this._raw_lView[PARENT]); }
+    get parent() {
+        return toDebug(this._raw_lView[PARENT]);
+    }
     /**
      * @return {?}
      */
-    get host() { return toHtml(this._raw_lView[HOST], true); }
+    get host() {
+        return toHtml(this._raw_lView[HOST], true);
+    }
     /**
      * @return {?}
      */
-    get html() { return (this.nodes || []).map((/**
-     * @param {?} node
-     * @return {?}
-     */
-    node => toHtml(node.native, true))).join(''); }
+    get html() {
+        return (this.nodes || []).map((/**
+         * @param {?} node
+         * @return {?}
+         */
+        node => toHtml(node.native, true))).join('');
+    }
     /**
      * @return {?}
      */
-    get context() { return this._raw_lView[CONTEXT]; }
+    get context() {
+        return this._raw_lView[CONTEXT];
+    }
     /**
      * The tree of nodes associated with the current `LView`. The nodes have been normalized into
      * a
@@ -10915,51 +10931,75 @@ class LViewDebug {
     /**
      * @return {?}
      */
-    get tView() { return this._raw_lView[TVIEW]; }
+    get tView() {
+        return this._raw_lView[TVIEW];
+    }
     /**
      * @return {?}
      */
-    get cleanup() { return this._raw_lView[CLEANUP]; }
+    get cleanup() {
+        return this._raw_lView[CLEANUP];
+    }
     /**
      * @return {?}
      */
-    get injector() { return this._raw_lView[INJECTOR$1]; }
+    get injector() {
+        return this._raw_lView[INJECTOR$1];
+    }
     /**
      * @return {?}
      */
-    get rendererFactory() { return this._raw_lView[RENDERER_FACTORY]; }
+    get rendererFactory() {
+        return this._raw_lView[RENDERER_FACTORY];
+    }
     /**
      * @return {?}
      */
-    get renderer() { return this._raw_lView[RENDERER]; }
+    get renderer() {
+        return this._raw_lView[RENDERER];
+    }
     /**
      * @return {?}
      */
-    get sanitizer() { return this._raw_lView[SANITIZER]; }
+    get sanitizer() {
+        return this._raw_lView[SANITIZER];
+    }
     /**
      * @return {?}
      */
-    get childHead() { return toDebug(this._raw_lView[CHILD_HEAD]); }
+    get childHead() {
+        return toDebug(this._raw_lView[CHILD_HEAD]);
+    }
     /**
      * @return {?}
      */
-    get next() { return toDebug(this._raw_lView[NEXT]); }
+    get next() {
+        return toDebug(this._raw_lView[NEXT]);
+    }
     /**
      * @return {?}
      */
-    get childTail() { return toDebug(this._raw_lView[CHILD_TAIL]); }
+    get childTail() {
+        return toDebug(this._raw_lView[CHILD_TAIL]);
+    }
     /**
      * @return {?}
      */
-    get declarationView() { return toDebug(this._raw_lView[DECLARATION_VIEW]); }
+    get declarationView() {
+        return toDebug(this._raw_lView[DECLARATION_VIEW]);
+    }
     /**
      * @return {?}
      */
-    get queries() { return this._raw_lView[QUERIES]; }
+    get queries() {
+        return this._raw_lView[QUERIES];
+    }
     /**
      * @return {?}
      */
-    get tHost() { return this._raw_lView[T_HOST]; }
+    get tHost() {
+        return this._raw_lView[T_HOST];
+    }
     /**
      * Normalized view of child views (and containers) attached at this location.
      * @return {?}
@@ -11050,7 +11090,9 @@ class LContainerDebug {
     /**
      * @return {?}
      */
-    get activeIndex() { return getLContainerActiveIndex(this._raw_lContainer); }
+    get activeIndex() {
+        return getLContainerActiveIndex(this._raw_lContainer);
+    }
     /**
      * @return {?}
      */
@@ -11068,23 +11110,33 @@ class LContainerDebug {
     /**
      * @return {?}
      */
-    get parent() { return toDebug(this._raw_lContainer[PARENT]); }
+    get parent() {
+        return toDebug(this._raw_lContainer[PARENT]);
+    }
     /**
      * @return {?}
      */
-    get movedViews() { return this._raw_lContainer[MOVED_VIEWS]; }
+    get movedViews() {
+        return this._raw_lContainer[MOVED_VIEWS];
+    }
     /**
      * @return {?}
      */
-    get host() { return this._raw_lContainer[HOST]; }
+    get host() {
+        return this._raw_lContainer[HOST];
+    }
     /**
      * @return {?}
      */
-    get native() { return this._raw_lContainer[NATIVE]; }
+    get native() {
+        return this._raw_lContainer[NATIVE];
+    }
     /**
      * @return {?}
      */
-    get next() { return toDebug(this._raw_lContainer[NEXT]); }
+    get next() {
+        return toDebug(this._raw_lContainer[NEXT]);
+    }
 }
 if (false) {
     /**
@@ -11125,7 +11177,9 @@ class I18NDebugItem {
     /**
      * @return {?}
      */
-    get tNode() { return getTNode(this._lView[TVIEW], this.nodeIndex); }
+    get tNode() {
+        return getTNode(this._lView[TVIEW], this.nodeIndex);
+    }
 }
 if (false) {
     /** @type {?} */
@@ -11163,7 +11217,9 @@ function attachI18nOpCodesDebug(mutateOpCodes, updateOpCodes, icus, lView) {
              * @param {?} icuCase
              * @return {?}
              */
-            icuCase => { attachDebugObject(icuCase, new I18nMutateOpCodesDebug(icuCase, lView)); }));
+            icuCase => {
+                attachDebugObject(icuCase, new I18nMutateOpCodesDebug(icuCase, lView));
+            }));
             icu.update.forEach((/**
              * @param {?} icuCase
              * @return {?}
@@ -11328,14 +11384,17 @@ class I18nUpdateOpCodesDebug {
                                     __raw_opCode: opCode,
                                     checkBit,
                                     type: 'Attr',
-                                    attrValue: value, attrName, sanitizeFn,
+                                    attrValue: value,
+                                    attrName,
+                                    sanitizeFn,
                                 });
                                 break;
                             case 0 /* Text */:
                                 results.push({
                                     __raw_opCode: opCode,
                                     checkBit,
-                                    type: 'Text', nodeIndex,
+                                    type: 'Text',
+                                    nodeIndex,
                                     text: value,
                                 });
                                 break;
@@ -11577,7 +11636,8 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     lView[SANITIZER] = sanitizer || parentLView && parentLView[SANITIZER] || (/** @type {?} */ (null));
     lView[(/** @type {?} */ (INJECTOR$1))] = injector || parentLView && parentLView[INJECTOR$1] || null;
     lView[T_HOST] = tHostNode;
-    ngDevMode && assertEqual(tView.type == 2 /* Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
+    ngDevMode &&
+        assertEqual(tView.type == 2 /* Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
     lView[DECLARATION_COMPONENT_VIEW] =
         tView.type == 2 /* Embedded */ ? (/** @type {?} */ (parentLView))[DECLARATION_COMPONENT_VIEW] : lView;
     ngDevMode && attachLViewDebug(lView);
@@ -11676,7 +11736,8 @@ function assignTViewNodeToLView(tView, tParentNode, index, lView) {
  * @return {?}
  */
 function allocExpando(tView, lView, numSlotsToAlloc) {
-    ngDevMode && assertGreaterThan(numSlotsToAlloc, 0, 'The number of slots to alloc should be greater than 0');
+    ngDevMode &&
+        assertGreaterThan(numSlotsToAlloc, 0, 'The number of slots to alloc should be greater than 0');
     if (numSlotsToAlloc > 0) {
         if (tView.firstCreatePass) {
             for (let i = 0; i < numSlotsToAlloc; i++) {
@@ -12067,7 +12128,7 @@ function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes
         null, // contentCheckHooks: HookData|null,
         null, // viewHooks: HookData|null,
         null, // viewCheckHooks: HookData|null,
-        null, // destroyHooks: HookData|null,
+        null, // destroyHooks: DestroyHookData|null,
         null, // cleanup: any[]|null,
         null, // contentQueries: number[]|null,
         null, // components: number[]|null,
@@ -12648,7 +12709,8 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
                     preOrderHooksFound = true;
                 }
                 if (!preOrderCheckHooksFound && (def.onChanges || def.doCheck)) {
-                    (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(tNode.index - HEADER_OFFSET);
+                    (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
+                        .push(tNode.index - HEADER_OFFSET);
                     preOrderCheckHooksFound = true;
                 }
                 addHostBindingsToExpandoInstructions(tView, def);
@@ -12811,7 +12873,8 @@ function invokeHostBindingsInCreationMode(def, directive) {
  * @return {?}
  */
 function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
-    ngDevMode && assertEqual(tView.firstCreatePass, true, 'Expando block should only be generated on first create pass.');
+    ngDevMode &&
+        assertEqual(tView.firstCreatePass, true, 'Expando block should only be generated on first create pass.');
     // Important: In JS `-x` and `0-x` is not the same! If `x===0` then `-x` will produce `-0` which
     // requires non standard math arithmetic and it can prevent VM optimizations.
     // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
@@ -12821,7 +12884,8 @@ function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
     const providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
     /** @type {?} */
     const providerCount = tView.data.length - providerStartIndex;
-    (tView.expandoInstructions || (tView.expandoInstructions = [])).push(elementIndex, providerCount, directiveCount);
+    (tView.expandoInstructions || (tView.expandoInstructions = []))
+        .push(elementIndex, providerCount, directiveCount);
 }
 /**
  * Matches the current node against all available selectors.
@@ -12833,7 +12897,8 @@ function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
  */
 function findDirectiveDefMatches(tView, viewData, tNode) {
     ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 4 /* ElementContainer */, 0 /* Container */);
+    ngDevMode &&
+        assertNodeOfPossibleTypes(tNode, 3 /* Element */, 4 /* ElementContainer */, 0 /* Container */);
     /** @type {?} */
     const registry = tView.directiveRegistry;
     /** @type {?} */
@@ -12871,7 +12936,8 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
 function markAsComponentHost(tView, hostTNode) {
     ngDevMode && assertFirstCreatePass(tView);
     hostTNode.flags |= 2 /* isComponentHost */;
-    (tView.components || (tView.components = ngDevMode ? new TViewComponents() : [])).push(hostTNode.index);
+    (tView.components || (tView.components = ngDevMode ? new TViewComponents() : []))
+        .push(hostTNode.index);
 }
 /**
  * Caches local names and their matching directive indices for query and template lookups.
@@ -12883,8 +12949,7 @@ function markAsComponentHost(tView, hostTNode) {
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
     if (localRefs) {
         /** @type {?} */
-        const localNames = tNode.localNames =
-            ngDevMode ? new TNodeLocalNames() : [];
+        const localNames = tNode.localNames = ngDevMode ? new TNodeLocalNames() : [];
         // Local names must be stored in tNode in the same order that localRefs are defined
         // in the template to ensure the data is loaded in the same slots as their refs
         // in the template (for template queries).
@@ -12925,7 +12990,8 @@ function saveNameToExportMap(index, def, exportsMap) {
  * @return {?}
  */
 function initTNodeFlags(tNode, index, numberOfDirectives) {
-    ngDevMode && assertNotEqual(numberOfDirectives, tNode.directiveEnd - tNode.directiveStart, 'Reached the max number of directives');
+    ngDevMode &&
+        assertNotEqual(numberOfDirectives, tNode.directiveEnd - tNode.directiveStart, 'Reached the max number of directives');
     tNode.flags |= 1 /* isDirectiveHost */;
     // When the first directive is created on a node, save the index
     tNode.directiveStart = index;
@@ -13896,7 +13962,8 @@ function trackMovedView(declarationContainer, lView) {
  */
 function detachMovedView(declarationContainer, lView) {
     ngDevMode && assertLContainer(declarationContainer);
-    ngDevMode && assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
+    ngDevMode &&
+        assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
     /** @type {?} */
     const movedViews = (/** @type {?} */ (declarationContainer[MOVED_VIEWS]));
     /** @type {?} */
@@ -14114,7 +14181,16 @@ function executeOnDestroys(tView, lView) {
             const context = lView[(/** @type {?} */ (destroyHooks[i]))];
             // Only call the destroy hook if the context has been requested.
             if (!(context instanceof NodeInjectorFactory)) {
-                ((/** @type {?} */ (destroyHooks[i + 1]))).call(context);
+                /** @type {?} */
+                const toCall = (/** @type {?} */ (destroyHooks[i + 1]));
+                if (Array.isArray(toCall)) {
+                    for (let j = 0; j < toCall.length; j += 2) {
+                        ((/** @type {?} */ (toCall[j + 1]))).call(context[(/** @type {?} */ (toCall[j]))]);
+                    }
+                }
+                else {
+                    toCall.call(context);
+                }
             }
         }
     }
@@ -14140,8 +14216,9 @@ function getRenderParent(tView, tNode, currentView) {
     // can't be used as a render parent.
     /** @type {?} */
     let parentTNode = tNode.parent;
-    while (parentTNode != null && (parentTNode.type === 4 /* ElementContainer */ ||
-        parentTNode.type === 5 /* IcuContainer */)) {
+    while (parentTNode != null &&
+        (parentTNode.type === 4 /* ElementContainer */ ||
+            parentTNode.type === 5 /* IcuContainer */)) {
         tNode = parentTNode;
         parentTNode = tNode.parent;
     }
@@ -14345,7 +14422,8 @@ function appendChild(tView, lView, childEl, childTNode) {
  */
 function getFirstNativeNode(lView, tNode) {
     if (tNode !== null) {
-        ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */, 5 /* IcuContainer */, 1 /* Projection */);
+        ngDevMode &&
+            assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */, 5 /* IcuContainer */, 1 /* Projection */);
         /** @type {?} */
         const tNodeType = tNode.type;
         if (tNodeType === 3 /* Element */) {
@@ -14441,7 +14519,8 @@ function nativeRemoveNode(renderer, rNode, isHostElement) {
 function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, isProjection) {
     while (tNode != null) {
         ngDevMode && assertTNodeForLView(tNode, lView);
-        ngDevMode && assertNodeOfPossibleTypes(tNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */, 1 /* Projection */, 1 /* Projection */, 5 /* IcuContainer */);
+        ngDevMode &&
+            assertNodeOfPossibleTypes(tNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */, 1 /* Projection */, 1 /* Projection */, 5 /* IcuContainer */);
         /** @type {?} */
         const rawSlotValue = lView[tNode.index];
         /** @type {?} */
@@ -27025,7 +27104,7 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
                 if (!isViewProvider && doesViewProvidersFactoryExist) {
                     lInjectablesBlueprint[existingViewProvidersFactoryIndex].providerFactory = factory;
                 }
-                registerDestroyHooksIfSupported(tView, provider, tInjectables.length);
+                registerDestroyHooksIfSupported(tView, provider, tInjectables.length, 0);
                 tInjectables.push(token);
                 tNode.directiveStart++;
                 tNode.directiveEnd++;
@@ -27037,10 +27116,11 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
             }
             else {
                 // Cases 1.b and 2.b
-                registerDestroyHooksIfSupported(tView, provider, existingProvidersFactoryIndex > -1 ?
-                    existingProvidersFactoryIndex :
-                    existingViewProvidersFactoryIndex);
-                multiFactoryAdd((/** @type {?} */ (lInjectablesBlueprint))[isViewProvider ? existingViewProvidersFactoryIndex : existingProvidersFactoryIndex], providerFactory, !isViewProvider && isComponent);
+                /** @type {?} */
+                const indexInFactory = multiFactoryAdd((/** @type {?} */ (lInjectablesBlueprint))[isViewProvider ? existingViewProvidersFactoryIndex :
+                    existingProvidersFactoryIndex], providerFactory, !isViewProvider && isComponent);
+                registerDestroyHooksIfSupported(tView, provider, existingProvidersFactoryIndex > -1 ? existingProvidersFactoryIndex :
+                    existingViewProvidersFactoryIndex, indexInFactory);
             }
             if (!isViewProvider && isComponent && doesViewProvidersFactoryExist) {
                 (/** @type {?} */ (lInjectablesBlueprint[existingViewProvidersFactoryIndex].componentProviders))++;
@@ -27053,9 +27133,11 @@ function resolveProvider$1(provider, tInjectables, lInjectablesBlueprint, isComp
  * @param {?} tView `TView` in which to register the hook.
  * @param {?} provider Provider whose hook should be registered.
  * @param {?} contextIndex Index under which to find the context for the hook when it's being invoked.
+ * @param {?=} indexInFactory Only required for `multi` providers. Index of the provider in the multi
+ * provider factory.
  * @return {?}
  */
-function registerDestroyHooksIfSupported(tView, provider, contextIndex) {
+function registerDestroyHooksIfSupported(tView, provider, contextIndex, indexInFactory) {
     /** @type {?} */
     const providerIsTypeProvider = isTypeProvider(provider);
     if (providerIsTypeProvider || isClassProvider(provider)) {
@@ -27064,7 +27146,23 @@ function registerDestroyHooksIfSupported(tView, provider, contextIndex) {
         /** @type {?} */
         const ngOnDestroy = prototype.ngOnDestroy;
         if (ngOnDestroy) {
-            (tView.destroyHooks || (tView.destroyHooks = [])).push(contextIndex, ngOnDestroy);
+            /** @type {?} */
+            const hooks = tView.destroyHooks || (tView.destroyHooks = []);
+            if (!providerIsTypeProvider && (((/** @type {?} */ (provider)))).multi) {
+                ngDevMode &&
+                    assertDefined(indexInFactory, 'indexInFactory when registering multi factory destroy hook');
+                /** @type {?} */
+                const existingCallbacksIndex = hooks.indexOf(contextIndex);
+                if (existingCallbacksIndex === -1) {
+                    hooks.push(contextIndex, [indexInFactory, ngOnDestroy]);
+                }
+                else {
+                    ((/** @type {?} */ (hooks[existingCallbacksIndex + 1]))).push((/** @type {?} */ (indexInFactory)), ngOnDestroy);
+                }
+            }
+            else {
+                hooks.push(contextIndex, ngOnDestroy);
+            }
         }
     }
 }
@@ -27073,13 +27171,13 @@ function registerDestroyHooksIfSupported(tView, provider, contextIndex) {
  * @param {?} multiFactory
  * @param {?} factory
  * @param {?} isComponentProvider
- * @return {?}
+ * @return {?} Index at which the factory was inserted.
  */
 function multiFactoryAdd(multiFactory, factory, isComponentProvider) {
-    (/** @type {?} */ (multiFactory.multi)).push(factory);
     if (isComponentProvider) {
         (/** @type {?} */ (multiFactory.componentProviders))++;
     }
+    return (/** @type {?} */ (multiFactory.multi)).push(factory) - 1;
 }
 /**
  * Returns the index of item in the array, but only in the begin to end range.
@@ -28018,7 +28116,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.0-rc.0+136.sha-e145fa1');
+const VERSION = new Version('9.1.0-rc.0+137.sha-95fc3d4');
 
 /**
  * @fileoverview added by tsickle

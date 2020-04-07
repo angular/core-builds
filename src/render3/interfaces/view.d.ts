@@ -318,8 +318,10 @@ export declare const enum InitPhaseState {
 }
 /** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 export declare const enum PreOrderHookFlags {
-    /** The index of the next pre-order hook to be called in the hooks array, on the first 16
-       bits */
+    /**
+       The index of the next pre-order hook to be called in the hooks array, on the first 16
+       bits
+     */
     IndexOfTheNextPreOrderHookMaskMask = 65535,
     /**
      * The number of init hooks that have already been called, on the last 16 bits
@@ -540,7 +542,7 @@ export interface TView {
      * Even indices: Directive index
      * Odd indices: Hook function
      */
-    destroyHooks: HookData | null;
+    destroyHooks: DestroyHookData | null;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
@@ -635,6 +637,13 @@ export interface RootContext {
      */
     flags: RootContextFlags;
 }
+/** Single hook callback function. */
+export declare type HookFn = () => void;
+/**
+ * Information necessary to call a hook. E.g. the callback that
+ * needs to invoked and the index at which to find its context.
+ */
+export declare type HookEntry = number | HookFn;
 /**
  * Array of hooks that should be executed for a view and their directive indices.
  *
@@ -647,7 +656,26 @@ export interface RootContext {
  * Special cases:
  *  - a negative directive index flags an init hook (ngOnInit, ngAfterContentInit, ngAfterViewInit)
  */
-export declare type HookData = (number | (() => void))[];
+export declare type HookData = HookEntry[];
+/**
+ * Array of destroy hooks that should be executed for a view and their directive indices.
+ *
+ * The array is set up as a series of number/function or number/(number|function)[]:
+ * - Even indices represent the context with which hooks should be called.
+ * - Odd indices are the hook functions themselves. If a value at an odd index is an array,
+ *   it represents the destroy hooks of a `multi` provider where:
+ *     - Even indices represent the index of the provider for which we've registered a destroy hook,
+ *       inside of the `multi` provider array.
+ *     - Odd indices are the destroy hook functions.
+ * For example:
+ * LView: `[0, 1, 2, AService, 4, [BService, CService, DService]]`
+ * destroyHooks: `[3, AService.ngOnDestroy, 5, [0, BService.ngOnDestroy, 2, DService.ngOnDestroy]]`
+ *
+ * In the example above `AService` is a type provider with an `ngOnDestroy`, whereas `BService`,
+ * `CService` and `DService` are part of a `multi` provider where only `BService` and `DService`
+ * have an `ngOnDestroy` hook.
+ */
+export declare type DestroyHookData = (HookEntry | HookData)[];
 /**
  * Static data that corresponds to the instance-specific data array on an LView.
  *

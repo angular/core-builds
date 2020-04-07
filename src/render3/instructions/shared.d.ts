@@ -194,7 +194,7 @@ export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNo
  * Marks a given TNode as a component's host. This consists of:
  * - setting appropriate TNode flags;
  * - storing index of component's host element so it will be queued for view refresh during CD.
-*/
+ */
 export declare function markAsComponentHost(tView: TView, hostTNode: TNode): void;
 /**
  * Initializes the flags on the current node, setting all indices to the initial index,
