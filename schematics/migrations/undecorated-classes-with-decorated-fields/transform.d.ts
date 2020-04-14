@@ -32,9 +32,9 @@ export declare class UndecoratedClassesWithDecoratedFieldsTransform {
      */
     private _analyzeClassDeclaration;
     /**
-    * Checks whether the given decorator resolves to an abstract directive. An directive is
-    * considered "abstract" if there is no selector specified.
-    */
+     * Checks whether the given decorator resolves to an abstract directive. An directive is
+     * considered "abstract" if there is no selector specified.
+     */
     private _isAbstractDirective;
     private _hasAngularDecoratedClassMember;
 }

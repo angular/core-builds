@@ -33,8 +33,10 @@ export declare class ModuleWithProvidersTransform {
     private _updateStaticMethodType;
     /** Whether the resolved value map represents a ModuleWithProviders object */
     isModuleWithProvidersType(value: ResolvedValueMap): boolean;
-    /** Determine the generic type of a suspected ModuleWithProviders return type and add it
-     * explicitly */
+    /**
+     * Determine the generic type of a suspected ModuleWithProviders return type and add it
+     * explicitly
+     */
     private _migrateStaticNgModuleMethod;
     /** Evaluate and return the ngModule type from an expression */
     private _getNgModuleTypeOfExpression;
