@@ -11,9 +11,9 @@ import { TNode } from './node';
 import { RNode } from './renderer';
 import { LView } from './view';
 /**
-* True if `value` is `LView`.
-* @param value wrapped value of `RNode`, `LView`, `LContainer`
-*/
+ * True if `value` is `LView`.
+ * @param value wrapped value of `RNode`, `LView`, `LContainer`
+ */
 export declare function isLView(value: RNode | LView | LContainer | {} | null): value is LView;
 /**
  * True if `value` is `LContainer`.

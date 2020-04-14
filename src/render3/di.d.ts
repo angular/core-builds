@@ -108,12 +108,12 @@ export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | nul
  */
 export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: Type<T> | InjectionToken<T>, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
 /**
-* Retrieve or instantiate the injectable from the `LView` at particular `index`.
-*
-* This function checks to see if the value has already been instantiated and if so returns the
-* cached `injectable`. Otherwise if it detects that the value is still a factory it
-* instantiates the `injectable` and caches the value.
-*/
+ * Retrieve or instantiate the injectable from the `LView` at particular `index`.
+ *
+ * This function checks to see if the value has already been instantiated and if so returns the
+ * cached `injectable`. Otherwise if it detects that the value is still a factory it
+ * instantiates the `injectable` and caches the value.
+ */
 export declare function getNodeInjectable(lView: LView, tView: TView, index: number, tNode: TDirectiveHostNode): any;
 /**
  * Returns the bit in an injector's bloom filter that should be used to determine whether or not

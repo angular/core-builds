@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.1+32.sha-5e80e7e
+ * @license Angular v10.0.0-next.1+33.sha-698b028
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -45,7 +45,9 @@
                     // if we run beforeEach in @angular/core/testing/testing_internal then we get no done
                     // fake it here and assume sync.
                     done = function () { };
-                    done.fail = function (e) { throw e; };
+                    done.fail = function (e) {
+                        throw e;
+                    };
                 }
                 runInTestZone(fn, this, done, function (err) {
                     if (typeof err === 'string') {
@@ -190,8 +192,11 @@
                 // Create subscriptions outside the NgZone so that the callbacks run oustide
                 // of NgZone.
                 ngZone.runOutsideAngular(function () {
-                    _this._onUnstableSubscription =
-                        ngZone.onUnstable.subscribe({ next: function () { _this._isStable = false; } });
+                    _this._onUnstableSubscription = ngZone.onUnstable.subscribe({
+                        next: function () {
+                            _this._isStable = false;
+                        }
+                    });
                     _this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
                         next: function () {
                             if (_this._autoDetect) {
@@ -221,8 +226,11 @@
                             }
                         }
                     });
-                    _this._onErrorSubscription =
-                        ngZone.onError.subscribe({ next: function (error) { throw error; } });
+                    _this._onErrorSubscription = ngZone.onError.subscribe({
+                        next: function (error) {
+                            throw error;
+                        }
+                    });
                 });
             }
         }
@@ -241,7 +249,9 @@
             if (this.ngZone != null) {
                 // Run the change detection inside the NgZone so that any async tasks as part of the change
                 // detection are captured by the zone and can be waited for in isStable.
-                this.ngZone.run(function () { _this._tick(checkNoChanges); });
+                this.ngZone.run(function () {
+                    _this._tick(checkNoChanges);
+                });
             }
             else {
                 // Running without zone. Just do the change detection.
@@ -251,7 +261,9 @@
         /**
          * Do a change detection run to make sure there were no changes.
          */
-        ComponentFixture.prototype.checkNoChanges = function () { this.changeDetectorRef.checkNoChanges(); };
+        ComponentFixture.prototype.checkNoChanges = function () {
+            this.changeDetectorRef.checkNoChanges();
+        };
         /**
          * Set whether the fixture should autodetect changes.
          *
@@ -269,7 +281,9 @@
          * Return whether the fixture is currently stable or has async tasks that have not been completed
          * yet.
          */
-        ComponentFixture.prototype.isStable = function () { return this._isStable && !this.ngZone.hasPendingMacrotasks; };
+        ComponentFixture.prototype.isStable = function () {
+            return this._isStable && !this.ngZone.hasPendingMacrotasks;
+        };
         /**
          * Get a promise that resolves when the fixture is stable.
          *
@@ -285,7 +299,9 @@
                 return this._promise;
             }
             else {
-                this._promise = new Promise(function (res) { _this._resolve = res; });
+                this._promise = new Promise(function (res) {
+                    _this._resolve = res;
+                });
                 return this._promise;
             }
         };
@@ -296,8 +312,8 @@
             return this._renderer;
         };
         /**
-          * Get a promise that resolves when the ui state is stable following animations.
-          */
+         * Get a promise that resolves when the ui state is stable following animations.
+         */
         ComponentFixture.prototype.whenRenderingDone = function () {
             var renderer = this._getRenderer();
             if (renderer && renderer.whenRenderingDone) {
@@ -873,42 +889,21 @@
                 _this._reject = rej;
             });
         }
-        AsyncTestCompleter.prototype.done = function (value) { this._resolve(value); };
-        AsyncTestCompleter.prototype.fail = function (error, stackTrace) { this._reject(error); };
+        AsyncTestCompleter.prototype.done = function (value) {
+            this._resolve(value);
+        };
+        AsyncTestCompleter.prototype.fail = function (error, stackTrace) {
+            this._reject(error);
+        };
         Object.defineProperty(AsyncTestCompleter.prototype, "promise", {
-            get: function () { return this._promise; },
+            get: function () {
+                return this._promise;
+            },
             enumerable: true,
             configurable: true
         });
         return AsyncTestCompleter;
     }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * An abstract class for inserting the root test component element in a platform independent way.
-     *
-     * @publicApi
-     */
-    var TestComponentRenderer = /** @class */ (function () {
-        function TestComponentRenderer() {
-        }
-        TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
-        return TestComponentRenderer;
-    }());
-    /**
-     * @publicApi
-     */
-    var ComponentFixtureAutoDetect = new i0.InjectionToken('ComponentFixtureAutoDetect');
-    /**
-     * @publicApi
-     */
-    var ComponentFixtureNoNgZone = new i0.InjectionToken('ComponentFixtureNoNgZone');
 
     /**
      * @license
@@ -1066,7 +1061,9 @@
         var _loop_1 = function (prop) {
             var removeValue = remove[prop];
             if (Array.isArray(removeValue)) {
-                removeValue.forEach(function (value) { removeObjects.add(_propHashKey(prop, value, references)); });
+                removeValue.forEach(function (value) {
+                    removeObjects.add(_propHashKey(prop, value, references));
+                });
             }
             else {
                 removeObjects.add(_propHashKey(prop, removeValue, references));
@@ -1218,7 +1215,9 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Object.defineProperty(DirectiveResolver.prototype, "type", {
-            get: function () { return i0.Directive; },
+            get: function () {
+                return i0.Directive;
+            },
             enumerable: true,
             configurable: true
         });
@@ -1230,7 +1229,9 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Object.defineProperty(ComponentResolver.prototype, "type", {
-            get: function () { return i0.Component; },
+            get: function () {
+                return i0.Component;
+            },
             enumerable: true,
             configurable: true
         });
@@ -1242,7 +1243,9 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Object.defineProperty(PipeResolver.prototype, "type", {
-            get: function () { return i0.Pipe; },
+            get: function () {
+                return i0.Pipe;
+            },
             enumerable: true,
             configurable: true
         });
@@ -1254,7 +1257,9 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Object.defineProperty(NgModuleResolver.prototype, "type", {
-            get: function () { return i0.NgModule; },
+            get: function () {
+                return i0.NgModule;
+            },
             enumerable: true,
             configurable: true
         });
@@ -1513,7 +1518,9 @@
         /**
          * @internal
          */
-        R3TestBedCompiler.prototype._getModuleResolver = function () { return this.resolvers.module; };
+        R3TestBedCompiler.prototype._getModuleResolver = function () {
+            return this.resolvers.module;
+        };
         /**
          * @internal
          */
@@ -2046,6 +2053,33 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * An abstract class for inserting the root test component element in a platform independent way.
+     *
+     * @publicApi
+     */
+    var TestComponentRenderer = /** @class */ (function () {
+        function TestComponentRenderer() {
+        }
+        TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
+        return TestComponentRenderer;
+    }());
+    /**
+     * @publicApi
+     */
+    var ComponentFixtureAutoDetect = new i0.InjectionToken('ComponentFixtureAutoDetect');
+    /**
+     * @publicApi
+     */
+    var ComponentFixtureNoNgZone = new i0.InjectionToken('ComponentFixtureNoNgZone');
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var _nextRootElementId = 0;
     /**
      * @description
@@ -2090,7 +2124,9 @@
          *
          * @publicApi
          */
-        TestBedRender3.resetTestEnvironment = function () { _getTestBedRender3().resetTestEnvironment(); };
+        TestBedRender3.resetTestEnvironment = function () {
+            _getTestBedRender3().resetTestEnvironment();
+        };
         TestBedRender3.configureCompiler = function (config) {
             _getTestBedRender3().configureCompiler(config);
             return TestBedRender3;
@@ -2108,7 +2144,9 @@
          * It is necessary to call this function
          * as fetching urls is asynchronous.
          */
-        TestBedRender3.compileComponents = function () { return _getTestBedRender3().compileComponents(); };
+        TestBedRender3.compileComponents = function () {
+            return _getTestBedRender3().compileComponents();
+        };
         TestBedRender3.overrideModule = function (ngModule, override) {
             _getTestBedRender3().overrideModule(ngModule, override);
             return TestBedRender3;
@@ -2213,7 +2251,9 @@
             this.assertNotInstantiated('R3TestBed.configureTestingModule', 'configure the test module');
             this.compiler.configureTestingModule(moduleDef);
         };
-        TestBedRender3.prototype.compileComponents = function () { return this.compiler.compileComponents(); };
+        TestBedRender3.prototype.compileComponents = function () {
+            return this.compiler.compileComponents();
+        };
         TestBedRender3.prototype.inject = function (token, notFoundValue, flags) {
             if (token === TestBedRender3) {
                 return this;
@@ -2372,7 +2412,9 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Object.defineProperty(TestingCompiler.prototype, "injector", {
-            get: function () { throw unimplemented(); },
+            get: function () {
+                throw unimplemented();
+            },
             enumerable: true,
             configurable: true
         });
@@ -2392,18 +2434,24 @@
          * Allows to pass the compile summary from AOT compilation to the JIT compiler,
          * so that it can use the code generated by AOT.
          */
-        TestingCompiler.prototype.loadAotSummaries = function (summaries) { throw unimplemented(); };
+        TestingCompiler.prototype.loadAotSummaries = function (summaries) {
+            throw unimplemented();
+        };
         /**
          * Gets the component factory for the given component.
          * This assumes that the component has been compiled before calling this call using
          * `compileModuleAndAllComponents*`.
          */
-        TestingCompiler.prototype.getComponentFactory = function (component) { throw unimplemented(); };
+        TestingCompiler.prototype.getComponentFactory = function (component) {
+            throw unimplemented();
+        };
         /**
          * Returns the component type that is stored in the given error.
          * This can be used for errors created by compileModule...
          */
-        TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
+        TestingCompiler.prototype.getComponentFromError = function (error) {
+            throw unimplemented();
+        };
         TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
         TestingCompiler.ɵprov = i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac });
         return TestingCompiler;
@@ -2484,7 +2532,9 @@
         /**
          * Reset the providers for the test injector.
          */
-        TestBedViewEngine.resetTestEnvironment = function () { _getTestBedViewEngine().resetTestEnvironment(); };
+        TestBedViewEngine.resetTestEnvironment = function () {
+            _getTestBedViewEngine().resetTestEnvironment();
+        };
         TestBedViewEngine.resetTestingModule = function () {
             _getTestBedViewEngine().resetTestingModule();
             return TestBedViewEngine;
@@ -2510,7 +2560,9 @@
          * It is necessary to call this function
          * as fetching urls is asynchronous.
          */
-        TestBedViewEngine.compileComponents = function () { return getTestBed().compileComponents(); };
+        TestBedViewEngine.compileComponents = function () {
+            return getTestBed().compileComponents();
+        };
         TestBedViewEngine.overrideModule = function (ngModule, override) {
             _getTestBedViewEngine().overrideModule(ngModule, override);
             return TestBedViewEngine;
@@ -2951,7 +3003,9 @@
         }
         else {
             // Not using an arrow function to preserve context passed from call site
-            return function () { return testBed.execute(tokens, fn, this); };
+            return function () {
+                return testBed.execute(tokens, fn, this);
+            };
         }
     }
     /**

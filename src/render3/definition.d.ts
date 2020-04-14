@@ -408,8 +408,8 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      * Assign static attribute values to a host element.
      *
      * This property will assign static attribute values as well as class and style
-     * values to a host element. Since attribute values can consist of different types of values, the
-     * `hostAttrs` array must include the values in the following format:
+     * values to a host element. Since attribute values can consist of different types of values,
+     * the `hostAttrs` array must include the values in the following format:
      *
      * attrs = [
      *   // static attributes (like `title`, `name`, `id`...)

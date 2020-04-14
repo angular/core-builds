@@ -75,8 +75,10 @@ export declare const enum TNodeFlags {
 export declare const enum TNodeProviderIndexes {
     /** The index of the first provider on this node is encoded on the least significant bits */
     ProvidersStartIndexMask = 65535,
-    /** The count of view providers from the component on this node is encoded on the 16 most
-       significant bits */
+    /**
+       The count of view providers from the component on this node is encoded on the 16 most
+       significant bits
+     */
     CptViewProvidersCountShift = 16,
     CptViewProvidersCountShifter = 65536
 }
@@ -100,21 +102,21 @@ export declare const enum AttributeMarker {
      */
     NamespaceURI = 0,
     /**
-      * Signals class declaration.
-      *
-      * Each value following `Classes` designates a class name to include on the element.
-      * ## Example:
-      *
-      * Given:
-      * ```
-      * <div class="foo bar baz">...<d/vi>
-      * ```
-      *
-      * the generated code is:
-      * ```
-      * var _c1 = [AttributeMarker.Classes, 'foo', 'bar', 'baz'];
-      * ```
-      */
+     * Signals class declaration.
+     *
+     * Each value following `Classes` designates a class name to include on the element.
+     * ## Example:
+     *
+     * Given:
+     * ```
+     * <div class="foo bar baz">...<d/vi>
+     * ```
+     *
+     * the generated code is:
+     * ```
+     * var _c1 = [AttributeMarker.Classes, 'foo', 'bar', 'baz'];
+     * ```
+     */
     Classes = 1,
     /**
      * Signals style declaration.

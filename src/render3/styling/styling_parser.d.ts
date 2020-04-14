@@ -125,7 +125,7 @@ export declare function consumeSeparator(text: string, startIndex: number, endIn
  * @param startIndex Starting index of character where the scan should start.
  * @param endIndex Ending index of character where the scan should end.
  * @returns Index after last style value character.
-*/
+ */
 export declare function consumeStyleValue(text: string, startIndex: number, endIndex: number): number;
 /**
  * Consumes all of the quoted characters.

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 export { ɵɵinject } from './di/injector_compatibility';
-export { ɵɵInjectableDef, ɵɵInjectorDef, ɵɵdefineInjectable, ɵɵdefineInjector } from './di/interface/defs';
+export { ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵInjectableDef, ɵɵInjectorDef } from './di/interface/defs';
 export { NgModuleDef, ɵɵNgModuleDefWithMeta } from './metadata/ng_module';
 export { ɵɵdefineNgModule } from './render3/definition';
 export { ɵɵFactoryDef } from './render3/interfaces/definition';

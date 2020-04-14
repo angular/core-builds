@@ -8,7 +8,8 @@
 import '../util/ng_dev_mode';
 import { LContext } from './interfaces/context';
 import { LView } from './interfaces/view';
-/** Returns the matching `LContext` data for a given DOM node, directive or component instance.
+/**
+ * Returns the matching `LContext` data for a given DOM node, directive or component instance.
  *
  * This function will examine the provided DOM element, component, or directive instance\'s
  * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched

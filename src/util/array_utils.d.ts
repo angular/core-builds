@@ -6,11 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
-* Equivalent to ES6 spread, add each item to an array.
-*
-* @param items The items to add
-* @param arr The array to which you want to add the items
-*/
+ * Equivalent to ES6 spread, add each item to an array.
+ *
+ * @param items The items to add
+ * @param arr The array to which you want to add the items
+ */
 export declare function addAllToArray(items: any[], arr: any[]): void;
 /**
  * Flattens an array.

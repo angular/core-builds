@@ -1,10 +1,10 @@
 /**
- * @license Angular v10.0.0-next.1+32.sha-5e80e7e
+ * @license Angular v10.0.0-next.1+33.sha-698b028
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵɵdefineInjectable, ɵɵgetInheritedFactory, ɵsetClassMetadata, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -63,7 +63,9 @@ function asyncFallback(fn) {
                  * @param {?} e
                  * @return {?}
                  */
-                function (e) { throw e; });
+                function (e) {
+                    throw e;
+                });
             }
             runInTestZone(fn, this, done, (/**
              * @param {?} err
@@ -261,11 +263,14 @@ class ComponentFixture {
              * @return {?}
              */
             () => {
-                this._onUnstableSubscription =
-                    ngZone.onUnstable.subscribe({ next: (/**
-                         * @return {?}
-                         */
-                        () => { this._isStable = false; }) });
+                this._onUnstableSubscription = ngZone.onUnstable.subscribe({
+                    next: (/**
+                     * @return {?}
+                     */
+                    () => {
+                        this._isStable = false;
+                    })
+                });
                 this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
                     next: (/**
                      * @return {?}
@@ -304,12 +309,15 @@ class ComponentFixture {
                         }
                     })
                 });
-                this._onErrorSubscription =
-                    ngZone.onError.subscribe({ next: (/**
-                         * @param {?} error
-                         * @return {?}
-                         */
-                        (error) => { throw error; }) });
+                this._onErrorSubscription = ngZone.onError.subscribe({
+                    next: (/**
+                     * @param {?} error
+                     * @return {?}
+                     */
+                    (error) => {
+                        throw error;
+                    })
+                });
             }));
         }
     }
@@ -336,7 +344,9 @@ class ComponentFixture {
             this.ngZone.run((/**
              * @return {?}
              */
-            () => { this._tick(checkNoChanges); }));
+            () => {
+                this._tick(checkNoChanges);
+            }));
         }
         else {
             // Running without zone. Just do the change detection.
@@ -347,7 +357,9 @@ class ComponentFixture {
      * Do a change detection run to make sure there were no changes.
      * @return {?}
      */
-    checkNoChanges() { this.changeDetectorRef.checkNoChanges(); }
+    checkNoChanges() {
+        this.changeDetectorRef.checkNoChanges();
+    }
     /**
      * Set whether the fixture should autodetect changes.
      *
@@ -367,7 +379,9 @@ class ComponentFixture {
      * yet.
      * @return {?}
      */
-    isStable() { return this._isStable && !(/** @type {?} */ (this.ngZone)).hasPendingMacrotasks; }
+    isStable() {
+        return this._isStable && !(/** @type {?} */ (this.ngZone)).hasPendingMacrotasks;
+    }
     /**
      * Get a promise that resolves when the fixture is stable.
      *
@@ -387,7 +401,9 @@ class ComponentFixture {
              * @param {?} res
              * @return {?}
              */
-            res => { this._resolve = res; }));
+            res => {
+                this._resolve = res;
+            }));
             return this._promise;
         }
     }
@@ -853,17 +869,23 @@ class AsyncTestCompleter {
      * @param {?=} value
      * @return {?}
      */
-    done(value) { this._resolve(value); }
+    done(value) {
+        this._resolve(value);
+    }
     /**
      * @param {?=} error
      * @param {?=} stackTrace
      * @return {?}
      */
-    fail(error, stackTrace) { this._reject(error); }
+    fail(error, stackTrace) {
+        this._reject(error);
+    }
     /**
      * @return {?}
      */
-    get promise() { return this._promise; }
+    get promise() {
+        return this._promise;
+    }
 }
 if (false) {
     /**
@@ -881,180 +903,6 @@ if (false) {
      * @private
      */
     AsyncTestCompleter.prototype._promise;
-}
-
-/**
- * @fileoverview added by tsickle
- * Generated from: packages/core/testing/src/test_bed_common.ts
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * \@publicApi
- */
-class TestComponentRenderer {
-    /**
-     * @param {?} rootElementId
-     * @return {?}
-     */
-    insertRootElement(rootElementId) { }
-}
-/**
- * \@publicApi
- * @type {?}
- */
-const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
-/**
- * \@publicApi
- * @type {?}
- */
-const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
-/**
- * Static methods implemented by the `TestBedViewEngine` and `TestBedRender3`
- *
- * \@publicApi
- * @record
- */
-function TestBedStatic() { }
-if (false) {
-    /* Skipping unhandled member: new (...args: any[]): TestBed;*/
-    /**
-     * @param {?} ngModule
-     * @param {?} platform
-     * @param {?=} aotSummaries
-     * @return {?}
-     */
-    TestBedStatic.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) { };
-    /**
-     * Reset the providers for the test injector.
-     * @return {?}
-     */
-    TestBedStatic.prototype.resetTestEnvironment = function () { };
-    /**
-     * @return {?}
-     */
-    TestBedStatic.prototype.resetTestingModule = function () { };
-    /**
-     * Allows overriding default compiler providers and settings
-     * which are defined in test_injector.js
-     * @param {?} config
-     * @return {?}
-     */
-    TestBedStatic.prototype.configureCompiler = function (config) { };
-    /**
-     * Allows overriding default providers, directives, pipes, modules of the test injector,
-     * which are defined in test_injector.js
-     * @param {?} moduleDef
-     * @return {?}
-     */
-    TestBedStatic.prototype.configureTestingModule = function (moduleDef) { };
-    /**
-     * Compile components with a `templateUrl` for the test's NgModule.
-     * It is necessary to call this function
-     * as fetching urls is asynchronous.
-     * @return {?}
-     */
-    TestBedStatic.prototype.compileComponents = function () { };
-    /**
-     * @param {?} ngModule
-     * @param {?} override
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideModule = function (ngModule, override) { };
-    /**
-     * @param {?} component
-     * @param {?} override
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideComponent = function (component, override) { };
-    /**
-     * @param {?} directive
-     * @param {?} override
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideDirective = function (directive, override) { };
-    /**
-     * @param {?} pipe
-     * @param {?} override
-     * @return {?}
-     */
-    TestBedStatic.prototype.overridePipe = function (pipe, override) { };
-    /**
-     * @param {?} component
-     * @param {?} template
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideTemplate = function (component, template) { };
-    /**
-     * Overrides the template of the given component, compiling the template
-     * in the context of the TestingModule.
-     *
-     * Note: This works for JIT and AOTed components as well.
-     * @param {?} component
-     * @param {?} template
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideTemplateUsingTestingModule = function (component, template) { };
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * Note: This works for JIT and AOTed components as well.
-     * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
-    /**
-     * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
-    /**
-     * @param {?} token
-     * @param {?} provider
-     * @return {?}
-     */
-    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
-    /**
-     * @template T
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @param {?=} flags
-     * @return {?}
-     */
-    TestBedStatic.prototype.inject = function (token, notFoundValue, flags) { };
-    /**
-     * @template T
-     * @param {?} token
-     * @param {?} notFoundValue
-     * @param {?=} flags
-     * @return {?}
-     */
-    TestBedStatic.prototype.inject = function (token, notFoundValue, flags) { };
-    /**
-     * @deprecated from v9.0.0 use TestBed.inject
-     * @template T
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @param {?=} flags
-     * @return {?}
-     */
-    TestBedStatic.prototype.get = function (token, notFoundValue, flags) { };
-    /**
-     * @deprecated from v9.0.0 use TestBed.inject
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @return {?}
-     */
-    TestBedStatic.prototype.get = function (token, notFoundValue) { };
-    /**
-     * @template T
-     * @param {?} component
-     * @return {?}
-     */
-    TestBedStatic.prototype.createComponent = function (component) { };
 }
 
 /**
@@ -1322,7 +1170,9 @@ function removeMetadata(metadata, remove, references) {
              * @param {?} value
              * @return {?}
              */
-            (value) => { removeObjects.add(_propHashKey(prop, value, references)); }));
+            (value) => {
+                removeObjects.add(_propHashKey(prop, value, references));
+            }));
         }
         else {
             removeObjects.add(_propHashKey(prop, removeValue, references));
@@ -1508,7 +1358,9 @@ class OverrideResolver {
          * @param {?} __0
          * @return {?}
          */
-        ([type, override]) => { this.addOverride(type, override); }));
+        ([type, override]) => {
+            this.addOverride(type, override);
+        }));
     }
     /**
      * @param {?} type
@@ -1584,25 +1436,33 @@ class DirectiveResolver extends OverrideResolver {
     /**
      * @return {?}
      */
-    get type() { return Directive; }
+    get type() {
+        return Directive;
+    }
 }
 class ComponentResolver extends OverrideResolver {
     /**
      * @return {?}
      */
-    get type() { return Component; }
+    get type() {
+        return Component;
+    }
 }
 class PipeResolver extends OverrideResolver {
     /**
      * @return {?}
      */
-    get type() { return Pipe; }
+    get type() {
+        return Pipe;
+    }
 }
 class NgModuleResolver extends OverrideResolver {
     /**
      * @return {?}
      */
-    get type() { return NgModule; }
+    get type() {
+        return NgModule;
+    }
 }
 
 /**
@@ -1929,7 +1789,9 @@ class R3TestBedCompiler {
      * \@internal
      * @return {?}
      */
-    _getModuleResolver() { return this.resolvers.module; }
+    _getModuleResolver() {
+        return this.resolvers.module;
+    }
     /**
      * \@internal
      * @param {?} moduleType
@@ -2838,6 +2700,180 @@ if (false) {
 
 /**
  * @fileoverview added by tsickle
+ * Generated from: packages/core/testing/src/test_bed_common.ts
+ * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * \@publicApi
+ */
+class TestComponentRenderer {
+    /**
+     * @param {?} rootElementId
+     * @return {?}
+     */
+    insertRootElement(rootElementId) { }
+}
+/**
+ * \@publicApi
+ * @type {?}
+ */
+const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
+/**
+ * \@publicApi
+ * @type {?}
+ */
+const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
+/**
+ * Static methods implemented by the `TestBedViewEngine` and `TestBedRender3`
+ *
+ * \@publicApi
+ * @record
+ */
+function TestBedStatic() { }
+if (false) {
+    /* Skipping unhandled member: new(...args: any[]): TestBed;*/
+    /**
+     * @param {?} ngModule
+     * @param {?} platform
+     * @param {?=} aotSummaries
+     * @return {?}
+     */
+    TestBedStatic.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) { };
+    /**
+     * Reset the providers for the test injector.
+     * @return {?}
+     */
+    TestBedStatic.prototype.resetTestEnvironment = function () { };
+    /**
+     * @return {?}
+     */
+    TestBedStatic.prototype.resetTestingModule = function () { };
+    /**
+     * Allows overriding default compiler providers and settings
+     * which are defined in test_injector.js
+     * @param {?} config
+     * @return {?}
+     */
+    TestBedStatic.prototype.configureCompiler = function (config) { };
+    /**
+     * Allows overriding default providers, directives, pipes, modules of the test injector,
+     * which are defined in test_injector.js
+     * @param {?} moduleDef
+     * @return {?}
+     */
+    TestBedStatic.prototype.configureTestingModule = function (moduleDef) { };
+    /**
+     * Compile components with a `templateUrl` for the test's NgModule.
+     * It is necessary to call this function
+     * as fetching urls is asynchronous.
+     * @return {?}
+     */
+    TestBedStatic.prototype.compileComponents = function () { };
+    /**
+     * @param {?} ngModule
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideModule = function (ngModule, override) { };
+    /**
+     * @param {?} component
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideComponent = function (component, override) { };
+    /**
+     * @param {?} directive
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideDirective = function (directive, override) { };
+    /**
+     * @param {?} pipe
+     * @param {?} override
+     * @return {?}
+     */
+    TestBedStatic.prototype.overridePipe = function (pipe, override) { };
+    /**
+     * @param {?} component
+     * @param {?} template
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideTemplate = function (component, template) { };
+    /**
+     * Overrides the template of the given component, compiling the template
+     * in the context of the TestingModule.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     * @param {?} component
+     * @param {?} template
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideTemplateUsingTestingModule = function (component, template) { };
+    /**
+     * Overwrites all providers for the given token with the given provider definition.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     * @param {?} token
+     * @param {?} provider
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
+    /**
+     * @param {?} token
+     * @param {?} provider
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
+    /**
+     * @param {?} token
+     * @param {?} provider
+     * @return {?}
+     */
+    TestBedStatic.prototype.overrideProvider = function (token, provider) { };
+    /**
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    TestBedStatic.prototype.inject = function (token, notFoundValue, flags) { };
+    /**
+     * @template T
+     * @param {?} token
+     * @param {?} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    TestBedStatic.prototype.inject = function (token, notFoundValue, flags) { };
+    /**
+     * @deprecated from v9.0.0 use TestBed.inject
+     * @template T
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @param {?=} flags
+     * @return {?}
+     */
+    TestBedStatic.prototype.get = function (token, notFoundValue, flags) { };
+    /**
+     * @deprecated from v9.0.0 use TestBed.inject
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    TestBedStatic.prototype.get = function (token, notFoundValue) { };
+    /**
+     * @template T
+     * @param {?} component
+     * @return {?}
+     */
+    TestBedStatic.prototype.createComponent = function (component) { };
+}
+
+/**
+ * @fileoverview added by tsickle
  * Generated from: packages/core/testing/src/r3_test_bed.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
@@ -2892,7 +2928,9 @@ class TestBedRender3 {
      * \@publicApi
      * @return {?}
      */
-    static resetTestEnvironment() { _getTestBedRender3().resetTestEnvironment(); }
+    static resetTestEnvironment() {
+        _getTestBedRender3().resetTestEnvironment();
+    }
     /**
      * @param {?} config
      * @return {?}
@@ -2917,7 +2955,9 @@ class TestBedRender3 {
      * as fetching urls is asynchronous.
      * @return {?}
      */
-    static compileComponents() { return _getTestBedRender3().compileComponents(); }
+    static compileComponents() {
+        return _getTestBedRender3().compileComponents();
+    }
     /**
      * @param {?} ngModule
      * @param {?} override
@@ -3093,7 +3133,9 @@ class TestBedRender3 {
     /**
      * @return {?}
      */
-    compileComponents() { return this.compiler.compileComponents(); }
+    compileComponents() {
+        return this.compiler.compileComponents();
+    }
     /**
      * @template T
      * @param {?} token
@@ -3374,7 +3416,9 @@ class TestingCompiler extends Compiler {
     /**
      * @return {?}
      */
-    get injector() { throw unimplemented(); }
+    get injector() {
+        throw unimplemented();
+    }
     /**
      * @param {?} module
      * @param {?} overrides
@@ -3413,7 +3457,9 @@ class TestingCompiler extends Compiler {
      * @param {?} summaries
      * @return {?}
      */
-    loadAotSummaries(summaries) { throw unimplemented(); }
+    loadAotSummaries(summaries) {
+        throw unimplemented();
+    }
     /**
      * Gets the component factory for the given component.
      * This assumes that the component has been compiled before calling this call using
@@ -3422,14 +3468,18 @@ class TestingCompiler extends Compiler {
      * @param {?} component
      * @return {?}
      */
-    getComponentFactory(component) { throw unimplemented(); }
+    getComponentFactory(component) {
+        throw unimplemented();
+    }
     /**
      * Returns the component type that is stored in the given error.
      * This can be used for errors created by compileModule...
      * @param {?} error
      * @return {?}
      */
-    getComponentFromError(error) { throw unimplemented(); }
+    getComponentFromError(error) {
+        throw unimplemented();
+    }
 }
 TestingCompiler.decorators = [
     { type: Injectable },
@@ -3527,7 +3577,9 @@ class TestBedViewEngine {
      * Reset the providers for the test injector.
      * @return {?}
      */
-    static resetTestEnvironment() { _getTestBedViewEngine().resetTestEnvironment(); }
+    static resetTestEnvironment() {
+        _getTestBedViewEngine().resetTestEnvironment();
+    }
     /**
      * @return {?}
      */
@@ -3561,7 +3613,9 @@ class TestBedViewEngine {
      * as fetching urls is asynchronous.
      * @return {?}
      */
-    static compileComponents() { return getTestBed().compileComponents(); }
+    static compileComponents() {
+        return getTestBed().compileComponents();
+    }
     /**
      * @param {?} ngModule
      * @param {?} override
@@ -4307,7 +4361,9 @@ function inject(tokens, fn) {
          * @this {?}
          * @return {?}
          */
-        function () { return testBed.execute(tokens, fn, this); });
+        function () {
+            return testBed.execute(tokens, fn, this);
+        });
     }
 }
 /**

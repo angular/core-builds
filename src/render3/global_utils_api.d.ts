@@ -14,4 +14,4 @@
  * file in the public_api_guard test.
  */
 export { applyChanges } from './util/change_detection_utils';
-export { Listener, getComponent, getContext, getDirectives, getHostElement, getInjector, getListeners, getOwningComponent, getRootComponents } from './util/discovery_utils';
+export { getComponent, getContext, getDirectives, getHostElement, getInjector, getListeners, getOwningComponent, getRootComponents, Listener } from './util/discovery_utils';

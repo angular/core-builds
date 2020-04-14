@@ -68,8 +68,10 @@ export interface IterableChanges<V> {
     forEachMovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
     /** Iterate over all removed items. */
     forEachRemovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /** Iterate over all items which had their identity (as computed by the `TrackByFunction`)
-     * changed. */
+    /**
+     * Iterate over all items which had their identity (as computed by the `TrackByFunction`)
+     * changed.
+     */
     forEachIdentityChange(fn: (record: IterableChangeRecord<V>) => void): void;
 }
 /**
