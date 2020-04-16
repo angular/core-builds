@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.2+14.sha-4a9f0be
+ * @license Angular v10.0.0-next.2+13.sha-88b0985
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8124,12 +8124,6 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
     }
 }
 function validateProperty(tView, lView, element, propName, tNode) {
-    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
-    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
-    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
-    // execute the check below.
-    if (tView.schemas === null)
-        return true;
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
     if (matchingSchemas(tView, lView, tNode.tagName) || propName in element ||
@@ -20135,7 +20129,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('10.0.0-next.2+14.sha-4a9f0be');
+var VERSION = new Version('10.0.0-next.2+13.sha-88b0985');
 
 /**
  * @license
