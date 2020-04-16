@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.2
+ * @license Angular v9.1.2+17.sha-797c306
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9356,7 +9356,13 @@ function matchTemplateAttribute(attrs, name) {
     if (i > -1) {
         i++;
         while (i < attrs.length) {
-            if (attrs[i] === name)
+            /** @type {?} */
+            const attr = attrs[i];
+            // Return in case we checked all template attrs and are switching to the next section in the
+            // attrs array (that starts with a number that represents an attribute marker).
+            if (typeof attr === 'number')
+                return -1;
+            if (attr === name)
                 return i;
             i++;
         }
@@ -12621,6 +12627,12 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
  * @return {?}
  */
 function validateProperty(tView, lView, element, propName, tNode) {
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (tView.schemas === null)
+        return true;
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
     if (matchingSchemas(tView, lView, tNode.tagName) || propName in element ||
@@ -28261,7 +28273,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.2');
+const VERSION = new Version('9.1.2+17.sha-797c306');
 
 /**
  * @fileoverview added by tsickle
@@ -34870,7 +34882,7 @@ function removeInnerTemplateTranslation(message) {
  * @return {?}
  */
 function getTranslationForTemplate(message, subTemplateIndex) {
-    if (typeof subTemplateIndex !== 'number') {
+    if (isRootTemplateMessage(subTemplateIndex)) {
         // We want the root template message, ignore all sub-templates
         return removeInnerTemplateTranslation(message);
     }
@@ -35017,6 +35029,13 @@ function ɵɵi18nStart(index, message, subTemplateIndex) {
 /** @type {?} */
 let i18nVarsCount;
 /**
+ * @param {?} startIndex
+ * @return {?}
+ */
+function allocNodeIndex(startIndex) {
+    return startIndex + i18nVarsCount++;
+}
+/**
  * See `i18nStart` above.
  * @param {?} lView
  * @param {?} tView
@@ -35060,85 +35079,92 @@ function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
     const updateOpCodes = [];
     /** @type {?} */
     const icuExpressions = [];
-    /** @type {?} */
-    const templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
-    /** @type {?} */
-    const msgParts = replaceNgsp(templateTranslation).split(PH_REGEXP);
-    for (let i = 0; i < msgParts.length; i++) {
+    if (message === '' && isRootTemplateMessage(subTemplateIndex)) {
+        // If top level translation is an empty string, do not invoke additional processing
+        // and just create op codes for empty text node instead.
+        createOpCodes.push(message, allocNodeIndex(startIndex), parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+    }
+    else {
         /** @type {?} */
-        let value = msgParts[i];
-        if (i & 1) {
-            // Odd indexes are placeholders (elements and sub-templates)
-            if (value.charAt(0) === '/') {
-                // It is a closing tag
-                if (value.charAt(1) === "#" /* ELEMENT */) {
+        const templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
+        /** @type {?} */
+        const msgParts = replaceNgsp(templateTranslation).split(PH_REGEXP);
+        for (let i = 0; i < msgParts.length; i++) {
+            /** @type {?} */
+            let value = msgParts[i];
+            if (i & 1) {
+                // Odd indexes are placeholders (elements and sub-templates)
+                if (value.charAt(0) === '/') {
+                    // It is a closing tag
+                    if (value.charAt(1) === "#" /* ELEMENT */) {
+                        /** @type {?} */
+                        const phIndex = parseInt(value.substr(2), 10);
+                        parentIndex = parentIndexStack[--parentIndexPointer];
+                        createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 5 /* ElementEnd */);
+                    }
+                }
+                else {
                     /** @type {?} */
-                    const phIndex = parseInt(value.substr(2), 10);
-                    parentIndex = parentIndexStack[--parentIndexPointer];
-                    createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 5 /* ElementEnd */);
+                    const phIndex = parseInt(value.substr(1), 10);
+                    /** @type {?} */
+                    const isElement = value.charAt(0) === "#" /* ELEMENT */;
+                    // The value represents a placeholder that we move to the designated index.
+                    // Note: positive indicies indicate that a TNode with a given index should also be marked
+                    // as parent while executing `Select` instruction.
+                    createOpCodes.push((isElement ? phIndex : ~phIndex) << 3 /* SHIFT_REF */ |
+                        0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                    if (isElement) {
+                        parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
+                    }
                 }
             }
             else {
+                // Even indexes are text (including bindings & ICU expressions)
                 /** @type {?} */
-                const phIndex = parseInt(value.substr(1), 10);
-                /** @type {?} */
-                const isElement = value.charAt(0) === "#" /* ELEMENT */;
-                // The value represents a placeholder that we move to the designated index.
-                // Note: positive indicies indicate that a TNode with a given index should also be marked as
-                // parent while executing `Select` instruction.
-                createOpCodes.push((isElement ? phIndex : ~phIndex) << 3 /* SHIFT_REF */ |
-                    0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                if (isElement) {
-                    parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
-                }
-            }
-        }
-        else {
-            // Even indexes are text (including bindings & ICU expressions)
-            /** @type {?} */
-            const parts = extractParts(value);
-            for (let j = 0; j < parts.length; j++) {
-                if (j & 1) {
-                    // Odd indexes are ICU expressions
-                    /** @type {?} */
-                    const icuExpression = (/** @type {?} */ (parts[j]));
-                    // Verify that ICU expression has the right shape. Translations might contain invalid
-                    // constructions (while original messages were correct), so ICU parsing at runtime may not
-                    // succeed (thus `icuExpression` remains a string).
-                    if (typeof icuExpression !== 'object') {
-                        throw new Error(`Unable to parse ICU expression in "${templateTranslation}" message.`);
+                const parts = extractParts(value);
+                for (let j = 0; j < parts.length; j++) {
+                    if (j & 1) {
+                        // Odd indexes are ICU expressions
+                        /** @type {?} */
+                        const icuExpression = (/** @type {?} */ (parts[j]));
+                        // Verify that ICU expression has the right shape. Translations might contain invalid
+                        // constructions (while original messages were correct), so ICU parsing at runtime may
+                        // not succeed (thus `icuExpression` remains a string).
+                        if (typeof icuExpression !== 'object') {
+                            throw new Error(`Unable to parse ICU expression in "${templateTranslation}" message.`);
+                        }
+                        // Create the comment node that will anchor the ICU expression
+                        /** @type {?} */
+                        const icuNodeIndex = allocNodeIndex(startIndex);
+                        createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        // Update codes for the ICU expression
+                        /** @type {?} */
+                        const mask = getBindingMask(icuExpression);
+                        icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
+                        // Since this is recursive, the last TIcu that was pushed is the one we want
+                        /** @type {?} */
+                        const tIcuIndex = icuExpressions.length - 1;
+                        updateOpCodes.push(toMaskBit(icuExpression.mainBinding), // mask of the main binding
+                        3, // skip 3 opCodes if not changed
+                        -1 - icuExpression.mainBinding, icuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, tIcuIndex, mask, // mask of all the bindings of this ICU expression
+                        2, // skip 2 opCodes if not changed
+                        icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
                     }
-                    // Create the comment node that will anchor the ICU expression
-                    /** @type {?} */
-                    const icuNodeIndex = startIndex + i18nVarsCount++;
-                    createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                    // Update codes for the ICU expression
-                    /** @type {?} */
-                    const mask = getBindingMask(icuExpression);
-                    icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
-                    // Since this is recursive, the last TIcu that was pushed is the one we want
-                    /** @type {?} */
-                    const tIcuIndex = icuExpressions.length - 1;
-                    updateOpCodes.push(toMaskBit(icuExpression.mainBinding), // mask of the main binding
-                    3, // skip 3 opCodes if not changed
-                    -1 - icuExpression.mainBinding, icuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, tIcuIndex, mask, // mask of all the bindings of this ICU expression
-                    2, // skip 2 opCodes if not changed
-                    icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
-                }
-                else if (parts[j] !== '') {
-                    /** @type {?} */
-                    const text = (/** @type {?} */ (parts[j]));
-                    // Even indexes are text (including bindings)
-                    /** @type {?} */
-                    const hasBinding = text.match(BINDING_REGEXP);
-                    // Create text nodes
-                    /** @type {?} */
-                    const textNodeIndex = startIndex + i18nVarsCount++;
-                    createOpCodes.push(
-                    // If there is a binding, the value will be set during update
-                    hasBinding ? '' : text, textNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                    if (hasBinding) {
-                        addAllToArray(generateBindingUpdateOpCodes(text, textNodeIndex), updateOpCodes);
+                    else if (parts[j] !== '') {
+                        /** @type {?} */
+                        const text = (/** @type {?} */ (parts[j]));
+                        // Even indexes are text (including bindings)
+                        /** @type {?} */
+                        const hasBinding = text.match(BINDING_REGEXP);
+                        // Create text nodes
+                        /** @type {?} */
+                        const textNodeIndex = allocNodeIndex(startIndex);
+                        createOpCodes.push(
+                        // If there is a binding, the value will be set during update
+                        hasBinding ? '' : text, textNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
+                        if (hasBinding) {
+                            addAllToArray(generateBindingUpdateOpCodes(text, textNodeIndex), updateOpCodes);
+                        }
                     }
                 }
             }
@@ -35211,6 +35237,13 @@ function appendI18nNode(tView, tNode, parentTNode, previousTNode, lView) {
         appendChild(tView, lView, slotValue[NATIVE], tNode);
     }
     return tNode;
+}
+/**
+ * @param {?} subTemplateIndex
+ * @return {?}
+ */
+function isRootTemplateMessage(subTemplateIndex) {
+    return subTemplateIndex === undefined;
 }
 /**
  * Handles message string post-processing for internationalization.
