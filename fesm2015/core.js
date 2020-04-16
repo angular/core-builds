@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.2+3.sha-b1f1d3f
+ * @license Angular v10.0.0-next.2+14.sha-4a9f0be
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9356,7 +9356,13 @@ function matchTemplateAttribute(attrs, name) {
     if (i > -1) {
         i++;
         while (i < attrs.length) {
-            if (attrs[i] === name)
+            /** @type {?} */
+            const attr = attrs[i];
+            // Return in case we checked all template attrs and are switching to the next section in the
+            // attrs array (that starts with a number that represents an attribute marker).
+            if (typeof attr === 'number')
+                return -1;
+            if (attr === name)
                 return i;
             i++;
         }
@@ -12621,6 +12627,12 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
  * @return {?}
  */
 function validateProperty(tView, lView, element, propName, tNode) {
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (tView.schemas === null)
+        return true;
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
     if (matchingSchemas(tView, lView, tNode.tagName) || propName in element ||
@@ -28261,7 +28273,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.2+3.sha-b1f1d3f');
+const VERSION = new Version('10.0.0-next.2+14.sha-4a9f0be');
 
 /**
  * @fileoverview added by tsickle
