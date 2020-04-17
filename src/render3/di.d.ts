@@ -13,6 +13,7 @@ import { FactoryFn } from './interfaces/definition';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LView, TData, TView } from './interfaces/view';
+export declare function setIncludeViewProviders(v: boolean): boolean;
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
  * corresponding bit in the injector's bloom filter.
