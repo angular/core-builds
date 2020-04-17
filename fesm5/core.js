@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.2+37.sha-fd7c39e
+ * @license Angular v9.1.2+41.sha-95f45e8
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20135,7 +20135,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.2+37.sha-fd7c39e');
+var VERSION = new Version('9.1.2+41.sha-95f45e8');
 
 /**
  * @license
@@ -25351,7 +25351,11 @@ function ɵɵpipe(index, pipeName) {
     }
     var pipeFactory = pipeDef.factory || (pipeDef.factory = getFactoryDef(pipeDef.type, true));
     var previousInjectImplementation = setInjectImplementation(ɵɵdirectiveInject);
+    // DI for pipes is supposed to behave like directives when placed on a component
+    // host node, which means that we have to disable access to `viewProviders`.
+    var previousIncludeViewProviders = setIncludeViewProviders(false);
     var pipeInstance = pipeFactory();
+    setIncludeViewProviders(previousIncludeViewProviders);
     setInjectImplementation(previousInjectImplementation);
     store(tView, getLView(), index, pipeInstance);
     return pipeInstance;
