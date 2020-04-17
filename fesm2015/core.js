@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.2+40.sha-bb150c2
+ * @license Angular v10.0.0-next.2+41.sha-81d23b3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28273,7 +28273,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.2+40.sha-bb150c2');
+const VERSION = new Version('10.0.0-next.2+41.sha-81d23b3');
 
 /**
  * @fileoverview added by tsickle
@@ -36936,8 +36936,13 @@ function ɵɵpipe(index, pipeName) {
     const pipeFactory = pipeDef.factory || (pipeDef.factory = getFactoryDef(pipeDef.type, true));
     /** @type {?} */
     const previousInjectImplementation = setInjectImplementation(ɵɵdirectiveInject);
+    // DI for pipes is supposed to behave like directives when placed on a component
+    // host node, which means that we have to disable access to `viewProviders`.
+    /** @type {?} */
+    const previousIncludeViewProviders = setIncludeViewProviders(false);
     /** @type {?} */
     const pipeInstance = pipeFactory();
+    setIncludeViewProviders(previousIncludeViewProviders);
     setInjectImplementation(previousInjectImplementation);
     store(tView, getLView(), index, pipeInstance);
     return pipeInstance;
