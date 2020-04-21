@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.2+51.sha-0bd50e2
+ * @license Angular v9.1.2+52.sha-c0ed57d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5955,6 +5955,14 @@
         return false;
     }
     /**
+     * Checks whether the `tNode` represents an inline template (e.g. `*ngFor`).
+     *
+     * @param tNode current TNode
+     */
+    function isInlineTemplate(tNode) {
+        return tNode.type === 0 /* Container */ && tNode.tagName !== NG_TEMPLATE_SELECTOR;
+    }
+    /**
      * Function that checks whether a given tNode matches tag-based selector and has a valid type.
      *
      * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
@@ -6027,9 +6035,8 @@
                     }
                     continue;
                 }
-                var isInlineTemplate = tNode.type == 0 /* Container */ && tNode.tagName !== NG_TEMPLATE_SELECTOR;
                 var attrName = (mode & 8 /* CLASS */) ? 'class' : current;
-                var attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate, isProjectionMode);
+                var attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
                 if (attrIndexInNode === -1) {
                     if (isPositive(mode))
                         return false;
@@ -8165,7 +8172,14 @@
         for (var i = start; i < end; i++) {
             var directiveDef = defs[i];
             var directiveInputs = directiveDef.inputs;
-            inputsFromAttrs.push(tNodeAttrs !== null ? generateInitialInputs(directiveInputs, tNodeAttrs) : null);
+            // Do not use unbound attributes as inputs to structural directives, since structural
+            // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
+            // TODO(FW-1930): microsyntax expressions may also contain unbound/static attributes, which
+            // should be set for inline templates.
+            var initialInputs = (tNodeAttrs !== null && !isInlineTemplate(tNode)) ?
+                generateInitialInputs(directiveInputs, tNodeAttrs) :
+                null;
+            inputsFromAttrs.push(initialInputs);
             inputsStore = generatePropertyAliases(directiveInputs, i, inputsStore);
             outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
         }
@@ -20305,7 +20319,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('9.1.2+51.sha-0bd50e2');
+    var VERSION = new Version('9.1.2+52.sha-c0ed57d');
 
     /**
      * @license
