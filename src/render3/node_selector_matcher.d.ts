@@ -9,6 +9,12 @@ import '../util/ng_dev_mode';
 import { TNode } from './interfaces/node';
 import { CssSelector, CssSelectorList } from './interfaces/projection';
 /**
+ * Checks whether the `tNode` represents an inline template (e.g. `*ngFor`).
+ *
+ * @param tNode current TNode
+ */
+export declare function isInlineTemplate(tNode: TNode): boolean;
+/**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
  * @param node static data of the node to match
