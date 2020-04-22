@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.2+55.sha-acf6075
+ * @license Angular v10.0.0-next.2+56.sha-942b986
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1518,6 +1518,8 @@ class R3TestBedCompiler {
         // Keep track of all components and directives, so we can patch Providers onto defs later.
         this.seenComponents = new Set();
         this.seenDirectives = new Set();
+        // Keep track of overridden modules, so that we can collect all affected ones in the module tree.
+        this.overriddenModules = new Set();
         // Store resolved styles for Components that have template overrides present and `styleUrls`
         // defined at the same time.
         this.existingComponentStyles = new Map();
@@ -1541,7 +1543,6 @@ class R3TestBedCompiler {
         this.providerOverridesByToken = new Map();
         this.moduleProvidersOverridden = new Set();
         this.testModuleRef = null;
-        this.hasModuleOverrides = false;
         class DynamicTestModule {
         }
         this.testModuleType = (/** @type {?} */ (DynamicTestModule));
@@ -1582,7 +1583,7 @@ class R3TestBedCompiler {
      * @return {?}
      */
     overrideModule(ngModule, override) {
-        this.hasModuleOverrides = true;
+        this.overriddenModules.add((/** @type {?} */ (ngModule)));
         // Compile the module right away.
         this.resolvers.module.addOverride(ngModule, override);
         /** @type {?} */
@@ -1868,6 +1869,25 @@ class R3TestBedCompiler {
      * @return {?}
      */
     applyTransitiveScopes() {
+        if (this.overriddenModules.size > 0) {
+            // Module overrides (via `TestBed.overrideModule`) might affect scopes that were previously
+            // calculated and stored in `transitiveCompileScopes`. If module overrides are present,
+            // collect all affected modules and reset scopes to force their re-calculatation.
+            /** @type {?} */
+            const testingModuleDef = ((/** @type {?} */ (this.testModuleType)))[ɵNG_MOD_DEF];
+            /** @type {?} */
+            const affectedModules = this.collectModulesAffectedByOverrides(testingModuleDef.imports);
+            if (affectedModules.size > 0) {
+                affectedModules.forEach((/**
+                 * @param {?} moduleType
+                 * @return {?}
+                 */
+                moduleType => {
+                    this.storeFieldOfDefOnType((/** @type {?} */ (moduleType)), ɵNG_MOD_DEF, 'transitiveCompileScopes');
+                    ((/** @type {?} */ (moduleType)))[ɵNG_MOD_DEF].transitiveCompileScopes = null;
+                }));
+            }
+        }
         /** @type {?} */
         const moduleToScope = new Map();
         /** @type {?} */
@@ -1881,15 +1901,6 @@ class R3TestBedCompiler {
                 const isTestingModule = isTestingModuleOverride(moduleType);
                 /** @type {?} */
                 const realType = isTestingModule ? this.testModuleType : (/** @type {?} */ (moduleType));
-                // Module overrides (via TestBed.overrideModule) might affect scopes that were
-                // previously calculated and stored in `transitiveCompileScopes`. If module overrides
-                // are present, always re-calculate transitive scopes to have the most up-to-date
-                // information available. The `moduleToScope` map avoids repeated re-calculation of
-                // scopes for the same module.
-                if (!isTestingModule && this.hasModuleOverrides) {
-                    this.storeFieldOfDefOnType((/** @type {?} */ (moduleType)), ɵNG_MOD_DEF, 'transitiveCompileScopes');
-                    ((/** @type {?} */ (moduleType)))[ɵNG_MOD_DEF].transitiveCompileScopes = null;
-                }
                 moduleToScope.set(moduleType, ɵtransitiveScopesFor(realType));
             }
             return (/** @type {?} */ (moduleToScope.get(moduleType)));
@@ -2113,6 +2124,68 @@ class R3TestBedCompiler {
             }
         });
         queueTypesFromModulesArrayRecur(arr);
+    }
+    // When module overrides (via `TestBed.overrideModule`) are present, it might affect all modules
+    // that import (even transitively) an overridden one. For all affected modules we need to
+    // recalculate their scopes for a given test run and restore original scopes at the end. The goal
+    // of this function is to collect all affected modules in a set for further processing. Example:
+    // if we have the following module hierarchy: A -> B -> C (where `->` means `imports`) and module
+    // `C` is overridden, we consider `A` and `B` as affected, since their scopes might become
+    // invalidated with the override.
+    /**
+     * @private
+     * @param {?} arr
+     * @return {?}
+     */
+    collectModulesAffectedByOverrides(arr) {
+        /** @type {?} */
+        const seenModules = new Set();
+        /** @type {?} */
+        const affectedModules = new Set();
+        /** @type {?} */
+        const calcAffectedModulesRecur = (/**
+         * @param {?} arr
+         * @param {?} path
+         * @return {?}
+         */
+        (arr, path) => {
+            for (const value of arr) {
+                if (Array.isArray(value)) {
+                    // If the value is an array, just flatten it (by invoking this function recursively),
+                    // keeping "path" the same.
+                    calcAffectedModulesRecur(value, path);
+                }
+                else if (hasNgModuleDef(value)) {
+                    if (seenModules.has(value)) {
+                        // If we've seen this module before and it's included into "affected modules" list, mark
+                        // the whole path that leads to that module as affected, but do not descend into its
+                        // imports, since we already examined them before.
+                        if (affectedModules.has(value)) {
+                            path.forEach((/**
+                             * @param {?} item
+                             * @return {?}
+                             */
+                            item => affectedModules.add(item)));
+                        }
+                        continue;
+                    }
+                    seenModules.add(value);
+                    if (this.overriddenModules.has(value)) {
+                        path.forEach((/**
+                         * @param {?} item
+                         * @return {?}
+                         */
+                        item => affectedModules.add(item)));
+                    }
+                    // Examine module imports recursively to look for overridden modules.
+                    /** @type {?} */
+                    const moduleDef = ((/** @type {?} */ (value)))[ɵNG_MOD_DEF];
+                    calcAffectedModulesRecur(maybeUnwrapFn(moduleDef.imports), path.concat(value));
+                }
+            }
+        });
+        calcAffectedModulesRecur(arr, []);
+        return affectedModules;
     }
     /**
      * @private
@@ -2445,6 +2518,11 @@ if (false) {
      * @type {?}
      * @private
      */
+    R3TestBedCompiler.prototype.overriddenModules;
+    /**
+     * @type {?}
+     * @private
+     */
     R3TestBedCompiler.prototype.existingComponentStyles;
     /**
      * @type {?}
@@ -2511,11 +2589,6 @@ if (false) {
      * @private
      */
     R3TestBedCompiler.prototype.testModuleRef;
-    /**
-     * @type {?}
-     * @private
-     */
-    R3TestBedCompiler.prototype.hasModuleOverrides;
     /**
      * @type {?}
      * @private
