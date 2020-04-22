@@ -21,6 +21,7 @@ export declare class R3TestBedCompiler {
     private pendingPipes;
     private seenComponents;
     private seenDirectives;
+    private overriddenModules;
     private existingComponentStyles;
     private resolvers;
     private componentToModuleScope;
@@ -35,7 +36,6 @@ export declare class R3TestBedCompiler {
     private moduleProvidersOverridden;
     private testModuleType;
     private testModuleRef;
-    private hasModuleOverrides;
     constructor(platform: PlatformRef, additionalModuleTypes: Type<any> | Type<any>[]);
     setCompilerProviders(providers: Provider[] | null): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
@@ -61,6 +61,7 @@ export declare class R3TestBedCompiler {
     private recompileNgModule;
     private queueType;
     private queueTypesFromModulesArray;
+    private collectModulesAffectedByOverrides;
     private maybeStoreNgDef;
     private storeFieldOfDefOnType;
     /**
