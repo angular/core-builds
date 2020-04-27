@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.3+35.sha-00e6cb1
+ * @license Angular v10.0.0-next.3+36.sha-f27deea
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11440,7 +11440,7 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
 }, QueryFields extends string[], NgContentSelectors extends string[]> = ɵComponentDef<T>;
 
 /**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
  *
  * This instruction is for compatibility purposes and is designed to ensure that a
  * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
@@ -14445,7 +14445,7 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
 export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
 
 /**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
  *
  * This instruction is for compatibility purposes and is designed to ensure that a
  * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
