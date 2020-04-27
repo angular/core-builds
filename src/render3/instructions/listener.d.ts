@@ -22,7 +22,7 @@ import { GlobalTargetResolver } from '../interfaces/renderer';
  */
 export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
 /**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
  *
  * This instruction is for compatibility purposes and is designed to ensure that a
  * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered

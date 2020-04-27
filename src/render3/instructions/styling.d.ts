@@ -8,7 +8,6 @@
 import { SafeValue } from '../../sanitization/bypass';
 import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
-import { DirectiveDef } from '../interfaces/definition';
 import { TNode } from '../interfaces/node';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { TStylingKey } from '../interfaces/styling';
@@ -169,13 +168,6 @@ export declare function checkStylingMap(keyValueArraySet: (keyValueArray: KeyVal
  * @param isClassBased `true` if `class` (`false` if `style`)
  */
 export declare function wrapInStaticStylingKey(tData: TData, tNode: TNode, stylingKey: TStylingKey, isClassBased: boolean): TStylingKey;
-/**
- * Retrieve the current `DirectiveDef` which is active when `hostBindings` style instruction is
- * being executed (or `null` if we are in `template`.)
- *
- * @param tData Current `TData` where the `DirectiveDef` will be looked up at.
- */
-export declare function getHostDirectiveDef(tData: TData): DirectiveDef<any> | null;
 /**
  * Convert user input to `KeyValueArray`.
  *

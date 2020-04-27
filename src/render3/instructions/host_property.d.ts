@@ -16,7 +16,7 @@ import { NO_CHANGE } from '../tokens';
  */
 export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵhostProperty;
 /**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
  *
  * This instruction is for compatibility purposes and is designed to ensure that a
  * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in

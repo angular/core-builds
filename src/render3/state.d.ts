@@ -6,8 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
+import { DirectiveDef } from './interfaces/definition';
 import { TNode } from './interfaces/node';
-import { LView, OpaqueViewState, TView } from './interfaces/view';
+import { LView, OpaqueViewState, TData, TView } from './interfaces/view';
 /**
  *
  */
@@ -238,6 +239,19 @@ export declare function setBindingRootForHostBindings(bindingRootIndex: number, 
  * `LView[getCurrentDirectiveIndex()]` is directive instance.
  */
 export declare function getCurrentDirectiveIndex(): number;
+/**
+ * Sets an index of a directive whose `hostBindings` are being processed.
+ *
+ * @param currentDirectiveIndex `TData` index where current directive instance can be found.
+ */
+export declare function setCurrentDirectiveIndex(currentDirectiveIndex: number): void;
+/**
+ * Retrieve the current `DirectiveDef` which is active when `hostBindings` instruction is being
+ * executed.
+ *
+ * @param tData Current `TData` where the `DirectiveDef` will be looked up at.
+ */
+export declare function getCurrentDirectiveDef(tData: TData): DirectiveDef<any> | null;
 export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;
 /**

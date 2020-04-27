@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.3+35.sha-00e6cb1
+ * @license Angular v10.0.0-next.3+36.sha-f27deea
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4169,7 +4169,7 @@ function setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex) 
     /** @type {?} */
     const lFrame = instructionState.lFrame;
     lFrame.bindingIndex = lFrame.bindingRootIndex = bindingRootIndex;
-    lFrame.currentDirectiveIndex = currentDirectiveIndex;
+    setCurrentDirectiveIndex(currentDirectiveIndex);
 }
 /**
  * When host binding is executing this points to the directive index.
@@ -4179,6 +4179,27 @@ function setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex) 
  */
 function getCurrentDirectiveIndex() {
     return instructionState.lFrame.currentDirectiveIndex;
+}
+/**
+ * Sets an index of a directive whose `hostBindings` are being processed.
+ *
+ * @param {?} currentDirectiveIndex `TData` index where current directive instance can be found.
+ * @return {?}
+ */
+function setCurrentDirectiveIndex(currentDirectiveIndex) {
+    instructionState.lFrame.currentDirectiveIndex = currentDirectiveIndex;
+}
+/**
+ * Retrieve the current `DirectiveDef` which is active when `hostBindings` instruction is being
+ * executed.
+ *
+ * @param {?} tData Current `TData` where the `DirectiveDef` will be looked up at.
+ * @return {?}
+ */
+function getCurrentDirectiveDef(tData) {
+    /** @type {?} */
+    const currentDirectiveIndex = instructionState.lFrame.currentDirectiveIndex;
+    return currentDirectiveIndex === -1 ? null : (/** @type {?} */ (tData[currentDirectiveIndex]));
 }
 /**
  * @return {?}
@@ -12894,13 +12915,16 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
     const firstCreatePass = tView.firstCreatePass;
     /** @type {?} */
     const elementIndex = tNode.index - HEADER_OFFSET;
+    /** @type {?} */
+    const currentDirectiveIndex = getCurrentDirectiveIndex();
     try {
         setSelectedIndex(elementIndex);
-        for (let i = start; i < end; i++) {
+        for (let dirIndex = start; dirIndex < end; dirIndex++) {
             /** @type {?} */
-            const def = (/** @type {?} */ (tView.data[i]));
+            const def = (/** @type {?} */ (tView.data[dirIndex]));
             /** @type {?} */
-            const directive = lView[i];
+            const directive = lView[dirIndex];
+            setCurrentDirectiveIndex(dirIndex);
             if (def.hostBindings !== null || def.hostVars !== 0 || def.hostAttrs !== null) {
                 invokeHostBindingsInCreationMode(def, directive);
             }
@@ -12911,6 +12935,7 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
     }
     finally {
         setSelectedIndex(-1);
+        setCurrentDirectiveIndex(currentDirectiveIndex);
     }
 }
 /**
@@ -13658,14 +13683,22 @@ function getTViewCleanup(tView) {
 /**
  * There are cases where the sub component's renderer needs to be included
  * instead of the current renderer (see the componentSyntheticHost* instructions).
+ * @param {?} currentDef
  * @param {?} tNode
  * @param {?} lView
  * @return {?}
  */
-function loadComponentRenderer(tNode, lView) {
-    /** @type {?} */
-    const componentLView = (/** @type {?} */ (unwrapLView(lView[tNode.index])));
-    return componentLView[RENDERER];
+function loadComponentRenderer(currentDef, tNode, lView) {
+    // TODO(FW-2043): the `currentDef` is null when host bindings are invoked while creating root
+    // component (see packages/core/src/render3/component.ts). This is not consistent with the process
+    // of creating inner components, when current directive index is available in the state. In order
+    // to avoid relying on current def being `null` (thus special-casing root component creation), the
+    // process of creating root component should be unified with the process of creating inner
+    // components.
+    if (currentDef === null || isComponentDef(currentDef)) {
+        lView = (/** @type {?} */ (unwrapLView(lView[tNode.index])));
+    }
+    return lView[RENDERER];
 }
 /**
  * Handles an error thrown in an LView.
@@ -21683,7 +21716,7 @@ function ɵɵlistener(eventName, listenerFn, useCapture = false, eventTargetReso
     return ɵɵlistener;
 }
 /**
- * Registers a synthetic host listener (e.g. `(\@foo.start)`) on a component.
+ * Registers a synthetic host listener (e.g. `(\@foo.start)`) on a component or directive.
  *
  * This instruction is for compatibility purposes and is designed to ensure that a
  * synthetic host listener (e.g. `\@HostListener('\@foo.start')`) properly gets rendered
@@ -21710,9 +21743,11 @@ function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture = 
     /** @type {?} */
     const lView = getLView();
     /** @type {?} */
-    const renderer = loadComponentRenderer(tNode, lView);
-    /** @type {?} */
     const tView = getTView();
+    /** @type {?} */
+    const currentDef = getCurrentDirectiveDef(tView.data);
+    /** @type {?} */
+    const renderer = loadComponentRenderer(currentDef, tNode, lView);
     listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
     return ɵɵcomponentHostSyntheticListener;
 }
@@ -23702,7 +23737,7 @@ function stylingFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) 
  */
 function wrapInStaticStylingKey(tData, tNode, stylingKey, isClassBased) {
     /** @type {?} */
-    const hostDirectiveDef = getHostDirectiveDef(tData);
+    const hostDirectiveDef = getCurrentDirectiveDef(tData);
     /** @type {?} */
     let residual = isClassBased ? tNode.residualClasses : tNode.residualStyles;
     if (hostDirectiveDef === null) {
@@ -23950,18 +23985,6 @@ function collectStylingFromTAttrs(stylingKey, attrs, isClassBased) {
         }
     }
     return stylingKey === undefined ? null : stylingKey;
-}
-/**
- * Retrieve the current `DirectiveDef` which is active when `hostBindings` style instruction is
- * being executed (or `null` if we are in `template`.)
- *
- * @param {?} tData Current `TData` where the `DirectiveDef` will be looked up at.
- * @return {?}
- */
-function getHostDirectiveDef(tData) {
-    /** @type {?} */
-    const currentDirectiveIndex = getCurrentDirectiveIndex();
-    return currentDirectiveIndex === -1 ? null : (/** @type {?} */ (tData[currentDirectiveIndex]));
 }
 /**
  * Convert user input to `KeyValueArray`.
@@ -25782,7 +25805,7 @@ function ɵɵhostProperty(propName, value, sanitizer) {
     return ɵɵhostProperty;
 }
 /**
- * Updates a synthetic host binding (e.g. `[\@foo]`) on a component.
+ * Updates a synthetic host binding (e.g. `[\@foo]`) on a component or directive.
  *
  * This instruction is for compatibility purposes and is designed to ensure that a
  * synthetic host binding (e.g. `\@HostBinding('\@foo')`) properly gets rendered in
@@ -25814,7 +25837,9 @@ function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
         /** @type {?} */
         const tNode = getSelectedTNode();
         /** @type {?} */
-        const renderer = loadComponentRenderer(tNode, lView);
+        const currentDef = getCurrentDirectiveDef(tView.data);
+        /** @type {?} */
+        const renderer = loadComponentRenderer(currentDef, tNode, lView);
         elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
@@ -28271,7 +28296,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.3+35.sha-00e6cb1');
+const VERSION = new Version('10.0.0-next.3+36.sha-f27deea');
 
 /**
  * @fileoverview added by tsickle

@@ -297,7 +297,7 @@ export declare function getLCleanup(view: LView): any[];
  * There are cases where the sub component's renderer needs to be included
  * instead of the current renderer (see the componentSyntheticHost* instructions).
  */
-export declare function loadComponentRenderer(tNode: TNode, lView: LView): Renderer3;
+export declare function loadComponentRenderer(currentDef: DirectiveDef<any> | null, tNode: TNode, lView: LView): Renderer3;
 /** Handles an error thrown in an LView. */
 export declare function handleError(lView: LView, error: any): void;
 /**
