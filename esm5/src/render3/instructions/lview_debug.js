@@ -434,7 +434,7 @@ var LViewDebug = /** @class */ (function () {
                 attached: !!(flags & 128 /* Attached */),
                 destroyed: !!(flags & 256 /* Destroyed */),
                 isRoot: !!(flags & 512 /* IsRoot */),
-                indexWithinInitPhase: flags >> 10 /* IndexWithinInitPhaseShift */,
+                indexWithinInitPhase: flags >> 11 /* IndexWithinInitPhaseShift */,
             };
         },
         enumerable: true,
