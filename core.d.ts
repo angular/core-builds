@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.3+35.sha-c440165
+ * @license Angular v9.1.3+36.sha-d743331
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7772,6 +7772,11 @@ declare interface TView {
      * Used for directive matching, attribute bindings, local definitions and more.
      */
     consts: TConstants | null;
+    /**
+     * Indicates that there was an error before we managed to complete the first create pass of the
+     * view. This means that the view is likely corrupted and we should try to recover it.
+     */
+    incompleteFirstPass: boolean;
 }
 
 /** Static data for a view  */
