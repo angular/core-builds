@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.4
+ * @license Angular v9.1.4+14.sha-c8c2272
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3801,6 +3801,13 @@ declare interface LContainer extends Array<any> {
      */
     [NEXT]: ɵangular_packages_core_core_bo | LContainer | null;
     /**
+     * The number of direct transplanted views which need a refresh or have descendants themselves
+     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
+     * change detection we should still descend to find those children to refresh, even if the parents
+     * are not `Dirty`/`CheckAlways`.
+     */
+    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
+    /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since
      * queries collect matches from the embedded view declaration point and _not_ the insertion point.
@@ -4049,11 +4056,16 @@ declare const enum LViewFlags {
     /** Whether or not this view is the root view */
     IsRoot = 512,
     /**
-     * Index of the current init phase on last 22 bits
+     * Whether this moved LView was needs to be refreshed at the insertion location because the
+     * declaration was dirty.
      */
-    IndexWithinInitPhaseIncrementer = 1024,
-    IndexWithinInitPhaseShift = 10,
-    IndexWithinInitPhaseReset = 1023
+    RefreshTransplantedView = 1024,
+    /**
+     * Index of the current init phase on last 21 bits
+     */
+    IndexWithinInitPhaseIncrementer = 2048,
+    IndexWithinInitPhaseShift = 11,
+    IndexWithinInitPhaseReset = 2047
 }
 
 /**
@@ -4112,7 +4124,7 @@ export declare interface ModuleWithProviders<T = any /** TODO(alxhub): remove de
     providers?: Provider[];
 }
 
-declare const MOVED_VIEWS = 5;
+declare const MOVED_VIEWS = 9;
 
 declare const NATIVE = 7;
 
@@ -5246,7 +5258,7 @@ declare interface PublicTestability {
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
 }
 
-declare const QUERIES = 5;
+declare const QUERIES = 19;
 
 /**
  * Type of the Query metadata.
@@ -7403,6 +7415,8 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
+declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
+
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
  *
@@ -8933,6 +8947,13 @@ export declare interface ɵangular_packages_core_core_bo extends Array<any> {
      * More flags for this view. See PreOrderHookFlags for more info.
      */
     [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
+    /**
+     * The number of direct transplanted views which need a refresh or have descendants themselves
+     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
+     * change detection we should still descend to find those children to refresh, even if the parents
+     * are not `Dirty`/`CheckAlways`.
+     */
+    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
 }
 
 

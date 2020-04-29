@@ -157,7 +157,7 @@ export function incrementInitPhaseFlags(lView, initPhase) {
     /** @type {?} */
     let flags = lView[FLAGS];
     if ((flags & 3 /* InitPhaseStateMask */) === initPhase) {
-        flags &= 1023 /* IndexWithinInitPhaseReset */;
+        flags &= 2047 /* IndexWithinInitPhaseReset */;
         flags += 1 /* InitPhaseStateIncrementer */;
         lView[FLAGS] = flags;
     }
@@ -232,13 +232,13 @@ function callHook(currentView, initPhase, arr, i) {
     const directive = currentView[directiveIndex];
     if (isInitHook) {
         /** @type {?} */
-        const indexWithintInitPhase = currentView[FLAGS] >> 10 /* IndexWithinInitPhaseShift */;
+        const indexWithintInitPhase = currentView[FLAGS] >> 11 /* IndexWithinInitPhaseShift */;
         // The init phase state must be always checked here as it may have been recursively
         // updated
         if (indexWithintInitPhase <
             (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
             (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
-            currentView[FLAGS] += 1024 /* IndexWithinInitPhaseIncrementer */;
+            currentView[FLAGS] += 2048 /* IndexWithinInitPhaseIncrementer */;
             hook.call(directive);
         }
     }
