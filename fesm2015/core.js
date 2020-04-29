@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.3+45.sha-89c5890
+ * @license Angular v10.0.0-next.3+46.sha-3d82aa7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2712,6 +2712,12 @@ if (false) {
      * @type {?}
      */
     TView.prototype.consts;
+    /**
+     * Indicates that there was an error before we managed to complete the first create pass of the
+     * view. This means that the view is likely corrupted and we should try to recover it.
+     * @type {?}
+     */
+    TView.prototype.incompleteFirstPass;
 }
 /** @enum {number} */
 const RootContextFlags = {
@@ -10451,6 +10457,7 @@ const TViewConstructor = class TView {
      * @param {?} firstChild
      * @param {?} schemas
      * @param {?} consts
+     * @param {?} incompleteFirstPass
      */
     constructor(type, //
     id, //
@@ -10481,7 +10488,9 @@ const TViewConstructor = class TView {
     pipeRegistry, //
     firstChild, //
     schemas, //
-    consts) {
+    consts, //
+    incompleteFirstPass //
+    ) {
         this.type = type;
         this.id = id;
         this.blueprint = blueprint;
@@ -10512,6 +10521,7 @@ const TViewConstructor = class TView {
         this.firstChild = firstChild;
         this.schemas = schemas;
         this.consts = consts;
+        this.incompleteFirstPass = incompleteFirstPass;
     }
     /**
      * @return {?}
@@ -11886,6 +11896,14 @@ function renderView(tView, lView, context) {
             renderChildComponents(lView, components);
         }
     }
+    catch (error) {
+        // If we didn't manage to get past the first template pass due to
+        // an error, mark the view as corrupted so we can try to recover.
+        if (tView.firstCreatePass) {
+            tView.incompleteFirstPass = true;
+        }
+        throw error;
+    }
     finally {
         lView[FLAGS] &= ~4 /* CreationMode */;
         leaveView();
@@ -12149,8 +12167,14 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor = getNative
  * @return {?} TView
  */
 function getOrCreateTComponentView(def) {
-    return def.tView ||
-        (def.tView = createTView(1 /* Component */, -1, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts));
+    /** @type {?} */
+    const tView = def.tView;
+    // Create a TView if there isn't one, or recreate it if the first create pass didn't
+    // complete successfuly since we can't know for sure whether it's in a usable shape.
+    if (tView === null || tView.incompleteFirstPass) {
+        return def.tView = createTView(1 /* Component */, -1, def.template, def.decls, def.vars, def.directiveDefs, def.pipeDefs, def.viewQuery, def.schemas, def.consts);
+    }
+    return tView;
 }
 /**
  * Creates a TView instance
@@ -12208,7 +12232,9 @@ function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes
         typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
         null, // firstChild: TNode|null,
         schemas, // schemas: SchemaMetadata[]|null,
-        consts) : // consts: TConstants|null
+        consts, // consts: TConstants|null
+        false // incompleteFirstPass: boolean
+        ) :
         {
             type: type,
             id: viewIndex,
@@ -12240,6 +12266,7 @@ function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes
             firstChild: null,
             schemas: schemas,
             consts: consts,
+            incompleteFirstPass: false
         };
 }
 /**
@@ -28296,7 +28323,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.3+45.sha-89c5890');
+const VERSION = new Version('10.0.0-next.3+46.sha-3d82aa7');
 
 /**
  * @fileoverview added by tsickle

@@ -601,6 +601,11 @@ export interface TView {
      * Used for directive matching, attribute bindings, local definitions and more.
      */
     consts: TConstants | null;
+    /**
+     * Indicates that there was an error before we managed to complete the first create pass of the
+     * view. This means that the view is likely corrupted and we should try to recover it.
+     */
+    incompleteFirstPass: boolean;
 }
 export declare const enum RootContextFlags {
     Empty = 0,
