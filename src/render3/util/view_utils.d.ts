@@ -94,3 +94,11 @@ export declare function getConstant<T>(consts: TConstants | null, index: number 
 export declare function resetPreOrderHookFlags(lView: LView): void;
 export declare function getLContainerActiveIndex(lContainer: LContainer): number;
 export declare function setLContainerActiveIndex(lContainer: LContainer, index: number): void;
+/**
+ * Updates the `TRANSPLANTED_VIEWS_TO_REFRESH` counter on the `LContainer` as well as the parents
+ * whose
+ *  1. counter goes from 0 to 1, indicating that there is a new child that has a view to refresh
+ *  or
+ *  2. counter goes from 1 to 0, indicating there are no more descendant views to refresh
+ */
+export declare function updateTransplantedViewCount(lContainer: LContainer, amount: 1 | -1): void;

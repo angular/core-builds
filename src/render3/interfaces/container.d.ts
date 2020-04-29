@@ -8,7 +8,7 @@
 import { ViewRef } from '../../linker/view_ref';
 import { TNode } from './node';
 import { RComment, RElement } from './renderer';
-import { HOST, LView, NEXT, PARENT, T_HOST } from './view';
+import { HOST, LView, NEXT, PARENT, T_HOST, TRANSPLANTED_VIEWS_TO_REFRESH } from './view';
 /**
  * Special location which allows easy identification of type. If we have an array which was
  * retrieved from the `LView` and that array has `true` at `TYPE` location, we know it is
@@ -21,16 +21,16 @@ export declare const TYPE = 1;
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
 export declare const ACTIVE_INDEX = 2;
-export declare const MOVED_VIEWS = 5;
 export declare const NATIVE = 7;
 export declare const VIEW_REFS = 8;
+export declare const MOVED_VIEWS = 9;
 /**
  * Size of LContainer's header. Represents the index after which all views in the
  * container will be inserted. We need to keep a record of current views so we know
  * which views are already in the DOM (and don't need to be re-added) and so we can
  * remove views from the DOM when they are no longer required.
  */
-export declare const CONTAINER_HEADER_OFFSET = 9;
+export declare const CONTAINER_HEADER_OFFSET = 10;
 /**
  * Used to track:
  *  - Inline embedded views (see: `ɵɵembeddedViewStart`)
@@ -106,6 +106,13 @@ export interface LContainer extends Array<any> {
      * view with the same parent, so we can remove listeners efficiently.
      */
     [NEXT]: LView | LContainer | null;
+    /**
+     * The number of direct transplanted views which need a refresh or have descendants themselves
+     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
+     * change detection we should still descend to find those children to refresh, even if the parents
+     * are not `Dirty`/`CheckAlways`.
+     */
+    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
     /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since

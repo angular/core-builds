@@ -23,7 +23,7 @@ export declare const TVIEW = 1;
 export declare const FLAGS = 2;
 export declare const PARENT = 3;
 export declare const NEXT = 4;
-export declare const QUERIES = 5;
+export declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
 export declare const T_HOST = 6;
 export declare const CLEANUP = 7;
 export declare const CONTEXT = 8;
@@ -37,8 +37,9 @@ export declare const DECLARATION_VIEW = 15;
 export declare const DECLARATION_COMPONENT_VIEW = 16;
 export declare const DECLARATION_LCONTAINER = 17;
 export declare const PREORDER_HOOK_FLAGS = 18;
+export declare const QUERIES = 19;
 /** Size of LView's header. Necessary to adjust for it when setting slots.  */
-export declare const HEADER_OFFSET = 19;
+export declare const HEADER_OFFSET = 20;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -247,6 +248,13 @@ export interface LView extends Array<any> {
      * More flags for this view. See PreOrderHookFlags for more info.
      */
     [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
+    /**
+     * The number of direct transplanted views which need a refresh or have descendants themselves
+     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
+     * change detection we should still descend to find those children to refresh, even if the parents
+     * are not `Dirty`/`CheckAlways`.
+     */
+    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
 }
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 export declare const enum LViewFlags {
@@ -297,11 +305,16 @@ export declare const enum LViewFlags {
     /** Whether or not this view is the root view */
     IsRoot = 512,
     /**
-     * Index of the current init phase on last 22 bits
+     * Whether this moved LView was needs to be refreshed at the insertion location because the
+     * declaration was dirty.
      */
-    IndexWithinInitPhaseIncrementer = 1024,
-    IndexWithinInitPhaseShift = 10,
-    IndexWithinInitPhaseReset = 1023
+    RefreshTransplantedView = 1024,
+    /**
+     * Index of the current init phase on last 21 bits
+     */
+    IndexWithinInitPhaseIncrementer = 2048,
+    IndexWithinInitPhaseShift = 11,
+    IndexWithinInitPhaseReset = 2047
 }
 /**
  * Possible states of the init phase:
