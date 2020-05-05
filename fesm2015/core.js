@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.5+7.sha-306f46c
+ * @license Angular v10.0.0-next.5+18.sha-b95a336
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28440,7 +28440,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.5+7.sha-306f46c');
+const VERSION = new Version('10.0.0-next.5+18.sha-b95a336');
 
 /**
  * @fileoverview added by tsickle
@@ -34759,6 +34759,8 @@ function normalizeLocale(locale) {
  * Generated from: packages/core/src/i18n/localization.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
+/** @type {?} */
+const pluralMapping = ['zero', 'one', 'two', 'few', 'many'];
 /**
  * Returns the plural case based on the locale
  * @param {?} value
@@ -34767,21 +34769,10 @@ function normalizeLocale(locale) {
  */
 function getPluralCase(value, locale) {
     /** @type {?} */
-    const plural = getLocalePluralCase(locale)(value);
-    switch (plural) {
-        case 0:
-            return 'zero';
-        case 1:
-            return 'one';
-        case 2:
-            return 'two';
-        case 3:
-            return 'few';
-        case 4:
-            return 'many';
-        default:
-            return 'other';
-    }
+    const plural = getLocalePluralCase(locale)(parseInt(value, 10));
+    /** @type {?} */
+    const result = pluralMapping[plural];
+    return (result !== undefined) ? result : 'other';
 }
 /**
  * The locale id that the application is using by default (for translations and ICU expressions).
