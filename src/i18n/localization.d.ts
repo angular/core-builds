@@ -8,7 +8,7 @@
 /**
  * Returns the plural case based on the locale
  */
-export declare function getPluralCase(value: any, locale: string): string;
+export declare function getPluralCase(value: string, locale: string): string;
 /**
  * The locale id that the application is using by default (for translations and ICU expressions).
  */
