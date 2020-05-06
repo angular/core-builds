@@ -1,15 +1,7 @@
 {
   "name": "@angular/core",
-  "version": "10.0.0-next.5+45.sha-fafa50d",
+  "version": "10.0.0-next.5+53.sha-3c6c00d",
   "description": "Angular - the core framework",
-  "main": "./bundles/core.umd.js",
-  "module": "./fesm5/core.js",
-  "es2015": "./fesm2015/core.js",
-  "esm5": "./esm5/core.js",
-  "esm2015": "./esm2015/core.js",
-  "fesm5": "./fesm5/core.js",
-  "fesm2015": "./fesm2015/core.js",
-  "typings": "./core.d.ts",
   "author": "angular",
   "license": "MIT",
   "peerDependencies": {
@@ -48,5 +40,11 @@
   "sideEffects": false,
   "publishConfig": {
     "registry": "https://wombat-dressing-room.appspot.com"
-  }
+  },
+  "main": "./bundles/core.umd.js",
+  "fesm2015": "./fesm2015/core.js",
+  "esm2015": "./esm2015/core.js",
+  "typings": "./core.d.ts",
+  "module": "./fesm2015/core.js",
+  "es2015": "./fesm2015/core.js"
 }
