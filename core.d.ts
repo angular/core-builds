@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.5+53.sha-3c6c00d
+ * @license Angular v10.0.0-next.5+54.sha-420b9be
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8584,12 +8584,6 @@ export declare class WrappedValue {
  */
 export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): string;
 
-/**
- * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
- * value) and returns a value that is safe to use in a browser environment.
- */
-export declare function ɵ_sanitizeStyle(value: string): string;
-
 
 export declare function ɵ_sanitizeUrl(url: string): string;
 
@@ -11553,8 +11547,14 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: T
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
- * The default style sanitizer will handle sanitization for style properties by
- * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+ * The default style sanitizer will handle sanitization for style properties.
+ *
+ * Style sanitization is no longer apart of Angular because modern browsers no
+ * longer support javascript expressions. Therefore, the reason why this API
+ * exists is exclusively for unwrapping any style value expressions that were
+ * marked as `SafeValue` values.
+ *
+ * This API will be removed in a future release of Angular.
  *
  * @publicApi
  */
@@ -13443,14 +13443,10 @@ export declare function ɵɵsanitizeScript(unsafeScript: any): string;
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
  *
- * This method parses the `style` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
  * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
  *
  * @param unsafeStyle untrusted `style`, typically from the user.
- * @returns `style` string which is safe to bind to the `style` properties, because all of the
- * dangerous javascript and urls have been removed.
+ * @returns `style` string which is safe to bind to the `style` properties.
  *
  * @publicApi
  */
