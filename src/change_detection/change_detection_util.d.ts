@@ -25,6 +25,7 @@ export declare function devModeEqual(a: any, b: any): boolean;
  * ```
  *
  * @publicApi
+ * @deprecated from v10 stop using. (No replacement, deemed unnecessary.)
  */
 export declare class WrappedValue {
     /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
