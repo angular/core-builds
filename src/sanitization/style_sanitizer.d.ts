@@ -7,11 +7,6 @@
  */
 import { SafeValue } from './bypass';
 /**
- * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
- * value) and returns a value that is safe to use in a browser environment.
- */
-export declare function _sanitizeStyle(value: string): string;
-/**
  * A series of flags to instruct a style sanitizer to either validate
  * or sanitize a value.
  *

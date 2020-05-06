@@ -26,14 +26,10 @@ export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
  *
- * This method parses the `style` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
  * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
  *
  * @param unsafeStyle untrusted `style`, typically from the user.
- * @returns `style` string which is safe to bind to the `style` properties, because all of the
- * dangerous javascript and urls have been removed.
+ * @returns `style` string which is safe to bind to the `style` properties.
  *
  * @publicApi
  */
@@ -105,8 +101,14 @@ export declare function getUrlSanitizer(tag: string, prop: string): typeof ɵɵs
  */
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 /**
- * The default style sanitizer will handle sanitization for style properties by
- * sanitizing any CSS property that can include a `url` value (usually image-based properties)
+ * The default style sanitizer will handle sanitization for style properties.
+ *
+ * Style sanitization is no longer apart of Angular because modern browsers no
+ * longer support javascript expressions. Therefore, the reason why this API
+ * exists is exclusively for unwrapping any style value expressions that were
+ * marked as `SafeValue` values.
+ *
+ * This API will be removed in a future release of Angular.
  *
  * @publicApi
  */
