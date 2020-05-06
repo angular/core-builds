@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.5+54.sha-420b9be
+ * @license Angular v10.0.0-next.5+55.sha-20cc3ab
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4111,15 +4111,14 @@ export declare class ModuleWithComponentFactories<T> {
 /**
  * A wrapper around an NgModule that associates it with the providers.
  *
- * @param T the module type. In Ivy applications, this must be explicitly
- * provided.
+ * @param T the module type.
  *
  * Note that using ModuleWithProviders without a generic type is deprecated.
  * The generic will become required in a future version of Angular.
  *
  * @publicApi
  */
-export declare interface ModuleWithProviders<T = any /** TODO(alxhub): remove default when callers pass explicit type param */> {
+export declare interface ModuleWithProviders<T> {
     ngModule: Type<T>;
     providers?: Provider[];
 }
