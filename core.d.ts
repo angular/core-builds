@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.5+42.sha-ecffc35
+ * @license Angular v10.0.0-next.5+43.sha-c9e0db5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8561,6 +8561,7 @@ declare interface ViewUpdateFn {
  * ```
  *
  * @publicApi
+ * @deprecated from v10 stop using. (No replacement, deemed unnecessary.)
  */
 export declare class WrappedValue {
     /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
