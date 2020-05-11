@@ -15,7 +15,6 @@ export declare function assertNgModuleType(actual: any, msg?: string): void;
 export declare function assertPreviousIsParent(isParent: boolean): void;
 export declare function assertHasParent(tNode: TNode | null): void;
 export declare function assertDataNext(lView: LView, index: number, arr?: any[]): void;
-export declare function assertLContainerOrUndefined(value: any): asserts value is LContainer | undefined | null;
 export declare function assertLContainer(value: any): asserts value is LContainer;
 export declare function assertLViewOrUndefined(value: any): asserts value is LView | null | undefined;
 export declare function assertLView(value: any): asserts value is LView;

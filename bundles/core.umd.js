@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.6+18.sha-ed1b4a8
+ * @license Angular v10.0.0-next.6+20.sha-28f3c1c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2215,9 +2215,6 @@
         if (arr == null)
             arr = lView;
         assertEqual(arr.length, index, "index " + index + " expected to be at the end of arr (length " + arr.length + ")");
-    }
-    function assertLContainerOrUndefined(value) {
-        value && assertEqual(isLContainer(value), true, 'Expecting LContainer or undefined or null');
     }
     function assertLContainer(value) {
         assertDefined(value, 'LContainer must be defined');
@@ -14331,26 +14328,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Creates an LContainer for inline views, e.g.
-     *
-     * % if (showing) {
-     *   <div></div>
-     * % }
-     *
-     * @param index The index of the container in the data array
-     *
-     * @codeGenApi
-     */
-    function ɵɵcontainer(index) {
-        var lView = getLView();
-        var tView = getTView();
-        var tNode = containerInternal(tView, lView, index, null, null);
-        if (tView.firstCreatePass) {
-            tNode.tViews = [];
-        }
-        setIsNotParent();
-    }
     function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
         ngDevMode && assertFirstCreatePass(tView);
         ngDevMode && ngDevMode.firstCreatePass++;
@@ -14406,83 +14383,6 @@
         if (localRefsIndex != null) {
             saveResolvedLocalsInData(lView, tNode, localRefExtractor);
         }
-    }
-    /**
-     * Sets a container up to receive views.
-     *
-     * @param index The index of the container in the data array
-     *
-     * @codeGenApi
-     */
-    function ɵɵcontainerRefreshStart(index) {
-        var lView = getLView();
-        var tView = getTView();
-        var previousOrParentTNode = load(tView.data, index);
-        ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-        setPreviousOrParentTNode(previousOrParentTNode, true);
-        lView[index + HEADER_OFFSET][ACTIVE_INDEX] = 0;
-        // We need to execute init hooks here so ngOnInit hooks are called in top level views
-        // before they are called in embedded views (for backwards compatibility).
-        if (!getCheckNoChangesMode()) {
-            var hooksInitPhaseCompleted = (lView[FLAGS] & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
-            if (hooksInitPhaseCompleted) {
-                var preOrderCheckHooks = tView.preOrderCheckHooks;
-                if (preOrderCheckHooks !== null) {
-                    executeCheckHooks(lView, preOrderCheckHooks, null);
-                }
-            }
-            else {
-                var preOrderHooks = tView.preOrderHooks;
-                if (preOrderHooks !== null) {
-                    executeInitAndCheckHooks(lView, preOrderHooks, 0 /* OnInitHooksToBeRun */, null);
-                }
-                incrementInitPhaseFlags(lView, 0 /* OnInitHooksToBeRun */);
-            }
-        }
-    }
-    /**
-     * Marks the end of the LContainer.
-     *
-     * Marking the end of LContainer is the time when to child views get inserted or removed.
-     *
-     * @codeGenApi
-     */
-    function ɵɵcontainerRefreshEnd() {
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        if (getIsParent()) {
-            setIsNotParent();
-        }
-        else {
-            ngDevMode && assertNodeType(previousOrParentTNode, 2 /* View */);
-            ngDevMode && assertHasParent(previousOrParentTNode);
-            previousOrParentTNode = previousOrParentTNode.parent;
-            setPreviousOrParentTNode(previousOrParentTNode, false);
-        }
-        ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
-        var lContainer = getLView()[previousOrParentTNode.index];
-        var nextIndex = getLContainerActiveIndex(lContainer);
-        // remove extra views at the end of the container
-        while (nextIndex < lContainer.length - CONTAINER_HEADER_OFFSET) {
-            removeView(lContainer, nextIndex);
-        }
-    }
-    function containerInternal(tView, lView, nodeIndex, tagName, attrs) {
-        ngDevMode &&
-            assertEqual(getBindingIndex(), tView.bindingStartIndex, 'container nodes should be created before any bindings');
-        var adjustedIndex = nodeIndex + HEADER_OFFSET;
-        ngDevMode && assertDataInRange(lView, nodeIndex + HEADER_OFFSET);
-        ngDevMode && ngDevMode.rendererCreateComment++;
-        var comment = lView[adjustedIndex] =
-            lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-        var tNode = getOrCreateTNode(tView, lView[T_HOST], nodeIndex, 0 /* Container */, tagName, attrs);
-        var lContainer = lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode);
-        appendChild(tView, lView, comment, tNode);
-        attachPatchData(comment, lView);
-        // Containers are added to the current view tree instead of their embedded views
-        // because views can be removed and re-inserted.
-        addToViewTree(lView, lContainer);
-        ngDevMode && assertNodeType(getPreviousOrParentTNode(), 0 /* Container */);
-        return tNode;
     }
 
     /**
@@ -14868,124 +14768,6 @@
     function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
         ɵɵelementContainerStart(index, attrsIndex, localRefsIndex);
         ɵɵelementContainerEnd();
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Marks the start of an embedded view.
-     *
-     * @param viewBlockId The ID of this view
-     * @return boolean Whether or not this view is in creation mode
-     *
-     * @codeGenApi
-     */
-    function ɵɵembeddedViewStart(viewBlockId, decls, vars) {
-        var lView = getLView();
-        var previousOrParentTNode = getPreviousOrParentTNode();
-        // The previous node can be a view node if we are processing an inline for loop
-        var containerTNode = previousOrParentTNode.type === 2 /* View */ ?
-            previousOrParentTNode.parent :
-            previousOrParentTNode;
-        var lContainer = lView[containerTNode.index];
-        ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
-        var viewToRender = scanForView(lContainer, getLContainerActiveIndex(lContainer), viewBlockId);
-        if (viewToRender) {
-            setIsParent();
-            enterView(viewToRender, viewToRender[TVIEW].node);
-        }
-        else {
-            // When we create a new LView, we always reset the state of the instructions.
-            viewToRender = createLView(lView, getOrCreateEmbeddedTView(viewBlockId, decls, vars, containerTNode), null, 16 /* CheckAlways */, null, null);
-            var tParentNode = getIsParent() ? previousOrParentTNode :
-                previousOrParentTNode && previousOrParentTNode.parent;
-            assignTViewNodeToLView(viewToRender[TVIEW], tParentNode, viewBlockId, viewToRender);
-            enterView(viewToRender, viewToRender[TVIEW].node);
-        }
-        if (lContainer) {
-            if (isCreationMode(viewToRender)) {
-                // it is a new view, insert it into collection of views for a given container
-                insertView(viewToRender[TVIEW], viewToRender, lContainer, getLContainerActiveIndex(lContainer));
-            }
-            lContainer[ACTIVE_INDEX] += 2 /* INCREMENT */;
-        }
-        return isCreationMode(viewToRender) ? 1 /* Create */ | 2 /* Update */ :
-            2 /* Update */;
-    }
-    /**
-     * Initialize the TView (e.g. static data) for the active embedded view.
-     *
-     * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
-     * static data for a particular node would overwrite the static data for a node in the view above
-     * it with the same index (since it's in the same template).
-     *
-     * @param viewIndex The index of the TView in TNode.tViews
-     * @param decls The number of nodes, local refs, and pipes in this template
-     * @param vars The number of bindings and pure function bindings in this template
-     * @param container The parent container in which to look for the view's static data
-     * @returns TView
-     */
-    function getOrCreateEmbeddedTView(viewIndex, decls, vars, parent) {
-        var tView = getLView()[TVIEW];
-        ngDevMode && assertNodeType(parent, 0 /* Container */);
-        var containerTViews = parent.tViews;
-        ngDevMode && assertDefined(containerTViews, 'TView expected');
-        ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
-        if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
-            containerTViews[viewIndex] = createTView(2 /* Embedded */, viewIndex, null, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, null, tView.consts);
-        }
-        return containerTViews[viewIndex];
-    }
-    /**
-     * Looks for a view with a given view block id inside a provided LContainer.
-     * Removes views that need to be deleted in the process.
-     *
-     * @param lContainer to search for views
-     * @param startIdx starting index in the views array to search from
-     * @param viewBlockId exact view block id to look for
-     */
-    function scanForView(lContainer, startIdx, viewBlockId) {
-        for (var i = startIdx + CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-            var viewAtPositionId = lContainer[i][TVIEW].id;
-            if (viewAtPositionId === viewBlockId) {
-                return lContainer[i];
-            }
-            else if (viewAtPositionId < viewBlockId) {
-                // found a view that should not be at this position - remove
-                removeView(lContainer, i - CONTAINER_HEADER_OFFSET);
-            }
-            else {
-                // found a view with id greater than the one we are searching for
-                // which means that required view doesn't exist and can't be found at
-                // later positions in the views array - stop the searchdef.cont here
-                break;
-            }
-        }
-        return null;
-    }
-    /**
-     * Marks the end of an embedded view.
-     *
-     * @codeGenApi
-     */
-    function ɵɵembeddedViewEnd() {
-        var lView = getLView();
-        var tView = getTView();
-        var viewHost = lView[T_HOST];
-        var context = lView[CONTEXT];
-        if (isCreationMode(lView)) {
-            renderView(tView, lView, context); // creation mode pass
-        }
-        refreshView(tView, lView, tView.template, context); // update mode pass
-        var lContainer = lView[PARENT];
-        ngDevMode && assertLContainerOrUndefined(lContainer);
-        leaveView();
-        setPreviousOrParentTNode(viewHost, false);
     }
 
     /**
@@ -20325,7 +20107,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-next.6+18.sha-ed1b4a8');
+    var VERSION = new Version('10.0.0-next.6+20.sha-28f3c1c');
 
     /**
      * @license
@@ -26554,10 +26336,7 @@
         'ɵɵProvidersFeature': ɵɵProvidersFeature,
         'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
         'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
-        'ɵɵcontainer': ɵɵcontainer,
         'ɵɵnextContext': ɵɵnextContext,
-        'ɵɵcontainerRefreshStart': ɵɵcontainerRefreshStart,
-        'ɵɵcontainerRefreshEnd': ɵɵcontainerRefreshEnd,
         'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
         'ɵɵnamespaceMathML': ɵɵnamespaceMathML,
         'ɵɵnamespaceSVG': ɵɵnamespaceSVG,
@@ -26657,8 +26436,6 @@
         'ɵɵtextInterpolate7': ɵɵtextInterpolate7,
         'ɵɵtextInterpolate8': ɵɵtextInterpolate8,
         'ɵɵtextInterpolateV': ɵɵtextInterpolateV,
-        'ɵɵembeddedViewStart': ɵɵembeddedViewStart,
-        'ɵɵembeddedViewEnd': ɵɵembeddedViewEnd,
         'ɵɵi18n': ɵɵi18n,
         'ɵɵi18nAttributes': ɵɵi18nAttributes,
         'ɵɵi18nExp': ɵɵi18nExp,
@@ -33135,9 +32912,6 @@
     exports.ɵɵclassMapInterpolateV = ɵɵclassMapInterpolateV;
     exports.ɵɵclassProp = ɵɵclassProp;
     exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
-    exports.ɵɵcontainer = ɵɵcontainer;
-    exports.ɵɵcontainerRefreshEnd = ɵɵcontainerRefreshEnd;
-    exports.ɵɵcontainerRefreshStart = ɵɵcontainerRefreshStart;
     exports.ɵɵcontentQuery = ɵɵcontentQuery;
     exports.ɵɵdefaultStyleSanitizer = ɵɵdefaultStyleSanitizer;
     exports.ɵɵdefineComponent = ɵɵdefineComponent;
@@ -33154,8 +32928,6 @@
     exports.ɵɵelementContainerStart = ɵɵelementContainerStart;
     exports.ɵɵelementEnd = ɵɵelementEnd;
     exports.ɵɵelementStart = ɵɵelementStart;
-    exports.ɵɵembeddedViewEnd = ɵɵembeddedViewEnd;
-    exports.ɵɵembeddedViewStart = ɵɵembeddedViewStart;
     exports.ɵɵenableBindings = ɵɵenableBindings;
     exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
     exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
