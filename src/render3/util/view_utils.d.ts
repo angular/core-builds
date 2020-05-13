@@ -92,8 +92,6 @@ export declare function getConstant<T>(consts: TConstants | null, index: number 
  * @param lView the LView on which the flags are reset
  */
 export declare function resetPreOrderHookFlags(lView: LView): void;
-export declare function getLContainerActiveIndex(lContainer: LContainer): number;
-export declare function setLContainerActiveIndex(lContainer: LContainer, index: number): void;
 /**
  * Updates the `TRANSPLANTED_VIEWS_TO_REFRESH` counter on the `LContainer` as well as the parents
  * whose

@@ -20,7 +20,15 @@ export declare const TYPE = 1;
  * without having to remember the specific indices.
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
-export declare const ACTIVE_INDEX = 2;
+/**
+ * Flag to signify that this `LContainer` may have transplanted views which need to be change
+ * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
+ *
+ * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
+ * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
+ * that the `MOVED_VIEWS` are transplanted and on-push.
+ */
+export declare const HAS_TRANSPLANTED_VIEWS = 2;
 export declare const NATIVE = 7;
 export declare const VIEW_REFS = 8;
 export declare const MOVED_VIEWS = 9;
@@ -31,28 +39,6 @@ export declare const MOVED_VIEWS = 9;
  * remove views from the DOM when they are no longer required.
  */
 export declare const CONTAINER_HEADER_OFFSET = 10;
-/**
- * Used to track Transplanted `LView`s (see: `LView[DECLARATION_COMPONENT_VIEW])`
- */
-export declare const enum ActiveIndexFlag {
-    /**
-     * Flag which signifies that the `LContainer` does not have any inline embedded views.
-     */
-    DYNAMIC_EMBEDDED_VIEWS_ONLY = -1,
-    /**
-     * Flag to signify that this `LContainer` may have transplanted views which need to be change
-     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
-     *
-     * This flag once set is never unset for the `LContainer`. This means that when unset we can skip
-     * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
-     * that the `MOVED_VIEWS` are transplanted and on-push.
-     */
-    HAS_TRANSPLANTED_VIEWS = 1,
-    /**
-     * Number of bits to shift inline embedded views counter to make space for other flags.
-     */
-    SHIFT = 1
-}
 /**
  * The state associated with a container.
  *
@@ -75,16 +61,12 @@ export interface LContainer extends Array<any> {
      */
     [TYPE]: true;
     /**
-     * The next active index in the views array to read or write to. This helps us
-     * keep track of where we are in the views array.
-     * In the case the LContainer is created for a ViewContainerRef,
-     * it is set to null to identify this scenario, as indices are "absolute" in that case,
-     * i.e. provided directly by the user of the ViewContainerRef API.
+     * Flag to signify that this `LContainer` may have transplanted views which need to be change
+     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
      *
-     * The lowest bit signals that this `LContainer` has transplanted views which need to be change
-     * detected as part of the declaration CD. (See `LView[DECLARATION_COMPONENT_VIEW]`)
+     * This flag, once set, is never unset for the `LContainer`.
      */
-    [ACTIVE_INDEX]: ActiveIndexFlag;
+    [HAS_TRANSPLANTED_VIEWS]: boolean;
     /**
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].

@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { LContainer } from '../interfaces/container';
 import { LView, RootContext } from '../interfaces/view';
 /**
  * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
@@ -27,3 +28,11 @@ export declare function getRootView(componentOrLView: LView | {}): LView;
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
 export declare function getRootContext(viewOrComponent: LView | {}): RootContext;
+/**
+ * Gets the first `LContainer` in the LView or `null` if none exists.
+ */
+export declare function getFirstLContainer(lView: LView): LContainer | null;
+/**
+ * Gets the next `LContainer` that is a sibling of the given container.
+ */
+export declare function getNextLContainer(container: LContainer): LContainer | null;
