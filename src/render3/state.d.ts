@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { StyleSanitizeFn } from '../sanitization/style_sanitizer';
 import { DirectiveDef } from './interfaces/definition';
 import { TNode } from './interfaces/node';
 import { LView, OpaqueViewState, TData, TView } from './interfaces/view';
@@ -79,10 +78,6 @@ interface LFrame {
      * Current namespace to be used when creating elements
      */
     currentNamespace: string | null;
-    /**
-     * Current sanitizer
-     */
-    currentSanitizer: StyleSanitizeFn | null;
     /**
      * The root index from which pure function instructions should calculate their binding
      * indices. In component views, this is TView.bindingStartIndex. In a host binding
@@ -336,7 +331,4 @@ export declare function ɵɵnamespaceHTML(): void;
  */
 export declare function namespaceHTMLInternal(): void;
 export declare function getNamespace(): string | null;
-export declare function setCurrentStyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
-export declare function resetCurrentStyleSanitizer(): void;
-export declare function getCurrentStyleSanitizer(): StyleSanitizeFn | null;
 export {};

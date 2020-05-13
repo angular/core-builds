@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { StyleSanitizeFn } from './style_sanitizer';
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -100,19 +99,5 @@ export declare function getUrlSanitizer(tag: string, prop: string): typeof ɵɵs
  * @publicApi
  */
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
-/**
- * The default style sanitizer will handle sanitization for style properties.
- *
- * Style sanitization is no longer apart of Angular because modern browsers no
- * longer support javascript expressions. Therefore, the reason why this API
- * exists is exclusively for unwrapping any style value expressions that were
- * marked as `SafeValue` values.
- *
- * This API will be removed in a future release of Angular.
- *
- * @publicApi
- */
-export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
-export declare function stylePropNeedsSanitization(prop: string): boolean;
 export declare function validateAgainstEventProperties(name: string): void;
 export declare function validateAgainstEventAttributes(name: string): void;

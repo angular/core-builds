@@ -6,30 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { SafeValue } from '../../sanitization/bypass';
-import { StyleSanitizeFn } from '../../sanitization/style_sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { TNode } from '../interfaces/node';
-import { SanitizerFn } from '../interfaces/sanitization';
 import { TStylingKey } from '../interfaces/styling';
 import { TData } from '../interfaces/view';
 import { NO_CHANGE } from '../tokens';
-/**
- * Sets the current style sanitizer function which will then be used
- * within all follow-up prop and map-based style binding instructions
- * for the given element.
- *
- * Note that once styling has been applied to the element (i.e. once
- * `advance(n)` is executed or the hostBindings/template function exits)
- * then the active `sanitizerFn` will be set to `null`. This means that
- * once styling is applied to another element then a another call to
- * `styleSanitizer` will need to be made.
- *
- * @param sanitizerFn The sanitization function that will be used to
- *       process style prop/value entries.
- *
- * @codeGenApi
- */
-export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 /**
  * Update a style binding on an element with the provided value.
  *
@@ -43,8 +24,6 @@ export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): v
  * @param prop A valid CSS property.
  * @param value New value to write (`null` or an empty string to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
  *
  * Note that this will apply the provided style value to the host element if this function is called
  * within a host binding function.
@@ -136,17 +115,15 @@ export declare function classStringParser(keyValueArray: KeyValueArray<any>, tex
  *
  * @param prop property name.
  * @param value binding value.
- * @param suffixOrSanitizer suffix or sanitization function
+ * @param suffix suffix for the property (e.g. `em` or `px`)
  * @param isClassBased `true` if `class` change (`false` if `style`)
  */
-export declare function checkStylingProperty(prop: string, value: any | NO_CHANGE, suffixOrSanitizer: SanitizerFn | string | undefined | null, isClassBased: boolean): void;
+export declare function checkStylingProperty(prop: string, value: any | NO_CHANGE, suffix: string | undefined | null, isClassBased: boolean): void;
 /**
  * Common code between `ɵɵclassMap` and `ɵɵstyleMap`.
  *
  * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
- * function so that
- *        `style` can pass in version which does sanitization. This is done for tree shaking
- *        purposes.
+ *        function so that `style` can be processed. This is done for tree shaking purposes.
  * @param stringParser Parser used to parse `value` if `string`. (Passed in as `style` and `class`
  *        have different parsers.)
  * @param value bound value from application
@@ -190,9 +167,8 @@ export declare function wrapInStaticStylingKey(tData: TData, tNode: TNode, styli
  * keep additional `Map` to keep track of duplicates or items which have not yet been visited.
  *
  * @param keyValueArraySet (See `keyValueArraySet` in "util/array_utils") Gets passed in as a
- * function so that
- *        `style` can pass in version which does sanitization. This is done for tree shaking
- *        purposes.
+ *        function so that `style` can be processed. This is done
+ *        for tree shaking purposes.
  * @param stringParser The parser is passed in so that it will be tree shakable. See
  *        `styleStringParser` and `classStringParser`
  * @param value The value to parse/convert to `KeyValueArray`
@@ -201,13 +177,13 @@ export declare function toStylingKeyValueArray(keyValueArraySet: (keyValueArray:
     [key: string]: any;
 } | SafeValue | null | undefined): KeyValueArray<any>;
 /**
- * Set a `value` for a `key` taking style sanitization into account.
+ * Set a `value` for a `key`.
  *
  * See: `keyValueArraySet` for details
  *
  * @param keyValueArray KeyValueArray to add to.
- * @param key Style key to add. (This key will be checked if it needs sanitization)
- * @param value The value to set (If key needs sanitization it will be sanitized)
+ * @param key Style key to add.
+ * @param value The value to set.
  */
 export declare function styleKeyValueArraySet(keyValueArray: KeyValueArray<any>, key: string, value: any): void;
 /**
