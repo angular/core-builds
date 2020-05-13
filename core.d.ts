@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+3.sha-352b9c7
+ * @license Angular v10.0.0-next.7+9.sha-7d3f504
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3887,10 +3887,6 @@ declare interface LFrame {
      */
     currentNamespace: string | null;
     /**
-     * Current sanitizer
-     */
-    currentSanitizer: StyleSanitizeFn | null;
-    /**
      * The root index from which pure function instructions should calculate their binding
      * indices. In component views, this is TView.bindingStartIndex. In a host binding
      * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
@@ -6413,41 +6409,6 @@ export declare interface StaticClassSansProvider {
  * @publicApi
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
-
-/**
- * Used to intercept and sanitize style values before they are written to the renderer.
- *
- * This function is designed to be called in two modes. When a value is not provided
- * then the function will return a boolean whether a property will be sanitized later.
- * If a value is provided then the sanitized version of that will be returned.
- */
-declare interface StyleSanitizeFn {
-    (prop: string, value: string | ɵSafeValue | null, mode?: StyleSanitizeMode): any;
-}
-
-/**
- * A series of flags to instruct a style sanitizer to either validate
- * or sanitize a value.
- *
- * Because sanitization is dependent on the style property (i.e. style
- * sanitization for `width` is much different than for `background-image`)
- * the sanitization function (e.g. `StyleSanitizerFn`) needs to check a
- * property value first before it actually sanitizes any values.
- *
- * This enum exist to allow a style sanitization function to either only
- * do validation (check the property to see whether a value will be
- * sanitized or not) or to sanitize the value (or both).
- *
- * @publicApi
- */
-declare const enum StyleSanitizeMode {
-    /** Just check to see if the property is required to be sanitized or not */
-    ValidateProperty = 1,
-    /** Skip checking the property; just sanitize the value */
-    SanitizeOnly = 2,
-    /** Check the property and (if true) then sanitize the value */
-    ValidateAndSanitize = 3
-}
 
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
@@ -11504,20 +11465,6 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: T
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
- * The default style sanitizer will handle sanitization for style properties.
- *
- * Style sanitization is no longer apart of Angular because modern browsers no
- * longer support javascript expressions. Therefore, the reason why this API
- * exists is exclusively for unwrapping any style value expressions that were
- * marked as `SafeValue` values.
- *
- * This API will be removed in a future release of Angular.
- *
- * @publicApi
- */
-export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
-
-/**
  * Create a component definition object.
  *
  *
@@ -13335,6 +13282,7 @@ export declare function ɵɵresolveWindow(element: RElement & {
  */
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 
+
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -13801,8 +13749,6 @@ export declare function ɵɵstyleMapInterpolateV(values: any[]): void;
  * @param prop A valid CSS property.
  * @param value New value to write (`null` or an empty string to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
  *
  * Note that this will apply the provided style value to the host element if this function is called
  * within a host binding function.
@@ -14125,24 +14071,6 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
  * @codeGenApi
  */
 export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;
-
-/**
- * Sets the current style sanitizer function which will then be used
- * within all follow-up prop and map-based style binding instructions
- * for the given element.
- *
- * Note that once styling has been applied to the element (i.e. once
- * `advance(n)` is executed or the hostBindings/template function exits)
- * then the active `sanitizerFn` will be set to `null`. This means that
- * once styling is applied to another element then a another call to
- * `styleSanitizer` will need to be made.
- *
- * @param sanitizerFn The sanitization function that will be used to
- *       process style prop/value entries.
- *
- * @codeGenApi
- */
-export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
