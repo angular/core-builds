@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+7.sha-45f4a47
+ * @license Angular v10.0.0-next.7+15.sha-57a8686
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,36 +18,6 @@ import { Subscription } from 'rxjs';
  */
 export declare interface AbstractType<T> extends Function {
     prototype: T;
-}
-
-/**
- * Below are constants for LContainer indices to help us look up LContainer members
- * without having to remember the specific indices.
- * Uglify will inline these when minifying so there shouldn't be a cost.
- */
-declare const ACTIVE_INDEX = 2;
-
-/**
- * Used to track Transplanted `LView`s (see: `LView[DECLARATION_COMPONENT_VIEW])`
- */
-declare const enum ActiveIndexFlag {
-    /**
-     * Flag which signifies that the `LContainer` does not have any inline embedded views.
-     */
-    DYNAMIC_EMBEDDED_VIEWS_ONLY = -1,
-    /**
-     * Flag to signify that this `LContainer` may have transplanted views which need to be change
-     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
-     *
-     * This flag once set is never unset for the `LContainer`. This means that when unset we can skip
-     * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
-     * that the `MOVED_VIEWS` are transplanted and on-push.
-     */
-    HAS_TRANSPLANTED_VIEWS = 1,
-    /**
-     * Number of bits to shift inline embedded views counter to make space for other flags.
-     */
-    SHIFT = 1
 }
 
 /**
@@ -2567,6 +2537,16 @@ declare type GlobalTargetResolver = (element: any) => {
 };
 
 /**
+ * Flag to signify that this `LContainer` may have transplanted views which need to be change
+ * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
+ *
+ * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
+ * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
+ * that the `MOVED_VIEWS` are transplanted and on-push.
+ */
+declare const HAS_TRANSPLANTED_VIEWS = 2;
+
+/**
  * Array of hooks that should be executed for a view and their directive indices.
  *
  * For each node of the view, the following data is stored:
@@ -3769,16 +3749,12 @@ declare interface LContainer extends Array<any> {
      */
     [TYPE]: true;
     /**
-     * The next active index in the views array to read or write to. This helps us
-     * keep track of where we are in the views array.
-     * In the case the LContainer is created for a ViewContainerRef,
-     * it is set to null to identify this scenario, as indices are "absolute" in that case,
-     * i.e. provided directly by the user of the ViewContainerRef API.
+     * Flag to signify that this `LContainer` may have transplanted views which need to be change
+     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
      *
-     * The lowest bit signals that this `LContainer` has transplanted views which need to be change
-     * detected as part of the declaration CD. (See `LView[DECLARATION_COMPONENT_VIEW]`)
+     * This flag, once set, is never unset for the `LContainer`.
      */
-    [ACTIVE_INDEX]: ActiveIndexFlag;
+    [HAS_TRANSPLANTED_VIEWS]: boolean;
     /**
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
@@ -8872,7 +8848,7 @@ export declare interface ɵangular_packages_core_core_bo extends Array<any> {
      *
      * see also:
      *   - https://hackmd.io/@mhevery/rJUJsvv9H write up of the problem
-     *   - `LContainer[ACTIVE_INDEX]` for flag which marks which `LContainer` has transplanted views.
+     *   - `LContainer[HAS_TRANSPLANTED_VIEWS]` which marks which `LContainer` has transplanted views.
      *   - `LContainer[TRANSPLANT_HEAD]` and `LContainer[TRANSPLANT_TAIL]` storage for transplanted
      *   - `LView[DECLARATION_LCONTAINER]` similar problem for queries
      *   - `LContainer[MOVED_VIEWS]` similar problem for queries
