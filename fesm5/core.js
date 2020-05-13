@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.6+19.sha-b91b3d7
+ * @license Angular v9.1.6+31.sha-92b97f7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1941,7 +1941,15 @@ var TYPE = 1;
  * without having to remember the specific indices.
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
-var ACTIVE_INDEX = 2;
+/**
+ * Flag to signify that this `LContainer` may have transplanted views which need to be change
+ * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
+ *
+ * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
+ * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
+ * that the `MOVED_VIEWS` are transplanted and on-push.
+ */
+var HAS_TRANSPLANTED_VIEWS = 2;
 // PARENT, NEXT, TRANSPLANTED_VIEWS_TO_REFRESH are indices 3, 4, and 5
 // As we already have these constants in LView, we don't need to re-create them.
 // T_HOST is index 6
@@ -2325,12 +2333,6 @@ function getConstant(consts, index) {
  */
 function resetPreOrderHookFlags(lView) {
     lView[PREORDER_HOOK_FLAGS] = 0;
-}
-function getLContainerActiveIndex(lContainer) {
-    return lContainer[ACTIVE_INDEX] >> 1 /* SHIFT */;
-}
-function setLContainerActiveIndex(lContainer, index) {
-    lContainer[ACTIVE_INDEX] = index << 1 /* SHIFT */;
 }
 /**
  * Updates the `TRANSPLANTED_VIEWS_TO_REFRESH` counter on the `LContainer` as well as the parents
@@ -6238,6 +6240,24 @@ function getRootContext(viewOrComponent) {
         assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
     return rootView[CONTEXT];
 }
+/**
+ * Gets the first `LContainer` in the LView or `null` if none exists.
+ */
+function getFirstLContainer(lView) {
+    return getNearestLContainer(lView[CHILD_HEAD]);
+}
+/**
+ * Gets the next `LContainer` that is a sibling of the given container.
+ */
+function getNextLContainer(container) {
+    return getNearestLContainer(container[NEXT]);
+}
+function getNearestLContainer(viewOrContainer) {
+    while (viewOrContainer !== null && !isLContainer(viewOrContainer)) {
+        viewOrContainer = viewOrContainer[NEXT];
+    }
+    return viewOrContainer;
+}
 
 /**
  * @license
@@ -7015,17 +7035,9 @@ var LContainerDebug = /** @class */ (function () {
     function LContainerDebug(_raw_lContainer) {
         this._raw_lContainer = _raw_lContainer;
     }
-    Object.defineProperty(LContainerDebug.prototype, "activeIndex", {
-        get: function () {
-            return getLContainerActiveIndex(this._raw_lContainer);
-        },
-        enumerable: true,
-        configurable: true
-    });
     Object.defineProperty(LContainerDebug.prototype, "hasTransplantedViews", {
         get: function () {
-            return (this._raw_lContainer[ACTIVE_INDEX] & 1 /* HAS_TRANSPLANTED_VIEWS */) ===
-                1 /* HAS_TRANSPLANTED_VIEWS */;
+            return this._raw_lContainer[HAS_TRANSPLANTED_VIEWS];
         },
         enumerable: true,
         configurable: true
@@ -8669,7 +8681,7 @@ function createLContainer(hostNative, currentView, native, tNode) {
     // https://jsperf.com/array-literal-vs-new-array-really
     var lContainer = new (ngDevMode ? LContainerArray : Array)(hostNative, // host native
     true, // Boolean `true` in this position signifies that this is an `LContainer`
-    -1 /* DYNAMIC_EMBEDDED_VIEWS_ONLY */ << 1 /* SHIFT */, // active index
+    false, // has transplanted views
     currentView, // parent
     null, // next
     0, // transplanted views to refresh count
@@ -8699,59 +8711,30 @@ function refreshDynamicEmbeddedViews(lView) {
     }
 }
 /**
- * Gets the first `LContainer` in the LView or `null` if none exists.
- */
-function getFirstLContainer(lView) {
-    var viewOrContainer = lView[CHILD_HEAD];
-    while (viewOrContainer !== null &&
-        !(isLContainer(viewOrContainer) &&
-            viewOrContainer[ACTIVE_INDEX] >> 1 /* SHIFT */ ===
-                -1 /* DYNAMIC_EMBEDDED_VIEWS_ONLY */)) {
-        viewOrContainer = viewOrContainer[NEXT];
-    }
-    return viewOrContainer;
-}
-/**
- * Gets the next `LContainer` that is a sibling of the given container.
- */
-function getNextLContainer(container) {
-    var viewOrContainer = container[NEXT];
-    while (viewOrContainer !== null &&
-        !(isLContainer(viewOrContainer) &&
-            viewOrContainer[ACTIVE_INDEX] >> 1 /* SHIFT */ ===
-                -1 /* DYNAMIC_EMBEDDED_VIEWS_ONLY */)) {
-        viewOrContainer = viewOrContainer[NEXT];
-    }
-    return viewOrContainer;
-}
-/**
  * Mark transplanted views as needing to be refreshed at their insertion points.
- *
- * See: `ActiveIndexFlag.HAS_TRANSPLANTED_VIEWS` and `LView[DECLARATION_COMPONENT_VIEW]` for
- * explanation of transplanted views.
  *
  * @param lView The `LView` that may have transplanted views.
  */
 function markTransplantedViewsForRefresh(lView) {
     for (var lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        if ((lContainer[ACTIVE_INDEX] & 1 /* HAS_TRANSPLANTED_VIEWS */) !== 0) {
-            var movedViews = lContainer[MOVED_VIEWS];
-            ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
-            for (var i = 0; i < movedViews.length; i++) {
-                var movedLView = movedViews[i];
-                var insertionLContainer = movedLView[PARENT];
-                ngDevMode && assertLContainer(insertionLContainer);
-                // We don't want to increment the counter if the moved LView was already marked for
-                // refresh.
-                if ((movedLView[FLAGS] & 1024 /* RefreshTransplantedView */) === 0) {
-                    updateTransplantedViewCount(insertionLContainer, 1);
-                }
-                // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
-                // those that aren't (declaration component === insertion component). In the latter case,
-                // it's fine to add the flag, as we will clear it immediately in
-                // `refreshDynamicEmbeddedViews` for the view currently being refreshed.
-                movedLView[FLAGS] |= 1024 /* RefreshTransplantedView */;
+        if (!lContainer[HAS_TRANSPLANTED_VIEWS])
+            continue;
+        var movedViews = lContainer[MOVED_VIEWS];
+        ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
+        for (var i = 0; i < movedViews.length; i++) {
+            var movedLView = movedViews[i];
+            var insertionLContainer = movedLView[PARENT];
+            ngDevMode && assertLContainer(insertionLContainer);
+            // We don't want to increment the counter if the moved LView was already marked for
+            // refresh.
+            if ((movedLView[FLAGS] & 1024 /* RefreshTransplantedView */) === 0) {
+                updateTransplantedViewCount(insertionLContainer, 1);
             }
+            // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
+            // those that aren't (declaration component === insertion component). In the latter case,
+            // it's fine to add the flag, as we will clear it immediately in
+            // `refreshDynamicEmbeddedViews` for the view currently being refreshed.
+            movedLView[FLAGS] |= 1024 /* RefreshTransplantedView */;
         }
     }
 }
@@ -9322,7 +9305,7 @@ function trackMovedView(declarationContainer, lView) {
         // At this point the declaration-component is not same as insertion-component; this means that
         // this is a transplanted view. Mark the declared lView as having transplanted views so that
         // those views can participate in CD.
-        declarationContainer[ACTIVE_INDEX] |= 1 /* HAS_TRANSPLANTED_VIEWS */;
+        declarationContainer[HAS_TRANSPLANTED_VIEWS] = true;
     }
     if (movedViews === null) {
         declarationContainer[MOVED_VIEWS] = [lView];
@@ -10700,7 +10683,6 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
     if (isLContainer(slotValue)) {
         // If the host is a container, we don't need to create a new LContainer
         lContainer = slotValue;
-        setLContainerActiveIndex(lContainer, -1 /* DYNAMIC_EMBEDDED_VIEWS_ONLY */);
     }
     else {
         var commentNode = void 0;
@@ -20057,7 +20039,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.6+19.sha-b91b3d7');
+var VERSION = new Version('9.1.6+31.sha-92b97f7');
 
 /**
  * @license
