@@ -224,7 +224,6 @@ export declare function buildDebugNode(tNode: ITNode, lView: LView, nodeIndex: n
 export declare class LContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);
-    get activeIndex(): number;
     get hasTransplantedViews(): boolean;
     get views(): LViewDebug[];
     get parent(): LViewDebug | LContainerDebug | null;
