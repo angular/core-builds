@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+52.sha-ea971f7
+ * @license Angular v10.0.0-next.7+53.sha-aaa89bb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2793,7 +2793,7 @@ const TYPE = 1;
  * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
  *
  * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
- * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
+ * a lot of work in `refreshEmbeddedViews`. But when set we still need to verify
  * that the `MOVED_VIEWS` are transplanted and on-push.
  * @type {?}
  */
@@ -11769,7 +11769,7 @@ function refreshView(tView, lView, templateFn, context) {
         // insertion points. This is needed to avoid the situation where the template is defined in this
         // `LView` but its declaration appears after the insertion component.
         markTransplantedViewsForRefresh(lView);
-        refreshDynamicEmbeddedViews(lView);
+        refreshEmbeddedViews(lView);
         // Content query results must be refreshed before content hooks are called.
         if (tView.contentQueries !== null) {
             refreshContentQueries(tView, lView);
@@ -13120,12 +13120,12 @@ function createLContainer(hostNative, currentView, native, tNode) {
     return lContainer;
 }
 /**
- * Goes over dynamic embedded views (ones created through ViewContainerRef APIs) and refreshes
+ * Goes over embedded views (ones created through ViewContainerRef APIs) and refreshes
  * them by executing an associated template function.
  * @param {?} lView
  * @return {?}
  */
-function refreshDynamicEmbeddedViews(lView) {
+function refreshEmbeddedViews(lView) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             /** @type {?} */
@@ -13166,7 +13166,7 @@ function markTransplantedViewsForRefresh(lView) {
             // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
             // those that aren't (declaration component === insertion component). In the latter case,
             // it's fine to add the flag, as we will clear it immediately in
-            // `refreshDynamicEmbeddedViews` for the view currently being refreshed.
+            // `refreshEmbeddedViews` for the view currently being refreshed.
             movedLView[FLAGS] |= 1024 /* RefreshTransplantedView */;
         }
     }
@@ -27992,7 +27992,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.7+52.sha-ea971f7');
+const VERSION = new Version('10.0.0-next.7+53.sha-aaa89bb');
 
 /**
  * @fileoverview added by tsickle
