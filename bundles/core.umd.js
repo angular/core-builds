@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+51.sha-ddaa124
+ * @license Angular v10.0.0-next.7+52.sha-ea971f7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10899,7 +10899,7 @@
     var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
     var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
     var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
-    var INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s+super\(\.\.\.arguments\)/;
+    var INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s*super\(\.\.\.arguments\)/;
     /**
      * Determine whether a stringified type is a class which delegates its constructor
      * to its parent.
@@ -20019,7 +20019,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-next.7+51.sha-ddaa124');
+    var VERSION = new Version('10.0.0-next.7+52.sha-ea971f7');
 
     /**
      * @license
