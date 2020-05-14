@@ -17,7 +17,7 @@ export declare function assertLessThanOrEqual<T>(actual: T, expected: T, msg: st
 export declare function assertGreaterThan<T>(actual: T, expected: T, msg: string): asserts actual is T;
 export declare function assertGreaterThanOrEqual<T>(actual: T, expected: T, msg: string): asserts actual is T;
 export declare function assertNotDefined<T>(actual: T, msg: string): void;
-export declare function assertDefined<T>(actual: T, msg: string): void;
+export declare function assertDefined<T>(actual: T | null | undefined, msg: string): asserts actual is T;
 export declare function throwError(msg: string): never;
 export declare function throwError(msg: string, actual: any, expected: any, comparison: string): never;
 export declare function assertDomNode(node: any): asserts node is Node;

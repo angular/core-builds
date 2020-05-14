@@ -49,7 +49,7 @@ export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, 
 export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Projection, name: null, attrs: TAttributes | null): TProjectionNode;
 export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.ElementContainer, name: string | null, attrs: TAttributes | null): TElementContainerNode;
 export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.IcuContainer, name: null, attrs: TAttributes | null): TElementContainerNode;
-export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode | null, index: number, lView: LView): TViewNode;
+export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode | null, index: number, lView: LView): void;
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
