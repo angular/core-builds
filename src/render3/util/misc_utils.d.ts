@@ -27,7 +27,7 @@ export declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
-    target: Window | null;
+    target: (Window & typeof globalThis) | null;
 };
 /**
  *

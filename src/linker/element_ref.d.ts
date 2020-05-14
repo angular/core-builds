@@ -18,7 +18,7 @@ import { injectElementRef as render3InjectElementRef } from '../render3/view_eng
  *
  * @publicApi
  */
-export declare class ElementRef<T extends any = any> {
+export declare class ElementRef<T = any> {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported
      * (e.g. when the application runs in a web worker).

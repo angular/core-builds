@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+17.sha-2418c6a
+ * @license Angular v10.0.0-next.7+43.sha-f16ca1c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -899,7 +899,7 @@
             get: function () {
                 return this._promise;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return AsyncTestCompleter;
@@ -1218,7 +1218,7 @@
             get: function () {
                 return i0.Directive;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return DirectiveResolver;
@@ -1232,7 +1232,7 @@
             get: function () {
                 return i0.Component;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return ComponentResolver;
@@ -1246,7 +1246,7 @@
             get: function () {
                 return i0.Pipe;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return PipeResolver;
@@ -1260,7 +1260,7 @@
             get: function () {
                 return i0.NgModule;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return NgModuleResolver;
@@ -1947,7 +1947,7 @@
                 this._injector = CompilerModuleFactory.create(this.platform.injector).injector;
                 return this._injector;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         // get overrides for a specific provider (if any)
@@ -2391,7 +2391,7 @@
                 }
                 return this._compiler;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(TestBedRender3.prototype, "testModuleRef", {
@@ -2405,7 +2405,7 @@
                 }
                 return this._testModuleRef;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         TestBedRender3.prototype.assertNotInstantiated = function (methodName, methodDescription) {
@@ -2472,7 +2472,7 @@
             get: function () {
                 throw unimplemented();
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         TestingCompiler.prototype.overrideModule = function (module, overrides) {
@@ -3120,6 +3120,14 @@
     // TODO(juliemr): remove this, only used because we need to export something to have compilation
     // work.
     var __core_private_testing_placeholder__ = '';
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
 
     /**
      * @license

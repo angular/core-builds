@@ -57,15 +57,15 @@ import { Subject, Subscription } from 'rxjs';
  * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
-export declare class EventEmitter<T extends any> extends Subject<T> {
+export interface EventEmitter<T> extends Subject<T> {
     /**
      * Creates an instance of this class that can
      * deliver events synchronously or asynchronously.
      *
-     * @param isAsync When true, deliver events asynchronously.
+     * @param [isAsync=false] When true, deliver events asynchronously.
      *
      */
-    constructor(isAsync?: boolean);
+    new (isAsync?: boolean): EventEmitter<T>;
     /**
      * Emits an event containing a given value.
      * @param value The value to emit.
@@ -81,3 +81,11 @@ export declare class EventEmitter<T extends any> extends Subject<T> {
      */
     subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
 }
+/**
+ * @publicApi
+ */
+export declare const EventEmitter: {
+    new (isAsync?: boolean): EventEmitter<any>;
+    new <T>(isAsync?: boolean): EventEmitter<T>;
+    readonly prototype: EventEmitter<any>;
+};
