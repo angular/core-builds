@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+52.sha-ea971f7
+ * @license Angular v10.0.0-next.7+53.sha-aaa89bb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2550,7 +2550,7 @@ declare type GlobalTargetResolver = (element: any) => {
  * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
  *
  * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
- * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
+ * a lot of work in `refreshEmbeddedViews`. But when set we still need to verify
  * that the `MOVED_VIEWS` are transplanted and on-push.
  */
 declare const HAS_TRANSPLANTED_VIEWS = 2;
