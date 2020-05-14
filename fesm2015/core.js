@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+17.sha-2418c6a
+ * @license Angular v10.0.0-next.7+43.sha-f16ca1c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15747,16 +15747,62 @@ function injectRenderer2() {
  * \@publicApi
  * @abstract
  */
-class ChangeDetectorRef {
-}
-/**
- * \@internal
- * @nocollapse
- */
-ChangeDetectorRef.__NG_ELEMENT_ID__ = (/**
- * @return {?}
- */
-() => SWITCH_CHANGE_DETECTOR_REF_FACTORY());
+let ChangeDetectorRef = /** @class */ (() => {
+    /**
+     * Base class for Angular Views, provides change detection functionality.
+     * A change-detection tree collects all views that are to be checked for changes.
+     * Use the methods to add and remove views from the tree, initiate change-detection,
+     * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+     *
+     * \@usageNotes
+     *
+     * The following examples demonstrate how to modify default change-detection behavior
+     * to perform explicit detection when needed.
+     *
+     * ### Use `markForCheck()` with `CheckOnce` strategy
+     *
+     * The following example sets the `OnPush` change-detection strategy for a component
+     * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+     * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+     *
+     * <code-example path="core/ts/change_detect/change-detection.ts"
+     * region="mark-for-check"></code-example>
+     *
+     * ### Detach change detector to limit how often check occurs
+     *
+     * The following example defines a component with a large list of read-only data
+     * that is expected to change constantly, many times per second.
+     * To improve performance, we want to check and update the list
+     * less often than the changes actually occur. To do that, we detach
+     * the component's change detector and perform an explicit local check every five seconds.
+     *
+     * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+     *
+     *
+     * ### Reattaching a detached component
+     *
+     * The following example creates a component displaying live data.
+     * The component detaches its change detector from the main change detector tree
+     * when the `live` property is set to false, and reattaches it when the property
+     * becomes true.
+     *
+     * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+     *
+     * \@publicApi
+     * @abstract
+     */
+    class ChangeDetectorRef {
+    }
+    /**
+     * \@internal
+     * @nocollapse
+     */
+    ChangeDetectorRef.__NG_ELEMENT_ID__ = (/**
+     * @return {?}
+     */
+    () => SWITCH_CHANGE_DETECTOR_REF_FACTORY());
+    return ChangeDetectorRef;
+})();
 if (false) {
     /**
      * \@internal
@@ -17275,37 +17321,65 @@ const INJECTOR_IMPL = INJECTOR_IMPL__PRE_R3__;
  * \@publicApi
  * @abstract
  */
-class Injector {
+let Injector = /** @class */ (() => {
     /**
-     * @param {?} options
-     * @param {?=} parent
-     * @return {?}
+     * Concrete injectors implement this interface. Injectors are configured
+     * with [providers](guide/glossary#provider) that associate
+     * dependencies of various types with [injection tokens](guide/glossary#di-token).
+     *
+     * @see ["DI Providers"](guide/dependency-injection-providers).
+     * @see `StaticProvider`
+     *
+     * \@usageNotes
+     *
+     *  The following example creates a service injector instance.
+     *
+     * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     *
+     * ### Usage example
+     *
+     * {\@example core/di/ts/injector_spec.ts region='Injector'}
+     *
+     * `Injector` returns itself when given `Injector` as a token:
+     *
+     * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
+     *
+     * \@publicApi
+     * @abstract
      */
-    static create(options, parent) {
-        if (Array.isArray(options)) {
-            return INJECTOR_IMPL(options, parent, '');
-        }
-        else {
-            return INJECTOR_IMPL(options.providers, options.parent, options.name || '');
+    class Injector {
+        /**
+         * @param {?} options
+         * @param {?=} parent
+         * @return {?}
+         */
+        static create(options, parent) {
+            if (Array.isArray(options)) {
+                return INJECTOR_IMPL(options, parent, '');
+            }
+            else {
+                return INJECTOR_IMPL(options.providers, options.parent, options.name || '');
+            }
         }
     }
-}
-Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
-Injector.NULL = new NullInjector();
-/** @nocollapse */
-Injector.ɵprov = ɵɵdefineInjectable({
-    token: Injector,
-    providedIn: (/** @type {?} */ ('any')),
-    factory: (/**
-     * @return {?}
+    Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
+    Injector.NULL = new NullInjector();
+    /** @nocollapse */
+    Injector.ɵprov = ɵɵdefineInjectable({
+        token: Injector,
+        providedIn: (/** @type {?} */ ('any')),
+        factory: (/**
+         * @return {?}
+         */
+        () => ɵɵinject(INJECTOR)),
+    });
+    /**
+     * \@internal
+     * @nocollapse
      */
-    () => ɵɵinject(INJECTOR)),
-});
-/**
- * \@internal
- * @nocollapse
- */
-Injector.__NG_ELEMENT_ID__ = -1;
+    Injector.__NG_ELEMENT_ID__ = -1;
+    return Injector;
+})();
 if (false) {
     /** @type {?} */
     Injector.THROW_IF_NOT_FOUND;
@@ -18846,270 +18920,273 @@ if (false) {
      */
     ReflectiveInjector.prototype.get = function (token, notFoundValue) { };
 }
-class ReflectiveInjector_ {
-    /**
-     * Private
-     * @param {?} _providers
-     * @param {?=} _parent
-     */
-    constructor(_providers, _parent) {
+let ReflectiveInjector_ = /** @class */ (() => {
+    class ReflectiveInjector_ {
         /**
-         * \@internal
+         * Private
+         * @param {?} _providers
+         * @param {?=} _parent
          */
-        this._constructionCounter = 0;
-        this._providers = _providers;
-        this.parent = _parent || null;
-        /** @type {?} */
-        const len = _providers.length;
-        this.keyIds = [];
-        this.objs = [];
-        for (let i = 0; i < len; i++) {
-            this.keyIds[i] = _providers[i].key.id;
-            this.objs[i] = UNDEFINED;
-        }
-    }
-    /**
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @return {?}
-     */
-    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
-        return this._getByKey(ReflectiveKey.get(token), null, notFoundValue);
-    }
-    /**
-     * @param {?} providers
-     * @return {?}
-     */
-    resolveAndCreateChild(providers) {
-        /** @type {?} */
-        const ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
-        return this.createChildFromResolved(ResolvedReflectiveProviders);
-    }
-    /**
-     * @param {?} providers
-     * @return {?}
-     */
-    createChildFromResolved(providers) {
-        /** @type {?} */
-        const inj = new ReflectiveInjector_(providers);
-        ((/** @type {?} */ (inj))).parent = this;
-        return inj;
-    }
-    /**
-     * @param {?} provider
-     * @return {?}
-     */
-    resolveAndInstantiate(provider) {
-        return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);
-    }
-    /**
-     * @param {?} provider
-     * @return {?}
-     */
-    instantiateResolved(provider) {
-        return this._instantiateProvider(provider);
-    }
-    /**
-     * @param {?} index
-     * @return {?}
-     */
-    getProviderAtIndex(index) {
-        if (index < 0 || index >= this._providers.length) {
-            throw outOfBoundsError(index);
-        }
-        return this._providers[index];
-    }
-    /**
-     * \@internal
-     * @param {?} provider
-     * @return {?}
-     */
-    _new(provider) {
-        if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
-            throw cyclicDependencyError(this, provider.key);
-        }
-        return this._instantiateProvider(provider);
-    }
-    /**
-     * @private
-     * @return {?}
-     */
-    _getMaxNumberOfObjects() {
-        return this.objs.length;
-    }
-    /**
-     * @private
-     * @param {?} provider
-     * @return {?}
-     */
-    _instantiateProvider(provider) {
-        if (provider.multiProvider) {
+        constructor(_providers, _parent) {
+            /**
+             * \@internal
+             */
+            this._constructionCounter = 0;
+            this._providers = _providers;
+            this.parent = _parent || null;
             /** @type {?} */
-            const res = [];
-            for (let i = 0; i < provider.resolvedFactories.length; ++i) {
-                res[i] = this._instantiate(provider, provider.resolvedFactories[i]);
-            }
-            return res;
-        }
-        else {
-            return this._instantiate(provider, provider.resolvedFactories[0]);
-        }
-    }
-    /**
-     * @private
-     * @param {?} provider
-     * @param {?} ResolvedReflectiveFactory
-     * @return {?}
-     */
-    _instantiate(provider, ResolvedReflectiveFactory) {
-        /** @type {?} */
-        const factory = ResolvedReflectiveFactory.factory;
-        /** @type {?} */
-        let deps;
-        try {
-            deps =
-                ResolvedReflectiveFactory.dependencies.map((/**
-                 * @param {?} dep
-                 * @return {?}
-                 */
-                dep => this._getByReflectiveDependency(dep)));
-        }
-        catch (e) {
-            if (e.addKey) {
-                e.addKey(this, provider.key);
-            }
-            throw e;
-        }
-        /** @type {?} */
-        let obj;
-        try {
-            obj = factory(...deps);
-        }
-        catch (e) {
-            throw instantiationError(this, e, e.stack, provider.key);
-        }
-        return obj;
-    }
-    /**
-     * @private
-     * @param {?} dep
-     * @return {?}
-     */
-    _getByReflectiveDependency(dep) {
-        return this._getByKey(dep.key, dep.visibility, dep.optional ? null : THROW_IF_NOT_FOUND);
-    }
-    /**
-     * @private
-     * @param {?} key
-     * @param {?} visibility
-     * @param {?} notFoundValue
-     * @return {?}
-     */
-    _getByKey(key, visibility, notFoundValue) {
-        if (key === ReflectiveInjector_.INJECTOR_KEY) {
-            return this;
-        }
-        if (visibility instanceof Self) {
-            return this._getByKeySelf(key, notFoundValue);
-        }
-        else {
-            return this._getByKeyDefault(key, notFoundValue, visibility);
-        }
-    }
-    /**
-     * @private
-     * @param {?} keyId
-     * @return {?}
-     */
-    _getObjByKeyId(keyId) {
-        for (let i = 0; i < this.keyIds.length; i++) {
-            if (this.keyIds[i] === keyId) {
-                if (this.objs[i] === UNDEFINED) {
-                    this.objs[i] = this._new(this._providers[i]);
-                }
-                return this.objs[i];
+            const len = _providers.length;
+            this.keyIds = [];
+            this.objs = [];
+            for (let i = 0; i < len; i++) {
+                this.keyIds[i] = _providers[i].key.id;
+                this.objs[i] = UNDEFINED;
             }
         }
-        return UNDEFINED;
-    }
-    /**
-     * \@internal
-     * @param {?} key
-     * @param {?} notFoundValue
-     * @return {?}
-     */
-    _throwOrNull(key, notFoundValue) {
-        if (notFoundValue !== THROW_IF_NOT_FOUND) {
-            return notFoundValue;
-        }
-        else {
-            throw noProviderError(this, key);
-        }
-    }
-    /**
-     * \@internal
-     * @param {?} key
-     * @param {?} notFoundValue
-     * @return {?}
-     */
-    _getByKeySelf(key, notFoundValue) {
-        /** @type {?} */
-        const obj = this._getObjByKeyId(key.id);
-        return (obj !== UNDEFINED) ? obj : this._throwOrNull(key, notFoundValue);
-    }
-    /**
-     * \@internal
-     * @param {?} key
-     * @param {?} notFoundValue
-     * @param {?} visibility
-     * @return {?}
-     */
-    _getByKeyDefault(key, notFoundValue, visibility) {
-        /** @type {?} */
-        let inj;
-        if (visibility instanceof SkipSelf) {
-            inj = this.parent;
-        }
-        else {
-            inj = this;
-        }
-        while (inj instanceof ReflectiveInjector_) {
-            /** @type {?} */
-            const inj_ = (/** @type {?} */ (inj));
-            /** @type {?} */
-            const obj = inj_._getObjByKeyId(key.id);
-            if (obj !== UNDEFINED)
-                return obj;
-            inj = inj_.parent;
-        }
-        if (inj !== null) {
-            return inj.get(key.token, notFoundValue);
-        }
-        else {
-            return this._throwOrNull(key, notFoundValue);
-        }
-    }
-    /**
-     * @return {?}
-     */
-    get displayName() {
-        /** @type {?} */
-        const providers = _mapProviders(this, (/**
-         * @param {?} b
+        /**
+         * @param {?} token
+         * @param {?=} notFoundValue
          * @return {?}
          */
-        (b) => ' "' + b.key.displayName + '" '))
-            .join(', ');
-        return `ReflectiveInjector(providers: [${providers}])`;
+        get(token, notFoundValue = THROW_IF_NOT_FOUND) {
+            return this._getByKey(ReflectiveKey.get(token), null, notFoundValue);
+        }
+        /**
+         * @param {?} providers
+         * @return {?}
+         */
+        resolveAndCreateChild(providers) {
+            /** @type {?} */
+            const ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
+            return this.createChildFromResolved(ResolvedReflectiveProviders);
+        }
+        /**
+         * @param {?} providers
+         * @return {?}
+         */
+        createChildFromResolved(providers) {
+            /** @type {?} */
+            const inj = new ReflectiveInjector_(providers);
+            ((/** @type {?} */ (inj))).parent = this;
+            return inj;
+        }
+        /**
+         * @param {?} provider
+         * @return {?}
+         */
+        resolveAndInstantiate(provider) {
+            return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);
+        }
+        /**
+         * @param {?} provider
+         * @return {?}
+         */
+        instantiateResolved(provider) {
+            return this._instantiateProvider(provider);
+        }
+        /**
+         * @param {?} index
+         * @return {?}
+         */
+        getProviderAtIndex(index) {
+            if (index < 0 || index >= this._providers.length) {
+                throw outOfBoundsError(index);
+            }
+            return this._providers[index];
+        }
+        /**
+         * \@internal
+         * @param {?} provider
+         * @return {?}
+         */
+        _new(provider) {
+            if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
+                throw cyclicDependencyError(this, provider.key);
+            }
+            return this._instantiateProvider(provider);
+        }
+        /**
+         * @private
+         * @return {?}
+         */
+        _getMaxNumberOfObjects() {
+            return this.objs.length;
+        }
+        /**
+         * @private
+         * @param {?} provider
+         * @return {?}
+         */
+        _instantiateProvider(provider) {
+            if (provider.multiProvider) {
+                /** @type {?} */
+                const res = [];
+                for (let i = 0; i < provider.resolvedFactories.length; ++i) {
+                    res[i] = this._instantiate(provider, provider.resolvedFactories[i]);
+                }
+                return res;
+            }
+            else {
+                return this._instantiate(provider, provider.resolvedFactories[0]);
+            }
+        }
+        /**
+         * @private
+         * @param {?} provider
+         * @param {?} ResolvedReflectiveFactory
+         * @return {?}
+         */
+        _instantiate(provider, ResolvedReflectiveFactory) {
+            /** @type {?} */
+            const factory = ResolvedReflectiveFactory.factory;
+            /** @type {?} */
+            let deps;
+            try {
+                deps =
+                    ResolvedReflectiveFactory.dependencies.map((/**
+                     * @param {?} dep
+                     * @return {?}
+                     */
+                    dep => this._getByReflectiveDependency(dep)));
+            }
+            catch (e) {
+                if (e.addKey) {
+                    e.addKey(this, provider.key);
+                }
+                throw e;
+            }
+            /** @type {?} */
+            let obj;
+            try {
+                obj = factory(...deps);
+            }
+            catch (e) {
+                throw instantiationError(this, e, e.stack, provider.key);
+            }
+            return obj;
+        }
+        /**
+         * @private
+         * @param {?} dep
+         * @return {?}
+         */
+        _getByReflectiveDependency(dep) {
+            return this._getByKey(dep.key, dep.visibility, dep.optional ? null : THROW_IF_NOT_FOUND);
+        }
+        /**
+         * @private
+         * @param {?} key
+         * @param {?} visibility
+         * @param {?} notFoundValue
+         * @return {?}
+         */
+        _getByKey(key, visibility, notFoundValue) {
+            if (key === ReflectiveInjector_.INJECTOR_KEY) {
+                return this;
+            }
+            if (visibility instanceof Self) {
+                return this._getByKeySelf(key, notFoundValue);
+            }
+            else {
+                return this._getByKeyDefault(key, notFoundValue, visibility);
+            }
+        }
+        /**
+         * @private
+         * @param {?} keyId
+         * @return {?}
+         */
+        _getObjByKeyId(keyId) {
+            for (let i = 0; i < this.keyIds.length; i++) {
+                if (this.keyIds[i] === keyId) {
+                    if (this.objs[i] === UNDEFINED) {
+                        this.objs[i] = this._new(this._providers[i]);
+                    }
+                    return this.objs[i];
+                }
+            }
+            return UNDEFINED;
+        }
+        /**
+         * \@internal
+         * @param {?} key
+         * @param {?} notFoundValue
+         * @return {?}
+         */
+        _throwOrNull(key, notFoundValue) {
+            if (notFoundValue !== THROW_IF_NOT_FOUND) {
+                return notFoundValue;
+            }
+            else {
+                throw noProviderError(this, key);
+            }
+        }
+        /**
+         * \@internal
+         * @param {?} key
+         * @param {?} notFoundValue
+         * @return {?}
+         */
+        _getByKeySelf(key, notFoundValue) {
+            /** @type {?} */
+            const obj = this._getObjByKeyId(key.id);
+            return (obj !== UNDEFINED) ? obj : this._throwOrNull(key, notFoundValue);
+        }
+        /**
+         * \@internal
+         * @param {?} key
+         * @param {?} notFoundValue
+         * @param {?} visibility
+         * @return {?}
+         */
+        _getByKeyDefault(key, notFoundValue, visibility) {
+            /** @type {?} */
+            let inj;
+            if (visibility instanceof SkipSelf) {
+                inj = this.parent;
+            }
+            else {
+                inj = this;
+            }
+            while (inj instanceof ReflectiveInjector_) {
+                /** @type {?} */
+                const inj_ = (/** @type {?} */ (inj));
+                /** @type {?} */
+                const obj = inj_._getObjByKeyId(key.id);
+                if (obj !== UNDEFINED)
+                    return obj;
+                inj = inj_.parent;
+            }
+            if (inj !== null) {
+                return inj.get(key.token, notFoundValue);
+            }
+            else {
+                return this._throwOrNull(key, notFoundValue);
+            }
+        }
+        /**
+         * @return {?}
+         */
+        get displayName() {
+            /** @type {?} */
+            const providers = _mapProviders(this, (/**
+             * @param {?} b
+             * @return {?}
+             */
+            (b) => ' "' + b.key.displayName + '" '))
+                .join(', ');
+            return `ReflectiveInjector(providers: [${providers}])`;
+        }
+        /**
+         * @return {?}
+         */
+        toString() {
+            return this.displayName;
+        }
     }
-    /**
-     * @return {?}
-     */
-    toString() {
-        return this.displayName;
-    }
-}
-ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
+    ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
+    return ReflectiveInjector_;
+})();
 if (false) {
     /**
      * @type {?}
@@ -27278,9 +27355,22 @@ class _NullComponentFactoryResolver {
  * \@publicApi
  * @abstract
  */
-class ComponentFactoryResolver {
-}
-ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+let ComponentFactoryResolver = /** @class */ (() => {
+    /**
+     * A simple registry that maps `Components` to generated `ComponentFactory` classes
+     * that can be used to create instances of components.
+     * Use to obtain the factory for a given component type,
+     * then use the factory's `create()` method to create a component of that type.
+     *
+     * @see [Dynamic Components](guide/dynamic-component-loader)
+     * \@publicApi
+     * @abstract
+     */
+    class ComponentFactoryResolver {
+    }
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+    return ComponentFactoryResolver;
+})();
 if (false) {
     /** @type {?} */
     ComponentFactoryResolver.NULL;
@@ -27427,22 +27517,41 @@ function noop(...args) {
 // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
 // i.e. users have to ask for what they need. With that, we can build better analysis tools
 // and could do better codegen in the future.
-class ElementRef {
+let ElementRef = /** @class */ (() => {
     /**
-     * @param {?} nativeElement
+     * A wrapper around a native element inside of a View.
+     *
+     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+     * element.
+     *
+     * \@security Permitting direct access to the DOM can make your application more vulnerable to
+     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+     * [Security Guide](http://g.co/ng/security).
+     *
+     * \@publicApi
+     * @template T
      */
-    constructor(nativeElement) {
-        this.nativeElement = nativeElement;
+    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
+    // i.e. users have to ask for what they need. With that, we can build better analysis tools
+    // and could do better codegen in the future.
+    class ElementRef {
+        /**
+         * @param {?} nativeElement
+         */
+        constructor(nativeElement) {
+            this.nativeElement = nativeElement;
+        }
     }
-}
-/**
- * \@internal
- * @nocollapse
- */
-ElementRef.__NG_ELEMENT_ID__ = (/**
- * @return {?}
- */
-() => SWITCH_ELEMENT_REF_FACTORY(ElementRef));
+    /**
+     * \@internal
+     * @nocollapse
+     */
+    ElementRef.__NG_ELEMENT_ID__ = (/**
+     * @return {?}
+     */
+    () => SWITCH_ELEMENT_REF_FACTORY(ElementRef));
+    return ElementRef;
+})();
 if (false) {
     /**
      * \@internal
@@ -27594,16 +27703,35 @@ RendererStyleFlags2[RendererStyleFlags2.DashCase] = 'DashCase';
  * \@publicApi
  * @abstract
  */
-class Renderer2 {
-}
-/**
- * \@internal
- * @nocollapse
- */
-Renderer2.__NG_ELEMENT_ID__ = (/**
- * @return {?}
- */
-() => SWITCH_RENDERER2_FACTORY());
+let Renderer2 = /** @class */ (() => {
+    /**
+     * Extend this base class to implement custom rendering. By default, Angular
+     * renders a template into DOM. You can use custom rendering to intercept
+     * rendering calls, or to render to something other than DOM.
+     *
+     * Create your custom renderer using `RendererFactory2`.
+     *
+     * Use a custom renderer to bypass Angular's templating and
+     * make custom UI changes that can't be expressed declaratively.
+     * For example if you need to set a property or an attribute whose name is
+     * not statically known, use the `setProperty()` or
+     * `setAttribute()` method.
+     *
+     * \@publicApi
+     * @abstract
+     */
+    class Renderer2 {
+    }
+    /**
+     * \@internal
+     * @nocollapse
+     */
+    Renderer2.__NG_ELEMENT_ID__ = (/**
+     * @return {?}
+     */
+    () => SWITCH_RENDERER2_FACTORY());
+    return Renderer2;
+})();
 if (false) {
     /**
      * \@internal
@@ -27816,17 +27944,26 @@ const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
  * \@publicApi
  * @abstract
  */
-class Sanitizer {
-}
-/** @nocollapse */
-Sanitizer.ɵprov = ɵɵdefineInjectable({
-    token: Sanitizer,
-    providedIn: 'root',
-    factory: (/**
-     * @return {?}
+let Sanitizer = /** @class */ (() => {
+    /**
+     * Sanitizer is used by the views to sanitize potentially dangerous values.
+     *
+     * \@publicApi
+     * @abstract
      */
-    () => null),
-});
+    class Sanitizer {
+    }
+    /** @nocollapse */
+    Sanitizer.ɵprov = ɵɵdefineInjectable({
+        token: Sanitizer,
+        providedIn: 'root',
+        factory: (/**
+         * @return {?}
+         */
+        () => null),
+    });
+    return Sanitizer;
+})();
 if (false) {
     /**
      * @nocollapse
@@ -27884,7 +28021,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.7+17.sha-2418c6a');
+const VERSION = new Version('10.0.0-next.7+43.sha-f16ca1c');
 
 /**
  * @fileoverview added by tsickle
@@ -29570,96 +29707,104 @@ if (false) {
  *
  * \@publicApi
  */
-class IterableDiffers {
+let IterableDiffers = /** @class */ (() => {
     /**
-     * @param {?} factories
+     * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+     *
+     * \@publicApi
      */
-    constructor(factories) {
-        this.factories = factories;
-    }
-    /**
-     * @param {?} factories
-     * @param {?=} parent
-     * @return {?}
-     */
-    static create(factories, parent) {
-        if (parent != null) {
-            /** @type {?} */
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
+    class IterableDiffers {
+        /**
+         * @param {?} factories
+         */
+        constructor(factories) {
+            this.factories = factories;
         }
-        return new IterableDiffers(factories);
-    }
-    /**
-     * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
-     * inherited {\@link IterableDiffers} instance with the provided factories and return a new
-     * {\@link IterableDiffers} instance.
-     *
-     * \@usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {\@link IterableDiffer} available.
-     *
-     * ```
-     * \@Component({
-     *   viewProviders: [
-     *     IterableDiffers.extend([new ImmutableListDiffer()])
-     *   ]
-     * })
-     * ```
-     * @param {?} factories
-     * @return {?}
-     */
-    static extend(factories) {
-        return {
-            provide: IterableDiffers,
-            useFactory: (/**
-             * @param {?} parent
-             * @return {?}
-             */
-            (parent) => {
-                if (!parent) {
-                    // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
-                    // to
-                    // bootstrap(), which would override default pipes instead of extending them.
-                    throw new Error('Cannot extend IterableDiffers without a parent injector');
-                }
-                return IterableDiffers.create(factories, parent);
-            }),
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    /**
-     * @param {?} iterable
-     * @return {?}
-     */
-    find(iterable) {
-        /** @type {?} */
-        const factory = this.factories.find((/**
-         * @param {?} f
+        /**
+         * @param {?} factories
+         * @param {?=} parent
          * @return {?}
          */
-        f => f.supports(iterable)));
-        if (factory != null) {
-            return factory;
+        static create(factories, parent) {
+            if (parent != null) {
+                /** @type {?} */
+                const copied = parent.factories.slice();
+                factories = factories.concat(copied);
+            }
+            return new IterableDiffers(factories);
         }
-        else {
-            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+        /**
+         * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
+         * inherited {\@link IterableDiffers} instance with the provided factories and return a new
+         * {\@link IterableDiffers} instance.
+         *
+         * \@usageNotes
+         * ### Example
+         *
+         * The following example shows how to extend an existing list of factories,
+         * which will only be applied to the injector for this component and its children.
+         * This step is all that's required to make a new {\@link IterableDiffer} available.
+         *
+         * ```
+         * \@Component({
+         *   viewProviders: [
+         *     IterableDiffers.extend([new ImmutableListDiffer()])
+         *   ]
+         * })
+         * ```
+         * @param {?} factories
+         * @return {?}
+         */
+        static extend(factories) {
+            return {
+                provide: IterableDiffers,
+                useFactory: (/**
+                 * @param {?} parent
+                 * @return {?}
+                 */
+                (parent) => {
+                    if (!parent) {
+                        // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
+                        // to
+                        // bootstrap(), which would override default pipes instead of extending them.
+                        throw new Error('Cannot extend IterableDiffers without a parent injector');
+                    }
+                    return IterableDiffers.create(factories, parent);
+                }),
+                // Dependency technically isn't optional, but we can provide a better error message this way.
+                deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
+            };
+        }
+        /**
+         * @param {?} iterable
+         * @return {?}
+         */
+        find(iterable) {
+            /** @type {?} */
+            const factory = this.factories.find((/**
+             * @param {?} f
+             * @return {?}
+             */
+            f => f.supports(iterable)));
+            if (factory != null) {
+                return factory;
+            }
+            else {
+                throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+            }
         }
     }
-}
-/** @nocollapse */
-IterableDiffers.ɵprov = ɵɵdefineInjectable({
-    token: IterableDiffers,
-    providedIn: 'root',
-    factory: (/**
-     * @return {?}
-     */
-    () => new IterableDiffers([new DefaultIterableDifferFactory()]))
-});
+    /** @nocollapse */
+    IterableDiffers.ɵprov = ɵɵdefineInjectable({
+        token: IterableDiffers,
+        providedIn: 'root',
+        factory: (/**
+         * @return {?}
+         */
+        () => new IterableDiffers([new DefaultIterableDifferFactory()]))
+    });
+    return IterableDiffers;
+})();
 if (false) {
     /**
      * @nocollapse
@@ -29805,95 +29950,103 @@ if (false) {
  *
  * \@publicApi
  */
-class KeyValueDiffers {
+let KeyValueDiffers = /** @class */ (() => {
     /**
-     * @param {?} factories
+     * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+     *
+     * \@publicApi
      */
-    constructor(factories) {
-        this.factories = factories;
-    }
-    /**
-     * @template S
-     * @param {?} factories
-     * @param {?=} parent
-     * @return {?}
-     */
-    static create(factories, parent) {
-        if (parent) {
-            /** @type {?} */
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
+    class KeyValueDiffers {
+        /**
+         * @param {?} factories
+         */
+        constructor(factories) {
+            this.factories = factories;
         }
-        return new KeyValueDiffers(factories);
-    }
-    /**
-     * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
-     * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
-     * {\@link KeyValueDiffers} instance.
-     *
-     * \@usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {\@link KeyValueDiffer} available.
-     *
-     * ```
-     * \@Component({
-     *   viewProviders: [
-     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
-     *   ]
-     * })
-     * ```
-     * @template S
-     * @param {?} factories
-     * @return {?}
-     */
-    static extend(factories) {
-        return {
-            provide: KeyValueDiffers,
-            useFactory: (/**
-             * @param {?} parent
-             * @return {?}
-             */
-            (parent) => {
-                if (!parent) {
-                    // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                    // to bootstrap(), which would override default pipes instead of extending them.
-                    throw new Error('Cannot extend KeyValueDiffers without a parent injector');
-                }
-                return KeyValueDiffers.create(factories, parent);
-            }),
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    /**
-     * @param {?} kv
-     * @return {?}
-     */
-    find(kv) {
-        /** @type {?} */
-        const factory = this.factories.find((/**
-         * @param {?} f
+        /**
+         * @template S
+         * @param {?} factories
+         * @param {?=} parent
          * @return {?}
          */
-        f => f.supports(kv)));
-        if (factory) {
-            return factory;
+        static create(factories, parent) {
+            if (parent) {
+                /** @type {?} */
+                const copied = parent.factories.slice();
+                factories = factories.concat(copied);
+            }
+            return new KeyValueDiffers(factories);
         }
-        throw new Error(`Cannot find a differ supporting object '${kv}'`);
+        /**
+         * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
+         * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
+         * {\@link KeyValueDiffers} instance.
+         *
+         * \@usageNotes
+         * ### Example
+         *
+         * The following example shows how to extend an existing list of factories,
+         * which will only be applied to the injector for this component and its children.
+         * This step is all that's required to make a new {\@link KeyValueDiffer} available.
+         *
+         * ```
+         * \@Component({
+         *   viewProviders: [
+         *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+         *   ]
+         * })
+         * ```
+         * @template S
+         * @param {?} factories
+         * @return {?}
+         */
+        static extend(factories) {
+            return {
+                provide: KeyValueDiffers,
+                useFactory: (/**
+                 * @param {?} parent
+                 * @return {?}
+                 */
+                (parent) => {
+                    if (!parent) {
+                        // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
+                        // to bootstrap(), which would override default pipes instead of extending them.
+                        throw new Error('Cannot extend KeyValueDiffers without a parent injector');
+                    }
+                    return KeyValueDiffers.create(factories, parent);
+                }),
+                // Dependency technically isn't optional, but we can provide a better error message this way.
+                deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
+            };
+        }
+        /**
+         * @param {?} kv
+         * @return {?}
+         */
+        find(kv) {
+            /** @type {?} */
+            const factory = this.factories.find((/**
+             * @param {?} f
+             * @return {?}
+             */
+            f => f.supports(kv)));
+            if (factory) {
+                return factory;
+            }
+            throw new Error(`Cannot find a differ supporting object '${kv}'`);
+        }
     }
-}
-/** @nocollapse */
-KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
-    token: KeyValueDiffers,
-    providedIn: 'root',
-    factory: (/**
-     * @return {?}
-     */
-    () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()]))
-});
+    /** @nocollapse */
+    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
+        token: KeyValueDiffers,
+        providedIn: 'root',
+        factory: (/**
+         * @return {?}
+         */
+        () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()]))
+    });
+    return KeyValueDiffers;
+})();
 if (false) {
     /**
      * @nocollapse
@@ -29952,16 +30105,39 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * @abstract
  * @template C
  */
-class TemplateRef {
-}
-/**
- * \@internal
- * @nocollapse
- */
-TemplateRef.__NG_ELEMENT_ID__ = (/**
- * @return {?}
- */
-() => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef));
+let TemplateRef = /** @class */ (() => {
+    /**
+     * Represents an embedded template that can be used to instantiate embedded views.
+     * To instantiate embedded views based on a template, use the `ViewContainerRef`
+     * method `createEmbeddedView()`.
+     *
+     * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+     * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+     * is injected into the constructor of the directive,
+     * using the `TemplateRef` token.
+     *
+     * You can also use a `Query` to find a `TemplateRef` associated with
+     * a component or a directive.
+     *
+     * @see `ViewContainerRef`
+     * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+     *
+     * \@publicApi
+     * @abstract
+     * @template C
+     */
+    class TemplateRef {
+    }
+    /**
+     * \@internal
+     * @nocollapse
+     */
+    TemplateRef.__NG_ELEMENT_ID__ = (/**
+     * @return {?}
+     */
+    () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef));
+    return TemplateRef;
+})();
 if (false) {
     /**
      * \@internal
@@ -30021,16 +30197,35 @@ const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
  * \@publicApi
  * @abstract
  */
-class ViewContainerRef {
-}
-/**
- * \@internal
- * @nocollapse
- */
-ViewContainerRef.__NG_ELEMENT_ID__ = (/**
- * @return {?}
- */
-() => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef));
+let ViewContainerRef = /** @class */ (() => {
+    /**
+     * Represents a container where one or more views can be attached to a component.
+     *
+     * Can contain *host views* (created by instantiating a
+     * component with the `createComponent()` method), and *embedded views*
+     * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+     *
+     * A view container instance can contain other view containers,
+     * creating a [view hierarchy](guide/glossary#view-tree).
+     *
+     * @see `ComponentRef`
+     * @see `EmbeddedViewRef`
+     *
+     * \@publicApi
+     * @abstract
+     */
+    class ViewContainerRef {
+    }
+    /**
+     * \@internal
+     * @nocollapse
+     */
+    ViewContainerRef.__NG_ELEMENT_ID__ = (/**
+     * @return {?}
+     */
+    () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef));
+    return ViewContainerRef;
+})();
 if (false) {
     /**
      * \@internal
@@ -36719,86 +36914,27 @@ function unwrapValue$1(lView, newValue) {
  * Generated from: packages/core/src/event_emitter.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-/**
- * Use in components with the `\@Output` directive to emit custom events
- * synchronously or asynchronously, and register handlers for those events
- * by subscribing to an instance.
- *
- * \@usageNotes
- *
- * Extends
- * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
- * for Angular by adding the `emit()` method.
- *
- * In the following example, a component defines two output properties
- * that create event emitters. When the title is clicked, the emitter
- * emits an open or close event to toggle the current visibility state.
- *
- * ```html
- * \@Component({
- *   selector: 'zippy',
- *   template: `
- *   <div class="zippy">
- *     <div (click)="toggle()">Toggle</div>
- *     <div [hidden]="!visible">
- *       <ng-content></ng-content>
- *     </div>
- *  </div>`})
- * export class Zippy {
- *   visible: boolean = true;
- * \@Output() open: EventEmitter<any> = new EventEmitter();
- * \@Output() close: EventEmitter<any> = new EventEmitter();
- *
- *   toggle() {
- *     this.visible = !this.visible;
- *     if (this.visible) {
- *       this.open.emit(null);
- *     } else {
- *       this.close.emit(null);
- *     }
- *   }
- * }
- * ```
- *
- * Access the event object with the `$event` argument passed to the output event
- * handler:
- *
- * ```html
- * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
- * ```
- *
- * @see [Observables in Angular](guide/observables-in-angular)
- * \@publicApi
- * @template T
- */
-class EventEmitter extends Subject {
+// WARNING: interface has both a type and a value, skipping emit
+class EventEmitter_ extends Subject {
     // tslint:disable-line
     /**
-     * Creates an instance of this class that can
-     * deliver events synchronously or asynchronously.
-     *
-     * @param {?=} isAsync When true, deliver events asynchronously.
-     *
+     * @param {?=} isAsync
      */
     constructor(isAsync = false) {
         super();
         this.__isAsync = isAsync;
     }
     /**
-     * Emits an event containing a given value.
-     * @param {?=} value The value to emit.
+     * @param {?=} value
      * @return {?}
      */
     emit(value) {
         super.next(value);
     }
     /**
-     * Registers handlers for events emitted by this instance.
-     * @param {?=} generatorOrNext When supplied, a custom handler for emitted events.
-     * @param {?=} error When supplied, a custom handler for an error notification
-     * from this emitter.
-     * @param {?=} complete When supplied, a custom handler for a completion
-     * notification from this emitter.
+     * @param {?=} generatorOrNext
+     * @param {?=} error
+     * @param {?=} complete
      * @return {?}
      */
     subscribe(generatorOrNext, error, complete) {
@@ -36928,12 +37064,14 @@ class EventEmitter extends Subject {
     }
 }
 if (false) {
-    /**
-     * \@internal
-     * @type {?}
-     */
-    EventEmitter.prototype.__isAsync;
+    /** @type {?} */
+    EventEmitter_.prototype.__isAsync;
 }
+/**
+ * \@publicApi
+ * @type {?}
+ */
+const EventEmitter = (/** @type {?} */ (EventEmitter_));
 
 /**
  * @fileoverview added by tsickle
@@ -40362,78 +40500,86 @@ const APP_INITIALIZER = new InjectionToken('Application Initializer');
  *
  * \@publicApi
  */
-class ApplicationInitStatus {
+let ApplicationInitStatus = /** @class */ (() => {
     /**
-     * @param {?} appInits
+     * A class that reflects the state of running {\@link APP_INITIALIZER}s.
+     *
+     * \@publicApi
      */
-    constructor(appInits) {
-        this.appInits = appInits;
-        this.initialized = false;
-        this.done = false;
-        this.donePromise = new Promise((/**
-         * @param {?} res
-         * @param {?} rej
-         * @return {?}
+    class ApplicationInitStatus {
+        /**
+         * @param {?} appInits
          */
-        (res, rej) => {
-            this.resolve = res;
-            this.reject = rej;
-        }));
-    }
-    /**
-     * \@internal
-     * @return {?}
-     */
-    runInitializers() {
-        if (this.initialized) {
-            return;
+        constructor(appInits) {
+            this.appInits = appInits;
+            this.initialized = false;
+            this.done = false;
+            this.donePromise = new Promise((/**
+             * @param {?} res
+             * @param {?} rej
+             * @return {?}
+             */
+            (res, rej) => {
+                this.resolve = res;
+                this.reject = rej;
+            }));
         }
-        /** @type {?} */
-        const asyncInitPromises = [];
-        /** @type {?} */
-        const complete = (/**
+        /**
+         * \@internal
          * @return {?}
          */
-        () => {
-            ((/** @type {?} */ (this))).done = true;
-            this.resolve();
-        });
-        if (this.appInits) {
-            for (let i = 0; i < this.appInits.length; i++) {
-                /** @type {?} */
-                const initResult = this.appInits[i]();
-                if (isPromise(initResult)) {
-                    asyncInitPromises.push(initResult);
+        runInitializers() {
+            if (this.initialized) {
+                return;
+            }
+            /** @type {?} */
+            const asyncInitPromises = [];
+            /** @type {?} */
+            const complete = (/**
+             * @return {?}
+             */
+            () => {
+                ((/** @type {?} */ (this))).done = true;
+                this.resolve();
+            });
+            if (this.appInits) {
+                for (let i = 0; i < this.appInits.length; i++) {
+                    /** @type {?} */
+                    const initResult = this.appInits[i]();
+                    if (isPromise(initResult)) {
+                        asyncInitPromises.push(initResult);
+                    }
                 }
             }
+            Promise.all(asyncInitPromises)
+                .then((/**
+             * @return {?}
+             */
+            () => {
+                complete();
+            }))
+                .catch((/**
+             * @param {?} e
+             * @return {?}
+             */
+            e => {
+                this.reject(e);
+            }));
+            if (asyncInitPromises.length === 0) {
+                complete();
+            }
+            this.initialized = true;
         }
-        Promise.all(asyncInitPromises)
-            .then((/**
-         * @return {?}
-         */
-        () => {
-            complete();
-        }))
-            .catch((/**
-         * @param {?} e
-         * @return {?}
-         */
-        e => {
-            this.reject(e);
-        }));
-        if (asyncInitPromises.length === 0) {
-            complete();
-        }
-        this.initialized = true;
     }
-}
-ApplicationInitStatus.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-ApplicationInitStatus.ctorParameters = () => [
-    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
-];
+    ApplicationInitStatus.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    ApplicationInitStatus.ctorParameters = () => [
+        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
+    ];
+    return ApplicationInitStatus;
+})();
 if (false) {
     /**
      * @type {?}
@@ -40534,28 +40680,31 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * Generated from: packages/core/src/console.ts
  * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
-class Console {
-    /**
-     * @param {?} message
-     * @return {?}
-     */
-    log(message) {
-        // tslint:disable-next-line:no-console
-        console.log(message);
+let Console = /** @class */ (() => {
+    class Console {
+        /**
+         * @param {?} message
+         * @return {?}
+         */
+        log(message) {
+            // tslint:disable-next-line:no-console
+            console.log(message);
+        }
+        // Note: for reporting errors use `DOM.logError()` as it is platform specific
+        /**
+         * @param {?} message
+         * @return {?}
+         */
+        warn(message) {
+            // tslint:disable-next-line:no-console
+            console.warn(message);
+        }
     }
-    // Note: for reporting errors use `DOM.logError()` as it is platform specific
-    /**
-     * @param {?} message
-     * @return {?}
-     */
-    warn(message) {
-        // tslint:disable-next-line:no-console
-        console.warn(message);
-    }
-}
-Console.decorators = [
-    { type: Injectable }
-];
+    Console.decorators = [
+        { type: Injectable }
+    ];
+    return Console;
+})();
 
 /**
  * @fileoverview added by tsickle
@@ -40817,49 +40966,63 @@ const Compiler_compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAll
  *
  * \@publicApi
  */
-class Compiler {
-    constructor() {
+let Compiler = /** @class */ (() => {
+    /**
+     * Low-level service for running the angular compiler during runtime
+     * to create {\@link ComponentFactory}s, which
+     * can later be used to create and render a Component instance.
+     *
+     * Each `\@NgModule` provides an own `Compiler` to its injector,
+     * that will use the directives/pipes of the ng module for compilation
+     * of components.
+     *
+     * \@publicApi
+     */
+    class Compiler {
+        constructor() {
+            /**
+             * Compiles the given NgModule and all of its components. All templates of the components listed
+             * in `entryComponents` have to be inlined.
+             */
+            this.compileModuleSync = Compiler_compileModuleSync;
+            /**
+             * Compiles the given NgModule and all of its components
+             */
+            this.compileModuleAsync = Compiler_compileModuleAsync;
+            /**
+             * Same as {\@link #compileModuleSync} but also creates ComponentFactories for all components.
+             */
+            this.compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync;
+            /**
+             * Same as {\@link #compileModuleAsync} but also creates ComponentFactories for all components.
+             */
+            this.compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAllComponentsAsync;
+        }
         /**
-         * Compiles the given NgModule and all of its components. All templates of the components listed
-         * in `entryComponents` have to be inlined.
+         * Clears all caches.
+         * @return {?}
          */
-        this.compileModuleSync = Compiler_compileModuleSync;
+        clearCache() { }
         /**
-         * Compiles the given NgModule and all of its components
+         * Clears the cache for the given component/ngModule.
+         * @param {?} type
+         * @return {?}
          */
-        this.compileModuleAsync = Compiler_compileModuleAsync;
+        clearCacheFor(type) { }
         /**
-         * Same as {\@link #compileModuleSync} but also creates ComponentFactories for all components.
+         * Returns the id for a given NgModule, if one is defined and known to the compiler.
+         * @param {?} moduleType
+         * @return {?}
          */
-        this.compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync;
-        /**
-         * Same as {\@link #compileModuleAsync} but also creates ComponentFactories for all components.
-         */
-        this.compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAllComponentsAsync;
+        getModuleId(moduleType) {
+            return undefined;
+        }
     }
-    /**
-     * Clears all caches.
-     * @return {?}
-     */
-    clearCache() { }
-    /**
-     * Clears the cache for the given component/ngModule.
-     * @param {?} type
-     * @return {?}
-     */
-    clearCacheFor(type) { }
-    /**
-     * Returns the id for a given NgModule, if one is defined and known to the compiler.
-     * @param {?} moduleType
-     * @return {?}
-     */
-    getModuleId(moduleType) {
-        return undefined;
-    }
-}
-Compiler.decorators = [
-    { type: Injectable }
-];
+    Compiler.decorators = [
+        { type: Injectable }
+    ];
+    return Compiler;
+})();
 if (false) {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
@@ -41544,232 +41707,241 @@ if (false) {
  * application on the page will have an instance of Testability.
  * \@publicApi
  */
-class Testability {
+let Testability = /** @class */ (() => {
     /**
-     * @param {?} _ngZone
+     * The Testability service provides testing hooks that can be accessed from
+     * the browser and by services such as Protractor. Each bootstrapped Angular
+     * application on the page will have an instance of Testability.
+     * \@publicApi
      */
-    constructor(_ngZone) {
-        this._ngZone = _ngZone;
-        this._pendingCount = 0;
-        this._isZoneStable = true;
+    class Testability {
         /**
-         * Whether any work was done since the last 'whenStable' callback. This is
-         * useful to detect if this could have potentially destabilized another
-         * component while it is stabilizing.
-         * \@internal
+         * @param {?} _ngZone
          */
-        this._didWork = false;
-        this._callbacks = [];
-        this.taskTrackingZone = null;
-        this._watchAngularEvents();
-        _ngZone.run((/**
-         * @return {?}
-         */
-        () => {
-            this.taskTrackingZone =
-                typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
-        }));
-    }
-    /**
-     * @private
-     * @return {?}
-     */
-    _watchAngularEvents() {
-        this._ngZone.onUnstable.subscribe({
-            next: (/**
+        constructor(_ngZone) {
+            this._ngZone = _ngZone;
+            this._pendingCount = 0;
+            this._isZoneStable = true;
+            /**
+             * Whether any work was done since the last 'whenStable' callback. This is
+             * useful to detect if this could have potentially destabilized another
+             * component while it is stabilizing.
+             * \@internal
+             */
+            this._didWork = false;
+            this._callbacks = [];
+            this.taskTrackingZone = null;
+            this._watchAngularEvents();
+            _ngZone.run((/**
              * @return {?}
              */
             () => {
-                this._didWork = true;
-                this._isZoneStable = false;
-            })
-        });
-        this._ngZone.runOutsideAngular((/**
+                this.taskTrackingZone =
+                    typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
+            }));
+        }
+        /**
+         * @private
          * @return {?}
          */
-        () => {
-            this._ngZone.onStable.subscribe({
+        _watchAngularEvents() {
+            this._ngZone.onUnstable.subscribe({
                 next: (/**
                  * @return {?}
                  */
                 () => {
-                    NgZone.assertNotInAngularZone();
-                    scheduleMicroTask((/**
+                    this._didWork = true;
+                    this._isZoneStable = false;
+                })
+            });
+            this._ngZone.runOutsideAngular((/**
+             * @return {?}
+             */
+            () => {
+                this._ngZone.onStable.subscribe({
+                    next: (/**
                      * @return {?}
                      */
                     () => {
-                        this._isZoneStable = true;
-                        this._runCallbacksIfReady();
-                    }));
-                })
-            });
-        }));
-    }
-    /**
-     * Increases the number of pending request
-     * @deprecated pending requests are now tracked with zones.
-     * @return {?}
-     */
-    increasePendingRequestCount() {
-        this._pendingCount += 1;
-        this._didWork = true;
-        return this._pendingCount;
-    }
-    /**
-     * Decreases the number of pending request
-     * @deprecated pending requests are now tracked with zones
-     * @return {?}
-     */
-    decreasePendingRequestCount() {
-        this._pendingCount -= 1;
-        if (this._pendingCount < 0) {
-            throw new Error('pending async requests below zero');
-        }
-        this._runCallbacksIfReady();
-        return this._pendingCount;
-    }
-    /**
-     * Whether an associated application is stable
-     * @return {?}
-     */
-    isStable() {
-        return this._isZoneStable && this._pendingCount === 0 && !this._ngZone.hasPendingMacrotasks;
-    }
-    /**
-     * @private
-     * @return {?}
-     */
-    _runCallbacksIfReady() {
-        if (this.isStable()) {
-            // Schedules the call backs in a new frame so that it is always async.
-            scheduleMicroTask((/**
-             * @return {?}
-             */
-            () => {
-                while (this._callbacks.length !== 0) {
-                    /** @type {?} */
-                    let cb = (/** @type {?} */ (this._callbacks.pop()));
-                    clearTimeout(cb.timeoutId);
-                    cb.doneCb(this._didWork);
-                }
-                this._didWork = false;
+                        NgZone.assertNotInAngularZone();
+                        scheduleMicroTask((/**
+                         * @return {?}
+                         */
+                        () => {
+                            this._isZoneStable = true;
+                            this._runCallbacksIfReady();
+                        }));
+                    })
+                });
             }));
         }
-        else {
-            // Still not stable, send updates.
-            /** @type {?} */
-            let pending = this.getPendingTasks();
-            this._callbacks = this._callbacks.filter((/**
-             * @param {?} cb
-             * @return {?}
-             */
-            (cb) => {
-                if (cb.updateCb && cb.updateCb(pending)) {
-                    clearTimeout(cb.timeoutId);
-                    return false;
-                }
-                return true;
-            }));
-            this._didWork = true;
-        }
-    }
-    /**
-     * @private
-     * @return {?}
-     */
-    getPendingTasks() {
-        if (!this.taskTrackingZone) {
-            return [];
-        }
-        // Copy the tasks data so that we don't leak tasks.
-        return this.taskTrackingZone.macroTasks.map((/**
-         * @param {?} t
+        /**
+         * Increases the number of pending request
+         * @deprecated pending requests are now tracked with zones.
          * @return {?}
          */
-        (t) => {
-            return {
-                source: t.source,
-                // From TaskTrackingZone:
-                // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
-                creationLocation: (/** @type {?} */ (((/** @type {?} */ (t))).creationLocation)),
-                data: t.data
-            };
-        }));
-    }
-    /**
-     * @private
-     * @param {?} cb
-     * @param {?=} timeout
-     * @param {?=} updateCb
-     * @return {?}
-     */
-    addCallback(cb, timeout, updateCb) {
-        /** @type {?} */
-        let timeoutId = -1;
-        if (timeout && timeout > 0) {
-            timeoutId = setTimeout((/**
-             * @return {?}
-             */
-            () => {
+        increasePendingRequestCount() {
+            this._pendingCount += 1;
+            this._didWork = true;
+            return this._pendingCount;
+        }
+        /**
+         * Decreases the number of pending request
+         * @deprecated pending requests are now tracked with zones
+         * @return {?}
+         */
+        decreasePendingRequestCount() {
+            this._pendingCount -= 1;
+            if (this._pendingCount < 0) {
+                throw new Error('pending async requests below zero');
+            }
+            this._runCallbacksIfReady();
+            return this._pendingCount;
+        }
+        /**
+         * Whether an associated application is stable
+         * @return {?}
+         */
+        isStable() {
+            return this._isZoneStable && this._pendingCount === 0 && !this._ngZone.hasPendingMacrotasks;
+        }
+        /**
+         * @private
+         * @return {?}
+         */
+        _runCallbacksIfReady() {
+            if (this.isStable()) {
+                // Schedules the call backs in a new frame so that it is always async.
+                scheduleMicroTask((/**
+                 * @return {?}
+                 */
+                () => {
+                    while (this._callbacks.length !== 0) {
+                        /** @type {?} */
+                        let cb = (/** @type {?} */ (this._callbacks.pop()));
+                        clearTimeout(cb.timeoutId);
+                        cb.doneCb(this._didWork);
+                    }
+                    this._didWork = false;
+                }));
+            }
+            else {
+                // Still not stable, send updates.
+                /** @type {?} */
+                let pending = this.getPendingTasks();
                 this._callbacks = this._callbacks.filter((/**
                  * @param {?} cb
                  * @return {?}
                  */
-                (cb) => cb.timeoutId !== timeoutId));
-                cb(this._didWork, this.getPendingTasks());
-            }), timeout);
+                (cb) => {
+                    if (cb.updateCb && cb.updateCb(pending)) {
+                        clearTimeout(cb.timeoutId);
+                        return false;
+                    }
+                    return true;
+                }));
+                this._didWork = true;
+            }
         }
-        this._callbacks.push((/** @type {?} */ ({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb })));
-    }
-    /**
-     * Wait for the application to be stable with a timeout. If the timeout is reached before that
-     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
-     *
-     * @param {?} doneCb The callback to invoke when Angular is stable or the timeout expires
-     *    whichever comes first.
-     * @param {?=} timeout Optional. The maximum time to wait for Angular to become stable. If not
-     *    specified, whenStable() will wait forever.
-     * @param {?=} updateCb Optional. If specified, this callback will be invoked whenever the set of
-     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
-     *    and no further updates will be issued.
-     * @return {?}
-     */
-    whenStable(doneCb, timeout, updateCb) {
-        if (updateCb && !this.taskTrackingZone) {
-            throw new Error('Task tracking zone is required when passing an update callback to ' +
-                'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
+        /**
+         * @private
+         * @return {?}
+         */
+        getPendingTasks() {
+            if (!this.taskTrackingZone) {
+                return [];
+            }
+            // Copy the tasks data so that we don't leak tasks.
+            return this.taskTrackingZone.macroTasks.map((/**
+             * @param {?} t
+             * @return {?}
+             */
+            (t) => {
+                return {
+                    source: t.source,
+                    // From TaskTrackingZone:
+                    // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
+                    creationLocation: (/** @type {?} */ (((/** @type {?} */ (t))).creationLocation)),
+                    data: t.data
+                };
+            }));
         }
-        // These arguments are 'Function' above to keep the public API simple.
-        this.addCallback((/** @type {?} */ (doneCb)), timeout, (/** @type {?} */ (updateCb)));
-        this._runCallbacksIfReady();
+        /**
+         * @private
+         * @param {?} cb
+         * @param {?=} timeout
+         * @param {?=} updateCb
+         * @return {?}
+         */
+        addCallback(cb, timeout, updateCb) {
+            /** @type {?} */
+            let timeoutId = -1;
+            if (timeout && timeout > 0) {
+                timeoutId = setTimeout((/**
+                 * @return {?}
+                 */
+                () => {
+                    this._callbacks = this._callbacks.filter((/**
+                     * @param {?} cb
+                     * @return {?}
+                     */
+                    (cb) => cb.timeoutId !== timeoutId));
+                    cb(this._didWork, this.getPendingTasks());
+                }), timeout);
+            }
+            this._callbacks.push((/** @type {?} */ ({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb })));
+        }
+        /**
+         * Wait for the application to be stable with a timeout. If the timeout is reached before that
+         * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
+         *
+         * @param {?} doneCb The callback to invoke when Angular is stable or the timeout expires
+         *    whichever comes first.
+         * @param {?=} timeout Optional. The maximum time to wait for Angular to become stable. If not
+         *    specified, whenStable() will wait forever.
+         * @param {?=} updateCb Optional. If specified, this callback will be invoked whenever the set of
+         *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
+         *    and no further updates will be issued.
+         * @return {?}
+         */
+        whenStable(doneCb, timeout, updateCb) {
+            if (updateCb && !this.taskTrackingZone) {
+                throw new Error('Task tracking zone is required when passing an update callback to ' +
+                    'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
+            }
+            // These arguments are 'Function' above to keep the public API simple.
+            this.addCallback((/** @type {?} */ (doneCb)), timeout, (/** @type {?} */ (updateCb)));
+            this._runCallbacksIfReady();
+        }
+        /**
+         * Get the number of pending requests
+         * @deprecated pending requests are now tracked with zones
+         * @return {?}
+         */
+        getPendingRequestCount() {
+            return this._pendingCount;
+        }
+        /**
+         * Find providers by name
+         * @param {?} using The root element to search from
+         * @param {?} provider The name of binding variable
+         * @param {?} exactMatch Whether using exactMatch
+         * @return {?}
+         */
+        findProviders(using, provider, exactMatch) {
+            // TODO(juliemr): implement.
+            return [];
+        }
     }
-    /**
-     * Get the number of pending requests
-     * @deprecated pending requests are now tracked with zones
-     * @return {?}
-     */
-    getPendingRequestCount() {
-        return this._pendingCount;
-    }
-    /**
-     * Find providers by name
-     * @param {?} using The root element to search from
-     * @param {?} provider The name of binding variable
-     * @param {?} exactMatch Whether using exactMatch
-     * @return {?}
-     */
-    findProviders(using, provider, exactMatch) {
-        // TODO(juliemr): implement.
-        return [];
-    }
-}
-Testability.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-Testability.ctorParameters = () => [
-    { type: NgZone }
-];
+    Testability.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    Testability.ctorParameters = () => [
+        { type: NgZone }
+    ];
+    return Testability;
+})();
 if (false) {
     /**
      * @type {?}
@@ -41810,76 +41982,83 @@ if (false) {
  * A global registry of {\@link Testability} instances for specific elements.
  * \@publicApi
  */
-class TestabilityRegistry {
-    constructor() {
+let TestabilityRegistry = /** @class */ (() => {
+    /**
+     * A global registry of {\@link Testability} instances for specific elements.
+     * \@publicApi
+     */
+    class TestabilityRegistry {
+        constructor() {
+            /**
+             * \@internal
+             */
+            this._applications = new Map();
+            _testabilityGetter.addToWindow(this);
+        }
         /**
-         * \@internal
+         * Registers an application with a testability hook so that it can be tracked
+         * @param {?} token token of application, root element
+         * @param {?} testability Testability hook
+         * @return {?}
          */
-        this._applications = new Map();
-        _testabilityGetter.addToWindow(this);
+        registerApplication(token, testability) {
+            this._applications.set(token, testability);
+        }
+        /**
+         * Unregisters an application.
+         * @param {?} token token of application, root element
+         * @return {?}
+         */
+        unregisterApplication(token) {
+            this._applications.delete(token);
+        }
+        /**
+         * Unregisters all applications
+         * @return {?}
+         */
+        unregisterAllApplications() {
+            this._applications.clear();
+        }
+        /**
+         * Get a testability hook associated with the application
+         * @param {?} elem root element
+         * @return {?}
+         */
+        getTestability(elem) {
+            return this._applications.get(elem) || null;
+        }
+        /**
+         * Get all registered testabilities
+         * @return {?}
+         */
+        getAllTestabilities() {
+            return Array.from(this._applications.values());
+        }
+        /**
+         * Get all registered applications(root elements)
+         * @return {?}
+         */
+        getAllRootElements() {
+            return Array.from(this._applications.keys());
+        }
+        /**
+         * Find testability of a node in the Tree
+         * @param {?} elem node
+         * @param {?=} findInAncestors whether finding testability in ancestors if testability was not found in
+         * current node
+         * @return {?}
+         */
+        findTestabilityInTree(elem, findInAncestors = true) {
+            return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
+        }
     }
-    /**
-     * Registers an application with a testability hook so that it can be tracked
-     * @param {?} token token of application, root element
-     * @param {?} testability Testability hook
-     * @return {?}
-     */
-    registerApplication(token, testability) {
-        this._applications.set(token, testability);
-    }
-    /**
-     * Unregisters an application.
-     * @param {?} token token of application, root element
-     * @return {?}
-     */
-    unregisterApplication(token) {
-        this._applications.delete(token);
-    }
-    /**
-     * Unregisters all applications
-     * @return {?}
-     */
-    unregisterAllApplications() {
-        this._applications.clear();
-    }
-    /**
-     * Get a testability hook associated with the application
-     * @param {?} elem root element
-     * @return {?}
-     */
-    getTestability(elem) {
-        return this._applications.get(elem) || null;
-    }
-    /**
-     * Get all registered testabilities
-     * @return {?}
-     */
-    getAllTestabilities() {
-        return Array.from(this._applications.values());
-    }
-    /**
-     * Get all registered applications(root elements)
-     * @return {?}
-     */
-    getAllRootElements() {
-        return Array.from(this._applications.keys());
-    }
-    /**
-     * Find testability of a node in the Tree
-     * @param {?} elem node
-     * @param {?=} findInAncestors whether finding testability in ancestors if testability was not found in
-     * current node
-     * @return {?}
-     */
-    findTestabilityInTree(elem, findInAncestors = true) {
-        return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
-    }
-}
-TestabilityRegistry.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-TestabilityRegistry.ctorParameters = () => [];
+    TestabilityRegistry.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    TestabilityRegistry.ctorParameters = () => [];
+    return TestabilityRegistry;
+})();
 if (false) {
     /**
      * \@internal
@@ -42229,215 +42408,228 @@ if (false) {
  *
  * \@publicApi
  */
-class PlatformRef {
+let PlatformRef = /** @class */ (() => {
     /**
-     * \@internal
-     * @param {?} _injector
+     * The Angular platform is the entry point for Angular on a web page. Each page
+     * has exactly one platform, and services (such as reflection) which are common
+     * to every Angular application running on the page are bound in its scope.
+     *
+     * A page's platform is initialized implicitly when a platform is created via a platform factory
+     * (e.g. {\@link platformBrowser}), or explicitly by calling the {\@link createPlatform} function.
+     *
+     * \@publicApi
      */
-    constructor(_injector) {
-        this._injector = _injector;
-        this._modules = [];
-        this._destroyListeners = [];
-        this._destroyed = false;
-    }
-    /**
-     * Creates an instance of an `\@NgModule` for the given platform
-     * for offline compilation.
-     *
-     * \@usageNotes
-     * ### Simple Example
-     *
-     * ```typescript
-     * my_module.ts:
-     *
-     * \@NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * main.ts:
-     * import {MyModuleNgFactory} from './my_module.ngfactory';
-     * import {platformBrowser} from '\@angular/platform-browser';
-     *
-     * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
-     * ```
-     * @template M
-     * @param {?} moduleFactory
-     * @param {?=} options
-     * @return {?}
-     */
-    bootstrapModuleFactory(moduleFactory, options) {
-        // Note: We need to create the NgZone _before_ we instantiate the module,
-        // as instantiating the module creates some providers eagerly.
-        // So we create a mini parent injector that just contains the new NgZone and
-        // pass that as parent to the NgModuleFactory.
-        /** @type {?} */
-        const ngZoneOption = options ? options.ngZone : undefined;
-        /** @type {?} */
-        const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
-        /** @type {?} */
-        const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
-        /** @type {?} */
-        const providers = [{ provide: NgZone, useValue: ngZone }];
-        // Attention: Don't use ApplicationRef.run here,
-        // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
-        return ngZone.run((/**
+    class PlatformRef {
+        /**
+         * \@internal
+         * @param {?} _injector
+         */
+        constructor(_injector) {
+            this._injector = _injector;
+            this._modules = [];
+            this._destroyListeners = [];
+            this._destroyed = false;
+        }
+        /**
+         * Creates an instance of an `\@NgModule` for the given platform
+         * for offline compilation.
+         *
+         * \@usageNotes
+         * ### Simple Example
+         *
+         * ```typescript
+         * my_module.ts:
+         *
+         * \@NgModule({
+         *   imports: [BrowserModule]
+         * })
+         * class MyModule {}
+         *
+         * main.ts:
+         * import {MyModuleNgFactory} from './my_module.ngfactory';
+         * import {platformBrowser} from '\@angular/platform-browser';
+         *
+         * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
+         * ```
+         * @template M
+         * @param {?} moduleFactory
+         * @param {?=} options
          * @return {?}
          */
-        () => {
+        bootstrapModuleFactory(moduleFactory, options) {
+            // Note: We need to create the NgZone _before_ we instantiate the module,
+            // as instantiating the module creates some providers eagerly.
+            // So we create a mini parent injector that just contains the new NgZone and
+            // pass that as parent to the NgModuleFactory.
             /** @type {?} */
-            const ngZoneInjector = Injector.create({ providers: providers, parent: this.injector, name: moduleFactory.moduleType.name });
+            const ngZoneOption = options ? options.ngZone : undefined;
             /** @type {?} */
-            const moduleRef = (/** @type {?} */ (moduleFactory.create(ngZoneInjector)));
+            const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
             /** @type {?} */
-            const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
-            if (!exceptionHandler) {
-                throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
-            }
-            moduleRef.onDestroy((/**
-             * @return {?}
-             */
-            () => remove(this._modules, moduleRef)));
-            (/** @type {?} */ (ngZone)).runOutsideAngular((/**
-             * @return {?}
-             */
-            () => (/** @type {?} */ (ngZone)).onError.subscribe({
-                next: (/**
-                 * @param {?} error
-                 * @return {?}
-                 */
-                (error) => {
-                    exceptionHandler.handleError(error);
-                })
-            })));
-            return _callAndReportToErrorHandler(exceptionHandler, (/** @type {?} */ (ngZone)), (/**
+            const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
+            /** @type {?} */
+            const providers = [{ provide: NgZone, useValue: ngZone }];
+            // Attention: Don't use ApplicationRef.run here,
+            // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+            return ngZone.run((/**
              * @return {?}
              */
             () => {
                 /** @type {?} */
-                const initStatus = moduleRef.injector.get(ApplicationInitStatus);
-                initStatus.runInitializers();
-                return initStatus.donePromise.then((/**
+                const ngZoneInjector = Injector.create({ providers: providers, parent: this.injector, name: moduleFactory.moduleType.name });
+                /** @type {?} */
+                const moduleRef = (/** @type {?} */ (moduleFactory.create(ngZoneInjector)));
+                /** @type {?} */
+                const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
+                if (!exceptionHandler) {
+                    throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
+                }
+                moduleRef.onDestroy((/**
+                 * @return {?}
+                 */
+                () => remove(this._modules, moduleRef)));
+                (/** @type {?} */ (ngZone)).runOutsideAngular((/**
+                 * @return {?}
+                 */
+                () => (/** @type {?} */ (ngZone)).onError.subscribe({
+                    next: (/**
+                     * @param {?} error
+                     * @return {?}
+                     */
+                    (error) => {
+                        exceptionHandler.handleError(error);
+                    })
+                })));
+                return _callAndReportToErrorHandler(exceptionHandler, (/** @type {?} */ (ngZone)), (/**
                  * @return {?}
                  */
                 () => {
-                    if (ivyEnabled) {
-                        // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
-                        /** @type {?} */
-                        const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
-                        setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                    }
-                    this._moduleDoBootstrap(moduleRef);
-                    return moduleRef;
+                    /** @type {?} */
+                    const initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                    initStatus.runInitializers();
+                    return initStatus.donePromise.then((/**
+                     * @return {?}
+                     */
+                    () => {
+                        if (ivyEnabled) {
+                            // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
+                            /** @type {?} */
+                            const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
+                            setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                        }
+                        this._moduleDoBootstrap(moduleRef);
+                        return moduleRef;
+                    }));
                 }));
             }));
-        }));
-    }
-    /**
-     * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
-     *
-     * \@usageNotes
-     * ### Simple Example
-     *
-     * ```typescript
-     * \@NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
-     * ```
-     *
-     * @template M
-     * @param {?} moduleType
-     * @param {?=} compilerOptions
-     * @return {?}
-     */
-    bootstrapModule(moduleType, compilerOptions = []) {
-        /** @type {?} */
-        const options = optionsReducer({}, compilerOptions);
-        return compileNgModuleFactory(this.injector, options, moduleType)
-            .then((/**
-         * @param {?} moduleFactory
+        }
+        /**
+         * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
+         *
+         * \@usageNotes
+         * ### Simple Example
+         *
+         * ```typescript
+         * \@NgModule({
+         *   imports: [BrowserModule]
+         * })
+         * class MyModule {}
+         *
+         * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+         * ```
+         *
+         * @template M
+         * @param {?} moduleType
+         * @param {?=} compilerOptions
          * @return {?}
          */
-        moduleFactory => this.bootstrapModuleFactory(moduleFactory, options)));
-    }
-    /**
-     * @private
-     * @param {?} moduleRef
-     * @return {?}
-     */
-    _moduleDoBootstrap(moduleRef) {
-        /** @type {?} */
-        const appRef = (/** @type {?} */ (moduleRef.injector.get(ApplicationRef)));
-        if (moduleRef._bootstrapComponents.length > 0) {
-            moduleRef._bootstrapComponents.forEach((/**
-             * @param {?} f
+        bootstrapModule(moduleType, compilerOptions = []) {
+            /** @type {?} */
+            const options = optionsReducer({}, compilerOptions);
+            return compileNgModuleFactory(this.injector, options, moduleType)
+                .then((/**
+             * @param {?} moduleFactory
              * @return {?}
              */
-            f => appRef.bootstrap(f)));
+            moduleFactory => this.bootstrapModuleFactory(moduleFactory, options)));
         }
-        else if (moduleRef.instance.ngDoBootstrap) {
-            moduleRef.instance.ngDoBootstrap(appRef);
-        }
-        else {
-            throw new Error(`The module ${stringify(moduleRef.instance
-                .constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
-                `Please define one of these.`);
-        }
-        this._modules.push(moduleRef);
-    }
-    /**
-     * Register a listener to be called when the platform is disposed.
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) {
-        this._destroyListeners.push(callback);
-    }
-    /**
-     * Retrieve the platform {\@link Injector}, which is the parent injector for
-     * every Angular application on the page and provides singleton providers.
-     * @return {?}
-     */
-    get injector() {
-        return this._injector;
-    }
-    /**
-     * Destroy the Angular platform and all Angular applications on the page.
-     * @return {?}
-     */
-    destroy() {
-        if (this._destroyed) {
-            throw new Error('The platform has already been destroyed!');
-        }
-        this._modules.slice().forEach((/**
-         * @param {?} module
+        /**
+         * @private
+         * @param {?} moduleRef
          * @return {?}
          */
-        module => module.destroy()));
-        this._destroyListeners.forEach((/**
-         * @param {?} listener
+        _moduleDoBootstrap(moduleRef) {
+            /** @type {?} */
+            const appRef = (/** @type {?} */ (moduleRef.injector.get(ApplicationRef)));
+            if (moduleRef._bootstrapComponents.length > 0) {
+                moduleRef._bootstrapComponents.forEach((/**
+                 * @param {?} f
+                 * @return {?}
+                 */
+                f => appRef.bootstrap(f)));
+            }
+            else if (moduleRef.instance.ngDoBootstrap) {
+                moduleRef.instance.ngDoBootstrap(appRef);
+            }
+            else {
+                throw new Error(`The module ${stringify(moduleRef.instance
+                    .constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
+                    `Please define one of these.`);
+            }
+            this._modules.push(moduleRef);
+        }
+        /**
+         * Register a listener to be called when the platform is disposed.
+         * @param {?} callback
          * @return {?}
          */
-        listener => listener()));
-        this._destroyed = true;
+        onDestroy(callback) {
+            this._destroyListeners.push(callback);
+        }
+        /**
+         * Retrieve the platform {\@link Injector}, which is the parent injector for
+         * every Angular application on the page and provides singleton providers.
+         * @return {?}
+         */
+        get injector() {
+            return this._injector;
+        }
+        /**
+         * Destroy the Angular platform and all Angular applications on the page.
+         * @return {?}
+         */
+        destroy() {
+            if (this._destroyed) {
+                throw new Error('The platform has already been destroyed!');
+            }
+            this._modules.slice().forEach((/**
+             * @param {?} module
+             * @return {?}
+             */
+            module => module.destroy()));
+            this._destroyListeners.forEach((/**
+             * @param {?} listener
+             * @return {?}
+             */
+            listener => listener()));
+            this._destroyed = true;
+        }
+        /**
+         * @return {?}
+         */
+        get destroyed() {
+            return this._destroyed;
+        }
     }
-    /**
-     * @return {?}
-     */
-    get destroyed() {
-        return this._destroyed;
-    }
-}
-PlatformRef.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-PlatformRef.ctorParameters = () => [
-    { type: Injector }
-];
+    PlatformRef.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    PlatformRef.ctorParameters = () => [
+        { type: Injector }
+    ];
+    return PlatformRef;
+})();
 if (false) {
     /**
      * @type {?}
@@ -42622,309 +42814,405 @@ function optionsReducer(dst, objs) {
  *
  * \@publicApi
  */
-class ApplicationRef {
+let ApplicationRef = /** @class */ (() => {
     /**
-     * \@internal
-     * @param {?} _zone
-     * @param {?} _console
-     * @param {?} _injector
-     * @param {?} _exceptionHandler
-     * @param {?} _componentFactoryResolver
-     * @param {?} _initStatus
-     */
-    constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
-        this._zone = _zone;
-        this._console = _console;
-        this._injector = _injector;
-        this._exceptionHandler = _exceptionHandler;
-        this._componentFactoryResolver = _componentFactoryResolver;
-        this._initStatus = _initStatus;
-        /**
-         * \@internal
-         */
-        this._bootstrapListeners = [];
-        this._views = [];
-        this._runningTick = false;
-        this._enforceNoNewChanges = false;
-        this._stable = true;
-        /**
-         * Get a list of component types registered to this application.
-         * This list is populated even before the component is created.
-         */
-        this.componentTypes = [];
-        /**
-         * Get a list of components registered to this application.
-         */
-        this.components = [];
-        this._enforceNoNewChanges = isDevMode();
-        this._zone.onMicrotaskEmpty.subscribe({
-            next: (/**
-             * @return {?}
-             */
-            () => {
-                this._zone.run((/**
-                 * @return {?}
-                 */
-                () => {
-                    this.tick();
-                }));
-            })
-        });
-        /** @type {?} */
-        const isCurrentlyStable = new Observable((/**
-         * @param {?} observer
-         * @return {?}
-         */
-        (observer) => {
-            this._stable = this._zone.isStable && !this._zone.hasPendingMacrotasks &&
-                !this._zone.hasPendingMicrotasks;
-            this._zone.runOutsideAngular((/**
-             * @return {?}
-             */
-            () => {
-                observer.next(this._stable);
-                observer.complete();
-            }));
-        }));
-        /** @type {?} */
-        const isStable = new Observable((/**
-         * @param {?} observer
-         * @return {?}
-         */
-        (observer) => {
-            // Create the subscription to onStable outside the Angular Zone so that
-            // the callback is run outside the Angular Zone.
-            /** @type {?} */
-            let stableSub;
-            this._zone.runOutsideAngular((/**
-             * @return {?}
-             */
-            () => {
-                stableSub = this._zone.onStable.subscribe((/**
-                 * @return {?}
-                 */
-                () => {
-                    NgZone.assertNotInAngularZone();
-                    // Check whether there are no pending macro/micro tasks in the next tick
-                    // to allow for NgZone to update the state.
-                    scheduleMicroTask((/**
-                     * @return {?}
-                     */
-                    () => {
-                        if (!this._stable && !this._zone.hasPendingMacrotasks &&
-                            !this._zone.hasPendingMicrotasks) {
-                            this._stable = true;
-                            observer.next(true);
-                        }
-                    }));
-                }));
-            }));
-            /** @type {?} */
-            const unstableSub = this._zone.onUnstable.subscribe((/**
-             * @return {?}
-             */
-            () => {
-                NgZone.assertInAngularZone();
-                if (this._stable) {
-                    this._stable = false;
-                    this._zone.runOutsideAngular((/**
-                     * @return {?}
-                     */
-                    () => {
-                        observer.next(false);
-                    }));
-                }
-            }));
-            return (/**
-             * @return {?}
-             */
-            () => {
-                stableSub.unsubscribe();
-                unstableSub.unsubscribe();
-            });
-        }));
-        ((/** @type {?} */ (this))).isStable =
-            merge$1(isCurrentlyStable, isStable.pipe(share()));
-    }
-    /**
-     * Bootstrap a new component at the root level of the application.
+     * A reference to an Angular application running on a page.
      *
      * \@usageNotes
-     * ### Bootstrap process
      *
-     * When bootstrapping a new root component into an application, Angular mounts the
-     * specified application component onto DOM elements identified by the componentType's
-     * selector and kicks off automatic change detection to finish initializing the component.
+     * {\@a is-stable-examples}
+     * ### isStable examples and caveats
      *
-     * Optionally, a component can be mounted onto a DOM element that does not match the
-     * componentType's selector.
+     * Note two important points about `isStable`, demonstrated in the examples below:
+     * - the application will never be stable if you start any kind
+     * of recurrent asynchronous task when the application starts
+     * (for example for a polling process, started with a `setInterval`, a `setTimeout`
+     * or using RxJS operators like `interval`);
+     * - the `isStable` Observable runs outside of the Angular zone.
      *
-     * ### Example
-     * {\@example core/ts/platform/platform.ts region='longform'}
-     * @template C
-     * @param {?} componentOrFactory
-     * @param {?=} rootSelectorOrNode
-     * @return {?}
+     * Let's imagine that you start a recurrent task
+     * (here incrementing a counter, using RxJS `interval`),
+     * and at the same time subscribe to `isStable`.
+     *
+     * ```
+     * constructor(appRef: ApplicationRef) {
+     *   appRef.isStable.pipe(
+     *      filter(stable => stable)
+     *   ).subscribe(() => console.log('App is stable now');
+     *   interval(1000).subscribe(counter => console.log(counter));
+     * }
+     * ```
+     * In this example, `isStable` will never emit `true`,
+     * and the trace "App is stable now" will never get logged.
+     *
+     * If you want to execute something when the app is stable,
+     * you have to wait for the application to be stable
+     * before starting your polling process.
+     *
+     * ```
+     * constructor(appRef: ApplicationRef) {
+     *   appRef.isStable.pipe(
+     *     first(stable => stable),
+     *     tap(stable => console.log('App is stable now')),
+     *     switchMap(() => interval(1000))
+     *   ).subscribe(counter => console.log(counter));
+     * }
+     * ```
+     * In this example, the trace "App is stable now" will be logged
+     * and then the counter starts incrementing every second.
+     *
+     * Note also that this Observable runs outside of the Angular zone,
+     * which means that the code in the subscription
+     * to this Observable will not trigger the change detection.
+     *
+     * Let's imagine that instead of logging the counter value,
+     * you update a field of your component
+     * and display it in its template.
+     *
+     * ```
+     * constructor(appRef: ApplicationRef) {
+     *   appRef.isStable.pipe(
+     *     first(stable => stable),
+     *     switchMap(() => interval(1000))
+     *   ).subscribe(counter => this.value = counter);
+     * }
+     * ```
+     * As the `isStable` Observable runs outside the zone,
+     * the `value` field will be updated properly,
+     * but the template will not be refreshed!
+     *
+     * You'll have to manually trigger the change detection to update the template.
+     *
+     * ```
+     * constructor(appRef: ApplicationRef, cd: ChangeDetectorRef) {
+     *   appRef.isStable.pipe(
+     *     first(stable => stable),
+     *     switchMap(() => interval(1000))
+     *   ).subscribe(counter => {
+     *     this.value = counter;
+     *     cd.detectChanges();
+     *   });
+     * }
+     * ```
+     *
+     * Or make the subscription callback run inside the zone.
+     *
+     * ```
+     * constructor(appRef: ApplicationRef, zone: NgZone) {
+     *   appRef.isStable.pipe(
+     *     first(stable => stable),
+     *     switchMap(() => interval(1000))
+     *   ).subscribe(counter => zone.run(() => this.value = counter));
+     * }
+     * ```
+     *
+     * \@publicApi
      */
-    bootstrap(componentOrFactory, rootSelectorOrNode) {
-        if (!this._initStatus.done) {
-            throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
-        }
-        /** @type {?} */
-        let componentFactory;
-        if (componentOrFactory instanceof ComponentFactory) {
-            componentFactory = componentOrFactory;
-        }
-        else {
-            componentFactory =
-                (/** @type {?} */ (this._componentFactoryResolver.resolveComponentFactory(componentOrFactory)));
-        }
-        this.componentTypes.push(componentFactory.componentType);
-        // Create a factory associated with the current module if it's not bound to some other
-        /** @type {?} */
-        const ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef);
-        /** @type {?} */
-        const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
-        /** @type {?} */
-        const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
-        compRef.onDestroy((/**
-         * @return {?}
+    class ApplicationRef {
+        /**
+         * \@internal
+         * @param {?} _zone
+         * @param {?} _console
+         * @param {?} _injector
+         * @param {?} _exceptionHandler
+         * @param {?} _componentFactoryResolver
+         * @param {?} _initStatus
          */
-        () => {
-            this._unloadComponent(compRef);
-        }));
-        /** @type {?} */
-        const testability = compRef.injector.get(Testability, null);
-        if (testability) {
-            compRef.injector.get(TestabilityRegistry)
-                .registerApplication(compRef.location.nativeElement, testability);
-        }
-        this._loadComponent(compRef);
-        if (isDevMode()) {
-            this._console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
-        }
-        return compRef;
-    }
-    /**
-     * Invoke this method to explicitly process change detection and its side-effects.
-     *
-     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
-     * further changes are detected. If additional changes are picked up during this second cycle,
-     * bindings in the app have side-effects that cannot be resolved in a single change detection
-     * pass.
-     * In this case, Angular throws an error, since an Angular application can only have one change
-     * detection pass during which all change detection must complete.
-     * @return {?}
-     */
-    tick() {
-        if (this._runningTick) {
-            throw new Error('ApplicationRef.tick is called recursively');
-        }
-        try {
-            this._runningTick = true;
-            for (let view of this._views) {
-                view.detectChanges();
-            }
-            if (this._enforceNoNewChanges) {
-                for (let view of this._views) {
-                    view.checkNoChanges();
-                }
-            }
-        }
-        catch (e) {
-            // Attention: Don't rethrow as it could cancel subscriptions to Observables!
-            this._zone.runOutsideAngular((/**
+        constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+            this._zone = _zone;
+            this._console = _console;
+            this._injector = _injector;
+            this._exceptionHandler = _exceptionHandler;
+            this._componentFactoryResolver = _componentFactoryResolver;
+            this._initStatus = _initStatus;
+            /**
+             * \@internal
+             */
+            this._bootstrapListeners = [];
+            this._views = [];
+            this._runningTick = false;
+            this._enforceNoNewChanges = false;
+            this._stable = true;
+            /**
+             * Get a list of component types registered to this application.
+             * This list is populated even before the component is created.
+             */
+            this.componentTypes = [];
+            /**
+             * Get a list of components registered to this application.
+             */
+            this.components = [];
+            this._enforceNoNewChanges = isDevMode();
+            this._zone.onMicrotaskEmpty.subscribe({
+                next: (/**
+                 * @return {?}
+                 */
+                () => {
+                    this._zone.run((/**
+                     * @return {?}
+                     */
+                    () => {
+                        this.tick();
+                    }));
+                })
+            });
+            /** @type {?} */
+            const isCurrentlyStable = new Observable((/**
+             * @param {?} observer
              * @return {?}
              */
-            () => this._exceptionHandler.handleError(e)));
+            (observer) => {
+                this._stable = this._zone.isStable && !this._zone.hasPendingMacrotasks &&
+                    !this._zone.hasPendingMicrotasks;
+                this._zone.runOutsideAngular((/**
+                 * @return {?}
+                 */
+                () => {
+                    observer.next(this._stable);
+                    observer.complete();
+                }));
+            }));
+            /** @type {?} */
+            const isStable = new Observable((/**
+             * @param {?} observer
+             * @return {?}
+             */
+            (observer) => {
+                // Create the subscription to onStable outside the Angular Zone so that
+                // the callback is run outside the Angular Zone.
+                /** @type {?} */
+                let stableSub;
+                this._zone.runOutsideAngular((/**
+                 * @return {?}
+                 */
+                () => {
+                    stableSub = this._zone.onStable.subscribe((/**
+                     * @return {?}
+                     */
+                    () => {
+                        NgZone.assertNotInAngularZone();
+                        // Check whether there are no pending macro/micro tasks in the next tick
+                        // to allow for NgZone to update the state.
+                        scheduleMicroTask((/**
+                         * @return {?}
+                         */
+                        () => {
+                            if (!this._stable && !this._zone.hasPendingMacrotasks &&
+                                !this._zone.hasPendingMicrotasks) {
+                                this._stable = true;
+                                observer.next(true);
+                            }
+                        }));
+                    }));
+                }));
+                /** @type {?} */
+                const unstableSub = this._zone.onUnstable.subscribe((/**
+                 * @return {?}
+                 */
+                () => {
+                    NgZone.assertInAngularZone();
+                    if (this._stable) {
+                        this._stable = false;
+                        this._zone.runOutsideAngular((/**
+                         * @return {?}
+                         */
+                        () => {
+                            observer.next(false);
+                        }));
+                    }
+                }));
+                return (/**
+                 * @return {?}
+                 */
+                () => {
+                    stableSub.unsubscribe();
+                    unstableSub.unsubscribe();
+                });
+            }));
+            ((/** @type {?} */ (this))).isStable =
+                merge$1(isCurrentlyStable, isStable.pipe(share()));
         }
-        finally {
-            this._runningTick = false;
-        }
-    }
-    /**
-     * Attaches a view so that it will be dirty checked.
-     * The view will be automatically detached when it is destroyed.
-     * This will throw if the view is already attached to a ViewContainer.
-     * @param {?} viewRef
-     * @return {?}
-     */
-    attachView(viewRef) {
-        /** @type {?} */
-        const view = ((/** @type {?} */ (viewRef)));
-        this._views.push(view);
-        view.attachToAppRef(this);
-    }
-    /**
-     * Detaches a view from dirty checking again.
-     * @param {?} viewRef
-     * @return {?}
-     */
-    detachView(viewRef) {
-        /** @type {?} */
-        const view = ((/** @type {?} */ (viewRef)));
-        remove(this._views, view);
-        view.detachFromAppRef();
-    }
-    /**
-     * @private
-     * @param {?} componentRef
-     * @return {?}
-     */
-    _loadComponent(componentRef) {
-        this.attachView(componentRef.hostView);
-        this.tick();
-        this.components.push(componentRef);
-        // Get the listeners lazily to prevent DI cycles.
-        /** @type {?} */
-        const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
-        listeners.forEach((/**
-         * @param {?} listener
+        /**
+         * Bootstrap a new component at the root level of the application.
+         *
+         * \@usageNotes
+         * ### Bootstrap process
+         *
+         * When bootstrapping a new root component into an application, Angular mounts the
+         * specified application component onto DOM elements identified by the componentType's
+         * selector and kicks off automatic change detection to finish initializing the component.
+         *
+         * Optionally, a component can be mounted onto a DOM element that does not match the
+         * componentType's selector.
+         *
+         * ### Example
+         * {\@example core/ts/platform/platform.ts region='longform'}
+         * @template C
+         * @param {?} componentOrFactory
+         * @param {?=} rootSelectorOrNode
          * @return {?}
          */
-        (listener) => listener(componentRef)));
-    }
-    /**
-     * @private
-     * @param {?} componentRef
-     * @return {?}
-     */
-    _unloadComponent(componentRef) {
-        this.detachView(componentRef.hostView);
-        remove(this.components, componentRef);
-    }
-    /**
-     * \@internal
-     * @return {?}
-     */
-    ngOnDestroy() {
-        // TODO(alxhub): Dispose of the NgZone.
-        this._views.slice().forEach((/**
-         * @param {?} view
+        bootstrap(componentOrFactory, rootSelectorOrNode) {
+            if (!this._initStatus.done) {
+                throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            }
+            /** @type {?} */
+            let componentFactory;
+            if (componentOrFactory instanceof ComponentFactory) {
+                componentFactory = componentOrFactory;
+            }
+            else {
+                componentFactory =
+                    (/** @type {?} */ (this._componentFactoryResolver.resolveComponentFactory(componentOrFactory)));
+            }
+            this.componentTypes.push(componentFactory.componentType);
+            // Create a factory associated with the current module if it's not bound to some other
+            /** @type {?} */
+            const ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef);
+            /** @type {?} */
+            const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
+            /** @type {?} */
+            const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
+            compRef.onDestroy((/**
+             * @return {?}
+             */
+            () => {
+                this._unloadComponent(compRef);
+            }));
+            /** @type {?} */
+            const testability = compRef.injector.get(Testability, null);
+            if (testability) {
+                compRef.injector.get(TestabilityRegistry)
+                    .registerApplication(compRef.location.nativeElement, testability);
+            }
+            this._loadComponent(compRef);
+            if (isDevMode()) {
+                this._console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
+            }
+            return compRef;
+        }
+        /**
+         * Invoke this method to explicitly process change detection and its side-effects.
+         *
+         * In development mode, `tick()` also performs a second change detection cycle to ensure that no
+         * further changes are detected. If additional changes are picked up during this second cycle,
+         * bindings in the app have side-effects that cannot be resolved in a single change detection
+         * pass.
+         * In this case, Angular throws an error, since an Angular application can only have one change
+         * detection pass during which all change detection must complete.
          * @return {?}
          */
-        (view) => view.destroy()));
+        tick() {
+            if (this._runningTick) {
+                throw new Error('ApplicationRef.tick is called recursively');
+            }
+            try {
+                this._runningTick = true;
+                for (let view of this._views) {
+                    view.detectChanges();
+                }
+                if (this._enforceNoNewChanges) {
+                    for (let view of this._views) {
+                        view.checkNoChanges();
+                    }
+                }
+            }
+            catch (e) {
+                // Attention: Don't rethrow as it could cancel subscriptions to Observables!
+                this._zone.runOutsideAngular((/**
+                 * @return {?}
+                 */
+                () => this._exceptionHandler.handleError(e)));
+            }
+            finally {
+                this._runningTick = false;
+            }
+        }
+        /**
+         * Attaches a view so that it will be dirty checked.
+         * The view will be automatically detached when it is destroyed.
+         * This will throw if the view is already attached to a ViewContainer.
+         * @param {?} viewRef
+         * @return {?}
+         */
+        attachView(viewRef) {
+            /** @type {?} */
+            const view = ((/** @type {?} */ (viewRef)));
+            this._views.push(view);
+            view.attachToAppRef(this);
+        }
+        /**
+         * Detaches a view from dirty checking again.
+         * @param {?} viewRef
+         * @return {?}
+         */
+        detachView(viewRef) {
+            /** @type {?} */
+            const view = ((/** @type {?} */ (viewRef)));
+            remove(this._views, view);
+            view.detachFromAppRef();
+        }
+        /**
+         * @private
+         * @param {?} componentRef
+         * @return {?}
+         */
+        _loadComponent(componentRef) {
+            this.attachView(componentRef.hostView);
+            this.tick();
+            this.components.push(componentRef);
+            // Get the listeners lazily to prevent DI cycles.
+            /** @type {?} */
+            const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
+            listeners.forEach((/**
+             * @param {?} listener
+             * @return {?}
+             */
+            (listener) => listener(componentRef)));
+        }
+        /**
+         * @private
+         * @param {?} componentRef
+         * @return {?}
+         */
+        _unloadComponent(componentRef) {
+            this.detachView(componentRef.hostView);
+            remove(this.components, componentRef);
+        }
+        /**
+         * \@internal
+         * @return {?}
+         */
+        ngOnDestroy() {
+            // TODO(alxhub): Dispose of the NgZone.
+            this._views.slice().forEach((/**
+             * @param {?} view
+             * @return {?}
+             */
+            (view) => view.destroy()));
+        }
+        /**
+         * Returns the number of attached views.
+         * @return {?}
+         */
+        get viewCount() {
+            return this._views.length;
+        }
     }
-    /**
-     * Returns the number of attached views.
-     * @return {?}
-     */
-    get viewCount() {
-        return this._views.length;
-    }
-}
-ApplicationRef.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-ApplicationRef.ctorParameters = () => [
-    { type: NgZone },
-    { type: Console },
-    { type: Injector },
-    { type: ErrorHandler },
-    { type: ComponentFactoryResolver },
-    { type: ApplicationInitStatus }
-];
+    ApplicationRef.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    ApplicationRef.ctorParameters = () => [
+        { type: NgZone },
+        { type: Console },
+        { type: Injector },
+        { type: ErrorHandler },
+        { type: ComponentFactoryResolver },
+        { type: ApplicationInitStatus }
+    ];
+    return ApplicationRef;
+})();
 if (false) {
     /**
      * \@internal
@@ -43158,85 +43446,94 @@ const DEFAULT_CONFIG = {
  * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
  * part of its implementation. See `LoadChildren` for more details.
  */
-class SystemJsNgModuleLoader {
+let SystemJsNgModuleLoader = /** @class */ (() => {
     /**
-     * @param {?} _compiler
-     * @param {?=} config
+     * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
+     * \@publicApi
+     * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
+     * part of its implementation. See `LoadChildren` for more details.
      */
-    constructor(_compiler, config) {
-        this._compiler = _compiler;
-        this._config = config || DEFAULT_CONFIG;
-    }
-    /**
-     * @param {?} path
-     * @return {?}
-     */
-    load(path) {
-        /** @type {?} */
-        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
-    }
-    /**
-     * @private
-     * @param {?} path
-     * @return {?}
-     */
-    loadAndCompile(path) {
-        let [module, exportName] = path.split(_SEPARATOR);
-        if (exportName === undefined) {
-            exportName = 'default';
+    class SystemJsNgModuleLoader {
+        /**
+         * @param {?} _compiler
+         * @param {?=} config
+         */
+        constructor(_compiler, config) {
+            this._compiler = _compiler;
+            this._config = config || DEFAULT_CONFIG;
         }
-        return System.import(module)
-            .then((/**
-         * @param {?} module
+        /**
+         * @param {?} path
          * @return {?}
          */
-        (module) => module[exportName]))
-            .then((/**
-         * @param {?} type
-         * @return {?}
-         */
-        (type) => checkNotEmpty(type, module, exportName)))
-            .then((/**
-         * @param {?} type
-         * @return {?}
-         */
-        (type) => this._compiler.compileModuleAsync(type)));
-    }
-    /**
-     * @private
-     * @param {?} path
-     * @return {?}
-     */
-    loadFactory(path) {
-        let [module, exportName] = path.split(_SEPARATOR);
-        /** @type {?} */
-        let factoryClassSuffix = FACTORY_CLASS_SUFFIX;
-        if (exportName === undefined) {
-            exportName = 'default';
-            factoryClassSuffix = '';
+        load(path) {
+            /** @type {?} */
+            const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+            return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         }
-        return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
-            .then((/**
-         * @param {?} module
+        /**
+         * @private
+         * @param {?} path
          * @return {?}
          */
-        (module) => module[exportName + factoryClassSuffix]))
-            .then((/**
-         * @param {?} factory
+        loadAndCompile(path) {
+            let [module, exportName] = path.split(_SEPARATOR);
+            if (exportName === undefined) {
+                exportName = 'default';
+            }
+            return System.import(module)
+                .then((/**
+             * @param {?} module
+             * @return {?}
+             */
+            (module) => module[exportName]))
+                .then((/**
+             * @param {?} type
+             * @return {?}
+             */
+            (type) => checkNotEmpty(type, module, exportName)))
+                .then((/**
+             * @param {?} type
+             * @return {?}
+             */
+            (type) => this._compiler.compileModuleAsync(type)));
+        }
+        /**
+         * @private
+         * @param {?} path
          * @return {?}
          */
-        (factory) => checkNotEmpty(factory, module, exportName)));
+        loadFactory(path) {
+            let [module, exportName] = path.split(_SEPARATOR);
+            /** @type {?} */
+            let factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+            if (exportName === undefined) {
+                exportName = 'default';
+                factoryClassSuffix = '';
+            }
+            return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
+                .then((/**
+             * @param {?} module
+             * @return {?}
+             */
+            (module) => module[exportName + factoryClassSuffix]))
+                .then((/**
+             * @param {?} factory
+             * @return {?}
+             */
+            (factory) => checkNotEmpty(factory, module, exportName)));
+        }
     }
-}
-SystemJsNgModuleLoader.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-SystemJsNgModuleLoader.ctorParameters = () => [
-    { type: Compiler },
-    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
-];
+    SystemJsNgModuleLoader.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    SystemJsNgModuleLoader.ctorParameters = () => [
+        { type: Compiler },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
+    ];
+    return SystemJsNgModuleLoader;
+})();
 if (false) {
     /**
      * @type {?}
@@ -44534,20 +44831,33 @@ function zoneSchedulerFactory(ngZone) {
  *
  * \@publicApi
  */
-class ApplicationModule {
-    // Inject ApplicationRef to make it eager...
+let ApplicationModule = /** @class */ (() => {
     /**
-     * @param {?} appRef
+     * Configures the root injector for an app with
+     * providers of `\@angular/core` dependencies that `ApplicationRef` needs
+     * to bootstrap components.
+     *
+     * Re-exported by `BrowserModule`, which is included automatically in the root
+     * `AppModule` when you create a new app with the CLI `new` command.
+     *
+     * \@publicApi
      */
-    constructor(appRef) { }
-}
-ApplicationModule.decorators = [
-    { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
-];
-/** @nocollapse */
-ApplicationModule.ctorParameters = () => [
-    { type: ApplicationRef }
-];
+    class ApplicationModule {
+        // Inject ApplicationRef to make it eager...
+        /**
+         * @param {?} appRef
+         */
+        constructor(appRef) { }
+    }
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
+    ];
+    /** @nocollapse */
+    ApplicationModule.ctorParameters = () => [
+        { type: ApplicationRef }
+    ];
+    return ApplicationModule;
+})();
 
 /**
  * @fileoverview added by tsickle

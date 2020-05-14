@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+17.sha-2418c6a
+ * @license Angular v10.0.0-next.7+43.sha-f16ca1c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6613,7 +6613,7 @@
                 processTNodeChildren(this.firstChild, buf);
                 return buf.join('');
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return TView;
@@ -6697,7 +6697,7 @@
                         return 'TNodeType.???';
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(TNode.prototype, "flags_", {
@@ -6721,7 +6721,7 @@
                     flags.push('TNodeFlags.isProjected');
                 return flags.join('|');
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(TNode.prototype, "template_", {
@@ -6743,21 +6743,21 @@
                 buf.push('</', this.tagName || this.type_, '>');
                 return buf.join('');
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(TNode.prototype, "styleBindings_", {
             get: function () {
                 return toDebugStyleBinding(this, false);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(TNode.prototype, "classBindings_", {
             get: function () {
                 return toDebugStyleBinding(this, true);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return TNode;
@@ -6885,35 +6885,35 @@
                     indexWithinInitPhase: flags >> 11 /* IndexWithinInitPhaseShift */,
                 };
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "parent", {
             get: function () {
                 return toDebug(this._raw_lView[PARENT]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "host", {
             get: function () {
                 return toHtml(this._raw_lView[HOST], true);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "html", {
             get: function () {
                 return (this.nodes || []).map(function (node) { return toHtml(node.native, true); }).join('');
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "context", {
             get: function () {
                 return this._raw_lView[CONTEXT];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "nodes", {
@@ -6927,91 +6927,91 @@
                 var tNode = lView[TVIEW].firstChild;
                 return toDebugNodes(tNode, lView);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "tView", {
             get: function () {
                 return this._raw_lView[TVIEW];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "cleanup", {
             get: function () {
                 return this._raw_lView[CLEANUP];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "injector", {
             get: function () {
                 return this._raw_lView[INJECTOR$1];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "rendererFactory", {
             get: function () {
                 return this._raw_lView[RENDERER_FACTORY];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "renderer", {
             get: function () {
                 return this._raw_lView[RENDERER];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "sanitizer", {
             get: function () {
                 return this._raw_lView[SANITIZER];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "childHead", {
             get: function () {
                 return toDebug(this._raw_lView[CHILD_HEAD]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "next", {
             get: function () {
                 return toDebug(this._raw_lView[NEXT]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "childTail", {
             get: function () {
                 return toDebug(this._raw_lView[CHILD_TAIL]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "declarationView", {
             get: function () {
                 return toDebug(this._raw_lView[DECLARATION_VIEW]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "queries", {
             get: function () {
                 return this._raw_lView[QUERIES];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "tHost", {
             get: function () {
                 return this._raw_lView[T_HOST];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "childViews", {
@@ -7027,7 +7027,7 @@
                 }
                 return childViews;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return LViewDebug;
@@ -7071,7 +7071,7 @@
             get: function () {
                 return this._raw_lContainer[HAS_TRANSPLANTED_VIEWS];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LContainerDebug.prototype, "views", {
@@ -7079,42 +7079,42 @@
                 return this._raw_lContainer.slice(CONTAINER_HEADER_OFFSET)
                     .map(toDebug);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LContainerDebug.prototype, "parent", {
             get: function () {
                 return toDebug(this._raw_lContainer[PARENT]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LContainerDebug.prototype, "movedViews", {
             get: function () {
                 return this._raw_lContainer[MOVED_VIEWS];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LContainerDebug.prototype, "host", {
             get: function () {
                 return this._raw_lContainer[HOST];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LContainerDebug.prototype, "native", {
             get: function () {
                 return this._raw_lContainer[NATIVE];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LContainerDebug.prototype, "next", {
             get: function () {
                 return toDebug(this._raw_lContainer[NEXT]);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return LContainerDebug;
@@ -7145,7 +7145,7 @@
             get: function () {
                 return getTNode(this._lView[TVIEW], this.nodeIndex);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return I18NDebugItem;
@@ -7246,7 +7246,7 @@
                 }
                 return results;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return I18nMutateOpCodesDebug;
@@ -7334,7 +7334,7 @@
                 }
                 return results;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return I18nUpdateOpCodesDebug;
@@ -10140,21 +10140,21 @@
                 }
                 return [];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewRef.prototype, "context", {
             get: function () {
                 return this._lView[CONTEXT];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewRef.prototype, "destroyed", {
             get: function () {
                 return (this._lView[FLAGS] & 256 /* Destroyed */) === 256 /* Destroyed */;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ViewRef.prototype.destroy = function () {
@@ -10394,7 +10394,7 @@
             get: function () {
                 return null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return RootViewRef;
@@ -10572,14 +10572,14 @@
                     get: function () {
                         return createElementRef(ElementRefToken, this._hostTNode, this._hostView);
                     },
-                    enumerable: true,
+                    enumerable: false,
                     configurable: true
                 });
                 Object.defineProperty(ViewContainerRef.prototype, "injector", {
                     get: function () {
                         return new NodeInjector(this._hostTNode, this._hostView);
                     },
-                    enumerable: true,
+                    enumerable: false,
                     configurable: true
                 });
                 Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
@@ -10592,7 +10592,7 @@
                             new NodeInjector(null, this._hostView) :
                             new NodeInjector(parentTNode, parentView);
                     },
-                    enumerable: true,
+                    enumerable: false,
                     configurable: true
                 });
                 ViewContainerRef.prototype.clear = function () {
@@ -10607,7 +10607,7 @@
                     get: function () {
                         return this._lContainer.length - CONTAINER_HEADER_OFFSET;
                     },
-                    enumerable: true,
+                    enumerable: false,
                     configurable: true
                 });
                 ViewContainerRef.prototype.createEmbeddedView = function (templateRef, context, index) {
@@ -11530,7 +11530,7 @@
             get: function () {
                 return this._destroyed;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         /**
@@ -12498,7 +12498,7 @@
             get: function () {
                 return _globalKeyRegistry.numberOfKeys;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return ReflectiveKey;
@@ -12521,7 +12521,7 @@
             get: function () {
                 return this._allKeys.size;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return KeyRegistry;
@@ -13098,7 +13098,7 @@
                     .join(', ');
                 return "ReflectiveInjector(providers: [" + providers + "])";
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ReflectiveInjector_.prototype.toString = function () {
@@ -20025,7 +20025,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-next.7+17.sha-2418c6a');
+    var VERSION = new Version('10.0.0-next.7+43.sha-f16ca1c');
 
     /**
      * @license
@@ -20233,7 +20233,7 @@
                 return this._additionsHead !== null || this._movesHead !== null ||
                     this._removalsHead !== null || this._identityChangesHead !== null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         /**
@@ -20689,7 +20689,7 @@
             get: function () {
                 return this.map.size === 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         _DuplicateMap.prototype.clear = function () {
@@ -20745,7 +20745,7 @@
                 return this._additionsHead !== null || this._changesHead !== null ||
                     this._removalsHead !== null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         DefaultKeyValueDiffer.prototype.forEachItem = function (fn) {
@@ -22098,7 +22098,7 @@
                 }
                 return inputsArr;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ComponentFactory_.prototype, "outputs", {
@@ -22110,7 +22110,7 @@
                 }
                 return outputsArr;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         /**
@@ -22148,21 +22148,21 @@
             get: function () {
                 return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ComponentRef_.prototype, "injector", {
             get: function () {
                 return new Injector_(this._view, this._elDef);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ComponentRef_.prototype, "componentType", {
             get: function () {
                 return this._component.constructor;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ComponentRef_.prototype.destroy = function () {
@@ -22190,14 +22190,14 @@
             get: function () {
                 return new ElementRef(this._data.renderElement);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewContainerRef_.prototype, "injector", {
             get: function () {
                 return new Injector_(this._view, this._elDef);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
@@ -22211,7 +22211,7 @@
                 }
                 return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ViewContainerRef_.prototype.clear = function () {
@@ -22234,7 +22234,7 @@
             get: function () {
                 return this._embeddedViews.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
@@ -22297,21 +22297,21 @@
             get: function () {
                 return rootRenderNodes(this._view);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewRef_.prototype, "context", {
             get: function () {
                 return this._view.context;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewRef_.prototype, "destroyed", {
             get: function () {
                 return (this._view.state & 128 /* Destroyed */) !== 0;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ViewRef_.prototype.markForCheck = function () {
@@ -22392,7 +22392,7 @@
             get: function () {
                 return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return TemplateRef_;
@@ -22456,14 +22456,14 @@
             get: function () {
                 return this.get(this._moduleType);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(NgModuleRef_.prototype, "componentFactoryResolver", {
             get: function () {
                 return this.get(ComponentFactoryResolver);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         NgModuleRef_.prototype.destroy = function () {
@@ -23064,14 +23064,14 @@
             get: function () {
                 return toRefArray(this.componentDef.inputs);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ComponentFactory.prototype, "outputs", {
             get: function () {
                 return toRefArray(this.componentDef.outputs);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ComponentFactory.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
@@ -23194,7 +23194,7 @@
             get: function () {
                 return new NodeInjector(this._tNode, this._rootLView);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ComponentRef.prototype.destroy = function () {
@@ -25385,88 +25385,18 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Use in components with the `@Output` directive to emit custom events
-     * synchronously or asynchronously, and register handlers for those events
-     * by subscribing to an instance.
-     *
-     * @usageNotes
-     *
-     * Extends
-     * [RxJS `Subject`](https://rxjs.dev/api/index/class/Subject)
-     * for Angular by adding the `emit()` method.
-     *
-     * In the following example, a component defines two output properties
-     * that create event emitters. When the title is clicked, the emitter
-     * emits an open or close event to toggle the current visibility state.
-     *
-     * ```html
-     * @Component({
-     *   selector: 'zippy',
-     *   template: `
-     *   <div class="zippy">
-     *     <div (click)="toggle()">Toggle</div>
-     *     <div [hidden]="!visible">
-     *       <ng-content></ng-content>
-     *     </div>
-     *  </div>`})
-     * export class Zippy {
-     *   visible: boolean = true;
-     *   @Output() open: EventEmitter<any> = new EventEmitter();
-     *   @Output() close: EventEmitter<any> = new EventEmitter();
-     *
-     *   toggle() {
-     *     this.visible = !this.visible;
-     *     if (this.visible) {
-     *       this.open.emit(null);
-     *     } else {
-     *       this.close.emit(null);
-     *     }
-     *   }
-     * }
-     * ```
-     *
-     * Access the event object with the `$event` argument passed to the output event
-     * handler:
-     *
-     * ```html
-     * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
-     * ```
-     *
-     * @see [Observables in Angular](guide/observables-in-angular)
-     * @publicApi
-     */
-    var EventEmitter = /** @class */ (function (_super) {
-        __extends(EventEmitter, _super);
-        /**
-         * Creates an instance of this class that can
-         * deliver events synchronously or asynchronously.
-         *
-         * @param isAsync When true, deliver events asynchronously.
-         *
-         */
-        function EventEmitter(isAsync) {
+    var EventEmitter_ = /** @class */ (function (_super) {
+        __extends(EventEmitter_, _super);
+        function EventEmitter_(isAsync) {
             if (isAsync === void 0) { isAsync = false; }
             var _this = _super.call(this) || this;
             _this.__isAsync = isAsync;
             return _this;
         }
-        /**
-         * Emits an event containing a given value.
-         * @param value The value to emit.
-         */
-        EventEmitter.prototype.emit = function (value) {
+        EventEmitter_.prototype.emit = function (value) {
             _super.prototype.next.call(this, value);
         };
-        /**
-         * Registers handlers for events emitted by this instance.
-         * @param generatorOrNext When supplied, a custom handler for emitted events.
-         * @param error When supplied, a custom handler for an error notification
-         * from this emitter.
-         * @param complete When supplied, a custom handler for a completion
-         * notification from this emitter.
-         */
-        EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
+        EventEmitter_.prototype.subscribe = function (generatorOrNext, error, complete) {
             var schedulerFn;
             var errorFn = function (err) { return null; };
             var completeFn = function () { return null; };
@@ -25518,8 +25448,12 @@
             }
             return sink;
         };
-        return EventEmitter;
+        return EventEmitter_;
     }(rxjs.Subject));
+    /**
+     * @publicApi
+     */
+    var EventEmitter = EventEmitter_;
 
     /**
      * @license
@@ -25795,7 +25729,7 @@
             get: function () {
                 return this.queries.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         TQueries_.prototype.track = function (tquery) {
@@ -28686,7 +28620,7 @@
             get: function () {
                 return this._injector;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         /**
@@ -28704,7 +28638,7 @@
             get: function () {
                 return this._destroyed;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         PlatformRef = __decorate([
@@ -29067,7 +29001,7 @@
             get: function () {
                 return this._views.length;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         ApplicationRef = __decorate([
@@ -29358,35 +29292,35 @@
             get: function () {
                 return this._debugContext.injector;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__PRE_R3__.prototype, "componentInstance", {
             get: function () {
                 return this._debugContext.component;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__PRE_R3__.prototype, "context", {
             get: function () {
                 return this._debugContext.context;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__PRE_R3__.prototype, "references", {
             get: function () {
                 return this._debugContext.references;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__PRE_R3__.prototype, "providerTokens", {
             get: function () {
                 return this._debugContext.providerTokens;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return DebugNode__PRE_R3__;
@@ -29462,7 +29396,7 @@
                 return this.childNodes //
                     .filter(function (node) { return node instanceof DebugElement__PRE_R3__; });
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         DebugElement__PRE_R3__.prototype.triggerEventHandler = function (eventName, eventObj) {
@@ -29511,14 +29445,14 @@
                 var parent = this.nativeNode.parentNode;
                 return parent ? new DebugElement__POST_R3__(parent) : null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "injector", {
             get: function () {
                 return getInjector(this.nativeNode);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "componentInstance", {
@@ -29527,35 +29461,35 @@
                 return nativeElement &&
                     (getComponent(nativeElement) || getOwningComponent(nativeElement));
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "context", {
             get: function () {
                 return getComponent(this.nativeNode) || getContext(this.nativeNode);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "listeners", {
             get: function () {
                 return getListeners(this.nativeNode).filter(function (listener) { return listener.type === 'dom'; });
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "references", {
             get: function () {
                 return getLocalRefs(this.nativeNode);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugNode__POST_R3__.prototype, "providerTokens", {
             get: function () {
                 return getInjectionTokens(this.nativeNode);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         return DebugNode__POST_R3__;
@@ -29572,7 +29506,7 @@
             get: function () {
                 return this.nativeNode.nodeType == Node.ELEMENT_NODE ? this.nativeNode : null;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "name", {
@@ -29588,7 +29522,7 @@
                     return this.nativeNode.nodeName;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "properties", {
@@ -29620,7 +29554,7 @@
                 collectPropertyBindings(properties, tNode, lView, tData);
                 return properties;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "attributes", {
@@ -29672,7 +29606,7 @@
                 }
                 return attributes;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "styles", {
@@ -29682,7 +29616,7 @@
                 }
                 return {};
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "classes", {
@@ -29696,7 +29630,7 @@
                 classes.forEach(function (value) { return result[value] = true; });
                 return result;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "childNodes", {
@@ -29709,7 +29643,7 @@
                 }
                 return children;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "children", {
@@ -29725,7 +29659,7 @@
                 }
                 return children;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         DebugElement__POST_R3__.prototype.query = function (predicate) {
@@ -32124,28 +32058,28 @@
                 // Has to be done lazily as we use the DebugContext also during creation of elements...
                 return asElementData(this.elView, this.elDef.nodeIndex).componentView || this.view;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "injector", {
             get: function () {
                 return createInjector$1(this.elView, this.elDef);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "component", {
             get: function () {
                 return this.elOrCompView.component;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "context", {
             get: function () {
                 return this.elOrCompView.context;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "providerTokens", {
@@ -32162,7 +32096,7 @@
                 }
                 return tokens;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "references", {
@@ -32180,7 +32114,7 @@
                 }
                 return references;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "componentRenderElement", {
@@ -32188,7 +32122,7 @@
                 var elData = findHostElement(this.elOrCompView);
                 return elData ? elData.renderElement : undefined;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(DebugContext_.prototype, "renderNode", {
@@ -32196,7 +32130,7 @@
                 return this.nodeDef.flags & 2 /* TypeText */ ? renderNode(this.view, this.nodeDef) :
                     renderNode(this.elView, this.elDef);
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         DebugContext_.prototype.logError = function (console) {
