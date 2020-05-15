@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.6+37.sha-4de546e
+ * @license Angular v9.1.6+41.sha-d808333
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1946,7 +1946,7 @@ var TYPE = 1;
  * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
  *
  * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
- * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
+ * a lot of work in `refreshEmbeddedViews`. But when set we still need to verify
  * that the `MOVED_VIEWS` are transplanted and on-push.
  */
 var HAS_TRANSPLANTED_VIEWS = 2;
@@ -6611,8 +6611,10 @@ var TNode = /** @class */ (function () {
     parent, //
     projection, //
     styles, //
+    stylesWithoutHost, //
     residualStyles, //
     classes, //
+    classesWithoutHost, //
     residualClasses, //
     classBindings, //
     styleBindings) {
@@ -6640,8 +6642,10 @@ var TNode = /** @class */ (function () {
         this.parent = parent;
         this.projection = projection;
         this.styles = styles;
+        this.stylesWithoutHost = stylesWithoutHost;
         this.residualStyles = residualStyles;
         this.classes = classes;
+        this.classesWithoutHost = classesWithoutHost;
         this.residualClasses = residualClasses;
         this.classBindings = classBindings;
         this.styleBindings = styleBindings;
@@ -7633,7 +7637,7 @@ function refreshView(tView, lView, templateFn, context) {
         // insertion points. This is needed to avoid the situation where the template is defined in this
         // `LView` but its declaration appears after the insertion component.
         markTransplantedViewsForRefresh(lView);
-        refreshDynamicEmbeddedViews(lView);
+        refreshEmbeddedViews(lView);
         // Content query results must be refreshed before content hooks are called.
         if (tView.contentQueries !== null) {
             refreshContentQueries(tView, lView);
@@ -8004,8 +8008,10 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
     tParent, // parent: TElementNode|TContainerNode|null
     null, // projection: number|(ITNode|RNode[])[]|null
     null, // styles: string|null
+    null, // stylesWithoutHost: string|null
     undefined, // residualStyles: string|null
     null, // classes: string|null
+    null, // classesWithoutHost: string|null
     undefined, // residualClasses: string|null
     0, // classBindings: TStylingRange;
     0) :
@@ -8033,8 +8039,10 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
             parent: tParent,
             projection: null,
             styles: null,
+            stylesWithoutHost: null,
             residualStyles: undefined,
             classes: null,
+            classesWithoutHost: null,
             residualClasses: undefined,
             classBindings: 0,
             styleBindings: 0,
@@ -8695,10 +8703,10 @@ function createLContainer(hostNative, currentView, native, tNode) {
     return lContainer;
 }
 /**
- * Goes over dynamic embedded views (ones created through ViewContainerRef APIs) and refreshes
+ * Goes over embedded views (ones created through ViewContainerRef APIs) and refreshes
  * them by executing an associated template function.
  */
-function refreshDynamicEmbeddedViews(lView) {
+function refreshEmbeddedViews(lView) {
     for (var lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
         for (var i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             var embeddedLView = lContainer[i];
@@ -8733,7 +8741,7 @@ function markTransplantedViewsForRefresh(lView) {
             // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
             // those that aren't (declaration component === insertion component). In the latter case,
             // it's fine to add the flag, as we will clear it immediately in
-            // `refreshDynamicEmbeddedViews` for the view currently being refreshed.
+            // `refreshEmbeddedViews` for the view currently being refreshed.
             movedLView[FLAGS] |= 1024 /* RefreshTransplantedView */;
         }
     }
@@ -10873,7 +10881,7 @@ function isType(v) {
 var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
 var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
 var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
-var INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s+super\(\.\.\.arguments\)/;
+var INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s*super\(\.\.\.arguments\)/;
 /**
  * Determine whether a stringified type is a class which delegates its constructor
  * to its parent.
@@ -13334,29 +13342,34 @@ function componentDefResolved(type) {
  *
  * @param tNode The `TNode` into which the styling information should be loaded.
  * @param attrs `TAttributes` containing the styling information.
+ * @param writeToHost Where should the resulting static styles be written?
+ *   - `false` Write to `TNode.stylesWithoutHost` / `TNode.classesWithoutHost`
+ *   - `true` Write to `TNode.styles` / `TNode.classes`
  */
-function computeStaticStyling(tNode, attrs) {
+function computeStaticStyling(tNode, attrs, writeToHost) {
     ngDevMode &&
         assertFirstCreatePass(getTView(), 'Expecting to be called in first template pass only');
-    var styles = tNode.styles;
-    var classes = tNode.classes;
+    var styles = writeToHost ? tNode.styles : null;
+    var classes = writeToHost ? tNode.classes : null;
     var mode = 0;
-    for (var i = 0; i < attrs.length; i++) {
-        var value = attrs[i];
-        if (typeof value === 'number') {
-            mode = value;
-        }
-        else if (mode == 1 /* Classes */) {
-            classes = concatStringsWithSpace(classes, value);
-        }
-        else if (mode == 2 /* Styles */) {
-            var style = value;
-            var styleValue = attrs[++i];
-            styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+    if (attrs !== null) {
+        for (var i = 0; i < attrs.length; i++) {
+            var value = attrs[i];
+            if (typeof value === 'number') {
+                mode = value;
+            }
+            else if (mode == 1 /* Classes */) {
+                classes = concatStringsWithSpace(classes, value);
+            }
+            else if (mode == 2 /* Styles */) {
+                var style = value;
+                var styleValue = attrs[++i];
+                styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+            }
         }
     }
-    styles !== null && (tNode.styles = styles);
-    classes !== null && (tNode.classes = classes);
+    writeToHost ? tNode.styles = styles : tNode.stylesWithoutHost = styles;
+    writeToHost ? tNode.classes = classes : tNode.classesWithoutHost = classes;
 }
 
 /**
@@ -14448,8 +14461,11 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
     var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     ngDevMode && warnAboutUnknownElement(tView, lView, native, tNode, hasDirectives);
+    if (tNode.attrs !== null) {
+        computeStaticStyling(tNode, tNode.attrs, false);
+    }
     if (tNode.mergedAttrs !== null) {
-        computeStaticStyling(tNode, tNode.mergedAttrs);
+        computeStaticStyling(tNode, tNode.mergedAttrs, true);
     }
     if (tView.queries !== null) {
         tView.queries.elementStart(tView, tNode);
@@ -14538,11 +14554,11 @@ function ɵɵelementEnd() {
             tView.queries.elementEnd(previousOrParentTNode);
         }
     }
-    if (tNode.classes !== null && hasClassInput(tNode)) {
-        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classes, true);
+    if (tNode.classesWithoutHost != null && hasClassInput(tNode)) {
+        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classesWithoutHost, true);
     }
-    if (tNode.styles !== null && hasStyleInput(tNode)) {
-        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.styles, false);
+    if (tNode.stylesWithoutHost != null && hasStyleInput(tNode)) {
+        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.stylesWithoutHost, false);
     }
 }
 /**
@@ -14610,7 +14626,7 @@ function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, l
     // While ng-container doesn't necessarily support styling, we use the style context to identify
     // and execute directives on the ng-container.
     if (attrs !== null) {
-        computeStaticStyling(tNode, attrs);
+        computeStaticStyling(tNode, attrs, true);
     }
     var localRefs = getConstant(tViewConsts, localRefsIndex);
     resolveDirectives(tView, lView, tNode, localRefs);
@@ -16493,7 +16509,7 @@ function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
             // the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
             // thing as it would think that the static portion was removed. For this reason we
             // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
-            var staticPrefix = isClassBased ? tNode.classes : tNode.styles;
+            var staticPrefix = isClassBased ? tNode.classesWithoutHost : tNode.stylesWithoutHost;
             ngDevMode && isClassBased === false && staticPrefix !== null &&
                 assertEqual(staticPrefix.endsWith(';'), true, 'Expecting static portion to end with \';\'');
             if (staticPrefix !== null) {
@@ -18998,7 +19014,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     var tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
     var mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
     if (mergedAttrs !== null) {
-        computeStaticStyling(tNode, mergedAttrs);
+        computeStaticStyling(tNode, mergedAttrs, true);
         if (rNode !== null) {
             setUpAttributes(hostRenderer, rNode, mergedAttrs);
             if (tNode.classes !== null) {
@@ -20039,7 +20055,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.6+37.sha-4de546e');
+var VERSION = new Version('9.1.6+41.sha-d808333');
 
 /**
  * @license
