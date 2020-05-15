@@ -90,8 +90,10 @@ declare class TNode implements ITNode {
     parent: TElementNode | TContainerNode | null;
     projection: number | (ITNode | RNode[])[] | null;
     styles: string | null;
+    stylesWithoutHost: string | null;
     residualStyles: KeyValueArray<any> | undefined | null;
     classes: string | null;
+    classesWithoutHost: string | null;
     residualClasses: KeyValueArray<any> | undefined | null;
     classBindings: TStylingRange;
     styleBindings: TStylingRange;
@@ -119,8 +121,10 @@ declare class TNode implements ITNode {
     parent: TElementNode | TContainerNode | null, //
     projection: number | (ITNode | RNode[])[] | null, //
     styles: string | null, //
+    stylesWithoutHost: string | null, //
     residualStyles: KeyValueArray<any> | undefined | null, //
     classes: string | null, //
+    classesWithoutHost: string | null, //
     residualClasses: KeyValueArray<any> | undefined | null, //
     classBindings: TStylingRange, //
     styleBindings: TStylingRange);

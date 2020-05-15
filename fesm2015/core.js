@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+53.sha-aaa89bb
+ * @license Angular v10.0.0-next.7+55.sha-42a9e5a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8467,14 +8467,29 @@ if (false) {
      */
     TNode.prototype.projection;
     /**
-     * A collection of all style static values for an element.
+     * A collection of all `style` static values for an element (including from host).
      *
      * This field will be populated if and when:
      *
-     * - There are one or more initial styles on an element (e.g. `<div style="width:200px">`)
+     * - There are one or more initial `style`s on an element (e.g. `<div style="width:200px;">`)
+     * - There are one or more initial `style`s on a directive/component host
+     *   (e.g. `\@Directive({host: {style: "width:200px;" } }`)
      * @type {?}
      */
     TNode.prototype.styles;
+    /**
+     * A collection of all `style` static values for an element excluding host sources.
+     *
+     * Populated when there are one or more initial `style`s on an element
+     * (e.g. `<div style="width:200px;">`)
+     * Must be stored separately from `tNode.styles` to facilitate setting directive
+     * inputs that shadow the `style` property. If we used `tNode.styles` as is for shadowed inputs,
+     * we would feed host styles back into directives as "inputs". If we used `tNode.attrs`, we would
+     * have to concatenate the attributes on every template pass. Instead, we process once on first
+     * create pass and store here.
+     * @type {?}
+     */
+    TNode.prototype.stylesWithoutHost;
     /**
      * A `KeyValueArray` version of residual `styles`.
      *
@@ -8505,14 +8520,29 @@ if (false) {
      */
     TNode.prototype.residualStyles;
     /**
-     * A collection of all class static values for an element.
+     * A collection of all class static values for an element (including from host).
      *
      * This field will be populated if and when:
      *
      * - There are one or more initial classes on an element (e.g. `<div class="one two three">`)
+     * - There are one or more initial classes on an directive/component host
+     *   (e.g. `\@Directive({host: {class: "SOME_CLASS" } }`)
      * @type {?}
      */
     TNode.prototype.classes;
+    /**
+     * A collection of all class static values for an element excluding host sources.
+     *
+     * Populated when there are one or more initial classes on an element
+     * (e.g. `<div class="SOME_CLASS">`)
+     * Must be stored separately from `tNode.classes` to facilitate setting directive
+     * inputs that shadow the `class` property. If we used `tNode.classes` as is for shadowed inputs,
+     * we would feed host classes back into directives as "inputs". If we used `tNode.attrs`, we would
+     * have to concatenate the attributes on every template pass. Instead, we process once on first
+     * create pass and store here.
+     * @type {?}
+     */
+    TNode.prototype.classesWithoutHost;
     /**
      * A `KeyValueArray` version of residual `classes`.
      *
@@ -10372,8 +10402,10 @@ class TNode$1 {
      * @param {?} parent
      * @param {?} projection
      * @param {?} styles
+     * @param {?} stylesWithoutHost
      * @param {?} residualStyles
      * @param {?} classes
+     * @param {?} classesWithoutHost
      * @param {?} residualClasses
      * @param {?} classBindings
      * @param {?} styleBindings
@@ -10402,8 +10434,10 @@ class TNode$1 {
     parent, //
     projection, //
     styles, //
+    stylesWithoutHost, //
     residualStyles, //
     classes, //
+    classesWithoutHost, //
     residualClasses, //
     classBindings, //
     styleBindings) {
@@ -10431,8 +10465,10 @@ class TNode$1 {
         this.parent = parent;
         this.projection = projection;
         this.styles = styles;
+        this.stylesWithoutHost = stylesWithoutHost;
         this.residualStyles = residualStyles;
         this.classes = classes;
+        this.classesWithoutHost = classesWithoutHost;
         this.residualClasses = residualClasses;
         this.classBindings = classBindings;
         this.styleBindings = styleBindings;
@@ -10569,9 +10605,13 @@ if (false) {
     /** @type {?} */
     TNode$1.prototype.styles;
     /** @type {?} */
+    TNode$1.prototype.stylesWithoutHost;
+    /** @type {?} */
     TNode$1.prototype.residualStyles;
     /** @type {?} */
     TNode$1.prototype.classes;
+    /** @type {?} */
+    TNode$1.prototype.classesWithoutHost;
     /** @type {?} */
     TNode$1.prototype.residualClasses;
     /** @type {?} */
@@ -12223,8 +12263,10 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
     tParent, // parent: TElementNode|TContainerNode|null
     null, // projection: number|(ITNode|RNode[])[]|null
     null, // styles: string|null
+    null, // stylesWithoutHost: string|null
     undefined, // residualStyles: string|null
     null, // classes: string|null
+    null, // classesWithoutHost: string|null
     undefined, (/** @type {?} */ (0)), (/** @type {?} */ (0))) :
         {
             type: type,
@@ -12250,8 +12292,10 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
             parent: tParent,
             projection: null,
             styles: null,
+            stylesWithoutHost: null,
             residualStyles: undefined,
             classes: null,
+            classesWithoutHost: null,
             residualClasses: undefined,
             classBindings: (/** @type {?} */ (0)),
             styleBindings: (/** @type {?} */ (0)),
@@ -19587,36 +19631,41 @@ function componentDefResolved(type) {
  *
  * @param {?} tNode The `TNode` into which the styling information should be loaded.
  * @param {?} attrs `TAttributes` containing the styling information.
+ * @param {?} writeToHost Where should the resulting static styles be written?
+ *   - `false` Write to `TNode.stylesWithoutHost` / `TNode.classesWithoutHost`
+ *   - `true` Write to `TNode.styles` / `TNode.classes`
  * @return {?}
  */
-function computeStaticStyling(tNode, attrs) {
+function computeStaticStyling(tNode, attrs, writeToHost) {
     ngDevMode &&
         assertFirstCreatePass(getTView(), 'Expecting to be called in first template pass only');
     /** @type {?} */
-    let styles = tNode.styles;
+    let styles = writeToHost ? tNode.styles : null;
     /** @type {?} */
-    let classes = tNode.classes;
+    let classes = writeToHost ? tNode.classes : null;
     /** @type {?} */
     let mode = 0;
-    for (let i = 0; i < attrs.length; i++) {
-        /** @type {?} */
-        const value = attrs[i];
-        if (typeof value === 'number') {
-            mode = value;
-        }
-        else if (mode == 1 /* Classes */) {
-            classes = concatStringsWithSpace(classes, (/** @type {?} */ (value)));
-        }
-        else if (mode == 2 /* Styles */) {
+    if (attrs !== null) {
+        for (let i = 0; i < attrs.length; i++) {
             /** @type {?} */
-            const style = (/** @type {?} */ (value));
-            /** @type {?} */
-            const styleValue = (/** @type {?} */ (attrs[++i]));
-            styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+            const value = attrs[i];
+            if (typeof value === 'number') {
+                mode = value;
+            }
+            else if (mode == 1 /* Classes */) {
+                classes = concatStringsWithSpace(classes, (/** @type {?} */ (value)));
+            }
+            else if (mode == 2 /* Styles */) {
+                /** @type {?} */
+                const style = (/** @type {?} */ (value));
+                /** @type {?} */
+                const styleValue = (/** @type {?} */ (attrs[++i]));
+                styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+            }
         }
     }
-    styles !== null && (tNode.styles = styles);
-    classes !== null && (tNode.classes = classes);
+    writeToHost ? tNode.styles = styles : tNode.stylesWithoutHost = styles;
+    writeToHost ? tNode.classes = classes : tNode.classesWithoutHost = classes;
 }
 
 /**
@@ -21025,8 +21074,11 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     /** @type {?} */
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
+    if (tNode.attrs !== null) {
+        computeStaticStyling(tNode, tNode.attrs, false);
+    }
     if (tNode.mergedAttrs !== null) {
-        computeStaticStyling(tNode, tNode.mergedAttrs);
+        computeStaticStyling(tNode, tNode.mergedAttrs, true);
     }
     if (tView.queries !== null) {
         tView.queries.elementStart(tView, tNode);
@@ -21129,11 +21181,11 @@ function ɵɵelementEnd() {
             (/** @type {?} */ (tView.queries)).elementEnd(previousOrParentTNode);
         }
     }
-    if (tNode.classes !== null && hasClassInput(tNode)) {
-        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classes, true);
+    if (tNode.classesWithoutHost != null && hasClassInput(tNode)) {
+        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classesWithoutHost, true);
     }
-    if (tNode.styles !== null && hasStyleInput(tNode)) {
-        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.styles, false);
+    if (tNode.stylesWithoutHost != null && hasStyleInput(tNode)) {
+        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.stylesWithoutHost, false);
     }
 }
 /**
@@ -21223,7 +21275,7 @@ function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, l
     // While ng-container doesn't necessarily support styling, we use the style context to identify
     // and execute directives on the ng-container.
     if (attrs !== null) {
-        computeStaticStyling(tNode, attrs);
+        computeStaticStyling(tNode, attrs, true);
     }
     /** @type {?} */
     const localRefs = getConstant(tViewConsts, localRefsIndex);
@@ -23305,7 +23357,7 @@ function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
             // thing as it would think that the static portion was removed. For this reason we
             // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
             /** @type {?} */
-            let staticPrefix = isClassBased ? tNode.classes : tNode.styles;
+            let staticPrefix = isClassBased ? tNode.classesWithoutHost : tNode.stylesWithoutHost;
             ngDevMode && isClassBased === false && staticPrefix !== null &&
                 assertEqual(staticPrefix.endsWith(';'), true, 'Expecting static portion to end with \';\'');
             if (staticPrefix !== null) {
@@ -26195,7 +26247,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     /** @type {?} */
     const mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
     if (mergedAttrs !== null) {
-        computeStaticStyling(tNode, mergedAttrs);
+        computeStaticStyling(tNode, mergedAttrs, true);
         if (rNode !== null) {
             setUpAttributes(hostRenderer, rNode, mergedAttrs);
             if (tNode.classes !== null) {
@@ -27992,7 +28044,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('10.0.0-next.7+53.sha-aaa89bb');
+const VERSION = new Version('10.0.0-next.7+55.sha-42a9e5a');
 
 /**
  * @fileoverview added by tsickle

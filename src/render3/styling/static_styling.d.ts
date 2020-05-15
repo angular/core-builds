@@ -13,5 +13,8 @@ import { TAttributes, TNode } from '../interfaces/node';
  *
  * @param tNode The `TNode` into which the styling information should be loaded.
  * @param attrs `TAttributes` containing the styling information.
+ * @param writeToHost Where should the resulting static styles be written?
+ *   - `false` Write to `TNode.stylesWithoutHost` / `TNode.classesWithoutHost`
+ *   - `true` Write to `TNode.styles` / `TNode.classes`
  */
-export declare function computeStaticStyling(tNode: TNode, attrs: TAttributes): void;
+export declare function computeStaticStyling(tNode: TNode, attrs: TAttributes | null, writeToHost: boolean): void;
