@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-next.7+53.sha-aaa89bb
+ * @license Angular v10.0.0-next.7+55.sha-42a9e5a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6643,8 +6643,10 @@
         parent, //
         projection, //
         styles, //
+        stylesWithoutHost, //
         residualStyles, //
         classes, //
+        classesWithoutHost, //
         residualClasses, //
         classBindings, //
         styleBindings) {
@@ -6672,8 +6674,10 @@
             this.parent = parent;
             this.projection = projection;
             this.styles = styles;
+            this.stylesWithoutHost = stylesWithoutHost;
             this.residualStyles = residualStyles;
             this.classes = classes;
+            this.classesWithoutHost = classesWithoutHost;
             this.residualClasses = residualClasses;
             this.classBindings = classBindings;
             this.styleBindings = styleBindings;
@@ -8036,8 +8040,10 @@
         tParent, // parent: TElementNode|TContainerNode|null
         null, // projection: number|(ITNode|RNode[])[]|null
         null, // styles: string|null
+        null, // stylesWithoutHost: string|null
         undefined, // residualStyles: string|null
         null, // classes: string|null
+        null, // classesWithoutHost: string|null
         undefined, // residualClasses: string|null
         0, // classBindings: TStylingRange;
         0) :
@@ -8065,8 +8071,10 @@
                 parent: tParent,
                 projection: null,
                 styles: null,
+                stylesWithoutHost: null,
                 residualStyles: undefined,
                 classes: null,
+                classesWithoutHost: null,
                 residualClasses: undefined,
                 classBindings: 0,
                 styleBindings: 0,
@@ -13360,29 +13368,34 @@
      *
      * @param tNode The `TNode` into which the styling information should be loaded.
      * @param attrs `TAttributes` containing the styling information.
+     * @param writeToHost Where should the resulting static styles be written?
+     *   - `false` Write to `TNode.stylesWithoutHost` / `TNode.classesWithoutHost`
+     *   - `true` Write to `TNode.styles` / `TNode.classes`
      */
-    function computeStaticStyling(tNode, attrs) {
+    function computeStaticStyling(tNode, attrs, writeToHost) {
         ngDevMode &&
             assertFirstCreatePass(getTView(), 'Expecting to be called in first template pass only');
-        var styles = tNode.styles;
-        var classes = tNode.classes;
+        var styles = writeToHost ? tNode.styles : null;
+        var classes = writeToHost ? tNode.classes : null;
         var mode = 0;
-        for (var i = 0; i < attrs.length; i++) {
-            var value = attrs[i];
-            if (typeof value === 'number') {
-                mode = value;
-            }
-            else if (mode == 1 /* Classes */) {
-                classes = concatStringsWithSpace(classes, value);
-            }
-            else if (mode == 2 /* Styles */) {
-                var style = value;
-                var styleValue = attrs[++i];
-                styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+        if (attrs !== null) {
+            for (var i = 0; i < attrs.length; i++) {
+                var value = attrs[i];
+                if (typeof value === 'number') {
+                    mode = value;
+                }
+                else if (mode == 1 /* Classes */) {
+                    classes = concatStringsWithSpace(classes, value);
+                }
+                else if (mode == 2 /* Styles */) {
+                    var style = value;
+                    var styleValue = attrs[++i];
+                    styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+                }
             }
         }
-        styles !== null && (tNode.styles = styles);
-        classes !== null && (tNode.classes = classes);
+        writeToHost ? tNode.styles = styles : tNode.stylesWithoutHost = styles;
+        writeToHost ? tNode.classes = classes : tNode.classesWithoutHost = classes;
     }
 
     /**
@@ -14475,8 +14488,11 @@
         var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
         var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
         ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
+        if (tNode.attrs !== null) {
+            computeStaticStyling(tNode, tNode.attrs, false);
+        }
         if (tNode.mergedAttrs !== null) {
-            computeStaticStyling(tNode, tNode.mergedAttrs);
+            computeStaticStyling(tNode, tNode.mergedAttrs, true);
         }
         if (tView.queries !== null) {
             tView.queries.elementStart(tView, tNode);
@@ -14565,11 +14581,11 @@
                 tView.queries.elementEnd(previousOrParentTNode);
             }
         }
-        if (tNode.classes !== null && hasClassInput(tNode)) {
-            setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classes, true);
+        if (tNode.classesWithoutHost != null && hasClassInput(tNode)) {
+            setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classesWithoutHost, true);
         }
-        if (tNode.styles !== null && hasStyleInput(tNode)) {
-            setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.styles, false);
+        if (tNode.stylesWithoutHost != null && hasStyleInput(tNode)) {
+            setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.stylesWithoutHost, false);
         }
     }
     /**
@@ -14637,7 +14653,7 @@
         // While ng-container doesn't necessarily support styling, we use the style context to identify
         // and execute directives on the ng-container.
         if (attrs !== null) {
-            computeStaticStyling(tNode, attrs);
+            computeStaticStyling(tNode, attrs, true);
         }
         var localRefs = getConstant(tViewConsts, localRefsIndex);
         resolveDirectives(tView, lView, tNode, localRefs);
@@ -16489,7 +16505,7 @@
                 // the binding has removed it. This would confuse `[ngStyle]`/`[ngClass]` to do the wrong
                 // thing as it would think that the static portion was removed. For this reason we
                 // concatenate it so that `[ngStyle]`/`[ngClass]`  can continue to work on changed.
-                var staticPrefix = isClassBased ? tNode.classes : tNode.styles;
+                var staticPrefix = isClassBased ? tNode.classesWithoutHost : tNode.stylesWithoutHost;
                 ngDevMode && isClassBased === false && staticPrefix !== null &&
                     assertEqual(staticPrefix.endsWith(';'), true, 'Expecting static portion to end with \';\'');
                 if (staticPrefix !== null) {
@@ -18983,7 +18999,7 @@
         var tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
         var mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
         if (mergedAttrs !== null) {
-            computeStaticStyling(tNode, mergedAttrs);
+            computeStaticStyling(tNode, mergedAttrs, true);
             if (rNode !== null) {
                 setUpAttributes(hostRenderer, rNode, mergedAttrs);
                 if (tNode.classes !== null) {
@@ -20019,7 +20035,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-next.7+53.sha-aaa89bb');
+    var VERSION = new Version('10.0.0-next.7+55.sha-42a9e5a');
 
     /**
      * @license
