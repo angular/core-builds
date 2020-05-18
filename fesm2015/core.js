@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.6+50.sha-0912be4
+ * @license Angular v9.1.6+62.sha-6db8e7e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11859,7 +11859,7 @@ function assignTViewNodeToLView(tView, tParentNode, index, lView) {
         tView.node = tNode = (/** @type {?} */ (createTNode(tView, (/** @type {?} */ (tParentNode)), //
         2 /* View */, index, null, null)));
     }
-    return lView[T_HOST] = (/** @type {?} */ (tNode));
+    lView[T_HOST] = (/** @type {?} */ (tNode));
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -15076,10 +15076,6 @@ class ViewRef {
         this._cdRefInjectingView = _cdRefInjectingView;
         this._appRef = null;
         this._viewContainerRef = null;
-        /**
-         * \@internal
-         */
-        this._tViewNode = null;
     }
     /**
      * @return {?}
@@ -15358,11 +15354,6 @@ if (false) {
      */
     ViewRef.prototype._viewContainerRef;
     /**
-     * \@internal
-     * @type {?}
-     */
-    ViewRef.prototype._tViewNode;
-    /**
      * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
      *
      * When ViewRef is created for a dynamic component, this also represents the `LView` for the
@@ -15570,10 +15561,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
                     embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
                 }
                 renderView(embeddedTView, embeddedLView, context);
-                /** @type {?} */
-                const viewRef = new ViewRef(embeddedLView);
-                viewRef._tViewNode = (/** @type {?} */ (embeddedLView[T_HOST]));
-                return viewRef;
+                return new ViewRef(embeddedLView);
             }
         };
     }
@@ -28181,7 +28169,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.6+50.sha-0912be4');
+const VERSION = new Version('9.1.6+62.sha-6db8e7e');
 
 /**
  * @fileoverview added by tsickle
@@ -34117,7 +34105,8 @@ class ComponentFactory$1 extends ComponentFactory {
         if (!rootSelectorOrNode || isIsolated) {
             // The host element of the internal or isolated root view is attached to the component's host
             // view node.
-            (/** @type {?} */ (componentRef.hostView._tViewNode)).child = tElementNode;
+            ngDevMode && assertNodeOfPossibleTypes(rootTView.node, 2 /* View */);
+            (/** @type {?} */ (rootTView.node)).child = tElementNode;
         }
         return componentRef;
     }
@@ -34179,7 +34168,7 @@ class ComponentRef$1 extends ComponentRef {
         this.destroyCbs = [];
         this.instance = instance;
         this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
-        this.hostView._tViewNode = assignTViewNodeToLView(_rootLView[TVIEW], null, -1, _rootLView);
+        assignTViewNodeToLView(_rootLView[TVIEW], null, -1, _rootLView);
         this.componentType = componentType;
     }
     /**
