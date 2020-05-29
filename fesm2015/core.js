@@ -1,11 +1,10 @@
 /**
- * @license Angular v10.0.0-rc.0+22.sha-82761ec
+ * @license Angular v10.0.0-rc.0+23.sha-d16a7f3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge as merge$1 } from 'rxjs';
-import { __decorate, __param, __metadata } from 'tslib';
 import { share } from 'rxjs/operators';
 
 /**
@@ -19427,7 +19426,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.0+22.sha-82761ec');
+const VERSION = new Version('10.0.0-rc.0+23.sha-d16a7f3');
 
 /**
  * @license
@@ -26551,7 +26550,7 @@ const APP_INITIALIZER = new InjectionToken('Application Initializer');
  * @publicApi
  */
 let ApplicationInitStatus = /** @class */ (() => {
-    let ApplicationInitStatus = class ApplicationInitStatus {
+    class ApplicationInitStatus {
         constructor(appInits) {
             this.appInits = appInits;
             this.initialized = false;
@@ -26591,12 +26590,14 @@ let ApplicationInitStatus = /** @class */ (() => {
             }
             this.initialized = true;
         }
-    };
-    ApplicationInitStatus = __decorate([
-        Injectable(),
-        __param(0, Inject(APP_INITIALIZER)), __param(0, Optional()),
-        __metadata("design:paramtypes", [Array])
-    ], ApplicationInitStatus);
+    }
+    ApplicationInitStatus.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    ApplicationInitStatus.ctorParameters = () => [
+        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
+    ];
     return ApplicationInitStatus;
 })();
 
@@ -26666,7 +26667,7 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * found in the LICENSE file at https://angular.io/license
  */
 let Console = /** @class */ (() => {
-    let Console = class Console {
+    class Console {
         log(message) {
             // tslint:disable-next-line:no-console
             console.log(message);
@@ -26676,10 +26677,10 @@ let Console = /** @class */ (() => {
             // tslint:disable-next-line:no-console
             console.warn(message);
         }
-    };
-    Console = __decorate([
-        Injectable()
-    ], Console);
+    }
+    Console.decorators = [
+        { type: Injectable }
+    ];
     return Console;
 })();
 
@@ -26901,7 +26902,7 @@ const Compiler_compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAll
  * @publicApi
  */
 let Compiler = /** @class */ (() => {
-    let Compiler = class Compiler {
+    class Compiler {
         constructor() {
             /**
              * Compiles the given NgModule and all of its components. All templates of the components listed
@@ -26935,10 +26936,10 @@ let Compiler = /** @class */ (() => {
         getModuleId(moduleType) {
             return undefined;
         }
-    };
-    Compiler = __decorate([
-        Injectable()
-    ], Compiler);
+    }
+    Compiler.decorators = [
+        { type: Injectable }
+    ];
     return Compiler;
 })();
 /**
@@ -27350,7 +27351,7 @@ class NoopNgZone {
  * @publicApi
  */
 let Testability = /** @class */ (() => {
-    let Testability = class Testability {
+    class Testability {
         constructor(_ngZone) {
             this._ngZone = _ngZone;
             this._pendingCount = 0;
@@ -27504,11 +27505,14 @@ let Testability = /** @class */ (() => {
             // TODO(juliemr): implement.
             return [];
         }
-    };
-    Testability = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [NgZone])
-    ], Testability);
+    }
+    Testability.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    Testability.ctorParameters = () => [
+        { type: NgZone }
+    ];
     return Testability;
 })();
 /**
@@ -27516,7 +27520,7 @@ let Testability = /** @class */ (() => {
  * @publicApi
  */
 let TestabilityRegistry = /** @class */ (() => {
-    let TestabilityRegistry = class TestabilityRegistry {
+    class TestabilityRegistry {
         constructor() {
             /** @internal */
             this._applications = new Map();
@@ -27571,11 +27575,12 @@ let TestabilityRegistry = /** @class */ (() => {
         findTestabilityInTree(elem, findInAncestors = true) {
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         }
-    };
-    TestabilityRegistry = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [])
-    ], TestabilityRegistry);
+    }
+    TestabilityRegistry.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    TestabilityRegistry.ctorParameters = () => [];
     return TestabilityRegistry;
 })();
 class _NoopGetTestability {
@@ -27753,7 +27758,7 @@ function getPlatform() {
  * @publicApi
  */
 let PlatformRef = /** @class */ (() => {
-    let PlatformRef = class PlatformRef {
+    class PlatformRef {
         /** @internal */
         constructor(_injector) {
             this._injector = _injector;
@@ -27885,11 +27890,14 @@ let PlatformRef = /** @class */ (() => {
         get destroyed() {
             return this._destroyed;
         }
-    };
-    PlatformRef = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [Injector])
-    ], PlatformRef);
+    }
+    PlatformRef.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    PlatformRef.ctorParameters = () => [
+        { type: Injector }
+    ];
     return PlatformRef;
 })();
 function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
@@ -28026,7 +28034,7 @@ function optionsReducer(dst, objs) {
  * @publicApi
  */
 let ApplicationRef = /** @class */ (() => {
-    let ApplicationRef = class ApplicationRef {
+    class ApplicationRef {
         /** @internal */
         constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
             this._zone = _zone;
@@ -28222,14 +28230,19 @@ let ApplicationRef = /** @class */ (() => {
         get viewCount() {
             return this._views.length;
         }
-    };
-    ApplicationRef = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [NgZone, Console, Injector,
-            ErrorHandler,
-            ComponentFactoryResolver,
-            ApplicationInitStatus])
-    ], ApplicationRef);
+    }
+    ApplicationRef.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    ApplicationRef.ctorParameters = () => [
+        { type: NgZone },
+        { type: Console },
+        { type: Injector },
+        { type: ErrorHandler },
+        { type: ComponentFactoryResolver },
+        { type: ApplicationInitStatus }
+    ];
     return ApplicationRef;
 })();
 function remove(list, el) {
@@ -28337,7 +28350,7 @@ const DEFAULT_CONFIG = {
  * part of its implementation. See `LoadChildren` for more details.
  */
 let SystemJsNgModuleLoader = /** @class */ (() => {
-    let SystemJsNgModuleLoader = class SystemJsNgModuleLoader {
+    class SystemJsNgModuleLoader {
         constructor(_compiler, config) {
             this._compiler = _compiler;
             this._config = config || DEFAULT_CONFIG;
@@ -28367,12 +28380,15 @@ let SystemJsNgModuleLoader = /** @class */ (() => {
                 .then((module) => module[exportName + factoryClassSuffix])
                 .then((factory) => checkNotEmpty(factory, module, exportName));
         }
-    };
-    SystemJsNgModuleLoader = __decorate([
-        Injectable(),
-        __param(1, Optional()),
-        __metadata("design:paramtypes", [Compiler, SystemJsNgModuleLoaderConfig])
-    ], SystemJsNgModuleLoader);
+    }
+    SystemJsNgModuleLoader.decorators = [
+        { type: Injectable }
+    ];
+    /** @nocollapse */
+    SystemJsNgModuleLoader.ctorParameters = () => [
+        { type: Compiler },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
+    ];
     return SystemJsNgModuleLoader;
 })();
 function checkNotEmpty(value, modulePath, exportName) {
@@ -29219,14 +29235,17 @@ function zoneSchedulerFactory(ngZone) {
  * @publicApi
  */
 let ApplicationModule = /** @class */ (() => {
-    let ApplicationModule = class ApplicationModule {
+    class ApplicationModule {
         // Inject ApplicationRef to make it eager...
         constructor(appRef) { }
-    };
-    ApplicationModule = __decorate([
-        NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
-        __metadata("design:paramtypes", [ApplicationRef])
-    ], ApplicationModule);
+    }
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
+    ];
+    /** @nocollapse */
+    ApplicationModule.ctorParameters = () => [
+        { type: ApplicationRef }
+    ];
     return ApplicationModule;
 })();
 

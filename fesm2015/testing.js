@@ -1,11 +1,11 @@
 /**
- * @license Angular v10.0.0-rc.0+22.sha-82761ec
+ * @license Angular v10.0.0-rc.0+23.sha-d16a7f3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
-import { __awaiter, __decorate } from 'tslib';
+import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -2064,7 +2064,7 @@ function unimplemented() {
  * @publicApi
  */
 let TestingCompiler = /** @class */ (() => {
-    let TestingCompiler = class TestingCompiler extends Compiler {
+    class TestingCompiler extends Compiler {
         get injector() {
             throw unimplemented();
         }
@@ -2102,10 +2102,10 @@ let TestingCompiler = /** @class */ (() => {
         getComponentFromError(error) {
             throw unimplemented();
         }
-    };
-    TestingCompiler = __decorate([
-        Injectable()
-    ], TestingCompiler);
+    }
+    TestingCompiler.decorators = [
+        { type: Injectable }
+    ];
     return TestingCompiler;
 })();
 /**
@@ -2391,16 +2391,16 @@ class TestBedViewEngine {
         const rootProviderOverrides = this._rootProviderOverrides;
         if (this._isRoot) {
             let RootScopeModule = /** @class */ (() => {
-                let RootScopeModule = class RootScopeModule {
-                };
-                RootScopeModule = __decorate([
-                    NgModule({
-                        providers: [
-                            ...rootProviderOverrides,
-                        ],
-                        jit: true,
-                    })
-                ], RootScopeModule);
+                class RootScopeModule {
+                }
+                RootScopeModule.decorators = [
+                    { type: NgModule, args: [{
+                                providers: [
+                                    ...rootProviderOverrides,
+                                ],
+                                jit: true,
+                            },] },
+                ];
                 return RootScopeModule;
             })();
             rootScopeImports.push(RootScopeModule);
@@ -2409,11 +2409,11 @@ class TestBedViewEngine {
         const imports = [rootScopeImports, this.ngModule, this._imports];
         const schemas = this._schemas;
         let DynamicTestModule = /** @class */ (() => {
-            let DynamicTestModule = class DynamicTestModule {
-            };
-            DynamicTestModule = __decorate([
-                NgModule({ providers, declarations, imports, schemas, jit: true })
-            ], DynamicTestModule);
+            class DynamicTestModule {
+            }
+            DynamicTestModule.decorators = [
+                { type: NgModule, args: [{ providers, declarations, imports, schemas, jit: true },] },
+            ];
             return DynamicTestModule;
         })();
         const compilerFactory = this.platform.injector.get(TestingCompilerFactory);
@@ -2519,11 +2519,11 @@ class TestBedViewEngine {
     overrideTemplateUsingTestingModule(component, template) {
         this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
         let OverrideComponent = /** @class */ (() => {
-            let OverrideComponent = class OverrideComponent {
-            };
-            OverrideComponent = __decorate([
-                Component({ selector: 'empty', template, jit: true })
-            ], OverrideComponent);
+            class OverrideComponent {
+            }
+            OverrideComponent.decorators = [
+                { type: Component, args: [{ selector: 'empty', template, jit: true },] },
+            ];
             return OverrideComponent;
         })();
         this._templateOverrides.push({ component, templateOf: OverrideComponent });
