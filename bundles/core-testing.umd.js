@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+34.sha-bd7393f
+ * @license Angular v10.0.0-rc.0+35.sha-4d0e175
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2530,9 +2530,9 @@
         TestingCompiler.prototype.getComponentFromError = function (error) {
             throw unimplemented();
         };
-        TestingCompiler = __decorate([
-            core.Injectable()
-        ], TestingCompiler);
+        TestingCompiler.decorators = [
+            { type: core.Injectable }
+        ];
         return TestingCompiler;
     }(core.Compiler));
     /**
@@ -2840,12 +2840,12 @@
                 var RootScopeModule = /** @class */ (function () {
                     function RootScopeModule() {
                     }
-                    RootScopeModule = __decorate([
-                        core.NgModule({
-                            providers: __spread(rootProviderOverrides),
-                            jit: true,
-                        })
-                    ], RootScopeModule);
+                    RootScopeModule.decorators = [
+                        { type: core.NgModule, args: [{
+                                    providers: __spread(rootProviderOverrides),
+                                    jit: true,
+                                },] },
+                    ];
                     return RootScopeModule;
                 }());
                 rootScopeImports.push(RootScopeModule);
@@ -2856,9 +2856,9 @@
             var DynamicTestModule = /** @class */ (function () {
                 function DynamicTestModule() {
                 }
-                DynamicTestModule = __decorate([
-                    core.NgModule({ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true })
-                ], DynamicTestModule);
+                DynamicTestModule.decorators = [
+                    { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
+                ];
                 return DynamicTestModule;
             }());
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
@@ -2980,9 +2980,9 @@
             var OverrideComponent = /** @class */ (function () {
                 function OverrideComponent() {
                 }
-                OverrideComponent = __decorate([
-                    core.Component({ selector: 'empty', template: template, jit: true })
-                ], OverrideComponent);
+                OverrideComponent.decorators = [
+                    { type: core.Component, args: [{ selector: 'empty', template: template, jit: true },] },
+                ];
                 return OverrideComponent;
             }());
             this._templateOverrides.push({ component: component, templateOf: OverrideComponent });
