@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+38.sha-3b52f70
+ * @license Angular v10.0.0-rc.0+39.sha-c3651ce
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -376,8 +376,8 @@
                 var decoratorInstance = new ((_a = PropDecoratorFactory).bind.apply(_a, __spread([void 0], args)))();
                 function PropDecorator(target, name) {
                     var constructor = target.constructor;
-                    // Use of Object.defineProperty is important since it creates non-enumerable property which
-                    // prevents the property is copied during subclassing.
+                    // Use of Object.defineProperty is important because it creates a non-enumerable property
+                    // which prevents the property from being copied during subclassing.
                     var meta = constructor.hasOwnProperty(PROP_METADATA) ?
                         constructor[PROP_METADATA] :
                         Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
@@ -20049,7 +20049,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-rc.0+38.sha-3b52f70');
+    var VERSION = new Version('10.0.0-rc.0+39.sha-c3651ce');
 
     /**
      * @license
