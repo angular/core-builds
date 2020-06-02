@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+47.sha-17e9819
+ * @license Angular v10.0.0-rc.0+45.sha-4414be7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -595,8 +595,8 @@
      *
      * @param type A type which may have `ɵprov`, via inheritance.
      *
-     * @deprecated Will be removed in a future version of Angular, where an error will occur in the
-     *     scenario if we find the `ɵprov` on an ancestor only.
+     * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
+     * `ɵprov` on an ancestor only.
      */
     function getInheritedInjectableDef(type) {
         // See `jit/injectable.ts#compileInjectable` for context on NG_PROV_DEF_FALLBACK.
@@ -608,7 +608,7 @@
             // TODO(FW-1307): Re-add ngDevMode when closure can handle it
             // ngDevMode &&
             console.warn("DEPRECATED: DI is instantiating a token \"" + typeName + "\" that inherits its @Injectable decorator but does not provide one itself.\n" +
-                ("This will become an error in a future version of Angular. Please add @Injectable() to the \"" + typeName + "\" class."));
+                ("This will become an error in v10. Please add @Injectable() to the \"" + typeName + "\" class."));
             return def;
         }
         else {
@@ -11281,7 +11281,7 @@
             // undecorated parent class. We work around it by defining a method which should be used
             // as a fallback. This should only be a problem in JIT mode, because in AOT TypeScript
             // seems to have a workaround for static properties. When inheriting from an undecorated
-            // parent is no longer supported (v11 or later), this can safely be removed.
+            // parent is no longer supported in v10, this can safely be removed.
             if (!type.hasOwnProperty(NG_PROV_DEF_FALLBACK)) {
                 type[NG_PROV_DEF_FALLBACK] = function () { return type[NG_PROV_DEF]; };
             }
@@ -19971,7 +19971,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-rc.0+47.sha-17e9819');
+    var VERSION = new Version('10.0.0-rc.0+45.sha-4414be7');
 
     /**
      * @license
