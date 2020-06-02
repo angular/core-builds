@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+39.sha-c3651ce
+ * @license Angular v10.0.0-rc.0+44.sha-1b55da1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10050,9 +10050,6 @@ export declare enum ɵLocaleDataIndex {
     PluralCase = 20,
     ExtraData = 21
 }
-
-
-export declare function ɵlooseIdentical(a: any, b: any): boolean;
 
 /**
  * @suppress {globalThis}

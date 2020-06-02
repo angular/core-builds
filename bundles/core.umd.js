@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+39.sha-c3651ce
+ * @license Angular v10.0.0-rc.0+44.sha-1b55da1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13448,59 +13448,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    function isIterable(obj) {
-        return obj !== null && typeof obj === 'object' && obj[getSymbolIterator()] !== undefined;
-    }
-    function isListLikeIterable(obj) {
-        if (!isJsObject(obj))
-            return false;
-        return Array.isArray(obj) ||
-            (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-                getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
-    }
-    function areIterablesEqual(a, b, comparator) {
-        var iterator1 = a[getSymbolIterator()]();
-        var iterator2 = b[getSymbolIterator()]();
-        while (true) {
-            var item1 = iterator1.next();
-            var item2 = iterator2.next();
-            if (item1.done && item2.done)
-                return true;
-            if (item1.done || item2.done)
-                return false;
-            if (!comparator(item1.value, item2.value))
-                return false;
-        }
-    }
-    function iterateListLike(obj, fn) {
-        if (Array.isArray(obj)) {
-            for (var i = 0; i < obj.length; i++) {
-                fn(obj[i]);
-            }
-        }
-        else {
-            var iterator = obj[getSymbolIterator()]();
-            var item = void 0;
-            while (!((item = iterator.next()).done)) {
-                fn(item.value);
-            }
-        }
-    }
-    function isJsObject(o) {
-        return o !== null && (typeof o === 'function' || typeof o === 'object');
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    // JS has NaN !== NaN
-    function looseIdentical(a, b) {
-        return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-    }
     function devModeEqual(a, b) {
         var isListLikeIterableA = isListLikeIterable(a);
         var isListLikeIterableB = isListLikeIterable(b);
@@ -13514,32 +13461,7 @@
                 return true;
             }
             else {
-                return looseIdentical(a, b);
-            }
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function devModeEqual$1(a, b) {
-        var isListLikeIterableA = isListLikeIterable$1(a);
-        var isListLikeIterableB = isListLikeIterable$1(b);
-        if (isListLikeIterableA && isListLikeIterableB) {
-            return areIterablesEqual$1(a, b, devModeEqual$1);
-        }
-        else {
-            var isAObject = a && (typeof a === 'object' || typeof a === 'function');
-            var isBObject = b && (typeof b === 'object' || typeof b === 'function');
-            if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-                return true;
-            }
-            else {
-                return looseIdentical(a, b);
+                return Object.is(a, b);
             }
         }
     }
@@ -13585,14 +13507,14 @@
         };
         return WrappedValue;
     }());
-    function isListLikeIterable$1(obj) {
-        if (!isJsObject$1(obj))
+    function isListLikeIterable(obj) {
+        if (!isJsObject(obj))
             return false;
         return Array.isArray(obj) ||
             (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
                 getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
     }
-    function areIterablesEqual$1(a, b, comparator) {
+    function areIterablesEqual(a, b, comparator) {
         var iterator1 = a[getSymbolIterator()]();
         var iterator2 = b[getSymbolIterator()]();
         while (true) {
@@ -13606,7 +13528,7 @@
                 return false;
         }
     }
-    function iterateListLike$1(obj, fn) {
+    function iterateListLike(obj, fn) {
         if (Array.isArray(obj)) {
             for (var i = 0; i < obj.length; i++) {
                 fn(obj[i]);
@@ -13620,7 +13542,7 @@
             }
         }
     }
-    function isJsObject$1(o) {
+    function isJsObject(o) {
         return o !== null && (typeof o === 'function' || typeof o === 'object');
     }
 
@@ -13669,7 +13591,7 @@
                 // View engine didn't report undefined values as changed on the first checkNoChanges pass
                 // (before the change detection was run).
                 var oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
-                if (!devModeEqual$1(oldValueToCompare, value)) {
+                if (!devModeEqual(oldValueToCompare, value)) {
                     var details = getExpressionChangedErrorDetails(lView, bindingIndex, oldValueToCompare, value);
                     throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName);
                 }
@@ -20049,7 +19971,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-rc.0+39.sha-c3651ce');
+    var VERSION = new Version('10.0.0-rc.0+44.sha-1b55da1');
 
     /**
      * @license
@@ -20062,7 +19984,7 @@
         function DefaultIterableDifferFactory() {
         }
         DefaultIterableDifferFactory.prototype.supports = function (obj) {
-            return isListLikeIterable$1(obj);
+            return isListLikeIterable(obj);
         };
         DefaultIterableDifferFactory.prototype.create = function (trackByFn) {
             return new DefaultIterableDiffer(trackByFn);
@@ -20185,7 +20107,7 @@
         DefaultIterableDiffer.prototype.diff = function (collection) {
             if (collection == null)
                 collection = [];
-            if (!isListLikeIterable$1(collection)) {
+            if (!isListLikeIterable(collection)) {
                 throw new Error("Error trying to diff '" + stringify(collection) + "'. Only arrays and iterables are allowed");
             }
             if (this.check(collection)) {
@@ -20209,7 +20131,7 @@
                 for (var index_1 = 0; index_1 < this.length; index_1++) {
                     item = collection[index_1];
                     itemTrackBy = this._trackByFn(index_1, item);
-                    if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
+                    if (record === null || !Object.is(record.trackById, itemTrackBy)) {
                         record = this._mismatch(record, item, itemTrackBy, index_1);
                         mayBeDirty = true;
                     }
@@ -20218,7 +20140,7 @@
                             // TODO(misko): can we limit this to duplicates only?
                             record = this._verifyReinsertion(record, item, itemTrackBy, index_1);
                         }
-                        if (!looseIdentical(record.item, item))
+                        if (!Object.is(record.item, item))
                             this._addIdentityChange(record, item);
                     }
                     record = record._next;
@@ -20226,9 +20148,9 @@
             }
             else {
                 index = 0;
-                iterateListLike$1(collection, function (item) {
+                iterateListLike(collection, function (item) {
                     itemTrackBy = _this._trackByFn(index, item);
-                    if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
+                    if (record === null || !Object.is(record.trackById, itemTrackBy)) {
                         record = _this._mismatch(record, item, itemTrackBy, index);
                         mayBeDirty = true;
                     }
@@ -20237,7 +20159,7 @@
                             // TODO(misko): can we limit this to duplicates only?
                             record = _this._verifyReinsertion(record, item, itemTrackBy, index);
                         }
-                        if (!looseIdentical(record.item, item))
+                        if (!Object.is(record.item, item))
                             _this._addIdentityChange(record, item);
                     }
                     record = record._next;
@@ -20316,7 +20238,7 @@
             if (record !== null) {
                 // We have seen this before, we need to move it forward in the collection.
                 // But first we need to check if identity changed, so we can update in view if necessary
-                if (!looseIdentical(record.item, item))
+                if (!Object.is(record.item, item))
                     this._addIdentityChange(record, item);
                 this._moveAfter(record, previousRecord, index);
             }
@@ -20326,7 +20248,7 @@
                 if (record !== null) {
                     // It is an item which we have evicted earlier: reinsert it back into the list.
                     // But first we need to check if identity changed, so we can update in view if necessary
-                    if (!looseIdentical(record.item, item))
+                    if (!Object.is(record.item, item))
                         this._addIdentityChange(record, item);
                     this._reinsertAfter(record, previousRecord, index);
                 }
@@ -20632,7 +20554,7 @@
             var record;
             for (record = this._head; record !== null; record = record._nextDup) {
                 if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
-                    looseIdentical(record.trackById, trackById)) {
+                    Object.is(record.trackById, trackById)) {
                     return record;
                 }
             }
@@ -20743,7 +20665,7 @@
         function DefaultKeyValueDifferFactory() {
         }
         DefaultKeyValueDifferFactory.prototype.supports = function (obj) {
-            return obj instanceof Map || isJsObject$1(obj);
+            return obj instanceof Map || isJsObject(obj);
         };
         DefaultKeyValueDifferFactory.prototype.create = function () {
             return new DefaultKeyValueDiffer();
@@ -20806,7 +20728,7 @@
             if (!map) {
                 map = new Map();
             }
-            else if (!(map instanceof Map || isJsObject$1(map))) {
+            else if (!(map instanceof Map || isJsObject(map))) {
                 throw new Error("Error trying to diff '" + stringify(map) + "'. Only maps and objects are allowed");
             }
             return this.check(map) ? this : null;
@@ -20936,7 +20858,7 @@
         };
         // Add the record or a given key to the list of changes only when the value has actually changed
         DefaultKeyValueDiffer.prototype._maybeAddToChanges = function (record, newValue) {
-            if (!looseIdentical(newValue, record.currentValue)) {
+            if (!Object.is(newValue, record.currentValue)) {
                 record.previousValue = record.currentValue;
                 record.currentValue = newValue;
                 this._addToChanges(record);
@@ -21453,7 +21375,7 @@
     function checkBinding(view, def, bindingIdx, value) {
         var oldValues = view.oldValues;
         if ((view.state & 2 /* FirstCheck */) ||
-            !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+            !Object.is(oldValues[def.bindingIndex + bindingIdx], value)) {
             return true;
         }
         return false;
@@ -21467,7 +21389,7 @@
     }
     function checkBindingNoChanges(view, def, bindingIdx, value) {
         var oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-        if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual$1(oldValue, value)) {
+        if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
             var bindingName = def.bindings[bindingIdx].name;
             throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), bindingName + ": " + oldValue, bindingName + ": " + value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
         }
@@ -32789,7 +32711,7 @@
     exports.ɵdefaultIterableDiffers = defaultIterableDiffers;
     exports.ɵdefaultKeyValueDiffers = defaultKeyValueDiffers;
     exports.ɵdetectChanges = detectChanges;
-    exports.ɵdevModeEqual = devModeEqual$1;
+    exports.ɵdevModeEqual = devModeEqual;
     exports.ɵdid = directiveDef;
     exports.ɵeld = elementDef;
     exports.ɵfindLocaleData = findLocaleData;
@@ -32811,11 +32733,10 @@
     exports.ɵinterpolate = interpolate;
     exports.ɵisBoundToModule__POST_R3__ = isBoundToModule__POST_R3__;
     exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
-    exports.ɵisListLikeIterable = isListLikeIterable$1;
+    exports.ɵisListLikeIterable = isListLikeIterable;
     exports.ɵisObservable = isObservable;
     exports.ɵisPromise = isPromise;
     exports.ɵivyEnabled = ivyEnabled;
-    exports.ɵlooseIdentical = looseIdentical;
     exports.ɵmakeDecorator = makeDecorator;
     exports.ɵmarkDirty = markDirty;
     exports.ɵmod = moduleDef;
