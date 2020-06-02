@@ -166,8 +166,8 @@ export declare function getInjectableDef<T>(type: any): ɵɵInjectableDef<T> | n
  *
  * @param type A type which may have `ɵprov`, via inheritance.
  *
- * @deprecated Will be removed in v10, where an error will occur in the scenario if we find the
- * `ɵprov` on an ancestor only.
+ * @deprecated Will be removed in a future version of Angular, where an error will occur in the
+ *     scenario if we find the `ɵprov` on an ancestor only.
  */
 export declare function getInheritedInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
 /**
