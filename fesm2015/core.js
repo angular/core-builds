@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.2+66.sha-8bead6b
+ * @license Angular v10.0.0-rc.2+69.sha-8d1d6e8
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3074,6 +3074,11 @@ function assertNodeOfPossibleTypes(tNode, ...types) {
     assertDefined(tNode, 'should be called with a TNode');
     const found = types.some(type => tNode.type === type);
     assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
+}
+function assertNodeNotOfTypes(tNode, types, message) {
+    assertDefined(tNode, 'should be called with a TNode');
+    const found = types.some(type => tNode.type === type);
+    assertEqual(found, false, message !== null && message !== void 0 ? message : `Should not be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
 }
 function typeName(type) {
     if (type == 1 /* Projection */)
@@ -8185,8 +8190,12 @@ function addComponentLogic(lView, hostTNode, def) {
     lView[hostTNode.index] = componentView;
 }
 function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
-    ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    ngDevMode && validateAgainstEventAttributes(name);
+    if (ngDevMode) {
+        assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+        validateAgainstEventAttributes(name);
+        assertNodeNotOfTypes(tNode, [0 /* Container */, 4 /* ElementContainer */], `Attempted to set attribute \`${name}\` on a container node. ` +
+            `Host bindings are not valid on ng-container or ng-template.`);
+    }
     const element = getNativeByTNode(tNode, lView);
     const renderer = lView[RENDERER];
     if (value == null) {
@@ -19358,7 +19367,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.2+66.sha-8bead6b');
+const VERSION = new Version('10.0.0-rc.2+69.sha-8d1d6e8');
 
 /**
  * @license
