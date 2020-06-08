@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+92.sha-650974e
+ * @license Angular v10.0.0-rc.0+93.sha-7793440
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3311,6 +3311,11 @@
         assertDefined(tNode, 'should be called with a TNode');
         var found = types.some(function (type) { return tNode.type === type; });
         assertEqual(found, true, "Should be one of " + types.map(typeName).join(', ') + " but got " + typeName(tNode.type));
+    }
+    function assertNodeNotOfTypes(tNode, types, message) {
+        assertDefined(tNode, 'should be called with a TNode');
+        var found = types.some(function (type) { return tNode.type === type; });
+        assertEqual(found, false, message !== null && message !== void 0 ? message : "Should not be one of " + types.map(typeName).join(', ') + " but got " + typeName(tNode.type));
     }
     function typeName(type) {
         if (type == 1 /* Projection */)
@@ -8631,8 +8636,12 @@
         lView[hostTNode.index] = componentView;
     }
     function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
-        ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-        ngDevMode && validateAgainstEventAttributes(name);
+        if (ngDevMode) {
+            assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+            validateAgainstEventAttributes(name);
+            assertNodeNotOfTypes(tNode, [0 /* Container */, 4 /* ElementContainer */], "Attempted to set attribute `" + name + "` on a container node. " +
+                "Host bindings are not valid on ng-container or ng-template.");
+        }
         var element = getNativeByTNode(tNode, lView);
         var renderer = lView[RENDERER];
         if (value == null) {
@@ -19981,7 +19990,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-rc.0+92.sha-650974e');
+    var VERSION = new Version('10.0.0-rc.0+93.sha-7793440');
 
     /**
      * @license
