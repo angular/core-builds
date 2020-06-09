@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+110.sha-eaa38a5
+ * @license Angular v10.0.0-rc.0+111.sha-b2ccc34
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19367,7 +19367,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.0+110.sha-eaa38a5');
+const VERSION = new Version('10.0.0-rc.0+111.sha-b2ccc34');
 
 /**
  * @license
@@ -27555,17 +27555,19 @@ function compileNgModuleFactory__PRE_R3__(injector, options, moduleType) {
 }
 function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
-    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
-    if (typeof ngJitMode === 'undefined' || ngJitMode) {
-        // Configure the compiler to use the provided options. This call may fail when multiple modules
-        // are bootstrapped with incompatible options, as a component can only be compiled according to
-        // a single set of options.
-        setJitOptions({
-            defaultEncapsulation: _lastDefined(compilerOptions.map(options => options.defaultEncapsulation)),
-            preserveWhitespaces: _lastDefined(compilerOptions.map(options => options.preserveWhitespaces)),
-        });
-    }
     const moduleFactory = new NgModuleFactory$1(moduleType);
+    // All of the logic below is irrelevant for AOT-compiled code.
+    if (typeof ngJitMode !== 'undefined' && !ngJitMode) {
+        return Promise.resolve(moduleFactory);
+    }
+    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
+    // Configure the compiler to use the provided options. This call may fail when multiple modules
+    // are bootstrapped with incompatible options, as a component can only be compiled according to
+    // a single set of options.
+    setJitOptions({
+        defaultEncapsulation: _lastDefined(compilerOptions.map(opts => opts.defaultEncapsulation)),
+        preserveWhitespaces: _lastDefined(compilerOptions.map(opts => opts.preserveWhitespaces)),
+    });
     if (isComponentResourceResolutionQueueEmpty()) {
         return Promise.resolve(moduleFactory);
     }
