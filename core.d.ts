@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.3+10.sha-ad6d2b4
+ * @license Angular v10.0.0-rc.3+11.sha-ec6a7ab
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26,7 +26,7 @@ export declare interface AbstractType<T> extends Function {
  * completed checking all content of a directive.
  *
  * @see `AfterViewChecked`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -53,7 +53,7 @@ export declare interface AfterContentChecked {
  *
  * @see `OnInit`
  * @see `AfterViewInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -79,7 +79,7 @@ export declare interface AfterContentInit {
  * completed checking a component's view for changes.
  *
  * @see `AfterContentChecked`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -106,7 +106,7 @@ export declare interface AfterViewChecked {
  *
  * @see `OnInit`
  * @see `AfterContentInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -2071,7 +2071,7 @@ export declare interface DoBootstrap {
  * changes on the same input.
  *
  * @see `OnChanges`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface
@@ -4670,7 +4670,7 @@ declare interface ObjectOrientedRenderer3 {
  *
  * @see `DoCheck`
  * @see `OnInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -4695,7 +4695,7 @@ export declare interface OnChanges {
  * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
  * Use for any custom cleanup that needs to occur when the
  * instance is destroyed.
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface
@@ -4720,7 +4720,7 @@ export declare interface OnDestroy {
  * Define an `ngOnInit()` method to handle any additional initialization tasks.
  *
  * @see `AfterContentInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
