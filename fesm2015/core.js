@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+113.sha-0a1d078
+ * @license Angular v10.0.0-rc.0+114.sha-401ef71
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19367,7 +19367,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.0+113.sha-0a1d078');
+const VERSION = new Version('10.0.0-rc.0+114.sha-401ef71');
 
 /**
  * @license
@@ -26535,7 +26535,6 @@ let ApplicationInitStatus = /** @class */ (() => {
     ApplicationInitStatus.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
     ApplicationInitStatus.ctorParameters = () => [
         { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
     ];
@@ -27450,7 +27449,6 @@ let Testability = /** @class */ (() => {
     Testability.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
     Testability.ctorParameters = () => [
         { type: NgZone }
     ];
@@ -27520,7 +27518,6 @@ let TestabilityRegistry = /** @class */ (() => {
     TestabilityRegistry.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
     TestabilityRegistry.ctorParameters = () => [];
     return TestabilityRegistry;
 })();
@@ -27837,7 +27834,6 @@ let PlatformRef = /** @class */ (() => {
     PlatformRef.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
     PlatformRef.ctorParameters = () => [
         { type: Injector }
     ];
@@ -28177,7 +28173,6 @@ let ApplicationRef = /** @class */ (() => {
     ApplicationRef.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
     ApplicationRef.ctorParameters = () => [
         { type: NgZone },
         { type: Console },
@@ -28327,7 +28322,6 @@ let SystemJsNgModuleLoader = /** @class */ (() => {
     SystemJsNgModuleLoader.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
     SystemJsNgModuleLoader.ctorParameters = () => [
         { type: Compiler },
         { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
@@ -29185,7 +29179,6 @@ let ApplicationModule = /** @class */ (() => {
     ApplicationModule.decorators = [
         { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
     ];
-    /** @nocollapse */
     ApplicationModule.ctorParameters = () => [
         { type: ApplicationRef }
     ];

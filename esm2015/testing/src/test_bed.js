@@ -287,7 +287,7 @@ export class TestBedViewEngine {
                                     ...rootProviderOverrides,
                                 ],
                                 jit: true,
-                            },] },
+                            },] }
                 ];
                 return RootScopeModule;
             })();
@@ -300,7 +300,7 @@ export class TestBedViewEngine {
             class DynamicTestModule {
             }
             DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers, declarations, imports, schemas, jit: true },] },
+                { type: NgModule, args: [{ providers, declarations, imports, schemas, jit: true },] }
             ];
             return DynamicTestModule;
         })();
@@ -410,7 +410,7 @@ export class TestBedViewEngine {
             class OverrideComponent {
             }
             OverrideComponent.decorators = [
-                { type: Component, args: [{ selector: 'empty', template, jit: true },] },
+                { type: Component, args: [{ selector: 'empty', template, jit: true },] }
             ];
             return OverrideComponent;
         })();

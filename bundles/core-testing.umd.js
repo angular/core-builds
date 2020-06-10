@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+113.sha-0a1d078
+ * @license Angular v10.0.0-rc.0+114.sha-401ef71
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2844,7 +2844,7 @@
                         { type: core.NgModule, args: [{
                                     providers: __spread(rootProviderOverrides),
                                     jit: true,
-                                },] },
+                                },] }
                     ];
                     return RootScopeModule;
                 }());
@@ -2857,7 +2857,7 @@
                 function DynamicTestModule() {
                 }
                 DynamicTestModule.decorators = [
-                    { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
+                    { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] }
                 ];
                 return DynamicTestModule;
             }());
@@ -2981,7 +2981,7 @@
                 function OverrideComponent() {
                 }
                 OverrideComponent.decorators = [
-                    { type: core.Component, args: [{ selector: 'empty', template: template, jit: true },] },
+                    { type: core.Component, args: [{ selector: 'empty', template: template, jit: true },] }
                 ];
                 return OverrideComponent;
             }());
