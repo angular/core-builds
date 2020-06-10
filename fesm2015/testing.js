@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.3+14.sha-9d397eb
+ * @license Angular v10.0.0-rc.3+16.sha-742f3d6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2399,7 +2399,7 @@ class TestBedViewEngine {
                                     ...rootProviderOverrides,
                                 ],
                                 jit: true,
-                            },] },
+                            },] }
                 ];
                 return RootScopeModule;
             })();
@@ -2412,7 +2412,7 @@ class TestBedViewEngine {
             class DynamicTestModule {
             }
             DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers, declarations, imports, schemas, jit: true },] },
+                { type: NgModule, args: [{ providers, declarations, imports, schemas, jit: true },] }
             ];
             return DynamicTestModule;
         })();
@@ -2522,7 +2522,7 @@ class TestBedViewEngine {
             class OverrideComponent {
             }
             OverrideComponent.decorators = [
-                { type: Component, args: [{ selector: 'empty', template, jit: true },] },
+                { type: Component, args: [{ selector: 'empty', template, jit: true },] }
             ];
             return OverrideComponent;
         })();
