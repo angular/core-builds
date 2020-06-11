@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.4+6.sha-c2f4a9b
+ * @license Angular v10.0.0-rc.4+14.sha-38c48be
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10385,16 +10385,13 @@ function injectRenderer2() {
  *
  * @publicApi
  */
-let ChangeDetectorRef = /** @class */ (() => {
-    class ChangeDetectorRef {
-    }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
-    return ChangeDetectorRef;
-})();
+class ChangeDetectorRef {
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+ChangeDetectorRef.__NG_ELEMENT_ID__ = () => SWITCH_CHANGE_DETECTOR_REF_FACTORY();
 const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
 const SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = (...args) => { };
 const ɵ0$5 = SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__;
@@ -11448,32 +11445,29 @@ const INJECTOR_IMPL = INJECTOR_IMPL__PRE_R3__;
  *
  * @publicApi
  */
-let Injector = /** @class */ (() => {
-    class Injector {
-        static create(options, parent) {
-            if (Array.isArray(options)) {
-                return INJECTOR_IMPL(options, parent, '');
-            }
-            else {
-                return INJECTOR_IMPL(options.providers, options.parent, options.name || '');
-            }
+class Injector {
+    static create(options, parent) {
+        if (Array.isArray(options)) {
+            return INJECTOR_IMPL(options, parent, '');
+        }
+        else {
+            return INJECTOR_IMPL(options.providers, options.parent, options.name || '');
         }
     }
-    Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
-    Injector.NULL = new NullInjector();
-    /** @nocollapse */
-    Injector.ɵprov = ɵɵdefineInjectable({
-        token: Injector,
-        providedIn: 'any',
-        factory: () => ɵɵinject(INJECTOR),
-    });
-    /**
-     * @internal
-     * @nocollapse
-     */
-    Injector.__NG_ELEMENT_ID__ = -1;
-    return Injector;
-})();
+}
+Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
+Injector.NULL = new NullInjector();
+/** @nocollapse */
+Injector.ɵprov = ɵɵdefineInjectable({
+    token: Injector,
+    providedIn: 'any',
+    factory: () => ɵɵinject(INJECTOR),
+});
+/**
+ * @internal
+ * @nocollapse
+ */
+Injector.__NG_ELEMENT_ID__ = -1;
 const IDENT = function (value) {
     return value;
 };
@@ -12421,166 +12415,163 @@ class ReflectiveInjector {
         return new ReflectiveInjector_(providers, parent);
     }
 }
-let ReflectiveInjector_ = /** @class */ (() => {
-    class ReflectiveInjector_ {
-        /**
-         * Private
-         */
-        constructor(_providers, _parent) {
-            /** @internal */
-            this._constructionCounter = 0;
-            this._providers = _providers;
-            this.parent = _parent || null;
-            const len = _providers.length;
-            this.keyIds = [];
-            this.objs = [];
-            for (let i = 0; i < len; i++) {
-                this.keyIds[i] = _providers[i].key.id;
-                this.objs[i] = UNDEFINED;
-            }
-        }
-        get(token, notFoundValue = THROW_IF_NOT_FOUND) {
-            return this._getByKey(ReflectiveKey.get(token), null, notFoundValue);
-        }
-        resolveAndCreateChild(providers) {
-            const ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
-            return this.createChildFromResolved(ResolvedReflectiveProviders);
-        }
-        createChildFromResolved(providers) {
-            const inj = new ReflectiveInjector_(providers);
-            inj.parent = this;
-            return inj;
-        }
-        resolveAndInstantiate(provider) {
-            return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);
-        }
-        instantiateResolved(provider) {
-            return this._instantiateProvider(provider);
-        }
-        getProviderAtIndex(index) {
-            if (index < 0 || index >= this._providers.length) {
-                throw outOfBoundsError(index);
-            }
-            return this._providers[index];
-        }
+class ReflectiveInjector_ {
+    /**
+     * Private
+     */
+    constructor(_providers, _parent) {
         /** @internal */
-        _new(provider) {
-            if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
-                throw cyclicDependencyError(this, provider.key);
-            }
-            return this._instantiateProvider(provider);
-        }
-        _getMaxNumberOfObjects() {
-            return this.objs.length;
-        }
-        _instantiateProvider(provider) {
-            if (provider.multiProvider) {
-                const res = [];
-                for (let i = 0; i < provider.resolvedFactories.length; ++i) {
-                    res[i] = this._instantiate(provider, provider.resolvedFactories[i]);
-                }
-                return res;
-            }
-            else {
-                return this._instantiate(provider, provider.resolvedFactories[0]);
-            }
-        }
-        _instantiate(provider, ResolvedReflectiveFactory) {
-            const factory = ResolvedReflectiveFactory.factory;
-            let deps;
-            try {
-                deps =
-                    ResolvedReflectiveFactory.dependencies.map(dep => this._getByReflectiveDependency(dep));
-            }
-            catch (e) {
-                if (e.addKey) {
-                    e.addKey(this, provider.key);
-                }
-                throw e;
-            }
-            let obj;
-            try {
-                obj = factory(...deps);
-            }
-            catch (e) {
-                throw instantiationError(this, e, e.stack, provider.key);
-            }
-            return obj;
-        }
-        _getByReflectiveDependency(dep) {
-            return this._getByKey(dep.key, dep.visibility, dep.optional ? null : THROW_IF_NOT_FOUND);
-        }
-        _getByKey(key, visibility, notFoundValue) {
-            if (key === ReflectiveInjector_.INJECTOR_KEY) {
-                return this;
-            }
-            if (visibility instanceof Self) {
-                return this._getByKeySelf(key, notFoundValue);
-            }
-            else {
-                return this._getByKeyDefault(key, notFoundValue, visibility);
-            }
-        }
-        _getObjByKeyId(keyId) {
-            for (let i = 0; i < this.keyIds.length; i++) {
-                if (this.keyIds[i] === keyId) {
-                    if (this.objs[i] === UNDEFINED) {
-                        this.objs[i] = this._new(this._providers[i]);
-                    }
-                    return this.objs[i];
-                }
-            }
-            return UNDEFINED;
-        }
-        /** @internal */
-        _throwOrNull(key, notFoundValue) {
-            if (notFoundValue !== THROW_IF_NOT_FOUND) {
-                return notFoundValue;
-            }
-            else {
-                throw noProviderError(this, key);
-            }
-        }
-        /** @internal */
-        _getByKeySelf(key, notFoundValue) {
-            const obj = this._getObjByKeyId(key.id);
-            return (obj !== UNDEFINED) ? obj : this._throwOrNull(key, notFoundValue);
-        }
-        /** @internal */
-        _getByKeyDefault(key, notFoundValue, visibility) {
-            let inj;
-            if (visibility instanceof SkipSelf) {
-                inj = this.parent;
-            }
-            else {
-                inj = this;
-            }
-            while (inj instanceof ReflectiveInjector_) {
-                const inj_ = inj;
-                const obj = inj_._getObjByKeyId(key.id);
-                if (obj !== UNDEFINED)
-                    return obj;
-                inj = inj_.parent;
-            }
-            if (inj !== null) {
-                return inj.get(key.token, notFoundValue);
-            }
-            else {
-                return this._throwOrNull(key, notFoundValue);
-            }
-        }
-        get displayName() {
-            const providers = _mapProviders(this, (b) => ' "' + b.key.displayName + '" ')
-                .join(', ');
-            return `ReflectiveInjector(providers: [${providers}])`;
-        }
-        toString() {
-            return this.displayName;
+        this._constructionCounter = 0;
+        this._providers = _providers;
+        this.parent = _parent || null;
+        const len = _providers.length;
+        this.keyIds = [];
+        this.objs = [];
+        for (let i = 0; i < len; i++) {
+            this.keyIds[i] = _providers[i].key.id;
+            this.objs[i] = UNDEFINED;
         }
     }
-    ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
-    return ReflectiveInjector_;
-})();
+    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
+        return this._getByKey(ReflectiveKey.get(token), null, notFoundValue);
+    }
+    resolveAndCreateChild(providers) {
+        const ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
+        return this.createChildFromResolved(ResolvedReflectiveProviders);
+    }
+    createChildFromResolved(providers) {
+        const inj = new ReflectiveInjector_(providers);
+        inj.parent = this;
+        return inj;
+    }
+    resolveAndInstantiate(provider) {
+        return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);
+    }
+    instantiateResolved(provider) {
+        return this._instantiateProvider(provider);
+    }
+    getProviderAtIndex(index) {
+        if (index < 0 || index >= this._providers.length) {
+            throw outOfBoundsError(index);
+        }
+        return this._providers[index];
+    }
+    /** @internal */
+    _new(provider) {
+        if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
+            throw cyclicDependencyError(this, provider.key);
+        }
+        return this._instantiateProvider(provider);
+    }
+    _getMaxNumberOfObjects() {
+        return this.objs.length;
+    }
+    _instantiateProvider(provider) {
+        if (provider.multiProvider) {
+            const res = [];
+            for (let i = 0; i < provider.resolvedFactories.length; ++i) {
+                res[i] = this._instantiate(provider, provider.resolvedFactories[i]);
+            }
+            return res;
+        }
+        else {
+            return this._instantiate(provider, provider.resolvedFactories[0]);
+        }
+    }
+    _instantiate(provider, ResolvedReflectiveFactory) {
+        const factory = ResolvedReflectiveFactory.factory;
+        let deps;
+        try {
+            deps =
+                ResolvedReflectiveFactory.dependencies.map(dep => this._getByReflectiveDependency(dep));
+        }
+        catch (e) {
+            if (e.addKey) {
+                e.addKey(this, provider.key);
+            }
+            throw e;
+        }
+        let obj;
+        try {
+            obj = factory(...deps);
+        }
+        catch (e) {
+            throw instantiationError(this, e, e.stack, provider.key);
+        }
+        return obj;
+    }
+    _getByReflectiveDependency(dep) {
+        return this._getByKey(dep.key, dep.visibility, dep.optional ? null : THROW_IF_NOT_FOUND);
+    }
+    _getByKey(key, visibility, notFoundValue) {
+        if (key === ReflectiveInjector_.INJECTOR_KEY) {
+            return this;
+        }
+        if (visibility instanceof Self) {
+            return this._getByKeySelf(key, notFoundValue);
+        }
+        else {
+            return this._getByKeyDefault(key, notFoundValue, visibility);
+        }
+    }
+    _getObjByKeyId(keyId) {
+        for (let i = 0; i < this.keyIds.length; i++) {
+            if (this.keyIds[i] === keyId) {
+                if (this.objs[i] === UNDEFINED) {
+                    this.objs[i] = this._new(this._providers[i]);
+                }
+                return this.objs[i];
+            }
+        }
+        return UNDEFINED;
+    }
+    /** @internal */
+    _throwOrNull(key, notFoundValue) {
+        if (notFoundValue !== THROW_IF_NOT_FOUND) {
+            return notFoundValue;
+        }
+        else {
+            throw noProviderError(this, key);
+        }
+    }
+    /** @internal */
+    _getByKeySelf(key, notFoundValue) {
+        const obj = this._getObjByKeyId(key.id);
+        return (obj !== UNDEFINED) ? obj : this._throwOrNull(key, notFoundValue);
+    }
+    /** @internal */
+    _getByKeyDefault(key, notFoundValue, visibility) {
+        let inj;
+        if (visibility instanceof SkipSelf) {
+            inj = this.parent;
+        }
+        else {
+            inj = this;
+        }
+        while (inj instanceof ReflectiveInjector_) {
+            const inj_ = inj;
+            const obj = inj_._getObjByKeyId(key.id);
+            if (obj !== UNDEFINED)
+                return obj;
+            inj = inj_.parent;
+        }
+        if (inj !== null) {
+            return inj.get(key.token, notFoundValue);
+        }
+        else {
+            return this._throwOrNull(key, notFoundValue);
+        }
+    }
+    get displayName() {
+        const providers = _mapProviders(this, (b) => ' "' + b.key.displayName + '" ')
+            .join(', ');
+        return `ReflectiveInjector(providers: [${providers}])`;
+    }
+    toString() {
+        return this.displayName;
+    }
+}
+ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
 function _mapProviders(injector, fn) {
     const res = [];
     for (let i = 0; i < injector._providers.length; ++i) {
@@ -19165,12 +19156,9 @@ class _NullComponentFactoryResolver {
  * @see [Dynamic Components](guide/dynamic-component-loader)
  * @publicApi
  */
-let ComponentFactoryResolver = /** @class */ (() => {
-    class ComponentFactoryResolver {
-    }
-    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
-    return ComponentFactoryResolver;
-})();
+class ComponentFactoryResolver {
+}
+ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
 class CodegenComponentFactoryResolver {
     constructor(factories, _parent, _ngModule) {
         this._parent = _parent;
@@ -19241,19 +19229,16 @@ function noop(...args) {
 // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
 // i.e. users have to ask for what they need. With that, we can build better analysis tools
 // and could do better codegen in the future.
-let ElementRef = /** @class */ (() => {
-    class ElementRef {
-        constructor(nativeElement) {
-            this.nativeElement = nativeElement;
-        }
+class ElementRef {
+    constructor(nativeElement) {
+        this.nativeElement = nativeElement;
     }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    ElementRef.__NG_ELEMENT_ID__ = () => SWITCH_ELEMENT_REF_FACTORY(ElementRef);
-    return ElementRef;
-})();
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+ElementRef.__NG_ELEMENT_ID__ = () => SWITCH_ELEMENT_REF_FACTORY(ElementRef);
 const SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
 const SWITCH_ELEMENT_REF_FACTORY__PRE_R3__ = noop;
 const SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__PRE_R3__;
@@ -19306,16 +19291,13 @@ var RendererStyleFlags2;
  *
  * @publicApi
  */
-let Renderer2 = /** @class */ (() => {
-    class Renderer2 {
-    }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    Renderer2.__NG_ELEMENT_ID__ = () => SWITCH_RENDERER2_FACTORY();
-    return Renderer2;
-})();
+class Renderer2 {
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+Renderer2.__NG_ELEMENT_ID__ = () => SWITCH_RENDERER2_FACTORY();
 const SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
 const SWITCH_RENDERER2_FACTORY__PRE_R3__ = noop;
 const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
@@ -19332,17 +19314,14 @@ const SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__PRE_R3__;
  *
  * @publicApi
  */
-let Sanitizer = /** @class */ (() => {
-    class Sanitizer {
-    }
-    /** @nocollapse */
-    Sanitizer.ɵprov = ɵɵdefineInjectable({
-        token: Sanitizer,
-        providedIn: 'root',
-        factory: () => null,
-    });
-    return Sanitizer;
-})();
+class Sanitizer {
+}
+/** @nocollapse */
+Sanitizer.ɵprov = ɵɵdefineInjectable({
+    token: Sanitizer,
+    providedIn: 'root',
+    factory: () => null,
+});
 
 /**
  * @license
@@ -19367,7 +19346,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.4+6.sha-c2f4a9b');
+const VERSION = new Version('10.0.0-rc.4+14.sha-38c48be');
 
 /**
  * @license
@@ -20298,72 +20277,69 @@ class KeyValueChangeRecord_ {
  *
  * @publicApi
  */
-let IterableDiffers = /** @class */ (() => {
-    class IterableDiffers {
-        constructor(factories) {
-            this.factories = factories;
+class IterableDiffers {
+    constructor(factories) {
+        this.factories = factories;
+    }
+    static create(factories, parent) {
+        if (parent != null) {
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
         }
-        static create(factories, parent) {
-            if (parent != null) {
-                const copied = parent.factories.slice();
-                factories = factories.concat(copied);
-            }
-            return new IterableDiffers(factories);
+        return new IterableDiffers(factories);
+    }
+    /**
+     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {@link IterableDiffers} instance with the provided factories and return a new
+     * {@link IterableDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link IterableDiffer} available.
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories) {
+        return {
+            provide: IterableDiffers,
+            useFactory: (parent) => {
+                if (!parent) {
+                    // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
+                    // to
+                    // bootstrap(), which would override default pipes instead of extending them.
+                    throw new Error('Cannot extend IterableDiffers without a parent injector');
+                }
+                return IterableDiffers.create(factories, parent);
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    find(iterable) {
+        const factory = this.factories.find(f => f.supports(iterable));
+        if (factory != null) {
+            return factory;
         }
-        /**
-         * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
-         * inherited {@link IterableDiffers} instance with the provided factories and return a new
-         * {@link IterableDiffers} instance.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * The following example shows how to extend an existing list of factories,
-         * which will only be applied to the injector for this component and its children.
-         * This step is all that's required to make a new {@link IterableDiffer} available.
-         *
-         * ```
-         * @Component({
-         *   viewProviders: [
-         *     IterableDiffers.extend([new ImmutableListDiffer()])
-         *   ]
-         * })
-         * ```
-         */
-        static extend(factories) {
-            return {
-                provide: IterableDiffers,
-                useFactory: (parent) => {
-                    if (!parent) {
-                        // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
-                        // to
-                        // bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend IterableDiffers without a parent injector');
-                    }
-                    return IterableDiffers.create(factories, parent);
-                },
-                // Dependency technically isn't optional, but we can provide a better error message this way.
-                deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
-            };
-        }
-        find(iterable) {
-            const factory = this.factories.find(f => f.supports(iterable));
-            if (factory != null) {
-                return factory;
-            }
-            else {
-                throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
-            }
+        else {
+            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
         }
     }
-    /** @nocollapse */
-    IterableDiffers.ɵprov = ɵɵdefineInjectable({
-        token: IterableDiffers,
-        providedIn: 'root',
-        factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
-    });
-    return IterableDiffers;
-})();
+}
+/** @nocollapse */
+IterableDiffers.ɵprov = ɵɵdefineInjectable({
+    token: IterableDiffers,
+    providedIn: 'root',
+    factory: () => new IterableDiffers([new DefaultIterableDifferFactory()])
+});
 function getTypeNameForDebugging(type) {
     return type['name'] || typeof type;
 }
@@ -20380,69 +20356,66 @@ function getTypeNameForDebugging(type) {
  *
  * @publicApi
  */
-let KeyValueDiffers = /** @class */ (() => {
-    class KeyValueDiffers {
-        constructor(factories) {
-            this.factories = factories;
-        }
-        static create(factories, parent) {
-            if (parent) {
-                const copied = parent.factories.slice();
-                factories = factories.concat(copied);
-            }
-            return new KeyValueDiffers(factories);
-        }
-        /**
-         * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
-         * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
-         * {@link KeyValueDiffers} instance.
-         *
-         * @usageNotes
-         * ### Example
-         *
-         * The following example shows how to extend an existing list of factories,
-         * which will only be applied to the injector for this component and its children.
-         * This step is all that's required to make a new {@link KeyValueDiffer} available.
-         *
-         * ```
-         * @Component({
-         *   viewProviders: [
-         *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
-         *   ]
-         * })
-         * ```
-         */
-        static extend(factories) {
-            return {
-                provide: KeyValueDiffers,
-                useFactory: (parent) => {
-                    if (!parent) {
-                        // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                        // to bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend KeyValueDiffers without a parent injector');
-                    }
-                    return KeyValueDiffers.create(factories, parent);
-                },
-                // Dependency technically isn't optional, but we can provide a better error message this way.
-                deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
-            };
-        }
-        find(kv) {
-            const factory = this.factories.find(f => f.supports(kv));
-            if (factory) {
-                return factory;
-            }
-            throw new Error(`Cannot find a differ supporting object '${kv}'`);
-        }
+class KeyValueDiffers {
+    constructor(factories) {
+        this.factories = factories;
     }
-    /** @nocollapse */
-    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
-        token: KeyValueDiffers,
-        providedIn: 'root',
-        factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
-    });
-    return KeyValueDiffers;
-})();
+    static create(factories, parent) {
+        if (parent) {
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new KeyValueDiffers(factories);
+    }
+    /**
+     * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
+     * {@link KeyValueDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link KeyValueDiffer} available.
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories) {
+        return {
+            provide: KeyValueDiffers,
+            useFactory: (parent) => {
+                if (!parent) {
+                    // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
+                    // to bootstrap(), which would override default pipes instead of extending them.
+                    throw new Error('Cannot extend KeyValueDiffers without a parent injector');
+                }
+                return KeyValueDiffers.create(factories, parent);
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    find(kv) {
+        const factory = this.factories.find(f => f.supports(kv));
+        if (factory) {
+            return factory;
+        }
+        throw new Error(`Cannot find a differ supporting object '${kv}'`);
+    }
+}
+/** @nocollapse */
+KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
+    token: KeyValueDiffers,
+    providedIn: 'root',
+    factory: () => new KeyValueDiffers([new DefaultKeyValueDifferFactory()])
+});
 
 /**
  * @license
@@ -20487,16 +20460,13 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  *
  * @publicApi
  */
-let TemplateRef = /** @class */ (() => {
-    class TemplateRef {
-    }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
-    return TemplateRef;
-})();
+class TemplateRef {
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+TemplateRef.__NG_ELEMENT_ID__ = () => SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef);
 const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
 const SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__ = noop;
 const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
@@ -20523,16 +20493,13 @@ const SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__;
  *
  * @publicApi
  */
-let ViewContainerRef = /** @class */ (() => {
-    class ViewContainerRef {
-    }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
-    return ViewContainerRef;
-})();
+class ViewContainerRef {
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+ViewContainerRef.__NG_ELEMENT_ID__ = () => SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef);
 const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
 const SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__ = noop;
 const SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__;
@@ -26490,56 +26457,53 @@ const APP_INITIALIZER = new InjectionToken('Application Initializer');
  *
  * @publicApi
  */
-let ApplicationInitStatus = /** @class */ (() => {
-    class ApplicationInitStatus {
-        constructor(appInits) {
-            this.appInits = appInits;
-            this.initialized = false;
-            this.done = false;
-            this.donePromise = new Promise((res, rej) => {
-                this.resolve = res;
-                this.reject = rej;
-            });
+class ApplicationInitStatus {
+    constructor(appInits) {
+        this.appInits = appInits;
+        this.initialized = false;
+        this.done = false;
+        this.donePromise = new Promise((res, rej) => {
+            this.resolve = res;
+            this.reject = rej;
+        });
+    }
+    /** @internal */
+    runInitializers() {
+        if (this.initialized) {
+            return;
         }
-        /** @internal */
-        runInitializers() {
-            if (this.initialized) {
-                return;
-            }
-            const asyncInitPromises = [];
-            const complete = () => {
-                this.done = true;
-                this.resolve();
-            };
-            if (this.appInits) {
-                for (let i = 0; i < this.appInits.length; i++) {
-                    const initResult = this.appInits[i]();
-                    if (isPromise(initResult)) {
-                        asyncInitPromises.push(initResult);
-                    }
+        const asyncInitPromises = [];
+        const complete = () => {
+            this.done = true;
+            this.resolve();
+        };
+        if (this.appInits) {
+            for (let i = 0; i < this.appInits.length; i++) {
+                const initResult = this.appInits[i]();
+                if (isPromise(initResult)) {
+                    asyncInitPromises.push(initResult);
                 }
             }
-            Promise.all(asyncInitPromises)
-                .then(() => {
-                complete();
-            })
-                .catch(e => {
-                this.reject(e);
-            });
-            if (asyncInitPromises.length === 0) {
-                complete();
-            }
-            this.initialized = true;
         }
+        Promise.all(asyncInitPromises)
+            .then(() => {
+            complete();
+        })
+            .catch(e => {
+            this.reject(e);
+        });
+        if (asyncInitPromises.length === 0) {
+            complete();
+        }
+        this.initialized = true;
     }
-    ApplicationInitStatus.decorators = [
-        { type: Injectable }
-    ];
-    ApplicationInitStatus.ctorParameters = () => [
-        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
-    ];
-    return ApplicationInitStatus;
-})();
+}
+ApplicationInitStatus.decorators = [
+    { type: Injectable }
+];
+ApplicationInitStatus.ctorParameters = () => [
+    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
+];
 
 /**
  * @license
@@ -26606,23 +26570,20 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let Console = /** @class */ (() => {
-    class Console {
-        log(message) {
-            // tslint:disable-next-line:no-console
-            console.log(message);
-        }
-        // Note: for reporting errors use `DOM.logError()` as it is platform specific
-        warn(message) {
-            // tslint:disable-next-line:no-console
-            console.warn(message);
-        }
+class Console {
+    log(message) {
+        // tslint:disable-next-line:no-console
+        console.log(message);
     }
-    Console.decorators = [
-        { type: Injectable }
-    ];
-    return Console;
-})();
+    // Note: for reporting errors use `DOM.logError()` as it is platform specific
+    warn(message) {
+        // tslint:disable-next-line:no-console
+        console.warn(message);
+    }
+}
+Console.decorators = [
+    { type: Injectable }
+];
 
 /**
  * @license
@@ -26841,47 +26802,44 @@ const Compiler_compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAll
  *
  * @publicApi
  */
-let Compiler = /** @class */ (() => {
-    class Compiler {
-        constructor() {
-            /**
-             * Compiles the given NgModule and all of its components. All templates of the components listed
-             * in `entryComponents` have to be inlined.
-             */
-            this.compileModuleSync = Compiler_compileModuleSync;
-            /**
-             * Compiles the given NgModule and all of its components
-             */
-            this.compileModuleAsync = Compiler_compileModuleAsync;
-            /**
-             * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
-             */
-            this.compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync;
-            /**
-             * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
-             */
-            this.compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAllComponentsAsync;
-        }
+class Compiler {
+    constructor() {
         /**
-         * Clears all caches.
+         * Compiles the given NgModule and all of its components. All templates of the components listed
+         * in `entryComponents` have to be inlined.
          */
-        clearCache() { }
+        this.compileModuleSync = Compiler_compileModuleSync;
         /**
-         * Clears the cache for the given component/ngModule.
+         * Compiles the given NgModule and all of its components
          */
-        clearCacheFor(type) { }
+        this.compileModuleAsync = Compiler_compileModuleAsync;
         /**
-         * Returns the id for a given NgModule, if one is defined and known to the compiler.
+         * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
          */
-        getModuleId(moduleType) {
-            return undefined;
-        }
+        this.compileModuleAndAllComponentsSync = Compiler_compileModuleAndAllComponentsSync;
+        /**
+         * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
+         */
+        this.compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAllComponentsAsync;
     }
-    Compiler.decorators = [
-        { type: Injectable }
-    ];
-    return Compiler;
-})();
+    /**
+     * Clears all caches.
+     */
+    clearCache() { }
+    /**
+     * Clears the cache for the given component/ngModule.
+     */
+    clearCacheFor(type) { }
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     */
+    getModuleId(moduleType) {
+        return undefined;
+    }
+}
+Compiler.decorators = [
+    { type: Injectable }
+];
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -27290,237 +27248,231 @@ class NoopNgZone {
  * application on the page will have an instance of Testability.
  * @publicApi
  */
-let Testability = /** @class */ (() => {
-    class Testability {
-        constructor(_ngZone) {
-            this._ngZone = _ngZone;
-            this._pendingCount = 0;
-            this._isZoneStable = true;
-            /**
-             * Whether any work was done since the last 'whenStable' callback. This is
-             * useful to detect if this could have potentially destabilized another
-             * component while it is stabilizing.
-             * @internal
-             */
-            this._didWork = false;
-            this._callbacks = [];
-            this.taskTrackingZone = null;
-            this._watchAngularEvents();
-            _ngZone.run(() => {
-                this.taskTrackingZone =
-                    typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
-            });
-        }
-        _watchAngularEvents() {
-            this._ngZone.onUnstable.subscribe({
+class Testability {
+    constructor(_ngZone) {
+        this._ngZone = _ngZone;
+        this._pendingCount = 0;
+        this._isZoneStable = true;
+        /**
+         * Whether any work was done since the last 'whenStable' callback. This is
+         * useful to detect if this could have potentially destabilized another
+         * component while it is stabilizing.
+         * @internal
+         */
+        this._didWork = false;
+        this._callbacks = [];
+        this.taskTrackingZone = null;
+        this._watchAngularEvents();
+        _ngZone.run(() => {
+            this.taskTrackingZone =
+                typeof Zone == 'undefined' ? null : Zone.current.get('TaskTrackingZone');
+        });
+    }
+    _watchAngularEvents() {
+        this._ngZone.onUnstable.subscribe({
+            next: () => {
+                this._didWork = true;
+                this._isZoneStable = false;
+            }
+        });
+        this._ngZone.runOutsideAngular(() => {
+            this._ngZone.onStable.subscribe({
                 next: () => {
-                    this._didWork = true;
-                    this._isZoneStable = false;
+                    NgZone.assertNotInAngularZone();
+                    scheduleMicroTask(() => {
+                        this._isZoneStable = true;
+                        this._runCallbacksIfReady();
+                    });
                 }
             });
-            this._ngZone.runOutsideAngular(() => {
-                this._ngZone.onStable.subscribe({
-                    next: () => {
-                        NgZone.assertNotInAngularZone();
-                        scheduleMicroTask(() => {
-                            this._isZoneStable = true;
-                            this._runCallbacksIfReady();
-                        });
-                    }
-                });
+        });
+    }
+    /**
+     * Increases the number of pending request
+     * @deprecated pending requests are now tracked with zones.
+     */
+    increasePendingRequestCount() {
+        this._pendingCount += 1;
+        this._didWork = true;
+        return this._pendingCount;
+    }
+    /**
+     * Decreases the number of pending request
+     * @deprecated pending requests are now tracked with zones
+     */
+    decreasePendingRequestCount() {
+        this._pendingCount -= 1;
+        if (this._pendingCount < 0) {
+            throw new Error('pending async requests below zero');
+        }
+        this._runCallbacksIfReady();
+        return this._pendingCount;
+    }
+    /**
+     * Whether an associated application is stable
+     */
+    isStable() {
+        return this._isZoneStable && this._pendingCount === 0 && !this._ngZone.hasPendingMacrotasks;
+    }
+    _runCallbacksIfReady() {
+        if (this.isStable()) {
+            // Schedules the call backs in a new frame so that it is always async.
+            scheduleMicroTask(() => {
+                while (this._callbacks.length !== 0) {
+                    let cb = this._callbacks.pop();
+                    clearTimeout(cb.timeoutId);
+                    cb.doneCb(this._didWork);
+                }
+                this._didWork = false;
             });
         }
-        /**
-         * Increases the number of pending request
-         * @deprecated pending requests are now tracked with zones.
-         */
-        increasePendingRequestCount() {
-            this._pendingCount += 1;
+        else {
+            // Still not stable, send updates.
+            let pending = this.getPendingTasks();
+            this._callbacks = this._callbacks.filter((cb) => {
+                if (cb.updateCb && cb.updateCb(pending)) {
+                    clearTimeout(cb.timeoutId);
+                    return false;
+                }
+                return true;
+            });
             this._didWork = true;
-            return this._pendingCount;
-        }
-        /**
-         * Decreases the number of pending request
-         * @deprecated pending requests are now tracked with zones
-         */
-        decreasePendingRequestCount() {
-            this._pendingCount -= 1;
-            if (this._pendingCount < 0) {
-                throw new Error('pending async requests below zero');
-            }
-            this._runCallbacksIfReady();
-            return this._pendingCount;
-        }
-        /**
-         * Whether an associated application is stable
-         */
-        isStable() {
-            return this._isZoneStable && this._pendingCount === 0 && !this._ngZone.hasPendingMacrotasks;
-        }
-        _runCallbacksIfReady() {
-            if (this.isStable()) {
-                // Schedules the call backs in a new frame so that it is always async.
-                scheduleMicroTask(() => {
-                    while (this._callbacks.length !== 0) {
-                        let cb = this._callbacks.pop();
-                        clearTimeout(cb.timeoutId);
-                        cb.doneCb(this._didWork);
-                    }
-                    this._didWork = false;
-                });
-            }
-            else {
-                // Still not stable, send updates.
-                let pending = this.getPendingTasks();
-                this._callbacks = this._callbacks.filter((cb) => {
-                    if (cb.updateCb && cb.updateCb(pending)) {
-                        clearTimeout(cb.timeoutId);
-                        return false;
-                    }
-                    return true;
-                });
-                this._didWork = true;
-            }
-        }
-        getPendingTasks() {
-            if (!this.taskTrackingZone) {
-                return [];
-            }
-            // Copy the tasks data so that we don't leak tasks.
-            return this.taskTrackingZone.macroTasks.map((t) => {
-                return {
-                    source: t.source,
-                    // From TaskTrackingZone:
-                    // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
-                    creationLocation: t.creationLocation,
-                    data: t.data
-                };
-            });
-        }
-        addCallback(cb, timeout, updateCb) {
-            let timeoutId = -1;
-            if (timeout && timeout > 0) {
-                timeoutId = setTimeout(() => {
-                    this._callbacks = this._callbacks.filter((cb) => cb.timeoutId !== timeoutId);
-                    cb(this._didWork, this.getPendingTasks());
-                }, timeout);
-            }
-            this._callbacks.push({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb });
-        }
-        /**
-         * Wait for the application to be stable with a timeout. If the timeout is reached before that
-         * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
-         *
-         * @param doneCb The callback to invoke when Angular is stable or the timeout expires
-         *    whichever comes first.
-         * @param timeout Optional. The maximum time to wait for Angular to become stable. If not
-         *    specified, whenStable() will wait forever.
-         * @param updateCb Optional. If specified, this callback will be invoked whenever the set of
-         *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
-         *    and no further updates will be issued.
-         */
-        whenStable(doneCb, timeout, updateCb) {
-            if (updateCb && !this.taskTrackingZone) {
-                throw new Error('Task tracking zone is required when passing an update callback to ' +
-                    'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
-            }
-            // These arguments are 'Function' above to keep the public API simple.
-            this.addCallback(doneCb, timeout, updateCb);
-            this._runCallbacksIfReady();
-        }
-        /**
-         * Get the number of pending requests
-         * @deprecated pending requests are now tracked with zones
-         */
-        getPendingRequestCount() {
-            return this._pendingCount;
-        }
-        /**
-         * Find providers by name
-         * @param using The root element to search from
-         * @param provider The name of binding variable
-         * @param exactMatch Whether using exactMatch
-         */
-        findProviders(using, provider, exactMatch) {
-            // TODO(juliemr): implement.
-            return [];
         }
     }
-    Testability.decorators = [
-        { type: Injectable }
-    ];
-    Testability.ctorParameters = () => [
-        { type: NgZone }
-    ];
-    return Testability;
-})();
+    getPendingTasks() {
+        if (!this.taskTrackingZone) {
+            return [];
+        }
+        // Copy the tasks data so that we don't leak tasks.
+        return this.taskTrackingZone.macroTasks.map((t) => {
+            return {
+                source: t.source,
+                // From TaskTrackingZone:
+                // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
+                creationLocation: t.creationLocation,
+                data: t.data
+            };
+        });
+    }
+    addCallback(cb, timeout, updateCb) {
+        let timeoutId = -1;
+        if (timeout && timeout > 0) {
+            timeoutId = setTimeout(() => {
+                this._callbacks = this._callbacks.filter((cb) => cb.timeoutId !== timeoutId);
+                cb(this._didWork, this.getPendingTasks());
+            }, timeout);
+        }
+        this._callbacks.push({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb });
+    }
+    /**
+     * Wait for the application to be stable with a timeout. If the timeout is reached before that
+     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
+     *
+     * @param doneCb The callback to invoke when Angular is stable or the timeout expires
+     *    whichever comes first.
+     * @param timeout Optional. The maximum time to wait for Angular to become stable. If not
+     *    specified, whenStable() will wait forever.
+     * @param updateCb Optional. If specified, this callback will be invoked whenever the set of
+     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
+     *    and no further updates will be issued.
+     */
+    whenStable(doneCb, timeout, updateCb) {
+        if (updateCb && !this.taskTrackingZone) {
+            throw new Error('Task tracking zone is required when passing an update callback to ' +
+                'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
+        }
+        // These arguments are 'Function' above to keep the public API simple.
+        this.addCallback(doneCb, timeout, updateCb);
+        this._runCallbacksIfReady();
+    }
+    /**
+     * Get the number of pending requests
+     * @deprecated pending requests are now tracked with zones
+     */
+    getPendingRequestCount() {
+        return this._pendingCount;
+    }
+    /**
+     * Find providers by name
+     * @param using The root element to search from
+     * @param provider The name of binding variable
+     * @param exactMatch Whether using exactMatch
+     */
+    findProviders(using, provider, exactMatch) {
+        // TODO(juliemr): implement.
+        return [];
+    }
+}
+Testability.decorators = [
+    { type: Injectable }
+];
+Testability.ctorParameters = () => [
+    { type: NgZone }
+];
 /**
  * A global registry of {@link Testability} instances for specific elements.
  * @publicApi
  */
-let TestabilityRegistry = /** @class */ (() => {
-    class TestabilityRegistry {
-        constructor() {
-            /** @internal */
-            this._applications = new Map();
-            _testabilityGetter.addToWindow(this);
-        }
-        /**
-         * Registers an application with a testability hook so that it can be tracked
-         * @param token token of application, root element
-         * @param testability Testability hook
-         */
-        registerApplication(token, testability) {
-            this._applications.set(token, testability);
-        }
-        /**
-         * Unregisters an application.
-         * @param token token of application, root element
-         */
-        unregisterApplication(token) {
-            this._applications.delete(token);
-        }
-        /**
-         * Unregisters all applications
-         */
-        unregisterAllApplications() {
-            this._applications.clear();
-        }
-        /**
-         * Get a testability hook associated with the application
-         * @param elem root element
-         */
-        getTestability(elem) {
-            return this._applications.get(elem) || null;
-        }
-        /**
-         * Get all registered testabilities
-         */
-        getAllTestabilities() {
-            return Array.from(this._applications.values());
-        }
-        /**
-         * Get all registered applications(root elements)
-         */
-        getAllRootElements() {
-            return Array.from(this._applications.keys());
-        }
-        /**
-         * Find testability of a node in the Tree
-         * @param elem node
-         * @param findInAncestors whether finding testability in ancestors if testability was not found in
-         * current node
-         */
-        findTestabilityInTree(elem, findInAncestors = true) {
-            return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
-        }
+class TestabilityRegistry {
+    constructor() {
+        /** @internal */
+        this._applications = new Map();
+        _testabilityGetter.addToWindow(this);
     }
-    TestabilityRegistry.decorators = [
-        { type: Injectable }
-    ];
-    TestabilityRegistry.ctorParameters = () => [];
-    return TestabilityRegistry;
-})();
+    /**
+     * Registers an application with a testability hook so that it can be tracked
+     * @param token token of application, root element
+     * @param testability Testability hook
+     */
+    registerApplication(token, testability) {
+        this._applications.set(token, testability);
+    }
+    /**
+     * Unregisters an application.
+     * @param token token of application, root element
+     */
+    unregisterApplication(token) {
+        this._applications.delete(token);
+    }
+    /**
+     * Unregisters all applications
+     */
+    unregisterAllApplications() {
+        this._applications.clear();
+    }
+    /**
+     * Get a testability hook associated with the application
+     * @param elem root element
+     */
+    getTestability(elem) {
+        return this._applications.get(elem) || null;
+    }
+    /**
+     * Get all registered testabilities
+     */
+    getAllTestabilities() {
+        return Array.from(this._applications.values());
+    }
+    /**
+     * Get all registered applications(root elements)
+     */
+    getAllRootElements() {
+        return Array.from(this._applications.keys());
+    }
+    /**
+     * Find testability of a node in the Tree
+     * @param elem node
+     * @param findInAncestors whether finding testability in ancestors if testability was not found in
+     * current node
+     */
+    findTestabilityInTree(elem, findInAncestors = true) {
+        return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
+    }
+}
+TestabilityRegistry.decorators = [
+    { type: Injectable }
+];
+TestabilityRegistry.ctorParameters = () => [];
 class _NoopGetTestability {
     addToWindow(registry) { }
     findTestabilityInTree(registry, elem, findInAncestors) {
@@ -27697,148 +27649,145 @@ function getPlatform() {
  *
  * @publicApi
  */
-let PlatformRef = /** @class */ (() => {
-    class PlatformRef {
-        /** @internal */
-        constructor(_injector) {
-            this._injector = _injector;
-            this._modules = [];
-            this._destroyListeners = [];
-            this._destroyed = false;
-        }
-        /**
-         * Creates an instance of an `@NgModule` for the given platform
-         * for offline compilation.
-         *
-         * @usageNotes
-         * ### Simple Example
-         *
-         * ```typescript
-         * my_module.ts:
-         *
-         * @NgModule({
-         *   imports: [BrowserModule]
-         * })
-         * class MyModule {}
-         *
-         * main.ts:
-         * import {MyModuleNgFactory} from './my_module.ngfactory';
-         * import {platformBrowser} from '@angular/platform-browser';
-         *
-         * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
-         * ```
-         */
-        bootstrapModuleFactory(moduleFactory, options) {
-            // Note: We need to create the NgZone _before_ we instantiate the module,
-            // as instantiating the module creates some providers eagerly.
-            // So we create a mini parent injector that just contains the new NgZone and
-            // pass that as parent to the NgModuleFactory.
-            const ngZoneOption = options ? options.ngZone : undefined;
-            const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
-            const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
-            const providers = [{ provide: NgZone, useValue: ngZone }];
-            // Attention: Don't use ApplicationRef.run here,
-            // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
-            return ngZone.run(() => {
-                const ngZoneInjector = Injector.create({ providers: providers, parent: this.injector, name: moduleFactory.moduleType.name });
-                const moduleRef = moduleFactory.create(ngZoneInjector);
-                const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
-                if (!exceptionHandler) {
-                    throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
+class PlatformRef {
+    /** @internal */
+    constructor(_injector) {
+        this._injector = _injector;
+        this._modules = [];
+        this._destroyListeners = [];
+        this._destroyed = false;
+    }
+    /**
+     * Creates an instance of an `@NgModule` for the given platform
+     * for offline compilation.
+     *
+     * @usageNotes
+     * ### Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {platformBrowser} from '@angular/platform-browser';
+     *
+     * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
+     * ```
+     */
+    bootstrapModuleFactory(moduleFactory, options) {
+        // Note: We need to create the NgZone _before_ we instantiate the module,
+        // as instantiating the module creates some providers eagerly.
+        // So we create a mini parent injector that just contains the new NgZone and
+        // pass that as parent to the NgModuleFactory.
+        const ngZoneOption = options ? options.ngZone : undefined;
+        const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
+        const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
+        const providers = [{ provide: NgZone, useValue: ngZone }];
+        // Attention: Don't use ApplicationRef.run here,
+        // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+        return ngZone.run(() => {
+            const ngZoneInjector = Injector.create({ providers: providers, parent: this.injector, name: moduleFactory.moduleType.name });
+            const moduleRef = moduleFactory.create(ngZoneInjector);
+            const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
+            if (!exceptionHandler) {
+                throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
+            }
+            moduleRef.onDestroy(() => remove(this._modules, moduleRef));
+            ngZone.runOutsideAngular(() => ngZone.onError.subscribe({
+                next: (error) => {
+                    exceptionHandler.handleError(error);
                 }
-                moduleRef.onDestroy(() => remove(this._modules, moduleRef));
-                ngZone.runOutsideAngular(() => ngZone.onError.subscribe({
-                    next: (error) => {
-                        exceptionHandler.handleError(error);
+            }));
+            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
+                const initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                initStatus.runInitializers();
+                return initStatus.donePromise.then(() => {
+                    if (ivyEnabled) {
+                        // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
+                        const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
+                        setLocaleId(localeId || DEFAULT_LOCALE_ID);
                     }
-                }));
-                return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
-                    const initStatus = moduleRef.injector.get(ApplicationInitStatus);
-                    initStatus.runInitializers();
-                    return initStatus.donePromise.then(() => {
-                        if (ivyEnabled) {
-                            // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
-                            const localeId = moduleRef.injector.get(LOCALE_ID$1, DEFAULT_LOCALE_ID);
-                            setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                        }
-                        this._moduleDoBootstrap(moduleRef);
-                        return moduleRef;
-                    });
+                    this._moduleDoBootstrap(moduleRef);
+                    return moduleRef;
                 });
             });
-        }
-        /**
-         * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
-         *
-         * @usageNotes
-         * ### Simple Example
-         *
-         * ```typescript
-         * @NgModule({
-         *   imports: [BrowserModule]
-         * })
-         * class MyModule {}
-         *
-         * let moduleRef = platformBrowser().bootstrapModule(MyModule);
-         * ```
-         *
-         */
-        bootstrapModule(moduleType, compilerOptions = []) {
-            const options = optionsReducer({}, compilerOptions);
-            return compileNgModuleFactory(this.injector, options, moduleType)
-                .then(moduleFactory => this.bootstrapModuleFactory(moduleFactory, options));
-        }
-        _moduleDoBootstrap(moduleRef) {
-            const appRef = moduleRef.injector.get(ApplicationRef);
-            if (moduleRef._bootstrapComponents.length > 0) {
-                moduleRef._bootstrapComponents.forEach(f => appRef.bootstrap(f));
-            }
-            else if (moduleRef.instance.ngDoBootstrap) {
-                moduleRef.instance.ngDoBootstrap(appRef);
-            }
-            else {
-                throw new Error(`The module ${stringify(moduleRef.instance
-                    .constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
-                    `Please define one of these.`);
-            }
-            this._modules.push(moduleRef);
-        }
-        /**
-         * Register a listener to be called when the platform is disposed.
-         */
-        onDestroy(callback) {
-            this._destroyListeners.push(callback);
-        }
-        /**
-         * Retrieve the platform {@link Injector}, which is the parent injector for
-         * every Angular application on the page and provides singleton providers.
-         */
-        get injector() {
-            return this._injector;
-        }
-        /**
-         * Destroy the Angular platform and all Angular applications on the page.
-         */
-        destroy() {
-            if (this._destroyed) {
-                throw new Error('The platform has already been destroyed!');
-            }
-            this._modules.slice().forEach(module => module.destroy());
-            this._destroyListeners.forEach(listener => listener());
-            this._destroyed = true;
-        }
-        get destroyed() {
-            return this._destroyed;
-        }
+        });
     }
-    PlatformRef.decorators = [
-        { type: Injectable }
-    ];
-    PlatformRef.ctorParameters = () => [
-        { type: Injector }
-    ];
-    return PlatformRef;
-})();
+    /**
+     * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
+     *
+     * @usageNotes
+     * ### Simple Example
+     *
+     * ```typescript
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+     * ```
+     *
+     */
+    bootstrapModule(moduleType, compilerOptions = []) {
+        const options = optionsReducer({}, compilerOptions);
+        return compileNgModuleFactory(this.injector, options, moduleType)
+            .then(moduleFactory => this.bootstrapModuleFactory(moduleFactory, options));
+    }
+    _moduleDoBootstrap(moduleRef) {
+        const appRef = moduleRef.injector.get(ApplicationRef);
+        if (moduleRef._bootstrapComponents.length > 0) {
+            moduleRef._bootstrapComponents.forEach(f => appRef.bootstrap(f));
+        }
+        else if (moduleRef.instance.ngDoBootstrap) {
+            moduleRef.instance.ngDoBootstrap(appRef);
+        }
+        else {
+            throw new Error(`The module ${stringify(moduleRef.instance
+                .constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
+                `Please define one of these.`);
+        }
+        this._modules.push(moduleRef);
+    }
+    /**
+     * Register a listener to be called when the platform is disposed.
+     */
+    onDestroy(callback) {
+        this._destroyListeners.push(callback);
+    }
+    /**
+     * Retrieve the platform {@link Injector}, which is the parent injector for
+     * every Angular application on the page and provides singleton providers.
+     */
+    get injector() {
+        return this._injector;
+    }
+    /**
+     * Destroy the Angular platform and all Angular applications on the page.
+     */
+    destroy() {
+        if (this._destroyed) {
+            throw new Error('The platform has already been destroyed!');
+        }
+        this._modules.slice().forEach(module => module.destroy());
+        this._destroyListeners.forEach(listener => listener());
+        this._destroyed = true;
+    }
+    get destroyed() {
+        return this._destroyed;
+    }
+}
+PlatformRef.decorators = [
+    { type: Injectable }
+];
+PlatformRef.ctorParameters = () => [
+    { type: Injector }
+];
 function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
     let ngZone;
     if (ngZoneOption === 'noop') {
@@ -27972,217 +27921,214 @@ function optionsReducer(dst, objs) {
  *
  * @publicApi
  */
-let ApplicationRef = /** @class */ (() => {
-    class ApplicationRef {
+class ApplicationRef {
+    /** @internal */
+    constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+        this._zone = _zone;
+        this._console = _console;
+        this._injector = _injector;
+        this._exceptionHandler = _exceptionHandler;
+        this._componentFactoryResolver = _componentFactoryResolver;
+        this._initStatus = _initStatus;
         /** @internal */
-        constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
-            this._zone = _zone;
-            this._console = _console;
-            this._injector = _injector;
-            this._exceptionHandler = _exceptionHandler;
-            this._componentFactoryResolver = _componentFactoryResolver;
-            this._initStatus = _initStatus;
-            /** @internal */
-            this._bootstrapListeners = [];
-            this._views = [];
-            this._runningTick = false;
-            this._enforceNoNewChanges = false;
-            this._stable = true;
-            /**
-             * Get a list of component types registered to this application.
-             * This list is populated even before the component is created.
-             */
-            this.componentTypes = [];
-            /**
-             * Get a list of components registered to this application.
-             */
-            this.components = [];
-            this._enforceNoNewChanges = isDevMode();
-            this._zone.onMicrotaskEmpty.subscribe({
-                next: () => {
-                    this._zone.run(() => {
-                        this.tick();
+        this._bootstrapListeners = [];
+        this._views = [];
+        this._runningTick = false;
+        this._enforceNoNewChanges = false;
+        this._stable = true;
+        /**
+         * Get a list of component types registered to this application.
+         * This list is populated even before the component is created.
+         */
+        this.componentTypes = [];
+        /**
+         * Get a list of components registered to this application.
+         */
+        this.components = [];
+        this._enforceNoNewChanges = isDevMode();
+        this._zone.onMicrotaskEmpty.subscribe({
+            next: () => {
+                this._zone.run(() => {
+                    this.tick();
+                });
+            }
+        });
+        const isCurrentlyStable = new Observable((observer) => {
+            this._stable = this._zone.isStable && !this._zone.hasPendingMacrotasks &&
+                !this._zone.hasPendingMicrotasks;
+            this._zone.runOutsideAngular(() => {
+                observer.next(this._stable);
+                observer.complete();
+            });
+        });
+        const isStable = new Observable((observer) => {
+            // Create the subscription to onStable outside the Angular Zone so that
+            // the callback is run outside the Angular Zone.
+            let stableSub;
+            this._zone.runOutsideAngular(() => {
+                stableSub = this._zone.onStable.subscribe(() => {
+                    NgZone.assertNotInAngularZone();
+                    // Check whether there are no pending macro/micro tasks in the next tick
+                    // to allow for NgZone to update the state.
+                    scheduleMicroTask(() => {
+                        if (!this._stable && !this._zone.hasPendingMacrotasks &&
+                            !this._zone.hasPendingMicrotasks) {
+                            this._stable = true;
+                            observer.next(true);
+                        }
+                    });
+                });
+            });
+            const unstableSub = this._zone.onUnstable.subscribe(() => {
+                NgZone.assertInAngularZone();
+                if (this._stable) {
+                    this._stable = false;
+                    this._zone.runOutsideAngular(() => {
+                        observer.next(false);
                     });
                 }
             });
-            const isCurrentlyStable = new Observable((observer) => {
-                this._stable = this._zone.isStable && !this._zone.hasPendingMacrotasks &&
-                    !this._zone.hasPendingMicrotasks;
-                this._zone.runOutsideAngular(() => {
-                    observer.next(this._stable);
-                    observer.complete();
-                });
-            });
-            const isStable = new Observable((observer) => {
-                // Create the subscription to onStable outside the Angular Zone so that
-                // the callback is run outside the Angular Zone.
-                let stableSub;
-                this._zone.runOutsideAngular(() => {
-                    stableSub = this._zone.onStable.subscribe(() => {
-                        NgZone.assertNotInAngularZone();
-                        // Check whether there are no pending macro/micro tasks in the next tick
-                        // to allow for NgZone to update the state.
-                        scheduleMicroTask(() => {
-                            if (!this._stable && !this._zone.hasPendingMacrotasks &&
-                                !this._zone.hasPendingMicrotasks) {
-                                this._stable = true;
-                                observer.next(true);
-                            }
-                        });
-                    });
-                });
-                const unstableSub = this._zone.onUnstable.subscribe(() => {
-                    NgZone.assertInAngularZone();
-                    if (this._stable) {
-                        this._stable = false;
-                        this._zone.runOutsideAngular(() => {
-                            observer.next(false);
-                        });
-                    }
-                });
-                return () => {
-                    stableSub.unsubscribe();
-                    unstableSub.unsubscribe();
-                };
-            });
-            this.isStable =
-                merge$1(isCurrentlyStable, isStable.pipe(share()));
+            return () => {
+                stableSub.unsubscribe();
+                unstableSub.unsubscribe();
+            };
+        });
+        this.isStable =
+            merge$1(isCurrentlyStable, isStable.pipe(share()));
+    }
+    /**
+     * Bootstrap a new component at the root level of the application.
+     *
+     * @usageNotes
+     * ### Bootstrap process
+     *
+     * When bootstrapping a new root component into an application, Angular mounts the
+     * specified application component onto DOM elements identified by the componentType's
+     * selector and kicks off automatic change detection to finish initializing the component.
+     *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * componentType's selector.
+     *
+     * ### Example
+     * {@example core/ts/platform/platform.ts region='longform'}
+     */
+    bootstrap(componentOrFactory, rootSelectorOrNode) {
+        if (!this._initStatus.done) {
+            throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
         }
-        /**
-         * Bootstrap a new component at the root level of the application.
-         *
-         * @usageNotes
-         * ### Bootstrap process
-         *
-         * When bootstrapping a new root component into an application, Angular mounts the
-         * specified application component onto DOM elements identified by the componentType's
-         * selector and kicks off automatic change detection to finish initializing the component.
-         *
-         * Optionally, a component can be mounted onto a DOM element that does not match the
-         * componentType's selector.
-         *
-         * ### Example
-         * {@example core/ts/platform/platform.ts region='longform'}
-         */
-        bootstrap(componentOrFactory, rootSelectorOrNode) {
-            if (!this._initStatus.done) {
-                throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
-            }
-            let componentFactory;
-            if (componentOrFactory instanceof ComponentFactory) {
-                componentFactory = componentOrFactory;
-            }
-            else {
-                componentFactory =
-                    this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
-            }
-            this.componentTypes.push(componentFactory.componentType);
-            // Create a factory associated with the current module if it's not bound to some other
-            const ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef);
-            const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
-            const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
-            compRef.onDestroy(() => {
-                this._unloadComponent(compRef);
-            });
-            const testability = compRef.injector.get(Testability, null);
-            if (testability) {
-                compRef.injector.get(TestabilityRegistry)
-                    .registerApplication(compRef.location.nativeElement, testability);
-            }
-            this._loadComponent(compRef);
-            if (isDevMode()) {
-                this._console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
-            }
-            return compRef;
+        let componentFactory;
+        if (componentOrFactory instanceof ComponentFactory) {
+            componentFactory = componentOrFactory;
         }
-        /**
-         * Invoke this method to explicitly process change detection and its side-effects.
-         *
-         * In development mode, `tick()` also performs a second change detection cycle to ensure that no
-         * further changes are detected. If additional changes are picked up during this second cycle,
-         * bindings in the app have side-effects that cannot be resolved in a single change detection
-         * pass.
-         * In this case, Angular throws an error, since an Angular application can only have one change
-         * detection pass during which all change detection must complete.
-         */
-        tick() {
-            if (this._runningTick) {
-                throw new Error('ApplicationRef.tick is called recursively');
+        else {
+            componentFactory =
+                this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+        }
+        this.componentTypes.push(componentFactory.componentType);
+        // Create a factory associated with the current module if it's not bound to some other
+        const ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef);
+        const selectorOrNode = rootSelectorOrNode || componentFactory.selector;
+        const compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
+        compRef.onDestroy(() => {
+            this._unloadComponent(compRef);
+        });
+        const testability = compRef.injector.get(Testability, null);
+        if (testability) {
+            compRef.injector.get(TestabilityRegistry)
+                .registerApplication(compRef.location.nativeElement, testability);
+        }
+        this._loadComponent(compRef);
+        if (isDevMode()) {
+            this._console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
+        }
+        return compRef;
+    }
+    /**
+     * Invoke this method to explicitly process change detection and its side-effects.
+     *
+     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
+     * further changes are detected. If additional changes are picked up during this second cycle,
+     * bindings in the app have side-effects that cannot be resolved in a single change detection
+     * pass.
+     * In this case, Angular throws an error, since an Angular application can only have one change
+     * detection pass during which all change detection must complete.
+     */
+    tick() {
+        if (this._runningTick) {
+            throw new Error('ApplicationRef.tick is called recursively');
+        }
+        try {
+            this._runningTick = true;
+            for (let view of this._views) {
+                view.detectChanges();
             }
-            try {
-                this._runningTick = true;
+            if (this._enforceNoNewChanges) {
                 for (let view of this._views) {
-                    view.detectChanges();
-                }
-                if (this._enforceNoNewChanges) {
-                    for (let view of this._views) {
-                        view.checkNoChanges();
-                    }
+                    view.checkNoChanges();
                 }
             }
-            catch (e) {
-                // Attention: Don't rethrow as it could cancel subscriptions to Observables!
-                this._zone.runOutsideAngular(() => this._exceptionHandler.handleError(e));
-            }
-            finally {
-                this._runningTick = false;
-            }
         }
-        /**
-         * Attaches a view so that it will be dirty checked.
-         * The view will be automatically detached when it is destroyed.
-         * This will throw if the view is already attached to a ViewContainer.
-         */
-        attachView(viewRef) {
-            const view = viewRef;
-            this._views.push(view);
-            view.attachToAppRef(this);
+        catch (e) {
+            // Attention: Don't rethrow as it could cancel subscriptions to Observables!
+            this._zone.runOutsideAngular(() => this._exceptionHandler.handleError(e));
         }
-        /**
-         * Detaches a view from dirty checking again.
-         */
-        detachView(viewRef) {
-            const view = viewRef;
-            remove(this._views, view);
-            view.detachFromAppRef();
-        }
-        _loadComponent(componentRef) {
-            this.attachView(componentRef.hostView);
-            this.tick();
-            this.components.push(componentRef);
-            // Get the listeners lazily to prevent DI cycles.
-            const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
-            listeners.forEach((listener) => listener(componentRef));
-        }
-        _unloadComponent(componentRef) {
-            this.detachView(componentRef.hostView);
-            remove(this.components, componentRef);
-        }
-        /** @internal */
-        ngOnDestroy() {
-            // TODO(alxhub): Dispose of the NgZone.
-            this._views.slice().forEach((view) => view.destroy());
-        }
-        /**
-         * Returns the number of attached views.
-         */
-        get viewCount() {
-            return this._views.length;
+        finally {
+            this._runningTick = false;
         }
     }
-    ApplicationRef.decorators = [
-        { type: Injectable }
-    ];
-    ApplicationRef.ctorParameters = () => [
-        { type: NgZone },
-        { type: Console },
-        { type: Injector },
-        { type: ErrorHandler },
-        { type: ComponentFactoryResolver },
-        { type: ApplicationInitStatus }
-    ];
-    return ApplicationRef;
-})();
+    /**
+     * Attaches a view so that it will be dirty checked.
+     * The view will be automatically detached when it is destroyed.
+     * This will throw if the view is already attached to a ViewContainer.
+     */
+    attachView(viewRef) {
+        const view = viewRef;
+        this._views.push(view);
+        view.attachToAppRef(this);
+    }
+    /**
+     * Detaches a view from dirty checking again.
+     */
+    detachView(viewRef) {
+        const view = viewRef;
+        remove(this._views, view);
+        view.detachFromAppRef();
+    }
+    _loadComponent(componentRef) {
+        this.attachView(componentRef.hostView);
+        this.tick();
+        this.components.push(componentRef);
+        // Get the listeners lazily to prevent DI cycles.
+        const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
+        listeners.forEach((listener) => listener(componentRef));
+    }
+    _unloadComponent(componentRef) {
+        this.detachView(componentRef.hostView);
+        remove(this.components, componentRef);
+    }
+    /** @internal */
+    ngOnDestroy() {
+        // TODO(alxhub): Dispose of the NgZone.
+        this._views.slice().forEach((view) => view.destroy());
+    }
+    /**
+     * Returns the number of attached views.
+     */
+    get viewCount() {
+        return this._views.length;
+    }
+}
+ApplicationRef.decorators = [
+    { type: Injectable }
+];
+ApplicationRef.ctorParameters = () => [
+    { type: NgZone },
+    { type: Console },
+    { type: Injector },
+    { type: ErrorHandler },
+    { type: ComponentFactoryResolver },
+    { type: ApplicationInitStatus }
+];
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
@@ -28287,47 +28233,44 @@ const DEFAULT_CONFIG = {
  * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
  * part of its implementation. See `LoadChildren` for more details.
  */
-let SystemJsNgModuleLoader = /** @class */ (() => {
-    class SystemJsNgModuleLoader {
-        constructor(_compiler, config) {
-            this._compiler = _compiler;
-            this._config = config || DEFAULT_CONFIG;
-        }
-        load(path) {
-            const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-            return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
-        }
-        loadAndCompile(path) {
-            let [module, exportName] = path.split(_SEPARATOR);
-            if (exportName === undefined) {
-                exportName = 'default';
-            }
-            return System.import(module)
-                .then((module) => module[exportName])
-                .then((type) => checkNotEmpty(type, module, exportName))
-                .then((type) => this._compiler.compileModuleAsync(type));
-        }
-        loadFactory(path) {
-            let [module, exportName] = path.split(_SEPARATOR);
-            let factoryClassSuffix = FACTORY_CLASS_SUFFIX;
-            if (exportName === undefined) {
-                exportName = 'default';
-                factoryClassSuffix = '';
-            }
-            return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
-                .then((module) => module[exportName + factoryClassSuffix])
-                .then((factory) => checkNotEmpty(factory, module, exportName));
-        }
+class SystemJsNgModuleLoader {
+    constructor(_compiler, config) {
+        this._compiler = _compiler;
+        this._config = config || DEFAULT_CONFIG;
     }
-    SystemJsNgModuleLoader.decorators = [
-        { type: Injectable }
-    ];
-    SystemJsNgModuleLoader.ctorParameters = () => [
-        { type: Compiler },
-        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
-    ];
-    return SystemJsNgModuleLoader;
-})();
+    load(path) {
+        const legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
+        return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+    }
+    loadAndCompile(path) {
+        let [module, exportName] = path.split(_SEPARATOR);
+        if (exportName === undefined) {
+            exportName = 'default';
+        }
+        return System.import(module)
+            .then((module) => module[exportName])
+            .then((type) => checkNotEmpty(type, module, exportName))
+            .then((type) => this._compiler.compileModuleAsync(type));
+    }
+    loadFactory(path) {
+        let [module, exportName] = path.split(_SEPARATOR);
+        let factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+        if (exportName === undefined) {
+            exportName = 'default';
+            factoryClassSuffix = '';
+        }
+        return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
+            .then((module) => module[exportName + factoryClassSuffix])
+            .then((factory) => checkNotEmpty(factory, module, exportName));
+    }
+}
+SystemJsNgModuleLoader.decorators = [
+    { type: Injectable }
+];
+SystemJsNgModuleLoader.ctorParameters = () => [
+    { type: Compiler },
+    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
+];
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
         throw new Error(`Cannot find '${exportName}' in '${modulePath}'`);
@@ -29171,19 +29114,16 @@ function zoneSchedulerFactory(ngZone) {
  *
  * @publicApi
  */
-let ApplicationModule = /** @class */ (() => {
-    class ApplicationModule {
-        // Inject ApplicationRef to make it eager...
-        constructor(appRef) { }
-    }
-    ApplicationModule.decorators = [
-        { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
-    ];
-    ApplicationModule.ctorParameters = () => [
-        { type: ApplicationRef }
-    ];
-    return ApplicationModule;
-})();
+class ApplicationModule {
+    // Inject ApplicationRef to make it eager...
+    constructor(appRef) { }
+}
+ApplicationModule.decorators = [
+    { type: NgModule, args: [{ providers: APPLICATION_MODULE_PROVIDERS },] }
+];
+ApplicationModule.ctorParameters = () => [
+    { type: ApplicationRef }
+];
 
 /**
  * @license

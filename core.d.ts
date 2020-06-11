@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.4+6.sha-c2f4a9b
+ * @license Angular v10.0.0-rc.4+14.sha-38c48be
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2078,6 +2078,9 @@ export declare interface DoBootstrap {
  * to invoke it own change-detection cycle.
  *
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
+ *
+ * For a more complete example and discussion, see
+ * [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection).
  *
  * @publicApi
  */
