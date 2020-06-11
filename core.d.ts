@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+134.sha-a937889
+ * @license Angular v10.0.0-rc.0+135.sha-97dc85b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1261,11 +1261,11 @@ export declare interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ContentChild;
@@ -1329,11 +1329,11 @@ export declare interface ContentChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): Query;
@@ -7313,7 +7313,7 @@ declare interface TQuery {
  * An object representing query metadata extracted from query annotations.
  */
 declare interface TQueryMetadata {
-    predicate: Type<any> | string[];
+    predicate: Type<any> | InjectionToken<unknown> | string[];
     descendants: boolean;
     read: any;
     isStatic: boolean;
@@ -7976,11 +7976,11 @@ export declare interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ViewChild;
@@ -8033,10 +8033,10 @@ export declare interface ViewChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
     }): ViewChildren;
 }
@@ -11457,7 +11457,7 @@ export declare function ɵɵcomponentHostSyntheticListener(eventName: string, li
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -13434,7 +13434,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
  *
  * @codeGenApi
  */
-export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
 
 /**
  * Creates new QueryList for a static view query.
@@ -13445,7 +13445,7 @@ export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predic
  *
  * @codeGenApi
  */
-export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
 
 /**
  * Update style bindings using an object literal on an element.
@@ -14380,6 +14380,6 @@ export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, valu
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
 
 export { }
