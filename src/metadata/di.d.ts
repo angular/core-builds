@@ -149,11 +149,11 @@ export interface ContentChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): Query;
@@ -209,11 +209,11 @@ export interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ContentChild;
@@ -265,10 +265,10 @@ export interface ViewChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
     }): ViewChildren;
 }
@@ -330,11 +330,11 @@ export interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ViewChild;
