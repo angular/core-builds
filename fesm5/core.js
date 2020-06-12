@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.11
+ * @license Angular v9.1.11+1.sha-6c1ab47
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4057,18 +4057,28 @@ function ɵɵgetFactoryOf(type) {
  */
 function ɵɵgetInheritedFactory(type) {
     return noSideEffects(function () {
-        var proto = Object.getPrototypeOf(type.prototype).constructor;
-        var factory = proto[NG_FACTORY_DEF] || ɵɵgetFactoryOf(proto);
-        if (factory !== null) {
-            return factory;
+        var ownConstructor = type.prototype.constructor;
+        var ownFactory = ownConstructor[NG_FACTORY_DEF] || ɵɵgetFactoryOf(ownConstructor);
+        var objectPrototype = Object.prototype;
+        var parent = Object.getPrototypeOf(type.prototype).constructor;
+        // Go up the prototype until we hit `Object`.
+        while (parent && parent !== objectPrototype) {
+            var factory = parent[NG_FACTORY_DEF] || ɵɵgetFactoryOf(parent);
+            // If we hit something that has a factory and the factory isn't the same as the type,
+            // we've found the inherited factory. Note the check that the factory isn't the type's
+            // own factory is redundant in most cases, but if the user has custom decorators on the
+            // class, this lookup will start one level down in the prototype chain, causing us to
+            // find the own factory first and potentially triggering an infinite loop downstream.
+            if (factory && factory !== ownFactory) {
+                return factory;
+            }
+            parent = Object.getPrototypeOf(parent);
         }
-        else {
-            // There is no factory defined. Either this was improper usage of inheritance
-            // (no Angular decorator on the superclass) or there is no constructor at all
-            // in the inheritance chain. Since the two cases cannot be distinguished, the
-            // latter has to be assumed.
-            return function (t) { return new t(); };
-        }
+        // There is no factory defined. Either this was improper usage of inheritance
+        // (no Angular decorator on the superclass) or there is no constructor at all
+        // in the inheritance chain. Since the two cases cannot be distinguished, the
+        // latter has to be assumed.
+        return function (t) { return new t(); };
     });
 }
 
@@ -20049,7 +20059,7 @@ var Version = /** @class */ (function () {
 /**
  * @publicApi
  */
-var VERSION = new Version('9.1.11');
+var VERSION = new Version('9.1.11+1.sha-6c1ab47');
 
 /**
  * @license
