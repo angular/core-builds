@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.5
+ * @license Angular v10.0.0-rc.6+3.sha-6c7467a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19346,7 +19346,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.5');
+const VERSION = new Version('10.0.0-rc.6+3.sha-6c7467a');
 
 /**
  * @license
@@ -27129,9 +27129,23 @@ function delayChangeDetectionForEvents(zone) {
         return;
     }
     zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, () => {
-        zone.lastRequestAnimationFrameId = -1;
-        updateMicroTaskStatus(zone);
-        checkStable(zone);
+        // This is a work around for https://github.com/angular/angular/issues/36839.
+        // The core issue is that when event coalescing is enabled it is possible for microtasks
+        // to get flushed too early (As is the case with `Promise.then`) between the
+        // coalescing eventTasks.
+        //
+        // To workaround this we schedule a "fake" eventTask before we process the
+        // coalescing eventTasks. The benefit of this is that the "fake" container eventTask
+        //  will prevent the microtasks queue from getting drained in between the coalescing
+        // eventTask execution.
+        if (!zone.fakeTopEventTask) {
+            zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
+                zone.lastRequestAnimationFrameId = -1;
+                updateMicroTaskStatus(zone);
+                checkStable(zone);
+            }, undefined, () => { }, () => { });
+        }
+        zone.fakeTopEventTask.invoke();
     });
     updateMicroTaskStatus(zone);
 }
@@ -27565,7 +27579,7 @@ class NgProbeToken {
 }
 /**
  * Creates a platform.
- * Platforms have to be eagerly created via this function.
+ * Platforms must be created on launch using this function.
  *
  * @publicApi
  */
@@ -27582,7 +27596,13 @@ function createPlatform(injector) {
     return _platform;
 }
 /**
- * Creates a factory for a platform
+ * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
+ * your applciation's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
+ * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
+ * to build up configurations that might be required by different libraries or parts of the
+ * application.
+ * @param name Identifies the new platform factory.
+ * @param providers A set of dependency providers for platforms created with the new factory.
  *
  * @publicApi
  */
@@ -27607,7 +27627,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
     };
 }
 /**
- * Checks that there currently is a platform which contains the given token as a provider.
+ * Checks that there is currently a platform that contains the given token as a provider.
  *
  * @publicApi
  */
@@ -27622,7 +27642,8 @@ function assertPlatform(requiredToken) {
     return platform;
 }
 /**
- * Destroy the existing platform.
+ * Destroys the current Angular platform and all Angular applications on the page.
+ * Destroys all modules and listeners registered with the platform.
  *
  * @publicApi
  */
@@ -27640,12 +27661,11 @@ function getPlatform() {
     return _platform && !_platform.destroyed ? _platform : null;
 }
 /**
- * The Angular platform is the entry point for Angular on a web page. Each page
- * has exactly one platform, and services (such as reflection) which are common
+ * The Angular platform is the entry point for Angular on a web page.
+ * Each page has exactly one platform. Services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
- *
- * A page's platform is initialized implicitly when a platform is created via a platform factory
- * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
+ * A page's platform is initialized implicitly when a platform is created using a platform
+ * factory such as `PlatformBrowser`, or explicitly by calling the `createPlatform()` function.
  *
  * @publicApi
  */
@@ -27658,11 +27678,11 @@ class PlatformRef {
         this._destroyed = false;
     }
     /**
-     * Creates an instance of an `@NgModule` for the given platform
-     * for offline compilation.
+     * Creates an instance of an `@NgModule` for the given platform for offline compilation.
      *
      * @usageNotes
-     * ### Simple Example
+     *
+     * The following example creates the NgModule for a browser platform.
      *
      * ```typescript
      * my_module.ts:
@@ -27755,20 +27775,21 @@ class PlatformRef {
         this._modules.push(moduleRef);
     }
     /**
-     * Register a listener to be called when the platform is disposed.
+     * Registers a listener to be called when the platform is destroyed.
      */
     onDestroy(callback) {
         this._destroyListeners.push(callback);
     }
     /**
-     * Retrieve the platform {@link Injector}, which is the parent injector for
+     * Retrieves the platform {@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
      */
     get injector() {
         return this._injector;
     }
     /**
-     * Destroy the Angular platform and all Angular applications on the page.
+     * Destroys the current Angular platform and all Angular applications on the page.
+     * Destroys all modules and listeners registered with the platform.
      */
     destroy() {
         if (this._destroyed) {
