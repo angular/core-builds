@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+195.sha-53e95233
+ * @license Angular v10.0.0-rc.0+196.sha-1d844b9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1247,7 +1247,7 @@ export declare interface ContentChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - True to read a different token from the queried element.
+     * * **read** - Used to read a different token from the queried element.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
@@ -1312,7 +1312,7 @@ export declare interface ContentChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
-     * * **read** - True to read a different token from the queried elements.
+     * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
      *
@@ -7957,7 +7957,7 @@ export declare interface ViewChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - True to read a different token from the queried elements.
+     * * **read** - Used to read a different token from the queried elements.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
@@ -8028,7 +8028,7 @@ export declare interface ViewChildrenDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - True to read a different token from the queried elements.
+     * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
      *
