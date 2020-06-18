@@ -132,7 +132,7 @@ export interface ContentChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
-     * * **read** - Used to read a different token from the queried elements.
+     * * **read** - True to read a different token from the queried elements.
      *
      * @usageNotes
      *
@@ -195,7 +195,7 @@ export interface ContentChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - Used to read a different token from the queried element.
+     * * **read** - True to read a different token from the queried element.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
@@ -253,7 +253,7 @@ export interface ViewChildrenDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - Used to read a different token from the queried elements.
+     * * **read** - True to read a different token from the queried elements.
      *
      * @usageNotes
      *
@@ -304,7 +304,7 @@ export interface ViewChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - Used to read a different token from the queried elements.
+     * * **read** - True to read a different token from the queried elements.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
