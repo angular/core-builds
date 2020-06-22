@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+200.sha-7e0eccc
+ * @license Angular v10.0.0-rc.0+208.sha-fd65958
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -25,35 +25,36 @@
     PERFORMANCE OF THIS SOFTWARE.
     ***************************************************************************** */
     /* global Reflect, Promise */
-
-    var extendStatics = function(d, b) {
+    var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b)
+                if (b.hasOwnProperty(p))
+                    d[p] = b[p]; };
         return extendStatics(d, b);
     };
-
     function __extends(d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
-
-    var __assign = function() {
+    var __assign = function () {
         __assign = Object.assign || function __assign(t) {
             for (var s, i = 1, n = arguments.length; i < n; i++) {
                 s = arguments[i];
-                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+                for (var p in s)
+                    if (Object.prototype.hasOwnProperty.call(s, p))
+                        t[p] = s[p];
             }
             return t;
         };
         return __assign.apply(this, arguments);
     };
-
     function __rest(s, e) {
         var t = {};
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-            t[p] = s[p];
+        for (var p in s)
+            if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+                t[p] = s[p];
         if (s != null && typeof Object.getOwnPropertySymbols === "function")
             for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
                 if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
@@ -61,175 +62,247 @@
             }
         return t;
     }
-
     function __decorate(decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+            r = Reflect.decorate(decorators, target, key, desc);
+        else
+            for (var i = decorators.length - 1; i >= 0; i--)
+                if (d = decorators[i])
+                    r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     }
-
     function __param(paramIndex, decorator) {
-        return function (target, key) { decorator(target, key, paramIndex); }
+        return function (target, key) { decorator(target, key, paramIndex); };
     }
-
     function __metadata(metadataKey, metadataValue) {
-        if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+            return Reflect.metadata(metadataKey, metadataValue);
     }
-
     function __awaiter(thisArg, _arguments, P, generator) {
         function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function fulfilled(value) { try {
+                step(generator.next(value));
+            }
+            catch (e) {
+                reject(e);
+            } }
+            function rejected(value) { try {
+                step(generator["throw"](value));
+            }
+            catch (e) {
+                reject(e);
+            } }
             function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
             step((generator = generator.apply(thisArg, _arguments || [])).next());
         });
     }
-
     function __generator(thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+        var _ = { label: 0, sent: function () { if (t[0] & 1)
+                throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
         function verb(n) { return function (v) { return step([n, v]); }; }
         function step(op) {
-            if (f) throw new TypeError("Generator is already executing.");
-            while (_) try {
-                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-                if (y = 0, t) op = [op[0] & 2, t.value];
-                switch (op[0]) {
-                    case 0: case 1: t = op; break;
-                    case 4: _.label++; return { value: op[1], done: false };
-                    case 5: _.label++; y = op[1]; op = [0]; continue;
-                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                    default:
-                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                        if (t[2]) _.ops.pop();
-                        _.trys.pop(); continue;
+            if (f)
+                throw new TypeError("Generator is already executing.");
+            while (_)
+                try {
+                    if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
+                        return t;
+                    if (y = 0, t)
+                        op = [op[0] & 2, t.value];
+                    switch (op[0]) {
+                        case 0:
+                        case 1:
+                            t = op;
+                            break;
+                        case 4:
+                            _.label++;
+                            return { value: op[1], done: false };
+                        case 5:
+                            _.label++;
+                            y = op[1];
+                            op = [0];
+                            continue;
+                        case 7:
+                            op = _.ops.pop();
+                            _.trys.pop();
+                            continue;
+                        default:
+                            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                                _ = 0;
+                                continue;
+                            }
+                            if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) {
+                                _.label = op[1];
+                                break;
+                            }
+                            if (op[0] === 6 && _.label < t[1]) {
+                                _.label = t[1];
+                                t = op;
+                                break;
+                            }
+                            if (t && _.label < t[2]) {
+                                _.label = t[2];
+                                _.ops.push(op);
+                                break;
+                            }
+                            if (t[2])
+                                _.ops.pop();
+                            _.trys.pop();
+                            continue;
+                    }
+                    op = body.call(thisArg, _);
                 }
-                op = body.call(thisArg, _);
-            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+                catch (e) {
+                    op = [6, e];
+                    y = 0;
+                }
+                finally {
+                    f = t = 0;
+                }
+            if (op[0] & 5)
+                throw op[1];
+            return { value: op[0] ? op[1] : void 0, done: true };
         }
     }
-
-    var __createBinding = Object.create ? (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-    }) : (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
+    var __createBinding = Object.create ? (function (o, m, k, k2) {
+        if (k2 === undefined)
+            k2 = k;
+        Object.defineProperty(o, k2, { enumerable: true, get: function () { return m[k]; } });
+    }) : (function (o, m, k, k2) {
+        if (k2 === undefined)
+            k2 = k;
         o[k2] = m[k];
     });
-
     function __exportStar(m, exports) {
-        for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+        for (var p in m)
+            if (p !== "default" && !exports.hasOwnProperty(p))
+                __createBinding(exports, m, p);
     }
-
     function __values(o) {
         var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-        if (m) return m.call(o);
-        if (o && typeof o.length === "number") return {
-            next: function () {
-                if (o && i >= o.length) o = void 0;
-                return { value: o && o[i++], done: !o };
-            }
-        };
+        if (m)
+            return m.call(o);
+        if (o && typeof o.length === "number")
+            return {
+                next: function () {
+                    if (o && i >= o.length)
+                        o = void 0;
+                    return { value: o && o[i++], done: !o };
+                }
+            };
         throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
     }
-
     function __read(o, n) {
         var m = typeof Symbol === "function" && o[Symbol.iterator];
-        if (!m) return o;
+        if (!m)
+            return o;
         var i = m.call(o), r, ar = [], e;
         try {
-            while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+            while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+                ar.push(r.value);
         }
-        catch (error) { e = { error: error }; }
+        catch (error) {
+            e = { error: error };
+        }
         finally {
             try {
-                if (r && !r.done && (m = i["return"])) m.call(i);
+                if (r && !r.done && (m = i["return"]))
+                    m.call(i);
             }
-            finally { if (e) throw e.error; }
+            finally {
+                if (e)
+                    throw e.error;
+            }
         }
         return ar;
     }
-
     function __spread() {
         for (var ar = [], i = 0; i < arguments.length; i++)
             ar = ar.concat(__read(arguments[i]));
         return ar;
     }
-
     function __spreadArrays() {
-        for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+        for (var s = 0, i = 0, il = arguments.length; i < il; i++)
+            s += arguments[i].length;
         for (var r = Array(s), k = 0, i = 0; i < il; i++)
             for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
                 r[k] = a[j];
         return r;
-    };
-
+    }
+    ;
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
     }
-
     function __asyncGenerator(thisArg, _arguments, generator) {
-        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        if (!Symbol.asyncIterator)
+            throw new TypeError("Symbol.asyncIterator is not defined.");
         var g = generator.apply(thisArg, _arguments || []), i, q = [];
         return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-        function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
-        function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+        function verb(n) { if (g[n])
+            i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+        function resume(n, v) { try {
+            step(g[n](v));
+        }
+        catch (e) {
+            settle(q[0][3], e);
+        } }
         function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
         function fulfill(value) { resume("next", value); }
         function reject(value) { resume("throw", value); }
-        function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+        function settle(f, v) { if (f(v), q.shift(), q.length)
+            resume(q[0][0], q[0][1]); }
     }
-
     function __asyncDelegator(o) {
         var i, p;
         return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
         function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
     }
-
     function __asyncValues(o) {
-        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        if (!Symbol.asyncIterator)
+            throw new TypeError("Symbol.asyncIterator is not defined.");
         var m = o[Symbol.asyncIterator], i;
         return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
         function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-        function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+        function settle(resolve, reject, d, v) { Promise.resolve(v).then(function (v) { resolve({ value: v, done: d }); }, reject); }
     }
-
     function __makeTemplateObject(cooked, raw) {
-        if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+        if (Object.defineProperty) {
+            Object.defineProperty(cooked, "raw", { value: raw });
+        }
+        else {
+            cooked.raw = raw;
+        }
         return cooked;
-    };
-
-    var __setModuleDefault = Object.create ? (function(o, v) {
+    }
+    ;
+    var __setModuleDefault = Object.create ? (function (o, v) {
         Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
+    }) : function (o, v) {
         o["default"] = v;
     };
-
     function __importStar(mod) {
-        if (mod && mod.__esModule) return mod;
+        if (mod && mod.__esModule)
+            return mod;
         var result = {};
-        if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+        if (mod != null)
+            for (var k in mod)
+                if (Object.hasOwnProperty.call(mod, k))
+                    __createBinding(result, mod, k);
         __setModuleDefault(result, mod);
         return result;
     }
-
     function __importDefault(mod) {
         return (mod && mod.__esModule) ? mod : { default: mod };
     }
-
     function __classPrivateFieldGet(receiver, privateMap) {
         if (!privateMap.has(receiver)) {
             throw new TypeError("attempted to get private field on non-instance");
         }
         return privateMap.get(receiver);
     }
-
     function __classPrivateFieldSet(receiver, privateMap, value) {
         if (!privateMap.has(receiver)) {
             throw new TypeError("attempted to set private field on non-instance");
@@ -258,13 +331,6 @@
         return { toString: fn }.toString();
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var ANNOTATIONS = '__annotations__';
     var PARAMETERS = '__parameters__';
     var PROP_METADATA = '__prop__metadata__';
@@ -275,7 +341,6 @@
         return noSideEffects(function () {
             var metaCtor = makeMetadataCtor(props);
             function DecoratorFactory() {
-                var _a;
                 var args = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
@@ -284,7 +349,7 @@
                     metaCtor.call.apply(metaCtor, __spread([this], args));
                     return this;
                 }
-                var annotationInstance = new ((_a = DecoratorFactory).bind.apply(_a, __spread([void 0], args)))();
+                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spread([void 0], args)))();
                 return function TypeDecorator(cls) {
                     if (typeFn)
                         typeFn.apply(void 0, __spread([cls], args));
@@ -325,7 +390,6 @@
         return noSideEffects(function () {
             var metaCtor = makeMetadataCtor(props);
             function ParamDecoratorFactory() {
-                var _a;
                 var args = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
@@ -334,7 +398,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var annotationInstance = new ((_a = ParamDecoratorFactory).bind.apply(_a, __spread([void 0], args)))();
+                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spread([void 0], args)))();
                 ParamDecorator.annotation = annotationInstance;
                 return ParamDecorator;
                 function ParamDecorator(cls, unusedKey, index) {
@@ -364,7 +428,6 @@
         return noSideEffects(function () {
             var metaCtor = makeMetadataCtor(props);
             function PropDecoratorFactory() {
-                var _a;
                 var args = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
@@ -373,7 +436,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var decoratorInstance = new ((_a = PropDecoratorFactory).bind.apply(_a, __spread([void 0], args)))();
+                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spread([void 0], args)))();
                 function PropDecorator(target, name) {
                     var constructor = target.constructor;
                     // Use of Object.defineProperty is important because it creates a non-enumerable property
@@ -2084,49 +2147,6 @@
     }
 
     /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    // Below are constants for LView indices to help us look up LView members
-    // without having to remember the specific indices.
-    // Uglify will inline these when minifying so there shouldn't be a cost.
-    var HOST = 0;
-    var TVIEW = 1;
-    var FLAGS = 2;
-    var PARENT = 3;
-    var NEXT = 4;
-    var TRANSPLANTED_VIEWS_TO_REFRESH = 5;
-    var T_HOST = 6;
-    var CLEANUP = 7;
-    var CONTEXT = 8;
-    var INJECTOR$1 = 9;
-    var RENDERER_FACTORY = 10;
-    var RENDERER = 11;
-    var SANITIZER = 12;
-    var CHILD_HEAD = 13;
-    var CHILD_TAIL = 14;
-    var DECLARATION_VIEW = 15;
-    var DECLARATION_COMPONENT_VIEW = 16;
-    var DECLARATION_LCONTAINER = 17;
-    var PREORDER_HOOK_FLAGS = 18;
-    var QUERIES = 19;
-    /** Size of LView's header. Necessary to adjust for it when setting slots.  */
-    var HEADER_OFFSET = 20;
-    // Note: This hack is necessary so we don't erroneously get a circular dependency
-    // failure based on types.
-    var unusedValueExportToPlacateAjd = 1;
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Special location which allows easy identification of type. If we have an array which was
      * retrieved from the `LView` and that array has `true` at `TYPE` location, we know it is
      * `LContainer`.
@@ -2160,6 +2180,42 @@
      * remove views from the DOM when they are no longer required.
      */
     var CONTAINER_HEADER_OFFSET = 10;
+    // Note: This hack is necessary so we don't erroneously get a circular dependency
+    // failure based on types.
+    var unusedValueExportToPlacateAjd = 1;
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    // Below are constants for LView indices to help us look up LView members
+    // without having to remember the specific indices.
+    // Uglify will inline these when minifying so there shouldn't be a cost.
+    var HOST = 0;
+    var TVIEW = 1;
+    var FLAGS = 2;
+    var PARENT = 3;
+    var NEXT = 4;
+    var TRANSPLANTED_VIEWS_TO_REFRESH = 5;
+    var T_HOST = 6;
+    var CLEANUP = 7;
+    var CONTEXT = 8;
+    var INJECTOR$1 = 9;
+    var RENDERER_FACTORY = 10;
+    var RENDERER = 11;
+    var SANITIZER = 12;
+    var CHILD_HEAD = 13;
+    var CHILD_TAIL = 14;
+    var DECLARATION_VIEW = 15;
+    var DECLARATION_COMPONENT_VIEW = 16;
+    var DECLARATION_LCONTAINER = 17;
+    var PREORDER_HOOK_FLAGS = 18;
+    var QUERIES = 19;
+    /** Size of LView's header. Necessary to adjust for it when setting slots.  */
+    var HEADER_OFFSET = 20;
     // Note: This hack is necessary so we don't erroneously get a circular dependency
     // failure based on types.
     var unusedValueExportToPlacateAjd$1 = 1;
@@ -4284,13 +4340,6 @@
         return error;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function getType(error) {
         return error[ERROR_TYPE];
     }
@@ -4815,13 +4864,6 @@
         return srcset.split(',').map(function (srcset) { return _sanitizeUrl(srcset.trim()); }).join(', ');
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function tagSet(tags) {
         var e_1, _a;
         var res = {};
@@ -5077,9 +5119,9 @@
         finally {
             // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
             if (inertBodyElement) {
-                var parent_1 = getTemplateContent(inertBodyElement) || inertBodyElement;
-                while (parent_1.firstChild) {
-                    parent_1.removeChild(parent_1.firstChild);
+                var parent = getTemplateContent(inertBodyElement) || inertBodyElement;
+                while (parent.firstChild) {
+                    parent.removeChild(parent.firstChild);
                 }
             }
         }
@@ -5442,9 +5484,9 @@
             ngDevMode && assertDomNode(rElement);
             // if the context is not found then we need to traverse upwards up the DOM
             // to find the nearest element that has already been monkey patched with data
-            var parent_1 = rElement;
-            while (parent_1 = parent_1.parentNode) {
-                var parentContext = readPatchedData(parent_1);
+            var parent = rElement;
+            while (parent = parent.parentNode) {
+                var parentContext = readPatchedData(parent);
                 if (parentContext) {
                     var lView = void 0;
                     if (Array.isArray(parentContext)) {
@@ -5815,9 +5857,9 @@
                 return foundIndex;
             if (foundIndex === 0 || className.charCodeAt(foundIndex - 1) <= 32 /* SPACE */) {
                 // Ensure that it has leading whitespace
-                var length_1 = classToSearch.length;
-                if (foundIndex + length_1 === end ||
-                    className.charCodeAt(foundIndex + length_1) <= 32 /* SPACE */) {
+                var length = classToSearch.length;
+                if (foundIndex + length === end ||
+                    className.charCodeAt(foundIndex + length) <= 32 /* SPACE */) {
                     // Ensure that it has trailing whitespace
                     return foundIndex;
                 }
@@ -8941,13 +8983,13 @@
     function markViewDirty(lView) {
         while (lView) {
             lView[FLAGS] |= 64 /* Dirty */;
-            var parent_1 = getLViewParent(lView);
+            var parent = getLViewParent(lView);
             // Stop traversing up as soon as you find a root view that wasn't attached to any container
-            if (isRootView(lView) && !parent_1) {
+            if (isRootView(lView) && !parent) {
                 return lView;
             }
             // continue otherwise
-            lView = parent_1;
+            lView = parent;
         }
         return null;
     }
@@ -9168,7 +9210,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd;
+    var unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd$1;
     function getLContainer(tNode, embeddedView) {
         ngDevMode && assertLView(embeddedView);
         var container = embeddedView[PARENT];
@@ -10129,13 +10171,6 @@
         return parentTNode;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var ViewRef = /** @class */ (function () {
         function ViewRef(
         /**
@@ -10477,13 +10512,6 @@
         return result;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Creates an ElementRef from the most recent node.
      *
@@ -10882,13 +10910,13 @@
     var ChangeDetectorRef = /** @class */ (function () {
         function ChangeDetectorRef() {
         }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
         return ChangeDetectorRef;
     }());
+    /**
+     * @internal
+     * @nocollapse
+     */
+    ChangeDetectorRef.__NG_ELEMENT_ID__ = function () { return SWITCH_CHANGE_DETECTOR_REF_FACTORY(); };
     var SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
     var SWITCH_CHANGE_DETECTOR_REF_FACTORY__PRE_R3__ = function () {
         var args = [];
@@ -10920,13 +10948,6 @@
         return typeof v === 'function';
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Attention: These regex has to hold even if the code is minified!
      */
@@ -11013,9 +11034,7 @@
                 // Retain the non-function case for compatibility with older tsickle
                 var ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
                 var paramTypes_1 = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
-                var paramAnnotations_1 = ctorParameters.map(function (ctorParam) {
-                    return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
-                });
+                var paramAnnotations_1 = ctorParameters.map(function (ctorParam) { return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators); });
                 return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
             }
             // API for metadata created by invoking the decorators.
@@ -11366,13 +11385,6 @@
         return compilerMeta;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
     var EMPTY_ARRAY$1 = [];
     function convertInjectableProviderToFactory(type, provider) {
@@ -11453,13 +11465,6 @@
      */
     var INJECTOR_SCOPE = new InjectionToken('Set Injector scope.');
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Marker which indicates that a value has not yet been created from the factory function.
      */
@@ -11970,21 +11975,21 @@
                 return INJECTOR_IMPL(options.providers, options.parent, options.name || '');
             }
         };
-        Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
-        Injector.NULL = new NullInjector();
-        /** @nocollapse */
-        Injector.ɵprov = ɵɵdefineInjectable({
-            token: Injector,
-            providedIn: 'any',
-            factory: function () { return ɵɵinject(INJECTOR); },
-        });
-        /**
-         * @internal
-         * @nocollapse
-         */
-        Injector.__NG_ELEMENT_ID__ = -1;
         return Injector;
     }());
+    Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
+    Injector.NULL = new NullInjector();
+    /** @nocollapse */
+    Injector.ɵprov = ɵɵdefineInjectable({
+        token: Injector,
+        providedIn: 'any',
+        factory: function () { return ɵɵinject(INJECTOR); },
+    });
+    /**
+     * @internal
+     * @nocollapse
+     */
+    Injector.__NG_ELEMENT_ID__ = -1;
     var IDENT = function (value) {
         return value;
     };
@@ -12148,7 +12153,6 @@
         }
     }
     function resolveToken(token, record, records, parent, notFoundValue, flags) {
-        var _a;
         var value;
         if (record && !(flags & exports.InjectFlags.SkipSelf)) {
             // If we don't have a record, this implies that we don't own the provider hence don't know how
@@ -12183,7 +12187,7 @@
                         !childRecord && !(options & 4 /* CheckParent */) ? Injector.NULL : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, exports.InjectFlags.Default));
                     }
                 }
-                record.value = value = useNew ? new ((_a = fn).bind.apply(_a, __spread([void 0], deps)))() : fn.apply(obj, deps);
+                record.value = value = useNew ? new (fn.bind.apply(fn, __spread([void 0], deps)))() : fn.apply(obj, deps);
             }
         }
         else if (!(flags & exports.InjectFlags.Self)) {
@@ -12812,13 +12816,6 @@
         return new ReflectiveDependency(ReflectiveKey.get(token), optional, visibility);
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     // Threshold for the dynamic version
     var UNDEFINED = {};
     /**
@@ -13113,9 +13110,9 @@
         ReflectiveInjector_.prototype.toString = function () {
             return this.displayName;
         };
-        ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
         return ReflectiveInjector_;
     }());
+    ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
     function _mapProviders(injector, fn) {
         var res = [];
         for (var i = 0; i < injector._providers.length; ++i) {
@@ -13209,7 +13206,7 @@
      */
     var ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
         if (data === void 0) { data = {}; }
-        return (__assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
+        return (Object.assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
     }, Query);
     /**
      * ContentChild decorator and metadata.
@@ -13221,7 +13218,7 @@
      */
     var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
         if (data === void 0) { data = {}; }
-        return (__assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
+        return (Object.assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
     }, Query);
     /**
      * ViewChildren decorator and metadata.
@@ -13231,7 +13228,7 @@
      */
     var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
         if (data === void 0) { data = {}; }
-        return (__assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
+        return (Object.assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
     }, Query);
     /**
      * ViewChild decorator and metadata.
@@ -13239,9 +13236,7 @@
      * @Annotation
      * @publicApi
      */
-    var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
-        return (__assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data));
-    }, Query);
+    var ViewChild = makePropDecorator('ViewChild', function (selector, data) { return (Object.assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data)); }, Query);
 
     /**
      * @license
@@ -13411,9 +13406,9 @@
     var _symbolIterator = null;
     function getSymbolIterator() {
         if (!_symbolIterator) {
-            var Symbol_1 = _global['Symbol'];
-            if (Symbol_1 && Symbol_1.iterator) {
-                _symbolIterator = Symbol_1.iterator;
+            var Symbol = _global['Symbol'];
+            if (Symbol && Symbol.iterator) {
+                _symbolIterator = Symbol.iterator;
             }
             else {
                 // es6-shim specific logic
@@ -14154,8 +14149,7 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([getTView().data, tNode, 'attr.' + attrName,
-                    getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spread([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
             }
         }
         return ɵɵattributeInterpolateV;
@@ -18400,13 +18394,6 @@
      */
 
     /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Retrieves the component instance associated with a given DOM element.
      *
      * @usageNotes
@@ -18680,7 +18667,7 @@
                 var firstParam = tCleanup[i++];
                 var secondParam = tCleanup[i++];
                 if (typeof firstParam === 'string') {
-                    var name_1 = firstParam;
+                    var name = firstParam;
                     var listenerElement = unwrapRNode(lView[secondParam]);
                     var callback = lCleanup[tCleanup[i++]];
                     var useCaptureOrIndx = tCleanup[i++];
@@ -18690,7 +18677,7 @@
                     var type = (typeof useCaptureOrIndx === 'boolean' || useCaptureOrIndx >= 0) ? 'dom' : 'output';
                     var useCapture = typeof useCaptureOrIndx === 'boolean' ? useCaptureOrIndx : false;
                     if (element == listenerElement) {
-                        listeners.push({ element: element, name: name_1, callback: callback, useCapture: useCapture, type: type });
+                        listeners.push({ element: element, name: name, callback: callback, useCapture: useCapture, type: type });
                     }
                 }
             }
@@ -19188,13 +19175,6 @@
         }
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Fields which exist on either directive or component definitions, and need to be copied from
      * parent to child classes by the `ɵɵCopyDefinitionFeature`.
@@ -19719,13 +19699,6 @@
         return ComponentFactory;
     }());
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function noComponentFactoryError(component) {
         var error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
         error[ERROR_COMPONENT] = component;
@@ -19755,9 +19728,9 @@
     var ComponentFactoryResolver = /** @class */ (function () {
         function ComponentFactoryResolver() {
         }
-        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
         return ComponentFactoryResolver;
     }());
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
     var CodegenComponentFactoryResolver = /** @class */ (function () {
         function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
             this._parent = _parent;
@@ -19840,13 +19813,13 @@
         function ElementRef(nativeElement) {
             this.nativeElement = nativeElement;
         }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
         return ElementRef;
     }());
+    /**
+     * @internal
+     * @nocollapse
+     */
+    ElementRef.__NG_ELEMENT_ID__ = function () { return SWITCH_ELEMENT_REF_FACTORY(ElementRef); };
     var SWITCH_ELEMENT_REF_FACTORY__POST_R3__ = injectElementRef;
     var SWITCH_ELEMENT_REF_FACTORY__PRE_R3__ = noop;
     var SWITCH_ELEMENT_REF_FACTORY = SWITCH_ELEMENT_REF_FACTORY__POST_R3__;
@@ -19900,13 +19873,13 @@
     var Renderer2 = /** @class */ (function () {
         function Renderer2() {
         }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
         return Renderer2;
     }());
+    /**
+     * @internal
+     * @nocollapse
+     */
+    Renderer2.__NG_ELEMENT_ID__ = function () { return SWITCH_RENDERER2_FACTORY(); };
     var SWITCH_RENDERER2_FACTORY__POST_R3__ = injectRenderer2;
     var SWITCH_RENDERER2_FACTORY__PRE_R3__ = noop;
     var SWITCH_RENDERER2_FACTORY = SWITCH_RENDERER2_FACTORY__POST_R3__;
@@ -19926,14 +19899,14 @@
     var Sanitizer = /** @class */ (function () {
         function Sanitizer() {
         }
-        /** @nocollapse */
-        Sanitizer.ɵprov = ɵɵdefineInjectable({
-            token: Sanitizer,
-            providedIn: 'root',
-            factory: function () { return null; },
-        });
         return Sanitizer;
     }());
+    /** @nocollapse */
+    Sanitizer.ɵprov = ɵɵdefineInjectable({
+        token: Sanitizer,
+        providedIn: 'root',
+        factory: function () { return null; },
+    });
 
     /**
      * @license
@@ -19959,7 +19932,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0-rc.0+200.sha-7e0eccc');
+    var VERSION = new Version('10.0.0-rc.0+208.sha-fd65958');
 
     /**
      * @license
@@ -20969,14 +20942,14 @@
                 throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
             }
         };
-        /** @nocollapse */
-        IterableDiffers.ɵprov = ɵɵdefineInjectable({
-            token: IterableDiffers,
-            providedIn: 'root',
-            factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
-        });
         return IterableDiffers;
     }());
+    /** @nocollapse */
+    IterableDiffers.ɵprov = ɵɵdefineInjectable({
+        token: IterableDiffers,
+        providedIn: 'root',
+        factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
+    });
     function getTypeNameForDebugging(type) {
         return type['name'] || typeof type;
     }
@@ -21046,14 +21019,14 @@
             }
             throw new Error("Cannot find a differ supporting object '" + kv + "'");
         };
-        /** @nocollapse */
-        KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
-            token: KeyValueDiffers,
-            providedIn: 'root',
-            factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
-        });
         return KeyValueDiffers;
     }());
+    /** @nocollapse */
+    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
+        token: KeyValueDiffers,
+        providedIn: 'root',
+        factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
+    });
 
     /**
      * @license
@@ -21101,13 +21074,13 @@
     var TemplateRef = /** @class */ (function () {
         function TemplateRef() {
         }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
         return TemplateRef;
     }());
+    /**
+     * @internal
+     * @nocollapse
+     */
+    TemplateRef.__NG_ELEMENT_ID__ = function () { return SWITCH_TEMPLATE_REF_FACTORY(TemplateRef, ElementRef); };
     var SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ = injectTemplateRef;
     var SWITCH_TEMPLATE_REF_FACTORY__PRE_R3__ = noop;
     var SWITCH_TEMPLATE_REF_FACTORY = SWITCH_TEMPLATE_REF_FACTORY__POST_R3__;
@@ -21130,13 +21103,13 @@
     var ViewContainerRef = /** @class */ (function () {
         function ViewContainerRef() {
         }
-        /**
-         * @internal
-         * @nocollapse
-         */
-        ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
         return ViewContainerRef;
     }());
+    /**
+     * @internal
+     * @nocollapse
+     */
+    ViewContainerRef.__NG_ELEMENT_ID__ = function () { return SWITCH_VIEW_CONTAINER_REF_FACTORY(ViewContainerRef, ElementRef); };
     var SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ = injectViewContainerRef;
     var SWITCH_VIEW_CONTAINER_REF_FACTORY__PRE_R3__ = noop;
     var SWITCH_VIEW_CONTAINER_REF_FACTORY = SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__;
@@ -21296,13 +21269,6 @@
         dirtyParentQueries: undefined,
     };
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var NOOP = function () { };
     var _tokenKeyCache = new Map();
     function tokenKey(token) {
@@ -21666,13 +21632,6 @@
     var EMPTY_ARRAY$4 = [];
     var EMPTY_MAP = {};
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var UNDEFINED_VALUE = {};
     var InjectorRefTokenKey = tokenKey(Injector);
     var INJECTORRefTokenKey = tokenKey(INJECTOR);
@@ -21983,13 +21942,6 @@
         visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var EMPTY_CONTEXT = {};
     // Attention: this function is called as top level function.
     // Putting any logic in here will destroy closure tree shaking!
@@ -22406,13 +22358,6 @@
         return NgModuleRef_;
     }());
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var Renderer2TokenKey = tokenKey(Renderer2);
     var ElementRefTokenKey = tokenKey(ElementRef);
     var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
@@ -22844,8 +22789,8 @@
         var initIndex = 0;
         for (var i = 0; i < nodes.length; i++) {
             var nodeDef = nodes[i];
-            var parent_1 = nodeDef.parent;
-            if (!parent_1 && nodeDef.flags & lifecycles) {
+            var parent = nodeDef.parent;
+            if (!parent && nodeDef.flags & lifecycles) {
                 // matching root node (e.g. a pipe)
                 callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
             }
@@ -22853,13 +22798,13 @@
                 // no child matches one of the lifecycles
                 i += nodeDef.childCount;
             }
-            while (parent_1 && (parent_1.flags & 1 /* TypeElement */) &&
-                i === parent_1.nodeIndex + parent_1.childCount) {
+            while (parent && (parent.flags & 1 /* TypeElement */) &&
+                i === parent.nodeIndex + parent.childCount) {
                 // last child of an element
-                if (parent_1.directChildFlags & lifecycles) {
-                    initIndex = callElementProvidersLifecycles(view, parent_1, lifecycles, initIndex);
+                if (parent.directChildFlags & lifecycles) {
+                    initIndex = callElementProvidersLifecycles(view, parent, lifecycles, initIndex);
                 }
-                parent_1 = parent_1.parent;
+                parent = parent.parent;
             }
         }
     }
@@ -22903,13 +22848,6 @@
         }
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
         __extends(ComponentFactoryResolver, _super);
         /**
@@ -24567,13 +24505,6 @@
     }
 
     /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Adds decorator, constructor, and property metadata to a given type via static metadata fields
      * on the type.
      *
@@ -24616,7 +24547,7 @@
                 if (clazz.propDecorators !== undefined &&
                     (!parentConstructor ||
                         parentConstructor.propDecorators !== clazz.propDecorators)) {
-                    clazz.propDecorators = __assign(__assign({}, clazz.propDecorators), propDecorators);
+                    clazz.propDecorators = Object.assign(Object.assign({}, clazz.propDecorators), propDecorators);
                 }
                 else {
                     clazz.propDecorators = propDecorators;
@@ -24674,13 +24605,6 @@
         return modules.get(id) || autoRegisterModuleById[id];
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var NgModuleRef$1 = /** @class */ (function (_super) {
         __extends(NgModuleRef$1, _super);
         function NgModuleRef$1(ngModuleType, _parent) {
@@ -25305,13 +25229,6 @@
         return newValue;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var EventEmitter_ = /** @class */ (function (_super) {
         __extends(EventEmitter_, _super);
         function EventEmitter_(isAsync) {
@@ -25705,7 +25622,7 @@
         TQuery_.prototype.isApplyingToNode = function (tNode) {
             if (this._appliesToNextNode && this.metadata.descendants === false) {
                 var declarationNodeIdx = this._declarationNodeIndex;
-                var parent_1 = tNode.parent;
+                var parent = tNode.parent;
                 // Determine if a given TNode is a "direct" child of a node on which a content query was
                 // declared (only direct children of query's host node can match with the descendants: false
                 // option). There are 3 main use-case / conditions to consider here:
@@ -25716,11 +25633,11 @@
                 // - <needs-target><ng-container><i #target></i></ng-container></needs-target>: here we need
                 // to go past `<ng-container>` to determine <i #target> parent node (but we shouldn't traverse
                 // up past the query's host node!).
-                while (parent_1 !== null && parent_1.type === 4 /* ElementContainer */ &&
-                    parent_1.index !== declarationNodeIdx) {
-                    parent_1 = parent_1.parent;
+                while (parent !== null && parent.type === 4 /* ElementContainer */ &&
+                    parent.index !== declarationNodeIdx) {
+                    parent = parent.parent;
                 }
-                return declarationNodeIdx === (parent_1 !== null ? parent_1.index : -1);
+                return declarationNodeIdx === (parent !== null ? parent.index : -1);
             }
             return this._appliesToNextNode;
         };
@@ -26265,13 +26182,6 @@
         jitOptions = null;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var EMPTY_ARRAY$5 = [];
     var moduleQueue = [];
     /**
@@ -26608,14 +26518,10 @@
      * a given module.
      */
     function patchComponentDefWithScope(componentDef, transitiveScopes) {
-        componentDef.directiveDefs = function () {
-            return Array.from(transitiveScopes.compilation.directives)
-                .map(function (dir) { return dir.hasOwnProperty(NG_COMP_DEF) ? getComponentDef(dir) : getDirectiveDef(dir); })
-                .filter(function (def) { return !!def; });
-        };
-        componentDef.pipeDefs = function () {
-            return Array.from(transitiveScopes.compilation.pipes).map(function (pipe) { return getPipeDef(pipe); });
-        };
+        componentDef.directiveDefs = function () { return Array.from(transitiveScopes.compilation.directives)
+            .map(function (dir) { return dir.hasOwnProperty(NG_COMP_DEF) ? getComponentDef(dir) : getDirectiveDef(dir); })
+            .filter(function (def) { return !!def; }); };
+        componentDef.pipeDefs = function () { return Array.from(transitiveScopes.compilation.pipes).map(function (pipe) { return getPipeDef(pipe); }); };
         componentDef.schemas = transitiveScopes.schemas;
         // Since we avoid Components/Directives/Pipes recompiling in case there are no overrides, we
         // may face a problem where previously compiled defs available to a given Component/Directive
@@ -26780,7 +26686,7 @@
                         }
                     }
                     var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
-                    var meta = __assign(__assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                    var meta = Object.assign(Object.assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                     if (meta.usesInheritance) {
                         addDirectiveDefToUndecoratedParents(type);
                     }
@@ -26853,7 +26759,7 @@
                 if (ngFactoryDef === null) {
                     var meta = getDirectiveMetadata(type, metadata);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", __assign(__assign({}, meta.metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Directive }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", Object.assign(Object.assign({}, meta.metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Directive }));
                 }
                 return ngFactoryDef;
             },
@@ -27002,7 +26908,7 @@
                 if (ngFactoryDef === null) {
                     var metadata = getPipeMetadata(type, meta);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", __assign(__assign({}, metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Pipe }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", Object.assign(Object.assign({}, metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Pipe }));
                 }
                 return ngFactoryDef;
             },
@@ -27033,6 +26939,13 @@
     }
 
     /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Type of the Directive metadata.
      *
      * @publicApi
@@ -27049,13 +26962,13 @@
      */
     var Component = makeDecorator('Component', function (c) {
         if (c === void 0) { c = {}; }
-        return (__assign({ changeDetection: exports.ChangeDetectionStrategy.Default }, c));
+        return (Object.assign({ changeDetection: exports.ChangeDetectionStrategy.Default }, c));
     }, Directive, undefined, function (type, meta) { return SWITCH_COMPILE_COMPONENT(type, meta); });
     /**
      * @Annotation
      * @publicApi
      */
-    var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_PIPE(type, meta); });
+    var Pipe = makeDecorator('Pipe', function (p) { return (Object.assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return SWITCH_COMPILE_PIPE(type, meta); });
     /**
      * @Annotation
      * @publicApi
@@ -27267,18 +27180,22 @@
             }
             this.initialized = true;
         };
-        ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
-        ApplicationInitStatus.ɵprov = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac });
         return ApplicationInitStatus;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(ApplicationInitStatus, [{
-            type: Injectable
-        }], function () { return [{ type: undefined, decorators: [{
-                    type: Inject,
-                    args: [APP_INITIALIZER]
-                }, {
-                    type: Optional
-                }] }]; }, null); })();
+    ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
+    ApplicationInitStatus.ɵprov = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(ApplicationInitStatus, [{
+                type: Injectable
+            }], function () {
+            return [{ type: undefined, decorators: [{
+                            type: Inject,
+                            args: [APP_INITIALIZER]
+                        }, {
+                            type: Optional
+                        }] }];
+        }, null);
+    })();
 
     /**
      * @license
@@ -27337,33 +27254,6 @@
      * @publicApi
      */
     var PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var Console = /** @class */ (function () {
-        function Console() {
-        }
-        Console.prototype.log = function (message) {
-            // tslint:disable-next-line:no-console
-            console.log(message);
-        };
-        // Note: for reporting errors use `DOM.logError()` as it is platform specific
-        Console.prototype.warn = function (message) {
-            // tslint:disable-next-line:no-console
-            console.warn(message);
-        };
-        Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-        Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
-        return Console;
-    }());
-    /*@__PURE__*/ (function () { setClassMetadata(Console, [{
-            type: Injectable
-        }], null, null); })();
 
     /**
      * @license
@@ -27593,13 +27483,15 @@
         Compiler.prototype.getModuleId = function (moduleType) {
             return undefined;
         };
-        Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
-        Compiler.ɵprov = ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
         return Compiler;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(Compiler, [{
-            type: Injectable
-        }], null, null); })();
+    Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
+    Compiler.ɵprov = ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(Compiler, [{
+                type: Injectable
+            }], null, null);
+    })();
     /**
      * Token to provide CompilerOptions in the platform injector.
      *
@@ -28186,13 +28078,15 @@
             // TODO(juliemr): implement.
             return [];
         };
-        Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
-        Testability.ɵprov = ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
         return Testability;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(Testability, [{
-            type: Injectable
-        }], function () { return [{ type: NgZone }]; }, null); })();
+    Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
+    Testability.ɵprov = ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(Testability, [{
+                type: Injectable
+            }], function () { return [{ type: NgZone }]; }, null);
+    })();
     /**
      * A global registry of {@link Testability} instances for specific elements.
      * @publicApi
@@ -28253,13 +28147,15 @@
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
-        TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-        TestabilityRegistry.ɵprov = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
         return TestabilityRegistry;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(TestabilityRegistry, [{
-            type: Injectable
-        }], function () { return []; }, null); })();
+    TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
+    TestabilityRegistry.ɵprov = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(TestabilityRegistry, [{
+                type: Injectable
+            }], function () { return []; }, null);
+    })();
     var _NoopGetTestability = /** @class */ (function () {
         function _NoopGetTestability() {
         }
@@ -28277,6 +28173,35 @@
         _testabilityGetter = getter;
     }
     var _testabilityGetter = new _NoopGetTestability();
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var Console = /** @class */ (function () {
+        function Console() {
+        }
+        Console.prototype.log = function (message) {
+            // tslint:disable-next-line:no-console
+            console.log(message);
+        };
+        // Note: for reporting errors use `DOM.logError()` as it is platform specific
+        Console.prototype.warn = function (message) {
+            // tslint:disable-next-line:no-console
+            console.warn(message);
+        };
+        return Console;
+    }());
+    Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
+    Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(Console, [{
+                type: Injectable
+            }], null, null);
+    })();
 
     var _platform;
     var compileNgModuleFactory = compileNgModuleFactory__POST_R3__;
@@ -28585,13 +28510,15 @@
             enumerable: false,
             configurable: true
         });
-        PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
-        PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
         return PlatformRef;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(PlatformRef, [{
-            type: Injectable
-        }], function () { return [{ type: Injector }]; }, null); })();
+    PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
+    PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(PlatformRef, [{
+                type: Injectable
+            }], function () { return [{ type: Injector }]; }, null);
+    })();
     function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
         var ngZone;
         if (ngZoneOption === 'noop') {
@@ -28628,7 +28555,7 @@
             dst = objs.reduce(optionsReducer, dst);
         }
         else {
-            dst = __assign(__assign({}, dst), objs);
+            dst = Object.assign(Object.assign({}, dst), objs);
         }
         return dst;
     }
@@ -28949,13 +28876,15 @@
             enumerable: false,
             configurable: true
         });
-        ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
-        ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
         return ApplicationRef;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(ApplicationRef, [{
-            type: Injectable
-        }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null); })();
+    ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
+    ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(ApplicationRef, [{
+                type: Injectable
+            }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
+    })();
     function remove(list, el) {
         var index = list.indexOf(el);
         if (index > -1) {
@@ -29090,15 +29019,19 @@
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
-        SystemJsNgModuleLoader.ɵprov = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
         return SystemJsNgModuleLoader;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(SystemJsNgModuleLoader, [{
-            type: Injectable
-        }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
-                    type: Optional
-                }] }]; }, null); })();
+    SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
+    SystemJsNgModuleLoader.ɵprov = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(SystemJsNgModuleLoader, [{
+                type: Injectable
+            }], function () {
+            return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
+                            type: Optional
+                        }] }];
+        }, null);
+    })();
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {
             throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
@@ -29106,13 +29039,6 @@
         return value;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Represents an Angular [view](guide/glossary#view),
      * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
@@ -30055,22 +29981,17 @@
         // Inject ApplicationRef to make it eager...
         function ApplicationModule(appRef) {
         }
-        ApplicationModule.ɵmod = ɵɵdefineNgModule({ type: ApplicationModule });
-        ApplicationModule.ɵinj = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
         return ApplicationModule;
     }());
-    /*@__PURE__*/ (function () { setClassMetadata(ApplicationModule, [{
-            type: NgModule,
-            args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
-        }], function () { return [{ type: ApplicationRef }]; }, null); })();
+    ApplicationModule.ɵmod = ɵɵdefineNgModule({ type: ApplicationModule });
+    ApplicationModule.ɵinj = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
+    /*@__PURE__*/ (function () {
+        setClassMetadata(ApplicationModule, [{
+                type: NgModule,
+                args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
+            }], function () { return [{ type: ApplicationRef }]; }, null);
+    })();
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
         flags |= 1 /* TypeElement */;
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
@@ -30228,8 +30149,8 @@
         }
         if (elDef.attrs) {
             for (var i = 0; i < elDef.attrs.length; i++) {
-                var _a = __read(elDef.attrs[i], 3), ns = _a[0], name_2 = _a[1], value = _a[2];
-                renderer.setAttribute(el, name_2, value, ns);
+                var _a = __read(elDef.attrs[i], 3), ns = _a[0], name = _a[1], value = _a[2];
+                renderer.setAttribute(el, name, value, ns);
             }
         }
         return el;
@@ -30581,13 +30502,6 @@
         visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, null, undefined);
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function purePipeDef(checkIndex, argCount) {
         // argCount + 1 to include the pipe as first arg
         return _pureExpressionDef(128 /* TypePurePipe */, checkIndex, newArray(argCount + 1));
@@ -31044,9 +30958,7 @@
                 }
             }
         }
-        var handleEvent = function (view, nodeIndex, eventName, event) {
-            return nodes[nodeIndex].element.handleEvent(view, eventName, event);
-        };
+        var handleEvent = function (view, nodeIndex, eventName, event) { return nodes[nodeIndex].element.handleEvent(view, eventName, event); };
         return {
             // Will be filled later...
             factory: null,
@@ -31551,13 +31463,6 @@
         }
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var initialized = false;
     function initServicesIfNeeded() {
         if (initialized) {
@@ -31597,9 +31502,7 @@
             checkNoChangesView: checkNoChangesView,
             destroyView: destroyView,
             createDebugContext: function (view, nodeIndex) { return new DebugContext_(view, nodeIndex); },
-            handleEvent: function (view, nodeIndex, eventName, event) {
-                return view.def.handleEvent(view, nodeIndex, eventName, event);
-            },
+            handleEvent: function (view, nodeIndex, eventName, event) { return view.def.handleEvent(view, nodeIndex, eventName, event); },
             updateDirectives: function (view, checkType) { return view.def.updateDirectives(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode : prodCheckNoChangesNode, view); },
             updateRenderer: function (view, checkType) { return view.def.updateRenderer(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode : prodCheckNoChangesNode, view); },
         };
@@ -32334,13 +32237,6 @@
         return DebugRenderer2;
     }());
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     function overrideProvider(override) {
         initServicesIfNeeded();
         return Services.overrideProvider(override);
