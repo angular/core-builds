@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0+17.sha-2cbe53a
+ * @license Angular v10.0.0+20.sha-64f2ffa
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19990,7 +19990,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.0+17.sha-2cbe53a');
+    var VERSION = new Version('10.0.0+20.sha-64f2ffa');
 
     /**
      * @license
@@ -23053,12 +23053,6 @@
                 elementCreate(elementName, rendererFactory.createRenderer(null, this.componentDef), getNamespace$1(elementName));
             var rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
                 16 /* CheckAlways */ | 512 /* IsRoot */;
-            // Check whether this Component needs to be isolated from other components, i.e. whether it
-            // should be placed into its own (empty) root context or existing root context should be used.
-            // Note: this is internal-only convention and might change in the future, so it should not be
-            // relied upon externally.
-            var isIsolated = typeof rootSelectorOrNode === 'string' &&
-                /^#root-ng-internal-isolated-\d+/.test(rootSelectorOrNode);
             var rootContext = createRootContext();
             // Create the root view. Uses empty TView and ContentTemplate.
             var rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
@@ -23113,12 +23107,9 @@
                 leaveView();
             }
             var componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
-            if (!rootSelectorOrNode || isIsolated) {
-                // The host element of the internal or isolated root view is attached to the component's host
-                // view node.
-                ngDevMode && assertNodeOfPossibleTypes(rootTView.node, 2 /* View */);
-                rootTView.node.child = tElementNode;
-            }
+            // The host element of the internal root view is attached to the component's host view node.
+            ngDevMode && assertNodeOfPossibleTypes(rootTView.node, 2 /* View */);
+            rootTView.node.child = tElementNode;
             return componentRef;
         };
         return ComponentFactory;
