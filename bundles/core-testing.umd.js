@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+260.sha-d12cdb5
+ * @license Angular v10.0.0-rc.0+262.sha-9118f49
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2433,7 +2433,7 @@
         TestBedRender3.prototype.createComponent = function (type) {
             var _this = this;
             var testComponentRenderer = this.inject(TestComponentRenderer);
-            var rootElId = "root-ng-internal-isolated-" + _nextRootElementId++;
+            var rootElId = "root" + _nextRootElementId++;
             testComponentRenderer.insertRootElement(rootElId);
             var componentDef = type.ɵcmp;
             if (!componentDef) {
