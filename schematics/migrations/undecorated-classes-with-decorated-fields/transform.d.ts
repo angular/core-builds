@@ -52,5 +52,12 @@ export declare class UndecoratedClassesWithDecoratedFieldsTransform {
      * considered Angular features..
      */
     private _determineClassKind;
+    /**
+     * Checks whether a given class has been reported as ambiguous in previous
+     * migration run. e.g. when build targets are migrated first, and then test
+     * targets that have an overlap with build source files, the same class
+     * could be detected as ambiguous.
+     */
+    private _hasBeenReportedAsAmbiguous;
 }
 export {};
