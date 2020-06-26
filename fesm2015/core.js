@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0+29.sha-ad6680f
+ * @license Angular v10.0.0+34.sha-e702372
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3070,10 +3070,10 @@ function assertNodeType(tNode, type) {
     assertDefined(tNode, 'should be called with a TNode');
     assertEqual(tNode.type, type, `should be a ${typeName(type)}`);
 }
-function assertNodeOfPossibleTypes(tNode, ...types) {
+function assertNodeOfPossibleTypes(tNode, types, message) {
     assertDefined(tNode, 'should be called with a TNode');
     const found = types.some(type => tNode.type === type);
-    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
+    assertEqual(found, true, message !== null && message !== void 0 ? message : `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
 }
 function assertNodeNotOfTypes(tNode, types, message) {
     assertDefined(tNode, 'should be called with a TNode');
@@ -3645,7 +3645,7 @@ function diPublicInInjector(injectorIndex, tView, token) {
  */
 function injectAttributeImpl(tNode, attrNameToInject) {
     ngDevMode &&
-        assertNodeOfPossibleTypes(tNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
+        assertNodeOfPossibleTypes(tNode, [0 /* Container */, 3 /* Element */, 4 /* ElementContainer */]);
     ngDevMode && assertDefined(tNode, 'expecting tNode');
     if (attrNameToInject === 'class') {
         return tNode.classes;
@@ -7110,7 +7110,7 @@ function assignTViewNodeToLView(tView, tParentNode, index, lView) {
     let tNode = tView.node;
     if (tNode == null) {
         ngDevMode && tParentNode &&
-            assertNodeOfPossibleTypes(tParentNode, 3 /* Element */, 0 /* Container */);
+            assertNodeOfPossibleTypes(tParentNode, [3 /* Element */, 0 /* Container */]);
         tView.node = tNode = createTNode(tView, tParentNode, //
         2 /* View */, index, null, null);
     }
@@ -8016,7 +8016,7 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
         const def = tView.data[i];
         const isComponent = isComponentDef(def);
         if (isComponent) {
-            ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */);
+            ngDevMode && assertNodeOfPossibleTypes(tNode, [3 /* Element */]);
             addComponentLogic(lView, tNode, def);
         }
         const directive = getNodeInjectable(lView, tView, i, tNode);
@@ -8092,7 +8092,7 @@ function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
 function findDirectiveDefMatches(tView, viewData, tNode) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode &&
-        assertNodeOfPossibleTypes(tNode, 3 /* Element */, 4 /* ElementContainer */, 0 /* Container */);
+        assertNodeOfPossibleTypes(tNode, [3 /* Element */, 4 /* ElementContainer */, 0 /* Container */]);
     const registry = tView.directiveRegistry;
     let matches = null;
     if (registry) {
@@ -8102,6 +8102,9 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                 matches || (matches = ngDevMode ? new MatchesArray() : []);
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
+                    ngDevMode &&
+                        assertNodeOfPossibleTypes(tNode, [3 /* Element */], `"${tNode.tagName}" tags cannot be used as component hosts. ` +
+                            `Please use a different tag to activate the ${stringify(def.type)} component.`);
                     if (tNode.flags & 2 /* isComponentHost */)
                         throwMultipleComponentError(tNode);
                     markAsComponentHost(tView, tNode);
@@ -9183,7 +9186,7 @@ function getRenderParent(tView, tNode, currentView) {
         else {
             // We are inserting a root element of the component view into the component host element and
             // it should always be eager.
-            ngDevMode && assertNodeOfPossibleTypes(hostTNode, 3 /* Element */);
+            ngDevMode && assertNodeOfPossibleTypes(hostTNode, [3 /* Element */]);
             return currentView[HOST];
         }
     }
@@ -9320,8 +9323,10 @@ function appendChild(tView, lView, childEl, childTNode) {
  */
 function getFirstNativeNode(lView, tNode) {
     if (tNode !== null) {
-        ngDevMode &&
-            assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */, 5 /* IcuContainer */, 1 /* Projection */);
+        ngDevMode && assertNodeOfPossibleTypes(tNode, [
+            3 /* Element */, 0 /* Container */, 4 /* ElementContainer */, 5 /* IcuContainer */,
+            1 /* Projection */
+        ]);
         const tNodeType = tNode.type;
         if (tNodeType === 3 /* Element */) {
             return getNativeByTNode(tNode, lView);
@@ -9392,8 +9397,10 @@ function nativeRemoveNode(renderer, rNode, isHostElement) {
 function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, isProjection) {
     while (tNode != null) {
         ngDevMode && assertTNodeForLView(tNode, lView);
-        ngDevMode &&
-            assertNodeOfPossibleTypes(tNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */, 1 /* Projection */, 1 /* Projection */, 5 /* IcuContainer */);
+        ngDevMode && assertNodeOfPossibleTypes(tNode, [
+            0 /* Container */, 3 /* Element */, 4 /* ElementContainer */, 1 /* Projection */,
+            5 /* IcuContainer */
+        ]);
         const rawSlotValue = lView[tNode.index];
         const tNodeType = tNode.type;
         if (isProjection) {
@@ -9411,7 +9418,7 @@ function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, is
                 applyProjectionRecursive(renderer, action, lView, tNode, renderParent, beforeNode);
             }
             else {
-                ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */);
+                ngDevMode && assertNodeOfPossibleTypes(tNode, [3 /* Element */, 0 /* Container */]);
                 applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
             }
         }
@@ -9968,8 +9975,10 @@ class RootViewRef extends ViewRef {
 }
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     while (tNode !== null) {
-        ngDevMode &&
-            assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 1 /* Projection */, 4 /* ElementContainer */, 5 /* IcuContainer */);
+        ngDevMode && assertNodeOfPossibleTypes(tNode, [
+            3 /* Element */, 0 /* Container */, 1 /* Projection */, 4 /* ElementContainer */,
+            5 /* IcuContainer */
+        ]);
         const lNode = lView[tNode.index];
         if (lNode !== null) {
             result.push(unwrapRNode(lNode));
@@ -10245,7 +10254,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
         };
     }
     ngDevMode &&
-        assertNodeOfPossibleTypes(hostTNode, 0 /* Container */, 3 /* Element */, 4 /* ElementContainer */);
+        assertNodeOfPossibleTypes(hostTNode, [0 /* Container */, 3 /* Element */, 4 /* ElementContainer */]);
     let lContainer;
     const slotValue = hostView[hostTNode.index];
     if (isLContainer(slotValue)) {
@@ -14241,7 +14250,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     // register a listener and store its cleanup function on LView.
     const lCleanup = getLCleanup(lView);
     ngDevMode &&
-        assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
+        assertNodeOfPossibleTypes(tNode, [3 /* Element */, 0 /* Container */, 4 /* ElementContainer */]);
     let processOutputs = true;
     // add native event listener - applicable to elements only
     if (tNode.type === 3 /* Element */) {
@@ -19346,7 +19355,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0+29.sha-ad6680f');
+const VERSION = new Version('10.0.0+34.sha-e702372');
 
 /**
  * @license
@@ -22332,7 +22341,7 @@ class ComponentFactory$1 extends ComponentFactory {
         }
         const componentRef = new ComponentRef$1(this.componentType, component, createElementRef(ElementRef, tElementNode, rootLView), rootLView, tElementNode);
         // The host element of the internal root view is attached to the component's host view node.
-        ngDevMode && assertNodeOfPossibleTypes(rootTView.node, 2 /* View */);
+        ngDevMode && assertNodeOfPossibleTypes(rootTView.node, [2 /* View */]);
         rootTView.node.child = tElementNode;
         return componentRef;
     }
@@ -25050,7 +25059,7 @@ function createSpecialToken(lView, tNode, read) {
     }
     else if (read === ViewContainerRef) {
         ngDevMode &&
-            assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */, 4 /* ElementContainer */);
+            assertNodeOfPossibleTypes(tNode, [3 /* Element */, 0 /* Container */, 4 /* ElementContainer */]);
         return createContainerRef(ViewContainerRef, ElementRef, tNode, lView);
     }
     else {
