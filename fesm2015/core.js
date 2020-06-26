@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+281.sha-acf3cff
+ * @license Angular v10.0.0-rc.0+278.sha-0879d2e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4525,7 +4525,7 @@ function isDOMParserAvailable() {
  *
  * This regular expression was taken from the Closure sanitization library.
  */
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file|sms):|[^&:/?#]*(?:[/?#]|$))/gi;
+const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
 /* A pattern that matches safe srcset values */
 const SAFE_SRCSET_PATTERN = /^(?:(?:https?|file):|[^&:/?#]*(?:[/?#]|$))/gi;
 /** A pattern that matches safe data URLs. Only matches image, video and audio types. */
@@ -19324,7 +19324,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.0+281.sha-acf3cff');
+const VERSION = new Version('10.0.0-rc.0+278.sha-0879d2e');
 
 /**
  * @license
