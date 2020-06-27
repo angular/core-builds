@@ -126,15 +126,6 @@ export declare function locateHostElement(renderer: Renderer3, elementOrSelector
  */
 export declare function storeCleanupWithContext(tView: TView, lView: LView, context: any, cleanupFn: Function): void;
 /**
- * Saves the cleanup function itself in LView.cleanupInstances.
- *
- * This is necessary for functions that are wrapped with their contexts, like in renderer2
- * listeners.
- *
- * On the first template pass, the index of the cleanup function is saved in TView.
- */
-export declare function storeCleanupFn(tView: TView, lView: LView, cleanupFn: Function): void;
-/**
  * Constructs a TNode object from the arguments.
  *
  * @param tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)

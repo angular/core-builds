@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+288.sha-c00f4ab
+ * @license Angular v10.0.0-rc.0+290.sha-98c047b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7532,20 +7532,6 @@ function storeCleanupWithContext(tView, lView, context, cleanupFn) {
     }
 }
 /**
- * Saves the cleanup function itself in LView.cleanupInstances.
- *
- * This is necessary for functions that are wrapped with their contexts, like in renderer2
- * listeners.
- *
- * On the first template pass, the index of the cleanup function is saved in TView.
- */
-function storeCleanupFn(tView, lView, cleanupFn) {
-    getLCleanup(lView).push(cleanupFn);
-    if (tView.firstCreatePass) {
-        getTViewCleanup(tView).push(lView[CLEANUP].length - 1, null);
-    }
-}
-/**
  * Constructs a TNode object from the arguments.
  *
  * @param tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)
@@ -9712,7 +9698,7 @@ class ViewRef {
         destroyLView(this._lView[TVIEW], this._lView);
     }
     onDestroy(callback) {
-        storeCleanupFn(this._lView[TVIEW], this._lView, callback);
+        storeCleanupWithContext(this._lView[TVIEW], this._lView, null, callback);
     }
     /**
      * Marks a view and all of its ancestors dirty.
@@ -19289,7 +19275,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.0-rc.0+288.sha-c00f4ab');
+const VERSION = new Version('10.0.0-rc.0+290.sha-98c047b');
 
 /**
  * @license
