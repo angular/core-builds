@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.1
+ * @license Angular v10.0.1+4.sha-78460c1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3497,7 +3497,13 @@ let nextNgElementId = 0;
  */
 function bloomAdd(injectorIndex, tView, type) {
     ngDevMode && assertEqual(tView.firstCreatePass, true, 'expected firstCreatePass to be true');
-    let id = typeof type !== 'string' ? type[NG_ELEMENT_ID] : type.charCodeAt(0) || 0;
+    let id;
+    if (typeof type === 'string') {
+        id = type.charCodeAt(0) || 0;
+    }
+    else if (type.hasOwnProperty(NG_ELEMENT_ID)) {
+        id = type[NG_ELEMENT_ID];
+    }
     // Set a unique ID on the directive type, so if something tries to inject the directive,
     // we can easily retrieve the ID and hash it into the bloom bit that should be checked.
     if (id == null) {
@@ -3943,7 +3949,9 @@ function bloomHashBitOrFactory(token) {
     if (typeof token === 'string') {
         return token.charCodeAt(0) || 0;
     }
-    const tokenId = token[NG_ELEMENT_ID];
+    const tokenId = 
+    // First check with `hasOwnProperty` so we don't get an inherited ID.
+    token.hasOwnProperty(NG_ELEMENT_ID) ? token[NG_ELEMENT_ID] : undefined;
     // Negative token IDs are used for special objects such as `Injector`
     return (typeof tokenId === 'number' && tokenId > 0) ? tokenId & BLOOM_MASK : tokenId;
 }
@@ -7573,20 +7581,6 @@ function storeCleanupWithContext(tView, lView, context, cleanupFn) {
     }
 }
 /**
- * Saves the cleanup function itself in LView.cleanupInstances.
- *
- * This is necessary for functions that are wrapped with their contexts, like in renderer2
- * listeners.
- *
- * On the first template pass, the index of the cleanup function is saved in TView.
- */
-function storeCleanupFn(tView, lView, cleanupFn) {
-    getLCleanup(lView).push(cleanupFn);
-    if (tView.firstCreatePass) {
-        getTViewCleanup(tView).push(lView[CLEANUP].length - 1, null);
-    }
-}
-/**
  * Constructs a TNode object from the arguments.
  *
  * @param tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)
@@ -9753,7 +9747,7 @@ class ViewRef {
         destroyLView(this._lView[TVIEW], this._lView);
     }
     onDestroy(callback) {
-        storeCleanupFn(this._lView[TVIEW], this._lView, callback);
+        storeCleanupWithContext(this._lView[TVIEW], this._lView, null, callback);
     }
     /**
      * Marks a view and all of its ancestors dirty.
@@ -19355,7 +19349,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.1');
+const VERSION = new Version('10.0.1+4.sha-78460c1');
 
 /**
  * @license
