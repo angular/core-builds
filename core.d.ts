@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.1+23.sha-f9f2ba6
+ * @license Angular v10.0.2+2.sha-842b6a1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -166,44 +166,51 @@ export declare interface AfterViewInit {
 export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 
 /**
- * All callbacks provided via this token will be called for every component that is bootstrapped.
- * Signature of the callback:
+ * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
+ * be called for every component that is bootstrapped.
  *
- * `(componentRef: ComponentRef) => void`.
+ * Each callback must take a `ComponentRef` instance and return nothing.
+ *
+ * `(componentRef: ComponentRef) => void`
  *
  * @publicApi
  */
 export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: ComponentRef<any>) => void)[]>;
 
 /**
- * A DI Token representing a unique string id assigned to the application by Angular and used
+ * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
  *
- * If you need to avoid randomly generated value to be used as an application id, you can provide
- * a custom value via a DI provider <!-- TODO: provider --> configuring the root {@link Injector}
- * using this token.
+ * BY default, the value is randomly generated and assigned to the application by Angular.
+ * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
+ * the root {@link Injector} that uses this token.
+ *
  * @publicApi
  */
 export declare const APP_ID: InjectionToken<string>;
 
 /**
- * An injection token that allows you to provide one or more initialization functions.
- * These function are injected at application startup and executed during
+ * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
+ * one or more initialization functions.
+ *
+ * The provided function are injected at application startup and executed during
  * app initialization. If any of these functions returns a Promise, initialization
  * does not complete until the Promise is resolved.
  *
  * You can, for example, create a factory function that loads language data
  * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
- * That way, the function is executed during the application bootstrap process,
+ * The function is executed during the application bootstrap process,
  * and the needed data is available on startup.
+ *
+ * @see `ApplicationInitStatus`
  *
  * @publicApi
  */
 export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
 
 /**
- * A class that reflects the state of running {@link APP_INITIALIZER}s.
+ * A class that reflects the state of running {@link APP_INITIALIZER} functions.
  *
  * @publicApi
  */
@@ -446,11 +453,11 @@ export declare interface AttributeDecorator {
      * <input type="text">
      * ```
      *
-     * The following example uses the decorator to inject the string literal `text`.
+     * The following example uses the decorator to inject the string literal `text` in a directive.
      *
      * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
      *
-     * ### Example as TypeScript Decorator
+     * The following example uses the decorator in a component constructor.
      *
      * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
      *
@@ -509,6 +516,8 @@ declare interface BootstrapOptions {
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
+ * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
+ *
  * @publicApi
  */
 export declare enum ChangeDetectionStrategy {
@@ -527,10 +536,13 @@ export declare enum ChangeDetectionStrategy {
 }
 
 /**
- * Base class for Angular Views, provides change detection functionality.
+ * Base class that provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
  * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
  *
  * @usageNotes
  *
@@ -888,7 +900,8 @@ export declare interface ComponentDecorator {
      * An Angular app contains a tree of Angular components.
      *
      * Angular components are a subset of directives, always associated with a template.
-     * Unlike other directives, only one component can be instantiated per an element in a template.
+     * Unlike other directives, only one component can be instantiated for a given element in a
+     * template.
      *
      * A component must belong to an NgModule in order for it to be available
      * to another component or application. To make it a member of an NgModule,
@@ -1936,10 +1949,10 @@ export declare interface Directive {
         [key: string]: string;
     };
     /**
-     * If true, this directive/component will be skipped by the AOT compiler and so will always be
-     * compiled using JIT.
-     *
-     * This exists to support future Ivy work and has no effect currently.
+     * When present, this directive/component is ignored by the AOT compiler.
+     * It remains in distributed code, and the JIT compiler attempts to compile it
+     * at run time, in the browser.
+     * To ensure the correct behavior, the app must import `@angular/compiler`.
      */
     jit?: true;
 }
@@ -2666,7 +2679,7 @@ export declare interface HostBindingDecorator {
 declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
- * Type of the Host decorator / constructor function.
+ * Type of the `Host` decorator / constructor function.
  *
  * @publicApi
  */
@@ -2676,15 +2689,15 @@ export declare interface HostDecorator {
      * that tells the DI framework to resolve the view by checking injectors of child
      * elements, and stop when reaching the host element of the current component.
      *
-     * For an extended example, see
-     * ["Dependency Injection Guide"](guide/dependency-injection-in-action#optional).
-     *
      * @usageNotes
      *
      * The following shows use with the `@Optional` decorator, and allows for a null result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
+     *
+     * For an extended example, see ["Dependency Injection
+     * Guide"](guide/dependency-injection-in-action#optional).
      */
     (): any;
     new (): Host;
@@ -3114,8 +3127,6 @@ export declare interface InjectDecorator {
      * Parameter decorator on a dependency parameter of a class constructor
      * that specifies a custom provider of the dependency.
      *
-     * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
      * @usageNotes
      * The following example shows a class constructor that specifies a
      * custom provider of a dependency using the parameter decorator.
@@ -3125,6 +3136,9 @@ export declare interface InjectDecorator {
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
      * </code-example>
+     *
+     * @see ["Dependency Injection Guide"](guide/dependency-injection)
+     *
      */
     (token: any): any;
     new (token: any): Inject;
@@ -4089,12 +4103,10 @@ export declare class ModuleWithComponentFactories<T> {
 }
 
 /**
- * A wrapper around an NgModule that associates it with the providers.
+ * A wrapper around an NgModule that associates it with [providers](guide/glossary#provider
+ * "Definition"). Usage without a generic type is deprecated.
  *
- * @param T the module type.
- *
- * Note that using ModuleWithProviders without a generic type is deprecated.
- * The generic will become required in a future version of Angular.
+ * @see [Deprecations](guide/deprecations#modulewithproviders-type-without-a-generic)
  *
  * @publicApi
  */
@@ -4306,10 +4318,10 @@ export declare interface NgModule {
      */
     id?: string;
     /**
-     * If true, this module will be skipped by the AOT compiler and so will always be compiled
-     * using JIT.
-     *
-     * This exists to support future Ivy work and has no effect currently.
+     * When present, this module is ignored by the AOT compiler.
+     * It remains in distributed code, and the JIT compiler attempts to compile it
+     * at run time, in the browser.
+     * To ensure the correct behavior, the app must import `@angular/compiler`.
      */
     jit?: true;
 }
@@ -4373,25 +4385,23 @@ declare interface NgModuleProviderDef {
 }
 
 /**
- * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
- *
- * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
- * NgModule Instance.
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
  *
  * @publicApi
  */
 export declare abstract class NgModuleRef<T> {
     /**
-     * The injector that contains all of the providers of the NgModule.
+     * The injector that contains all of the providers of the `NgModule`.
      */
     abstract get injector(): Injector;
     /**
-     * The ComponentFactoryResolver to get hold of the ComponentFactories
+     * The resolver that can retrieve the component factories
      * declared in the `entryComponents` property of the module.
      */
     abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
-     * The NgModule instance.
+     * The `NgModule` instance.
      */
     abstract get instance(): T;
     /**
@@ -4399,7 +4409,7 @@ export declare abstract class NgModuleRef<T> {
      */
     abstract destroy(): void;
     /**
-     * Allows to register a callback that will be called when the module is destroyed.
+     * Registers a callback to be executed when the module is destroyed.
      */
     abstract onDestroy(callback: () => void): void;
 }
@@ -4785,8 +4795,6 @@ export declare interface OptionalDecorator {
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
-     * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
      * @usageNotes
      *
      * The following code allows the possibility of a null result:
@@ -4794,6 +4802,7 @@ export declare interface OptionalDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
      *
+     * @see ["Dependency Injection Guide"](guide/dependency-injection).
      */
     (): any;
     new (): Optional;
@@ -4856,7 +4865,8 @@ declare const enum OutputType {
 }
 
 /**
- * A token which indicates the root directory of the application
+ * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
+ * the application
  * @publicApi
  */
 export declare const PACKAGE_ROOT_URL: InjectionToken<string>;
@@ -4979,13 +4989,13 @@ declare type PipeTypeList = (PipeType<any> | Type<any>)[];
 declare type PipeTypesOrFactory = (() => PipeTypeList) | PipeTypeList;
 
 /**
- * A token that indicates an opaque platform id.
+ * A token that indicates an opaque platform ID.
  * @publicApi
  */
 export declare const PLATFORM_ID: InjectionToken<Object>;
 
 /**
- * A function that will be executed when a platform is initialized.
+ * A function that is executed when a platform is initialized.
  * @publicApi
  */
 export declare const PLATFORM_INITIALIZER: InjectionToken<(() => void)[]>;
@@ -6249,7 +6259,6 @@ export declare interface SelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
      * </code-example>
      *
-     *
      * @see `SkipSelf`
      * @see `Optional`
      *
@@ -6299,7 +6308,7 @@ export declare interface SimpleChanges {
 }
 
 /**
- * Type of the SkipSelf metadata.
+ * Type of the `SkipSelf` metadata.
  *
  * @publicApi
  */
@@ -6307,7 +6316,7 @@ export declare interface SkipSelf {
 }
 
 /**
- * SkipSelf decorator and metadata.
+ * `SkipSelf` decorator and metadata.
  *
  * @Annotation
  * @publicApi
@@ -6315,7 +6324,7 @@ export declare interface SkipSelf {
 export declare const SkipSelf: SkipSelfDecorator;
 
 /**
- * Type of the SkipSelf decorator / constructor function.
+ * Type of the `SkipSelf` decorator / constructor function.
  *
  * @publicApi
  */
@@ -6334,9 +6343,7 @@ export declare interface SkipSelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
      * </code-example>
      *
-     * Learn more in the
-     * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
-     *
+     * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
      * @see `Self`
      * @see `Optional`
      *
@@ -8245,12 +8252,9 @@ declare interface ViewHandleEventFn {
 declare type ViewQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
- * Represents an Angular [view](guide/glossary#view),
- * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
- * Also serves as the base class
- * that adds destroy methods for [embedded views](guide/glossary#view-tree).
+ * Represents an Angular [view](guide/glossary#view "Definition").
  *
- * @see `EmbeddedViewRef`
+ * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *
  * @publicApi
  */
@@ -9160,7 +9164,7 @@ export declare function ɵangular_packages_core_core_y(tNode: TNode, attrNameToI
 export declare const ɵangular_packages_core_core_z: InstructionState;
 
 /**
- * Providers that will generate a random APP_ID_TOKEN.
+ * Providers that generate a random `APP_ID_TOKEN`.
  * @publicApi
  */
 export declare const ɵAPP_ID_RANDOM_PROVIDER: {

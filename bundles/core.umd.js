@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.1+23.sha-f9f2ba6
+ * @license Angular v10.0.2+2.sha-842b6a1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -427,7 +427,7 @@
      */
     var Self = makeParamDecorator('Self');
     /**
-     * SkipSelf decorator and metadata.
+     * `SkipSelf` decorator and metadata.
      *
      * @Annotation
      * @publicApi
@@ -1238,10 +1238,8 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
-     *
-     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
-     * NgModule Instance.
+     * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+     * Provides access to the `NgModule` instance and related objects.
      *
      * @publicApi
      */
@@ -10803,10 +10801,13 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Base class for Angular Views, provides change detection functionality.
+     * Base class that provides change detection functionality.
      * A change-detection tree collects all views that are to be checked for changes.
      * Use the methods to add and remove views from the tree, initiate change-detection,
-     * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+     * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+     *
+     * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+     * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
      *
      * @usageNotes
      *
@@ -19949,7 +19950,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.1+23.sha-f9f2ba6');
+    var VERSION = new Version('10.0.2+2.sha-842b6a1');
 
     /**
      * @license
@@ -27206,21 +27207,25 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * An injection token that allows you to provide one or more initialization functions.
-     * These function are injected at application startup and executed during
+     * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
+     * one or more initialization functions.
+     *
+     * The provided function are injected at application startup and executed during
      * app initialization. If any of these functions returns a Promise, initialization
      * does not complete until the Promise is resolved.
      *
      * You can, for example, create a factory function that loads language data
      * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
-     * That way, the function is executed during the application bootstrap process,
+     * The function is executed during the application bootstrap process,
      * and the needed data is available on startup.
+     *
+     * @see `ApplicationInitStatus`
      *
      * @publicApi
      */
     var APP_INITIALIZER = new InjectionToken('Application Initializer');
     /**
-     * A class that reflects the state of running {@link APP_INITIALIZER}s.
+     * A class that reflects the state of running {@link APP_INITIALIZER} functions.
      *
      * @publicApi
      */
@@ -27283,13 +27288,14 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * A DI Token representing a unique string id assigned to the application by Angular and used
+     * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
      * primarily for prefixing application attributes and CSS styles when
      * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
      *
-     * If you need to avoid randomly generated value to be used as an application id, you can provide
-     * a custom value via a DI provider <!-- TODO: provider --> configuring the root {@link Injector}
-     * using this token.
+     * BY default, the value is randomly generated and assigned to the application by Angular.
+     * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
+     * the root {@link Injector} that uses this token.
+     *
      * @publicApi
      */
     var APP_ID = new InjectionToken('AppId');
@@ -27297,7 +27303,7 @@
         return "" + _randomChar() + _randomChar() + _randomChar();
     }
     /**
-     * Providers that will generate a random APP_ID_TOKEN.
+     * Providers that generate a random `APP_ID_TOKEN`.
      * @publicApi
      */
     var APP_ID_RANDOM_PROVIDER = {
@@ -27309,26 +27315,29 @@
         return String.fromCharCode(97 + Math.floor(Math.random() * 25));
     }
     /**
-     * A function that will be executed when a platform is initialized.
+     * A function that is executed when a platform is initialized.
      * @publicApi
      */
     var PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
     /**
-     * A token that indicates an opaque platform id.
+     * A token that indicates an opaque platform ID.
      * @publicApi
      */
     var PLATFORM_ID = new InjectionToken('Platform ID');
     /**
-     * All callbacks provided via this token will be called for every component that is bootstrapped.
-     * Signature of the callback:
+     * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
+     * be called for every component that is bootstrapped.
      *
-     * `(componentRef: ComponentRef) => void`.
+     * Each callback must take a `ComponentRef` instance and return nothing.
+     *
+     * `(componentRef: ComponentRef) => void`
      *
      * @publicApi
      */
     var APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
     /**
-     * A token which indicates the root directory of the application
+     * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
+     * the application
      * @publicApi
      */
     var PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
@@ -29126,12 +29135,9 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Represents an Angular [view](guide/glossary#view),
-     * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
-     * Also serves as the base class
-     * that adds destroy methods for [embedded views](guide/glossary#view-tree).
+     * Represents an Angular [view](guide/glossary#view "Definition").
      *
-     * @see `EmbeddedViewRef`
+     * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
      *
      * @publicApi
      */
