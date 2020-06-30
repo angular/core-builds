@@ -15,8 +15,6 @@ export interface InjectDecorator {
      * Parameter decorator on a dependency parameter of a class constructor
      * that specifies a custom provider of the dependency.
      *
-     * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
      * @usageNotes
      * The following example shows a class constructor that specifies a
      * custom provider of a dependency using the parameter decorator.
@@ -26,6 +24,9 @@ export interface InjectDecorator {
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
      * </code-example>
+     *
+     * @see ["Dependency Injection Guide"](guide/dependency-injection)
+     *
      */
     (token: any): any;
     new (token: any): Inject;
@@ -62,8 +63,6 @@ export interface OptionalDecorator {
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
-     * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
      * @usageNotes
      *
      * The following code allows the possibility of a null result:
@@ -71,6 +70,7 @@ export interface OptionalDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
      *
+     * @see ["Dependency Injection Guide"](guide/dependency-injection).
      */
     (): any;
     new (): Optional;
@@ -111,7 +111,6 @@ export interface SelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
      * </code-example>
      *
-     *
      * @see `SkipSelf`
      * @see `Optional`
      *
@@ -134,7 +133,7 @@ export interface Self {
  */
 export declare const Self: SelfDecorator;
 /**
- * Type of the SkipSelf decorator / constructor function.
+ * Type of the `SkipSelf` decorator / constructor function.
  *
  * @publicApi
  */
@@ -153,9 +152,7 @@ export interface SkipSelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
      * </code-example>
      *
-     * Learn more in the
-     * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
-     *
+     * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
      * @see `Self`
      * @see `Optional`
      *
@@ -164,21 +161,21 @@ export interface SkipSelfDecorator {
     new (): SkipSelf;
 }
 /**
- * Type of the SkipSelf metadata.
+ * Type of the `SkipSelf` metadata.
  *
  * @publicApi
  */
 export interface SkipSelf {
 }
 /**
- * SkipSelf decorator and metadata.
+ * `SkipSelf` decorator and metadata.
  *
  * @Annotation
  * @publicApi
  */
 export declare const SkipSelf: SkipSelfDecorator;
 /**
- * Type of the Host decorator / constructor function.
+ * Type of the `Host` decorator / constructor function.
  *
  * @publicApi
  */
@@ -188,15 +185,15 @@ export interface HostDecorator {
      * that tells the DI framework to resolve the view by checking injectors of child
      * elements, and stop when reaching the host element of the current component.
      *
-     * For an extended example, see
-     * ["Dependency Injection Guide"](guide/dependency-injection-in-action#optional).
-     *
      * @usageNotes
      *
      * The following shows use with the `@Optional` decorator, and allows for a null result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
+     *
+     * For an extended example, see ["Dependency Injection
+     * Guide"](guide/dependency-injection-in-action#optional).
      */
     (): any;
     new (): Host;
@@ -233,11 +230,11 @@ export interface AttributeDecorator {
      * <input type="text">
      * ```
      *
-     * The following example uses the decorator to inject the string literal `text`.
+     * The following example uses the decorator to inject the string literal `text` in a directive.
      *
      * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
      *
-     * ### Example as TypeScript Decorator
+     * The following example uses the decorator in a component constructor.
      *
      * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
      *
