@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.0-rc.0+308.sha-11dd2be
+ * @license Angular v10.0.0-rc.0+309.sha-9206a26
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,10 +18,13 @@ declare interface AbstractType<T> extends Function {
 }
 
 /**
- * Base class for Angular Views, provides change detection functionality.
+ * Base class that provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
  * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
  *
  * @usageNotes
  *
@@ -691,25 +694,23 @@ declare abstract class NgModuleFactory_2<T> {
 }
 
 /**
- * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
- *
- * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
- * NgModule Instance.
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
  *
  * @publicApi
  */
 declare abstract class NgModuleRef<T> {
     /**
-     * The injector that contains all of the providers of the NgModule.
+     * The injector that contains all of the providers of the `NgModule`.
      */
     abstract get injector(): Injector;
     /**
-     * The ComponentFactoryResolver to get hold of the ComponentFactories
+     * The resolver that can retrieve the component factories
      * declared in the `entryComponents` property of the module.
      */
     abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
-     * The NgModule instance.
+     * The `NgModule` instance.
      */
     abstract get instance(): T;
     /**
@@ -717,7 +718,7 @@ declare abstract class NgModuleRef<T> {
      */
     abstract destroy(): void;
     /**
-     * Allows to register a callback that will be called when the module is destroyed.
+     * Registers a callback to be executed when the module is destroyed.
      */
     abstract onDestroy(callback: () => void): void;
 }
@@ -888,12 +889,9 @@ declare interface ValueSansProvider {
 }
 
 /**
- * Represents an Angular [view](guide/glossary#view),
- * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
- * Also serves as the base class
- * that adds destroy methods for [embedded views](guide/glossary#view-tree).
+ * Represents an Angular [view](guide/glossary#view "Definition").
  *
- * @see `EmbeddedViewRef`
+ * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *
  * @publicApi
  */
