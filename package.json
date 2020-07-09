@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "10.1.0-next.0+18.sha-c40cbec",
+  "version": "10.1.0-next.0+19.sha-1550663",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -45,8 +45,8 @@
   },
   "main": "./bundles/core.umd.js",
   "fesm2015": "./fesm2015/core.js",
-  "esm2015": "./esm2015/index.js",
-  "typings": "./index.d.ts",
+  "esm2015": "./esm2015/core.js",
+  "typings": "./core.d.ts",
   "module": "./fesm2015/core.js",
   "es2015": "./fesm2015/core.js"
 }
