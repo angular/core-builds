@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.3+45.sha-53e4ff7
+ * @license Angular v10.0.3+52.sha-9cf78d5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -836,7 +836,7 @@ declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProv
  *
  * Represents a type that a Component or other object is instances of.
  *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+ * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is represented by
  * the `MyCustomComponent` constructor function.
  *
  * @publicApi
