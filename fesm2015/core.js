@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.3+58.sha-396033d
+ * @license Angular v10.0.3+60.sha-e3b8010
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -638,7 +638,7 @@ function ngDevModeResetPerfCounters() {
  * (and thus Ivy instructions), so a single initialization there is sufficient to ensure ngDevMode
  * is defined for the entire instruction set.
  *
- * When using checking `ngDevMode` on toplevel, always init it before referencing it
+ * When checking `ngDevMode` on toplevel, always init it before referencing it
  * (e.g. `((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode())`), otherwise you can
  *  get a `ReferenceError` like in https://github.com/angular/angular/issues/31595.
  *
@@ -19309,7 +19309,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.3+58.sha-396033d');
+const VERSION = new Version('10.0.3+60.sha-e3b8010');
 
 /**
  * @license
