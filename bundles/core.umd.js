@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.0+46.sha-421e807
+ * @license Angular v10.1.0-next.0+48.sha-f4fac40
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -945,7 +945,7 @@
      * (and thus Ivy instructions), so a single initialization there is sufficient to ensure ngDevMode
      * is defined for the entire instruction set.
      *
-     * When using checking `ngDevMode` on toplevel, always init it before referencing it
+     * When checking `ngDevMode` on toplevel, always init it before referencing it
      * (e.g. `((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode())`), otherwise you can
      *  get a `ReferenceError` like in https://github.com/angular/angular/issues/31595.
      *
@@ -19916,7 +19916,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.0+46.sha-421e807');
+    var VERSION = new Version('10.1.0-next.0+48.sha-f4fac40');
 
     /**
      * @license
