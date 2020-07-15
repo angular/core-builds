@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.1+9.sha-406f801
+ * @license Angular v10.1.0-next.1+11.sha-24b4205
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7711,7 +7711,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
-            if (!validateProperty(tView, lView, element, propName, tNode)) {
+            if (!validateProperty(tView, element, propName, tNode)) {
                 // Return here since we only log warnings for unknown properties.
                 logUnknownPropertyError(propName, tNode);
                 return;
@@ -7729,10 +7729,10 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
                 element[propName] = value;
         }
     }
-    else if (tNode.type === 0 /* Container */) {
+    else if (tNode.type === 0 /* Container */ || tNode.type === 4 /* ElementContainer */) {
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
-        if (ngDevMode && !matchingSchemas(tView, lView, tNode.tagName)) {
+        if (ngDevMode && !matchingSchemas(tView, tNode.tagName)) {
             logUnknownPropertyError(propName, tNode);
         }
     }
@@ -7785,7 +7785,7 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
         }
     }
 }
-function validateProperty(tView, lView, element, propName, tNode) {
+function validateProperty(tView, element, propName, tNode) {
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
     // defined as an array (as an empty array in case `schemas` field is not defined) and we should
@@ -7794,15 +7794,14 @@ function validateProperty(tView, lView, element, propName, tNode) {
         return true;
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    if (matchingSchemas(tView, lView, tNode.tagName) || propName in element ||
-        isAnimationProp(propName)) {
+    if (matchingSchemas(tView, tNode.tagName) || propName in element || isAnimationProp(propName)) {
         return true;
     }
     // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
     // need to account for both here, while being careful for `typeof null` also returning 'object'.
     return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
-function matchingSchemas(tView, lView, tagName) {
+function matchingSchemas(tView, tagName) {
     const schemas = tView.schemas;
     if (schemas !== null) {
         for (let i = 0; i < schemas.length; i++) {
@@ -13818,7 +13817,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const attrs = getConstant(tViewConsts, attrsIndex);
     const tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
+    ngDevMode && logUnknownElementError(tView, native, tNode, hasDirectives);
     if (tNode.attrs !== null) {
         computeStaticStyling(tNode, tNode.attrs, false);
     }
@@ -13933,7 +13932,7 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
     ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
     ɵɵelementEnd();
 }
-function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
+function logUnknownElementError(tView, element, tNode, hasDirectives) {
     const schemas = tView.schemas;
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
@@ -13954,7 +13953,7 @@ function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
             element instanceof HTMLUnknownElement) ||
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
-        if (isUnknown && !matchingSchemas(tView, lView, tagName)) {
+        if (isUnknown && !matchingSchemas(tView, tagName)) {
             let message = `'${tagName}' is not a known element:\n`;
             message += `1. If '${tagName}' is an Angular component, then verify that it is part of this module.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
@@ -19309,7 +19308,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.1.0-next.1+9.sha-406f801');
+const VERSION = new Version('10.1.0-next.1+11.sha-24b4205');
 
 /**
  * @license
