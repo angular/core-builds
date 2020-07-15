@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.1+10.sha-bf641e1
+ * @license Angular v10.1.0-next.1+8.sha-c8e77d8
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8189,7 +8189,7 @@
             propName = mapPropName(propName);
             if (ngDevMode) {
                 validateAgainstEventProperties(propName);
-                if (!validateProperty(tView, element, propName, tNode)) {
+                if (!validateProperty(tView, lView, element, propName, tNode)) {
                     // Return here since we only log warnings for unknown properties.
                     logUnknownPropertyError(propName, tNode);
                     return;
@@ -8207,10 +8207,10 @@
                     element[propName] = value;
             }
         }
-        else if (tNode.type === 0 /* Container */ || tNode.type === 4 /* ElementContainer */) {
+        else if (tNode.type === 0 /* Container */) {
             // If the node is a container and the property didn't
             // match any of the inputs or schemas we should throw.
-            if (ngDevMode && !matchingSchemas(tView, tNode.tagName)) {
+            if (ngDevMode && !matchingSchemas(tView, lView, tNode.tagName)) {
                 logUnknownPropertyError(propName, tNode);
             }
         }
@@ -8264,7 +8264,7 @@
             }
         }
     }
-    function validateProperty(tView, element, propName, tNode) {
+    function validateProperty(tView, lView, element, propName, tNode) {
         // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
         // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
         // defined as an array (as an empty array in case `schemas` field is not defined) and we should
@@ -8273,14 +8273,15 @@
             return true;
         // The property is considered valid if the element matches the schema, it exists on the element
         // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-        if (matchingSchemas(tView, tNode.tagName) || propName in element || isAnimationProp(propName)) {
+        if (matchingSchemas(tView, lView, tNode.tagName) || propName in element ||
+            isAnimationProp(propName)) {
             return true;
         }
         // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
         // need to account for both here, while being careful for `typeof null` also returning 'object'.
         return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
     }
-    function matchingSchemas(tView, tagName) {
+    function matchingSchemas(tView, lView, tagName) {
         var schemas = tView.schemas;
         if (schemas !== null) {
             for (var i = 0; i < schemas.length; i++) {
@@ -14365,7 +14366,7 @@
         var attrs = getConstant(tViewConsts, attrsIndex);
         var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
         var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-        ngDevMode && logUnknownElementError(tView, native, tNode, hasDirectives);
+        ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
         if (tNode.attrs !== null) {
             computeStaticStyling(tNode, tNode.attrs, false);
         }
@@ -14480,7 +14481,7 @@
         ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
         ɵɵelementEnd();
     }
-    function logUnknownElementError(tView, element, tNode, hasDirectives) {
+    function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
         var schemas = tView.schemas;
         // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
         // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
@@ -14501,7 +14502,7 @@
                 element instanceof HTMLUnknownElement) ||
                 (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                     !customElements.get(tagName));
-            if (isUnknown && !matchingSchemas(tView, tagName)) {
+            if (isUnknown && !matchingSchemas(tView, lView, tagName)) {
                 var message = "'" + tagName + "' is not a known element:\n";
                 message += "1. If '" + tagName + "' is an Angular component, then verify that it is part of this module.\n";
                 if (tagName && tagName.indexOf('-') > -1) {
@@ -19891,7 +19892,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.1+10.sha-bf641e1');
+    var VERSION = new Version('10.1.0-next.1+8.sha-c8e77d8');
 
     /**
      * @license

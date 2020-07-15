@@ -139,7 +139,7 @@ export declare function storeCleanupWithContext(tView: TView, lView: LView, cont
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 export declare function elementPropertyInternal<T>(tView: TView, tNode: TNode, lView: LView, propName: string, value: T, renderer: Renderer3, sanitizer: SanitizerFn | null | undefined, nativeOnly: boolean): void;
 export declare function setNgReflectProperties(lView: LView, element: RElement | RComment, type: TNodeType, dataValue: PropertyAliasValue, value: any): void;
-export declare function matchingSchemas(tView: TView, tagName: string | null): boolean;
+export declare function matchingSchemas(tView: TView, lView: LView, tagName: string | null): boolean;
 /**
  * Instantiate a root component.
  */
