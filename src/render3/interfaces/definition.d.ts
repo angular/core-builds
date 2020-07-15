@@ -214,14 +214,6 @@ export interface DirectiveDef<T> {
      * Populated when the factory is first requested by directive instantiation logic.
      */
     readonly factory: FactoryFn<T> | null;
-    readonly onChanges: (() => void) | null;
-    readonly onInit: (() => void) | null;
-    readonly doCheck: (() => void) | null;
-    readonly afterContentInit: (() => void) | null;
-    readonly afterContentChecked: (() => void) | null;
-    readonly afterViewInit: (() => void) | null;
-    readonly afterViewChecked: (() => void) | null;
-    readonly onDestroy: (() => void) | null;
     /**
      * The features applied to this directive
      */

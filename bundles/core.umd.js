@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.1+13.sha-469aba0
+ * @license Angular v10.1.0-next.1+14.sha-737506e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1891,14 +1891,6 @@
                 inputs: null,
                 outputs: null,
                 exportAs: componentDefinition.exportAs || null,
-                onChanges: null,
-                onInit: typePrototype.ngOnInit || null,
-                doCheck: typePrototype.ngDoCheck || null,
-                afterContentInit: typePrototype.ngAfterContentInit || null,
-                afterContentChecked: typePrototype.ngAfterContentChecked || null,
-                afterViewInit: typePrototype.ngAfterViewInit || null,
-                afterViewChecked: typePrototype.ngAfterViewChecked || null,
-                onDestroy: typePrototype.ngOnDestroy || null,
                 onPush: componentDefinition.changeDetection === exports.ChangeDetectionStrategy.OnPush,
                 directiveDefs: null,
                 pipeDefs: null,
@@ -1906,8 +1898,8 @@
                 viewQuery: componentDefinition.viewQuery || null,
                 features: componentDefinition.features || null,
                 data: componentDefinition.data || {},
-                // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in
-                // the next line. Also `None` should be 0 not 2.
+                // TODO(misko): convert ViewEncapsulation into const enum so that it can be used
+                // directly in the next line. Also `None` should be 0 not 2.
                 encapsulation: componentDefinition.encapsulation || exports.ViewEncapsulation.Emulated,
                 id: 'c',
                 styles: componentDefinition.styles || EMPTY_ARRAY,
@@ -2317,6 +2309,127 @@
         if (obj.type === undefined || obj.selectors == undefined || obj.inputs === undefined) {
             throwError("Expected a DirectiveDef/ComponentDef and this object does not seem to have the expected shape.");
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a basic change from a previous to a new value for a single
+     * property on a directive instance. Passed as a value in a
+     * {@link SimpleChanges} object to the `ngOnChanges` hook.
+     *
+     * @see `OnChanges`
+     *
+     * @publicApi
+     */
+    var SimpleChange = /** @class */ (function () {
+        function SimpleChange(previousValue, currentValue, firstChange) {
+            this.previousValue = previousValue;
+            this.currentValue = currentValue;
+            this.firstChange = firstChange;
+        }
+        /**
+         * Check whether the new value is the first value assigned.
+         */
+        SimpleChange.prototype.isFirstChange = function () {
+            return this.firstChange;
+        };
+        return SimpleChange;
+    }());
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+     * lifecycle hook, so it should be included in any component that implements
+     * that hook.
+     *
+     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
+     * inherited properties will not be propagated to the ngOnChanges lifecycle
+     * hook.
+     *
+     * Example usage:
+     *
+     * ```
+     * static ɵcmp = defineComponent({
+     *   ...
+     *   inputs: {name: 'publicName'},
+     *   features: [NgOnChangesFeature]
+     * });
+     * ```
+     *
+     * @codeGenApi
+     */
+    function ɵɵNgOnChangesFeature() {
+        return NgOnChangesFeatureImpl;
+    }
+    function NgOnChangesFeatureImpl(definition) {
+        if (definition.type.prototype.ngOnChanges) {
+            definition.setInput = ngOnChangesSetInput;
+        }
+        return rememberChangeHistoryAndInvokeOnChangesHook;
+    }
+    // This option ensures that the ngOnChanges lifecycle hook will be inherited
+    // from superclasses (in InheritDefinitionFeature).
+    /** @nocollapse */
+    // tslint:disable-next-line:no-toplevel-property-access
+    ɵɵNgOnChangesFeature.ngInherit = true;
+    /**
+     * This is a synthetic lifecycle hook which gets inserted into `TView.preOrderHooks` to simulate
+     * `ngOnChanges`.
+     *
+     * The hook reads the `NgSimpleChangesStore` data from the component instance and if changes are
+     * found it invokes `ngOnChanges` on the component instance.
+     *
+     * @param this Component instance. Because this function gets inserted into `TView.preOrderHooks`,
+     *     it is guaranteed to be called with component instance.
+     */
+    function rememberChangeHistoryAndInvokeOnChangesHook() {
+        var simpleChangesStore = getSimpleChangesStore(this);
+        var current = simpleChangesStore === null || simpleChangesStore === void 0 ? void 0 : simpleChangesStore.current;
+        if (current) {
+            var previous = simpleChangesStore.previous;
+            if (previous === EMPTY_OBJ) {
+                simpleChangesStore.previous = current;
+            }
+            else {
+                // New changes are copied to the previous store, so that we don't lose history for inputs
+                // which were not changed this time
+                for (var key in current) {
+                    previous[key] = current[key];
+                }
+            }
+            simpleChangesStore.current = null;
+            this.ngOnChanges(current);
+        }
+    }
+    function ngOnChangesSetInput(instance, value, publicName, privateName) {
+        var simpleChangesStore = getSimpleChangesStore(instance) ||
+            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
+        var previous = simpleChangesStore.previous;
+        var declaredName = this.declaredInputs[publicName];
+        var previousChange = previous[declaredName];
+        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+        instance[privateName] = value;
+    }
+    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
+    function getSimpleChangesStore(instance) {
+        return instance[SIMPLE_CHANGES_STORE] || null;
+    }
+    function setSimpleChangesStore(instance, store) {
+        return instance[SIMPLE_CHANGES_STORE] = store;
     }
 
     /**
@@ -3013,17 +3126,19 @@
      */
     function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
         ngDevMode && assertFirstCreatePass(tView);
-        var onChanges = directiveDef.onChanges, onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
-        if (onChanges) {
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, onChanges);
-            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, onChanges);
+        var _a = directiveDef.type.prototype, ngOnChanges = _a.ngOnChanges, ngOnInit = _a.ngOnInit, ngDoCheck = _a.ngDoCheck;
+        if (ngOnChanges) {
+            var wrappedOnChanges = NgOnChangesFeatureImpl(directiveDef);
+            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, wrappedOnChanges);
+            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
+                .push(directiveIndex, wrappedOnChanges);
         }
-        if (onInit) {
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(-directiveIndex, onInit);
+        if (ngOnInit) {
+            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(0 - directiveIndex, ngOnInit);
         }
-        if (doCheck) {
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, doCheck);
-            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, doCheck);
+        if (ngDoCheck) {
+            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, ngDoCheck);
+            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, ngDoCheck);
         }
     }
     /**
@@ -3051,23 +3166,24 @@
         // hooks for projected components and directives must be called *before* their hosts.
         for (var i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
             var directiveDef = tView.data[i];
-            if (directiveDef.afterContentInit) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
+            var lifecycleHooks = directiveDef.type.prototype;
+            var ngAfterContentInit = lifecycleHooks.ngAfterContentInit, ngAfterContentChecked = lifecycleHooks.ngAfterContentChecked, ngAfterViewInit = lifecycleHooks.ngAfterViewInit, ngAfterViewChecked = lifecycleHooks.ngAfterViewChecked, ngOnDestroy = lifecycleHooks.ngOnDestroy;
+            if (ngAfterContentInit) {
+                (tView.contentHooks || (tView.contentHooks = [])).push(-i, ngAfterContentInit);
             }
-            if (directiveDef.afterContentChecked) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
-                (tView.contentCheckHooks || (tView.contentCheckHooks = []))
-                    .push(i, directiveDef.afterContentChecked);
+            if (ngAfterContentChecked) {
+                (tView.contentHooks || (tView.contentHooks = [])).push(i, ngAfterContentChecked);
+                (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, ngAfterContentChecked);
             }
-            if (directiveDef.afterViewInit) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
+            if (ngAfterViewInit) {
+                (tView.viewHooks || (tView.viewHooks = [])).push(-i, ngAfterViewInit);
             }
-            if (directiveDef.afterViewChecked) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
-                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
+            if (ngAfterViewChecked) {
+                (tView.viewHooks || (tView.viewHooks = [])).push(i, ngAfterViewChecked);
+                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, ngAfterViewChecked);
             }
-            if (directiveDef.onDestroy != null) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
+            if (ngOnDestroy != null) {
+                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, ngOnDestroy);
             }
         }
     }
@@ -8360,16 +8476,18 @@
                         tNode.flags |= 8 /* hasContentQuery */;
                     if (def.hostBindings !== null || def.hostAttrs !== null || def.hostVars !== 0)
                         tNode.flags |= 128 /* hasHostBindings */;
+                    var lifeCycleHooks = def.type.prototype;
                     // Only push a node index into the preOrderHooks array if this is the first
                     // pre-order hook found on this node.
-                    if (!preOrderHooksFound && (def.onChanges || def.onInit || def.doCheck)) {
+                    if (!preOrderHooksFound &&
+                        (lifeCycleHooks.ngOnChanges || lifeCycleHooks.ngOnInit || lifeCycleHooks.ngDoCheck)) {
                         // We will push the actual hook function into this array later during dir instantiation.
                         // We cannot do it now because we must ensure hooks are registered in the same
                         // order that directives are created (i.e. injection order).
                         (tView.preOrderHooks || (tView.preOrderHooks = [])).push(tNode.index - HEADER_OFFSET);
                         preOrderHooksFound = true;
                     }
-                    if (!preOrderCheckHooksFound && (def.onChanges || def.doCheck)) {
+                    if (!preOrderCheckHooksFound && (lifeCycleHooks.ngOnChanges || lifeCycleHooks.ngDoCheck)) {
                         (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
                             .push(tNode.index - HEADER_OFFSET);
                         preOrderCheckHooksFound = true;
@@ -19030,16 +19148,6 @@
                         var defData = definition.data;
                         defData.animation = (defData.animation || []).concat(superDef.data.animation);
                     }
-                    // Inherit hooks
-                    // Assume super class inheritance feature has already run.
-                    writeableDef.afterContentChecked =
-                        writeableDef.afterContentChecked || superDef.afterContentChecked;
-                    writeableDef.afterContentInit = definition.afterContentInit || superDef.afterContentInit;
-                    writeableDef.afterViewChecked = definition.afterViewChecked || superDef.afterViewChecked;
-                    writeableDef.afterViewInit = definition.afterViewInit || superDef.afterViewInit;
-                    writeableDef.doCheck = definition.doCheck || superDef.doCheck;
-                    writeableDef.onDestroy = definition.onDestroy || superDef.onDestroy;
-                    writeableDef.onInit = definition.onInit || superDef.onInit;
                 }
                 // Run parent features
                 var features = superDef.features;
@@ -19224,117 +19332,6 @@
                 finally { if (e_2) throw e_2.error; }
             }
         }
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Represents a basic change from a previous to a new value for a single
-     * property on a directive instance. Passed as a value in a
-     * {@link SimpleChanges} object to the `ngOnChanges` hook.
-     *
-     * @see `OnChanges`
-     *
-     * @publicApi
-     */
-    var SimpleChange = /** @class */ (function () {
-        function SimpleChange(previousValue, currentValue, firstChange) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-            this.firstChange = firstChange;
-        }
-        /**
-         * Check whether the new value is the first value assigned.
-         */
-        SimpleChange.prototype.isFirstChange = function () {
-            return this.firstChange;
-        };
-        return SimpleChange;
-    }());
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var PRIVATE_PREFIX = '__ngOnChanges_';
-    /**
-     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
-     * lifecycle hook, so it should be included in any component that implements
-     * that hook.
-     *
-     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
-     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
-     * inherited properties will not be propagated to the ngOnChanges lifecycle
-     * hook.
-     *
-     * Example usage:
-     *
-     * ```
-     * static ɵcmp = defineComponent({
-     *   ...
-     *   inputs: {name: 'publicName'},
-     *   features: [NgOnChangesFeature]
-     * });
-     * ```
-     *
-     * @codeGenApi
-     */
-    function ɵɵNgOnChangesFeature(definition) {
-        if (definition.type.prototype.ngOnChanges) {
-            definition.setInput = ngOnChangesSetInput;
-            definition.onChanges = wrapOnChanges();
-        }
-    }
-    // This option ensures that the ngOnChanges lifecycle hook will be inherited
-    // from superclasses (in InheritDefinitionFeature).
-    /** @nocollapse */
-    // tslint:disable-next-line:no-toplevel-property-access
-    ɵɵNgOnChangesFeature.ngInherit = true;
-    function wrapOnChanges() {
-        return function wrapOnChangesHook_inPreviousChangesStorage() {
-            var simpleChangesStore = getSimpleChangesStore(this);
-            var current = simpleChangesStore && simpleChangesStore.current;
-            if (current) {
-                var previous = simpleChangesStore.previous;
-                if (previous === EMPTY_OBJ) {
-                    simpleChangesStore.previous = current;
-                }
-                else {
-                    // New changes are copied to the previous store, so that we don't lose history for inputs
-                    // which were not changed this time
-                    for (var key in current) {
-                        previous[key] = current[key];
-                    }
-                }
-                simpleChangesStore.current = null;
-                this.ngOnChanges(current);
-            }
-        };
-    }
-    function ngOnChangesSetInput(instance, value, publicName, privateName) {
-        var simpleChangesStore = getSimpleChangesStore(instance) ||
-            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
-        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
-        var previous = simpleChangesStore.previous;
-        var declaredName = this.declaredInputs[publicName];
-        var previousChange = previous[declaredName];
-        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
-        instance[privateName] = value;
-    }
-    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
-    function getSimpleChangesStore(instance) {
-        return instance[SIMPLE_CHANGES_STORE] || null;
-    }
-    function setSimpleChangesStore(instance, store) {
-        return instance[SIMPLE_CHANGES_STORE] = store;
     }
 
     /**
@@ -19891,7 +19888,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.1+13.sha-469aba0');
+    var VERSION = new Version('10.1.0-next.1+14.sha-737506e');
 
     /**
      * @license

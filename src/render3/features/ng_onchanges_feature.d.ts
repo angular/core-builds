@@ -5,7 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { DirectiveDef } from '../interfaces/definition';
+import { OnChanges } from '../../interface/lifecycle_hooks';
+import { DirectiveDef, DirectiveDefFeature } from '../interfaces/definition';
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
  * lifecycle hook, so it should be included in any component that implements
@@ -28,4 +29,17 @@ import { DirectiveDef } from '../interfaces/definition';
  *
  * @codeGenApi
  */
-export declare function ɵɵNgOnChangesFeature<T>(definition: DirectiveDef<T>): void;
+export declare function ɵɵNgOnChangesFeature<T>(): DirectiveDefFeature;
+export declare function NgOnChangesFeatureImpl<T>(definition: DirectiveDef<T>): typeof rememberChangeHistoryAndInvokeOnChangesHook;
+/**
+ * This is a synthetic lifecycle hook which gets inserted into `TView.preOrderHooks` to simulate
+ * `ngOnChanges`.
+ *
+ * The hook reads the `NgSimpleChangesStore` data from the component instance and if changes are
+ * found it invokes `ngOnChanges` on the component instance.
+ *
+ * @param this Component instance. Because this function gets inserted into `TView.preOrderHooks`,
+ *     it is guaranteed to be called with component instance.
+ */
+declare function rememberChangeHistoryAndInvokeOnChangesHook(this: OnChanges): void;
+export {};
