@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.0+11.sha-7b7e3d9
+ * @license Angular v10.1.0-next.1+29.sha-e056ca3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -945,7 +945,7 @@
      * (and thus Ivy instructions), so a single initialization there is sufficient to ensure ngDevMode
      * is defined for the entire instruction set.
      *
-     * When using checking `ngDevMode` on toplevel, always init it before referencing it
+     * When checking `ngDevMode` on toplevel, always init it before referencing it
      * (e.g. `((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode())`), otherwise you can
      *  get a `ReferenceError` like in https://github.com/angular/angular/issues/31595.
      *
@@ -1894,14 +1894,6 @@
                 inputs: null,
                 outputs: null,
                 exportAs: componentDefinition.exportAs || null,
-                onChanges: null,
-                onInit: typePrototype.ngOnInit || null,
-                doCheck: typePrototype.ngDoCheck || null,
-                afterContentInit: typePrototype.ngAfterContentInit || null,
-                afterContentChecked: typePrototype.ngAfterContentChecked || null,
-                afterViewInit: typePrototype.ngAfterViewInit || null,
-                afterViewChecked: typePrototype.ngAfterViewChecked || null,
-                onDestroy: typePrototype.ngOnDestroy || null,
                 onPush: componentDefinition.changeDetection === exports.ChangeDetectionStrategy.OnPush,
                 directiveDefs: null,
                 pipeDefs: null,
@@ -1909,8 +1901,8 @@
                 viewQuery: componentDefinition.viewQuery || null,
                 features: componentDefinition.features || null,
                 data: componentDefinition.data || {},
-                // TODO(misko): convert ViewEncapsulation into const enum so that it can be used directly in
-                // the next line. Also `None` should be 0 not 2.
+                // TODO(misko): convert ViewEncapsulation into const enum so that it can be used
+                // directly in the next line. Also `None` should be 0 not 2.
                 encapsulation: componentDefinition.encapsulation || exports.ViewEncapsulation.Emulated,
                 id: 'c',
                 styles: componentDefinition.styles || EMPTY_ARRAY,
@@ -2320,6 +2312,127 @@
         if (obj.type === undefined || obj.selectors == undefined || obj.inputs === undefined) {
             throwError("Expected a DirectiveDef/ComponentDef and this object does not seem to have the expected shape.");
         }
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents a basic change from a previous to a new value for a single
+     * property on a directive instance. Passed as a value in a
+     * {@link SimpleChanges} object to the `ngOnChanges` hook.
+     *
+     * @see `OnChanges`
+     *
+     * @publicApi
+     */
+    var SimpleChange = /** @class */ (function () {
+        function SimpleChange(previousValue, currentValue, firstChange) {
+            this.previousValue = previousValue;
+            this.currentValue = currentValue;
+            this.firstChange = firstChange;
+        }
+        /**
+         * Check whether the new value is the first value assigned.
+         */
+        SimpleChange.prototype.isFirstChange = function () {
+            return this.firstChange;
+        };
+        return SimpleChange;
+    }());
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
+     * lifecycle hook, so it should be included in any component that implements
+     * that hook.
+     *
+     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
+     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
+     * inherited properties will not be propagated to the ngOnChanges lifecycle
+     * hook.
+     *
+     * Example usage:
+     *
+     * ```
+     * static ɵcmp = defineComponent({
+     *   ...
+     *   inputs: {name: 'publicName'},
+     *   features: [NgOnChangesFeature]
+     * });
+     * ```
+     *
+     * @codeGenApi
+     */
+    function ɵɵNgOnChangesFeature() {
+        return NgOnChangesFeatureImpl;
+    }
+    function NgOnChangesFeatureImpl(definition) {
+        if (definition.type.prototype.ngOnChanges) {
+            definition.setInput = ngOnChangesSetInput;
+        }
+        return rememberChangeHistoryAndInvokeOnChangesHook;
+    }
+    // This option ensures that the ngOnChanges lifecycle hook will be inherited
+    // from superclasses (in InheritDefinitionFeature).
+    /** @nocollapse */
+    // tslint:disable-next-line:no-toplevel-property-access
+    ɵɵNgOnChangesFeature.ngInherit = true;
+    /**
+     * This is a synthetic lifecycle hook which gets inserted into `TView.preOrderHooks` to simulate
+     * `ngOnChanges`.
+     *
+     * The hook reads the `NgSimpleChangesStore` data from the component instance and if changes are
+     * found it invokes `ngOnChanges` on the component instance.
+     *
+     * @param this Component instance. Because this function gets inserted into `TView.preOrderHooks`,
+     *     it is guaranteed to be called with component instance.
+     */
+    function rememberChangeHistoryAndInvokeOnChangesHook() {
+        var simpleChangesStore = getSimpleChangesStore(this);
+        var current = simpleChangesStore === null || simpleChangesStore === void 0 ? void 0 : simpleChangesStore.current;
+        if (current) {
+            var previous = simpleChangesStore.previous;
+            if (previous === EMPTY_OBJ) {
+                simpleChangesStore.previous = current;
+            }
+            else {
+                // New changes are copied to the previous store, so that we don't lose history for inputs
+                // which were not changed this time
+                for (var key in current) {
+                    previous[key] = current[key];
+                }
+            }
+            simpleChangesStore.current = null;
+            this.ngOnChanges(current);
+        }
+    }
+    function ngOnChangesSetInput(instance, value, publicName, privateName) {
+        var simpleChangesStore = getSimpleChangesStore(instance) ||
+            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
+        var previous = simpleChangesStore.previous;
+        var declaredName = this.declaredInputs[publicName];
+        var previousChange = previous[declaredName];
+        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+        instance[privateName] = value;
+    }
+    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
+    function getSimpleChangesStore(instance) {
+        return instance[SIMPLE_CHANGES_STORE] || null;
+    }
+    function setSimpleChangesStore(instance, store) {
+        return instance[SIMPLE_CHANGES_STORE] = store;
     }
 
     /**
@@ -3017,17 +3130,19 @@
      */
     function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
         ngDevMode && assertFirstCreatePass(tView);
-        var onChanges = directiveDef.onChanges, onInit = directiveDef.onInit, doCheck = directiveDef.doCheck;
-        if (onChanges) {
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, onChanges);
-            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, onChanges);
+        var _a = directiveDef.type.prototype, ngOnChanges = _a.ngOnChanges, ngOnInit = _a.ngOnInit, ngDoCheck = _a.ngDoCheck;
+        if (ngOnChanges) {
+            var wrappedOnChanges = NgOnChangesFeatureImpl(directiveDef);
+            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, wrappedOnChanges);
+            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
+                .push(directiveIndex, wrappedOnChanges);
         }
-        if (onInit) {
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(-directiveIndex, onInit);
+        if (ngOnInit) {
+            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(0 - directiveIndex, ngOnInit);
         }
-        if (doCheck) {
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, doCheck);
-            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, doCheck);
+        if (ngDoCheck) {
+            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, ngDoCheck);
+            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, ngDoCheck);
         }
     }
     /**
@@ -3055,23 +3170,24 @@
         // hooks for projected components and directives must be called *before* their hosts.
         for (var i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
             var directiveDef = tView.data[i];
-            if (directiveDef.afterContentInit) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(-i, directiveDef.afterContentInit);
+            var lifecycleHooks = directiveDef.type.prototype;
+            var ngAfterContentInit = lifecycleHooks.ngAfterContentInit, ngAfterContentChecked = lifecycleHooks.ngAfterContentChecked, ngAfterViewInit = lifecycleHooks.ngAfterViewInit, ngAfterViewChecked = lifecycleHooks.ngAfterViewChecked, ngOnDestroy = lifecycleHooks.ngOnDestroy;
+            if (ngAfterContentInit) {
+                (tView.contentHooks || (tView.contentHooks = [])).push(-i, ngAfterContentInit);
             }
-            if (directiveDef.afterContentChecked) {
-                (tView.contentHooks || (tView.contentHooks = [])).push(i, directiveDef.afterContentChecked);
-                (tView.contentCheckHooks || (tView.contentCheckHooks = []))
-                    .push(i, directiveDef.afterContentChecked);
+            if (ngAfterContentChecked) {
+                (tView.contentHooks || (tView.contentHooks = [])).push(i, ngAfterContentChecked);
+                (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, ngAfterContentChecked);
             }
-            if (directiveDef.afterViewInit) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(-i, directiveDef.afterViewInit);
+            if (ngAfterViewInit) {
+                (tView.viewHooks || (tView.viewHooks = [])).push(-i, ngAfterViewInit);
             }
-            if (directiveDef.afterViewChecked) {
-                (tView.viewHooks || (tView.viewHooks = [])).push(i, directiveDef.afterViewChecked);
-                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, directiveDef.afterViewChecked);
+            if (ngAfterViewChecked) {
+                (tView.viewHooks || (tView.viewHooks = [])).push(i, ngAfterViewChecked);
+                (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, ngAfterViewChecked);
             }
-            if (directiveDef.onDestroy != null) {
-                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, directiveDef.onDestroy);
+            if (ngOnDestroy != null) {
+                (tView.destroyHooks || (tView.destroyHooks = [])).push(i, ngOnDestroy);
             }
         }
     }
@@ -4153,10 +4269,10 @@
     function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, isHostSpecialCase) {
         var nodeProviderIndexes = tNode.providerIndexes;
         var tInjectables = tView.data;
-        var injectablesStart = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
+        var injectablesStart = nodeProviderIndexes & 1048575 /* ProvidersStartIndexMask */;
         var directivesStart = tNode.directiveStart;
         var directiveEnd = tNode.directiveEnd;
-        var cptViewProvidersCount = nodeProviderIndexes >> 16 /* CptViewProvidersCountShift */;
+        var cptViewProvidersCount = nodeProviderIndexes >> 20 /* CptViewProvidersCountShift */;
         var startingIndex = canAccessViewProviders ? injectablesStart : injectablesStart + cptViewProvidersCount;
         // When the host special case applies, only the viewProviders and the component are visible
         var endIndex = isHostSpecialCase ? injectablesStart + cptViewProvidersCount : directiveEnd;
@@ -7432,6 +7548,8 @@
                     else {
                         // If it's not a number, it's a host binding function that needs to be executed.
                         if (instruction !== null) {
+                            ngDevMode &&
+                                assertLessThan(currentDirectiveIndex, 1048576 /* CptViewProvidersCountShifter */, 'Reached the max number of host bindings');
                             setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex);
                             var hostCtx = lView[currentDirectiveIndex];
                             instruction(2 /* Update */, hostCtx);
@@ -8195,7 +8313,7 @@
             propName = mapPropName(propName);
             if (ngDevMode) {
                 validateAgainstEventProperties(propName);
-                if (!validateProperty(tView, lView, element, propName, tNode)) {
+                if (!validateProperty(tView, element, propName, tNode)) {
                     // Return here since we only log warnings for unknown properties.
                     logUnknownPropertyError(propName, tNode);
                     return;
@@ -8213,10 +8331,10 @@
                     element[propName] = value;
             }
         }
-        else if (tNode.type === 0 /* Container */) {
+        else if (tNode.type === 0 /* Container */ || tNode.type === 4 /* ElementContainer */) {
             // If the node is a container and the property didn't
             // match any of the inputs or schemas we should throw.
-            if (ngDevMode && !matchingSchemas(tView, lView, tNode.tagName)) {
+            if (ngDevMode && !matchingSchemas(tView, tNode.tagName)) {
                 logUnknownPropertyError(propName, tNode);
             }
         }
@@ -8270,7 +8388,7 @@
             }
         }
     }
-    function validateProperty(tView, lView, element, propName, tNode) {
+    function validateProperty(tView, element, propName, tNode) {
         // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
         // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
         // defined as an array (as an empty array in case `schemas` field is not defined) and we should
@@ -8279,15 +8397,14 @@
             return true;
         // The property is considered valid if the element matches the schema, it exists on the element
         // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-        if (matchingSchemas(tView, lView, tNode.tagName) || propName in element ||
-            isAnimationProp(propName)) {
+        if (matchingSchemas(tView, tNode.tagName) || propName in element || isAnimationProp(propName)) {
             return true;
         }
         // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
         // need to account for both here, while being careful for `typeof null` also returning 'object'.
         return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
     }
-    function matchingSchemas(tView, lView, tagName) {
+    function matchingSchemas(tView, tagName) {
         var schemas = tView.schemas;
         if (schemas !== null) {
             for (var i = 0; i < schemas.length; i++) {
@@ -8367,16 +8484,18 @@
                         tNode.flags |= 8 /* hasContentQuery */;
                     if (def.hostBindings !== null || def.hostAttrs !== null || def.hostVars !== 0)
                         tNode.flags |= 128 /* hasHostBindings */;
+                    var lifeCycleHooks = def.type.prototype;
                     // Only push a node index into the preOrderHooks array if this is the first
                     // pre-order hook found on this node.
-                    if (!preOrderHooksFound && (def.onChanges || def.onInit || def.doCheck)) {
+                    if (!preOrderHooksFound &&
+                        (lifeCycleHooks.ngOnChanges || lifeCycleHooks.ngOnInit || lifeCycleHooks.ngDoCheck)) {
                         // We will push the actual hook function into this array later during dir instantiation.
                         // We cannot do it now because we must ensure hooks are registered in the same
                         // order that directives are created (i.e. injection order).
                         (tView.preOrderHooks || (tView.preOrderHooks = [])).push(tNode.index - HEADER_OFFSET);
                         preOrderHooksFound = true;
                     }
-                    if (!preOrderCheckHooksFound && (def.onChanges || def.doCheck)) {
+                    if (!preOrderCheckHooksFound && (lifeCycleHooks.ngOnChanges || lifeCycleHooks.ngDoCheck)) {
                         (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
                             .push(tNode.index - HEADER_OFFSET);
                         preOrderCheckHooksFound = true;
@@ -8516,7 +8635,7 @@
         // requires non standard math arithmetic and it can prevent VM optimizations.
         // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
         var elementIndex = HEADER_OFFSET - tNode.index;
-        var providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+        var providerStartIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
         var providerCount = tView.data.length - providerStartIndex;
         (tView.expandoInstructions || (tView.expandoInstructions = []))
             .push(elementIndex, providerCount, directiveCount);
@@ -10905,7 +11024,7 @@
      *
      * Represents a type that a Component or other object is instances of.
      *
-     * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+     * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is represented by
      * the `MyCustomComponent` constructor function.
      *
      * @publicApi
@@ -14389,7 +14508,7 @@
         var attrs = getConstant(tViewConsts, attrsIndex);
         var tNode = getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, name, attrs);
         var hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-        ngDevMode && logUnknownElementError(tView, lView, native, tNode, hasDirectives);
+        ngDevMode && logUnknownElementError(tView, native, tNode, hasDirectives);
         if (tNode.attrs !== null) {
             computeStaticStyling(tNode, tNode.attrs, false);
         }
@@ -14504,7 +14623,7 @@
         ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
         ɵɵelementEnd();
     }
-    function logUnknownElementError(tView, lView, element, tNode, hasDirectives) {
+    function logUnknownElementError(tView, element, tNode, hasDirectives) {
         var schemas = tView.schemas;
         // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
         // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
@@ -14525,7 +14644,7 @@
                 element instanceof HTMLUnknownElement) ||
                 (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                     !customElements.get(tagName));
-            if (isUnknown && !matchingSchemas(tView, lView, tagName)) {
+            if (isUnknown && !matchingSchemas(tView, tagName)) {
                 var message = "'" + tagName + "' is not a known element:\n";
                 message += "1. If '" + tagName + "' is an Angular component, then verify that it is part of this module.\n";
                 if (tagName && tagName.indexOf('-') > -1) {
@@ -18500,7 +18619,7 @@
         var tView = lView[TVIEW];
         var tNode = tView.data[context.nodeIndex];
         var providerTokens = [];
-        var startIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+        var startIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
         var endIndex = tNode.directiveEnd;
         for (var i = startIndex; i < endIndex; i++) {
             var value = tView.data[i];
@@ -19055,16 +19174,6 @@
                         var defData = definition.data;
                         defData.animation = (defData.animation || []).concat(superDef.data.animation);
                     }
-                    // Inherit hooks
-                    // Assume super class inheritance feature has already run.
-                    writeableDef.afterContentChecked =
-                        writeableDef.afterContentChecked || superDef.afterContentChecked;
-                    writeableDef.afterContentInit = definition.afterContentInit || superDef.afterContentInit;
-                    writeableDef.afterViewChecked = definition.afterViewChecked || superDef.afterViewChecked;
-                    writeableDef.afterViewInit = definition.afterViewInit || superDef.afterViewInit;
-                    writeableDef.doCheck = definition.doCheck || superDef.doCheck;
-                    writeableDef.onDestroy = definition.onDestroy || superDef.onDestroy;
-                    writeableDef.onInit = definition.onInit || superDef.onInit;
                 }
                 // Run parent features
                 var features = superDef.features;
@@ -19259,117 +19368,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Represents a basic change from a previous to a new value for a single
-     * property on a directive instance. Passed as a value in a
-     * {@link SimpleChanges} object to the `ngOnChanges` hook.
-     *
-     * @see `OnChanges`
-     *
-     * @publicApi
-     */
-    var SimpleChange = /** @class */ (function () {
-        function SimpleChange(previousValue, currentValue, firstChange) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-            this.firstChange = firstChange;
-        }
-        /**
-         * Check whether the new value is the first value assigned.
-         */
-        SimpleChange.prototype.isFirstChange = function () {
-            return this.firstChange;
-        };
-        return SimpleChange;
-    }());
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var PRIVATE_PREFIX = '__ngOnChanges_';
-    /**
-     * The NgOnChangesFeature decorates a component with support for the ngOnChanges
-     * lifecycle hook, so it should be included in any component that implements
-     * that hook.
-     *
-     * If the component or directive uses inheritance, the NgOnChangesFeature MUST
-     * be included as a feature AFTER {@link InheritDefinitionFeature}, otherwise
-     * inherited properties will not be propagated to the ngOnChanges lifecycle
-     * hook.
-     *
-     * Example usage:
-     *
-     * ```
-     * static ɵcmp = defineComponent({
-     *   ...
-     *   inputs: {name: 'publicName'},
-     *   features: [NgOnChangesFeature]
-     * });
-     * ```
-     *
-     * @codeGenApi
-     */
-    function ɵɵNgOnChangesFeature(definition) {
-        if (definition.type.prototype.ngOnChanges) {
-            definition.setInput = ngOnChangesSetInput;
-            definition.onChanges = wrapOnChanges();
-        }
-    }
-    // This option ensures that the ngOnChanges lifecycle hook will be inherited
-    // from superclasses (in InheritDefinitionFeature).
-    /** @nocollapse */
-    // tslint:disable-next-line:no-toplevel-property-access
-    ɵɵNgOnChangesFeature.ngInherit = true;
-    function wrapOnChanges() {
-        return function wrapOnChangesHook_inPreviousChangesStorage() {
-            var simpleChangesStore = getSimpleChangesStore(this);
-            var current = simpleChangesStore && simpleChangesStore.current;
-            if (current) {
-                var previous = simpleChangesStore.previous;
-                if (previous === EMPTY_OBJ) {
-                    simpleChangesStore.previous = current;
-                }
-                else {
-                    // New changes are copied to the previous store, so that we don't lose history for inputs
-                    // which were not changed this time
-                    for (var key in current) {
-                        previous[key] = current[key];
-                    }
-                }
-                simpleChangesStore.current = null;
-                this.ngOnChanges(current);
-            }
-        };
-    }
-    function ngOnChangesSetInput(instance, value, publicName, privateName) {
-        var simpleChangesStore = getSimpleChangesStore(instance) ||
-            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
-        var current = simpleChangesStore.current || (simpleChangesStore.current = {});
-        var previous = simpleChangesStore.previous;
-        var declaredName = this.declaredInputs[publicName];
-        var previousChange = previous[declaredName];
-        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
-        instance[privateName] = value;
-    }
-    var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
-    function getSimpleChangesStore(instance) {
-        return instance[SIMPLE_CHANGES_STORE] || null;
-    }
-    function setSimpleChangesStore(instance, store) {
-        return instance[SIMPLE_CHANGES_STORE] = store;
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Resolves the providers which are defined in the DirectiveDef.
      *
      * When inserting the tokens and the factories in their respective arrays, we can assume that
@@ -19416,9 +19414,9 @@
             var token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
             var providerFactory = providerToFactory(provider);
             var tNode = getPreviousOrParentTNode();
-            var beginIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+            var beginIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
             var endIndex = tNode.directiveStart;
-            var cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
+            var cptViewProvidersCount = tNode.providerIndexes >> 20 /* CptViewProvidersCountShift */;
             if (isTypeProvider(provider) || !provider.multi) {
                 // Single provider case: the factory is created and pushed immediately
                 var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
@@ -19430,7 +19428,7 @@
                     tNode.directiveStart++;
                     tNode.directiveEnd++;
                     if (isViewProvider) {
-                        tNode.providerIndexes += 65536 /* CptViewProvidersCountShifter */;
+                        tNode.providerIndexes += 1048576 /* CptViewProvidersCountShifter */;
                     }
                     lInjectablesBlueprint.push(factory);
                     lView.push(factory);
@@ -19480,7 +19478,7 @@
                     tNode.directiveStart++;
                     tNode.directiveEnd++;
                     if (isViewProvider) {
-                        tNode.providerIndexes += 65536 /* CptViewProvidersCountShifter */;
+                        tNode.providerIndexes += 1048576 /* CptViewProvidersCountShifter */;
                     }
                     lInjectablesBlueprint.push(factory);
                     lView.push(factory);
@@ -19916,7 +19914,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.0+11.sha-7b7e3d9');
+    var VERSION = new Version('10.1.0-next.1+29.sha-e056ca3');
 
     /**
      * @license
@@ -32475,21 +32473,22 @@
     exports.ɵand = anchorDef;
     exports.ɵangular_packages_core_core_a = isForwardRef;
     exports.ɵangular_packages_core_core_b = injectInjectorOnly;
-    exports.ɵangular_packages_core_core_ba = getLView;
-    exports.ɵangular_packages_core_core_bb = getPreviousOrParentTNode;
-    exports.ɵangular_packages_core_core_bc = getBindingRoot;
-    exports.ɵangular_packages_core_core_bd = nextContextImpl;
-    exports.ɵangular_packages_core_core_bf = pureFunction1Internal;
-    exports.ɵangular_packages_core_core_bg = pureFunction2Internal;
-    exports.ɵangular_packages_core_core_bh = pureFunction3Internal;
-    exports.ɵangular_packages_core_core_bi = pureFunction4Internal;
-    exports.ɵangular_packages_core_core_bj = pureFunctionVInternal;
-    exports.ɵangular_packages_core_core_bk = getUrlSanitizer;
-    exports.ɵangular_packages_core_core_bl = makeParamDecorator;
-    exports.ɵangular_packages_core_core_bm = makePropDecorator;
-    exports.ɵangular_packages_core_core_bn = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_bp = noSideEffects;
-    exports.ɵangular_packages_core_core_bq = getRootContext;
+    exports.ɵangular_packages_core_core_ba = instructionState;
+    exports.ɵangular_packages_core_core_bb = getLView;
+    exports.ɵangular_packages_core_core_bc = getPreviousOrParentTNode;
+    exports.ɵangular_packages_core_core_bd = getBindingRoot;
+    exports.ɵangular_packages_core_core_be = nextContextImpl;
+    exports.ɵangular_packages_core_core_bg = pureFunction1Internal;
+    exports.ɵangular_packages_core_core_bh = pureFunction2Internal;
+    exports.ɵangular_packages_core_core_bi = pureFunction3Internal;
+    exports.ɵangular_packages_core_core_bj = pureFunction4Internal;
+    exports.ɵangular_packages_core_core_bk = pureFunctionVInternal;
+    exports.ɵangular_packages_core_core_bl = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bm = makeParamDecorator;
+    exports.ɵangular_packages_core_core_bn = makePropDecorator;
+    exports.ɵangular_packages_core_core_bo = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bq = noSideEffects;
+    exports.ɵangular_packages_core_core_br = getRootContext;
     exports.ɵangular_packages_core_core_c = NullInjector;
     exports.ɵangular_packages_core_core_d = ReflectiveInjector_;
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
@@ -32511,9 +32510,9 @@
     exports.ɵangular_packages_core_core_u = USD_CURRENCY_CODE;
     exports.ɵangular_packages_core_core_v = _def;
     exports.ɵangular_packages_core_core_w = DebugContext;
-    exports.ɵangular_packages_core_core_x = SCHEDULER;
-    exports.ɵangular_packages_core_core_y = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_z = instructionState;
+    exports.ɵangular_packages_core_core_x = NgOnChangesFeatureImpl;
+    exports.ɵangular_packages_core_core_y = SCHEDULER;
+    exports.ɵangular_packages_core_core_z = injectAttributeImpl;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
