@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.1+26.sha-b3b03c3
+ * @license Angular v10.1.0-next.1+27.sha-38a7021
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4264,10 +4264,10 @@
     function locateDirectiveOrProvider(tNode, tView, token, canAccessViewProviders, isHostSpecialCase) {
         var nodeProviderIndexes = tNode.providerIndexes;
         var tInjectables = tView.data;
-        var injectablesStart = nodeProviderIndexes & 65535 /* ProvidersStartIndexMask */;
+        var injectablesStart = nodeProviderIndexes & 1048575 /* ProvidersStartIndexMask */;
         var directivesStart = tNode.directiveStart;
         var directiveEnd = tNode.directiveEnd;
-        var cptViewProvidersCount = nodeProviderIndexes >> 16 /* CptViewProvidersCountShift */;
+        var cptViewProvidersCount = nodeProviderIndexes >> 20 /* CptViewProvidersCountShift */;
         var startingIndex = canAccessViewProviders ? injectablesStart : injectablesStart + cptViewProvidersCount;
         // When the host special case applies, only the viewProviders and the component are visible
         var endIndex = isHostSpecialCase ? injectablesStart + cptViewProvidersCount : directiveEnd;
@@ -7542,6 +7542,8 @@
                     else {
                         // If it's not a number, it's a host binding function that needs to be executed.
                         if (instruction !== null) {
+                            ngDevMode &&
+                                assertLessThan(currentDirectiveIndex, 1048576 /* CptViewProvidersCountShifter */, 'Reached the max number of host bindings');
                             setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex);
                             var hostCtx = lView[currentDirectiveIndex];
                             instruction(2 /* Update */, hostCtx);
@@ -8627,7 +8629,7 @@
         // requires non standard math arithmetic and it can prevent VM optimizations.
         // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
         var elementIndex = HEADER_OFFSET - tNode.index;
-        var providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+        var providerStartIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
         var providerCount = tView.data.length - providerStartIndex;
         (tView.expandoInstructions || (tView.expandoInstructions = []))
             .push(elementIndex, providerCount, directiveCount);
@@ -18594,7 +18596,7 @@
         var tView = lView[TVIEW];
         var tNode = tView.data[context.nodeIndex];
         var providerTokens = [];
-        var startIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+        var startIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
         var endIndex = tNode.directiveEnd;
         for (var i = startIndex; i < endIndex; i++) {
             var value = tView.data[i];
@@ -19388,9 +19390,9 @@
             var token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
             var providerFactory = providerToFactory(provider);
             var tNode = getPreviousOrParentTNode();
-            var beginIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
+            var beginIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
             var endIndex = tNode.directiveStart;
-            var cptViewProvidersCount = tNode.providerIndexes >> 16 /* CptViewProvidersCountShift */;
+            var cptViewProvidersCount = tNode.providerIndexes >> 20 /* CptViewProvidersCountShift */;
             if (isTypeProvider(provider) || !provider.multi) {
                 // Single provider case: the factory is created and pushed immediately
                 var factory = new NodeInjectorFactory(providerFactory, isViewProvider, ɵɵdirectiveInject);
@@ -19402,7 +19404,7 @@
                     tNode.directiveStart++;
                     tNode.directiveEnd++;
                     if (isViewProvider) {
-                        tNode.providerIndexes += 65536 /* CptViewProvidersCountShifter */;
+                        tNode.providerIndexes += 1048576 /* CptViewProvidersCountShifter */;
                     }
                     lInjectablesBlueprint.push(factory);
                     lView.push(factory);
@@ -19452,7 +19454,7 @@
                     tNode.directiveStart++;
                     tNode.directiveEnd++;
                     if (isViewProvider) {
-                        tNode.providerIndexes += 65536 /* CptViewProvidersCountShifter */;
+                        tNode.providerIndexes += 1048576 /* CptViewProvidersCountShifter */;
                     }
                     lInjectablesBlueprint.push(factory);
                     lView.push(factory);
@@ -19888,7 +19890,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.1+26.sha-b3b03c3');
+    var VERSION = new Version('10.1.0-next.1+27.sha-38a7021');
 
     /**
      * @license

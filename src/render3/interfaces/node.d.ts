@@ -73,14 +73,14 @@ export declare const enum TNodeFlags {
  * Corresponds to the TNode.providerIndexes property.
  */
 export declare const enum TNodeProviderIndexes {
-    /** The index of the first provider on this node is encoded on the least significant bits */
-    ProvidersStartIndexMask = 65535,
+    /** The index of the first provider on this node is encoded on the least significant bits. */
+    ProvidersStartIndexMask = 1048575,
     /**
-       The count of view providers from the component on this node is encoded on the 16 most
-       significant bits
+     * The count of view providers from the component on this node is
+     * encoded on the 20 most significant bits.
      */
-    CptViewProvidersCountShift = 16,
-    CptViewProvidersCountShifter = 65536
+    CptViewProvidersCountShift = 20,
+    CptViewProvidersCountShifter = 1048576
 }
 /**
  * A set of marker values to be used in the attributes arrays. These markers indicate that some
