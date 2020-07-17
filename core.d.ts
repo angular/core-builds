@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.1+26.sha-b3b03c3
+ * @license Angular v10.1.0-next.1+27.sha-38a7021
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7158,14 +7158,14 @@ declare const enum TNodeFlags {
  * Corresponds to the TNode.providerIndexes property.
  */
 declare const enum TNodeProviderIndexes {
-    /** The index of the first provider on this node is encoded on the least significant bits */
-    ProvidersStartIndexMask = 65535,
+    /** The index of the first provider on this node is encoded on the least significant bits. */
+    ProvidersStartIndexMask = 1048575,
     /**
-       The count of view providers from the component on this node is encoded on the 16 most
-       significant bits
+     * The count of view providers from the component on this node is
+     * encoded on the 20 most significant bits.
      */
-    CptViewProvidersCountShift = 16,
-    CptViewProvidersCountShifter = 65536
+    CptViewProvidersCountShift = 20,
+    CptViewProvidersCountShifter = 1048576
 }
 
 /**
