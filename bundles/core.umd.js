@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.1+41.sha-eae13e4
+ * @license Angular v10.1.0-next.1+42.sha-d72b1e4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14847,7 +14847,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵcomponentHostSyntheticListener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    function ɵɵsyntheticHostListener(eventName, listenerFn, useCapture, eventTargetResolver) {
         if (useCapture === void 0) { useCapture = false; }
         var tNode = getPreviousOrParentTNode();
         var lView = getLView();
@@ -14855,7 +14855,7 @@
         var currentDef = getCurrentDirectiveDef(tView.data);
         var renderer = loadComponentRenderer(currentDef, tNode, lView);
         listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
-        return ɵɵcomponentHostSyntheticListener;
+        return ɵɵsyntheticHostListener;
     }
     /**
      * A utility function that checks if a given element has already an event handler registered for an
@@ -18473,7 +18473,7 @@
      *
      * @codeGenApi
      */
-    function ɵɵupdateSyntheticHostBinding(propName, value, sanitizer) {
+    function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
         var lView = getLView();
         var bindingIndex = nextBindingIndex();
         if (bindingUpdated(lView, bindingIndex, value)) {
@@ -18484,7 +18484,7 @@
             elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true);
             ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
         }
-        return ɵɵupdateSyntheticHostBinding;
+        return ɵɵsyntheticHostProperty;
     }
 
     /**
@@ -19914,7 +19914,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.1+41.sha-eae13e4');
+    var VERSION = new Version('10.1.0-next.1+42.sha-d72b1e4');
 
     /**
      * @license
@@ -26042,8 +26042,8 @@
         'ɵɵrestoreView': ɵɵrestoreView,
         'ɵɵlistener': ɵɵlistener,
         'ɵɵprojection': ɵɵprojection,
-        'ɵɵupdateSyntheticHostBinding': ɵɵupdateSyntheticHostBinding,
-        'ɵɵcomponentHostSyntheticListener': ɵɵcomponentHostSyntheticListener,
+        'ɵɵsyntheticHostProperty': ɵɵsyntheticHostProperty,
+        'ɵɵsyntheticHostListener': ɵɵsyntheticHostListener,
         'ɵɵpipeBind1': ɵɵpipeBind1,
         'ɵɵpipeBind2': ɵɵpipeBind2,
         'ɵɵpipeBind3': ɵɵpipeBind3,
@@ -32622,7 +32622,6 @@
     exports.ɵɵclassMapInterpolate8 = ɵɵclassMapInterpolate8;
     exports.ɵɵclassMapInterpolateV = ɵɵclassMapInterpolateV;
     exports.ɵɵclassProp = ɵɵclassProp;
-    exports.ɵɵcomponentHostSyntheticListener = ɵɵcomponentHostSyntheticListener;
     exports.ɵɵcontentQuery = ɵɵcontentQuery;
     exports.ɵɵdefineComponent = ɵɵdefineComponent;
     exports.ɵɵdefineDirective = ɵɵdefineDirective;
@@ -32727,6 +32726,8 @@
     exports.ɵɵstylePropInterpolate7 = ɵɵstylePropInterpolate7;
     exports.ɵɵstylePropInterpolate8 = ɵɵstylePropInterpolate8;
     exports.ɵɵstylePropInterpolateV = ɵɵstylePropInterpolateV;
+    exports.ɵɵsyntheticHostListener = ɵɵsyntheticHostListener;
+    exports.ɵɵsyntheticHostProperty = ɵɵsyntheticHostProperty;
     exports.ɵɵtemplate = ɵɵtemplate;
     exports.ɵɵtemplateRefExtractor = ɵɵtemplateRefExtractor;
     exports.ɵɵtext = ɵɵtext;
@@ -32740,7 +32741,6 @@
     exports.ɵɵtextInterpolate7 = ɵɵtextInterpolate7;
     exports.ɵɵtextInterpolate8 = ɵɵtextInterpolate8;
     exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
-    exports.ɵɵupdateSyntheticHostBinding = ɵɵupdateSyntheticHostBinding;
     exports.ɵɵviewQuery = ɵɵviewQuery;
 
     Object.defineProperty(exports, '__esModule', { value: true });
