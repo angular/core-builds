@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.4+35.sha-4664acc
+ * @license Angular v10.0.4+36.sha-2af3d9c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11440,29 +11440,6 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
 }, QueryFields extends string[], NgContentSelectors extends string[]> = ɵComponentDef<T>;
 
 /**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation @triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵcomponentHostSyntheticListener;
-
-/**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
  *
@@ -14103,6 +14080,52 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
 export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;
 
 /**
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+ * in the component's renderer. Normally all host listeners are evaluated with the
+ * parent component's renderer, but, in the case of animation @triggers, they need
+ * to be evaluated with the sub component's renderer (because that's where the
+ * animation triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `listener`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵsyntheticHostListener;
+
+/**
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation @triggers, they need to be
+ * evaluated with the sub component's renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param index The index of the element to update in the data array
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵsyntheticHostProperty<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵsyntheticHostProperty;
+
+/**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
  *
  * <ng-template #foo>
@@ -14364,29 +14387,6 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  * @codeGenApi
  */
 export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
-
-/**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
- * the component's renderer. Normally all host bindings are evaluated with the parent
- * component's renderer, but, in the case of animation @triggers, they need to be
- * evaluated with the sub component's renderer (because that's where the animation
- * triggers are defined).
- *
- * Do not use this instruction as a replacement for `elementProperty`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- *
- * @codeGenApi
- */
-export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵupdateSyntheticHostBinding;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
