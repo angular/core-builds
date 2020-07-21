@@ -42,4 +42,4 @@ export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) =>
  *
  * @codeGenApi
  */
-export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵcomponentHostSyntheticListener;
+export declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵsyntheticHostListener;

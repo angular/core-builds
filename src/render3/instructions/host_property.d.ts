@@ -36,4 +36,4 @@ export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitize
  *
  * @codeGenApi
  */
-export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵupdateSyntheticHostBinding;
+export declare function ɵɵsyntheticHostProperty<T>(propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵsyntheticHostProperty;
