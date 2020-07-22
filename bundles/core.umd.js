@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.5
+ * @license Angular v10.0.5+7.sha-6ec7297
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19914,7 +19914,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.5');
+    var VERSION = new Version('10.0.5+7.sha-6ec7297');
 
     /**
      * @license
@@ -27100,7 +27100,7 @@
      * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
      * one or more initialization functions.
      *
-     * The provided function are injected at application startup and executed during
+     * The provided functions are injected at application startup and executed during
      * app initialization. If any of these functions returns a Promise, initialization
      * does not complete until the Promise is resolved.
      *
