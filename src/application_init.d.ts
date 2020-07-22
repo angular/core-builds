@@ -4,7 +4,7 @@ import * as i0 from "./r3_symbols";
  * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
  * one or more initialization functions.
  *
- * The provided function are injected at application startup and executed during
+ * The provided functions are injected at application startup and executed during
  * app initialization. If any of these functions returns a Promise, initialization
  * does not complete until the Promise is resolved.
  *
