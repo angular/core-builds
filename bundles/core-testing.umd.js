@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.5+32.sha-776067c
+ * @license Angular v10.0.5+38.sha-b1e7775
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3184,9 +3184,6 @@
             resetFakeAsyncZone();
         });
     }
-    // TODO(juliemr): remove this, only used because we need to export something to have compilation
-    // work.
-    var __core_private_testing_placeholder__ = '';
 
     /**
      * @license
@@ -3239,7 +3236,6 @@
     exports.InjectSetupWrapper = InjectSetupWrapper;
     exports.TestBed = TestBed;
     exports.TestComponentRenderer = TestComponentRenderer;
-    exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
     exports.async = async;
     exports.discardPeriodicTasks = discardPeriodicTasks;
     exports.fakeAsync = fakeAsync;

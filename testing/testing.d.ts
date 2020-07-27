@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.5+32.sha-776067c
+ * @license Angular v10.0.5+38.sha-b1e7775
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23,9 +23,6 @@ import { Pipe } from '@angular/core';
 import { PlatformRef } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
-
-
-export declare const __core_private_testing_placeholder__ = "";
 
 
 /**
