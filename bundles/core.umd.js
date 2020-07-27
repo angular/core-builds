@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.2+39.sha-96aa14d
+ * @license Angular v10.1.0-next.2+42.sha-5d3ba8d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -587,6 +587,7 @@
      *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
      *
      * @codeGenApi
+     * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
      */
     function ɵɵdefineInjectable(opts) {
         return {
@@ -620,7 +621,7 @@
      *   whose providers will also be added to the injector. Locally provided types will override
      *   providers from imports.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵdefineInjector(options) {
         return {
@@ -5254,7 +5255,7 @@
      * @returns `html` string which is safe to display to user, because all of the dangerous javascript
      * and urls have been removed.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵsanitizeHtml(unsafeHtml) {
         var sanitizer = getSanitizer();
@@ -5275,7 +5276,7 @@
      * @param unsafeStyle untrusted `style`, typically from the user.
      * @returns `style` string which is safe to bind to the `style` properties.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵsanitizeStyle(unsafeStyle) {
         var sanitizer = getSanitizer();
@@ -5301,7 +5302,7 @@
      * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
      * all of the dangerous javascript has been removed.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵsanitizeUrl(unsafeUrl) {
         var sanitizer = getSanitizer();
@@ -5322,7 +5323,7 @@
      * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
      * only trusted `url`s have been allowed to pass.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
         var sanitizer = getSanitizer();
@@ -5344,7 +5345,7 @@
      * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
      * because only trusted `scripts` have been allowed to pass.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵsanitizeScript(unsafeScript) {
         var sanitizer = getSanitizer();
@@ -5385,7 +5386,7 @@
      * @param prop name of the property that contains the value.
      * @returns `url` string which is safe to bind.
      *
-     * @publicApi
+     * @codeGenApi
      */
     function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
         return getUrlSanitizer(tag, prop)(unsafeUrl);
@@ -19914,7 +19915,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.2+39.sha-96aa14d');
+    var VERSION = new Version('10.1.0-next.2+42.sha-5d3ba8d');
 
     /**
      * @license
