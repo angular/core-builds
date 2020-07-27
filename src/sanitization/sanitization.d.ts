@@ -18,7 +18,7 @@
  * @returns `html` string which is safe to display to user, because all of the dangerous javascript
  * and urls have been removed.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
 /**
@@ -30,7 +30,7 @@ export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
  * @param unsafeStyle untrusted `style`, typically from the user.
  * @returns `style` string which is safe to bind to the `style` properties.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeStyle(unsafeStyle: any): string;
 /**
@@ -47,7 +47,7 @@ export declare function ɵɵsanitizeStyle(unsafeStyle: any): string;
  * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * all of the dangerous javascript has been removed.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
 /**
@@ -59,7 +59,7 @@ export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
  * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * only trusted `url`s have been allowed to pass.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
 /**
@@ -72,7 +72,7 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
  * because only trusted `scripts` have been allowed to pass.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeScript(unsafeScript: any): string;
 /**
@@ -96,7 +96,7 @@ export declare function getUrlSanitizer(tag: string, prop: string): typeof ɵɵs
  * @param prop name of the property that contains the value.
  * @returns `url` string which is safe to bind.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 export declare function validateAgainstEventProperties(name: string): void;

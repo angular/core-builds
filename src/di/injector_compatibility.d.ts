@@ -41,6 +41,7 @@ export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>
  *
  * @see inject
  * @codeGenApi
+ * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
 export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
 export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
