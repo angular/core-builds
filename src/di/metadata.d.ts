@@ -251,7 +251,7 @@ export interface Attribute {
     /**
      * The name of the attribute whose value can be injected.
      */
-    attributeName?: string;
+    attributeName: string;
 }
 /**
  * Attribute decorator and metadata.

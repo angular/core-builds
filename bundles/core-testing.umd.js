@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.2+45.sha-65cc0c8
+ * @license Angular v10.1.0-next.2+58.sha-2a45b93
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3189,6 +3189,16 @@
             resetFakeAsyncZone();
         });
     }
+    /**
+     * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
+     * investigation.
+     *
+     * A work around is to mark it as `@codeGenApi` for now and investigate later.
+     *
+     * @codeGenApi
+     */
+    // TODO(iminar): Remove this code in a safe way.
+    var __core_private_testing_placeholder__ = '';
 
     /**
      * @license
@@ -3241,6 +3251,7 @@
     exports.InjectSetupWrapper = InjectSetupWrapper;
     exports.TestBed = TestBed;
     exports.TestComponentRenderer = TestComponentRenderer;
+    exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
     exports.async = async;
     exports.discardPeriodicTasks = discardPeriodicTasks;
     exports.fakeAsync = fakeAsync;
