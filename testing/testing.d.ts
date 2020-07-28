@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.5+38.sha-b1e7775
+ * @license Angular v10.0.5+51.sha-7570356
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23,6 +23,16 @@ import { Pipe } from '@angular/core';
 import { PlatformRef } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
+
+/**
+ * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
+ * investigation.
+ *
+ * A work around is to mark it as `@codeGenApi` for now and investigate later.
+ *
+ * @codeGenApi
+ */
+export declare const __core_private_testing_placeholder__ = "";
 
 
 /**

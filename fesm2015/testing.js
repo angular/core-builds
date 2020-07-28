@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.5+38.sha-b1e7775
+ * @license Angular v10.0.5+51.sha-7570356
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2664,6 +2664,16 @@ if (_global$1.beforeEach) {
         resetFakeAsyncZone();
     });
 }
+/**
+ * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
+ * investigation.
+ *
+ * A work around is to mark it as `@codeGenApi` for now and investigate later.
+ *
+ * @codeGenApi
+ */
+// TODO(iminar): Remove this code in a safe way.
+const __core_private_testing_placeholder__ = '';
 
 /**
  * @license
@@ -2710,5 +2720,5 @@ if (_global$1.beforeEach) {
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, withModule, MetadataOverrider as ɵMetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, withModule, MetadataOverrider as ɵMetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c };
 //# sourceMappingURL=testing.js.map

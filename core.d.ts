@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.5+38.sha-b1e7775
+ * @license Angular v10.0.5+51.sha-7570356
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -424,7 +424,7 @@ export declare interface Attribute {
     /**
      * The name of the attribute whose value can be injected.
      */
-    attributeName?: string;
+    attributeName: string;
 }
 
 /**
@@ -7986,7 +7986,7 @@ export declare interface ViewChildDecorator {
      *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
      * with `@ViewChild('cmp')`)
      *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ViewChild(SomeService) someService: SomeService`)
+     * `@ViewChild(SomeComponent) someComponent: SomeComponent`)
      *   * Any provider defined through a string token (e.g. `@ViewChild('someToken') someTokenVal:
      * any`)
      *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChild(TemplateRef)
@@ -10253,10 +10253,10 @@ export declare class ɵNoopNgZone implements NgZone {
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
     readonly onError: EventEmitter<any>;
-    run(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
-    runGuarded(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
-    runOutsideAngular(fn: (...args: any[]) => any): any;
-    runTask(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any, name?: string): any;
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any): T;
+    runGuarded<T>(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): T;
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any, name?: string): T;
 }
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
