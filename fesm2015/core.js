@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.3
+ * @license Angular v10.1.0-next.3+1.sha-cf4da82
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19308,7 +19308,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.1.0-next.3');
+const VERSION = new Version('10.1.0-next.3+1.sha-cf4da82');
 
 /**
  * @license
