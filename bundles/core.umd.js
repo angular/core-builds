@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.3+18.sha-1eebb7f
+ * @license Angular v10.1.0-next.3+19.sha-3a525d1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19915,7 +19915,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.3+18.sha-1eebb7f');
+    var VERSION = new Version('10.1.0-next.3+19.sha-3a525d1');
 
     /**
      * @license
@@ -32488,7 +32488,8 @@
     exports.ɵangular_packages_core_core_bm = makeParamDecorator;
     exports.ɵangular_packages_core_core_bn = makePropDecorator;
     exports.ɵangular_packages_core_core_bo = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_bq = getRootContext;
+    exports.ɵangular_packages_core_core_bq = noSideEffects;
+    exports.ɵangular_packages_core_core_br = getRootContext;
     exports.ɵangular_packages_core_core_c = NullInjector;
     exports.ɵangular_packages_core_core_d = ReflectiveInjector_;
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
@@ -32564,7 +32565,6 @@
     exports.ɵmod = moduleDef;
     exports.ɵmpd = moduleProvideDef;
     exports.ɵncd = ngContentDef;
-    exports.ɵnoSideEffects = noSideEffects;
     exports.ɵnov = nodeValue;
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
