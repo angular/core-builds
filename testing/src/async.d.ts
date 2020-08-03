@@ -13,7 +13,7 @@
  * Example:
  *
  * ```
- * it('...', async(inject([AClass], (object) => {
+ * it('...', waitForAsync(inject([AClass], (object) => {
  *   object.doSomething.then(() => {
  *     expect(...);
  *   })
@@ -22,4 +22,10 @@
  *
  * @publicApi
  */
+export declare function waitForAsync(fn: Function): (done: any) => any;
+/**
+ * @deprecated use `waitForAsync()`, (expected removal in v12)
+ * @see {@link waitForAsync}
+ * @publicApi
+ * */
 export declare function async(fn: Function): (done: any) => any;
