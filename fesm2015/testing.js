@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.3+40.sha-87baa06
+ * @license Angular v10.1.0-next.3+43.sha-8fbf40b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -125,7 +125,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  * Example:
  *
  * ```
- * it('...', async(inject([AClass], (object) => {
+ * it('...', waitForAsync(inject([AClass], (object) => {
  *   object.doSomething.then(() => {
  *     expect(...);
  *   })
@@ -134,11 +134,11 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  *
  * @publicApi
  */
-function async(fn) {
+function waitForAsync(fn) {
     const _Zone = typeof Zone !== 'undefined' ? Zone : null;
     if (!_Zone) {
         return function () {
-            return Promise.reject('Zone is needed for the async() test helper but could not be found. ' +
+            return Promise.reject('Zone is needed for the waitForAsync() test helper but could not be found. ' +
                 'Please make sure that your environment includes zone.js/dist/zone.js');
         };
     }
@@ -150,6 +150,14 @@ function async(fn) {
     // TODO @JiaLiPassion, remove this after all library updated to
     // newest version of zone.js(0.8.25)
     return asyncFallback(fn);
+}
+/**
+ * @deprecated use `waitForAsync()`, (expected removal in v12)
+ * @see {@link waitForAsync}
+ * @publicApi
+ * */
+function async(fn) {
+    return waitForAsync(fn);
 }
 
 /**
@@ -2720,5 +2728,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, withModule, MetadataOverrider as ɵMetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, TestBedViewEngine as ɵangular_packages_core_testing_testing_a, TestBedRender3 as ɵangular_packages_core_testing_testing_b, _getTestBedRender3 as ɵangular_packages_core_testing_testing_c };
 //# sourceMappingURL=testing.js.map

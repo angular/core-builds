@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.3+40.sha-87baa06
+ * @license Angular v10.1.0-next.3+43.sha-8fbf40b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -34,24 +34,11 @@ import { Type } from '@angular/core';
  */
 export declare const __core_private_testing_placeholder__ = "";
 
-
 /**
- * Wraps a test function in an asynchronous test zone. The test will automatically
- * complete when all asynchronous calls within this zone are done. Can be used
- * to wrap an {@link inject} call.
- *
- * Example:
- *
- * ```
- * it('...', async(inject([AClass], (object) => {
- *   object.doSomething.then(() => {
- *     expect(...);
- *   })
- * });
- * ```
- *
+ * @deprecated use `waitForAsync()`, (expected removal in v12)
+ * @see {@link waitForAsync}
  * @publicApi
- */
+ * */
 export declare function async(fn: Function): (done: any) => any;
 
 /**
@@ -470,6 +457,26 @@ export declare type TestModuleMetadata = {
 export declare function tick(millis?: number, tickOptions?: {
     processNewMacroTasksSynchronously: boolean;
 }): void;
+
+
+/**
+ * Wraps a test function in an asynchronous test zone. The test will automatically
+ * complete when all asynchronous calls within this zone are done. Can be used
+ * to wrap an {@link inject} call.
+ *
+ * Example:
+ *
+ * ```
+ * it('...', waitForAsync(inject([AClass], (object) => {
+ *   object.doSomething.then(() => {
+ *     expect(...);
+ *   })
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+export declare function waitForAsync(fn: Function): (done: any) => any;
 
 /**
  * @publicApi

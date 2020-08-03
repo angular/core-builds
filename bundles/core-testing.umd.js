@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.3+40.sha-87baa06
+ * @license Angular v10.1.0-next.3+43.sha-8fbf40b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -128,7 +128,7 @@
      * Example:
      *
      * ```
-     * it('...', async(inject([AClass], (object) => {
+     * it('...', waitForAsync(inject([AClass], (object) => {
      *   object.doSomething.then(() => {
      *     expect(...);
      *   })
@@ -137,11 +137,11 @@
      *
      * @publicApi
      */
-    function async(fn) {
+    function waitForAsync(fn) {
         var _Zone = typeof Zone !== 'undefined' ? Zone : null;
         if (!_Zone) {
             return function () {
-                return Promise.reject('Zone is needed for the async() test helper but could not be found. ' +
+                return Promise.reject('Zone is needed for the waitForAsync() test helper but could not be found. ' +
                     'Please make sure that your environment includes zone.js/dist/zone.js');
             };
         }
@@ -153,6 +153,14 @@
         // TODO @JiaLiPassion, remove this after all library updated to
         // newest version of zone.js(0.8.25)
         return asyncFallback(fn);
+    }
+    /**
+     * @deprecated use `waitForAsync()`, (expected removal in v12)
+     * @see {@link waitForAsync}
+     * @publicApi
+     * */
+    function async(fn) {
+        return waitForAsync(fn);
     }
 
     /**
@@ -3256,6 +3264,7 @@
     exports.inject = inject;
     exports.resetFakeAsyncZone = resetFakeAsyncZone;
     exports.tick = tick;
+    exports.waitForAsync = waitForAsync;
     exports.withModule = withModule;
     exports.ɵMetadataOverrider = MetadataOverrider;
     exports.ɵTestingCompiler = TestingCompiler;
