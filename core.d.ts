@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.8+17.sha-f5d5bac
+ * @license Angular v10.0.8+19.sha-deb290b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -693,7 +693,7 @@ export declare interface CollectionChangeRecord<V> extends IterableChangeRecord<
 }
 
 /**
- * Marks that the next string is for comment.
+ * Marks that the next string is comment text.
  *
  * See `I18nMutateOpCodes` documentation.
  */
@@ -2116,7 +2116,7 @@ export declare interface DoCheck {
 }
 
 /**
- * Marks that the next string is for element.
+ * Marks that the next string is an element name.
  *
  * See `I18nMutateOpCodes` documentation.
  */
@@ -2794,6 +2794,17 @@ export declare interface HostListenerDecorator {
     new (eventName: string, args?: string[]): any;
 }
 
+declare interface I18nDebug {
+    /**
+     * Human readable representation of the OpCode arrays.
+     *
+     * NOTE: This property only exists if `ngDevMode` is set to `true` and it is not present in
+     * production. Its presence is purely to help debug issue in development, and should not be relied
+     * on in production application.
+     */
+    debug?: string[];
+}
+
 /**
  * Array storing OpCode for dynamically creating `i18n` blocks.
  *
@@ -2803,50 +2814,27 @@ export declare interface HostListenerDecorator {
  *   // For adding text nodes
  *   // ---------------------
  *   // Equivalent to:
- *   //   const node = lView[index++] = document.createTextNode('abc');
- *   //   lView[1].insertBefore(node, lView[2]);
- *   'abc', 1 << SHIFT_PARENT | 2 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createTextNode('xyz');
- *   //   lView[1].appendChild(node);
- *   'xyz', 1 << SHIFT_PARENT | AppendChild,
+ *   //   lView[1].appendChild(lView[0] = document.createTextNode('xyz'));
+ *   'xyz', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
  *
  *   // For adding element nodes
  *   // ---------------------
  *   // Equivalent to:
- *   //   const node = lView[index++] = document.createElement('div');
- *   //   lView[1].insertBefore(node, lView[2]);
- *   ELEMENT_MARKER, 'div', 1 << SHIFT_PARENT | 2 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createElement('div');
- *   //   lView[1].appendChild(node);
- *   ELEMENT_MARKER, 'div', 1 << SHIFT_PARENT | AppendChild,
+ *   //   lView[1].appendChild(lView[0] = document.createElement('div'));
+ *   ELEMENT_MARKER, 'div', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
  *
  *   // For adding comment nodes
  *   // ---------------------
  *   // Equivalent to:
- *   //   const node = lView[index++] = document.createComment('');
- *   //   lView[1].insertBefore(node, lView[2]);
- *   COMMENT_MARKER, '', 1 << SHIFT_PARENT | 2 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createComment('');
- *   //   lView[1].appendChild(node);
- *   COMMENT_MARKER, '', 1 << SHIFT_PARENT | AppendChild,
+ *   //   lView[1].appendChild(lView[0] = document.createComment(''));
+ *   COMMENT_MARKER, '', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
  *
  *   // For moving existing nodes to a different location
  *   // --------------------------------------------------
  *   // Equivalent to:
  *   //   const node = lView[1];
- *   //   lView[2].insertBefore(node, lView[3]);
- *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | 3 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[1];
  *   //   lView[2].appendChild(node);
- *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | AppendChild,
+ *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
  *
  *   // For removing existing nodes
  *   // --------------------------------------------------
@@ -2858,17 +2846,13 @@ export declare interface HostListenerDecorator {
  *   // --------------------------------------------------
  *   //   const node = lView[1];
  *   //   node.setAttribute('attr', 'value');
- *   1 << SHIFT_REF | Select, 'attr', 'value'
- *            // NOTE: Select followed by two string (vs select followed by OpCode)
+ *   1 << SHIFT_REF | Attr, 'attr', 'value'
  * ];
  * ```
- * NOTE:
- *   - `index` is initial location where the extra nodes should be stored in the EXPANDO section of
- * `LVIewData`.
  *
  * See: `applyI18nCreateOpCodes`;
  */
-declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARKER | COMMENT_MARKER | null> {
+declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARKER | COMMENT_MARKER | null>, I18nDebug {
 }
 
 /**
@@ -2879,6 +2863,10 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * mask bit. (Bit 1 for expression 1, bit 2 for expression 2 etc..., bit 32 for expression 32 and
  * higher.) The OpCodes then compare its own change mask against the expression change mask to
  * determine if the OpCodes should execute.
+ *
+ * NOTE: 32nd bit is special as it says 32nd or higher. This way if we have more than 32 bindings
+ * the code still works, but with lower efficiency. (it is unlikely that a translation would have
+ * more than 32 bindings.)
  *
  * These OpCodes can be used by both the i18n block as well as ICU sub-block.
  *
@@ -2903,8 +2891,8 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  *   // The following OpCodes represent: `<div i18n-title="pre{{exp1}}in{{exp2}}post">`
  *   // If `changeMask & 0b11`
  *   //        has changed then execute update OpCodes.
- *   //        has NOT changed then skip `7` values and start processing next OpCodes.
- *   0b11, 7,
+ *   //        has NOT changed then skip `8` values and start processing next OpCodes.
+ *   0b11, 8,
  *   // Concatenate `newValue = 'pre'+lView[bindIndex-4]+'in'+lView[bindIndex-3]+'post';`.
  *   'pre', -4, 'in', -3, 'post',
  *   // Update attribute: `elementAttribute(1, 'title', sanitizerFn(newValue));`
@@ -2923,8 +2911,8 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  *   // The following OpCodes represent: `<div i18n>{exp4, plural, ... }">`
  *   // If `changeMask & 0b1000`
  *   //        has changed then execute update OpCodes.
- *   //        has NOT changed then skip `4` values and start processing next OpCodes.
- *   0b1000, 4,
+ *   //        has NOT changed then skip `2` values and start processing next OpCodes.
+ *   0b1000, 2,
  *   // Concatenate `newValue = lView[bindIndex -1];`.
  *   -1,
  *   // Switch ICU: `icuSwitchCase(lView[1], 0, newValue);`
@@ -2939,7 +2927,7 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * ```
  *
  */
-declare interface I18nUpdateOpCodes extends Array<string | number | SanitizerFn | null> {
+declare interface I18nUpdateOpCodes extends Array<string | number | SanitizerFn | null>, I18nDebug {
 }
 
 /**
