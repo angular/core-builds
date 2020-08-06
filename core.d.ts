@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+12.sha-696a9b0
+ * @license Angular v10.1.0-next.4+17.sha-18cd1a9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8941,18 +8941,6 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
     [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
 }
 
-
-/**
- * Convince closure compiler that the wrapped function has no side-effects.
- *
- * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
- * allow us to execute a function but have closure compiler mark the call as no-side-effects.
- * It is important that the return value for the `noSideEffects` function be assigned
- * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
- * compiler.
- */
-export declare function ɵangular_packages_core_core_bq<T>(fn: () => T): T;
-
 /**
  * Returns the `RootContext` instance that is associated with
  * the application where the target is situated. It does this by walking the parent views until it
@@ -8960,7 +8948,7 @@ export declare function ɵangular_packages_core_core_bq<T>(fn: () => T): T;
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_br(viewOrComponent: ɵangular_packages_core_core_bp | {}): RootContext;
+export declare function ɵangular_packages_core_core_bq(viewOrComponent: ɵangular_packages_core_core_bp | {}): RootContext;
 
 export declare class ɵangular_packages_core_core_c implements Injector {
     get(token: any, notFoundValue?: any): any;
@@ -10258,6 +10246,18 @@ export declare class ɵNoopNgZone implements NgZone {
     runOutsideAngular<T>(fn: (...args: any[]) => T): T;
     runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any, name?: string): T;
 }
+
+
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
 
