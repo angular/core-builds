@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import '../util/ng_i18n_closure_mode';
+import '../util/ng_dev_mode';
 /**
  * Extracts a part of a message and removes the rest.
  *

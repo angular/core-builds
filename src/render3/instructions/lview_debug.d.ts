@@ -11,7 +11,6 @@ import { Sanitizer } from '../../sanitization/sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
-import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
 import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
@@ -242,44 +241,4 @@ export declare class LContainerDebug {
  * @param value `LView` if any
  */
 export declare function readLViewValue(value: any): LView | null;
-export declare class I18NDebugItem {
-    __raw_opCode: any;
-    private _lView;
-    nodeIndex: number;
-    type: string;
-    [key: string]: any;
-    get tNode(): ITNode;
-    constructor(__raw_opCode: any, _lView: LView, nodeIndex: number, type: string);
-}
-/**
- * Turns a list of "Create" & "Update" OpCodes into a human-readable list of operations for
- * debugging purposes.
- * @param mutateOpCodes mutation opCodes to read
- * @param updateOpCodes update opCodes to read
- * @param icus list of ICU expressions
- * @param lView The view the opCodes are acting on
- */
-export declare function attachI18nOpCodesDebug(mutateOpCodes: I18nMutateOpCodes, updateOpCodes: I18nUpdateOpCodes, icus: TIcu[] | null, lView: LView): void;
-export declare class I18nMutateOpCodesDebug implements I18nOpCodesDebug {
-    private readonly __raw_opCodes;
-    private readonly __lView;
-    constructor(__raw_opCodes: I18nMutateOpCodes, __lView: LView);
-    /**
-     * A list of operation information about how the OpCodes will act on the view.
-     */
-    get operations(): any[];
-}
-export declare class I18nUpdateOpCodesDebug implements I18nOpCodesDebug {
-    private readonly __raw_opCodes;
-    private readonly icus;
-    private readonly __lView;
-    constructor(__raw_opCodes: I18nUpdateOpCodes, icus: TIcu[] | null, __lView: LView);
-    /**
-     * A list of operation information about how the OpCodes will act on the view.
-     */
-    get operations(): any[];
-}
-export interface I18nOpCodesDebug {
-    operations: any[];
-}
 export {};
