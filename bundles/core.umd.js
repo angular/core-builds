@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+15.sha-dca4443
+ * @license Angular v10.1.0-next.4+12.sha-696a9b0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19891,7 +19891,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.4+15.sha-dca4443');
+    var VERSION = new Version('10.1.0-next.4+12.sha-696a9b0');
 
     /**
      * @license
@@ -32515,7 +32515,6 @@
     exports.ɵmod = moduleDef;
     exports.ɵmpd = moduleProvideDef;
     exports.ɵncd = ngContentDef;
-    exports.ɵnoSideEffects = noSideEffects;
     exports.ɵnov = nodeValue;
     exports.ɵoverrideComponentView = overrideComponentView;
     exports.ɵoverrideProvider = overrideProvider;
