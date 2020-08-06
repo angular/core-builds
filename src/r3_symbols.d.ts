@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+12.sha-696a9b0
+ * @license Angular v10.1.0-next.4+16.sha-0551fbd
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -913,6 +913,18 @@ declare abstract class ViewRef extends ChangeDetectorRef {
      */
     abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
+
+
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 /**
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
