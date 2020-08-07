@@ -6,9 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../../di/injector';
-import { DebugNode } from '../instructions/lview_debug';
 import { LContext } from '../interfaces/context';
-import { LView } from '../interfaces/view';
+import { DebugNode, LView } from '../interfaces/view';
 /**
  * Retrieves the component instance associated with a given DOM element.
  *

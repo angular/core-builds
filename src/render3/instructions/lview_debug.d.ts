@@ -16,7 +16,7 @@ import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
 import { RComment, RElement, Renderer3, RendererFactory3, RNode } from '../interfaces/renderer';
 import { TStylingKey, TStylingRange } from '../interfaces/styling';
-import { DestroyHookData, ExpandoInstructions, HookData, LView, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
+import { DebugNode, DestroyHookData, ExpandoInstructions, HookData, LContainerDebug as ILContainerDebug, LView, LViewDebug as ILViewDebug, LViewDebugRange, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
 /**
  * This function clones a blueprint and creates LView.
  *
@@ -29,7 +29,7 @@ export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TViewNode | TElementNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: DestroyHookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null, incompleteFirstPass: boolean): {
+    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TViewNode | TElementNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: DestroyHookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null, incompleteFirstPass: boolean, _decls: number, _vars: number): {
         type: TViewType;
         id: number;
         blueprint: LView;
@@ -61,6 +61,8 @@ export declare const TViewConstructor: {
         schemas: SchemaMetadata[] | null;
         consts: TConstants | null;
         incompleteFirstPass: boolean;
+        _decls: number;
+        _vars: number;
         readonly template_: string;
     };
 };
@@ -162,10 +164,10 @@ export declare const LCleanup: ArrayConstructor;
 export declare const TCleanup: ArrayConstructor;
 export declare function attachLViewDebug(lView: LView): void;
 export declare function attachLContainerDebug(lContainer: LContainer): void;
-export declare function toDebug(obj: LView): LViewDebug;
-export declare function toDebug(obj: LView | null): LViewDebug | null;
-export declare function toDebug(obj: LView | LContainer | null): LViewDebug | LContainerDebug | null;
-export declare class LViewDebug {
+export declare function toDebug(obj: LView): ILViewDebug;
+export declare function toDebug(obj: LView | null): ILViewDebug | null;
+export declare function toDebug(obj: LView | LContainer | null): ILViewDebug | ILContainerDebug | null;
+export declare class LViewDebug implements ILViewDebug {
     private readonly _raw_lView;
     constructor(_raw_lView: LView);
     /**
@@ -183,38 +185,35 @@ export declare class LViewDebug {
         isRoot: boolean;
         indexWithinInitPhase: number;
     };
-    get parent(): LViewDebug | LContainerDebug | null;
-    get host(): string | null;
+    get parent(): ILViewDebug | ILContainerDebug | null;
+    get hostHTML(): string | null;
     get html(): string;
     get context(): {} | null;
     /**
      * The tree of nodes associated with the current `LView`. The nodes have been normalized into
-     * a
-     * tree structure with relevant details pulled out for readability.
+     * a tree structure with relevant details pulled out for readability.
      */
-    get nodes(): DebugNode[] | null;
+    get nodes(): DebugNode[];
     get tView(): ITView;
     get cleanup(): any[] | null;
     get injector(): Injector | null;
     get rendererFactory(): RendererFactory3;
     get renderer(): Renderer3;
     get sanitizer(): Sanitizer | null;
-    get childHead(): LViewDebug | LContainerDebug | null;
-    get next(): LViewDebug | LContainerDebug | null;
-    get childTail(): LViewDebug | LContainerDebug | null;
-    get declarationView(): LViewDebug | null;
+    get childHead(): ILViewDebug | ILContainerDebug | null;
+    get next(): ILViewDebug | ILContainerDebug | null;
+    get childTail(): ILViewDebug | ILContainerDebug | null;
+    get declarationView(): ILViewDebug | null;
     get queries(): LQueries | null;
     get tHost(): TViewNode | TElementNode | null;
+    get decls(): LViewDebugRange;
+    get vars(): LViewDebugRange;
+    get i18n(): LViewDebugRange;
+    get expando(): LViewDebugRange;
     /**
      * Normalized view of child views (and containers) attached at this location.
      */
-    get childViews(): Array<LViewDebug | LContainerDebug>;
-}
-export interface DebugNode {
-    html: string | null;
-    native: Node;
-    nodes: DebugNode[] | null;
-    component: LViewDebug | null;
+    get childViews(): Array<ILViewDebug | ILContainerDebug>;
 }
 /**
  * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
@@ -222,18 +221,18 @@ export interface DebugNode {
  * @param tNode
  * @param lView
  */
-export declare function toDebugNodes(tNode: ITNode | null, lView: LView): DebugNode[] | null;
+export declare function toDebugNodes(tNode: ITNode | null, lView: LView): DebugNode[];
 export declare function buildDebugNode(tNode: ITNode, lView: LView, nodeIndex: number): DebugNode;
-export declare class LContainerDebug {
+export declare class LContainerDebug implements ILContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);
     get hasTransplantedViews(): boolean;
-    get views(): LViewDebug[];
-    get parent(): LViewDebug | LContainerDebug | null;
+    get views(): ILViewDebug[];
+    get parent(): ILViewDebug | null;
     get movedViews(): LView[] | null;
     get host(): RElement | RComment | LView;
     get native(): RComment;
-    get next(): LViewDebug | LContainerDebug | null;
+    get next(): ILViewDebug | ILContainerDebug | null;
 }
 /**
  * Return an `LView` value if found.

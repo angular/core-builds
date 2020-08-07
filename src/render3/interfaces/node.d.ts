@@ -40,6 +40,11 @@ export declare const enum TNodeType {
     IcuContainer = 5
 }
 /**
+ * Converts `TNodeType` into human readable text.
+ * Make sure this matches with `TNodeType`
+ */
+export declare const TNodeTypeAsString: readonly ["Container", "Projection", "View", "Element", "ElementContainer", "IcuContainer"];
+/**
  * Corresponds to the TNode.flags property.
  */
 export declare const enum TNodeFlags {
