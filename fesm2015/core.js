@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+22.sha-df7f3b0
+ * @license Angular v10.1.0-next.4+23.sha-702958e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5517,6 +5517,18 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
     return { propName: undefined, oldValue, newValue };
 }
 
+/**
+ * Converts `TNodeType` into human readable text.
+ * Make sure this matches with `TNodeType`
+ */
+const TNodeTypeAsString = [
+    'Container',
+    'Projection',
+    'View',
+    'Element',
+    'ElementContainer',
+    'IcuContainer' // 5
+];
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$4 = 1;
@@ -6389,8 +6401,9 @@ const TViewConstructor = class TView {
     firstChild, //
     schemas, //
     consts, //
-    incompleteFirstPass //
-    ) {
+    incompleteFirstPass, //
+    _decls, //
+    _vars) {
         this.type = type;
         this.id = id;
         this.blueprint = blueprint;
@@ -6422,6 +6435,8 @@ const TViewConstructor = class TView {
         this.schemas = schemas;
         this.consts = consts;
         this.incompleteFirstPass = incompleteFirstPass;
+        this._decls = _decls;
+        this._vars = _vars;
     }
     get template_() {
         const buf = [];
@@ -6680,7 +6695,7 @@ class LViewDebug {
     get parent() {
         return toDebug(this._raw_lView[PARENT]);
     }
-    get host() {
+    get hostHTML() {
         return toHtml(this._raw_lView[HOST], true);
     }
     get html() {
@@ -6691,8 +6706,7 @@ class LViewDebug {
     }
     /**
      * The tree of nodes associated with the current `LView`. The nodes have been normalized into
-     * a
-     * tree structure with relevant details pulled out for readability.
+     * a tree structure with relevant details pulled out for readability.
      */
     get nodes() {
         const lView = this._raw_lView;
@@ -6735,6 +6749,25 @@ class LViewDebug {
     get tHost() {
         return this._raw_lView[T_HOST];
     }
+    get decls() {
+        const tView = this.tView;
+        const start = HEADER_OFFSET;
+        return toLViewRange(this.tView, this._raw_lView, start, start + tView._decls);
+    }
+    get vars() {
+        const tView = this.tView;
+        const start = HEADER_OFFSET + tView._decls;
+        return toLViewRange(this.tView, this._raw_lView, start, start + tView._vars);
+    }
+    get i18n() {
+        const tView = this.tView;
+        const start = HEADER_OFFSET + tView._decls + tView._vars;
+        return toLViewRange(this.tView, this._raw_lView, start, this.tView.expandoStartIndex);
+    }
+    get expando() {
+        const tView = this.tView;
+        return toLViewRange(this.tView, this._raw_lView, this.tView.expandoStartIndex, this._raw_lView.length);
+    }
     /**
      * Normalized view of child views (and containers) attached at this location.
      */
@@ -6747,6 +6780,13 @@ class LViewDebug {
         }
         return childViews;
     }
+}
+function toLViewRange(tView, lView, start, end) {
+    let content = [];
+    for (let index = start; index < end; index++) {
+        content.push({ index: index, t: tView.data[index], l: lView[index] });
+    }
+    return { start: start, end: end, length: end - start, content: content };
 }
 /**
  * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
@@ -6765,18 +6805,17 @@ function toDebugNodes(tNode, lView) {
         return debugNodes;
     }
     else {
-        return null;
+        return [];
     }
 }
 function buildDebugNode(tNode, lView, nodeIndex) {
     const rawValue = lView[nodeIndex];
     const native = unwrapRNode(rawValue);
-    const componentLViewDebug = toDebug(readLViewValue(rawValue));
     return {
         html: toHtml(native),
+        type: TNodeTypeAsString[tNode.type],
         native: native,
-        nodes: toDebugNodes(tNode.child, lView),
-        component: componentLViewDebug,
+        children: toDebugNodes(tNode.child, lView),
     };
 }
 class LContainerDebug {
@@ -7380,8 +7419,9 @@ function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes
         null, // firstChild: TNode|null,
         schemas, // schemas: SchemaMetadata[]|null,
         consts, // consts: TConstants|null
-        false // incompleteFirstPass: boolean
-        ) :
+        false, // incompleteFirstPass: boolean
+        decls, // ngDevMode only: decls
+        vars) :
         {
             type: type,
             id: viewIndex,
@@ -19127,7 +19167,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.1.0-next.4+22.sha-df7f3b0');
+const VERSION = new Version('10.1.0-next.4+23.sha-702958e');
 
 /**
  * @license
