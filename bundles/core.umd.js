@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.8+19.sha-deb290b
+ * @license Angular v10.0.8+20.sha-ef7b70a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5852,6 +5852,18 @@
         return { propName: undefined, oldValue: oldValue, newValue: newValue };
     }
 
+    /**
+     * Converts `TNodeType` into human readable text.
+     * Make sure this matches with `TNodeType`
+     */
+    var TNodeTypeAsString = [
+        'Container',
+        'Projection',
+        'View',
+        'Element',
+        'ElementContainer',
+        'IcuContainer' // 5
+    ];
     // Note: This hack is necessary so we don't erroneously get a circular dependency
     // failure based on types.
     var unusedValueExportToPlacateAjd$4 = 1;
@@ -6725,8 +6737,9 @@
         firstChild, //
         schemas, //
         consts, //
-        incompleteFirstPass //
-        ) {
+        incompleteFirstPass, //
+        _decls, //
+        _vars) {
             this.type = type;
             this.id = id;
             this.blueprint = blueprint;
@@ -6758,6 +6771,8 @@
             this.schemas = schemas;
             this.consts = consts;
             this.incompleteFirstPass = incompleteFirstPass;
+            this._decls = _decls;
+            this._vars = _vars;
         }
         Object.defineProperty(TView.prototype, "template_", {
             get: function () {
@@ -7051,7 +7066,7 @@
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(LViewDebug.prototype, "host", {
+        Object.defineProperty(LViewDebug.prototype, "hostHTML", {
             get: function () {
                 return toHtml(this._raw_lView[HOST], true);
             },
@@ -7075,8 +7090,7 @@
         Object.defineProperty(LViewDebug.prototype, "nodes", {
             /**
              * The tree of nodes associated with the current `LView`. The nodes have been normalized into
-             * a
-             * tree structure with relevant details pulled out for readability.
+             * a tree structure with relevant details pulled out for readability.
              */
             get: function () {
                 var lView = this._raw_lView;
@@ -7170,6 +7184,41 @@
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(LViewDebug.prototype, "decls", {
+            get: function () {
+                var tView = this.tView;
+                var start = HEADER_OFFSET;
+                return toLViewRange(this.tView, this._raw_lView, start, start + tView._decls);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "vars", {
+            get: function () {
+                var tView = this.tView;
+                var start = HEADER_OFFSET + tView._decls;
+                return toLViewRange(this.tView, this._raw_lView, start, start + tView._vars);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "i18n", {
+            get: function () {
+                var tView = this.tView;
+                var start = HEADER_OFFSET + tView._decls + tView._vars;
+                return toLViewRange(this.tView, this._raw_lView, start, this.tView.expandoStartIndex);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(LViewDebug.prototype, "expando", {
+            get: function () {
+                var tView = this.tView;
+                return toLViewRange(this.tView, this._raw_lView, this.tView.expandoStartIndex, this._raw_lView.length);
+            },
+            enumerable: false,
+            configurable: true
+        });
         Object.defineProperty(LViewDebug.prototype, "childViews", {
             /**
              * Normalized view of child views (and containers) attached at this location.
@@ -7188,6 +7237,13 @@
         });
         return LViewDebug;
     }());
+    function toLViewRange(tView, lView, start, end) {
+        var content = [];
+        for (var index = start; index < end; index++) {
+            content.push({ index: index, t: tView.data[index], l: lView[index] });
+        }
+        return { start: start, end: end, length: end - start, content: content };
+    }
     /**
      * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
      *
@@ -7205,18 +7261,17 @@
             return debugNodes;
         }
         else {
-            return null;
+            return [];
         }
     }
     function buildDebugNode(tNode, lView, nodeIndex) {
         var rawValue = lView[nodeIndex];
         var native = unwrapRNode(rawValue);
-        var componentLViewDebug = toDebug(readLViewValue(rawValue));
         return {
             html: toHtml(native),
+            type: TNodeTypeAsString[tNode.type],
             native: native,
-            nodes: toDebugNodes(tNode.child, lView),
-            component: componentLViewDebug,
+            children: toDebugNodes(tNode.child, lView),
         };
     }
     var LContainerDebug = /** @class */ (function () {
@@ -7850,8 +7905,9 @@
             null, // firstChild: TNode|null,
             schemas, // schemas: SchemaMetadata[]|null,
             consts, // consts: TConstants|null
-            false // incompleteFirstPass: boolean
-            ) :
+            false, // incompleteFirstPass: boolean
+            decls, // ngDevMode only: decls
+            vars) :
             {
                 type: type,
                 id: viewIndex,
@@ -19719,7 +19775,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.8+19.sha-deb290b');
+    var VERSION = new Version('10.0.8+20.sha-ef7b70a');
 
     /**
      * @license

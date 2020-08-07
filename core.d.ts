@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.8+19.sha-deb290b
+ * @license Angular v10.0.8+20.sha-ef7b70a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1594,6 +1594,29 @@ export declare interface DebugNode {
 export declare const DebugNode: {
     new (...args: any[]): DebugNode;
 };
+
+/**
+ * A logical node which comprise into `LView`s.
+ *
+ */
+declare interface DebugNode_2 {
+    /**
+     * HTML representation of the node.
+     */
+    html: string | null;
+    /**
+     * Human readable node type.
+     */
+    type: typeof TNodeTypeAsString[number];
+    /**
+     * DOM native node.
+     */
+    native: Node;
+    /**
+     * Child nodes
+     */
+    children: DebugNode_2[];
+}
 
 declare class DebugNode__POST_R3__ implements DebugNode {
     readonly nativeNode: Node;
@@ -3814,6 +3837,28 @@ declare interface LContainer extends Array<any> {
 }
 
 /**
+ * Human readable version of the `LContainer`
+ *
+ * `LContainer` is a data structure used internally to keep track of child views. The `LContainer`
+ * is designed for efficiency and so at times it is difficult to read or write tests which assert on
+ * its values. For this reason when `ngDevMode` is true we patch a `LContainer.debug` property which
+ * points to `LContainerDebug` for easier debugging and test writing. It is the intent of
+ * `LContainerDebug` to be used in tests.
+ */
+declare interface LContainerDebug {
+    readonly native: RComment;
+    /**
+     * Child `LView`s.
+     */
+    readonly views: LViewDebug[];
+    readonly parent: LViewDebug | null;
+    readonly movedViews: ɵangular_packages_core_core_bp[] | null;
+    readonly host: RElement | RComment | ɵangular_packages_core_core_bp;
+    readonly next: LViewDebug | LContainerDebug | null;
+    readonly hasTransplantedViews: boolean;
+}
+
+/**
  *
  */
 declare interface LFrame {
@@ -3987,6 +4032,126 @@ declare interface LQuery<T> {
      * Called when an embedded view, impacting results of this query, is inserted or removed.
      */
     setDirty(): void;
+}
+
+/**
+ * Human readable version of the `LView`.
+ *
+ * `LView` is a data structure used internally to keep track of views. The `LView` is designed for
+ * efficiency and so at times it is difficult to read or write tests which assert on its values. For
+ * this reason when `ngDevMode` is true we patch a `LView.debug` property which points to
+ * `LViewDebug` for easier debugging and test writing. It is the intent of `LViewDebug` to be used
+ * in tests.
+ */
+declare interface LViewDebug {
+    /**
+     * Flags associated with the `LView` unpacked into a more readable state.
+     *
+     * See `LViewFlags` for the flag meanings.
+     */
+    readonly flags: {
+        initPhaseState: number;
+        creationMode: boolean;
+        firstViewPass: boolean;
+        checkAlways: boolean;
+        dirty: boolean;
+        attached: boolean;
+        destroyed: boolean;
+        isRoot: boolean;
+        indexWithinInitPhase: number;
+    };
+    /**
+     * Parent view (or container)
+     */
+    readonly parent: LViewDebug | LContainerDebug | null;
+    /**
+     * Next sibling to the `LView`.
+     */
+    readonly next: LViewDebug | LContainerDebug | null;
+    /**
+     * The context used for evaluation of the `LView`
+     *
+     * (Usually the component)
+     */
+    readonly context: {} | null;
+    /**
+     * Hierarchical tree of nodes.
+     */
+    readonly nodes: DebugNode_2[];
+    /**
+     * HTML representation of the `LView`.
+     *
+     * This is only approximate to actual HTML as child `LView`s are removed.
+     */
+    readonly html: string;
+    /**
+     * The host element to which this `LView` is attached.
+     */
+    readonly hostHTML: string | null;
+    /**
+     * Child `LView`s
+     */
+    readonly childViews: Array<LViewDebug | LContainerDebug>;
+    /**
+     * Sub range of `LView` containing decls (DOM elements).
+     */
+    readonly decls: LViewDebugRange;
+    /**
+     * Sub range of `LView` containing vars (bindings).
+     */
+    readonly vars: LViewDebugRange;
+    /**
+     * Sub range of `LView` containing i18n (translated DOM elements).
+     */
+    readonly i18n: LViewDebugRange;
+    /**
+     * Sub range of `LView` containing expando (used by DI).
+     */
+    readonly expando: LViewDebugRange;
+}
+
+/**
+ * `LView` is subdivided to ranges where the actual data is stored. Some of these ranges such as
+ * `decls` and `vars` are known at compile time. Other such as `i18n` and `expando` are runtime only
+ * concepts.
+ */
+declare interface LViewDebugRange {
+    /**
+     * The starting index in `LView` where the range begins. (Inclusive)
+     */
+    start: number;
+    /**
+     * The ending index in `LView` where the range ends. (Exclusive)
+     */
+    end: number;
+    /**
+     * The length of the range
+     */
+    length: number;
+    /**
+     * The merged content of the range. `t` contains data from `TView.data` and `l` contains `LView`
+     * data at an index.
+     */
+    content: LViewDebugRangeContent[];
+}
+
+/**
+ * For convenience the static and instance portions of `TView` and `LView` are merged into a single
+ * object in `LViewRange`.
+ */
+declare interface LViewDebugRangeContent {
+    /**
+     * Index into original `LView` or `TView.data`.
+     */
+    index: number;
+    /**
+     * Value from the `TView.data[index]` location.
+     */
+    t: any;
+    /**
+     * Value from the `LView[index]` location.
+     */
+    l: any;
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -7187,6 +7352,12 @@ declare const enum TNodeType {
 }
 
 /**
+ * Converts `TNodeType` into human readable text.
+ * Make sure this matches with `TNodeType`
+ */
+declare const TNodeTypeAsString: readonly ["Container", "Projection", "View", "Element", "ElementContainer", "IcuContainer"];
+
+/**
  * Type representing a set of TNodes that can have local refs (`#foo`) placed on them.
  */
 declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bf | TElementContainerNode;
@@ -8726,6 +8897,14 @@ export declare function ɵangular_packages_core_core_bo<T>(objWithPropertyToExtr
  * don't have to edit the data array based on which views are present.
  */
 export declare interface ɵangular_packages_core_core_bp extends Array<any> {
+    /**
+     * Human readable representation of the `LView`.
+     *
+     * NOTE: This property only exists if `ngDevMode` is set to `true` and it is not present in
+     * production. Its presence is purely to help debug issue in development, and should not be relied
+     * on in production application.
+     */
+    debug?: LViewDebug;
     /**
      * The host node for this LView instance, if this is a component view.
      * If this is an embedded view, HOST will be null.
