@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+27.sha-0de93fd
+ * @license Angular v10.1.0-next.4+29.sha-6d8c73a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1403,7 +1403,7 @@
             (typeof node === 'object' && node != null &&
                 node.constructor.name === 'WebWorkerRenderNode'), true, "The provided value must be an instance of a DOM Node but got " + stringify(node));
     }
-    function assertDataInRange(arr, index) {
+    function assertIndexInRange(arr, index) {
         var maxLen = arr ? arr.length : 0;
         assertLessThan(index, maxLen, "Index expected to be less than " + maxLen + " but got " + index);
     }
@@ -2618,7 +2618,7 @@
      */
     function getNativeByTNode(tNode, lView) {
         ngDevMode && assertTNodeForLView(tNode, lView);
-        ngDevMode && assertDataInRange(lView, tNode.index);
+        ngDevMode && assertIndexInRange(lView, tNode.index);
         var node = unwrapRNode(lView[tNode.index]);
         ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
         return node;
@@ -2648,12 +2648,12 @@
     }
     /** Retrieves a value from any `LView` or `TData`. */
     function load(view, index) {
-        ngDevMode && assertDataInRange(view, index + HEADER_OFFSET);
+        ngDevMode && assertIndexInRange(view, index + HEADER_OFFSET);
         return view[index + HEADER_OFFSET];
     }
     function getComponentLViewByIndex(nodeIndex, hostView) {
         // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
-        ngDevMode && assertDataInRange(hostView, nodeIndex);
+        ngDevMode && assertIndexInRange(hostView, nodeIndex);
         var slotValue = hostView[nodeIndex];
         var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
         return lView;
@@ -6498,7 +6498,7 @@
     }
     function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
         ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
-        ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+        ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
         // Flush the initial hooks for elements in the view that have been added up to this point.
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
         if (!checkNoChangesMode) {
@@ -7019,19 +7019,23 @@
         if (includeChildren === void 0) { includeChildren = false; }
         var node = unwrapRNode(value);
         if (node) {
-            var isTextNode = node.nodeType === Node.TEXT_NODE;
-            var outerHTML = (isTextNode ? node.textContent : node.outerHTML) || '';
-            if (includeChildren || isTextNode) {
-                return outerHTML;
-            }
-            else {
-                var innerHTML = '>' + node.innerHTML + '<';
-                return (outerHTML.split(innerHTML)[0]) + '>';
+            switch (node.nodeType) {
+                case Node.TEXT_NODE:
+                    return node.textContent;
+                case Node.COMMENT_NODE:
+                    return "<!--" + node.textContent + "-->";
+                case Node.ELEMENT_NODE:
+                    var outerHTML = node.outerHTML;
+                    if (includeChildren) {
+                        return outerHTML;
+                    }
+                    else {
+                        var innerHTML = '>' + node.innerHTML + '<';
+                        return (outerHTML.split(innerHTML)[0]) + '>';
+                    }
             }
         }
-        else {
-            return null;
-        }
+        return null;
     }
     var LViewDebug = /** @class */ (function () {
         function LViewDebug(_raw_lView) {
@@ -7493,13 +7497,6 @@
         var tNode = tView.data[adjustedIndex] ||
             createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs);
         setPreviousOrParentTNode(tNode, true);
-        if (ngDevMode) {
-            // For performance reasons it is important that the tNode retains the same shape during runtime.
-            // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
-            // prevent class transitions.
-            // FIXME(misko): re-enable this once i18n code is compliant with this.
-            // Object.seal(tNode);
-        }
         return tNode;
     }
     function createTNodeAtIndex(tView, tHostNode, adjustedIndex, type, name, attrs) {
@@ -7873,7 +7870,7 @@
         // that has a host binding, we will update the blueprint with that def's hostVars count.
         var initialViewLength = bindingStartIndex + vars;
         var blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
-        return blueprint[TVIEW] = ngDevMode ?
+        var tView = blueprint[TVIEW] = ngDevMode ?
             new TViewConstructor(type, viewIndex, // id: number,
             blueprint, // blueprint: LView,
             templateFn, // template: ComponentTemplate<{}>|null,
@@ -7941,6 +7938,13 @@
                 consts: consts,
                 incompleteFirstPass: false
             };
+        if (ngDevMode) {
+            // For performance reasons it is important that the tView retains the same shape during runtime.
+            // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
+            // prevent class transitions.
+            Object.seal(tView);
+        }
+        return tView;
     }
     function createViewBlueprint(bindingStartIndex, initialViewLength) {
         var blueprint = ngDevMode ? new LViewBlueprint() : [];
@@ -8014,37 +8018,38 @@
     function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
         ngDevMode && ngDevMode.tNode++;
         var injectorIndex = tParent ? tParent.injectorIndex : -1;
-        return ngDevMode ? new TNodeDebug(tView, // tView_: TView
-        type, // type: TNodeType
-        adjustedIndex, // index: number
-        injectorIndex, // injectorIndex: number
-        -1, // directiveStart: number
-        -1, // directiveEnd: number
-        -1, // directiveStylingLast: number
-        null, // propertyBindings: number[]|null
-        0, // flags: TNodeFlags
-        0, // providerIndexes: TNodeProviderIndexes
-        tagName, // tagName: string|null
-        attrs, // attrs: (string|AttributeMarker|(string|SelectorFlags)[])[]|null
-        null, // mergedAttrs
-        null, // localNames: (string|number)[]|null
-        undefined, // initialInputs: (string[]|null)[]|null|undefined
-        null, // inputs: PropertyAliases|null
-        null, // outputs: PropertyAliases|null
-        null, // tViews: ITView|ITView[]|null
-        null, // next: ITNode|null
-        null, // projectionNext: ITNode|null
-        null, // child: ITNode|null
-        tParent, // parent: TElementNode|TContainerNode|null
-        null, // projection: number|(ITNode|RNode[])[]|null
-        null, // styles: string|null
-        null, // stylesWithoutHost: string|null
-        undefined, // residualStyles: string|null
-        null, // classes: string|null
-        null, // classesWithoutHost: string|null
-        undefined, // residualClasses: string|null
-        0, // classBindings: TStylingRange;
-        0) :
+        var tNode = ngDevMode ?
+            new TNodeDebug(tView, // tView_: TView
+            type, // type: TNodeType
+            adjustedIndex, // index: number
+            injectorIndex, // injectorIndex: number
+            -1, // directiveStart: number
+            -1, // directiveEnd: number
+            -1, // directiveStylingLast: number
+            null, // propertyBindings: number[]|null
+            0, // flags: TNodeFlags
+            0, // providerIndexes: TNodeProviderIndexes
+            tagName, // tagName: string|null
+            attrs, // attrs: (string|AttributeMarker|(string|SelectorFlags)[])[]|null
+            null, // mergedAttrs
+            null, // localNames: (string|number)[]|null
+            undefined, // initialInputs: (string[]|null)[]|null|undefined
+            null, // inputs: PropertyAliases|null
+            null, // outputs: PropertyAliases|null
+            null, // tViews: ITView|ITView[]|null
+            null, // next: ITNode|null
+            null, // projectionNext: ITNode|null
+            null, // child: ITNode|null
+            tParent, // parent: TElementNode|TContainerNode|null
+            null, // projection: number|(ITNode|RNode[])[]|null
+            null, // styles: string|null
+            null, // stylesWithoutHost: string|null
+            undefined, // residualStyles: string|null
+            null, // classes: string|null
+            null, // classesWithoutHost: string|null
+            undefined, // residualClasses: string|null
+            0, // classBindings: TStylingRange;
+            0) :
             {
                 type: type,
                 index: adjustedIndex,
@@ -8077,6 +8082,13 @@
                 classBindings: 0,
                 styleBindings: 0,
             };
+        if (ngDevMode) {
+            // For performance reasons it is important that the tNode retains the same shape during runtime.
+            // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
+            // prevent class transitions.
+            Object.seal(tNode);
+        }
+        return tNode;
     }
     function generatePropertyAliases(inputAliasMap, directiveDefIdx, propStore) {
         for (var publicName in inputAliasMap) {
@@ -9117,7 +9129,7 @@
             var index = inputs[i++];
             var privateName = inputs[i++];
             var instance = lView[index];
-            ngDevMode && assertDataInRange(lView, index);
+            ngDevMode && assertIndexInRange(lView, index);
             var def = tView.data[index];
             if (def.setInput !== null) {
                 def.setInput(instance, value, publicName, privateName);
@@ -9132,7 +9144,7 @@
      */
     function textBindingInternal(lView, index, value) {
         ngDevMode && assertNotSame(value, NO_CHANGE, 'value should not be NO_CHANGE');
-        ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+        ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
         var element = getNativeByIndex(index, lView);
         ngDevMode && assertDefined(element, 'native element should exist');
         ngDevMode && ngDevMode.rendererSetText++;
@@ -13507,7 +13519,7 @@
     }
     /** Gets the current binding value. */
     function getBinding(lView, bindingIndex) {
-        ngDevMode && assertDataInRange(lView, bindingIndex);
+        ngDevMode && assertIndexInRange(lView, bindingIndex);
         ngDevMode &&
             assertNotSame(lView[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
         return lView[bindingIndex];
@@ -14402,7 +14414,7 @@
         ngDevMode &&
             assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
         ngDevMode && ngDevMode.rendererCreateElement++;
-        ngDevMode && assertDataInRange(lView, adjustedIndex);
+        ngDevMode && assertIndexInRange(lView, adjustedIndex);
         var renderer = lView[RENDERER];
         var native = lView[adjustedIndex] = elementCreate(name, renderer, getNamespace());
         var tNode = tView.firstCreatePass ?
@@ -14562,7 +14574,7 @@
         var lView = getLView();
         var tView = getTView();
         var adjustedIndex = index + HEADER_OFFSET;
-        ngDevMode && assertDataInRange(lView, adjustedIndex);
+        ngDevMode && assertIndexInRange(lView, adjustedIndex);
         ngDevMode &&
             assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
         var tNode = tView.firstCreatePass ?
@@ -14829,7 +14841,7 @@
             if (propsLength) {
                 for (var i = 0; i < propsLength; i += 2) {
                     var index = props[i];
-                    ngDevMode && assertDataInRange(lView, index);
+                    ngDevMode && assertIndexInRange(lView, index);
                     var minifiedName = props[i + 1];
                     var directiveInstance = lView[index];
                     var output = directiveInstance[minifiedName];
@@ -15889,7 +15901,7 @@
         // - we are a map in which case we have to continue searching even after we find what we were
         //   looking for since we are a wild card and everything needs to be flipped to duplicate.
         while (cursor !== 0 && (foundDuplicate === false || isMap)) {
-            ngDevMode && assertDataInRange(tData, cursor);
+            ngDevMode && assertIndexInRange(tData, cursor);
             var tStylingValueAtCursor = tData[cursor];
             var tStyleRangeAtCursor = tData[cursor + 1];
             if (isStylingMatch(tStylingValueAtCursor, tStylingKey)) {
@@ -17006,7 +17018,7 @@
         var adjustedIndex = index + HEADER_OFFSET;
         ngDevMode &&
             assertEqual(getBindingIndex(), tView.bindingStartIndex, 'text nodes should be created before any bindings');
-        ngDevMode && assertDataInRange(lView, adjustedIndex);
+        ngDevMode && assertIndexInRange(lView, adjustedIndex);
         var tNode = tView.firstCreatePass ?
             getOrCreateTNode(tView, lView[T_HOST], index, 3 /* Element */, null, null) :
             tView.data[adjustedIndex];
@@ -18869,7 +18881,7 @@
      */
     function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, sanitizer) {
         var tView = rootView[TVIEW];
-        ngDevMode && assertDataInRange(rootView, 0 + HEADER_OFFSET);
+        ngDevMode && assertIndexInRange(rootView, 0 + HEADER_OFFSET);
         rootView[0 + HEADER_OFFSET] = rNode;
         var tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
         var mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
@@ -19775,7 +19787,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.4+27.sha-0de93fd');
+    var VERSION = new Version('10.1.0-next.4+29.sha-6d8c73a');
 
     /**
      * @license
@@ -23927,7 +23939,7 @@
         // Find the last node that was added before `i18nEnd`
         var lastCreatedNode = getPreviousOrParentTNode();
         // Read the instructions to insert/move/remove DOM elements
-        var visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tView, lView);
+        var visitedNodes = applyCreateOpCodes(tView, rootIndex, tI18n.create, lView);
         // Remove deleted nodes
         var index = rootIndex + 1;
         while (index <= lastCreatedNode.index - HEADER_OFFSET) {
@@ -23953,7 +23965,7 @@
      */
     function createDynamicNodeAtIndex(tView, lView, index, type, native, name) {
         var previousOrParentTNode = getPreviousOrParentTNode();
-        ngDevMode && assertDataInRange(lView, index + HEADER_OFFSET);
+        ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
         lView[index + HEADER_OFFSET] = native;
         // FIXME(misko): Why does this create A TNode??? I would not expect this to be here.
         var tNode = getOrCreateTNode(tView, lView[T_HOST], index, type, name, null);
@@ -23964,7 +23976,15 @@
         }
         return tNode;
     }
-    function readCreateOpCodes(index, createOpCodes, tView, lView) {
+    /**
+     * Apply `I18nMutateOpCodes` OpCodes.
+     *
+     * @param tView Current `TView`
+     * @param rootIndex Pointer to the root (parent) tNode for the i18n.
+     * @param createOpCodes OpCodes to process
+     * @param lView Current `LView`
+     */
+    function applyCreateOpCodes(tView, rootindex, createOpCodes, lView) {
         var renderer = lView[RENDERER];
         var currentTNode = null;
         var previousTNode = null;
@@ -23986,7 +24006,7 @@
                     case 1 /* AppendChild */:
                         var destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
                         var destinationTNode = void 0;
-                        if (destinationNodeIndex === index) {
+                        if (destinationNodeIndex === rootindex) {
                             // If the destination node is `i18nStart`, we don't have a
                             // top-level node and we should use the host node instead
                             destinationTNode = lView[T_HOST];
@@ -24042,7 +24062,6 @@
                         currentTNode = createDynamicNodeAtIndex(tView, lView, commentNodeIndex, 5 /* IcuContainer */, commentRNode, null);
                         visitedNodes.push(commentNodeIndex);
                         attachPatchData(commentRNode, lView);
-                        currentTNode.activeCaseIndex = null;
                         // We will add the case nodes later, during the update phase
                         setIsNotParent();
                         break;
@@ -24065,14 +24084,25 @@
         setIsNotParent();
         return visitedNodes;
     }
-    function readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, tView, lView, bypassCheckBit) {
+    /**
+     * Apply `I18nUpdateOpCodes` OpCodes
+     *
+     * @param tView Current `TView`
+     * @param tIcus If ICUs present than this contains them.
+     * @param lView Current `LView`
+     * @param updateOpCodes OpCodes to process
+     * @param bindingsStartIndex Location of the first `ɵɵi18nApply`
+     * @param changeMask Each bit corresponds to a `ɵɵi18nExp` (Counting backwards from
+     *     `bindingsStartIndex`)
+     */
+    function applyUpdateOpCodes(tView, tIcus, lView, updateOpCodes, bindingsStartIndex, changeMask) {
         var caseCreated = false;
         for (var i = 0; i < updateOpCodes.length; i++) {
             // bit code to check if we should apply the next update
             var checkBit = updateOpCodes[i];
             // Number of opCodes to skip until next set of update codes
             var skipCodes = updateOpCodes[++i];
-            if (bypassCheckBit || (checkBit & changeMask)) {
+            if (checkBit & changeMask) {
                 // The value has been updated since last checked
                 var value = '';
                 for (var j = i + 1; j <= (i + skipCodes); j++) {
@@ -24097,10 +24127,11 @@
                                     textBindingInternal(lView, nodeIndex, value);
                                     break;
                                 case 2 /* IcuSwitch */:
-                                    caseCreated = icuSwitchCase(tView, updateOpCodes[++j], nodeIndex, icus, lView, value);
+                                    caseCreated =
+                                        applyIcuSwitchCase(tView, tIcus, updateOpCodes[++j], lView, value);
                                     break;
                                 case 3 /* IcuUpdate */:
-                                    icuUpdateCase(tView, lView, updateOpCodes[++j], nodeIndex, bindingsStartIndex, icus, caseCreated);
+                                    applyIcuUpdateCase(tView, tIcus, updateOpCodes[++j], bindingsStartIndex, lView, caseCreated);
                                     break;
                             }
                         }
@@ -24110,53 +24141,92 @@
             i += skipCodes;
         }
     }
-    function icuUpdateCase(tView, lView, tIcuIndex, nodeIndex, bindingsStartIndex, tIcus, caseCreated) {
+    /**
+     * Apply OpCodes associated with updating an existing ICU.
+     *
+     * @param tView Current `TView`
+     * @param tIcus tIcus ICUs active at this location them.
+     * @param tIcuIndex Index into `tIcus` to process.
+     * @param bindingsStartIndex Location of the first `ɵɵi18nApply`
+     * @param lView Current `LView`
+     * @param changeMask Each bit corresponds to a `ɵɵi18nExp` (Counting backwards from
+     *     `bindingsStartIndex`)
+     */
+    function applyIcuUpdateCase(tView, tIcus, tIcuIndex, bindingsStartIndex, lView, caseCreated) {
+        ngDevMode && assertIndexInRange(tIcus, tIcuIndex);
         var tIcu = tIcus[tIcuIndex];
-        var icuTNode = getTNode(tView, nodeIndex);
-        if (icuTNode.activeCaseIndex !== null) {
-            readUpdateOpCodes(tIcu.update[icuTNode.activeCaseIndex], tIcus, bindingsStartIndex, changeMask, tView, lView, caseCreated);
+        ngDevMode && assertIndexInRange(lView, tIcu.currentCaseLViewIndex);
+        var activeCaseIndex = lView[tIcu.currentCaseLViewIndex];
+        if (activeCaseIndex !== null) {
+            var mask = caseCreated ?
+                -1 : // -1 is same as all bits on, which simulates creation since it marks all bits dirty
+                changeMask;
+            applyUpdateOpCodes(tView, tIcus, lView, tIcu.update[activeCaseIndex], bindingsStartIndex, mask);
         }
     }
-    function icuSwitchCase(tView, tIcuIndex, nodeIndex, tIcus, lView, value) {
-        var tIcu = tIcus[tIcuIndex];
-        var icuTNode = getTNode(tView, nodeIndex);
+    /**
+     * Apply OpCodes associated with switching a case on ICU.
+     *
+     * This involves tearing down existing case and than building up a new case.
+     *
+     * @param tView Current `TView`
+     * @param tIcus ICUs active at this location.
+     * @param tIcuIndex Index into `tIcus` to process.
+     * @param lView Current `LView`
+     * @param value Value of the case to update to.
+     * @returns true if a new case was created (needed so that the update executes regardless of the
+     *     bitmask)
+     */
+    function applyIcuSwitchCase(tView, tIcus, tIcuIndex, lView, value) {
+        applyIcuSwitchCaseRemove(tView, tIcus, tIcuIndex, lView);
+        // Rebuild a new case for this ICU
         var caseCreated = false;
-        // If there is an active case, delete the old nodes
-        if (icuTNode.activeCaseIndex !== null) {
-            var removeCodes = tIcu.remove[icuTNode.activeCaseIndex];
+        ngDevMode && assertIndexInRange(tIcus, tIcuIndex);
+        var tIcu = tIcus[tIcuIndex];
+        var caseIndex = getCaseIndex(tIcu, value);
+        lView[tIcu.currentCaseLViewIndex] = caseIndex !== -1 ? caseIndex : null;
+        if (caseIndex > -1) {
+            // Add the nodes for the new case
+            applyCreateOpCodes(tView, -1, // -1 means we don't have parent node
+            tIcu.create[caseIndex], lView);
+            caseCreated = true;
+        }
+        return caseCreated;
+    }
+    /**
+     * Apply OpCodes associated with tearing down of DOM.
+     *
+     * This involves tearing down existing case and than building up a new case.
+     *
+     * @param tView Current `TView`
+     * @param tIcus ICUs active at this location.
+     * @param tIcuIndex Index into `tIcus` to process.
+     * @param lView Current `LView`
+     * @returns true if a new case was created (needed so that the update executes regardless of the
+     *     bitmask)
+     */
+    function applyIcuSwitchCaseRemove(tView, tIcus, tIcuIndex, lView) {
+        ngDevMode && assertIndexInRange(tIcus, tIcuIndex);
+        var tIcu = tIcus[tIcuIndex];
+        var activeCaseIndex = lView[tIcu.currentCaseLViewIndex];
+        if (activeCaseIndex !== null) {
+            var removeCodes = tIcu.remove[activeCaseIndex];
             for (var k = 0; k < removeCodes.length; k++) {
                 var removeOpCode = removeCodes[k];
                 var nodeOrIcuIndex = removeOpCode >>> 3 /* SHIFT_REF */;
                 switch (removeOpCode & 7 /* MASK_INSTRUCTION */) {
                     case 3 /* Remove */:
+                        // FIXME(misko): this comment is wrong!
                         // Remove DOM element, but do *not* mark TNode as detached, since we are
                         // just switching ICU cases (while keeping the same TNode), so a DOM element
                         // representing a new ICU case will be re-created.
                         removeNode(tView, lView, nodeOrIcuIndex, /* markAsDetached */ false);
                         break;
                     case 6 /* RemoveNestedIcu */:
-                        removeNestedIcu(tView, tIcus, removeCodes, nodeOrIcuIndex, removeCodes[k + 1] >>> 3 /* SHIFT_REF */);
+                        applyIcuSwitchCaseRemove(tView, tIcus, nodeOrIcuIndex, lView);
                         break;
                 }
             }
-        }
-        // Update the active caseIndex
-        var caseIndex = getCaseIndex(tIcu, value);
-        icuTNode.activeCaseIndex = caseIndex !== -1 ? caseIndex : null;
-        if (caseIndex > -1) {
-            // Add the nodes for the new case
-            readCreateOpCodes(-1 /* -1 means we don't have parent node */, tIcu.create[caseIndex], tView, lView);
-            caseCreated = true;
-        }
-        return caseCreated;
-    }
-    function removeNestedIcu(tView, tIcus, removeCodes, nodeIndex, nestedIcuNodeIndex) {
-        var nestedIcuTNode = getTNode(tView, nestedIcuNodeIndex);
-        var activeIndex = nestedIcuTNode.activeCaseIndex;
-        if (activeIndex !== null) {
-            var nestedTIcu = tIcus[nodeIndex];
-            // FIXME(misko): the fact that we are adding items to parent list looks very suspect!
-            addAllToArray(nestedTIcu.remove[activeIndex], removeCodes);
         }
     }
     function removeNode(tView, lView, index, markAsDetached) {
@@ -24309,17 +24379,17 @@
             ngDevMode && assertDefined(tView, "tView should be defined");
             var tI18n = tView.data[index + HEADER_OFFSET];
             var updateOpCodes = void 0;
-            var icus = null;
+            var tIcus = null;
             if (Array.isArray(tI18n)) {
                 updateOpCodes = tI18n;
             }
             else {
                 updateOpCodes = tI18n.update;
-                icus = tI18n.icus;
+                tIcus = tI18n.icus;
             }
             var bindingsStartIndex = getBindingIndex() - shiftsCounter - 1;
             var lView = getLView();
-            readUpdateOpCodes(updateOpCodes, icus, bindingsStartIndex, changeMask, tView, lView, false);
+            applyUpdateOpCodes(tView, tIcus, lView, updateOpCodes, bindingsStartIndex, changeMask);
             // Reset changeMask & maskBit to default for the next update cycle
             changeMask = 0;
             shiftsCounter = 0;
@@ -24365,9 +24435,10 @@
         var updateCodes = [];
         var vars = [];
         var childIcus = [];
-        for (var i = 0; i < icuExpression.values.length; i++) {
+        var values = icuExpression.values;
+        for (var i = 0; i < values.length; i++) {
             // Each value is an array of strings & other ICU expressions
-            var valueArr = icuExpression.values[i];
+            var valueArr = values[i];
             var nestedIcus = [];
             for (var j = 0; j < valueArr.length; j++) {
                 var value = valueArr[j];
@@ -24388,6 +24459,9 @@
         var tIcu = {
             type: icuExpression.type,
             vars: vars,
+            currentCaseLViewIndex: HEADER_OFFSET +
+                expandoStartIndex // expandoStartIndex does not include the header so add it.
+                + 1,
             childIcus: childIcus,
             cases: icuExpression.cases,
             create: createCodes,
@@ -24415,7 +24489,13 @@
             throw new Error('Unable to generate inert body element');
         }
         var wrapper = getTemplateContent(inertBodyElement) || inertBodyElement;
-        var opCodes = { vars: 0, childIcus: [], create: [], remove: [], update: [] };
+        var opCodes = {
+            vars: 1,
+            childIcus: [],
+            create: [],
+            remove: [],
+            update: []
+        };
         if (ngDevMode) {
             attachDebugGetter(opCodes.create, i18nMutateOpCodesToString);
             attachDebugGetter(opCodes.remove, i18nMutateOpCodesToString);
@@ -25013,7 +25093,7 @@
      * it to `undefined`.
      */
     function getPureFunctionReturnValue(lView, returnValueIndex) {
-        ngDevMode && assertDataInRange(lView, returnValueIndex);
+        ngDevMode && assertIndexInRange(lView, returnValueIndex);
         var lastReturnValue = lView[returnValueIndex];
         return lastReturnValue === NO_CHANGE ? undefined : lastReturnValue;
     }
@@ -25638,7 +25718,7 @@
             }
         };
         TQueries_.prototype.getByIndex = function (index) {
-            ngDevMode && assertDataInRange(this.queries, index);
+            ngDevMode && assertIndexInRange(this.queries, index);
             return this.queries[index];
         };
         Object.defineProperty(TQueries_.prototype, "length", {
@@ -25841,7 +25921,7 @@
                     result.push(null);
                 }
                 else {
-                    ngDevMode && assertDataInRange(tViewData, matchedNodeIdx);
+                    ngDevMode && assertIndexInRange(tViewData, matchedNodeIdx);
                     var tNode = tViewData[matchedNodeIdx];
                     result.push(createResultForNode(lView, tNode, tQueryMatches[i + 1], tQuery.metadata.read));
                 }
@@ -26003,7 +26083,7 @@
     function loadQueryInternal(lView, queryIndex) {
         ngDevMode &&
             assertDefined(lView[QUERIES], 'LQueries should be defined when trying to load a query');
-        ngDevMode && assertDataInRange(lView[QUERIES].queries, queryIndex);
+        ngDevMode && assertIndexInRange(lView[QUERIES].queries, queryIndex);
         return lView[QUERIES].queries[queryIndex].queryList;
     }
     function createLQuery(tView, lView) {

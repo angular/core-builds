@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+27.sha-0de93fd
+ * @license Angular v10.1.0-next.4+29.sha-6d8c73a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6882,6 +6882,13 @@ declare interface TIcu {
      * write into them.
      */
     vars: number[];
+    /**
+     * Currently selected ICU case pointer.
+     *
+     * `lView[currentCaseLViewIndex]` stores the currently selected case. This is needed to know how
+     * to clean up the current case when transitioning no the new case.
+     */
+    currentCaseLViewIndex: number;
     /**
      * An optional array of child/sub ICUs.
      *
