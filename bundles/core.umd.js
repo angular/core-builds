@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+33.sha-6da9e58
+ * @license Angular v10.1.0-next.4+34.sha-5dc8d28
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19763,7 +19763,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.4+33.sha-6da9e58');
+    var VERSION = new Version('10.1.0-next.4+34.sha-5dc8d28');
 
     /**
      * @license
@@ -25827,21 +25827,23 @@
             return this._appliesToNextNode;
         };
         TQuery_.prototype.matchTNode = function (tView, tNode) {
-            if (Array.isArray(this.metadata.predicate)) {
-                var localNames = this.metadata.predicate;
-                for (var i = 0; i < localNames.length; i++) {
-                    this.matchTNodeWithReadOption(tView, tNode, getIdxOfMatchingSelector(tNode, localNames[i]));
+            var predicate = this.metadata.predicate;
+            if (Array.isArray(predicate)) {
+                for (var i = 0; i < predicate.length; i++) {
+                    var name = predicate[i];
+                    this.matchTNodeWithReadOption(tView, tNode, getIdxOfMatchingSelector(tNode, name));
+                    // Also try matching the name to a provider since strings can be used as DI tokens too.
+                    this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, name, false, false));
                 }
             }
             else {
-                var typePredicate = this.metadata.predicate;
-                if (typePredicate === TemplateRef) {
+                if (predicate === TemplateRef) {
                     if (tNode.type === 0 /* Container */) {
                         this.matchTNodeWithReadOption(tView, tNode, -1);
                     }
                 }
                 else {
-                    this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, typePredicate, false, false));
+                    this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, predicate, false, false));
                 }
             }
         };

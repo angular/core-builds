@@ -107,7 +107,7 @@ export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | nul
  * @param isHostSpecialCase Whether the host special case applies.
  * @returns Index of a found directive or provider, or null when none found.
  */
-export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: Type<T> | InjectionToken<T>, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
+export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: Type<T> | InjectionToken<T> | string, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
 /**
  * Retrieve or instantiate the injectable from the `LView` at particular `index`.
  *
