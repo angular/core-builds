@@ -21,4 +21,4 @@ export declare function assertDefined<T>(actual: T | null | undefined, msg: stri
 export declare function throwError(msg: string): never;
 export declare function throwError(msg: string, actual: any, expected: any, comparison: string): never;
 export declare function assertDomNode(node: any): asserts node is Node;
-export declare function assertDataInRange(arr: any[], index: number): void;
+export declare function assertIndexInRange(arr: any[], index: number): void;

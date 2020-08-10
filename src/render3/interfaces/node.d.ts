@@ -639,12 +639,6 @@ export interface TIcuContainerNode extends TNode {
     parent: TElementNode | TElementContainerNode | null;
     tViews: null;
     projection: null;
-    /**
-     * Indicates the current active case for an ICU expression.
-     * It is null when there is no active case.
-     *
-     */
-    activeCaseIndex: number | null;
 }
 /** Static data for a view  */
 export interface TViewNode extends TNode {
