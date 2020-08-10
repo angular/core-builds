@@ -5,24 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import '../util/ng_i18n_closure_mode';
-import '../util/ng_dev_mode';
-/**
- * Extracts a part of a message and removes the rest.
- *
- * This method is used for extracting a part of the message associated with a template. A translated
- * message can span multiple templates.
- *
- * Example:
- * ```
- * <div i18n>Translate <span *ngIf>me</span>!</div>
- * ```
- *
- * @param message The message to crop
- * @param subTemplateIndex Index of the sub-template to extract. If undefined it returns the
- * external template and removes all sub-templates.
- */
-export declare function getTranslationForTemplate(message: string, subTemplateIndex?: number): string;
+import '../../util/ng_dev_mode';
+import '../../util/ng_i18n_closure_mode';
 /**
  * Marks a block of text as translatable.
  *
@@ -53,29 +37,6 @@ export declare function getTranslationForTemplate(message: string, subTemplateIn
  * @codeGenApi
  */
 export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
-/**
- * Handles message string post-processing for internationalization.
- *
- * Handles message string post-processing by transforming it from intermediate
- * format (that might contain some markers that we need to replace) to the final
- * form, consumable by i18nStart instruction. Post processing steps include:
- *
- * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
- * 2. Replace all ICU vars (like "VAR_PLURAL")
- * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
- * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
- *    in case multiple ICUs have the same placeholder name
- *
- * @param message Raw translation string for post processing
- * @param replacements Set of replacements that should be applied
- *
- * @returns Transformed string that can be consumed by i18nStart instruction
- *
- * @codeGenApi
- */
-export declare function ɵɵi18nPostprocess(message: string, replacements?: {
-    [key: string]: (string | string[]);
-}): string;
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
@@ -140,16 +101,25 @@ export declare function ɵɵi18nExp<T>(value: T): typeof ɵɵi18nExp;
  */
 export declare function ɵɵi18nApply(index: number): void;
 /**
- * Sets the locale id that will be used for translations and ICU expressions.
- * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
- * but is now defined as a global value.
+ * Handles message string post-processing for internationalization.
  *
- * @param localeId
+ * Handles message string post-processing by transforming it from intermediate
+ * format (that might contain some markers that we need to replace) to the final
+ * form, consumable by i18nStart instruction. Post processing steps include:
+ *
+ * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
+ * 2. Replace all ICU vars (like "VAR_PLURAL")
+ * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+ * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+ *    in case multiple ICUs have the same placeholder name
+ *
+ * @param message Raw translation string for post processing
+ * @param replacements Set of replacements that should be applied
+ *
+ * @returns Transformed string that can be consumed by i18nStart instruction
+ *
+ * @codeGenApi
  */
-export declare function setLocaleId(localeId: string): void;
-/**
- * Gets the locale id that will be used for translations and ICU expressions.
- * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
- * but is now defined as a global value.
- */
-export declare function getLocaleId(): string;
+export declare function ɵɵi18nPostprocess(message: string, replacements?: {
+    [key: string]: (string | string[]);
+}): string;

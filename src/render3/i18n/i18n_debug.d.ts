@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { I18nMutateOpCodes, I18nUpdateOpCodes } from './interfaces/i18n';
+import { I18nMutateOpCodes, I18nUpdateOpCodes } from '../interfaces/i18n';
 /**
  * Converts `I18nUpdateOpCodes` array into a human readable format.
  *
