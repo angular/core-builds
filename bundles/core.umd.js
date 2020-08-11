@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.4+36.sha-df76a20
+ * @license Angular v10.1.0-next.4+43.sha-e2e5f83
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19763,7 +19763,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.4+36.sha-df76a20');
+    var VERSION = new Version('10.1.0-next.4+43.sha-e2e5f83');
 
     /**
      * @license
@@ -26815,6 +26815,20 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * Keep track of the compilation depth to avoid reentrancy issues during JIT compilation. This
+     * matters in the following scenario:
+     *
+     * Consider a component 'A' that extends component 'B', both declared in module 'M'. During
+     * the compilation of 'A' the definition of 'B' is requested to capture the inheritance chain,
+     * potentially triggering compilation of 'B'. If this nested compilation were to trigger
+     * `flushModuleScopingQueueAsMuchAsPossible` it may happen that module 'M' is still pending in the
+     * queue, resulting in 'A' and 'B' to be patched with the NgModule scope. As the compilation of
+     * 'A' is still in progress, this would introduce a circular dependency on its compilation. To avoid
+     * this issue, the module scope queue is only flushed for compilations at the depth 0, to ensure
+     * all compilations have finished.
+     */
+    var compilationDepth = 0;
+    /**
      * Compile an Angular component according to its decorator metadata, and patch the resulting
      * component def (ɵcmp) onto the component type.
      *
@@ -26874,16 +26888,25 @@
                     }
                     var templateUrl = metadata.templateUrl || "ng:///" + type.name + "/template.html";
                     var meta = Object.assign(Object.assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces: preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation: encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
-                    if (meta.usesInheritance) {
-                        addDirectiveDefToUndecoratedParents(type);
+                    compilationDepth++;
+                    try {
+                        if (meta.usesInheritance) {
+                            addDirectiveDefToUndecoratedParents(type);
+                        }
+                        ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
                     }
-                    ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
-                    // When NgModule decorator executed, we enqueued the module definition such that
-                    // it would only dequeue and add itself as module scope to all of its declarations,
-                    // but only if  if all of its declarations had resolved. This call runs the check
-                    // to see if any modules that are in the queue can be dequeued and add scope to
-                    // their declarations.
-                    flushModuleScopingQueueAsMuchAsPossible();
+                    finally {
+                        // Ensure that the compilation depth is decremented even when the compilation failed.
+                        compilationDepth--;
+                    }
+                    if (compilationDepth === 0) {
+                        // When NgModule decorator executed, we enqueued the module definition such that
+                        // it would only dequeue and add itself as module scope to all of its declarations,
+                        // but only if  if all of its declarations had resolved. This call runs the check
+                        // to see if any modules that are in the queue can be dequeued and add scope to
+                        // their declarations.
+                        flushModuleScopingQueueAsMuchAsPossible();
+                    }
                     // If component compilation is async, then the @NgModule annotation which declares the
                     // component may execute and set an ngSelectorScope property on the component type. This
                     // allows the component to patch itself with directiveDefs from the module after it
