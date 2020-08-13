@@ -21,6 +21,8 @@ export declare const enum CharCode {
     SEMI_COLON = 59,
     BACK_SLASH = 92,
     AT_SIGN = 64,
+    ZERO = 48,
+    NINE = 57,
     A = 65,
     U = 85,
     R = 82,
