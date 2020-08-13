@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.9+8.sha-8bb726e
+ * @license Angular v10.0.9+9.sha-cb83b8a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16124,7 +16124,8 @@
         var ch;
         while (startIndex < endIndex &&
             ((ch = text.charCodeAt(startIndex)) === 45 /* DASH */ || ch === 95 /* UNDERSCORE */ ||
-                ((ch & -33 /* UPPER_CASE */) >= 65 /* A */ && (ch & -33 /* UPPER_CASE */) <= 90 /* Z */))) {
+                ((ch & -33 /* UPPER_CASE */) >= 65 /* A */ && (ch & -33 /* UPPER_CASE */) <= 90 /* Z */) ||
+                (ch >= 48 /* ZERO */ && ch <= 57 /* NINE */))) {
             startIndex++;
         }
         return startIndex;
@@ -19787,7 +19788,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.9+8.sha-8bb726e');
+    var VERSION = new Version('10.0.9+9.sha-cb83b8a');
 
     /**
      * @license
