@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.9+14.sha-692e34d
+ * @license Angular v10.0.9+16.sha-d5e09f4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8935,16 +8935,6 @@ function detachView(lContainer, removeIndex) {
     return viewToDetach;
 }
 /**
- * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
- *
- * @param lContainer The container from which to remove a view
- * @param removeIndex The index of the view to remove
- */
-function removeView(lContainer, removeIndex) {
-    const detachedView = detachView(lContainer, removeIndex);
-    detachedView && destroyLView(detachedView[TVIEW], detachedView);
-}
-/**
  * A standalone function which destroys an LView,
  * conducting clean up (e.g. removing listeners, calling onDestroys).
  *
@@ -10166,8 +10156,17 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             remove(index) {
                 this.allocateContainerIfNeeded();
                 const adjustedIdx = this._adjustIndex(index, -1);
-                removeView(this._lContainer, adjustedIdx);
-                removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx);
+                const detachedView = detachView(this._lContainer, adjustedIdx);
+                if (detachedView) {
+                    // Before destroying the view, remove it from the container's array of `ViewRef`s.
+                    // This ensures the view container length is updated before calling
+                    // `destroyLView`, which could recursively call view container methods that
+                    // rely on an accurate container length.
+                    // (e.g. a method on this view container being called by a child directive's OnDestroy
+                    // lifecycle hook)
+                    removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx);
+                    destroyLView(detachedView[TVIEW], detachedView);
+                }
             }
             detach(index) {
                 this.allocateContainerIfNeeded();
@@ -19180,7 +19179,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.0.9+14.sha-692e34d');
+const VERSION = new Version('10.0.9+16.sha-d5e09f4');
 
 /**
  * @license
