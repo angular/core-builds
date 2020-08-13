@@ -77,13 +77,6 @@ export declare function insertView(tView: TView, lView: LView, lContainer: LCont
  */
 export declare function detachView(lContainer: LContainer, removeIndex: number): LView | undefined;
 /**
- * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
- *
- * @param lContainer The container from which to remove a view
- * @param removeIndex The index of the view to remove
- */
-export declare function removeView(lContainer: LContainer, removeIndex: number): void;
-/**
  * A standalone function which destroys an LView,
  * conducting clean up (e.g. removing listeners, calling onDestroys).
  *

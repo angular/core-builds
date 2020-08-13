@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.5+17.sha-d5f819e
+ * @license Angular v10.1.0-next.5+18.sha-b071495
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9420,16 +9420,6 @@
         return viewToDetach;
     }
     /**
-     * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
-     *
-     * @param lContainer The container from which to remove a view
-     * @param removeIndex The index of the view to remove
-     */
-    function removeView(lContainer, removeIndex) {
-        var detachedView = detachView(lContainer, removeIndex);
-        detachedView && destroyLView(detachedView[TVIEW], detachedView);
-    }
-    /**
      * A standalone function which destroys an LView,
      * conducting clean up (e.g. removing listeners, calling onDestroys).
      *
@@ -10684,8 +10674,17 @@
                 ViewContainerRef.prototype.remove = function (index) {
                     this.allocateContainerIfNeeded();
                     var adjustedIdx = this._adjustIndex(index, -1);
-                    removeView(this._lContainer, adjustedIdx);
-                    removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx);
+                    var detachedView = detachView(this._lContainer, adjustedIdx);
+                    if (detachedView) {
+                        // Before destroying the view, remove it from the container's array of `ViewRef`s.
+                        // This ensures the view container length is updated before calling
+                        // `destroyLView`, which could recursively call view container methods that
+                        // rely on an accurate container length.
+                        // (e.g. a method on this view container being called by a child directive's OnDestroy
+                        // lifecycle hook)
+                        removeFromArray(this._lContainer[VIEW_REFS], adjustedIdx);
+                        destroyLView(detachedView[TVIEW], detachedView);
+                    }
                 };
                 ViewContainerRef.prototype.detach = function (index) {
                     this.allocateContainerIfNeeded();
@@ -19764,7 +19763,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.5+17.sha-d5f819e');
+    var VERSION = new Version('10.1.0-next.5+18.sha-b071495');
 
     /**
      * @license
