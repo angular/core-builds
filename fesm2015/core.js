@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.5+9.sha-aa847cb
+ * @license Angular v10.1.0-next.5+10.sha-a80f654
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15546,7 +15546,8 @@ function consumeStyleKey(text, startIndex, endIndex) {
     let ch;
     while (startIndex < endIndex &&
         ((ch = text.charCodeAt(startIndex)) === 45 /* DASH */ || ch === 95 /* UNDERSCORE */ ||
-            ((ch & -33 /* UPPER_CASE */) >= 65 /* A */ && (ch & -33 /* UPPER_CASE */) <= 90 /* Z */))) {
+            ((ch & -33 /* UPPER_CASE */) >= 65 /* A */ && (ch & -33 /* UPPER_CASE */) <= 90 /* Z */) ||
+            (ch >= 48 /* ZERO */ && ch <= 57 /* NINE */))) {
         startIndex++;
     }
     return startIndex;
@@ -19179,7 +19180,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.1.0-next.5+9.sha-aa847cb');
+const VERSION = new Version('10.1.0-next.5+10.sha-a80f654');
 
 /**
  * @license
