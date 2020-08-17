@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.5+20.sha-71079ce
+ * @license Angular v10.1.0-next.5+22.sha-cb05c01
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6625,8 +6625,23 @@ declare type TAttributes = (string | ɵAttributeMarker | CssSelector)[];
  * Constants that are associated with a view. Includes:
  * - Attribute arrays.
  * - Local definition arrays.
+ * - Translated messages (i18n).
  */
 declare type TConstants = (TAttributes | string)[];
+
+/**
+ * Factory function that returns an array of consts. Consts can be represented as a function in case
+ * any additional statements are required to define consts in the list. An example is i18n where
+ * additional i18n calls are generated, which should be executed when consts are requested for the
+ * first time.
+ */
+declare type TConstantsFactory = () => TConstants;
+
+/**
+ * TConstants type that describes how the `consts` field is generated on ComponentDef: it can be
+ * either an array or a factory function that returns that array.
+ */
+declare type TConstantsOrFactory = TConstants | TConstantsFactory;
 
 /** Static data for an LContainer */
 declare interface TContainerNode extends TNode {
@@ -9709,7 +9724,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     readonly template: ComponentTemplate<T>;
     /** Constants associated with the component's view. */
-    readonly consts: TConstants | null;
+    readonly consts: TConstantsOrFactory | null;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11853,7 +11868,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * Constants for the nodes in the component's view.
      * Includes attribute arrays, local definition arrays etc.
      */
-    consts?: TConstants;
+    consts?: TConstantsOrFactory;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -12368,12 +12383,12 @@ export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitize
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18n(index: number, messageIndex: number, subTemplateIndex?: number): void;
 
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
@@ -12393,7 +12408,7 @@ export declare function ɵɵi18nApply(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nAttributes(index: number, values: string[]): void;
+export declare function ɵɵi18nAttributes(index: number, attrsIndex: number): void;
 
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
@@ -12463,12 +12478,12 @@ export declare function ɵɵi18nPostprocess(message: string, replacements?: {
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18nStart(index: number, messageIndex: number, subTemplateIndex?: number): void;
 
 /**
  * Merges the definition from a super class to a sub class.

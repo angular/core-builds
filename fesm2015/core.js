@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.5+20.sha-71079ce
+ * @license Angular v10.1.0-next.5+22.sha-cb05c01
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7376,7 +7376,7 @@ function getOrCreateTComponentView(def) {
  * @param schemas Schemas for this view
  * @param consts Constants for this view
  */
-function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes, viewQuery, schemas, consts) {
+function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes, viewQuery, schemas, constsOrFactory) {
     ngDevMode && ngDevMode.tView++;
     const bindingStartIndex = HEADER_OFFSET + decls;
     // This length does not yet contain host bindings from child directives because at this point,
@@ -7384,6 +7384,7 @@ function createTView(type, viewIndex, templateFn, decls, vars, directives, pipes
     // that has a host binding, we will update the blueprint with that def's hostVars count.
     const initialViewLength = bindingStartIndex + vars;
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
+    const consts = typeof constsOrFactory === 'function' ? constsOrFactory() : constsOrFactory;
     const tView = blueprint[TVIEW] = ngDevMode ?
         new TViewConstructor(type, viewIndex, // id: number,
         blueprint, // blueprint: LView,
@@ -19179,7 +19180,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('10.1.0-next.5+20.sha-71079ce');
+const VERSION = new Version('10.1.0-next.5+22.sha-cb05c01');
 
 /**
  * @license
@@ -23891,14 +23892,15 @@ function i18nPostprocess(message, replacements = {}) {
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-function ɵɵi18nStart(index, message, subTemplateIndex) {
+function ɵɵi18nStart(index, messageIndex, subTemplateIndex) {
     const tView = getTView();
     ngDevMode && assertDefined(tView, `tView should be defined`);
+    const message = getConstant(tView.consts, messageIndex);
     pushI18nIndex(index);
     // We need to delay projections until `i18nEnd`
     setDelayProjection(true);
@@ -23941,13 +23943,13 @@ function ɵɵi18nEnd() {
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-function ɵɵi18n(index, message, subTemplateIndex) {
-    ɵɵi18nStart(index, message, subTemplateIndex);
+function ɵɵi18n(index, messageIndex, subTemplateIndex) {
+    ɵɵi18nStart(index, messageIndex, subTemplateIndex);
     ɵɵi18nEnd();
 }
 /**
@@ -23958,11 +23960,12 @@ function ɵɵi18n(index, message, subTemplateIndex) {
  *
  * @codeGenApi
  */
-function ɵɵi18nAttributes(index, values) {
+function ɵɵi18nAttributes(index, attrsIndex) {
     const lView = getLView();
     const tView = getTView();
     ngDevMode && assertDefined(tView, `tView should be defined`);
-    i18nAttributesFirstPass(lView, tView, index, values);
+    const attrs = getConstant(tView.consts, attrsIndex);
+    i18nAttributesFirstPass(lView, tView, index, attrs);
 }
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
