@@ -9,12 +9,36 @@ import { Type } from '../interface/type';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
 import { GetterFn, MethodFn, SetterFn } from './types';
 /**
- * Attention: These regex has to hold even if the code is minified!
+ * Regular expression that detects pass-through constructors for ES5 output. This Regex
+ * intends to capture the common delegation pattern emitted by TypeScript and Babel. Also
+ * it intends to capture the pattern where existing constructors have been downleveled from
+ * ES2015 to ES5 using TypeScript w/ downlevel iteration. e.g.
+ *
+ * ```
+ *   function MyClass() {
+ *     var _this = _super.apply(this, arguments) || this;
+ * ```
+ *
+ * ```
+ *   function MyClass() {
+ *     var _this = _super.apply(this, __spread(arguments)) || this;
+ * ```
+ *
+ * More details can be found in: https://github.com/angular/angular/issues/38453.
  */
-export declare const DELEGATE_CTOR: RegExp;
-export declare const INHERITED_CLASS: RegExp;
-export declare const INHERITED_CLASS_WITH_CTOR: RegExp;
-export declare const INHERITED_CLASS_WITH_DELEGATE_CTOR: RegExp;
+export declare const ES5_DELEGATE_CTOR: RegExp;
+/** Regular expression that detects ES2015 classes which extend from other classes. */
+export declare const ES2015_INHERITED_CLASS: RegExp;
+/**
+ * Regular expression that detects ES2015 classes which extend from other classes and
+ * have an explicit constructor defined.
+ */
+export declare const ES2015_INHERITED_CLASS_WITH_CTOR: RegExp;
+/**
+ * Regular expression that detects ES2015 classes which extend from other classes
+ * and inherit a constructor.
+ */
+export declare const ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR: RegExp;
 /**
  * Determine whether a stringified type is a class which delegates its constructor
  * to its parent.
