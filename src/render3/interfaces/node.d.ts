@@ -224,8 +224,21 @@ export declare type TAttributes = (string | AttributeMarker | CssSelector)[];
  * Constants that are associated with a view. Includes:
  * - Attribute arrays.
  * - Local definition arrays.
+ * - Translated messages (i18n).
  */
 export declare type TConstants = (TAttributes | string)[];
+/**
+ * Factory function that returns an array of consts. Consts can be represented as a function in case
+ * any additional statements are required to define consts in the list. An example is i18n where
+ * additional i18n calls are generated, which should be executed when consts are requested for the
+ * first time.
+ */
+export declare type TConstantsFactory = () => TConstants;
+/**
+ * TConstants type that describes how the `consts` field is generated on ComponentDef: it can be
+ * either an array or a factory function that returns that array.
+ */
+export declare type TConstantsOrFactory = TConstants | TConstantsFactory;
 /**
  * Binding data (flyweight) for a particular node that is shared between all templates
  * of a specific type.

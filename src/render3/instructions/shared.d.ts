@@ -11,7 +11,7 @@ import { ViewEncapsulation } from '../../metadata/view';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
-import { LocalRefExtractor, PropertyAliasValue, TAttributes, TConstants, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
+import { LocalRefExtractor, PropertyAliasValue, TAttributes, TConstantsOrFactory, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { LView, LViewFlags, RootContext, RootContextFlags, TData, TView, TViewType } from '../interfaces/view';
@@ -108,7 +108,7 @@ export declare function getOrCreateTComponentView(def: ComponentDef<any>): TView
  * @param schemas Schemas for this view
  * @param consts Constants for this view
  */
-export declare function createTView(type: TViewType, viewIndex: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, consts: TConstants | null): TView;
+export declare function createTView(type: TViewType, viewIndex: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, constsOrFactory: TConstantsOrFactory | null): TView;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
  *

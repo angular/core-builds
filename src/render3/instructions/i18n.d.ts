@@ -31,12 +31,12 @@ import '../../util/ng_i18n_closure_mode';
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18nStart(index: number, messageIndex: number, subTemplateIndex?: number): void;
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
  * into the render tree, moves the placeholder nodes and removes the deleted nodes.
@@ -65,12 +65,12 @@ export declare function ɵɵi18nEnd(): void;
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18n(index: number, messageIndex: number, subTemplateIndex?: number): void;
 /**
  * Marks a list of attributes as translatable.
  *
@@ -79,7 +79,7 @@ export declare function ɵɵi18n(index: number, message: string, subTemplateInde
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nAttributes(index: number, values: string[]): void;
+export declare function ɵɵi18nAttributes(index: number, attrsIndex: number): void;
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
  * update the translated nodes.
