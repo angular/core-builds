@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.5+24.sha-81c3e80
+ * @license Angular v10.1.0-next.5+26.sha-3b9c802
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,13 +10907,42 @@
         return typeof v === 'function';
     }
 
-    /**
-     * Attention: These regex has to hold even if the code is minified!
+    /*
+     * #########################
+     * Attention: These Regular expressions have to hold even if the code is minified!
+     * ##########################
      */
-    var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
-    var INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
-    var INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
-    var INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s*super\(\.\.\.arguments\)/;
+    /**
+     * Regular expression that detects pass-through constructors for ES5 output. This Regex
+     * intends to capture the common delegation pattern emitted by TypeScript and Babel. Also
+     * it intends to capture the pattern where existing constructors have been downleveled from
+     * ES2015 to ES5 using TypeScript w/ downlevel iteration. e.g.
+     *
+     * ```
+     *   function MyClass() {
+     *     var _this = _super.apply(this, arguments) || this;
+     * ```
+     *
+     * ```
+     *   function MyClass() {
+     *     var _this = _super.apply(this, __spread(arguments)) || this;
+     * ```
+     *
+     * More details can be found in: https://github.com/angular/angular/issues/38453.
+     */
+    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|[^()]+\(arguments\))\)/;
+    /** Regular expression that detects ES2015 classes which extend from other classes. */
+    var ES2015_INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
+    /**
+     * Regular expression that detects ES2015 classes which extend from other classes and
+     * have an explicit constructor defined.
+     */
+    var ES2015_INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(/;
+    /**
+     * Regular expression that detects ES2015 classes which extend from other classes
+     * and inherit a constructor.
+     */
+    var ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s*super\(\.\.\.arguments\)/;
     /**
      * Determine whether a stringified type is a class which delegates its constructor
      * to its parent.
@@ -10923,8 +10952,9 @@
      * an initialized instance property.
      */
     function isDelegateCtor(typeStr) {
-        return DELEGATE_CTOR.test(typeStr) || INHERITED_CLASS_WITH_DELEGATE_CTOR.test(typeStr) ||
-            (INHERITED_CLASS.test(typeStr) && !INHERITED_CLASS_WITH_CTOR.test(typeStr));
+        return ES5_DELEGATE_CTOR.test(typeStr) ||
+            ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR.test(typeStr) ||
+            (ES2015_INHERITED_CLASS.test(typeStr) && !ES2015_INHERITED_CLASS_WITH_CTOR.test(typeStr));
     }
     var ReflectionCapabilities = /** @class */ (function () {
         function ReflectionCapabilities(reflect) {
@@ -19788,7 +19818,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0-next.5+24.sha-81c3e80');
+    var VERSION = new Version('10.1.0-next.5+26.sha-3b9c802');
 
     /**
      * @license
