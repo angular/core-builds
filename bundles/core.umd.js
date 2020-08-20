@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.0.11+5.sha-5528536
+ * @license Angular v10.0.11+6.sha-87bbf69
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4799,9 +4799,8 @@
         DOMParserHelper.prototype.getInertBodyElement = function (html) {
             // We add these extra elements to ensure that the rest of the content is parsed as expected
             // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
-            // `<head>` tag. Note that the `<body>` tag is closed implicitly to prevent unclosed tags
-            // in `html` from consuming the otherwise explicit `</body>` tag.
-            html = '<body><remove></remove>' + html;
+            // `<head>` tag.
+            html = '<body><remove></remove>' + html + '</body>';
             try {
                 var body = new window.DOMParser().parseFromString(html, 'text/html').body;
                 body.removeChild(body.firstChild);
@@ -19818,7 +19817,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.0.11+5.sha-5528536');
+    var VERSION = new Version('10.0.11+6.sha-87bbf69');
 
     /**
      * @license
