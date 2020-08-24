@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0-next.7+19.sha-b48cc6e
+ * @license Angular v10.1.0-next.7+25.sha-375f0a6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3202,14 +3202,6 @@
      */
     // TODO(iminar): Remove this code in a safe way.
     var __core_private_testing_placeholder__ = '';
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
 
     /**
      * @license
