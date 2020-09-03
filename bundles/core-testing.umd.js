@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.0+7.sha-50f4d8a
+ * @license Angular v11.0.0-next.0+9.sha-2cb3d58
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1680,6 +1680,11 @@
                 var moduleScope = getScopeOfModule(moduleType);
                 _this.storeFieldOfDefOnType(componentType, core.ɵNG_COMP_DEF, 'directiveDefs');
                 _this.storeFieldOfDefOnType(componentType, core.ɵNG_COMP_DEF, 'pipeDefs');
+                // `tView` that is stored on component def contains information about directives and pipes
+                // that are in the scope of this component. Patching component scope will cause `tView` to be
+                // changed. Store original `tView` before patching scope, so the `tView` (including scope
+                // information) is restored back to its previous/original state before running next test.
+                _this.storeFieldOfDefOnType(componentType, core.ɵNG_COMP_DEF, 'tView');
                 core.ɵpatchComponentDefWithScope(componentType.ɵcmp, moduleScope);
             });
             this.componentToModuleScope.clear();
