@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.0+2.sha-5da1934
+ * @license Angular v11.0.0-next.0+6.sha-fdea180
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19211,7 +19211,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.0+2.sha-5da1934');
+const VERSION = new Version('11.0.0-next.0+6.sha-fdea180');
 
 /**
  * @license
@@ -19750,7 +19750,7 @@ class IterableChangeRecord_ {
         this._nextIdentityChange = null;
     }
 }
-// A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
+// A linked list of IterableChangeRecords with the same IterableChangeRecord_.item
 class _DuplicateItemRecordList {
     constructor() {
         /** @internal */

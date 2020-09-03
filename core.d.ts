@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.0+2.sha-5da1934
+ * @license Angular v11.0.0-next.0+6.sha-fdea180
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -684,13 +684,6 @@ export declare interface ClassSansProvider {
 }
 
 declare const CLEANUP = 7;
-
-/**
- * @deprecated v4.0.0 - Use IterableChangeRecord instead.
- * @publicApi
- */
-export declare interface CollectionChangeRecord<V> extends IterableChangeRecord<V> {
-}
 
 /**
  * Marks that the next string is comment text.
