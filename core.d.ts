@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.0+25.sha-926ffcd
+ * @license Angular v11.0.0-next.0+28.sha-2c4a98a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13592,13 +13592,6 @@ export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
  * @codeGenApi
  */
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
-
-/**
- * Selects an element for later binding instructions.
- * @deprecated No longer being generated, but still used in unit tests.
- * @codeGenApi
- */
-export declare function ɵɵselect(index: number): void;
 
 /**
  * @codeGenApi
