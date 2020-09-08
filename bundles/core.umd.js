@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.0+20.sha-5863537
+ * @license Angular v10.1.0+26.sha-a1c34c6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6488,15 +6488,6 @@
         ngDevMode && assertGreaterThan(delta, 0, 'Can only advance forward');
         selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, getCheckNoChangesMode());
     }
-    /**
-     * Selects an element for later binding instructions.
-     * @deprecated No longer being generated, but still used in unit tests.
-     * @codeGenApi
-     */
-    function ɵɵselect(index) {
-        // TODO(misko): Remove this function as it is no longer being used.
-        selectIndexInternal(getTView(), getLView(), index, getCheckNoChangesMode());
-    }
     function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
         ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
         ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
@@ -8532,11 +8523,12 @@
                     matches || (matches = ngDevMode ? new MatchesArray() : []);
                     diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                     if (isComponentDef(def)) {
-                        ngDevMode &&
+                        if (ngDevMode) {
                             assertNodeOfPossibleTypes(tNode, [3 /* Element */], "\"" + tNode.tagName + "\" tags cannot be used as component hosts. " +
                                 ("Please use a different tag to activate the " + stringify(def.type) + " component."));
-                        if (tNode.flags & 2 /* isComponentHost */)
-                            throwMultipleComponentError(tNode);
+                            if (tNode.flags & 2 /* isComponentHost */)
+                                throwMultipleComponentError(tNode);
+                        }
                         markAsComponentHost(tView, tNode);
                         // The component is always stored first with directives after.
                         matches.unshift(def);
@@ -11761,7 +11753,7 @@
                 var multiRecord_1 = this.records.get(token);
                 if (multiRecord_1) {
                     // It has. Throw a nice error if
-                    if (multiRecord_1.multi === undefined) {
+                    if (ngDevMode && multiRecord_1.multi === undefined) {
                         throwMixedMultiProviderError();
                     }
                 }
@@ -11775,14 +11767,14 @@
             }
             else {
                 var existing = this.records.get(token);
-                if (existing && existing.multi !== undefined) {
+                if (ngDevMode && existing && existing.multi !== undefined) {
                     throwMixedMultiProviderError();
                 }
             }
             this.records.set(token, record);
         };
         R3Injector.prototype.hydrate = function (token, record) {
-            if (record.value === CIRCULAR) {
+            if (ngDevMode && record.value === CIRCULAR) {
                 throwCyclicDependencyError(stringify(token));
             }
             else if (record.value === NOT_YET) {
@@ -11885,7 +11877,7 @@
             else {
                 var classRef_1 = resolveForwardRef(provider &&
                     (provider.useClass || provider.provide));
-                if (!classRef_1) {
+                if (ngDevMode && !classRef_1) {
                     throwInvalidProviderError(ngModuleType, providers, provider);
                 }
                 if (hasDeps(provider)) {
@@ -19819,7 +19811,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.0+20.sha-5863537');
+    var VERSION = new Version('10.1.0+26.sha-a1c34c6');
 
     /**
      * @license
@@ -26373,7 +26365,6 @@
         'ɵɵstylePropInterpolate8': ɵɵstylePropInterpolate8,
         'ɵɵstylePropInterpolateV': ɵɵstylePropInterpolateV,
         'ɵɵclassProp': ɵɵclassProp,
-        'ɵɵselect': ɵɵselect,
         'ɵɵadvance': ɵɵadvance,
         'ɵɵtemplate': ɵɵtemplate,
         'ɵɵtext': ɵɵtext,
@@ -32989,7 +32980,6 @@
     exports.ɵɵsanitizeStyle = ɵɵsanitizeStyle;
     exports.ɵɵsanitizeUrl = ɵɵsanitizeUrl;
     exports.ɵɵsanitizeUrlOrResourceUrl = ɵɵsanitizeUrlOrResourceUrl;
-    exports.ɵɵselect = ɵɵselect;
     exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
     exports.ɵɵsetNgModuleScope = ɵɵsetNgModuleScope;
     exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
