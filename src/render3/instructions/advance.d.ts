@@ -23,10 +23,4 @@ import { LView, TView } from '../interfaces/view';
  * @codeGenApi
  */
 export declare function ɵɵadvance(delta: number): void;
-/**
- * Selects an element for later binding instructions.
- * @deprecated No longer being generated, but still used in unit tests.
- * @codeGenApi
- */
-export declare function ɵɵselect(index: number): void;
 export declare function selectIndexInternal(tView: TView, lView: LView, index: number, checkNoChangesMode: boolean): void;

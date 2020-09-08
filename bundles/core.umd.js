@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.0+25.sha-926ffcd
+ * @license Angular v11.0.0-next.0+28.sha-2c4a98a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6482,15 +6482,6 @@
     function ɵɵadvance(delta) {
         ngDevMode && assertGreaterThan(delta, 0, 'Can only advance forward');
         selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, getCheckNoChangesMode());
-    }
-    /**
-     * Selects an element for later binding instructions.
-     * @deprecated No longer being generated, but still used in unit tests.
-     * @codeGenApi
-     */
-    function ɵɵselect(index) {
-        // TODO(misko): Remove this function as it is no longer being used.
-        selectIndexInternal(getTView(), getLView(), index, getCheckNoChangesMode());
     }
     function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
         ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
@@ -19795,7 +19786,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.0+25.sha-926ffcd');
+    var VERSION = new Version('11.0.0-next.0+28.sha-2c4a98a');
 
     /**
      * @license
@@ -26346,7 +26337,6 @@
         'ɵɵstylePropInterpolate8': ɵɵstylePropInterpolate8,
         'ɵɵstylePropInterpolateV': ɵɵstylePropInterpolateV,
         'ɵɵclassProp': ɵɵclassProp,
-        'ɵɵselect': ɵɵselect,
         'ɵɵadvance': ɵɵadvance,
         'ɵɵtemplate': ɵɵtemplate,
         'ɵɵtext': ɵɵtext,
@@ -32939,7 +32929,6 @@
     exports.ɵɵsanitizeStyle = ɵɵsanitizeStyle;
     exports.ɵɵsanitizeUrl = ɵɵsanitizeUrl;
     exports.ɵɵsanitizeUrlOrResourceUrl = ɵɵsanitizeUrlOrResourceUrl;
-    exports.ɵɵselect = ɵɵselect;
     exports.ɵɵsetComponentScope = ɵɵsetComponentScope;
     exports.ɵɵsetNgModuleScope = ɵɵsetNgModuleScope;
     exports.ɵɵstaticContentQuery = ɵɵstaticContentQuery;
