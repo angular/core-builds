@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.0+26.sha-83ace4e
+ * @license Angular v11.0.0-next.0+39.sha-bfb7eec
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8036,11 +8036,12 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                 matches || (matches = ngDevMode ? new MatchesArray() : []);
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
-                    ngDevMode &&
+                    if (ngDevMode) {
                         assertNodeOfPossibleTypes(tNode, [3 /* Element */], `"${tNode.tagName}" tags cannot be used as component hosts. ` +
                             `Please use a different tag to activate the ${stringify(def.type)} component.`);
-                    if (tNode.flags & 2 /* isComponentHost */)
-                        throwMultipleComponentError(tNode);
+                        if (tNode.flags & 2 /* isComponentHost */)
+                            throwMultipleComponentError(tNode);
+                    }
                     markAsComponentHost(tView, tNode);
                     // The component is always stored first with directives after.
                     matches.unshift(def);
@@ -11212,7 +11213,7 @@ class R3Injector {
             let multiRecord = this.records.get(token);
             if (multiRecord) {
                 // It has. Throw a nice error if
-                if (multiRecord.multi === undefined) {
+                if (ngDevMode && multiRecord.multi === undefined) {
                     throwMixedMultiProviderError();
                 }
             }
@@ -11226,14 +11227,14 @@ class R3Injector {
         }
         else {
             const existing = this.records.get(token);
-            if (existing && existing.multi !== undefined) {
+            if (ngDevMode && existing && existing.multi !== undefined) {
                 throwMixedMultiProviderError();
             }
         }
         this.records.set(token, record);
     }
     hydrate(token, record) {
-        if (record.value === CIRCULAR) {
+        if (ngDevMode && record.value === CIRCULAR) {
             throwCyclicDependencyError(stringify(token));
         }
         else if (record.value === NOT_YET) {
@@ -11335,7 +11336,7 @@ function providerToFactory(provider, ngModuleType, providers) {
         else {
             const classRef = resolveForwardRef(provider &&
                 (provider.useClass || provider.provide));
-            if (!classRef) {
+            if (ngDevMode && !classRef) {
                 throwInvalidProviderError(ngModuleType, providers, provider);
             }
             if (hasDeps(provider)) {
@@ -19202,7 +19203,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.0+26.sha-83ace4e');
+const VERSION = new Version('11.0.0-next.0+39.sha-bfb7eec');
 
 /**
  * @license
