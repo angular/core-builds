@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.1+5.sha-7669bd8
+ * @license Angular v10.1.1+9.sha-edb7f90
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9378,6 +9378,7 @@
         // would be cleared and the counter decremented), we need to decrement the view counter here
         // instead.
         if (lView[FLAGS] & 1024 /* RefreshTransplantedView */) {
+            lView[FLAGS] &= ~1024 /* RefreshTransplantedView */;
             updateTransplantedViewCount(insertionLContainer, -1);
         }
         movedViews.splice(declarationViewIndex, 1);
@@ -19811,7 +19812,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.1+5.sha-7669bd8');
+    var VERSION = new Version('10.1.1+9.sha-edb7f90');
 
     /**
      * @license
@@ -20033,7 +20034,6 @@
         DefaultIterableDiffer.prototype._reset = function () {
             if (this.isDirty) {
                 var record = void 0;
-                var nextRecord = void 0;
                 for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
                     record._nextPrevious = record._next;
                 }
@@ -20041,9 +20041,8 @@
                     record.previousIndex = record.currentIndex;
                 }
                 this._additionsHead = this._additionsTail = null;
-                for (record = this._movesHead; record !== null; record = nextRecord) {
+                for (record = this._movesHead; record !== null; record = record._nextMoved) {
                     record.previousIndex = record.currentIndex;
-                    nextRecord = record._nextMoved;
                 }
                 this._movesHead = this._movesTail = null;
                 this._removalsHead = this._removalsTail = null;
