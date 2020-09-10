@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.1+9.sha-281865b
+ * @license Angular v11.0.0-next.1+11.sha-d141516
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9378,6 +9378,7 @@
         // would be cleared and the counter decremented), we need to decrement the view counter here
         // instead.
         if (lView[FLAGS] & 1024 /* RefreshTransplantedView */) {
+            lView[FLAGS] &= ~1024 /* RefreshTransplantedView */;
             updateTransplantedViewCount(insertionLContainer, -1);
         }
         movedViews.splice(declarationViewIndex, 1);
@@ -19811,7 +19812,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.1+9.sha-281865b');
+    var VERSION = new Version('11.0.0-next.1+11.sha-d141516');
 
     /**
      * @license
