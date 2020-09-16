@@ -9,7 +9,7 @@
 import * as ts from 'typescript';
 import { HelperFunction } from './helpers';
 /** Replaces an import inside an import statement with a different one. */
-export declare function replaceImport(node: ts.NamedImports, oldImport: string, newImport: string): ts.NamedImports;
+export declare function replaceImport(node: ts.NamedImports, existingImport: ts.ImportSpecifier, newImportName: string): ts.NamedImports;
 /**
  * Migrates a function call expression from `Renderer` to `Renderer2`.
  * Returns null if the expression should be dropped.
