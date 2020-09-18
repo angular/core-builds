@@ -7,7 +7,9 @@
  */
 import './util/ng_jit_mode';
 import { Observable } from 'rxjs';
-import { InjectionToken, Injector, StaticProvider } from './di';
+import { InjectionToken } from './di/injection_token';
+import { Injector } from './di/injector';
+import { StaticProvider } from './di/interface/provider';
 import { Type } from './interface/type';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';

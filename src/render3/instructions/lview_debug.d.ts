@@ -5,13 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AttributeMarker, ComponentTemplate } from '..';
 import { Injector, SchemaMetadata } from '../../core';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
-import { DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
-import { PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { ComponentTemplate, DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
+import { AttributeMarker, PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
 import { RComment, RElement, Renderer3, RendererFactory3, RNode } from '../interfaces/renderer';
