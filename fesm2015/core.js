@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.2+14.sha-c4b8964
+ * @license Angular v11.0.0-next.2+20.sha-e442486
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19204,7 +19204,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.2+14.sha-c4b8964');
+const VERSION = new Version('11.0.0-next.2+20.sha-e442486');
 
 /**
  * @license
