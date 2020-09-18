@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.2+26.sha-88d7bb8
+ * @license Angular v11.0.0-next.2+23.sha-d92a0dd
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12831,913 +12831,6 @@ function computeStaticStyling(tNode, attrs, writeToHost) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component.
- *
- * @param component The component which the change detection should be performed on.
- */
-function detectChanges(component) {
-    const view = getComponentViewByInstance(component);
-    detectChangesInternal(view[TVIEW], view, component);
-}
-/**
- * Marks the component as dirty (needing change detection). Marking a component dirty will
- * schedule a change detection on it at some point in the future.
- *
- * Marking an already dirty component as dirty won't do anything. Only one outstanding change
- * detection can be scheduled per component tree.
- *
- * @param component Component to mark as dirty.
- */
-function markDirty(component) {
-    ngDevMode && assertDefined(component, 'component');
-    const rootView = markViewDirty(getComponentViewByInstance(component));
-    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
-    scheduleTick(rootView[CONTEXT], 1 /* DetectChanges */);
-}
-/**
- * Used to perform change detection on the whole application.
- *
- * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
- * executes lifecycle hooks and conditionally checks components based on their
- * `ChangeDetectionStrategy` and dirtiness.
- *
- * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
- * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
- * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
- * be changed when calling `renderComponent` and providing the `scheduler` option.
- */
-function tick(component) {
-    const rootView = getRootView(component);
-    const rootContext = rootView[CONTEXT];
-    tickRootContext(rootContext);
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Retrieves the component instance associated with a given DOM element.
- *
- * @usageNotes
- * Given the following DOM structure:
- * ```html
- * <my-app>
- *   <div>
- *     <child-comp></child-comp>
- *   </div>
- * </my-app>
- * ```
- * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
- * associated with this DOM element.
- *
- * Calling the function on `<my-app>` will return the `MyApp` instance.
- *
- *
- * @param element DOM element from which the component should be retrieved.
- * @returns Component instance associated with the element or `null` if there
- *    is no component associated with it.
- *
- * @publicApi
- * @globalApi ng
- */
-function getComponent(element) {
-    assertDomElement(element);
-    const context = loadLContext(element, false);
-    if (context === null)
-        return null;
-    if (context.component === undefined) {
-        context.component = getComponentAtNodeIndex(context.nodeIndex, context.lView);
-    }
-    return context.component;
-}
-/**
- * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
- * view that the element is part of. Otherwise retrieves the instance of the component whose view
- * owns the element (in this case, the result is the same as calling `getOwningComponent`).
- *
- * @param element Element for which to get the surrounding component instance.
- * @returns Instance of the component that is around the element or null if the element isn't
- *    inside any component.
- *
- * @publicApi
- * @globalApi ng
- */
-function getContext(element) {
-    assertDomElement(element);
-    const context = loadLContext(element, false);
-    return context === null ? null : context.lView[CONTEXT];
-}
-/**
- * Retrieves the component instance whose view contains the DOM element.
- *
- * For example, if `<child-comp>` is used in the template of `<app-comp>`
- * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
- * would return `<app-comp>`.
- *
- * @param elementOrDir DOM element, component or directive instance
- *    for which to retrieve the root components.
- * @returns Component instance whose view owns the DOM element or null if the element is not
- *    part of a component view.
- *
- * @publicApi
- * @globalApi ng
- */
-function getOwningComponent(elementOrDir) {
-    const context = loadLContext(elementOrDir, false);
-    if (context === null)
-        return null;
-    let lView = context.lView;
-    let parent;
-    ngDevMode && assertLView(lView);
-    while (lView[HOST] === null && (parent = getLViewParent(lView))) {
-        // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
-        lView = parent;
-    }
-    return lView[FLAGS] & 512 /* IsRoot */ ? null : lView[CONTEXT];
-}
-/**
- * Retrieves all root components associated with a DOM element, directive or component instance.
- * Root components are those which have been bootstrapped by Angular.
- *
- * @param elementOrDir DOM element, component or directive instance
- *    for which to retrieve the root components.
- * @returns Root components associated with the target object.
- *
- * @publicApi
- * @globalApi ng
- */
-function getRootComponents(elementOrDir) {
-    return [...getRootContext(elementOrDir).components];
-}
-/**
- * Retrieves an `Injector` associated with an element, component or directive instance.
- *
- * @param elementOrDir DOM element, component or directive instance for which to
- *    retrieve the injector.
- * @returns Injector associated with the element, component or directive instance.
- *
- * @publicApi
- * @globalApi ng
- */
-function getInjector(elementOrDir) {
-    const context = loadLContext(elementOrDir, false);
-    if (context === null)
-        return Injector.NULL;
-    const tNode = context.lView[TVIEW].data[context.nodeIndex];
-    return new NodeInjector(tNode, context.lView);
-}
-/**
- * Retrieve a set of injection tokens at a given DOM node.
- *
- * @param element Element for which the injection tokens should be retrieved.
- */
-function getInjectionTokens(element) {
-    const context = loadLContext(element, false);
-    if (context === null)
-        return [];
-    const lView = context.lView;
-    const tView = lView[TVIEW];
-    const tNode = tView.data[context.nodeIndex];
-    const providerTokens = [];
-    const startIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
-    const endIndex = tNode.directiveEnd;
-    for (let i = startIndex; i < endIndex; i++) {
-        let value = tView.data[i];
-        if (isDirectiveDefHack(value)) {
-            // The fact that we sometimes store Type and sometimes DirectiveDef in this location is a
-            // design flaw.  We should always store same type so that we can be monomorphic. The issue
-            // is that for Components/Directives we store the def instead the type. The correct behavior
-            // is that we should always be storing injectable type in this location.
-            value = value.type;
-        }
-        providerTokens.push(value);
-    }
-    return providerTokens;
-}
-/**
- * Retrieves directive instances associated with a given DOM element. Does not include
- * component instances.
- *
- * @usageNotes
- * Given the following DOM structure:
- * ```
- * <my-app>
- *   <button my-button></button>
- *   <my-comp></my-comp>
- * </my-app>
- * ```
- * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
- * directive that is associated with the DOM element.
- *
- * Calling `getDirectives` on `<my-comp>` will return an empty array.
- *
- * @param element DOM element for which to get the directives.
- * @returns Array of directives associated with the element.
- *
- * @publicApi
- * @globalApi ng
- */
-function getDirectives(element) {
-    const context = loadLContext(element);
-    if (context.directives === undefined) {
-        context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
-    }
-    // The `directives` in this case are a named array called `LComponentView`. Clone the
-    // result so we don't expose an internal data structure in the user's console.
-    return context.directives === null ? [] : [...context.directives];
-}
-function loadLContext(target, throwOnNotFound = true) {
-    const context = getLContext(target);
-    if (!context && throwOnNotFound) {
-        throw new Error(ngDevMode ? `Unable to find context associated with ${stringifyForError(target)}` :
-            'Invalid ng target');
-    }
-    return context;
-}
-/**
- * Retrieve map of local references.
- *
- * The references are retrieved as a map of local reference name to element or directive instance.
- *
- * @param target DOM element, component or directive instance for which to retrieve
- *    the local references.
- */
-function getLocalRefs(target) {
-    const context = loadLContext(target, false);
-    if (context === null)
-        return {};
-    if (context.localRefs === undefined) {
-        context.localRefs = discoverLocalRefs(context.lView, context.nodeIndex);
-    }
-    return context.localRefs || {};
-}
-/**
- * Retrieves the host element of a component or directive instance.
- * The host element is the DOM element that matched the selector of the directive.
- *
- * @param componentOrDirective Component or directive instance for which the host
- *     element should be retrieved.
- * @returns Host element of the target.
- *
- * @publicApi
- * @globalApi ng
- */
-function getHostElement(componentOrDirective) {
-    return getLContext(componentOrDirective).native;
-}
-/**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param component The component to return the content text for.
- */
-function getRenderedText(component) {
-    const hostElement = getHostElement(component);
-    return hostElement.textContent || '';
-}
-function loadLContextFromNode(node) {
-    if (!(node instanceof Node))
-        throw new Error('Expecting instance of DOM Element');
-    return loadLContext(node);
-}
-/**
- * Retrieves a list of event listeners associated with a DOM element. The list does include host
- * listeners, but it does not include event listeners defined outside of the Angular context
- * (e.g. through `addEventListener`).
- *
- * @usageNotes
- * Given the following DOM structure:
- * ```
- * <my-app>
- *   <div (click)="doSomething()"></div>
- * </my-app>
- *
- * ```
- * Calling `getListeners` on `<div>` will return an object that looks as follows:
- * ```
- * {
- *   name: 'click',
- *   element: <div>,
- *   callback: () => doSomething(),
- *   useCapture: false
- * }
- * ```
- *
- * @param element Element for which the DOM listeners should be retrieved.
- * @returns Array of event listeners on the DOM element.
- *
- * @publicApi
- * @globalApi ng
- */
-function getListeners(element) {
-    assertDomElement(element);
-    const lContext = loadLContext(element, false);
-    if (lContext === null)
-        return [];
-    const lView = lContext.lView;
-    const tView = lView[TVIEW];
-    const lCleanup = lView[CLEANUP];
-    const tCleanup = tView.cleanup;
-    const listeners = [];
-    if (tCleanup && lCleanup) {
-        for (let i = 0; i < tCleanup.length;) {
-            const firstParam = tCleanup[i++];
-            const secondParam = tCleanup[i++];
-            if (typeof firstParam === 'string') {
-                const name = firstParam;
-                const listenerElement = unwrapRNode(lView[secondParam]);
-                const callback = lCleanup[tCleanup[i++]];
-                const useCaptureOrIndx = tCleanup[i++];
-                // if useCaptureOrIndx is boolean then report it as is.
-                // if useCaptureOrIndx is positive number then it in unsubscribe method
-                // if useCaptureOrIndx is negative number then it is a Subscription
-                const type = (typeof useCaptureOrIndx === 'boolean' || useCaptureOrIndx >= 0) ? 'dom' : 'output';
-                const useCapture = typeof useCaptureOrIndx === 'boolean' ? useCaptureOrIndx : false;
-                if (element == listenerElement) {
-                    listeners.push({ element, name, callback, useCapture, type });
-                }
-            }
-        }
-    }
-    listeners.sort(sortListeners);
-    return listeners;
-}
-function sortListeners(a, b) {
-    if (a.name == b.name)
-        return 0;
-    return a.name < b.name ? -1 : 1;
-}
-/**
- * This function should not exist because it is megamorphic and only mostly correct.
- *
- * See call site for more info.
- */
-function isDirectiveDefHack(obj) {
-    return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
-}
-/**
- * Returns the attached `DebugNode` instance for an element in the DOM.
- *
- * @param element DOM element which is owned by an existing component's view.
- */
-function getDebugNode(element) {
-    let debugNode = null;
-    const lContext = loadLContextFromNode(element);
-    const lView = lContext.lView;
-    const nodeIndex = lContext.nodeIndex;
-    if (nodeIndex !== -1) {
-        const valueInLView = lView[nodeIndex];
-        // this means that value in the lView is a component with its own
-        // data. In this situation the TNode is not accessed at the same spot.
-        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] :
-            getTNode(lView[TVIEW], nodeIndex - HEADER_OFFSET);
-        debugNode = buildDebugNode(tNode, lView, nodeIndex);
-    }
-    return debugNode;
-}
-/**
- * Retrieve the component `LView` from component/element.
- *
- * NOTE: `LView` is a private and should not be leaked outside.
- *       Don't export this method to `ng.*` on window.
- *
- * @param target DOM element or component instance for which to retrieve the LView.
- */
-function getComponentLView(target) {
-    const lContext = loadLContext(target);
-    const nodeIndx = lContext.nodeIndex;
-    const lView = lContext.lView;
-    const componentLView = lView[nodeIndx];
-    ngDevMode && assertLView(componentLView);
-    return componentLView;
-}
-/** Asserts that a value is a DOM Element. */
-function assertDomElement(value) {
-    if (typeof Element !== 'undefined' && !(value instanceof Element)) {
-        throw new Error('Expecting instance of DOM Element');
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Marks a component for check (in case of OnPush components) and synchronously
- * performs change detection on the application this component belongs to.
- *
- * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
- *
- * @publicApi
- * @globalApi ng
- */
-function applyChanges(component) {
-    markDirty(component);
-    getRootComponents(component).forEach(rootComponent => detectChanges(rootComponent));
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This file introduces series of globally accessible debug tools
- * to allow for the Angular debugging story to function.
- *
- * To see this in action run the following command:
- *
- *   bazel run --config=ivy
- *   //packages/core/test/bundling/todo:devserver
- *
- *  Then load `localhost:5432` and start using the console tools.
- */
-/**
- * This value reflects the property on the window where the dev
- * tools are patched (window.ng).
- * */
-const GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
-let _published = false;
-/**
- * Publishes a collection of default debug tools onto`window.ng`.
- *
- * These functions are available globally when Angular is in development
- * mode and are automatically stripped away from prod mode is on.
- */
-function publishDefaultGlobalUtils() {
-    if (!_published) {
-        _published = true;
-        publishGlobalUtil('getComponent', getComponent);
-        publishGlobalUtil('getContext', getContext);
-        publishGlobalUtil('getListeners', getListeners);
-        publishGlobalUtil('getOwningComponent', getOwningComponent);
-        publishGlobalUtil('getHostElement', getHostElement);
-        publishGlobalUtil('getInjector', getInjector);
-        publishGlobalUtil('getRootComponents', getRootComponents);
-        publishGlobalUtil('getDirectives', getDirectives);
-        publishGlobalUtil('applyChanges', applyChanges);
-    }
-}
-/**
- * Publishes the given function to `window.ng` so that it can be
- * used from the browser console when an application is not in production.
- */
-function publishGlobalUtil(name, fn) {
-    if (typeof COMPILED === 'undefined' || !COMPILED) {
-        // Note: we can't export `ng` when using closure enhanced optimization as:
-        // - closure declares globals itself for minified names, which sometimes clobber our `ng` global
-        // - we can't declare a closure extern as the namespace `ng` is already used within Google
-        //   for typings for AngularJS (via `goog.provide('ng....')`).
-        const w = _global;
-        ngDevMode && assertDefined(fn, 'function not defined');
-        if (w) {
-            let container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
-            if (!container) {
-                container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
-            }
-            container[name] = fn;
-        }
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const ɵ0$b = (token, notFoundValue) => {
-    throw new Error('NullInjector: Not found: ' + stringifyForError(token));
-};
-// TODO: A hack to not pull in the NullInjector from @angular/core.
-const NULL_INJECTOR$1 = {
-    get: ɵ0$b
-};
-/**
- * Bootstraps a Component into an existing host element and returns an instance
- * of the component.
- *
- * Use this function to bootstrap a component into the DOM tree. Each invocation
- * of this function will create a separate tree of components, injectors and
- * change detection cycles and lifetimes. To dynamically insert a new component
- * into an existing tree such that it shares the same injection, change detection
- * and object lifetime, use {@link ViewContainer#createComponent}.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-function renderComponent$1(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
-    ngDevMode && publishDefaultGlobalUtils();
-    ngDevMode && assertComponentType(componentType);
-    const rendererFactory = opts.rendererFactory || domRendererFactory3;
-    const sanitizer = opts.sanitizer || null;
-    const componentDef = getComponentDef(componentType);
-    if (componentDef.type != componentType)
-        componentDef.type = componentType;
-    // The first index of the first selector is the tag name.
-    const componentTag = componentDef.selectors[0][0];
-    const hostRenderer = rendererFactory.createRenderer(null, null);
-    const hostRNode = locateHostElement(hostRenderer, opts.host || componentTag, componentDef.encapsulation);
-    const rootFlags = componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
-        16 /* CheckAlways */ | 512 /* IsRoot */;
-    const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
-    const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-    const rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
-    const rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
-    enterView(rootView, null);
-    let component;
-    try {
-        if (rendererFactory.begin)
-            rendererFactory.begin();
-        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
-        component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
-        // create mode pass
-        renderView(rootTView, rootView, null);
-        // update mode pass
-        refreshView(rootTView, rootView, null, null);
-    }
-    finally {
-        leaveView();
-        if (rendererFactory.end)
-            rendererFactory.end();
-    }
-    return component;
-}
-/**
- * Creates the root component view and the root component node.
- *
- * @param rNode Render host element.
- * @param def ComponentDef
- * @param rootView The parent view where the host node is stored
- * @param hostRenderer The current renderer
- * @param sanitizer The sanitizer, if provided
- *
- * @returns Component view created
- */
-function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, sanitizer) {
-    const tView = rootView[TVIEW];
-    ngDevMode && assertIndexInRange(rootView, 0 + HEADER_OFFSET);
-    rootView[0 + HEADER_OFFSET] = rNode;
-    const tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
-    const mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
-    if (mergedAttrs !== null) {
-        computeStaticStyling(tNode, mergedAttrs, true);
-        if (rNode !== null) {
-            setUpAttributes(hostRenderer, rNode, mergedAttrs);
-            if (tNode.classes !== null) {
-                writeDirectClass(hostRenderer, rNode, tNode.classes);
-            }
-            if (tNode.styles !== null) {
-                writeDirectStyle(hostRenderer, rNode, tNode.styles);
-            }
-        }
-    }
-    const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, viewRenderer, sanitizer);
-    if (tView.firstCreatePass) {
-        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
-        markAsComponentHost(tView, tNode);
-        initTNodeFlags(tNode, rootView.length, 1);
-    }
-    addToViewTree(rootView, componentView);
-    // Store component view at node index, with node as the HOST
-    return rootView[HEADER_OFFSET] = componentView;
-}
-/**
- * Creates a root component and sets it up with features and host bindings. Shared by
- * renderComponent() and ViewContainerRef.createComponent().
- */
-function createRootComponent(componentView, componentDef, rootLView, rootContext, hostFeatures) {
-    const tView = rootLView[TVIEW];
-    // Create directive instance with factory() and store at next index in viewData
-    const component = instantiateRootComponent(tView, rootLView, componentDef);
-    rootContext.components.push(component);
-    componentView[CONTEXT] = component;
-    hostFeatures && hostFeatures.forEach((feature) => feature(component, componentDef));
-    // We want to generate an empty QueryList for root content queries for backwards
-    // compatibility with ViewEngine.
-    if (componentDef.contentQueries) {
-        componentDef.contentQueries(1 /* Create */, component, rootLView.length - 1);
-    }
-    const rootTNode = getPreviousOrParentTNode();
-    if (tView.firstCreatePass &&
-        (componentDef.hostBindings !== null || componentDef.hostAttrs !== null)) {
-        const elementIndex = rootTNode.index - HEADER_OFFSET;
-        setSelectedIndex(elementIndex);
-        const rootTView = rootLView[TVIEW];
-        addHostBindingsToExpandoInstructions(rootTView, componentDef);
-        growHostVarsSpace(rootTView, rootLView, componentDef.hostVars);
-        invokeHostBindingsInCreationMode(componentDef, component);
-    }
-    return component;
-}
-function createRootContext(scheduler, playerHandler) {
-    return {
-        components: [],
-        scheduler: scheduler || defaultScheduler,
-        clean: CLEAN_PROMISE,
-        playerHandler: playerHandler || null,
-        flags: 0 /* Empty */
-    };
-}
-/**
- * Used to enable lifecycle hooks on the root component.
- *
- * Include this feature when calling `renderComponent` if the root component
- * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
- * be called properly.
- *
- * Example:
- *
- * ```
- * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
- * ```
- */
-function LifecycleHooksFeature(component, def) {
-    const rootTView = readPatchedLView(component)[TVIEW];
-    const dirIndex = rootTView.data.length - 1;
-    // TODO(misko): replace `as TNode` with createTNode call. (needs refactoring to lose dep on
-    // LNode).
-    registerPostOrderHooks(rootTView, { directiveStart: dirIndex, directiveEnd: dirIndex + 1 });
-}
-/**
- * Wait on component until it is rendered.
- *
- * This function returns a `Promise` which is resolved when the component's
- * change detection is executed. This is determined by finding the scheduler
- * associated with the `component`'s render tree and waiting until the scheduler
- * flushes. If nothing is scheduled, the function returns a resolved promise.
- *
- * Example:
- * ```
- * await whenRendered(myComponent);
- * ```
- *
- * @param component Component to wait upon
- * @returns Promise which resolves when the component is rendered.
- */
-function whenRendered(component) {
-    return getRootContext(component).clean;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function getSuperType(type) {
-    return Object.getPrototypeOf(type.prototype).constructor;
-}
-/**
- * Merges the definition from a super class to a sub class.
- * @param definition The definition that is a SubClass of another directive of component
- *
- * @codeGenApi
- */
-function ɵɵInheritDefinitionFeature(definition) {
-    let superType = getSuperType(definition.type);
-    let shouldInheritFields = true;
-    const inheritanceChain = [definition];
-    while (superType) {
-        let superDef = undefined;
-        if (isComponentDef(definition)) {
-            // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
-            superDef = superType.ɵcmp || superType.ɵdir;
-        }
-        else {
-            if (superType.ɵcmp) {
-                throw new Error('Directives cannot inherit Components');
-            }
-            // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
-            superDef = superType.ɵdir;
-        }
-        if (superDef) {
-            if (shouldInheritFields) {
-                inheritanceChain.push(superDef);
-                // Some fields in the definition may be empty, if there were no values to put in them that
-                // would've justified object creation. Unwrap them if necessary.
-                const writeableDef = definition;
-                writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
-                writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
-                writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
-                // Merge hostBindings
-                const superHostBindings = superDef.hostBindings;
-                superHostBindings && inheritHostBindings(definition, superHostBindings);
-                // Merge queries
-                const superViewQuery = superDef.viewQuery;
-                const superContentQueries = superDef.contentQueries;
-                superViewQuery && inheritViewQuery(definition, superViewQuery);
-                superContentQueries && inheritContentQueries(definition, superContentQueries);
-                // Merge inputs and outputs
-                fillProperties(definition.inputs, superDef.inputs);
-                fillProperties(definition.declaredInputs, superDef.declaredInputs);
-                fillProperties(definition.outputs, superDef.outputs);
-                // Merge animations metadata.
-                // If `superDef` is a Component, the `data` field is present (defaults to an empty object).
-                if (isComponentDef(superDef) && superDef.data.animation) {
-                    // If super def is a Component, the `definition` is also a Component, since Directives can
-                    // not inherit Components (we throw an error above and cannot reach this code).
-                    const defData = definition.data;
-                    defData.animation = (defData.animation || []).concat(superDef.data.animation);
-                }
-            }
-            // Run parent features
-            const features = superDef.features;
-            if (features) {
-                for (let i = 0; i < features.length; i++) {
-                    const feature = features[i];
-                    if (feature && feature.ngInherit) {
-                        feature(definition);
-                    }
-                    // If `InheritDefinitionFeature` is a part of the current `superDef`, it means that this
-                    // def already has all the necessary information inherited from its super class(es), so we
-                    // can stop merging fields from super classes. However we need to iterate through the
-                    // prototype chain to look for classes that might contain other "features" (like
-                    // NgOnChanges), which we should invoke for the original `definition`. We set the
-                    // `shouldInheritFields` flag to indicate that, essentially skipping fields inheritance
-                    // logic and only invoking functions from the "features" list.
-                    if (feature === ɵɵInheritDefinitionFeature) {
-                        shouldInheritFields = false;
-                    }
-                }
-            }
-        }
-        superType = Object.getPrototypeOf(superType);
-    }
-    mergeHostAttrsAcrossInheritance(inheritanceChain);
-}
-/**
- * Merge the `hostAttrs` and `hostVars` from the inherited parent to the base class.
- *
- * @param inheritanceChain A list of `WritableDefs` starting at the top most type and listing
- * sub-types in order. For each type take the `hostAttrs` and `hostVars` and merge it with the child
- * type.
- */
-function mergeHostAttrsAcrossInheritance(inheritanceChain) {
-    let hostVars = 0;
-    let hostAttrs = null;
-    // We process the inheritance order from the base to the leaves here.
-    for (let i = inheritanceChain.length - 1; i >= 0; i--) {
-        const def = inheritanceChain[i];
-        // For each `hostVars`, we need to add the superclass amount.
-        def.hostVars = (hostVars += def.hostVars);
-        // for each `hostAttrs` we need to merge it with superclass.
-        def.hostAttrs =
-            mergeHostAttrs(def.hostAttrs, hostAttrs = mergeHostAttrs(hostAttrs, def.hostAttrs));
-    }
-}
-function maybeUnwrapEmpty(value) {
-    if (value === EMPTY_OBJ) {
-        return {};
-    }
-    else if (value === EMPTY_ARRAY) {
-        return [];
-    }
-    else {
-        return value;
-    }
-}
-function inheritViewQuery(definition, superViewQuery) {
-    const prevViewQuery = definition.viewQuery;
-    if (prevViewQuery) {
-        definition.viewQuery = (rf, ctx) => {
-            superViewQuery(rf, ctx);
-            prevViewQuery(rf, ctx);
-        };
-    }
-    else {
-        definition.viewQuery = superViewQuery;
-    }
-}
-function inheritContentQueries(definition, superContentQueries) {
-    const prevContentQueries = definition.contentQueries;
-    if (prevContentQueries) {
-        definition.contentQueries = (rf, ctx, directiveIndex) => {
-            superContentQueries(rf, ctx, directiveIndex);
-            prevContentQueries(rf, ctx, directiveIndex);
-        };
-    }
-    else {
-        definition.contentQueries = superContentQueries;
-    }
-}
-function inheritHostBindings(definition, superHostBindings) {
-    const prevHostBindings = definition.hostBindings;
-    if (prevHostBindings) {
-        definition.hostBindings = (rf, ctx) => {
-            superHostBindings(rf, ctx);
-            prevHostBindings(rf, ctx);
-        };
-    }
-    else {
-        definition.hostBindings = superHostBindings;
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Fields which exist on either directive or component definitions, and need to be copied from
- * parent to child classes by the `ɵɵCopyDefinitionFeature`.
- */
-const COPY_DIRECTIVE_FIELDS = [
-    // The child class should use the providers of its parent.
-    'providersResolver',
-];
-/**
- * Fields which exist only on component definitions, and need to be copied from parent to child
- * classes by the `ɵɵCopyDefinitionFeature`.
- *
- * The type here allows any field of `ComponentDef` which is not also a property of `DirectiveDef`,
- * since those should go in `COPY_DIRECTIVE_FIELDS` above.
- */
-const COPY_COMPONENT_FIELDS = [
-    // The child class should use the template function of its parent, including all template
-    // semantics.
-    'template',
-    'decls',
-    'consts',
-    'vars',
-    'onPush',
-    'ngContentSelectors',
-    // The child class should use the CSS styles of its parent, including all styling semantics.
-    'styles',
-    'encapsulation',
-    // The child class should be checked by the runtime in the same way as its parent.
-    'schemas',
-];
-/**
- * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
- * definition.
- *
- * This exists primarily to support ngcc migration of an existing View Engine pattern, where an
- * entire decorator is inherited from a parent to a child class. When ngcc detects this case, it
- * generates a skeleton definition on the child class, and applies this feature.
- *
- * The `ɵɵCopyDefinitionFeature` then copies any needed fields from the parent class' definition,
- * including things like the component template function.
- *
- * @param definition The definition of a child class which inherits from a parent class with its
- * own definition.
- *
- * @codeGenApi
- */
-function ɵɵCopyDefinitionFeature(definition) {
-    let superType = getSuperType(definition.type);
-    let superDef = undefined;
-    if (isComponentDef(definition)) {
-        // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
-        superDef = superType.ɵcmp;
-    }
-    else {
-        // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
-        superDef = superType.ɵdir;
-    }
-    // Needed because `definition` fields are readonly.
-    const defAny = definition;
-    // Copy over any fields that apply to either directives or components.
-    for (const field of COPY_DIRECTIVE_FIELDS) {
-        defAny[field] = superDef[field];
-    }
-    if (isComponentDef(superDef)) {
-        // Copy over any component-specific fields.
-        for (const field of COPY_COMPONENT_FIELDS) {
-            defAny[field] = superDef[field];
-        }
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _symbolIterator = null;
 function getSymbolIterator() {
     if (!_symbolIterator) {
@@ -14487,6 +13580,57 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
         }
     }
     return ɵɵattributeInterpolateV;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component.
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+function detectChanges(component) {
+    const view = getComponentViewByInstance(component);
+    detectChangesInternal(view[TVIEW], view, component);
+}
+/**
+ * Marks the component as dirty (needing change detection). Marking a component dirty will
+ * schedule a change detection on it at some point in the future.
+ *
+ * Marking an already dirty component as dirty won't do anything. Only one outstanding change
+ * detection can be scheduled per component tree.
+ *
+ * @param component Component to mark as dirty.
+ */
+function markDirty(component) {
+    ngDevMode && assertDefined(component, 'component');
+    const rootView = markViewDirty(getComponentViewByInstance(component));
+    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
+    scheduleTick(rootView[CONTEXT], 1 /* DetectChanges */);
+}
+/**
+ * Used to perform change detection on the whole application.
+ *
+ * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
+ * executes lifecycle hooks and conditionally checks components based on their
+ * `ChangeDetectionStrategy` and dirtiness.
+ *
+ * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
+ * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
+ * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
+ * be changed when calling `renderComponent` and providing the `scheduler` option.
+ */
+function tick(component) {
+    const rootView = getRootView(component);
+    const rootContext = rootView[CONTEXT];
+    tickRootContext(rootContext);
 }
 
 /**
@@ -18678,6 +17822,862 @@ function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Retrieves the component instance associated with a given DOM element.
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```html
+ * <my-app>
+ *   <div>
+ *     <child-comp></child-comp>
+ *   </div>
+ * </my-app>
+ * ```
+ * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
+ * associated with this DOM element.
+ *
+ * Calling the function on `<my-app>` will return the `MyApp` instance.
+ *
+ *
+ * @param element DOM element from which the component should be retrieved.
+ * @returns Component instance associated with the element or `null` if there
+ *    is no component associated with it.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getComponent(element) {
+    assertDomElement(element);
+    const context = loadLContext(element, false);
+    if (context === null)
+        return null;
+    if (context.component === undefined) {
+        context.component = getComponentAtNodeIndex(context.nodeIndex, context.lView);
+    }
+    return context.component;
+}
+/**
+ * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
+ * view that the element is part of. Otherwise retrieves the instance of the component whose view
+ * owns the element (in this case, the result is the same as calling `getOwningComponent`).
+ *
+ * @param element Element for which to get the surrounding component instance.
+ * @returns Instance of the component that is around the element or null if the element isn't
+ *    inside any component.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getContext(element) {
+    assertDomElement(element);
+    const context = loadLContext(element, false);
+    return context === null ? null : context.lView[CONTEXT];
+}
+/**
+ * Retrieves the component instance whose view contains the DOM element.
+ *
+ * For example, if `<child-comp>` is used in the template of `<app-comp>`
+ * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
+ * would return `<app-comp>`.
+ *
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Component instance whose view owns the DOM element or null if the element is not
+ *    part of a component view.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getOwningComponent(elementOrDir) {
+    const context = loadLContext(elementOrDir, false);
+    if (context === null)
+        return null;
+    let lView = context.lView;
+    let parent;
+    ngDevMode && assertLView(lView);
+    while (lView[HOST] === null && (parent = getLViewParent(lView))) {
+        // As long as lView[HOST] is null we know we are part of sub-template such as `*ngIf`
+        lView = parent;
+    }
+    return lView[FLAGS] & 512 /* IsRoot */ ? null : lView[CONTEXT];
+}
+/**
+ * Retrieves all root components associated with a DOM element, directive or component instance.
+ * Root components are those which have been bootstrapped by Angular.
+ *
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Root components associated with the target object.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getRootComponents(elementOrDir) {
+    return [...getRootContext(elementOrDir).components];
+}
+/**
+ * Retrieves an `Injector` associated with an element, component or directive instance.
+ *
+ * @param elementOrDir DOM element, component or directive instance for which to
+ *    retrieve the injector.
+ * @returns Injector associated with the element, component or directive instance.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getInjector(elementOrDir) {
+    const context = loadLContext(elementOrDir, false);
+    if (context === null)
+        return Injector.NULL;
+    const tNode = context.lView[TVIEW].data[context.nodeIndex];
+    return new NodeInjector(tNode, context.lView);
+}
+/**
+ * Retrieve a set of injection tokens at a given DOM node.
+ *
+ * @param element Element for which the injection tokens should be retrieved.
+ */
+function getInjectionTokens(element) {
+    const context = loadLContext(element, false);
+    if (context === null)
+        return [];
+    const lView = context.lView;
+    const tView = lView[TVIEW];
+    const tNode = tView.data[context.nodeIndex];
+    const providerTokens = [];
+    const startIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
+    const endIndex = tNode.directiveEnd;
+    for (let i = startIndex; i < endIndex; i++) {
+        let value = tView.data[i];
+        if (isDirectiveDefHack(value)) {
+            // The fact that we sometimes store Type and sometimes DirectiveDef in this location is a
+            // design flaw.  We should always store same type so that we can be monomorphic. The issue
+            // is that for Components/Directives we store the def instead the type. The correct behavior
+            // is that we should always be storing injectable type in this location.
+            value = value.type;
+        }
+        providerTokens.push(value);
+    }
+    return providerTokens;
+}
+/**
+ * Retrieves directive instances associated with a given DOM element. Does not include
+ * component instances.
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```
+ * <my-app>
+ *   <button my-button></button>
+ *   <my-comp></my-comp>
+ * </my-app>
+ * ```
+ * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
+ * directive that is associated with the DOM element.
+ *
+ * Calling `getDirectives` on `<my-comp>` will return an empty array.
+ *
+ * @param element DOM element for which to get the directives.
+ * @returns Array of directives associated with the element.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getDirectives(element) {
+    const context = loadLContext(element);
+    if (context.directives === undefined) {
+        context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
+    }
+    // The `directives` in this case are a named array called `LComponentView`. Clone the
+    // result so we don't expose an internal data structure in the user's console.
+    return context.directives === null ? [] : [...context.directives];
+}
+function loadLContext(target, throwOnNotFound = true) {
+    const context = getLContext(target);
+    if (!context && throwOnNotFound) {
+        throw new Error(ngDevMode ? `Unable to find context associated with ${stringifyForError(target)}` :
+            'Invalid ng target');
+    }
+    return context;
+}
+/**
+ * Retrieve map of local references.
+ *
+ * The references are retrieved as a map of local reference name to element or directive instance.
+ *
+ * @param target DOM element, component or directive instance for which to retrieve
+ *    the local references.
+ */
+function getLocalRefs(target) {
+    const context = loadLContext(target, false);
+    if (context === null)
+        return {};
+    if (context.localRefs === undefined) {
+        context.localRefs = discoverLocalRefs(context.lView, context.nodeIndex);
+    }
+    return context.localRefs || {};
+}
+/**
+ * Retrieves the host element of a component or directive instance.
+ * The host element is the DOM element that matched the selector of the directive.
+ *
+ * @param componentOrDirective Component or directive instance for which the host
+ *     element should be retrieved.
+ * @returns Host element of the target.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getHostElement(componentOrDirective) {
+    return getLContext(componentOrDirective).native;
+}
+/**
+ * Retrieves the rendered text for a given component.
+ *
+ * This function retrieves the host element of a component and
+ * and then returns the `textContent` for that element. This implies
+ * that the text returned will include re-projected content of
+ * the component as well.
+ *
+ * @param component The component to return the content text for.
+ */
+function getRenderedText(component) {
+    const hostElement = getHostElement(component);
+    return hostElement.textContent || '';
+}
+function loadLContextFromNode(node) {
+    if (!(node instanceof Node))
+        throw new Error('Expecting instance of DOM Element');
+    return loadLContext(node);
+}
+/**
+ * Retrieves a list of event listeners associated with a DOM element. The list does include host
+ * listeners, but it does not include event listeners defined outside of the Angular context
+ * (e.g. through `addEventListener`).
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```
+ * <my-app>
+ *   <div (click)="doSomething()"></div>
+ * </my-app>
+ *
+ * ```
+ * Calling `getListeners` on `<div>` will return an object that looks as follows:
+ * ```
+ * {
+ *   name: 'click',
+ *   element: <div>,
+ *   callback: () => doSomething(),
+ *   useCapture: false
+ * }
+ * ```
+ *
+ * @param element Element for which the DOM listeners should be retrieved.
+ * @returns Array of event listeners on the DOM element.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getListeners(element) {
+    assertDomElement(element);
+    const lContext = loadLContext(element, false);
+    if (lContext === null)
+        return [];
+    const lView = lContext.lView;
+    const tView = lView[TVIEW];
+    const lCleanup = lView[CLEANUP];
+    const tCleanup = tView.cleanup;
+    const listeners = [];
+    if (tCleanup && lCleanup) {
+        for (let i = 0; i < tCleanup.length;) {
+            const firstParam = tCleanup[i++];
+            const secondParam = tCleanup[i++];
+            if (typeof firstParam === 'string') {
+                const name = firstParam;
+                const listenerElement = unwrapRNode(lView[secondParam]);
+                const callback = lCleanup[tCleanup[i++]];
+                const useCaptureOrIndx = tCleanup[i++];
+                // if useCaptureOrIndx is boolean then report it as is.
+                // if useCaptureOrIndx is positive number then it in unsubscribe method
+                // if useCaptureOrIndx is negative number then it is a Subscription
+                const type = (typeof useCaptureOrIndx === 'boolean' || useCaptureOrIndx >= 0) ? 'dom' : 'output';
+                const useCapture = typeof useCaptureOrIndx === 'boolean' ? useCaptureOrIndx : false;
+                if (element == listenerElement) {
+                    listeners.push({ element, name, callback, useCapture, type });
+                }
+            }
+        }
+    }
+    listeners.sort(sortListeners);
+    return listeners;
+}
+function sortListeners(a, b) {
+    if (a.name == b.name)
+        return 0;
+    return a.name < b.name ? -1 : 1;
+}
+/**
+ * This function should not exist because it is megamorphic and only mostly correct.
+ *
+ * See call site for more info.
+ */
+function isDirectiveDefHack(obj) {
+    return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
+}
+/**
+ * Returns the attached `DebugNode` instance for an element in the DOM.
+ *
+ * @param element DOM element which is owned by an existing component's view.
+ */
+function getDebugNode(element) {
+    let debugNode = null;
+    const lContext = loadLContextFromNode(element);
+    const lView = lContext.lView;
+    const nodeIndex = lContext.nodeIndex;
+    if (nodeIndex !== -1) {
+        const valueInLView = lView[nodeIndex];
+        // this means that value in the lView is a component with its own
+        // data. In this situation the TNode is not accessed at the same spot.
+        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] :
+            getTNode(lView[TVIEW], nodeIndex - HEADER_OFFSET);
+        debugNode = buildDebugNode(tNode, lView, nodeIndex);
+    }
+    return debugNode;
+}
+/**
+ * Retrieve the component `LView` from component/element.
+ *
+ * NOTE: `LView` is a private and should not be leaked outside.
+ *       Don't export this method to `ng.*` on window.
+ *
+ * @param target DOM element or component instance for which to retrieve the LView.
+ */
+function getComponentLView(target) {
+    const lContext = loadLContext(target);
+    const nodeIndx = lContext.nodeIndex;
+    const lView = lContext.lView;
+    const componentLView = lView[nodeIndx];
+    ngDevMode && assertLView(componentLView);
+    return componentLView;
+}
+/** Asserts that a value is a DOM Element. */
+function assertDomElement(value) {
+    if (typeof Element !== 'undefined' && !(value instanceof Element)) {
+        throw new Error('Expecting instance of DOM Element');
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Marks a component for check (in case of OnPush components) and synchronously
+ * performs change detection on the application this component belongs to.
+ *
+ * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function applyChanges(component) {
+    markDirty(component);
+    getRootComponents(component).forEach(rootComponent => detectChanges(rootComponent));
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This file introduces series of globally accessible debug tools
+ * to allow for the Angular debugging story to function.
+ *
+ * To see this in action run the following command:
+ *
+ *   bazel run --config=ivy
+ *   //packages/core/test/bundling/todo:devserver
+ *
+ *  Then load `localhost:5432` and start using the console tools.
+ */
+/**
+ * This value reflects the property on the window where the dev
+ * tools are patched (window.ng).
+ * */
+const GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
+let _published = false;
+/**
+ * Publishes a collection of default debug tools onto`window.ng`.
+ *
+ * These functions are available globally when Angular is in development
+ * mode and are automatically stripped away from prod mode is on.
+ */
+function publishDefaultGlobalUtils() {
+    if (!_published) {
+        _published = true;
+        publishGlobalUtil('getComponent', getComponent);
+        publishGlobalUtil('getContext', getContext);
+        publishGlobalUtil('getListeners', getListeners);
+        publishGlobalUtil('getOwningComponent', getOwningComponent);
+        publishGlobalUtil('getHostElement', getHostElement);
+        publishGlobalUtil('getInjector', getInjector);
+        publishGlobalUtil('getRootComponents', getRootComponents);
+        publishGlobalUtil('getDirectives', getDirectives);
+        publishGlobalUtil('applyChanges', applyChanges);
+    }
+}
+/**
+ * Publishes the given function to `window.ng` so that it can be
+ * used from the browser console when an application is not in production.
+ */
+function publishGlobalUtil(name, fn) {
+    if (typeof COMPILED === 'undefined' || !COMPILED) {
+        // Note: we can't export `ng` when using closure enhanced optimization as:
+        // - closure declares globals itself for minified names, which sometimes clobber our `ng` global
+        // - we can't declare a closure extern as the namespace `ng` is already used within Google
+        //   for typings for AngularJS (via `goog.provide('ng....')`).
+        const w = _global;
+        ngDevMode && assertDefined(fn, 'function not defined');
+        if (w) {
+            let container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
+            if (!container) {
+                container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
+            }
+            container[name] = fn;
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const ɵ0$b = (token, notFoundValue) => {
+    throw new Error('NullInjector: Not found: ' + stringifyForError(token));
+};
+// TODO: A hack to not pull in the NullInjector from @angular/core.
+const NULL_INJECTOR$1 = {
+    get: ɵ0$b
+};
+/**
+ * Bootstraps a Component into an existing host element and returns an instance
+ * of the component.
+ *
+ * Use this function to bootstrap a component into the DOM tree. Each invocation
+ * of this function will create a separate tree of components, injectors and
+ * change detection cycles and lifetimes. To dynamically insert a new component
+ * into an existing tree such that it shares the same injection, change detection
+ * and object lifetime, use {@link ViewContainer#createComponent}.
+ *
+ * @param componentType Component to bootstrap
+ * @param options Optional parameters which control bootstrapping
+ */
+function renderComponent$1(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
+    ngDevMode && publishDefaultGlobalUtils();
+    ngDevMode && assertComponentType(componentType);
+    const rendererFactory = opts.rendererFactory || domRendererFactory3;
+    const sanitizer = opts.sanitizer || null;
+    const componentDef = getComponentDef(componentType);
+    if (componentDef.type != componentType)
+        componentDef.type = componentType;
+    // The first index of the first selector is the tag name.
+    const componentTag = componentDef.selectors[0][0];
+    const hostRenderer = rendererFactory.createRenderer(null, null);
+    const hostRNode = locateHostElement(hostRenderer, opts.host || componentTag, componentDef.encapsulation);
+    const rootFlags = componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
+        16 /* CheckAlways */ | 512 /* IsRoot */;
+    const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
+    const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
+    const rootTView = createTView(0 /* Root */, -1, null, 1, 0, null, null, null, null, null);
+    const rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, undefined, opts.injector || null);
+    enterView(rootView, null);
+    let component;
+    try {
+        if (rendererFactory.begin)
+            rendererFactory.begin();
+        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
+        component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
+        // create mode pass
+        renderView(rootTView, rootView, null);
+        // update mode pass
+        refreshView(rootTView, rootView, null, null);
+    }
+    finally {
+        leaveView();
+        if (rendererFactory.end)
+            rendererFactory.end();
+    }
+    return component;
+}
+/**
+ * Creates the root component view and the root component node.
+ *
+ * @param rNode Render host element.
+ * @param def ComponentDef
+ * @param rootView The parent view where the host node is stored
+ * @param hostRenderer The current renderer
+ * @param sanitizer The sanitizer, if provided
+ *
+ * @returns Component view created
+ */
+function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, sanitizer) {
+    const tView = rootView[TVIEW];
+    ngDevMode && assertIndexInRange(rootView, 0 + HEADER_OFFSET);
+    rootView[0 + HEADER_OFFSET] = rNode;
+    const tNode = getOrCreateTNode(tView, null, 0, 3 /* Element */, null, null);
+    const mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
+    if (mergedAttrs !== null) {
+        computeStaticStyling(tNode, mergedAttrs, true);
+        if (rNode !== null) {
+            setUpAttributes(hostRenderer, rNode, mergedAttrs);
+            if (tNode.classes !== null) {
+                writeDirectClass(hostRenderer, rNode, tNode.classes);
+            }
+            if (tNode.styles !== null) {
+                writeDirectStyle(hostRenderer, rNode, tNode.styles);
+            }
+        }
+    }
+    const viewRenderer = rendererFactory.createRenderer(rNode, def);
+    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, viewRenderer, sanitizer);
+    if (tView.firstCreatePass) {
+        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
+        markAsComponentHost(tView, tNode);
+        initTNodeFlags(tNode, rootView.length, 1);
+    }
+    addToViewTree(rootView, componentView);
+    // Store component view at node index, with node as the HOST
+    return rootView[HEADER_OFFSET] = componentView;
+}
+/**
+ * Creates a root component and sets it up with features and host bindings. Shared by
+ * renderComponent() and ViewContainerRef.createComponent().
+ */
+function createRootComponent(componentView, componentDef, rootLView, rootContext, hostFeatures) {
+    const tView = rootLView[TVIEW];
+    // Create directive instance with factory() and store at next index in viewData
+    const component = instantiateRootComponent(tView, rootLView, componentDef);
+    rootContext.components.push(component);
+    componentView[CONTEXT] = component;
+    hostFeatures && hostFeatures.forEach((feature) => feature(component, componentDef));
+    // We want to generate an empty QueryList for root content queries for backwards
+    // compatibility with ViewEngine.
+    if (componentDef.contentQueries) {
+        componentDef.contentQueries(1 /* Create */, component, rootLView.length - 1);
+    }
+    const rootTNode = getPreviousOrParentTNode();
+    if (tView.firstCreatePass &&
+        (componentDef.hostBindings !== null || componentDef.hostAttrs !== null)) {
+        const elementIndex = rootTNode.index - HEADER_OFFSET;
+        setSelectedIndex(elementIndex);
+        const rootTView = rootLView[TVIEW];
+        addHostBindingsToExpandoInstructions(rootTView, componentDef);
+        growHostVarsSpace(rootTView, rootLView, componentDef.hostVars);
+        invokeHostBindingsInCreationMode(componentDef, component);
+    }
+    return component;
+}
+function createRootContext(scheduler, playerHandler) {
+    return {
+        components: [],
+        scheduler: scheduler || defaultScheduler,
+        clean: CLEAN_PROMISE,
+        playerHandler: playerHandler || null,
+        flags: 0 /* Empty */
+    };
+}
+/**
+ * Used to enable lifecycle hooks on the root component.
+ *
+ * Include this feature when calling `renderComponent` if the root component
+ * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+ * be called properly.
+ *
+ * Example:
+ *
+ * ```
+ * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
+ * ```
+ */
+function LifecycleHooksFeature(component, def) {
+    const rootTView = readPatchedLView(component)[TVIEW];
+    const dirIndex = rootTView.data.length - 1;
+    // TODO(misko): replace `as TNode` with createTNode call. (needs refactoring to lose dep on
+    // LNode).
+    registerPostOrderHooks(rootTView, { directiveStart: dirIndex, directiveEnd: dirIndex + 1 });
+}
+/**
+ * Wait on component until it is rendered.
+ *
+ * This function returns a `Promise` which is resolved when the component's
+ * change detection is executed. This is determined by finding the scheduler
+ * associated with the `component`'s render tree and waiting until the scheduler
+ * flushes. If nothing is scheduled, the function returns a resolved promise.
+ *
+ * Example:
+ * ```
+ * await whenRendered(myComponent);
+ * ```
+ *
+ * @param component Component to wait upon
+ * @returns Promise which resolves when the component is rendered.
+ */
+function whenRendered(component) {
+    return getRootContext(component).clean;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function getSuperType(type) {
+    return Object.getPrototypeOf(type.prototype).constructor;
+}
+/**
+ * Merges the definition from a super class to a sub class.
+ * @param definition The definition that is a SubClass of another directive of component
+ *
+ * @codeGenApi
+ */
+function ɵɵInheritDefinitionFeature(definition) {
+    let superType = getSuperType(definition.type);
+    let shouldInheritFields = true;
+    const inheritanceChain = [definition];
+    while (superType) {
+        let superDef = undefined;
+        if (isComponentDef(definition)) {
+            // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
+            superDef = superType.ɵcmp || superType.ɵdir;
+        }
+        else {
+            if (superType.ɵcmp) {
+                throw new Error('Directives cannot inherit Components');
+            }
+            // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
+            superDef = superType.ɵdir;
+        }
+        if (superDef) {
+            if (shouldInheritFields) {
+                inheritanceChain.push(superDef);
+                // Some fields in the definition may be empty, if there were no values to put in them that
+                // would've justified object creation. Unwrap them if necessary.
+                const writeableDef = definition;
+                writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
+                writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
+                writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
+                // Merge hostBindings
+                const superHostBindings = superDef.hostBindings;
+                superHostBindings && inheritHostBindings(definition, superHostBindings);
+                // Merge queries
+                const superViewQuery = superDef.viewQuery;
+                const superContentQueries = superDef.contentQueries;
+                superViewQuery && inheritViewQuery(definition, superViewQuery);
+                superContentQueries && inheritContentQueries(definition, superContentQueries);
+                // Merge inputs and outputs
+                fillProperties(definition.inputs, superDef.inputs);
+                fillProperties(definition.declaredInputs, superDef.declaredInputs);
+                fillProperties(definition.outputs, superDef.outputs);
+                // Merge animations metadata.
+                // If `superDef` is a Component, the `data` field is present (defaults to an empty object).
+                if (isComponentDef(superDef) && superDef.data.animation) {
+                    // If super def is a Component, the `definition` is also a Component, since Directives can
+                    // not inherit Components (we throw an error above and cannot reach this code).
+                    const defData = definition.data;
+                    defData.animation = (defData.animation || []).concat(superDef.data.animation);
+                }
+            }
+            // Run parent features
+            const features = superDef.features;
+            if (features) {
+                for (let i = 0; i < features.length; i++) {
+                    const feature = features[i];
+                    if (feature && feature.ngInherit) {
+                        feature(definition);
+                    }
+                    // If `InheritDefinitionFeature` is a part of the current `superDef`, it means that this
+                    // def already has all the necessary information inherited from its super class(es), so we
+                    // can stop merging fields from super classes. However we need to iterate through the
+                    // prototype chain to look for classes that might contain other "features" (like
+                    // NgOnChanges), which we should invoke for the original `definition`. We set the
+                    // `shouldInheritFields` flag to indicate that, essentially skipping fields inheritance
+                    // logic and only invoking functions from the "features" list.
+                    if (feature === ɵɵInheritDefinitionFeature) {
+                        shouldInheritFields = false;
+                    }
+                }
+            }
+        }
+        superType = Object.getPrototypeOf(superType);
+    }
+    mergeHostAttrsAcrossInheritance(inheritanceChain);
+}
+/**
+ * Merge the `hostAttrs` and `hostVars` from the inherited parent to the base class.
+ *
+ * @param inheritanceChain A list of `WritableDefs` starting at the top most type and listing
+ * sub-types in order. For each type take the `hostAttrs` and `hostVars` and merge it with the child
+ * type.
+ */
+function mergeHostAttrsAcrossInheritance(inheritanceChain) {
+    let hostVars = 0;
+    let hostAttrs = null;
+    // We process the inheritance order from the base to the leaves here.
+    for (let i = inheritanceChain.length - 1; i >= 0; i--) {
+        const def = inheritanceChain[i];
+        // For each `hostVars`, we need to add the superclass amount.
+        def.hostVars = (hostVars += def.hostVars);
+        // for each `hostAttrs` we need to merge it with superclass.
+        def.hostAttrs =
+            mergeHostAttrs(def.hostAttrs, hostAttrs = mergeHostAttrs(hostAttrs, def.hostAttrs));
+    }
+}
+function maybeUnwrapEmpty(value) {
+    if (value === EMPTY_OBJ) {
+        return {};
+    }
+    else if (value === EMPTY_ARRAY) {
+        return [];
+    }
+    else {
+        return value;
+    }
+}
+function inheritViewQuery(definition, superViewQuery) {
+    const prevViewQuery = definition.viewQuery;
+    if (prevViewQuery) {
+        definition.viewQuery = (rf, ctx) => {
+            superViewQuery(rf, ctx);
+            prevViewQuery(rf, ctx);
+        };
+    }
+    else {
+        definition.viewQuery = superViewQuery;
+    }
+}
+function inheritContentQueries(definition, superContentQueries) {
+    const prevContentQueries = definition.contentQueries;
+    if (prevContentQueries) {
+        definition.contentQueries = (rf, ctx, directiveIndex) => {
+            superContentQueries(rf, ctx, directiveIndex);
+            prevContentQueries(rf, ctx, directiveIndex);
+        };
+    }
+    else {
+        definition.contentQueries = superContentQueries;
+    }
+}
+function inheritHostBindings(definition, superHostBindings) {
+    const prevHostBindings = definition.hostBindings;
+    if (prevHostBindings) {
+        definition.hostBindings = (rf, ctx) => {
+            superHostBindings(rf, ctx);
+            prevHostBindings(rf, ctx);
+        };
+    }
+    else {
+        definition.hostBindings = superHostBindings;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Fields which exist on either directive or component definitions, and need to be copied from
+ * parent to child classes by the `ɵɵCopyDefinitionFeature`.
+ */
+const COPY_DIRECTIVE_FIELDS = [
+    // The child class should use the providers of its parent.
+    'providersResolver',
+];
+/**
+ * Fields which exist only on component definitions, and need to be copied from parent to child
+ * classes by the `ɵɵCopyDefinitionFeature`.
+ *
+ * The type here allows any field of `ComponentDef` which is not also a property of `DirectiveDef`,
+ * since those should go in `COPY_DIRECTIVE_FIELDS` above.
+ */
+const COPY_COMPONENT_FIELDS = [
+    // The child class should use the template function of its parent, including all template
+    // semantics.
+    'template',
+    'decls',
+    'consts',
+    'vars',
+    'onPush',
+    'ngContentSelectors',
+    // The child class should use the CSS styles of its parent, including all styling semantics.
+    'styles',
+    'encapsulation',
+    // The child class should be checked by the runtime in the same way as its parent.
+    'schemas',
+];
+/**
+ * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
+ * definition.
+ *
+ * This exists primarily to support ngcc migration of an existing View Engine pattern, where an
+ * entire decorator is inherited from a parent to a child class. When ngcc detects this case, it
+ * generates a skeleton definition on the child class, and applies this feature.
+ *
+ * The `ɵɵCopyDefinitionFeature` then copies any needed fields from the parent class' definition,
+ * including things like the component template function.
+ *
+ * @param definition The definition of a child class which inherits from a parent class with its
+ * own definition.
+ *
+ * @codeGenApi
+ */
+function ɵɵCopyDefinitionFeature(definition) {
+    let superType = getSuperType(definition.type);
+    let superDef = undefined;
+    if (isComponentDef(definition)) {
+        // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
+        superDef = superType.ɵcmp;
+    }
+    else {
+        // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
+        superDef = superType.ɵdir;
+    }
+    // Needed because `definition` fields are readonly.
+    const defAny = definition;
+    // Copy over any fields that apply to either directives or components.
+    for (const field of COPY_DIRECTIVE_FIELDS) {
+        defAny[field] = superDef[field];
+    }
+    if (isComponentDef(superDef)) {
+        // Copy over any component-specific fields.
+        for (const field of COPY_COMPONENT_FIELDS) {
+            defAny[field] = superDef[field];
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Resolves the providers which are defined in the DirectiveDef.
  *
  * When inserting the tokens and the factories in their respective arrays, we can assume that
@@ -19204,7 +19204,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.2+26.sha-88d7bb8');
+const VERSION = new Version('11.0.0-next.2+23.sha-d92a0dd');
 
 /**
  * @license
