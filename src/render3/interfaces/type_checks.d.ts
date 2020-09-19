@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentDef, DirectiveDef } from '..';
 import { LContainer } from './container';
+import { ComponentDef, DirectiveDef } from './definition';
 import { TNode } from './node';
 import { RNode } from './renderer';
 import { LView } from './view';
