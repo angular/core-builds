@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.2+50.sha-a206852
+ * @license Angular v11.0.0-next.2+52.sha-ba3f4c2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2445,6 +2445,7 @@
          * Overwrites all providers for the given token with the given provider definition.
          */
         TestBedRender3.prototype.overrideProvider = function (token, provider) {
+            this.assertNotInstantiated('overrideProvider', 'override provider');
             this.compiler.overrideProvider(token, provider);
         };
         TestBedRender3.prototype.createComponent = function (type) {
@@ -2996,6 +2997,7 @@
             this._pipeOverrides.push([pipe, override]);
         };
         TestBedViewEngine.prototype.overrideProvider = function (token, provider) {
+            this._assertNotInstantiated('overrideProvider', 'override provider');
             this.overrideProviderImpl(token, provider);
         };
         TestBedViewEngine.prototype.overrideProviderImpl = function (token, provider, deprecated) {
