@@ -10,9 +10,10 @@ import { DirectiveDef } from './interfaces/definition';
 import { TNode } from './interfaces/node';
 import { LView, TView } from './interfaces/view';
 export declare function assertTNodeForLView(tNode: TNode, lView: LView): void;
+export declare function assertTNodeForTView(tNode: TNode, tView: TView): void;
 export declare function assertComponentType(actual: any, msg?: string): void;
 export declare function assertNgModuleType(actual: any, msg?: string): void;
-export declare function assertPreviousIsParent(isParent: boolean): void;
+export declare function assertCurrentTNodeIsParent(isParent: boolean): void;
 export declare function assertHasParent(tNode: TNode | null): void;
 export declare function assertDataNext(lView: LView, index: number, arr?: any[]): void;
 export declare function assertLContainer(value: any): asserts value is LContainer;
@@ -25,3 +26,16 @@ export declare function assertFirstUpdatePass(tView: TView, errMessage?: string)
  * an interface, so we can't do a direct instanceof check.
  */
 export declare function assertDirectiveDef<T>(obj: any): asserts obj is DirectiveDef<T>;
+export declare function assertIndexInDeclRange(lView: LView, index: number): void;
+export declare function assertIndexInVarsRange(lView: LView, index: number): void;
+export declare function assertIndexInI18nRange(lView: LView, index: number): void;
+export declare function assertIndexInExpandoRange(lView: LView, index: number): void;
+export declare function assertBetween(lower: number, upper: number, index: number): void;
+/**
+ * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
+ * NodeInjector data structure.
+ *
+ * @param lView `LView` which should be checked.
+ * @param injectorIndex index into the `LView` where the `NodeInjector` is expected.
+ */
+export declare function assertNodeInjector(lView: LView, injectorIndex: number): void;

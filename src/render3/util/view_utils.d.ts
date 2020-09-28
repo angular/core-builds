@@ -63,7 +63,7 @@ export declare function getNativeByTNode(tNode: TNode, lView: LView): RNode;
  * @param tNode
  * @param lView
  */
-export declare function getNativeByTNodeOrNull(tNode: TNode, lView: LView): RNode | null;
+export declare function getNativeByTNodeOrNull(tNode: TNode | null, lView: LView): RNode | null;
 export declare function getTNode(tView: TView, index: number): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function load<T>(view: LView | TData, index: number): T;

@@ -10,7 +10,7 @@ import { Sanitizer } from '../../sanitization/sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { ComponentTemplate, DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
-import { AttributeMarker, PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType, TViewNode } from '../interfaces/node';
+import { AttributeMarker, PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
 import { RComment, RElement, Renderer3, RendererFactory3, RNode } from '../interfaces/renderer';
@@ -28,14 +28,13 @@ export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (type: TViewType, id: number, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, node: TViewNode | TElementNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: DestroyHookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null, incompleteFirstPass: boolean, _decls: number, _vars: number): {
+    new (type: TViewType, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, declTNode: ITNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: DestroyHookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null, incompleteFirstPass: boolean, _decls: number, _vars: number): {
         type: TViewType;
-        id: number;
         blueprint: LView;
         template: ComponentTemplate<{}> | null;
         queries: TQueries | null;
         viewQuery: ViewQueriesFunction<{}> | null;
-        node: TViewNode | TElementNode | null;
+        declTNode: ITNode | null;
         data: TData;
         bindingStartIndex: number;
         expandoStartIndex: number;
@@ -63,6 +62,8 @@ export declare const TViewConstructor: {
         _decls: number;
         _vars: number;
         readonly template_: string;
+        readonly type_: string;
+        readonly i18nStartIndex: number;
     };
 };
 declare class TNode implements ITNode {
@@ -128,11 +129,27 @@ declare class TNode implements ITNode {
     residualClasses: KeyValueArray<any> | undefined | null, //
     classBindings: TStylingRange, //
     styleBindings: TStylingRange);
+    /**
+     * Return a human debug version of the set of `NodeInjector`s which will be consulted when
+     * resolving tokens from this `TNode`.
+     *
+     * When debugging applications, it is often difficult to determine which `NodeInjector`s will be
+     * consulted. This method shows a list of `DebugNode`s representing the `TNode`s which will be
+     * consulted in order when resolving a token starting at this `TNode`.
+     *
+     * The original data is stored in `LView` and `TView` with a lot of offset indexes, and so it is
+     * difficult to reason about.
+     *
+     * @param lView The `LView` instance for this `TNode`.
+     */
+    debugNodeInjectorPath(lView: LView): DebugNode[];
     get type_(): string;
     get flags_(): string;
     get template_(): string;
     get styleBindings_(): DebugStyleBindings;
     get classBindings_(): DebugStyleBindings;
+    get providerIndexStart_(): number;
+    get providerIndexEnd_(): number;
 }
 export declare const TNodeDebug: typeof TNode;
 export declare type TNodeDebug = TNode;
@@ -204,7 +221,7 @@ export declare class LViewDebug implements ILViewDebug {
     get childTail(): ILViewDebug | ILContainerDebug | null;
     get declarationView(): ILViewDebug | null;
     get queries(): LQueries | null;
-    get tHost(): TViewNode | TElementNode | null;
+    get tHost(): ITNode | null;
     get decls(): LViewDebugRange;
     get vars(): LViewDebugRange;
     get i18n(): LViewDebugRange;
@@ -221,7 +238,7 @@ export declare class LViewDebug implements ILViewDebug {
  * @param lView
  */
 export declare function toDebugNodes(tNode: ITNode | null, lView: LView): DebugNode[];
-export declare function buildDebugNode(tNode: ITNode, lView: LView, nodeIndex: number): DebugNode;
+export declare function buildDebugNode(tNode: ITNode, lView: LView): DebugNode;
 export declare class LContainerDebug implements ILContainerDebug {
     private readonly _raw_lContainer;
     constructor(_raw_lContainer: LContainer);

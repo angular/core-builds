@@ -6,18 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './interfaces/container';
-import { TNode, TProjectionNode, TViewNode } from './interfaces/node';
+import { TNode, TProjectionNode } from './interfaces/node';
 import { RElement, Renderer3, RNode, RText } from './interfaces/renderer';
 import { LView, TView } from './interfaces/view';
-export declare function getLContainer(tNode: TViewNode, embeddedView: LView): LContainer | null;
-/**
- * Retrieves render parent for a given view.
- * Might be null if a view is not yet attached to any container.
- */
-export declare function getContainerRenderParent(tViewNode: TViewNode, view: LView): RElement | null;
 export declare function createTextNode(value: string, renderer: Renderer3): RText;
 /**
- * Adds or removes all DOM elements associated with a view.
+ * Removes all DOM elements associated with a view.
  *
  * Because some root nodes of the view may be containers, we sometimes need
  * to propagate deeply into the nested containers to remove all elements in the
@@ -25,11 +19,23 @@ export declare function createTextNode(value: string, renderer: Renderer3): RTex
  *
  * @param tView The `TView' of the `LView` from which elements should be added or removed
  * @param lView The view from which elements should be added or removed
- * @param insertMode Whether or not elements should be added (if false, removing)
+ */
+export declare function removeViewFromContainer(tView: TView, lView: LView): void;
+/**
+ * Adds all DOM elements associated with a view.
+ *
+ * Because some root nodes of the view may be containers, we sometimes need
+ * to propagate deeply into the nested containers to add all elements in the
+ * views beneath it.
+ *
+ * @param tView The `TView' of the `LView` from which elements should be added or removed
+ * @param parentTNode The `TNode` where the `LView` should be attached to.
+ * @param renderer Current renderer to use for DOM manipulations.
+ * @param lView The view from which elements should be added or removed
+ * @param parentNativeNode The parent `RElement` where it should be inserted into.
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-export declare function addRemoveViewFromContainer(tView: TView, lView: LView, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(tView: TView, lView: LView, insertMode: false, beforeNode: null): void;
+export declare function addViewToContainer(tView: TView, parentTNode: TNode, renderer: Renderer3, lView: LView, parentNativeNode: RElement, beforeNode: RNode | null): void;
 /**
  * Detach a `LView` from the DOM by detaching its nodes.
  *
@@ -84,19 +90,6 @@ export declare function detachView(lContainer: LContainer, removeIndex: number):
  * @param lView The view to be destroyed.
  */
 export declare function destroyLView(tView: TView, lView: LView): void;
-/**
- * Determines which LViewOrLContainer to jump to when traversing back up the
- * tree in destroyViewTree.
- *
- * Normally, the view's parent LView should be checked, but in the case of
- * embedded views, the container (which is the view node's parent, but not the
- * LView's parent) needs to be checked for a possible next property.
- *
- * @param lViewOrLContainer The LViewOrLContainer for which we need a parent state
- * @param rootView The rootView, so we don't propagate too far up the view tree
- * @returns The correct parent LViewOrLContainer
- */
-export declare function getParentState(lViewOrLContainer: LView | LContainer, rootView: LView): LView | LContainer | null;
 /**
  * Inserts a native node before another native node for a given parent using {@link Renderer3}.
  * This is a utility function that can be used when native nodes were determined - it abstracts an

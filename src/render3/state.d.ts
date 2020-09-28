@@ -43,11 +43,11 @@ interface LFrame {
      *
      * This is used in conjunction with `isParent`.
      */
-    previousOrParentTNode: TNode;
+    currentTNode: TNode | null;
     /**
      * If `isParent` is:
-     *  - `true`: then `previousOrParentTNode` points to a parent node.
-     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
+     *  - `true`: then `currentTNode` points to a parent node.
+     *  - `false`: then `currentTNode` points to previous node (sibling).
      */
     isParent: boolean;
     /**
@@ -203,11 +203,11 @@ export declare function getTView(): TView;
  * @codeGenApi
  */
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
-export declare function getPreviousOrParentTNode(): TNode;
-export declare function setPreviousOrParentTNode(tNode: TNode, isParent: boolean): void;
-export declare function getIsParent(): boolean;
-export declare function setIsNotParent(): void;
-export declare function setIsParent(): void;
+export declare function getCurrentTNode(): TNode | null;
+export declare function setCurrentTNode(tNode: TNode, isParent: boolean): void;
+export declare function isCurrentTNodeParent(): boolean;
+export declare function setCurrentTNodeAsNotParent(): void;
+export declare function setCurrentTNodeAsParent(): void;
 export declare function getContextLView(): LView;
 export declare function getCheckNoChangesMode(): boolean;
 export declare function setCheckNoChangesMode(mode: boolean): void;
@@ -264,10 +264,9 @@ export declare function enterDI(newView: LView, tNode: TNode): void;
  * exited the state has to be restored
  *
  * @param newView New lView to become active
- * @param tNode Element to which the View is a child of
  * @returns the previously active lView;
  */
-export declare function enterView(newView: LView, tNode: TNode | null): void;
+export declare function enterView(newView: LView): void;
 /**
  * This is a lightweight version of the `leaveView` which is needed by the DI system.
  *

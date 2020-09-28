@@ -11,6 +11,5 @@ export declare function assertNodeType(tNode: TNode, type: TNodeType.Element): a
 export declare function assertNodeType(tNode: TNode, type: TNodeType.ElementContainer): asserts tNode is TElementContainerNode;
 export declare function assertNodeType(tNode: TNode, type: TNodeType.IcuContainer): asserts tNode is TIcuContainerNode;
 export declare function assertNodeType(tNode: TNode, type: TNodeType.Projection): asserts tNode is TProjectionNode;
-export declare function assertNodeType(tNode: TNode, type: TNodeType.View): asserts tNode is TContainerNode;
 export declare function assertNodeOfPossibleTypes(tNode: TNode | null, types: TNodeType[], message?: string): void;
 export declare function assertNodeNotOfTypes(tNode: TNode, types: TNodeType[], message?: string): void;

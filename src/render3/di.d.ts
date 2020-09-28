@@ -27,18 +27,19 @@ export declare function bloomAdd(injectorIndex: number, tView: TView, type: Type
  * Creates (or gets an existing) injector for a given element or container.
  *
  * @param tNode for which an injector should be retrieved / created.
- * @param hostView View where the node is stored
+ * @param lView View where the node is stored
  * @returns Node injector
  */
-export declare function getOrCreateNodeInjectorForNode(tNode: TElementNode | TContainerNode | TElementContainerNode, hostView: LView): number;
-export declare function getInjectorIndex(tNode: TNode, hostView: LView): number;
+export declare function getOrCreateNodeInjectorForNode(tNode: TElementNode | TContainerNode | TElementContainerNode, lView: LView): number;
+export declare function getInjectorIndex(tNode: TNode, lView: LView): number;
 /**
  * Finds the index of the parent injector, with a view offset if applicable. Used to set the
  * parent injector initially.
  *
- * Returns a combination of number of `ViewData` we have to go up and index in that `Viewdata`
+ * @returns Returns a number that is the combination of the number of LViews that we have to go up
+ * to find the LView containing the parent inject AND the index of the injector within that LView.
  */
-export declare function getParentInjectorLocation(tNode: TNode, view: LView): RelativeInjectorLocation;
+export declare function getParentInjectorLocation(tNode: TNode, lView: LView): RelativeInjectorLocation;
 /**
  * Makes a type or an injection token public to the DI system by adding it to an
  * injector's bloom filter.

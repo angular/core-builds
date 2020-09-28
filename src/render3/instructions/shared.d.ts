@@ -11,7 +11,7 @@ import { ViewEncapsulation } from '../../metadata/view';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from '../interfaces/container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, ViewQueriesFunction } from '../interfaces/definition';
-import { LocalRefExtractor, PropertyAliasValue, TAttributes, TConstantsOrFactory, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType, TProjectionNode, TViewNode } from '../interfaces/node';
+import { LocalRefExtractor, PropertyAliasValue, TAttributes, TConstantsOrFactory, TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TIcuContainerNode, TNode, TNodeType, TProjectionNode } from '../interfaces/node';
 import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/renderer';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { LView, LViewFlags, RootContext, RootContextFlags, TData, TView, TViewType } from '../interfaces/view';
@@ -29,14 +29,11 @@ export declare function setHostBindingsByExecutingExpandoInstructions(tView: TVi
  * @returns the element created
  */
 export declare function elementCreate(name: string, renderer: Renderer3, namespace: string | null): RElement;
-export declare function createLView<T>(parentLView: LView | null, tView: TView, context: T | null, flags: LViewFlags, host: RElement | null, tHostNode: TViewNode | TElementNode | null, rendererFactory?: RendererFactory3 | null, renderer?: Renderer3 | null, sanitizer?: Sanitizer | null, injector?: Injector | null): LView;
+export declare function createLView<T>(parentLView: LView | null, tView: TView, context: T | null, flags: LViewFlags, host: RElement | null, tHostNode: TNode | null, rendererFactory: RendererFactory3 | null, renderer: Renderer3 | null, sanitizer: Sanitizer | null, injector: Injector | null): LView;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
  *
  * @param tView The current `TView`.
- * @param tHostNode This is a hack and we should not have to pass this value in. It is only used to
- * determine if the parent belongs to a different tView. Instead we should not have parentTView
- * point to TView other the current one.
  * @param index The index at which the TNode should be saved (null if view, since they are not
  * saved).
  * @param type The type of TNode to create
@@ -44,12 +41,11 @@ export declare function createLView<T>(parentLView: LView | null, tView: TView, 
  * @param name The tag name of the associated native element, if applicable
  * @param attrs Any attrs for the native element, if applicable
  */
-export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Element, name: string | null, attrs: TAttributes | null): TElementNode;
-export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Container, name: string | null, attrs: TAttributes | null): TContainerNode;
-export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.Projection, name: null, attrs: TAttributes | null): TProjectionNode;
-export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.ElementContainer, name: string | null, attrs: TAttributes | null): TElementContainerNode;
-export declare function getOrCreateTNode(tView: TView, tHostNode: TNode | null, index: number, type: TNodeType.IcuContainer, name: null, attrs: TAttributes | null): TElementContainerNode;
-export declare function assignTViewNodeToLView(tView: TView, tParentNode: TNode | null, index: number, lView: LView): void;
+export declare function getOrCreateTNode(tView: TView, index: number, type: TNodeType.Element, name: string | null, attrs: TAttributes | null): TElementNode;
+export declare function getOrCreateTNode(tView: TView, index: number, type: TNodeType.Container, name: string | null, attrs: TAttributes | null): TContainerNode;
+export declare function getOrCreateTNode(tView: TView, index: number, type: TNodeType.Projection, name: null, attrs: TAttributes | null): TProjectionNode;
+export declare function getOrCreateTNode(tView: TView, index: number, type: TNodeType.ElementContainer, name: string | null, attrs: TAttributes | null): TElementContainerNode;
+export declare function getOrCreateTNode(tView: TView, index: number, type: TNodeType.IcuContainer, name: null, attrs: TAttributes | null): TElementContainerNode;
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
@@ -99,7 +95,8 @@ export declare function getOrCreateTComponentView(def: ComponentDef<any>): TView
 /**
  * Creates a TView instance
  *
- * @param viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
+ * @param type Type of `TView`.
+ * @param declTNode Declaration location of this `TView`.
  * @param templateFn Template function
  * @param decls The number of nodes, local refs, and pipes in this template
  * @param directives Registry of directives for this view
@@ -108,7 +105,7 @@ export declare function getOrCreateTComponentView(def: ComponentDef<any>): TView
  * @param schemas Schemas for this view
  * @param consts Constants for this view
  */
-export declare function createTView(type: TViewType, viewIndex: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, constsOrFactory: TConstantsOrFactory | null): TView;
+export declare function createTView(type: TViewType, declTNode: TNode | null, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null, viewQuery: ViewQueriesFunction<any> | null, schemas: SchemaMetadata[] | null, constsOrFactory: TConstantsOrFactory | null): TView;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
  *
@@ -129,6 +126,7 @@ export declare function storeCleanupWithContext(tView: TView, lView: LView, cont
  * Constructs a TNode object from the arguments.
  *
  * @param tView `TView` to which this `TNode` belongs (used only in `ngDevMode`)
+ * @param tParent Parent `TNode`
  * @param type The type of the node
  * @param adjustedIndex The index of the TNode in TView.data, adjusted for HEADER_OFFSET
  * @param tagName The tag name of the node
@@ -136,6 +134,11 @@ export declare function storeCleanupWithContext(tView: TView, lView: LView, cont
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
+export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType.Container, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TContainerNode;
+export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType.Element, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TElementNode;
+export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType.ElementContainer, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TElementContainerNode;
+export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType.IcuContainer, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TIcuContainerNode;
+export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType.Projection, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TProjectionNode;
 export declare function createTNode(tView: TView, tParent: TElementNode | TContainerNode | null, type: TNodeType, adjustedIndex: number, tagName: string | null, attrs: TAttributes | null): TNode;
 export declare function elementPropertyInternal<T>(tView: TView, tNode: TNode, lView: LView, propName: string, value: T, renderer: Renderer3, sanitizer: SanitizerFn | null | undefined, nativeOnly: boolean): void;
 export declare function setNgReflectProperties(lView: LView, element: RElement | RComment, type: TNodeType, dataValue: PropertyAliasValue, value: any): void;

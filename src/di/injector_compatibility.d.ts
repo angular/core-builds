@@ -28,6 +28,14 @@ export declare function setCurrentInjector(injector: Injector | null | undefined
  * Sets the current inject implementation.
  */
 export declare function setInjectImplementation(impl: (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T | null) | undefined): (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T | null) | undefined;
+/**
+ * Assert that `_injectImplementation` is not `fn`.
+ *
+ * This is useful, to prevent infinite recursion.
+ *
+ * @param fn Function which it should not equal to
+ */
+export declare function assertInjectImplementationNot(fn: (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T | null)): void;
 export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>): T;
 export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 /**
