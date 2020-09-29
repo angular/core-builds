@@ -644,7 +644,7 @@ function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKe
  * @param bindingIndex Binding index of the binding.
  */
 function updateStyling(tView, tNode, lView, renderer, prop, value, isClassBased, bindingIndex) {
-    if (tNode.type !== 3 /* Element */) {
+    if (tNode.type !== 2 /* Element */) {
         // It is possible to have styling on non-elements (such as ng-container).
         // This is rare, but it does happen. In such a case, just ignore the binding.
         return;
