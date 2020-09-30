@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.3+91.sha-8b7acc4
+ * @license Angular v11.0.0-next.3+92.sha-827245f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16240,7 +16240,7 @@ function markDuplicates(tData, tStylingKey, index, isPrevDir, isClassBinding) {
 /**
  * Determines if two `TStylingKey`s are a match.
  *
- * When computing weather a binding contains a duplicate, we need to compare if the instruction
+ * When computing whether a binding contains a duplicate, we need to compare if the instruction
  * `TStylingKey` has a match.
  *
  * Here are examples of `TStylingKey`s which match given `tStylingKeyCursor` is:
@@ -19221,7 +19221,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.3+91.sha-8b7acc4');
+const VERSION = new Version('11.0.0-next.3+92.sha-827245f');
 
 /**
  * @license
