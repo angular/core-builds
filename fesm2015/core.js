@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+11.sha-0a16e60
+ * @license Angular v11.0.0-next.5+14.sha-ca4ef61
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -542,7 +542,7 @@ var R3FactoryTarget;
 var ViewEncapsulation;
 (function (ViewEncapsulation) {
     ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+    // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
@@ -1515,15 +1515,7 @@ var ViewEncapsulation$1;
      * This is the default option.
      */
     ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-    /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+    // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     /**
      * Don't provide any template or style encapsulation.
      */
@@ -9241,8 +9233,8 @@ function getRenderParent(tView, tNode, currentView) {
             // Since the projection would then move it to its final destination. Note that we can't
             // make this assumption when using the Shadow DOM, because the native projection placeholders
             // (<content> or <slot>) have to be in place as elements are being inserted.
-            if (encapsulation !== ViewEncapsulation$1.ShadowDom &&
-                encapsulation !== ViewEncapsulation$1.Native) {
+            if (encapsulation === ViewEncapsulation$1.None ||
+                encapsulation === ViewEncapsulation$1.Emulated) {
                 return null;
             }
         }
@@ -19221,7 +19213,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.5+11.sha-0a16e60');
+const VERSION = new Version('11.0.0-next.5+14.sha-ca4ef61');
 
 /**
  * @license
@@ -20707,7 +20699,10 @@ function getParentRenderElement(view, renderHost, def) {
         if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
             (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
             (renderParent.element.componentRendererType &&
-                renderParent.element.componentRendererType.encapsulation === ViewEncapsulation$1.Native)) {
+                (renderParent.element.componentRendererType.encapsulation ===
+                    ViewEncapsulation$1.ShadowDom ||
+                    // TODO(FW-2290): remove the `encapsulation === 1` fallback logic in v12.
+                    renderParent.element.componentRendererType.encapsulation === 1))) {
             // only children of non components, or children of components with native encapsulation should
             // be attached.
             return asElementData(view, def.renderParent.nodeIndex).renderElement;
