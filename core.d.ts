@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+11.sha-0a16e60
+ * @license Angular v11.0.0-next.5+14.sha-ca4ef61
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -835,7 +835,6 @@ export declare interface Component extends Directive {
     animations?: any[];
     /**
      * An encapsulation policy for the template and CSS styles. One of:
-     * - `ViewEncapsulation.Native`: Deprecated. Use `ViewEncapsulation.ShadowDom` instead.
      * - `ViewEncapsulation.Emulated`: Use shimmed CSS that
      * emulates the native behavior.
      * - `ViewEncapsulation.None`: Use global CSS without any
@@ -8403,15 +8402,6 @@ export declare enum ViewEncapsulation {
      * This is the default option.
      */
     Emulated = 0,
-    /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    Native = 1,
     /**
      * Don't provide any template or style encapsulation.
      */
