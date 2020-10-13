@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+53.sha-b642f0b
+ * @license Angular v11.0.0-next.5+55.sha-584f37c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4922,6 +4922,81 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
+     * The Trusted Types policy, or null if Trusted Types are not
+     * enabled/supported, or undefined if the policy has not been created yet.
+     */
+    var policy;
+    /**
+     * Returns the Trusted Types policy, or null if Trusted Types are not
+     * enabled/supported. The first call to this function will create the policy.
+     */
+    function getPolicy() {
+        if (policy === undefined) {
+            policy = null;
+            if (_global.trustedTypes) {
+                try {
+                    policy = _global.trustedTypes.createPolicy('angular', {
+                        createHTML: function (s) { return s; },
+                        createScript: function (s) { return s; },
+                        createScriptURL: function (s) { return s; },
+                    });
+                }
+                catch (_a) {
+                    // trustedTypes.createPolicy throws if called with a name that is
+                    // already registered, even in report-only mode. Until the API changes,
+                    // catch the error not to break the applications functionally. In such
+                    // cases, the code will fall back to using strings.
+                }
+            }
+        }
+        return policy;
+    }
+    /**
+     * Unsafely promote a string to a TrustedHTML, falling back to strings when
+     * Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that the
+     * provided string will never cause an XSS vulnerability if used in a context
+     * that will be interpreted as HTML by a browser, e.g. when assigning to
+     * element.innerHTML.
+     */
+    function trustedHTMLFromString(html) {
+        var _a;
+        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createHTML(html)) || html;
+    }
+    /**
+     * Unsafely promote a string to a TrustedScript, falling back to strings when
+     * Trusted Types are not available.
+     * @security In particular, it must be assured that the provided string will
+     * never cause an XSS vulnerability if used in a context that will be
+     * interpreted and executed as a script by a browser, e.g. when calling eval.
+     */
+    function trustedScriptFromString(script) {
+        var _a;
+        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScript(script)) || script;
+    }
+    /**
+     * Unsafely promote a string to a TrustedScriptURL, falling back to strings
+     * when Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that the
+     * provided string will never cause an XSS vulnerability if used in a context
+     * that will cause a browser to load and execute a resource, e.g. when
+     * assigning to script.src.
+     */
+    function trustedScriptURLFromString(url) {
+        var _a;
+        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScriptURL(url)) || url;
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * This helper is used to get hold of an inert tree of DOM elements containing dirty HTML
      * that needs sanitizing.
      * Depending upon browser support we use one of two strategies for doing this.
@@ -4945,7 +5020,9 @@
             // in `html` from consuming the otherwise explicit `</body>` tag.
             html = '<body><remove></remove>' + html;
             try {
-                var body = new window.DOMParser().parseFromString(html, 'text/html').body;
+                var body = new window.DOMParser()
+                    .parseFromString(trustedHTMLFromString(html), 'text/html')
+                    .body;
                 body.removeChild(body.firstChild);
                 return body;
             }
@@ -4977,7 +5054,7 @@
             // Prefer using <template> element if supported.
             var templateEl = this.inertDocument.createElement('template');
             if ('content' in templateEl) {
-                templateEl.innerHTML = html;
+                templateEl.innerHTML = trustedHTMLFromString(html);
                 return templateEl;
             }
             // Note that previously we used to do something like `this.inertDocument.body.innerHTML = html`
@@ -4988,7 +5065,7 @@
             // down the line. This has been worked around by creating a new inert `body` and using it as
             // the root node in which we insert the HTML.
             var inertBody = this.inertDocument.createElement('body');
-            inertBody.innerHTML = html;
+            inertBody.innerHTML = trustedHTMLFromString(html);
             // Support: IE 9-11 only
             // strip custom-namespaced attributes on IE<=11
             if (this.defaultDoc.documentMode) {
@@ -5032,7 +5109,7 @@
      */
     function isDOMParserAvailable() {
         try {
-            return !!new window.DOMParser().parseFromString('', 'text/html');
+            return !!new window.DOMParser().parseFromString(trustedHTMLFromString(''), 'text/html');
         }
         catch (_a) {
             return false;
@@ -19844,7 +19921,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.5+53.sha-b642f0b');
+    var VERSION = new Version('11.0.0-next.5+55.sha-584f37c');
 
     /**
      * @license
