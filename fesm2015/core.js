@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+55.sha-584f37c
+ * @license Angular v11.0.0-next.5+62.sha-8fd25d9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -328,22 +328,14 @@ function ɵɵdefineInjector(options) {
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
 function getInjectableDef(type) {
-    return getOwnDefinition(type, type[NG_PROV_DEF]) ||
-        getOwnDefinition(type, type[NG_INJECTABLE_DEF]);
+    return getOwnDefinition(type, NG_PROV_DEF) || getOwnDefinition(type, NG_INJECTABLE_DEF);
 }
 /**
- * Return `def` only if it is defined directly on `type` and is not inherited from a base
+ * Return definition only if it is defined directly on `type` and is not inherited from a base
  * class of `type`.
- *
- * The function `Object.hasOwnProperty` is not sufficient to distinguish this case because in older
- * browsers (e.g. IE10) static property inheritance is implemented by copying the properties.
- *
- * Instead, the definition's `token` is compared to the `type`, and if they don't match then the
- * property was not defined directly on the type itself, and was likely inherited. The definition
- * is only returned if the `type` matches the `def.token`.
  */
-function getOwnDefinition(type, def) {
-    return def && def.token === type ? def : null;
+function getOwnDefinition(type, field) {
+    return type.hasOwnProperty(field) ? type[field] : null;
 }
 /**
  * Read the injectable def (`ɵprov`) for `type` or read the `ɵprov` from one of its ancestors.
@@ -354,10 +346,7 @@ function getOwnDefinition(type, def) {
  *     scenario if we find the `ɵprov` on an ancestor only.
  */
 function getInheritedInjectableDef(type) {
-    // See `jit/injectable.ts#compileInjectable` for context on NG_PROV_DEF_FALLBACK.
-    const def = type &&
-        (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF] ||
-            (type[NG_PROV_DEF_FALLBACK] && type[NG_PROV_DEF_FALLBACK]()));
+    const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
     if (def) {
         const typeName = getTypeName(type);
         // TODO(FW-1307): Re-add ngDevMode when closure can handle it
@@ -396,13 +385,6 @@ function getInjectorDef(type) {
 }
 const NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
 const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
-// On IE10 properties defined via `defineProperty` won't be inherited by child classes,
-// which will break inheriting the injectable definition from a grandparent through an
-// undecorated parent class. We work around it by defining a fallback method which will be
-// used to retrieve the definition. This should only be a problem in JIT mode, because in
-// AOT TypeScript seems to have a workaround for static properties. When inheriting from an
-// undecorated parent is no longer supported in v10, this can safely be removed.
-const NG_PROV_DEF_FALLBACK = getClosureSafeProperty({ ɵprovFallback: getClosureSafeProperty });
 // We need to keep these around so we can read off old defs if new defs are unavailable
 const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
 const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
@@ -4749,7 +4731,7 @@ class InertDocumentHelper {
         // the root node in which we insert the HTML.
         const inertBody = this.inertDocument.createElement('body');
         inertBody.innerHTML = trustedHTMLFromString(html);
-        // Support: IE 9-11 only
+        // Support: IE 11 only
         // strip custom-namespaced attributes on IE<=11
         if (this.defaultDoc.documentMode) {
             this.stripCustomNsAttrs(inertBody);
@@ -4757,7 +4739,7 @@ class InertDocumentHelper {
         return inertBody;
     }
     /**
-     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+     * When IE11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
      * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
      * 'ns1:xlink:foo').
      *
@@ -10864,15 +10846,6 @@ function compileInjectable(type, srcMeta) {
                 return ngInjectableDef;
             },
         });
-        // On IE10 properties defined via `defineProperty` won't be inherited by child classes,
-        // which will break inheriting the injectable definition from a grandparent through an
-        // undecorated parent class. We work around it by defining a method which should be used
-        // as a fallback. This should only be a problem in JIT mode, because in AOT TypeScript
-        // seems to have a workaround for static properties. When inheriting from an undecorated
-        // parent is no longer supported (v11 or later), this can safely be removed.
-        if (!type.hasOwnProperty(NG_PROV_DEF_FALLBACK)) {
-            type[NG_PROV_DEF_FALLBACK] = () => type[NG_PROV_DEF];
-        }
     }
     // if NG_FACTORY_DEF is already defined on this class then don't overwrite it
     if (!type.hasOwnProperty(NG_FACTORY_DEF)) {
@@ -19290,7 +19263,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.5+55.sha-584f37c');
+const VERSION = new Version('11.0.0-next.5+62.sha-8fd25d9');
 
 /**
  * @license
@@ -24141,16 +24114,8 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
     return noSideEffects(() => {
         const clazz = type;
-        // We determine whether a class has its own metadata by taking the metadata from the
-        // parent constructor and checking whether it's the same as the subclass metadata below.
-        // We can't use `hasOwnProperty` here because it doesn't work correctly in IE10 for
-        // static fields that are defined by TS. See
-        // https://github.com/angular/angular/pull/28439#issuecomment-459349218.
-        const parentPrototype = clazz.prototype ? Object.getPrototypeOf(clazz.prototype) : null;
-        const parentConstructor = parentPrototype && parentPrototype.constructor;
         if (decorators !== null) {
-            if (clazz.decorators !== undefined &&
-                (!parentConstructor || parentConstructor.decorators !== clazz.decorators)) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
                 clazz.decorators.push(...decorators);
             }
             else {
@@ -24168,9 +24133,7 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
             // different decorator types. Decorators on individual fields are not merged, as it's
             // also incredibly unlikely that a field will be decorated both with an Angular
             // decorator and a non-Angular decorator that's also been downleveled.
-            if (clazz.propDecorators !== undefined &&
-                (!parentConstructor ||
-                    parentConstructor.propDecorators !== clazz.propDecorators)) {
+            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
                 clazz.propDecorators = Object.assign(Object.assign({}, clazz.propDecorators), propDecorators);
             }
             else {

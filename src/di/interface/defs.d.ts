@@ -180,6 +180,5 @@ export declare function getInheritedInjectableDef<T>(type: any): ɵɵInjectableD
 export declare function getInjectorDef<T>(type: any): ɵɵInjectorDef<T> | null;
 export declare const NG_PROV_DEF: string;
 export declare const NG_INJ_DEF: string;
-export declare const NG_PROV_DEF_FALLBACK: string;
 export declare const NG_INJECTABLE_DEF: string;
 export declare const NG_INJECTOR_DEF: string;
