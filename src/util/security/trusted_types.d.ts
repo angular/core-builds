@@ -34,3 +34,13 @@ export declare function trustedScriptFromString(script: string): TrustedScript |
  * assigning to script.src.
  */
 export declare function trustedScriptURLFromString(url: string): TrustedScriptURL | string;
+/**
+ * Unsafely call the Function constructor with the given string arguments. It
+ * is only available in development mode, and should be stripped out of
+ * production code.
+ * @security This is a security-sensitive function; any use of this function
+ * must go through security review. In particular, it must be assured that it
+ * is only called from development code, as use in production code can lead to
+ * XSS vulnerabilities.
+ */
+export declare function newTrustedFunctionForDev(...args: string[]): Function;

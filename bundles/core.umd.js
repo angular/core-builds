@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+62.sha-8fd25d9
+ * @license Angular v11.0.0-next.5+68.sha-898be92
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4897,13 +4897,6 @@
     }
 
     /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * The Trusted Types policy, or null if Trusted Types are not
      * enabled/supported, or undefined if the policy has not been created yet.
      */
@@ -4969,6 +4962,49 @@
     function trustedScriptURLFromString(url) {
         var _a;
         return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScriptURL(url)) || url;
+    }
+    /**
+     * Unsafely call the Function constructor with the given string arguments. It
+     * is only available in development mode, and should be stripped out of
+     * production code.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that it
+     * is only called from development code, as use in production code can lead to
+     * XSS vulnerabilities.
+     */
+    function newTrustedFunctionForDev() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (typeof ngDevMode === 'undefined') {
+            throw new Error('newTrustedFunctionForDev should never be called in production');
+        }
+        if (!_global.trustedTypes) {
+            // In environments that don't support Trusted Types, fall back to the most
+            // straightforward implementation:
+            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+        }
+        // Chrome currently does not support passing TrustedScript to the Function
+        // constructor. The following implements the workaround proposed on the page
+        // below, where the Chromium bug is also referenced:
+        // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
+        var fnArgs = args.slice(0, -1).join(',');
+        var fnBody = args.pop().toString();
+        var body = "(function anonymous(" + fnArgs + "\n) { " + fnBody + "\n})";
+        // Using eval directly confuses the compiler and prevents this module from
+        // being stripped out of JS binaries even if not used. The global['eval']
+        // indirection fixes that.
+        var fn = _global['eval'](trustedScriptFromString(body));
+        // To completely mimic the behavior of calling "new Function", two more
+        // things need to happen:
+        // 1. Stringifying the resulting function should return its source code
+        fn.toString = function () { return body; };
+        // 2. When calling the resulting function, `this` should refer to `global`
+        return fn.bind(_global);
+        // When Trusted Types support in Function constructors is widely available,
+        // the implementation of this function can be simplified to:
+        // return new Function(...args.map(a => trustedScriptFromString(a)));
     }
 
     /**
@@ -5637,9 +5673,10 @@
         // This should never be called in prod mode, so let's verify that is the case.
         if (ngDevMode) {
             try {
-                // We need to do it this way so that TypeScript does not down-level the below code.
-                var FunctionConstructor = createNamedArrayType.constructor;
-                return (new FunctionConstructor('Array', "return class " + name + " extends Array{}"))(Array);
+                // If this function were compromised the following could lead to arbitrary
+                // script execution. We bless it with Trusted Types anyway since this
+                // function is stripped out of production binaries.
+                return (newTrustedFunctionForDev('Array', "return class " + name + " extends Array{}"))(Array);
             }
             catch (e) {
                 // If it does not work just give up and fall back to regular Array.
@@ -19894,7 +19931,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.5+62.sha-8fd25d9');
+    var VERSION = new Version('11.0.0-next.5+68.sha-898be92');
 
     /**
      * @license
