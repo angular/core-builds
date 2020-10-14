@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+62.sha-8fd25d9
+ * @license Angular v11.0.0-next.5+68.sha-898be92
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4661,6 +4661,47 @@ function trustedScriptURLFromString(url) {
     var _a;
     return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScriptURL(url)) || url;
 }
+/**
+ * Unsafely call the Function constructor with the given string arguments. It
+ * is only available in development mode, and should be stripped out of
+ * production code.
+ * @security This is a security-sensitive function; any use of this function
+ * must go through security review. In particular, it must be assured that it
+ * is only called from development code, as use in production code can lead to
+ * XSS vulnerabilities.
+ */
+function newTrustedFunctionForDev(...args) {
+    if (typeof ngDevMode === 'undefined') {
+        throw new Error('newTrustedFunctionForDev should never be called in production');
+    }
+    if (!_global.trustedTypes) {
+        // In environments that don't support Trusted Types, fall back to the most
+        // straightforward implementation:
+        return new Function(...args);
+    }
+    // Chrome currently does not support passing TrustedScript to the Function
+    // constructor. The following implements the workaround proposed on the page
+    // below, where the Chromium bug is also referenced:
+    // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
+    const fnArgs = args.slice(0, -1).join(',');
+    const fnBody = args.pop().toString();
+    const body = `(function anonymous(${fnArgs}
+) { ${fnBody}
+})`;
+    // Using eval directly confuses the compiler and prevents this module from
+    // being stripped out of JS binaries even if not used. The global['eval']
+    // indirection fixes that.
+    const fn = _global['eval'](trustedScriptFromString(body));
+    // To completely mimic the behavior of calling "new Function", two more
+    // things need to happen:
+    // 1. Stringifying the resulting function should return its source code
+    fn.toString = () => body;
+    // 2. When calling the resulting function, `this` should refer to `global`
+    return fn.bind(_global);
+    // When Trusted Types support in Function constructors is widely available,
+    // the implementation of this function can be simplified to:
+    // return new Function(...args.map(a => trustedScriptFromString(a)));
+}
 
 /**
  * @license
@@ -5313,9 +5354,10 @@ function createNamedArrayType(name) {
     // This should never be called in prod mode, so let's verify that is the case.
     if (ngDevMode) {
         try {
-            // We need to do it this way so that TypeScript does not down-level the below code.
-            const FunctionConstructor = createNamedArrayType.constructor;
-            return (new FunctionConstructor('Array', `return class ${name} extends Array{}`))(Array);
+            // If this function were compromised the following could lead to arbitrary
+            // script execution. We bless it with Trusted Types anyway since this
+            // function is stripped out of production binaries.
+            return (newTrustedFunctionForDev('Array', `return class ${name} extends Array{}`))(Array);
         }
         catch (e) {
             // If it does not work just give up and fall back to regular Array.
@@ -19294,7 +19336,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.5+62.sha-8fd25d9');
+const VERSION = new Version('11.0.0-next.5+68.sha-898be92');
 
 /**
  * @license
