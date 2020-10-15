@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { TrustedHTML, TrustedScript, TrustedScriptURL } from '../util/security/trusted_type_defs';
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -75,6 +76,42 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  * @codeGenApi
  */
 export declare function ɵɵsanitizeScript(unsafeScript: any): string;
+/**
+ * Promotes the given constant string to a TrustedHTML.
+ * @param html constant string containing trusted HTML.
+ * @returns TrustedHTML wrapping `html`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedHTML.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | string;
+/**
+ * Promotes the given constant string to a TrustedScript.
+ * @param script constant string containing a trusted script.
+ * @returns TrustedScript wrapping `script`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScript.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantScript(script: string): TrustedScript | string;
+/**
+ * Promotes the given constant string to a TrustedScriptURL.
+ * @param url constant string containing a trusted script URL.
+ * @returns TrustedScriptURL wrapping `url`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScriptURL.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantResourceUrl(url: string): TrustedScriptURL | string;
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
  *
