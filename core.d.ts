@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+10.sha-822b838
+ * @license Angular v11.0.0-next.6+13.sha-6e18d2d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7612,6 +7612,36 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
 declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
 
+
+/**
+ * @fileoverview
+ * While Angular only uses Trusted Types internally for the time being,
+ * references to Trusted Types could leak into our core.d.ts, which would force
+ * anyone compiling against @angular/core to provide the @types/trusted-types
+ * package in their compilation unit.
+ *
+ * Until https://github.com/microsoft/TypeScript/issues/30024 is resolved, we
+ * will keep Angular's public API surface free of references to Trusted Types.
+ * For internal and semi-private APIs that need to reference Trusted Types, the
+ * minimal type definitions for the Trusted Types API provided by this module
+ * should be used instead.
+ *
+ * Adapted from
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
+ * but restricted to the API surface used within Angular.
+ */
+declare type TrustedHTML = {
+    __brand__: 'TrustedHTML';
+};
+
+declare type TrustedScript = {
+    __brand__: 'TrustedScript';
+};
+
+declare type TrustedScriptURL = {
+    __brand__: 'TrustedScriptURL';
+};
+
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
  *
@@ -9161,6 +9191,37 @@ export declare function ɵangular_packages_core_core_bp(viewOrComponent: ɵangul
 export declare function ɵangular_packages_core_core_bq(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
+
+/**
+ * Unsafely promote a string to a TrustedHTML, falling back to strings when
+ * Trusted Types are not available.
+ * @security This is a security-sensitive function; any use of this function
+ * must go through security review. In particular, it must be assured that the
+ * provided string will never cause an XSS vulnerability if used in a context
+ * that will be interpreted as HTML by a browser, e.g. when assigning to
+ * element.innerHTML.
+ */
+export declare function ɵangular_packages_core_core_br(html: string): TrustedHTML | string;
+
+/**
+ * Unsafely promote a string to a TrustedScriptURL, falling back to strings
+ * when Trusted Types are not available.
+ * @security This is a security-sensitive function; any use of this function
+ * must go through security review. In particular, it must be assured that the
+ * provided string will never cause an XSS vulnerability if used in a context
+ * that will cause a browser to load and execute a resource, e.g. when
+ * assigning to script.src.
+ */
+export declare function ɵangular_packages_core_core_bs(url: string): TrustedScriptURL | string;
+
+/**
+ * Unsafely promote a string to a TrustedScript, falling back to strings when
+ * Trusted Types are not available.
+ * @security In particular, it must be assured that the provided string will
+ * never cause an XSS vulnerability if used in a context that will be
+ * interpreted and executed as a script by a browser, e.g. when calling eval.
+ */
+export declare function ɵangular_packages_core_core_bt(script: string): TrustedScript | string;
 
 export declare class ɵangular_packages_core_core_c implements Injector {
     get(token: any, notFoundValue?: any): any;
@@ -13505,7 +13566,6 @@ export declare function ɵɵresolveWindow(element: RElement & {
  */
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 
-
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -14596,6 +14656,45 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  * @codeGenApi
  */
 export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
+
+/**
+ * Promotes the given constant string to a TrustedHTML.
+ * @param html constant string containing trusted HTML.
+ * @returns TrustedHTML wrapping `html`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedHTML.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | string;
+
+/**
+ * Promotes the given constant string to a TrustedScriptURL.
+ * @param url constant string containing a trusted script URL.
+ * @returns TrustedScriptURL wrapping `url`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScriptURL.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantResourceUrl(url: string): TrustedScriptURL | string;
+
+/**
+ * Promotes the given constant string to a TrustedScript.
+ * @param script constant string containing a trusted script.
+ * @returns TrustedScript wrapping `script`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScript.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantScript(script: string): TrustedScript | string;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.

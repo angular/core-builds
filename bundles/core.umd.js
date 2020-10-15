@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+10.sha-822b838
+ * @license Angular v11.0.0-next.6+13.sha-6e18d2d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4713,6 +4713,117 @@
     };
 
     /**
+     * The Trusted Types policy, or null if Trusted Types are not
+     * enabled/supported, or undefined if the policy has not been created yet.
+     */
+    var policy;
+    /**
+     * Returns the Trusted Types policy, or null if Trusted Types are not
+     * enabled/supported. The first call to this function will create the policy.
+     */
+    function getPolicy() {
+        if (policy === undefined) {
+            policy = null;
+            if (_global.trustedTypes) {
+                try {
+                    policy = _global.trustedTypes.createPolicy('angular', {
+                        createHTML: function (s) { return s; },
+                        createScript: function (s) { return s; },
+                        createScriptURL: function (s) { return s; },
+                    });
+                }
+                catch (_a) {
+                    // trustedTypes.createPolicy throws if called with a name that is
+                    // already registered, even in report-only mode. Until the API changes,
+                    // catch the error not to break the applications functionally. In such
+                    // cases, the code will fall back to using strings.
+                }
+            }
+        }
+        return policy;
+    }
+    /**
+     * Unsafely promote a string to a TrustedHTML, falling back to strings when
+     * Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that the
+     * provided string will never cause an XSS vulnerability if used in a context
+     * that will be interpreted as HTML by a browser, e.g. when assigning to
+     * element.innerHTML.
+     */
+    function trustedHTMLFromString(html) {
+        var _a;
+        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createHTML(html)) || html;
+    }
+    /**
+     * Unsafely promote a string to a TrustedScript, falling back to strings when
+     * Trusted Types are not available.
+     * @security In particular, it must be assured that the provided string will
+     * never cause an XSS vulnerability if used in a context that will be
+     * interpreted and executed as a script by a browser, e.g. when calling eval.
+     */
+    function trustedScriptFromString(script) {
+        var _a;
+        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScript(script)) || script;
+    }
+    /**
+     * Unsafely promote a string to a TrustedScriptURL, falling back to strings
+     * when Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that the
+     * provided string will never cause an XSS vulnerability if used in a context
+     * that will cause a browser to load and execute a resource, e.g. when
+     * assigning to script.src.
+     */
+    function trustedScriptURLFromString(url) {
+        var _a;
+        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScriptURL(url)) || url;
+    }
+    /**
+     * Unsafely call the Function constructor with the given string arguments. It
+     * is only available in development mode, and should be stripped out of
+     * production code.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that it
+     * is only called from development code, as use in production code can lead to
+     * XSS vulnerabilities.
+     */
+    function newTrustedFunctionForDev() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (typeof ngDevMode === 'undefined') {
+            throw new Error('newTrustedFunctionForDev should never be called in production');
+        }
+        if (!_global.trustedTypes) {
+            // In environments that don't support Trusted Types, fall back to the most
+            // straightforward implementation:
+            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+        }
+        // Chrome currently does not support passing TrustedScript to the Function
+        // constructor. The following implements the workaround proposed on the page
+        // below, where the Chromium bug is also referenced:
+        // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
+        var fnArgs = args.slice(0, -1).join(',');
+        var fnBody = args.pop().toString();
+        var body = "(function anonymous(" + fnArgs + "\n) { " + fnBody + "\n})";
+        // Using eval directly confuses the compiler and prevents this module from
+        // being stripped out of JS binaries even if not used. The global['eval']
+        // indirection fixes that.
+        var fn = _global['eval'](trustedScriptFromString(body));
+        // To completely mimic the behavior of calling "new Function", two more
+        // things need to happen:
+        // 1. Stringifying the resulting function should return its source code
+        fn.toString = function () { return body; };
+        // 2. When calling the resulting function, `this` should refer to `global`
+        return fn.bind(_global);
+        // When Trusted Types support in Function constructors is widely available,
+        // the implementation of this function can be simplified to:
+        // return new Function(...args.map(a => trustedScriptFromString(a)));
+    }
+
+    /**
      * @license
      * Copyright Google LLC All Rights Reserved.
      *
@@ -4899,117 +5010,6 @@
             throw new Error('Cannot enable prod mode after platform setup.');
         }
         _devMode = false;
-    }
-
-    /**
-     * The Trusted Types policy, or null if Trusted Types are not
-     * enabled/supported, or undefined if the policy has not been created yet.
-     */
-    var policy;
-    /**
-     * Returns the Trusted Types policy, or null if Trusted Types are not
-     * enabled/supported. The first call to this function will create the policy.
-     */
-    function getPolicy() {
-        if (policy === undefined) {
-            policy = null;
-            if (_global.trustedTypes) {
-                try {
-                    policy = _global.trustedTypes.createPolicy('angular', {
-                        createHTML: function (s) { return s; },
-                        createScript: function (s) { return s; },
-                        createScriptURL: function (s) { return s; },
-                    });
-                }
-                catch (_a) {
-                    // trustedTypes.createPolicy throws if called with a name that is
-                    // already registered, even in report-only mode. Until the API changes,
-                    // catch the error not to break the applications functionally. In such
-                    // cases, the code will fall back to using strings.
-                }
-            }
-        }
-        return policy;
-    }
-    /**
-     * Unsafely promote a string to a TrustedHTML, falling back to strings when
-     * Trusted Types are not available.
-     * @security This is a security-sensitive function; any use of this function
-     * must go through security review. In particular, it must be assured that the
-     * provided string will never cause an XSS vulnerability if used in a context
-     * that will be interpreted as HTML by a browser, e.g. when assigning to
-     * element.innerHTML.
-     */
-    function trustedHTMLFromString(html) {
-        var _a;
-        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createHTML(html)) || html;
-    }
-    /**
-     * Unsafely promote a string to a TrustedScript, falling back to strings when
-     * Trusted Types are not available.
-     * @security In particular, it must be assured that the provided string will
-     * never cause an XSS vulnerability if used in a context that will be
-     * interpreted and executed as a script by a browser, e.g. when calling eval.
-     */
-    function trustedScriptFromString(script) {
-        var _a;
-        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScript(script)) || script;
-    }
-    /**
-     * Unsafely promote a string to a TrustedScriptURL, falling back to strings
-     * when Trusted Types are not available.
-     * @security This is a security-sensitive function; any use of this function
-     * must go through security review. In particular, it must be assured that the
-     * provided string will never cause an XSS vulnerability if used in a context
-     * that will cause a browser to load and execute a resource, e.g. when
-     * assigning to script.src.
-     */
-    function trustedScriptURLFromString(url) {
-        var _a;
-        return ((_a = getPolicy()) === null || _a === void 0 ? void 0 : _a.createScriptURL(url)) || url;
-    }
-    /**
-     * Unsafely call the Function constructor with the given string arguments. It
-     * is only available in development mode, and should be stripped out of
-     * production code.
-     * @security This is a security-sensitive function; any use of this function
-     * must go through security review. In particular, it must be assured that it
-     * is only called from development code, as use in production code can lead to
-     * XSS vulnerabilities.
-     */
-    function newTrustedFunctionForDev() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (typeof ngDevMode === 'undefined') {
-            throw new Error('newTrustedFunctionForDev should never be called in production');
-        }
-        if (!_global.trustedTypes) {
-            // In environments that don't support Trusted Types, fall back to the most
-            // straightforward implementation:
-            return new (Function.bind.apply(Function, __spread([void 0], args)))();
-        }
-        // Chrome currently does not support passing TrustedScript to the Function
-        // constructor. The following implements the workaround proposed on the page
-        // below, where the Chromium bug is also referenced:
-        // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
-        var fnArgs = args.slice(0, -1).join(',');
-        var fnBody = args.pop().toString();
-        var body = "(function anonymous(" + fnArgs + "\n) { " + fnBody + "\n})";
-        // Using eval directly confuses the compiler and prevents this module from
-        // being stripped out of JS binaries even if not used. The global['eval']
-        // indirection fixes that.
-        var fn = _global['eval'](trustedScriptFromString(body));
-        // To completely mimic the behavior of calling "new Function", two more
-        // things need to happen:
-        // 1. Stringifying the resulting function should return its source code
-        fn.toString = function () { return body; };
-        // 2. When calling the resulting function, `this` should refer to `global`
-        return fn.bind(_global);
-        // When Trusted Types support in Function constructors is widely available,
-        // the implementation of this function can be simplified to:
-        // return new Function(...args.map(a => trustedScriptFromString(a)));
     }
 
     /**
@@ -5599,6 +5599,48 @@
             return unwrapSafeValue(unsafeScript);
         }
         throw new Error('unsafe value used in a script context');
+    }
+    /**
+     * Promotes the given constant string to a TrustedHTML.
+     * @param html constant string containing trusted HTML.
+     * @returns TrustedHTML wrapping `html`.
+     *
+     * @security This is a security-sensitive function and should only be used to
+     * convert constant values of attributes and properties found in
+     * application-provided Angular templates to TrustedHTML.
+     *
+     * @codeGenApi
+     */
+    function ɵɵtrustConstantHtml(html) {
+        return trustedHTMLFromString(html);
+    }
+    /**
+     * Promotes the given constant string to a TrustedScript.
+     * @param script constant string containing a trusted script.
+     * @returns TrustedScript wrapping `script`.
+     *
+     * @security This is a security-sensitive function and should only be used to
+     * convert constant values of attributes and properties found in
+     * application-provided Angular templates to TrustedScript.
+     *
+     * @codeGenApi
+     */
+    function ɵɵtrustConstantScript(script) {
+        return trustedScriptFromString(script);
+    }
+    /**
+     * Promotes the given constant string to a TrustedScriptURL.
+     * @param url constant string containing a trusted script URL.
+     * @returns TrustedScriptURL wrapping `url`.
+     *
+     * @security This is a security-sensitive function and should only be used to
+     * convert constant values of attributes and properties found in
+     * application-provided Angular templates to TrustedScriptURL.
+     *
+     * @codeGenApi
+     */
+    function ɵɵtrustConstantResourceUrl(url) {
+        return trustedScriptURLFromString(url);
     }
     /**
      * Detects which sanitizer to use for URL property, based on tag name and prop name.
@@ -21754,7 +21796,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+10.sha-822b838');
+    var VERSION = new Version('11.0.0-next.6+13.sha-6e18d2d');
 
     /**
      * @license
@@ -26539,6 +26581,9 @@
         'ɵɵsanitizeScript': ɵɵsanitizeScript,
         'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
         'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
+        'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
+        'ɵɵtrustConstantScript': ɵɵtrustConstantScript,
+        'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
     }); };
     /**
      * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
@@ -32913,6 +32958,9 @@
     exports.ɵangular_packages_core_core_bn = getClosureSafeProperty;
     exports.ɵangular_packages_core_core_bp = getRootContext;
     exports.ɵangular_packages_core_core_bq = i18nPostprocess;
+    exports.ɵangular_packages_core_core_br = trustedHTMLFromString;
+    exports.ɵangular_packages_core_core_bs = trustedScriptURLFromString;
+    exports.ɵangular_packages_core_core_bt = trustedScriptFromString;
     exports.ɵangular_packages_core_core_c = NullInjector;
     exports.ɵangular_packages_core_core_d = ReflectiveInjector_;
     exports.ɵangular_packages_core_core_e = ReflectiveDependency;
@@ -33165,6 +33213,9 @@
     exports.ɵɵtextInterpolate7 = ɵɵtextInterpolate7;
     exports.ɵɵtextInterpolate8 = ɵɵtextInterpolate8;
     exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
+    exports.ɵɵtrustConstantHtml = ɵɵtrustConstantHtml;
+    exports.ɵɵtrustConstantResourceUrl = ɵɵtrustConstantResourceUrl;
+    exports.ɵɵtrustConstantScript = ɵɵtrustConstantScript;
     exports.ɵɵviewQuery = ɵɵviewQuery;
 
     Object.defineProperty(exports, '__esModule', { value: true });
