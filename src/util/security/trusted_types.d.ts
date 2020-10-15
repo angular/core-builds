@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/// <reference types="trusted-types" />
+import { TrustedHTML, TrustedScript, TrustedScriptURL } from './trusted_type_defs';
 /**
  * Unsafely promote a string to a TrustedHTML, falling back to strings when
  * Trusted Types are not available.
