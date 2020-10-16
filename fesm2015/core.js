@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+26.sha-a3812c6
+ * @license Angular v11.0.0-next.6+29.sha-765fa33
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -637,7 +637,7 @@ function initNgDevMode() {
         if (typeof ngDevMode !== 'object') {
             ngDevModeResetPerfCounters();
         }
-        return !!ngDevMode;
+        return typeof ngDevMode !== 'undefined' && !!ngDevMode;
     }
     return false;
 }
@@ -21154,7 +21154,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+26.sha-a3812c6');
+const VERSION = new Version('11.0.0-next.6+29.sha-765fa33');
 
 /**
  * @license
