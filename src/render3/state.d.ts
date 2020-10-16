@@ -135,8 +135,11 @@ interface InstructionState {
      * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
      *
      * Necessary to support ChangeDetectorRef.checkNoChanges().
+     *
+     * checkNoChanges Runs only in devmode=true and verifies that no unintended changes exist in
+     * the change detector or its children.
      */
-    checkNoChangesMode: boolean;
+    isInCheckNoChangesMode: boolean;
 }
 export declare const instructionState: InstructionState;
 export declare function getElementDepthCount(): number;
@@ -209,8 +212,8 @@ export declare function isCurrentTNodeParent(): boolean;
 export declare function setCurrentTNodeAsNotParent(): void;
 export declare function setCurrentTNodeAsParent(): void;
 export declare function getContextLView(): LView;
-export declare function getCheckNoChangesMode(): boolean;
-export declare function setCheckNoChangesMode(mode: boolean): void;
+export declare function isInCheckNoChangesMode(): boolean;
+export declare function setIsInCheckNoChangesMode(mode: boolean): void;
 export declare function getBindingRoot(): number;
 export declare function getBindingIndex(): number;
 export declare function setBindingIndex(value: number): number;
