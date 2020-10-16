@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.1.6+16.sha-94d7ef3
+ * @license Angular v10.1.6+18.sha-4a5f17c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -964,7 +964,7 @@
             if (typeof ngDevMode !== 'object') {
                 ngDevModeResetPerfCounters();
             }
-            return !!ngDevMode;
+            return typeof ngDevMode !== 'undefined' && !!ngDevMode;
         }
         return false;
     }
@@ -21677,7 +21677,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.1.6+16.sha-94d7ef3');
+    var VERSION = new Version('10.1.6+18.sha-4a5f17c');
 
     /**
      * @license
