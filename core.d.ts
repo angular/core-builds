@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+25.sha-96f59f6
+ * @license Angular v11.0.0-next.6+26.sha-a3812c6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3468,8 +3468,11 @@ declare interface InstructionState {
      * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
      *
      * Necessary to support ChangeDetectorRef.checkNoChanges().
+     *
+     * checkNoChanges Runs only in devmode=true and verifies that no unintended changes exist in
+     * the change detector or its children.
      */
-    checkNoChangesMode: boolean;
+    isInCheckNoChangesMode: boolean;
 }
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
