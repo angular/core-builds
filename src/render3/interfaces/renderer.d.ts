@@ -14,6 +14,7 @@
  * it will be easy to implement such API.
  */
 import { RendererStyleFlags2, RendererType2 } from '../../render/api';
+import { TrustedHTML, TrustedScript, TrustedScriptURL } from '../../util/security/trusted_type_defs';
 export declare enum RendererStyleFlags3 {
     Important = 1,
     DashCase = 2
@@ -64,7 +65,7 @@ export interface ProceduralRenderer3 {
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
     removeClass(el: RElement, name: string): void;
@@ -121,9 +122,9 @@ export interface RElement extends RNode {
     classList: RDomTokenList;
     className: string;
     textContent: string | null;
-    setAttribute(name: string, value: string): void;
+    setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
-    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
+    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
     setProperty?(name: string, value: any): void;

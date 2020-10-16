@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+29.sha-765fa33
+ * @license Angular v11.0.0-next.6+33.sha-81aa119
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4825,6 +4825,81 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * The Trusted Types policy, or null if Trusted Types are not
+     * enabled/supported, or undefined if the policy has not been created yet.
+     */
+    var policy$1;
+    /**
+     * Returns the Trusted Types policy, or null if Trusted Types are not
+     * enabled/supported. The first call to this function will create the policy.
+     */
+    function getPolicy$1() {
+        if (policy$1 === undefined) {
+            policy$1 = null;
+            if (_global.trustedTypes) {
+                try {
+                    policy$1 = _global.trustedTypes
+                        .createPolicy('angular#unsafe-bypass', {
+                        createHTML: function (s) { return s; },
+                        createScript: function (s) { return s; },
+                        createScriptURL: function (s) { return s; },
+                    });
+                }
+                catch (_a) {
+                    // trustedTypes.createPolicy throws if called with a name that is
+                    // already registered, even in report-only mode. Until the API changes,
+                    // catch the error not to break the applications functionally. In such
+                    // cases, the code will fall back to using strings.
+                }
+            }
+        }
+        return policy$1;
+    }
+    /**
+     * Unsafely promote a string to a TrustedHTML, falling back to strings when
+     * Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that it
+     * is only passed strings that come directly from custom sanitizers or the
+     * bypassSecurityTrust* functions.
+     */
+    function trustedHTMLFromStringBypass(html) {
+        var _a;
+        return ((_a = getPolicy$1()) === null || _a === void 0 ? void 0 : _a.createHTML(html)) || html;
+    }
+    /**
+     * Unsafely promote a string to a TrustedScript, falling back to strings when
+     * Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that it
+     * is only passed strings that come directly from custom sanitizers or the
+     * bypassSecurityTrust* functions.
+     */
+    function trustedScriptFromStringBypass(script) {
+        var _a;
+        return ((_a = getPolicy$1()) === null || _a === void 0 ? void 0 : _a.createScript(script)) || script;
+    }
+    /**
+     * Unsafely promote a string to a TrustedScriptURL, falling back to strings
+     * when Trusted Types are not available.
+     * @security This is a security-sensitive function; any use of this function
+     * must go through security review. In particular, it must be assured that it
+     * is only passed strings that come directly from custom sanitizers or the
+     * bypassSecurityTrust* functions.
+     */
+    function trustedScriptURLFromStringBypass(url) {
+        var _a;
+        return ((_a = getPolicy$1()) === null || _a === void 0 ? void 0 : _a.createScriptURL(url)) || url;
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var SafeValueImpl = /** @class */ (function () {
         function SafeValueImpl(changingThisBreaksApplicationSecurity) {
             this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
@@ -5436,7 +5511,7 @@
             if (isDevMode() && sanitizer.sanitizedSomething) {
                 console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
             }
-            return safeHtml;
+            return trustedHTMLFromString(safeHtml);
         }
         finally {
             // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
@@ -5498,10 +5573,10 @@
     function ɵɵsanitizeHtml(unsafeHtml) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
+            return trustedHTMLFromStringBypass(sanitizer.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '');
         }
         if (allowSanitizationBypassAndThrow(unsafeHtml, "HTML" /* Html */)) {
-            return unwrapSafeValue(unsafeHtml);
+            return trustedHTMLFromStringBypass(unwrapSafeValue(unsafeHtml));
         }
         return _sanitizeHtml(getDocument(), renderStringify(unsafeHtml));
     }
@@ -5566,10 +5641,10 @@
     function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+            return trustedScriptURLFromStringBypass(sanitizer.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '');
         }
         if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* ResourceUrl */)) {
-            return unwrapSafeValue(unsafeResourceUrl);
+            return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
         }
         throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
     }
@@ -5588,10 +5663,10 @@
     function ɵɵsanitizeScript(unsafeScript) {
         var sanitizer = getSanitizer();
         if (sanitizer) {
-            return sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '';
+            return trustedScriptFromStringBypass(sanitizer.sanitize(exports.SecurityContext.SCRIPT, unsafeScript) || '');
         }
         if (allowSanitizationBypassAndThrow(unsafeScript, "Script" /* Script */)) {
-            return unwrapSafeValue(unsafeScript);
+            return trustedScriptFromStringBypass(unwrapSafeValue(unsafeScript));
         }
         throw new Error('unsafe value used in a script context');
     }
@@ -21774,7 +21849,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+29.sha-765fa33');
+    var VERSION = new Version('11.0.0-next.6+33.sha-81aa119');
 
     /**
      * @license

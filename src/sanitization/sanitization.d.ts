@@ -21,7 +21,7 @@ import { TrustedHTML, TrustedScript, TrustedScriptURL } from '../util/security/t
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
@@ -62,7 +62,7 @@ export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): TrustedScriptURL | string;
 /**
  * A `script` sanitizer which only lets trusted javascript through.
  *
@@ -75,7 +75,7 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | string;
 /**
  * Promotes the given constant string to a TrustedHTML.
  * @param html constant string containing trusted HTML.
