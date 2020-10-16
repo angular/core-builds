@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+29.sha-765fa33
+ * @license Angular v11.0.0-next.6+33.sha-81aa119
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5343,7 +5343,7 @@ declare interface ProceduralRenderer3 {
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
     removeClass(el: RElement, name: string): void;
@@ -5908,9 +5908,9 @@ declare interface RElement extends RNode {
     classList: RDomTokenList;
     className: string;
     textContent: string | null;
-    setAttribute(name: string, value: string): void;
+    setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
-    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
+    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
     setProperty?(name: string, value: any): void;
@@ -6365,11 +6365,10 @@ export declare abstract class Sanitizer {
     static ɵprov: never;
 }
 
-
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string;
+declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
 
 
 /**
@@ -8768,7 +8767,7 @@ export declare class WrappedValue {
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
-export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): string;
+export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): TrustedHTML | string;
 
 
 export declare function ɵ_sanitizeUrl(url: string): string;
@@ -13584,7 +13583,7 @@ export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
 
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
@@ -13597,7 +13596,7 @@ export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): TrustedScriptURL | string;
 
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -13611,7 +13610,7 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | string;
 
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
