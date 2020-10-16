@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+22.sha-6acddb9
+ * @license Angular v11.0.0-next.6+24.sha-20b801e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2484,7 +2484,7 @@ function updateTransplantedViewCount(lContainer, amount) {
 const instructionState = {
     lFrame: createLFrame(null),
     bindingsEnabled: true,
-    checkNoChangesMode: false,
+    isInCheckNoChangesMode: false,
 };
 function getElementDepthCount() {
     return instructionState.lFrame.elementDepthCount;
@@ -2588,12 +2588,12 @@ function setCurrentTNodeAsParent() {
 function getContextLView() {
     return instructionState.lFrame.contextLView;
 }
-function getCheckNoChangesMode() {
+function isInCheckNoChangesMode() {
     // TODO(misko): remove this from the LView since it is ngDevMode=true mode only.
-    return instructionState.checkNoChangesMode;
+    return instructionState.isInCheckNoChangesMode;
 }
-function setCheckNoChangesMode(mode) {
-    instructionState.checkNoChangesMode = mode;
+function setIsInCheckNoChangesMode(mode) {
+    instructionState.isInCheckNoChangesMode = mode;
 }
 // top level variables should not be exported for performance reasons (PERF_NOTES.md)
 function getBindingRoot() {
@@ -3027,7 +3027,7 @@ function incrementInitPhaseFlags(lView, initPhase) {
  */
 function callHooks(currentView, arr, initPhase, currentNodeIndex) {
     ngDevMode &&
-        assertEqual(getCheckNoChangesMode(), false, 'Hooks should never be run in the check no changes mode.');
+        assertEqual(isInCheckNoChangesMode(), false, 'Hooks should never be run when in check no changes mode.');
     const startIndex = currentNodeIndex !== undefined ?
         (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
         0;
@@ -6378,7 +6378,7 @@ function getNearestLContainer(viewOrContainer) {
  */
 function ɵɵadvance(delta) {
     ngDevMode && assertGreaterThan(delta, 0, 'Can only advance forward');
-    selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, getCheckNoChangesMode());
+    selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, isInCheckNoChangesMode());
 }
 function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
     ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
@@ -7445,7 +7445,9 @@ function refreshView(tView, lView, templateFn, context) {
     if ((flags & 256 /* Destroyed */) === 256 /* Destroyed */)
         return;
     enterView(lView);
-    const checkNoChangesMode = getCheckNoChangesMode();
+    // Check no changes mode is a dev only mode used to verify that bindings have not changed
+    // since they were assigned. We do not want to execute lifecycle hooks in that mode.
+    const isInCheckNoChangesPass = isInCheckNoChangesMode();
     try {
         resetPreOrderHookFlags(lView);
         setBindingIndex(tView.bindingStartIndex);
@@ -7455,7 +7457,7 @@ function refreshView(tView, lView, templateFn, context) {
         const hooksInitPhaseCompleted = (flags & 3 /* InitPhaseStateMask */) === 3 /* InitPhaseCompleted */;
         // execute pre-order hooks (OnInit, OnChanges, DoCheck)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-        if (!checkNoChangesMode) {
+        if (!isInCheckNoChangesPass) {
             if (hooksInitPhaseCompleted) {
                 const preOrderCheckHooks = tView.preOrderCheckHooks;
                 if (preOrderCheckHooks !== null) {
@@ -7481,7 +7483,7 @@ function refreshView(tView, lView, templateFn, context) {
         }
         // execute content hooks (AfterContentInit, AfterContentChecked)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-        if (!checkNoChangesMode) {
+        if (!isInCheckNoChangesPass) {
             if (hooksInitPhaseCompleted) {
                 const contentCheckHooks = tView.contentCheckHooks;
                 if (contentCheckHooks !== null) {
@@ -7511,7 +7513,7 @@ function refreshView(tView, lView, templateFn, context) {
         }
         // execute view hooks (AfterViewInit, AfterViewChecked)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-        if (!checkNoChangesMode) {
+        if (!isInCheckNoChangesPass) {
             if (hooksInitPhaseCompleted) {
                 const viewCheckHooks = tView.viewCheckHooks;
                 if (viewCheckHooks !== null) {
@@ -7541,7 +7543,7 @@ function refreshView(tView, lView, templateFn, context) {
         // refresh a `NgClass` binding should work. If we would reset the dirty state in the check
         // no changes cycle, the component would be not be dirty for the next update pass. This would
         // be different in production mode where the component dirty state is not reset.
-        if (!checkNoChangesMode) {
+        if (!isInCheckNoChangesPass) {
             lView[FLAGS] &= ~(64 /* Dirty */ | 8 /* FirstLViewPass */);
         }
         if (lView[FLAGS] & 1024 /* RefreshTransplantedView */) {
@@ -7555,7 +7557,7 @@ function refreshView(tView, lView, templateFn, context) {
 }
 function renderComponentOrTemplate(tView, lView, templateFn, context) {
     const rendererFactory = lView[RENDERER_FACTORY];
-    const normalExecutionPath = !getCheckNoChangesMode();
+    const normalExecutionPath = !isInCheckNoChangesMode();
     const creationModeIsActive = isCreationMode(lView);
     try {
         if (normalExecutionPath && !creationModeIsActive && rendererFactory.begin) {
@@ -7579,7 +7581,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
             // When we're updating, inherently select 0 so we don't
             // have to generate that instruction for most update blocks.
-            selectIndexInternal(tView, lView, 0, getCheckNoChangesMode());
+            selectIndexInternal(tView, lView, 0, isInCheckNoChangesMode());
         }
         templateFn(rf, context);
     }
@@ -8797,12 +8799,12 @@ function detectChangesInRootView(lView) {
     tickRootContext(lView[CONTEXT]);
 }
 function checkNoChangesInternal(tView, view, context) {
-    setCheckNoChangesMode(true);
+    setIsInCheckNoChangesMode(true);
     try {
         detectChangesInternal(tView, view, context);
     }
     finally {
-        setCheckNoChangesMode(false);
+        setIsInCheckNoChangesMode(false);
     }
 }
 /**
@@ -8815,12 +8817,12 @@ function checkNoChangesInternal(tView, view, context) {
  * @param lView The view which the change detection should be checked on.
  */
 function checkNoChangesInRootView(lView) {
-    setCheckNoChangesMode(true);
+    setIsInCheckNoChangesMode(true);
     try {
         detectChangesInRootView(lView);
     }
     finally {
-        setCheckNoChangesMode(false);
+        setIsInCheckNoChangesMode(false);
     }
 }
 function executeViewQueryFn(flags, viewQueryFn, component) {
@@ -14079,7 +14081,7 @@ function bindingUpdated(lView, bindingIndex, value) {
         return false;
     }
     else {
-        if (ngDevMode && getCheckNoChangesMode()) {
+        if (ngDevMode && isInCheckNoChangesMode()) {
             // View engine didn't report undefined values as changed on the first checkNoChanges pass
             // (before the change detection was run).
             const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
@@ -21183,7 +21185,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+22.sha-6acddb9');
+const VERSION = new Version('11.0.0-next.6+24.sha-20b801e');
 
 /**
  * @license
