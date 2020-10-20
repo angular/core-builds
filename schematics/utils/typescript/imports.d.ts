@@ -32,3 +32,10 @@ export declare function getImportOfIdentifier(typeChecker: ts.TypeChecker, node:
  *    their original name.
  */
 export declare function getImportSpecifier(sourceFile: ts.SourceFile, moduleName: string, specifierName: string): ts.ImportSpecifier | null;
+/**
+ * Replaces an import inside a named imports node with a different one.
+ * @param node Node that contains the imports.
+ * @param existingImport Import that should be replaced.
+ * @param newImportName Import that should be inserted.
+ */
+export declare function replaceImport(node: ts.NamedImports, existingImport: string, newImportName: string): ts.NamedImports;

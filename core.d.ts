@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.5+2.sha-a8c0972
+ * @license Angular v11.0.0-next.6+52.sha-0f1a18e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -835,7 +835,6 @@ export declare interface Component extends Directive {
     animations?: any[];
     /**
      * An encapsulation policy for the template and CSS styles. One of:
-     * - `ViewEncapsulation.Native`: Deprecated. Use `ViewEncapsulation.ShadowDom` instead.
      * - `ViewEncapsulation.Emulated`: Use shimmed CSS that
      * emulates the native behavior.
      * - `ViewEncapsulation.None`: Use global CSS without any
@@ -3469,8 +3468,11 @@ declare interface InstructionState {
      * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
      *
      * Necessary to support ChangeDetectorRef.checkNoChanges().
+     *
+     * checkNoChanges Runs only in devmode=true and verifies that no unintended changes exist in
+     * the change detector or its children.
      */
-    checkNoChangesMode: boolean;
+    isInCheckNoChangesMode: boolean;
 }
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
@@ -5341,7 +5343,7 @@ declare interface ProceduralRenderer3 {
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
     removeClass(el: RElement, name: string): void;
@@ -5906,9 +5908,9 @@ declare interface RElement extends RNode {
     classList: RDomTokenList;
     className: string;
     textContent: string | null;
-    setAttribute(name: string, value: string): void;
+    setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
-    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
+    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
     setProperty?(name: string, value: any): void;
@@ -6363,11 +6365,10 @@ export declare abstract class Sanitizer {
     static ɵprov: never;
 }
 
-
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string;
+declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
 
 
 /**
@@ -7613,6 +7614,36 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
 declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
 
+
+/**
+ * @fileoverview
+ * While Angular only uses Trusted Types internally for the time being,
+ * references to Trusted Types could leak into our core.d.ts, which would force
+ * anyone compiling against @angular/core to provide the @types/trusted-types
+ * package in their compilation unit.
+ *
+ * Until https://github.com/microsoft/TypeScript/issues/30024 is resolved, we
+ * will keep Angular's public API surface free of references to Trusted Types.
+ * For internal and semi-private APIs that need to reference Trusted Types, the
+ * minimal type definitions for the Trusted Types API provided by this module
+ * should be used instead.
+ *
+ * Adapted from
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
+ * but restricted to the API surface used within Angular.
+ */
+declare type TrustedHTML = {
+    __brand__: 'TrustedHTML';
+};
+
+declare type TrustedScript = {
+    __brand__: 'TrustedScript';
+};
+
+declare type TrustedScriptURL = {
+    __brand__: 'TrustedScriptURL';
+};
+
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
  *
@@ -8404,15 +8435,6 @@ export declare enum ViewEncapsulation {
      */
     Emulated = 0,
     /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    Native = 1,
-    /**
      * Don't provide any template or style encapsulation.
      */
     None = 2,
@@ -8745,7 +8767,7 @@ export declare class WrappedValue {
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
-export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): string;
+export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): TrustedHTML | string;
 
 
 export declare function ɵ_sanitizeUrl(url: string): string;
@@ -9171,6 +9193,37 @@ export declare function ɵangular_packages_core_core_bp(viewOrComponent: ɵangul
 export declare function ɵangular_packages_core_core_bq(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
+
+/**
+ * Unsafely promote a string to a TrustedHTML, falling back to strings when
+ * Trusted Types are not available.
+ * @security This is a security-sensitive function; any use of this function
+ * must go through security review. In particular, it must be assured that the
+ * provided string will never cause an XSS vulnerability if used in a context
+ * that will be interpreted as HTML by a browser, e.g. when assigning to
+ * element.innerHTML.
+ */
+export declare function ɵangular_packages_core_core_br(html: string): TrustedHTML | string;
+
+/**
+ * Unsafely promote a string to a TrustedScriptURL, falling back to strings
+ * when Trusted Types are not available.
+ * @security This is a security-sensitive function; any use of this function
+ * must go through security review. In particular, it must be assured that the
+ * provided string will never cause an XSS vulnerability if used in a context
+ * that will cause a browser to load and execute a resource, e.g. when
+ * assigning to script.src.
+ */
+export declare function ɵangular_packages_core_core_bs(url: string): TrustedScriptURL | string;
+
+/**
+ * Unsafely promote a string to a TrustedScript, falling back to strings when
+ * Trusted Types are not available.
+ * @security In particular, it must be assured that the provided string will
+ * never cause an XSS vulnerability if used in a context that will be
+ * interpreted and executed as a script by a browser, e.g. when calling eval.
+ */
+export declare function ɵangular_packages_core_core_bt(script: string): TrustedScript | string;
 
 export declare class ɵangular_packages_core_core_c implements Injector {
     get(token: any, notFoundValue?: any): any;
@@ -13515,7 +13568,6 @@ export declare function ɵɵresolveWindow(element: RElement & {
  */
 export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 
-
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -13531,7 +13583,7 @@ export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
 
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
@@ -13544,7 +13596,7 @@ export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): TrustedScriptURL | string;
 
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -13558,7 +13610,7 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | string;
 
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
@@ -14606,6 +14658,45 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  * @codeGenApi
  */
 export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
+
+/**
+ * Promotes the given constant string to a TrustedHTML.
+ * @param html constant string containing trusted HTML.
+ * @returns TrustedHTML wrapping `html`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedHTML.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | string;
+
+/**
+ * Promotes the given constant string to a TrustedScriptURL.
+ * @param url constant string containing a trusted script URL.
+ * @returns TrustedScriptURL wrapping `url`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScriptURL.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantResourceUrl(url: string): TrustedScriptURL | string;
+
+/**
+ * Promotes the given constant string to a TrustedScript.
+ * @param script constant string containing a trusted script.
+ * @returns TrustedScript wrapping `script`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScript.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantScript(script: string): TrustedScript | string;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.

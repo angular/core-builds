@@ -16,5 +16,3 @@ export declare function findRendererReferences(sourceFile: ts.SourceFile, typeCh
     methodCalls: Set<ts.CallExpression>;
     forwardRefs: Set<ts.Identifier>;
 };
-/** Gets the closest `NamedImports` to an `ImportSpecifier`. */
-export declare function getNamedImports(specifier: ts.ImportSpecifier): ts.NamedImports | null;
