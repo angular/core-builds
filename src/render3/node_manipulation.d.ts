@@ -7,9 +7,19 @@
  */
 import { LContainer } from './interfaces/container';
 import { TNode, TProjectionNode } from './interfaces/node';
-import { RElement, Renderer3, RNode, RText } from './interfaces/renderer';
+import { RComment, RElement, Renderer3, RNode, RText } from './interfaces/renderer';
 import { LView, TView } from './interfaces/view';
-export declare function createTextNode(value: string, renderer: Renderer3): RText;
+export declare function createTextNode(renderer: Renderer3, value: string): RText;
+export declare function updateTextNode(renderer: Renderer3, rNode: RText, value: string): void;
+export declare function createCommentNode(renderer: Renderer3, value: string): RComment;
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param renderer A renderer to use
+ * @param name the tag name
+ * @param namespace Optional namespace for element.
+ * @returns the element created
+ */
+export declare function createElementNode(renderer: Renderer3, name: string, namespace: string | null): RElement;
 /**
  * Removes all DOM elements associated with a view.
  *
@@ -91,11 +101,44 @@ export declare function detachView(lContainer: LContainer, removeIndex: number):
  */
 export declare function destroyLView(tView: TView, lView: LView): void;
 /**
+ * Returns a native element if a node can be inserted into the given parent.
+ *
+ * There are two reasons why we may not be able to insert a element immediately.
+ * - Projection: When creating a child content element of a component, we have to skip the
+ *   insertion because the content of a component will be projected.
+ *   `<component><content>delayed due to projection</content></component>`
+ * - Parent container is disconnected: This can happen when we are inserting a view into
+ *   parent container, which itself is disconnected. For example the parent container is part
+ *   of a View which has not be inserted or is made for projection but has not been inserted
+ *   into destination.
+ *
+ * @param tView: Current `TView`.
+ * @param tNode: `TNode` for which we wish to retrieve render parent.
+ * @param lView: Current `LView`.
+ */
+export declare function getParentRElement(tView: TView, tNode: TNode, lView: LView): RElement | null;
+/**
+ * Get closest `RElement` or `null` if it can't be found.
+ *
+ * If `TNode` is `TNodeType.Element` => return `RElement` at `LView[tNode.index]` location.
+ * If `TNode` is `TNodeType.ElementContainer|IcuContain` => return the parent (recursively).
+ * If `TNode` is `null` then return host `RElement`:
+ *   - return `null` if projection
+ *   - return `null` if parent container is disconnected (we have no parent.)
+ *
+ * @param tView: Current `TView`.
+ * @param tNode: `TNode` for which we wish to retrieve `RElement` (or `null` if host element is
+ *     needed).
+ * @param lView: Current `LView`.
+ * @returns `null` if the `RElement` can't be determined at this time (no parent / projection)
+ */
+export declare function getClosestRElement(tView: TView, tNode: TNode | null, lView: LView): RElement | null;
+/**
  * Inserts a native node before another native node for a given parent using {@link Renderer3}.
  * This is a utility function that can be used when native nodes were determined - it abstracts an
  * actual renderer being used.
  */
-export declare function nativeInsertBefore(renderer: Renderer3, parent: RElement, child: RNode, beforeNode: RNode | null): void;
+export declare function nativeInsertBefore(renderer: Renderer3, parent: RElement, child: RNode, beforeNode: RNode | null, isMove: boolean): void;
 /**
  * Returns a native parent of a given native node.
  */
@@ -107,15 +150,12 @@ export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNo
 /**
  * Appends the `child` native node (or a collection of nodes) to the `parent`.
  *
- * The element insertion might be delayed {@link canInsertNativeNode}.
- *
  * @param tView The `TView' to be appended
  * @param lView The current LView
- * @param childEl The native child (or children) that should be appended
+ * @param childRNode The native child (or children) that should be appended
  * @param childTNode The TNode of the child element
- * @returns Whether or not the child was appended
  */
-export declare function appendChild(tView: TView, lView: LView, childEl: RNode | RNode[], childTNode: TNode): void;
+export declare function appendChild(tView: TView, lView: LView, childRNode: RNode | RNode[], childTNode: TNode): void;
 export declare function getBeforeNodeForView(viewIndexInContainer: number, lContainer: LContainer): RNode | null;
 /**
  * Removes a native node itself using a given renderer. To remove the node we are looking up its

@@ -7,10 +7,13 @@
  */
 import { LContainer } from './interfaces/container';
 import { DirectiveDef } from './interfaces/definition';
+import { TIcu } from './interfaces/i18n';
 import { TNode } from './interfaces/node';
 import { LView, TView } from './interfaces/view';
 export declare function assertTNodeForLView(tNode: TNode, lView: LView): void;
 export declare function assertTNodeForTView(tNode: TNode, tView: TView): void;
+export declare function assertTNode(tNode: TNode): void;
+export declare function assertTIcu(tIcu: TIcu): void;
 export declare function assertComponentType(actual: any, msg?: string): void;
 export declare function assertNgModuleType(actual: any, msg?: string): void;
 export declare function assertCurrentTNodeIsParent(isParent: boolean): void;
@@ -28,7 +31,6 @@ export declare function assertFirstUpdatePass(tView: TView, errMessage?: string)
 export declare function assertDirectiveDef<T>(obj: any): asserts obj is DirectiveDef<T>;
 export declare function assertIndexInDeclRange(lView: LView, index: number): void;
 export declare function assertIndexInVarsRange(lView: LView, index: number): void;
-export declare function assertIndexInI18nRange(lView: LView, index: number): void;
 export declare function assertIndexInExpandoRange(lView: LView, index: number): void;
 export declare function assertBetween(lower: number, upper: number, index: number): void;
 /**

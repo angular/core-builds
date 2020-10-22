@@ -10,7 +10,7 @@ import { Sanitizer } from '../../sanitization/sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';
 import { ComponentTemplate, DirectiveDefList, PipeDefList, ViewQueriesFunction } from '../interfaces/definition';
-import { AttributeMarker, PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType } from '../interfaces/node';
+import { AttributeMarker, InsertBeforeIndex, PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
 import { RComment, RElement, Renderer3, RendererFactory3, RNode } from '../interfaces/renderer';
@@ -63,13 +63,17 @@ export declare const TViewConstructor: {
         _vars: number;
         readonly template_: string;
         readonly type_: string;
-        readonly i18nStartIndex: number;
+        /**
+         * Returns initial value of `expandoStartIndex`.
+         */
+        readonly originalExpandoStartIndex: number;
     };
 };
 declare class TNode implements ITNode {
     tView_: TView;
     type: TNodeType;
     index: number;
+    insertBeforeIndex: InsertBeforeIndex;
     injectorIndex: number;
     directiveStart: number;
     directiveEnd: number;
@@ -77,7 +81,7 @@ declare class TNode implements ITNode {
     propertyBindings: number[] | null;
     flags: TNodeFlags;
     providerIndexes: TNodeProviderIndexes;
-    tagName: string | null;
+    value: string | null;
     attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null;
     mergedAttrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null;
     localNames: (string | number)[] | null;
@@ -101,6 +105,7 @@ declare class TNode implements ITNode {
     constructor(tView_: TView, //
     type: TNodeType, //
     index: number, //
+    insertBeforeIndex: InsertBeforeIndex, //
     injectorIndex: number, //
     directiveStart: number, //
     directiveEnd: number, //
@@ -108,7 +113,7 @@ declare class TNode implements ITNode {
     propertyBindings: number[] | null, //
     flags: TNodeFlags, //
     providerIndexes: TNodeProviderIndexes, //
-    tagName: string | null, //
+    value: string | null, //
     attrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null, //
     mergedAttrs: (string | AttributeMarker | (string | SelectorFlags)[])[] | null, //
     localNames: (string | number)[] | null, //
@@ -210,6 +215,7 @@ export declare class LViewDebug implements ILViewDebug {
      * a tree structure with relevant details pulled out for readability.
      */
     get nodes(): DebugNode[];
+    get template(): string;
     get tView(): ITView;
     get cleanup(): any[] | null;
     get injector(): Injector | null;
@@ -224,7 +230,6 @@ export declare class LViewDebug implements ILViewDebug {
     get tHost(): ITNode | null;
     get decls(): LViewDebugRange;
     get vars(): LViewDebugRange;
-    get i18n(): LViewDebugRange;
     get expando(): LViewDebugRange;
     /**
      * Normalized view of child views (and containers) attached at this location.
@@ -250,10 +255,4 @@ export declare class LContainerDebug implements ILContainerDebug {
     get native(): RComment;
     get next(): ILViewDebug | ILContainerDebug | null;
 }
-/**
- * Return an `LView` value if found.
- *
- * @param value `LView` if any
- */
-export declare function readLViewValue(value: any): LView | null;
 export {};

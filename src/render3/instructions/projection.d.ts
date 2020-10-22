@@ -35,7 +35,6 @@ export declare function matchingProjectionSlotIndex(tNode: TNode, projectionSlot
  * @codeGenApi
  */
 export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): void;
-export declare function setDelayProjection(value: boolean): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.

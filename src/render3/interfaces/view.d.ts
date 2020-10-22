@@ -12,8 +12,8 @@ import { SchemaMetadata } from '../../metadata';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { LContainer } from './container';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, HostBindingsFunction, PipeDef, PipeDefList, ViewQueriesFunction } from './definition';
-import { I18nUpdateOpCodes, TI18n } from './i18n';
-import { TConstants, TNode, TNodeTypeAsString } from './node';
+import { I18nUpdateOpCodes, TI18n, TIcu } from './i18n';
+import { TConstants, TNode } from './node';
 import { PlayerHandler } from './player';
 import { LQueries, TQueries } from './query';
 import { RComment, RElement, Renderer3, RendererFactory3 } from './renderer';
@@ -38,7 +38,13 @@ export declare const DECLARATION_COMPONENT_VIEW = 16;
 export declare const DECLARATION_LCONTAINER = 17;
 export declare const PREORDER_HOOK_FLAGS = 18;
 export declare const QUERIES = 19;
-/** Size of LView's header. Necessary to adjust for it when setting slots.  */
+/**
+ * Size of LView's header. Necessary to adjust for it when setting slots.
+ *
+ * IMPORTANT: `HEADER_OFFSET` should only be referred to the in the `ɵɵ*` instructions to translate
+ * instruction index into `LView` index. All other indexes should be in the `LView` index space and
+ * there should be no need to refer to `HEADER_OFFSET` anywhere else.
+ */
 export declare const HEADER_OFFSET = 20;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
@@ -730,7 +736,7 @@ export declare type DestroyHookData = (HookEntry | HookData)[];
  *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
+export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
 export declare const unusedValueExportToPlacateAjd = 1;
 /**
  * Human readable version of the `LView`.
@@ -759,6 +765,10 @@ export interface LViewDebug {
         indexWithinInitPhase: number;
     };
     /**
+     * Associated TView
+     */
+    readonly tView: TView;
+    /**
      * Parent view (or container)
      */
     readonly parent: LViewDebug | LContainerDebug | null;
@@ -776,6 +786,11 @@ export interface LViewDebug {
      * Hierarchical tree of nodes.
      */
     readonly nodes: DebugNode[];
+    /**
+     * Template structure (no instance data).
+     * (Shows how TNodes are connected)
+     */
+    readonly template: string;
     /**
      * HTML representation of the `LView`.
      *
@@ -798,10 +813,6 @@ export interface LViewDebug {
      * Sub range of `LView` containing vars (bindings).
      */
     readonly vars: LViewDebugRange;
-    /**
-     * Sub range of `LView` containing i18n (translated DOM elements).
-     */
-    readonly i18n: LViewDebugRange;
     /**
      * Sub range of `LView` containing expando (used by DI).
      */
@@ -882,7 +893,7 @@ export interface DebugNode {
     /**
      * Human readable node type.
      */
-    type: typeof TNodeTypeAsString[number];
+    type: string;
     /**
      * DOM native node.
      */

@@ -7,13 +7,24 @@
  */
 import '../../util/ng_dev_mode';
 import '../../util/ng_i18n_closure_mode';
-import { I18nUpdateOpCodes, IcuCase, IcuExpression, TIcu } from '../interfaces/i18n';
+import { I18nUpdateOpCodes, IcuExpression, TIcu } from '../interfaces/i18n';
 import { SanitizerFn } from '../interfaces/sanitization';
 import { LView, TView } from '../interfaces/view';
 /**
- * See `i18nStart` above.
+ * Create dynamic nodes from i18n translation block.
+ *
+ * - Text nodes are created synchronously
+ * - TNodes are linked into tree lazily
+ *
+ * @param tView Current `TView`
+ * @parentTNodeIndex index to the parent TNode of this i18n block
+ * @param lView Current `LView`
+ * @param index Index of `ɵɵi18nStart` instruction.
+ * @param message Message to translate.
+ * @param subTemplateIndex Index into the sub template of message translation. (ie in case of
+ *     `ngIf`) (-1 otherwise)
  */
-export declare function i18nStartFirstPass(lView: LView, tView: TView, index: number, message: string, subTemplateIndex?: number): void;
+export declare function i18nStartFirstCreatePass(tView: TView, parentTNodeIndex: number, lView: LView, index: number, message: string, subTemplateIndex: number): void;
 /**
  * See `i18nAttributes` above.
  */
@@ -21,18 +32,19 @@ export declare function i18nAttributesFirstPass(lView: LView, tView: TView, inde
 /**
  * Generate the OpCodes to update the bindings of a string.
  *
+ * @param updateOpCodes Place where the update opcodes will be stored.
  * @param str The string containing the bindings.
  * @param destinationNode Index of the destination node which will receive the binding.
  * @param attrName Name of the attribute, if the string belongs to an attribute.
  * @param sanitizeFn Sanitization function used to sanitize the string after update, if necessary.
  */
-export declare function generateBindingUpdateOpCodes(str: string, destinationNode: number, attrName?: string, sanitizeFn?: SanitizerFn | null): I18nUpdateOpCodes;
-export declare function isRootTemplateMessage(subTemplateIndex: number | undefined): subTemplateIndex is undefined;
+export declare function generateBindingUpdateOpCodes(updateOpCodes: I18nUpdateOpCodes, str: string, destinationNode: number, attrName?: string, sanitizeFn?: SanitizerFn | null): number;
+export declare function isRootTemplateMessage(subTemplateIndex: number): subTemplateIndex is -1;
 /**
  * Extracts a part of a message and removes the rest.
  *
- * This method is used for extracting a part of the message associated with a template. A translated
- * message can span multiple templates.
+ * This method is used for extracting a part of the message associated with a template. A
+ * translated message can span multiple templates.
  *
  * Example:
  * ```
@@ -43,16 +55,16 @@ export declare function isRootTemplateMessage(subTemplateIndex: number | undefin
  * @param subTemplateIndex Index of the sub-template to extract. If undefined it returns the
  * external template and removes all sub-templates.
  */
-export declare function getTranslationForTemplate(message: string, subTemplateIndex?: number): string;
+export declare function getTranslationForTemplate(message: string, subTemplateIndex: number): string;
 /**
  * Generate the OpCodes for ICU expressions.
  *
- * @param tIcus
  * @param icuExpression
- * @param startIndex
- * @param expandoStartIndex
+ * @param index Index where the anchor is stored and an optional `TIcuContainerNode`
+ *   - `lView[anchorIdx]` points to a `Comment` node representing the anchor for the ICU.
+ *   - `tView.data[anchorIdx]` points to the `TIcuContainerNode` if ICU is root (`null` otherwise)
  */
-export declare function icuStart(tIcus: TIcu[], icuExpression: IcuExpression, startIndex: number, expandoStartIndex: number): void;
+export declare function icuStart(tView: TView, lView: LView, updateOpCodes: I18nUpdateOpCodes, parentIdx: number, icuExpression: IcuExpression, anchorIdx: number): void;
 /**
  * Parses text containing an ICU expression and produces a JSON object for it.
  * Original code from closure library, modified for Angular.
@@ -62,13 +74,18 @@ export declare function icuStart(tIcus: TIcu[], icuExpression: IcuExpression, st
  */
 export declare function parseICUBlock(pattern: string): IcuExpression;
 /**
+ * Breaks pattern into strings and top level {...} blocks.
+ * Can be used to break a message into text and ICU expressions, or to break an ICU expression
+ * into keys and cases. Original code from closure library, modified for Angular.
+ *
+ * @param pattern (sub)Pattern to be broken.
+ * @returns An `Array<string|IcuExpression>` where:
+ *   - odd positions: `string` => text between ICU expressions
+ *   - even positions: `ICUExpression` => ICU expression parsed into `ICUExpression` record.
+ */
+export declare function i18nParseTextIntoPartsAndICU(pattern: string): (string | IcuExpression)[];
+/**
  * Parses a node, its children and its siblings, and generates the mutate & update OpCodes.
  *
- * @param currentNode The first node to parse
- * @param icuCase The data for the ICU expression case that contains those nodes
- * @param parentIndex Index of the current node's parent
- * @param nestedIcus Data for the nested ICU expressions that this case contains
- * @param tIcus Data for all ICU expressions of the current message
- * @param expandoStartIndex Expando start index for the current ICU expression
  */
-export declare function parseNodes(currentNode: Node | null, icuCase: IcuCase, parentIndex: number, nestedIcus: IcuExpression[], tIcus: TIcu[], expandoStartIndex: number): void;
+export declare function parseIcuCase(tView: TView, tIcu: TIcu, lView: LView, updateOpCodes: I18nUpdateOpCodes, parentIdx: number, caseName: string, unsafeCaseHtml: string, nestedIcus: IcuExpression[]): number;

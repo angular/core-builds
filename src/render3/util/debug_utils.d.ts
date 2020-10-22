@@ -22,4 +22,4 @@ export declare function attachDebugObject(obj: any, debug: any): void;
  * @param obj Object to patch
  * @param debugGetter Getter returning a value to patch
  */
-export declare function attachDebugGetter(obj: any, debugGetter: () => any): void;
+export declare function attachDebugGetter<T>(obj: T, debugGetter: (this: T) => any): void;

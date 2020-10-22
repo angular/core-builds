@@ -5,33 +5,47 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { I18nMutateOpCodes, I18nUpdateOpCodes, TIcu } from '../interfaces/i18n';
+import { I18nCreateOpCodes, I18nUpdateOpCodes, IcuCreateOpCodes } from '../interfaces/i18n';
+import { RElement, RNode } from '../interfaces/renderer';
 import { LView, TView } from '../interfaces/view';
-export declare function pushI18nIndex(index: number): void;
-export declare function setMaskBit(bit: boolean): void;
+/**
+ * Keep track of which input bindings in `ɵɵi18nExp` have changed.
+ *
+ * `setMaskBit` gets invoked by each call to `ɵɵi18nExp`.
+ *
+ * @param hasChange did `ɵɵi18nExp` detect a change.
+ */
+export declare function setMaskBit(hasChange: boolean): void;
 export declare function applyI18n(tView: TView, lView: LView, index: number): void;
+/**
+ * Apply `I18nCreateOpCodes` op-codes as stored in `TI18n.create`.
+ *
+ * Creates text (and comment) nodes which are internationalized.
+ *
+ * @param lView Current lView
+ * @param createOpCodes Set of op-codes to apply
+ * @param parentRNode Parent node (so that direct children can be added eagerly) or `null` if it is
+ *     a root node.
+ * @param insertInFrontOf DOM node that should be used as an anchor.
+ */
+export declare function applyCreateOpCodes(lView: LView, createOpCodes: I18nCreateOpCodes, parentRNode: RElement | null, insertInFrontOf: RElement | null): void;
 /**
  * Apply `I18nMutateOpCodes` OpCodes.
  *
  * @param tView Current `TView`
- * @param rootIndex Pointer to the root (parent) tNode for the i18n.
- * @param createOpCodes OpCodes to process
+ * @param mutableOpCodes Mutable OpCodes to process
  * @param lView Current `LView`
+ * @param anchorRNode place where the i18n node should be inserted.
  */
-export declare function applyCreateOpCodes(tView: TView, rootindex: number, createOpCodes: I18nMutateOpCodes, lView: LView): number[];
+export declare function applyMutableOpCodes(tView: TView, mutableOpCodes: IcuCreateOpCodes, lView: LView, anchorRNode: RNode): void;
 /**
  * Apply `I18nUpdateOpCodes` OpCodes
  *
  * @param tView Current `TView`
- * @param tIcus If ICUs present than this contains them.
  * @param lView Current `LView`
  * @param updateOpCodes OpCodes to process
  * @param bindingsStartIndex Location of the first `ɵɵi18nApply`
  * @param changeMask Each bit corresponds to a `ɵɵi18nExp` (Counting backwards from
  *     `bindingsStartIndex`)
  */
-export declare function applyUpdateOpCodes(tView: TView, tIcus: TIcu[] | null, lView: LView, updateOpCodes: I18nUpdateOpCodes, bindingsStartIndex: number, changeMask: number): void;
-/**
- * See `i18nEnd` above.
- */
-export declare function i18nEndFirstPass(tView: TView, lView: LView): void;
+export declare function applyUpdateOpCodes(tView: TView, lView: LView, updateOpCodes: I18nUpdateOpCodes, bindingsStartIndex: number, changeMask: number): void;

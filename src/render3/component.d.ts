@@ -77,6 +77,7 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  * @param rNode Render host element.
  * @param def ComponentDef
  * @param rootView The parent view where the host node is stored
+ * @param rendererFactory Factory to be used for creating child renderers.
  * @param hostRenderer The current renderer
  * @param sanitizer The sanitizer, if provided
  *
