@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-rc.0+1.sha-7f79e77
+ * @license Angular v11.0.0-rc.0+29.sha-6669571
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -722,13 +722,23 @@ function throwError(msg, actual, expected, comparison) {
 }
 function assertDomNode(node) {
     // If we're in a worker, `Node` will not be defined.
-    assertEqual((typeof Node !== 'undefined' && node instanceof Node) ||
-        (typeof node === 'object' && node != null &&
-            node.constructor.name === 'WebWorkerRenderNode'), true, `The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
+    if (!(typeof Node !== 'undefined' && node instanceof Node) &&
+        !(typeof node === 'object' && node != null &&
+            node.constructor.name === 'WebWorkerRenderNode')) {
+        throwError(`The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
+    }
 }
 function assertIndexInRange(arr, index) {
-    const maxLen = arr ? arr.length : 0;
-    assertLessThan(index, maxLen, `Index expected to be less than ${maxLen} but got ${index}`);
+    assertDefined(arr, 'Array must be defined.');
+    const maxLen = arr.length;
+    if (index < 0 || index >= maxLen) {
+        throwError(`Index expected to be less than ${maxLen} but got ${index}`);
+    }
+}
+function assertOneOf(value, ...validValues) {
+    if (validValues.indexOf(value) !== -1)
+        return true;
+    throwError(`Expected value to be one of ${JSON.stringify(validValues)} but was ${JSON.stringify(value)}.`);
 }
 
 /**
@@ -1865,7 +1875,13 @@ const DECLARATION_COMPONENT_VIEW = 16;
 const DECLARATION_LCONTAINER = 17;
 const PREORDER_HOOK_FLAGS = 18;
 const QUERIES = 19;
-/** Size of LView's header. Necessary to adjust for it when setting slots.  */
+/**
+ * Size of LView's header. Necessary to adjust for it when setting slots.
+ *
+ * IMPORTANT: `HEADER_OFFSET` should only be referred to the in the `ɵɵ*` instructions to translate
+ * instruction index into `LView` index. All other indexes should be in the `LView` index space and
+ * there should be no need to refer to `HEADER_OFFSET` anywhere else.
+ */
 const HEADER_OFFSET = 20;
 /**
  * Converts `TViewType` into human readable text.
@@ -1975,9 +1991,21 @@ function assertTNodeForLView(tNode, lView) {
     assertTNodeForTView(tNode, lView[TVIEW]);
 }
 function assertTNodeForTView(tNode, tView) {
-    assertDefined(tNode, 'TNode must be defined');
+    assertTNode(tNode);
     tNode.hasOwnProperty('tView_') &&
         assertEqual(tNode.tView_, tView, 'This TNode does not belong to this TView.');
+}
+function assertTNode(tNode) {
+    assertDefined(tNode, 'TNode must be defined');
+    if (!(tNode && typeof tNode === 'object' && tNode.hasOwnProperty('directiveStylingLast'))) {
+        throwError('Not of type TNode, got: ' + tNode);
+    }
+}
+function assertTIcu(tIcu) {
+    assertDefined(tIcu, 'Expected TIcu to be defined');
+    if (!(typeof tIcu.currentCaseLViewIndex === 'number')) {
+        throwError('Object is not of TIcu type.');
+    }
 }
 function assertComponentType(actual, msg = 'Type passed in is not ComponentType, it does not have \'ɵcmp\' property.') {
     if (!getComponentDef(actual)) {
@@ -2033,15 +2061,11 @@ function assertIndexInDeclRange(lView, index) {
 }
 function assertIndexInVarsRange(lView, index) {
     const tView = lView[1];
-    assertBetween(tView.bindingStartIndex, tView.i18nStartIndex, index);
-}
-function assertIndexInI18nRange(lView, index) {
-    const tView = lView[1];
-    assertBetween(tView.i18nStartIndex, tView.expandoStartIndex, index);
+    assertBetween(tView.bindingStartIndex, tView.originalExpandoStartIndex, index);
 }
 function assertIndexInExpandoRange(lView, index) {
     const tView = lView[1];
-    assertBetween(tView.expandoStartIndex, lView.length, index);
+    assertBetween(tView.originalExpandoStartIndex, lView.length, index);
 }
 function assertBetween(lower, upper, index) {
     if (!(lower <= index && index < upper)) {
@@ -2067,6 +2091,182 @@ function assertNodeInjector(lView, injectorIndex) {
     assertNumber(lView[injectorIndex + 6], 'injectorIndex should point to a bloom filter');
     assertNumber(lView[injectorIndex + 7], 'injectorIndex should point to a bloom filter');
     assertNumber(lView[injectorIndex + 8 /* PARENT */], 'injectorIndex should point to parent injector');
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used for stringify render output in Ivy.
+ * Important! This function is very performance-sensitive and we should
+ * be extra careful not to introduce megamorphic reads in it.
+ */
+function renderStringify(value) {
+    if (typeof value === 'string')
+        return value;
+    if (value == null)
+        return '';
+    return '' + value;
+}
+/**
+ * Used to stringify a value so that it can be displayed in an error message.
+ * Important! This function contains a megamorphic read and should only be
+ * used for error messages.
+ */
+function stringifyForError(value) {
+    if (typeof value === 'function')
+        return value.name || value.toString();
+    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+        return value.type.name || value.type.toString();
+    }
+    return renderStringify(value);
+}
+const ɵ0$2 = () => (typeof requestAnimationFrame !== 'undefined' &&
+    requestAnimationFrame || // browser only
+    setTimeout // everything else
+)
+    .bind(_global);
+const defaultScheduler = (ɵ0$2)();
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveWindow(element) {
+    return { name: 'window', target: element.ownerDocument.defaultView };
+}
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveDocument(element) {
+    return { name: 'document', target: element.ownerDocument };
+}
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveBody(element) {
+    return { name: 'body', target: element.ownerDocument.body };
+}
+/**
+ * The special delimiter we use to separate property names, prefixes, and suffixes
+ * in property binding metadata. See storeBindingMetadata().
+ *
+ * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+ * because it is a very uncommon character that is unlikely to be part of a user's
+ * property names or interpolation strings. If it is in fact used in a property
+ * binding, DebugElement.properties will not return the correct value for that
+ * binding. However, there should be no runtime effect for real applications.
+ *
+ * This character is typically rendered as a question mark inside of a diamond.
+ * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+ *
+ */
+const INTERPOLATION_DELIMITER = `�`;
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ */
+function maybeUnwrapFn(value) {
+    if (value instanceof Function) {
+        return value();
+    }
+    else {
+        return value;
+    }
+}
+
+/** Called when directives inject each other (creating a circular dependency) */
+function throwCyclicDependencyError(token, path) {
+    const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
+    throw new Error(`Circular dependency in DI detected for ${token}${depPath}`);
+}
+/** Called when there are multiple component selectors that match a given node */
+function throwMultipleComponentError(tNode) {
+    throw new Error(`Multiple components match node with tagname ${tNode.value}`);
+}
+function throwMixedMultiProviderError() {
+    throw new Error(`Cannot mix multi providers and regular providers`);
+}
+function throwInvalidProviderError(ngModuleType, providers, provider) {
+    let ngModuleDetail = '';
+    if (ngModuleType && providers) {
+        const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
+        ngModuleDetail =
+            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
+    }
+    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+}
+/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
+function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
+    const field = propName ? ` for '${propName}'` : '';
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.`;
+    if (creationMode) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook?`;
+    }
+    // TODO: include debug context, see `viewDebugError` function in
+    // `packages/core/src/view/errors.ts` for reference.
+    throw new Error(msg);
+}
+function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
+    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
+    let oldValue = prefix, newValue = prefix;
+    for (let i = 0; i < chunks.length; i++) {
+        const slotIdx = rootIndex + i;
+        oldValue += `${lView[slotIdx]}${chunks[i]}`;
+        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
+    }
+    return { propName, oldValue, newValue };
+}
+/**
+ * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
+ * - property name (for property bindings or interpolations)
+ * - old and new values, enriched using information from metadata
+ *
+ * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
+ * function description.
+ */
+function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
+    const tData = lView[TVIEW].data;
+    const metadata = tData[bindingIndex];
+    if (typeof metadata === 'string') {
+        // metadata for property interpolation
+        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
+            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
+        }
+        // metadata for property binding
+        return { propName: metadata, oldValue, newValue };
+    }
+    // metadata is not available for this expression, check if this expression is a part of the
+    // property interpolation by going from the current binding index left and look for a string that
+    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
+    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
+    if (metadata === null) {
+        let idx = bindingIndex - 1;
+        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
+            idx--;
+        }
+        const meta = tData[idx];
+        if (typeof meta === 'string') {
+            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
+            // first interpolation delimiter separates property name from interpolation parts (in case of
+            // property interpolations), so we subtract one from total number of found delimiters
+            if (matches && (matches.length - 1) > bindingIndex - idx) {
+                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
+            }
+        }
+    }
+    return { propName: undefined, oldValue, newValue };
+}
+/** Throws an error when a token is not found in DI. */
+function throwProviderNotFoundError(token, injectorName) {
+    const injectorDetails = injectorName ? ` in ${injectorName}` : '';
+    throw new Error(`No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -2283,11 +2483,11 @@ var RendererStyleFlags3;
 function isProceduralRenderer(renderer) {
     return !!(renderer.listen);
 }
-const ɵ0$2 = (hostElement, rendererType) => {
+const ɵ0$3 = (hostElement, rendererType) => {
     return getDocument();
 };
 const domRendererFactory3 = {
-    createRenderer: ɵ0$2
+    createRenderer: ɵ0$3
 };
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -2359,7 +2559,9 @@ function unwrapLContainer(value) {
  * from any containers, component views, or style contexts.
  */
 function getNativeByIndex(index, lView) {
-    return unwrapRNode(lView[index + HEADER_OFFSET]);
+    ngDevMode && assertIndexInRange(lView, index);
+    ngDevMode && assertGreaterThanOrEqual(index, HEADER_OFFSET, 'Expected to be past HEADER_OFFSET');
+    return unwrapRNode(lView[index]);
 }
 /**
  * Retrieve an `RNode` for a given `TNode` and `LView`.
@@ -2394,15 +2596,18 @@ function getNativeByTNodeOrNull(tNode, lView) {
     }
     return null;
 }
+// fixme(misko): The return Type should be `TNode|null`
 function getTNode(tView, index) {
     ngDevMode && assertGreaterThan(index, -1, 'wrong index for TNode');
     ngDevMode && assertLessThan(index, tView.data.length, 'wrong index for TNode');
-    return tView.data[index + HEADER_OFFSET];
+    const tNode = tView.data[index];
+    ngDevMode && tNode !== null && assertTNode(tNode);
+    return tNode;
 }
 /** Retrieves a value from any `LView` or `TData`. */
 function load(view, index) {
-    ngDevMode && assertIndexInRange(view, index + HEADER_OFFSET);
-    return view[index + HEADER_OFFSET];
+    ngDevMode && assertIndexInRange(view, index);
+    return view[index];
 }
 function getComponentLViewByIndex(nodeIndex, hostView) {
     // Could be an LView or an LContainer. If LContainer, unwrap to find LView.
@@ -2443,9 +2648,11 @@ function viewAttachedToChangeDetector(view) {
 function viewAttachedToContainer(view) {
     return isLContainer(view[PARENT]);
 }
-/** Returns a constant from `TConstants` instance. */
 function getConstant(consts, index) {
-    return consts === null || index == null ? null : consts[index];
+    if (index === null || index === undefined)
+        return null;
+    ngDevMode && assertIndexInRange(consts, index);
+    return consts[index];
 }
 /**
  * Resets the pre-order hook flags of the view.
@@ -2486,6 +2693,14 @@ const instructionState = {
     bindingsEnabled: true,
     isInCheckNoChangesMode: false,
 };
+/**
+ * Returns true if the instruction state stack is empty.
+ *
+ * Intended to be called from tests only (tree shaken otherwise).
+ */
+function specOnlyIsInstructionStateEmpty() {
+    return instructionState.lFrame.parent === null;
+}
 function getElementDepthCount() {
     return instructionState.lFrame.elementDepthCount;
 }
@@ -2569,12 +2784,25 @@ function ɵɵrestoreView(viewToRestore) {
     instructionState.lFrame.contextLView = viewToRestore;
 }
 function getCurrentTNode() {
+    let currentTNode = getCurrentTNodePlaceholderOk();
+    while (currentTNode !== null && currentTNode.type === 64 /* Placeholder */) {
+        currentTNode = currentTNode.parent;
+    }
+    return currentTNode;
+}
+function getCurrentTNodePlaceholderOk() {
     return instructionState.lFrame.currentTNode;
 }
+function getCurrentParentTNode() {
+    const lFrame = instructionState.lFrame;
+    const currentTNode = lFrame.currentTNode;
+    return lFrame.isParent ? currentTNode : currentTNode.parent;
+}
 function setCurrentTNode(tNode, isParent) {
-    ngDevMode && assertTNodeForTView(tNode, instructionState.lFrame.tView);
-    instructionState.lFrame.currentTNode = tNode;
-    instructionState.lFrame.isParent = isParent;
+    ngDevMode && tNode && assertTNodeForTView(tNode, instructionState.lFrame.tView);
+    const lFrame = instructionState.lFrame;
+    lFrame.currentTNode = tNode;
+    lFrame.isParent = isParent;
 }
 function isCurrentTNodeParent() {
     return instructionState.lFrame.isParent;
@@ -2618,6 +2846,12 @@ function incrementBindingIndex(count) {
     const index = lFrame.bindingIndex;
     lFrame.bindingIndex = lFrame.bindingIndex + count;
     return index;
+}
+function isInI18nBlock() {
+    return instructionState.lFrame.inI18n;
+}
+function setInI18nBlock(isInI18nBlock) {
+    instructionState.lFrame.inI18n = isInI18nBlock;
 }
 /**
  * Set a new binding root index so that host template functions can execute.
@@ -2691,13 +2925,14 @@ function enterDI(newView, tNode) {
  * @returns the previously active lView;
  */
 function enterView(newView) {
+    ngDevMode && assertNotEqual(newView[0], newView[1], '????');
     ngDevMode && assertLViewOrUndefined(newView);
     const newLFrame = allocLFrame();
     if (ngDevMode) {
         assertEqual(newLFrame.isParent, true, 'Expected clean LFrame');
         assertEqual(newLFrame.lView, null, 'Expected clean LFrame');
         assertEqual(newLFrame.tView, null, 'Expected clean LFrame');
-        assertEqual(newLFrame.selectedIndex, 0, 'Expected clean LFrame');
+        assertEqual(newLFrame.selectedIndex, -1, 'Expected clean LFrame');
         assertEqual(newLFrame.elementDepthCount, 0, 'Expected clean LFrame');
         assertEqual(newLFrame.currentDirectiveIndex, -1, 'Expected clean LFrame');
         assertEqual(newLFrame.currentNamespace, null, 'Expected clean LFrame');
@@ -2712,6 +2947,7 @@ function enterView(newView) {
     newLFrame.tView = tView;
     newLFrame.contextLView = newView;
     newLFrame.bindingIndex = tView.bindingStartIndex;
+    newLFrame.inI18n = false;
 }
 /**
  * Allocates next free LFrame. This function tries to reuse the `LFrame`s to lower memory pressure.
@@ -2728,7 +2964,7 @@ function createLFrame(parent) {
         isParent: true,
         lView: null,
         tView: null,
-        selectedIndex: 0,
+        selectedIndex: -1,
         contextLView: null,
         elementDepthCount: 0,
         currentNamespace: null,
@@ -2738,6 +2974,7 @@ function createLFrame(parent) {
         currentQueryIndex: 0,
         parent: parent,
         child: null,
+        inI18n: false,
     };
     parent !== null && (parent.child = lFrame); // link the new LFrame for reuse.
     return lFrame;
@@ -2777,7 +3014,7 @@ function leaveView() {
     const oldLFrame = leaveViewLight();
     oldLFrame.isParent = true;
     oldLFrame.tView = null;
-    oldLFrame.selectedIndex = 0;
+    oldLFrame.selectedIndex = -1;
     oldLFrame.contextLView = null;
     oldLFrame.elementDepthCount = 0;
     oldLFrame.currentDirectiveIndex = -1;
@@ -2819,6 +3056,10 @@ function getSelectedIndex() {
  * run if and when the provided `index` value is different from the current selected index value.)
  */
 function setSelectedIndex(index) {
+    ngDevMode && index !== -1 &&
+        assertGreaterThanOrEqual(index, HEADER_OFFSET, 'Index must be past HEADER_OFFSET (or -1).');
+    ngDevMode &&
+        assertLessThan(index, instructionState.lFrame.lView.length, 'Can\'t set index passed end of LView');
     instructionState.lFrame.selectedIndex = index;
 }
 /**
@@ -2925,6 +3166,7 @@ function registerPostOrderHooks(tView, tNode) {
     // hooks for projected components and directives must be called *before* their hosts.
     for (let i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
         const directiveDef = tView.data[i];
+        ngDevMode && assertDefined(directiveDef, 'Expecting DirectiveDef');
         const lifecycleHooks = directiveDef.type.prototype;
         const { ngAfterContentInit, ngAfterContentChecked, ngAfterViewInit, ngAfterViewChecked, ngOnDestroy } = lifecycleHooks;
         if (ngAfterContentInit) {
@@ -3219,13 +3461,17 @@ const unusedValueExportToPlacateAjd$3 = 1;
  * Converts `TNodeType` into human readable text.
  * Make sure this matches with `TNodeType`
  */
-const TNodeTypeAsString = [
-    'Container',
-    'Projection',
-    'Element',
-    'ElementContainer',
-    'IcuContainer' // 4
-];
+function toTNodeTypeAsString(tNodeType) {
+    let text = '';
+    (tNodeType & 1 /* Text */) && (text += '|Text');
+    (tNodeType & 2 /* Element */) && (text += '|Element');
+    (tNodeType & 4 /* Container */) && (text += '|Container');
+    (tNodeType & 8 /* ElementContainer */) && (text += '|ElementContainer');
+    (tNodeType & 16 /* Projection */) && (text += '|Projection');
+    (tNodeType & 32 /* Icu */) && (text += '|IcuContainer');
+    (tNodeType & 64 /* Placeholder */) && (text += '|Placeholder');
+    return text.length > 0 ? text.substring(1) : text;
+}
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$4 = 1;
@@ -3285,22 +3531,23 @@ function hasStyleInput(tNode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function assertNodeType(tNode, type) {
+function assertTNodeType(tNode, expectedTypes, message) {
     assertDefined(tNode, 'should be called with a TNode');
-    assertEqual(tNode.type, type, `should be a ${typeName(type)}`);
+    if ((tNode.type & expectedTypes) === 0) {
+        throwError(message ||
+            `Expected [${toTNodeTypeAsString(expectedTypes)}] but got ${toTNodeTypeAsString(tNode.type)}.`);
+    }
 }
-function assertNodeOfPossibleTypes(tNode, types, message) {
-    assertDefined(tNode, 'should be called with a TNode');
-    const found = types.some(type => tNode.type === type);
-    assertEqual(found, true, message !== null && message !== void 0 ? message : `Should be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
-}
-function assertNodeNotOfTypes(tNode, types, message) {
-    assertDefined(tNode, 'should be called with a TNode');
-    const found = types.some(type => tNode.type === type);
-    assertEqual(found, false, message !== null && message !== void 0 ? message : `Should not be one of ${types.map(typeName).join(', ')} but got ${typeName(tNode.type)}`);
-}
-function typeName(type) {
-    return TNodeTypeAsString[type] || '<unknown>';
+function assertPureTNodeType(type) {
+    if (!(type === 2 /* Element */ || //
+        type === 1 /* Text */ || //
+        type === 4 /* Container */ || //
+        type === 8 /* ElementContainer */ || //
+        type === 32 /* Icu */ || //
+        type === 16 /* Projection */ || //
+        type === 64 /* Placeholder */)) {
+        throwError(`Expected TNodeType to have only a single type selected, but got ${toTNodeTypeAsString(type)}.`);
+    }
 }
 
 /**
@@ -3563,92 +3810,6 @@ function getParentInjectorView(location, startView) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Used for stringify render output in Ivy.
- * Important! This function is very performance-sensitive and we should
- * be extra careful not to introduce megamorphic reads in it.
- */
-function renderStringify(value) {
-    if (typeof value === 'string')
-        return value;
-    if (value == null)
-        return '';
-    return '' + value;
-}
-/**
- * Used to stringify a value so that it can be displayed in an error message.
- * Important! This function contains a megamorphic read and should only be
- * used for error messages.
- */
-function stringifyForError(value) {
-    if (typeof value === 'function')
-        return value.name || value.toString();
-    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-        return value.type.name || value.type.toString();
-    }
-    return renderStringify(value);
-}
-const ɵ0$3 = () => (typeof requestAnimationFrame !== 'undefined' &&
-    requestAnimationFrame || // browser only
-    setTimeout // everything else
-)
-    .bind(_global);
-const defaultScheduler = (ɵ0$3)();
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveWindow(element) {
-    return { name: 'window', target: element.ownerDocument.defaultView };
-}
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveDocument(element) {
-    return { name: 'document', target: element.ownerDocument };
-}
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveBody(element) {
-    return { name: 'body', target: element.ownerDocument.body };
-}
-/**
- * The special delimiter we use to separate property names, prefixes, and suffixes
- * in property binding metadata. See storeBindingMetadata().
- *
- * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
- * because it is a very uncommon character that is unlikely to be part of a user's
- * property names or interpolation strings. If it is in fact used in a property
- * binding, DebugElement.properties will not return the correct value for that
- * binding. However, there should be no runtime effect for real applications.
- *
- * This character is typically rendered as a question mark inside of a diamond.
- * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
- *
- */
-const INTERPOLATION_DELIMITER = `�`;
-/**
- * Unwrap a value which might be behind a closure (for forward declaration reasons).
- */
-function maybeUnwrapFn(value) {
-    if (value instanceof Function) {
-        return value();
-    }
-    else {
-        return value;
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Defines if the call to `inject` should include `viewProviders` in its resolution.
  *
  * This is set to true when we try to instantiate a component. This value is reset in
@@ -3895,8 +4056,7 @@ function diPublicInInjector(injectorIndex, tView, token) {
  * @publicApi
  */
 function injectAttributeImpl(tNode, attrNameToInject) {
-    ngDevMode &&
-        assertNodeOfPossibleTypes(tNode, [0 /* Container */, 2 /* Element */, 3 /* ElementContainer */]);
+    ngDevMode && assertTNodeType(tNode, 12 /* AnyContainer */ | 3 /* AnyRNode */);
     ngDevMode && assertDefined(tNode, 'expecting tNode');
     if (attrNameToInject === 'class') {
         return tNode.classes;
@@ -3965,7 +4125,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
             try {
                 const value = bloomHash();
                 if (value == null && !(flags & InjectFlags.Optional)) {
-                    throw new Error(`No provider for ${stringifyForError(token)}!`);
+                    throwProviderNotFoundError(token);
                 }
                 else {
                     return value;
@@ -4064,7 +4224,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
         return notFoundValue;
     }
     else {
-        throw new Error(`NodeInjector: NOT_FOUND [${stringifyForError(token)}]`);
+        throwProviderNotFoundError(token, 'NodeInjector');
     }
 }
 const NOT_FOUND = {};
@@ -4088,7 +4248,7 @@ function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flag
         // - AND the parent TNode is an Element.
         // This means that we just came from the Component's View and therefore are allowed to see
         // into the ViewProviders.
-        (previousTView != currentTView && (tNode.type === 2 /* Element */));
+        (previousTView != currentTView && ((tNode.type & 3 /* AnyRNode */) !== 0));
     // This special case happens when there is a @host on the inject and when we are searching
     // on the host element node.
     const isHostSpecialCase = (flags & InjectFlags.Host) && hostTElementNode === tNode;
@@ -4148,7 +4308,7 @@ function getNodeInjectable(lView, tView, index, tNode) {
     if (isFactory(value)) {
         const factory = value;
         if (factory.resolving) {
-            throw new Error(`Circular dep for ${stringifyForError(tData[index])}`);
+            throwCyclicDependencyError(stringifyForError(tData[index]));
         }
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
         factory.resolving = true;
@@ -5618,11 +5778,7 @@ function findViaNativeElement(lView, target) {
  * Locates the next tNode (child, sibling or parent).
  */
 function traverseNextElement(tNode) {
-    if (tNode.child && tNode.child.parent === tNode) {
-        // FIXME(misko): checking if `tNode.child.parent === tNode` should not be necessary
-        // We have added it here because i18n creates TNode's which are not valid, so this is a work
-        // around. The i18n code will be refactored in #39003 and once it lands this extra check can be
-        // deleted.
+    if (tNode.child) {
         return tNode.child;
     }
     else if (tNode.next) {
@@ -5726,88 +5882,32 @@ function discoverLocalRefs(lView, nodeIndex) {
     return null;
 }
 
-/** Called when directives inject each other (creating a circular dependency) */
-function throwCyclicDependencyError(token) {
-    throw new Error(`Cannot instantiate cyclic dependency! ${token}`);
-}
-/** Called when there are multiple component selectors that match a given node */
-function throwMultipleComponentError(tNode) {
-    throw new Error(`Multiple components match node with tagname ${tNode.tagName}`);
-}
-function throwMixedMultiProviderError() {
-    throw new Error(`Cannot mix multi providers and regular providers`);
-}
-function throwInvalidProviderError(ngModuleType, providers, provider) {
-    let ngModuleDetail = '';
-    if (ngModuleType && providers) {
-        const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
-        ngModuleDetail =
-            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
-    }
-    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
-}
-/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
-    const field = propName ? ` for '${propName}'` : '';
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.`;
-    if (creationMode) {
-        msg +=
-            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                ` Has it been created in a change detection hook?`;
-    }
-    // TODO: include debug context, see `viewDebugError` function in
-    // `packages/core/src/view/errors.ts` for reference.
-    throw new Error(msg);
-}
-function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
-    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
-    let oldValue = prefix, newValue = prefix;
-    for (let i = 0; i < chunks.length; i++) {
-        const slotIdx = rootIndex + i;
-        oldValue += `${lView[slotIdx]}${chunks[i]}`;
-        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
-    }
-    return { propName, oldValue, newValue };
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let _icuContainerIterate;
+/**
+ * Iterator which provides ability to visit all of the `TIcuContainerNode` root `RNode`s.
+ */
+function icuContainerIterate(tIcuContainerNode, lView) {
+    return _icuContainerIterate(tIcuContainerNode, lView);
 }
 /**
- * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
- * - property name (for property bindings or interpolations)
- * - old and new values, enriched using information from metadata
+ * Ensures that `IcuContainerVisitor`'s implementation is present.
  *
- * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
- * function description.
+ * This function is invoked when i18n instruction comes across an ICU. The purpose is to allow the
+ * bundler to tree shake ICU logic and only load it if ICU instruction is executed.
  */
-function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
-    const tData = lView[TVIEW].data;
-    const metadata = tData[bindingIndex];
-    if (typeof metadata === 'string') {
-        // metadata for property interpolation
-        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
-            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
-        }
-        // metadata for property binding
-        return { propName: metadata, oldValue, newValue };
+function ensureIcuContainerVisitorLoaded(loader) {
+    if (_icuContainerIterate === undefined) {
+        // Do not inline this function. We want to keep `ensureIcuContainerVisitorLoaded` light, so it
+        // can be inlined into call-site.
+        _icuContainerIterate = loader();
     }
-    // metadata is not available for this expression, check if this expression is a part of the
-    // property interpolation by going from the current binding index left and look for a string that
-    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
-    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
-    if (metadata === null) {
-        let idx = bindingIndex - 1;
-        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
-            idx--;
-        }
-        const meta = tData[idx];
-        if (typeof meta === 'string') {
-            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
-            // first interpolation delimiter separates property name from interpolation parts (in case of
-            // property interpolations), so we subtract one from total number of found delimiters
-            if (matches && (matches.length - 1) > bindingIndex - idx) {
-                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
-            }
-        }
-    }
-    return { propName: undefined, oldValue, newValue };
 }
 
 /**
@@ -5820,6 +5920,1010 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$5 = 1;
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
+ * that LContainer, which is an LView
+ * @param lView the lView whose parent to get
+ */
+function getLViewParent(lView) {
+    ngDevMode && assertLView(lView);
+    const parent = lView[PARENT];
+    return isLContainer(parent) ? parent[PARENT] : parent;
+}
+/**
+ * Retrieve the root view from any component or `LView` by walking the parent `LView` until
+ * reaching the root `LView`.
+ *
+ * @param componentOrLView any component or `LView`
+ */
+function getRootView(componentOrLView) {
+    ngDevMode && assertDefined(componentOrLView, 'component');
+    let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
+    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
+        lView = getLViewParent(lView);
+    }
+    ngDevMode && assertLView(lView);
+    return lView;
+}
+/**
+ * Returns the `RootContext` instance that is associated with
+ * the application where the target is situated. It does this by walking the parent views until it
+ * gets to the root view, then getting the context off of that.
+ *
+ * @param viewOrComponent the `LView` or component to get the root context for.
+ */
+function getRootContext(viewOrComponent) {
+    const rootView = getRootView(viewOrComponent);
+    ngDevMode &&
+        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
+    return rootView[CONTEXT];
+}
+/**
+ * Gets the first `LContainer` in the LView or `null` if none exists.
+ */
+function getFirstLContainer(lView) {
+    return getNearestLContainer(lView[CHILD_HEAD]);
+}
+/**
+ * Gets the next `LContainer` that is a sibling of the given container.
+ */
+function getNextLContainer(container) {
+    return getNearestLContainer(container[NEXT]);
+}
+function getNearestLContainer(viewOrContainer) {
+    while (viewOrContainer !== null && !isLContainer(viewOrContainer)) {
+        viewOrContainer = viewOrContainer[NEXT];
+    }
+    return viewOrContainer;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const unusedValueToPlacateAjd = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd;
+/**
+ * NOTE: for performance reasons, the possible actions are inlined within the function instead of
+ * being passed as an argument.
+ */
+function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode) {
+    // If this slot was allocated for a text node dynamically created by i18n, the text node itself
+    // won't be created until i18nApply() in the update block, so this node should be skipped.
+    // For more info, see "ICU expressions should work inside an ngTemplateOutlet inside an ngFor"
+    // in `i18n_spec.ts`.
+    if (lNodeToHandle != null) {
+        let lContainer;
+        let isComponent = false;
+        // We are expecting an RNode, but in the case of a component or LContainer the `RNode` is
+        // wrapped in an array which needs to be unwrapped. We need to know if it is a component and if
+        // it has LContainer so that we can process all of those cases appropriately.
+        if (isLContainer(lNodeToHandle)) {
+            lContainer = lNodeToHandle;
+        }
+        else if (isLView(lNodeToHandle)) {
+            isComponent = true;
+            ngDevMode && assertDefined(lNodeToHandle[HOST], 'HOST must be defined for a component LView');
+            lNodeToHandle = lNodeToHandle[HOST];
+        }
+        const rNode = unwrapRNode(lNodeToHandle);
+        ngDevMode && !isProceduralRenderer(renderer) && assertDomNode(rNode);
+        if (action === 0 /* Create */ && parent !== null) {
+            if (beforeNode == null) {
+                nativeAppendChild(renderer, parent, rNode);
+            }
+            else {
+                nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
+            }
+        }
+        else if (action === 1 /* Insert */ && parent !== null) {
+            nativeInsertBefore(renderer, parent, rNode, beforeNode || null, true);
+        }
+        else if (action === 2 /* Detach */) {
+            nativeRemoveNode(renderer, rNode, isComponent);
+        }
+        else if (action === 3 /* Destroy */) {
+            ngDevMode && ngDevMode.rendererDestroyNode++;
+            renderer.destroyNode(rNode);
+        }
+        if (lContainer != null) {
+            applyContainer(renderer, action, lContainer, parent, beforeNode);
+        }
+    }
+}
+function createTextNode(renderer, value) {
+    ngDevMode && ngDevMode.rendererCreateTextNode++;
+    ngDevMode && ngDevMode.rendererSetText++;
+    return isProceduralRenderer(renderer) ? renderer.createText(value) :
+        renderer.createTextNode(value);
+}
+function updateTextNode(renderer, rNode, value) {
+    ngDevMode && ngDevMode.rendererSetText++;
+    isProceduralRenderer(renderer) ? renderer.setValue(rNode, value) : rNode.textContent = value;
+}
+function createCommentNode(renderer, value) {
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    // isProceduralRenderer check is not needed because both `Renderer2` and `Renderer3` have the same
+    // method name.
+    return renderer.createComment(value);
+}
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param renderer A renderer to use
+ * @param name the tag name
+ * @param namespace Optional namespace for element.
+ * @returns the element created
+ */
+function createElementNode(renderer, name, namespace) {
+    ngDevMode && ngDevMode.rendererCreateElement++;
+    if (isProceduralRenderer(renderer)) {
+        return renderer.createElement(name, namespace);
+    }
+    else {
+        return namespace === null ? renderer.createElement(name) :
+            renderer.createElementNS(namespace, name);
+    }
+}
+/**
+ * Removes all DOM elements associated with a view.
+ *
+ * Because some root nodes of the view may be containers, we sometimes need
+ * to propagate deeply into the nested containers to remove all elements in the
+ * views beneath it.
+ *
+ * @param tView The `TView' of the `LView` from which elements should be added or removed
+ * @param lView The view from which elements should be added or removed
+ */
+function removeViewFromContainer(tView, lView) {
+    const renderer = lView[RENDERER];
+    applyView(tView, lView, renderer, 2 /* Detach */, null, null);
+    lView[HOST] = null;
+    lView[T_HOST] = null;
+}
+/**
+ * Adds all DOM elements associated with a view.
+ *
+ * Because some root nodes of the view may be containers, we sometimes need
+ * to propagate deeply into the nested containers to add all elements in the
+ * views beneath it.
+ *
+ * @param tView The `TView' of the `LView` from which elements should be added or removed
+ * @param parentTNode The `TNode` where the `LView` should be attached to.
+ * @param renderer Current renderer to use for DOM manipulations.
+ * @param lView The view from which elements should be added or removed
+ * @param parentNativeNode The parent `RElement` where it should be inserted into.
+ * @param beforeNode The node before which elements should be added, if insert mode
+ */
+function addViewToContainer(tView, parentTNode, renderer, lView, parentNativeNode, beforeNode) {
+    lView[HOST] = parentNativeNode;
+    lView[T_HOST] = parentTNode;
+    applyView(tView, lView, renderer, 1 /* Insert */, parentNativeNode, beforeNode);
+}
+/**
+ * Detach a `LView` from the DOM by detaching its nodes.
+ *
+ * @param tView The `TView' of the `LView` to be detached
+ * @param lView the `LView` to be detached.
+ */
+function renderDetachView(tView, lView) {
+    applyView(tView, lView, lView[RENDERER], 2 /* Detach */, null, null);
+}
+/**
+ * Traverses down and up the tree of views and containers to remove listeners and
+ * call onDestroy callbacks.
+ *
+ * Notes:
+ *  - Because it's used for onDestroy calls, it needs to be bottom-up.
+ *  - Must process containers instead of their views to avoid splicing
+ *  when views are destroyed and re-added.
+ *  - Using a while loop because it's faster than recursion
+ *  - Destroy only called on movement to sibling or movement to parent (laterally or up)
+ *
+ *  @param rootView The view to destroy
+ */
+function destroyViewTree(rootView) {
+    // If the view has no children, we can clean it up and return early.
+    let lViewOrLContainer = rootView[CHILD_HEAD];
+    if (!lViewOrLContainer) {
+        return cleanUpView(rootView[TVIEW], rootView);
+    }
+    while (lViewOrLContainer) {
+        let next = null;
+        if (isLView(lViewOrLContainer)) {
+            // If LView, traverse down to child.
+            next = lViewOrLContainer[CHILD_HEAD];
+        }
+        else {
+            ngDevMode && assertLContainer(lViewOrLContainer);
+            // If container, traverse down to its first LView.
+            const firstView = lViewOrLContainer[CONTAINER_HEADER_OFFSET];
+            if (firstView)
+                next = firstView;
+        }
+        if (!next) {
+            // Only clean up view when moving to the side or up, as destroy hooks
+            // should be called in order from the bottom up.
+            while (lViewOrLContainer && !lViewOrLContainer[NEXT] && lViewOrLContainer !== rootView) {
+                if (isLView(lViewOrLContainer)) {
+                    cleanUpView(lViewOrLContainer[TVIEW], lViewOrLContainer);
+                }
+                lViewOrLContainer = lViewOrLContainer[PARENT];
+            }
+            if (lViewOrLContainer === null)
+                lViewOrLContainer = rootView;
+            if (isLView(lViewOrLContainer)) {
+                cleanUpView(lViewOrLContainer[TVIEW], lViewOrLContainer);
+            }
+            next = lViewOrLContainer && lViewOrLContainer[NEXT];
+        }
+        lViewOrLContainer = next;
+    }
+}
+/**
+ * Inserts a view into a container.
+ *
+ * This adds the view to the container's array of active views in the correct
+ * position. It also adds the view's elements to the DOM if the container isn't a
+ * root node of another view (in that case, the view's elements will be added when
+ * the container's parent view is added later).
+ *
+ * @param tView The `TView' of the `LView` to insert
+ * @param lView The view to insert
+ * @param lContainer The container into which the view should be inserted
+ * @param index Which index in the container to insert the child view into
+ */
+function insertView(tView, lView, lContainer, index) {
+    ngDevMode && assertLView(lView);
+    ngDevMode && assertLContainer(lContainer);
+    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
+    const containerLength = lContainer.length;
+    if (index > 0) {
+        // This is a new view, we need to add it to the children.
+        lContainer[indexInContainer - 1][NEXT] = lView;
+    }
+    if (index < containerLength - CONTAINER_HEADER_OFFSET) {
+        lView[NEXT] = lContainer[indexInContainer];
+        addToArray(lContainer, CONTAINER_HEADER_OFFSET + index, lView);
+    }
+    else {
+        lContainer.push(lView);
+        lView[NEXT] = null;
+    }
+    lView[PARENT] = lContainer;
+    // track views where declaration and insertion points are different
+    const declarationLContainer = lView[DECLARATION_LCONTAINER];
+    if (declarationLContainer !== null && lContainer !== declarationLContainer) {
+        trackMovedView(declarationLContainer, lView);
+    }
+    // notify query that a new view has been added
+    const lQueries = lView[QUERIES];
+    if (lQueries !== null) {
+        lQueries.insertView(tView);
+    }
+    // Sets the attached flag
+    lView[FLAGS] |= 128 /* Attached */;
+}
+/**
+ * Track views created from the declaration container (TemplateRef) and inserted into a
+ * different LContainer.
+ */
+function trackMovedView(declarationContainer, lView) {
+    ngDevMode && assertDefined(lView, 'LView required');
+    ngDevMode && assertLContainer(declarationContainer);
+    const movedViews = declarationContainer[MOVED_VIEWS];
+    const insertedLContainer = lView[PARENT];
+    ngDevMode && assertLContainer(insertedLContainer);
+    const insertedComponentLView = insertedLContainer[PARENT][DECLARATION_COMPONENT_VIEW];
+    ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
+    const declaredComponentLView = lView[DECLARATION_COMPONENT_VIEW];
+    ngDevMode && assertDefined(declaredComponentLView, 'Missing declaredComponentLView');
+    if (declaredComponentLView !== insertedComponentLView) {
+        // At this point the declaration-component is not same as insertion-component; this means that
+        // this is a transplanted view. Mark the declared lView as having transplanted views so that
+        // those views can participate in CD.
+        declarationContainer[HAS_TRANSPLANTED_VIEWS] = true;
+    }
+    if (movedViews === null) {
+        declarationContainer[MOVED_VIEWS] = [lView];
+    }
+    else {
+        movedViews.push(lView);
+    }
+}
+function detachMovedView(declarationContainer, lView) {
+    ngDevMode && assertLContainer(declarationContainer);
+    ngDevMode &&
+        assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
+    const movedViews = declarationContainer[MOVED_VIEWS];
+    const declarationViewIndex = movedViews.indexOf(lView);
+    const insertionLContainer = lView[PARENT];
+    ngDevMode && assertLContainer(insertionLContainer);
+    // If the view was marked for refresh but then detached before it was checked (where the flag
+    // would be cleared and the counter decremented), we need to decrement the view counter here
+    // instead.
+    if (lView[FLAGS] & 1024 /* RefreshTransplantedView */) {
+        lView[FLAGS] &= ~1024 /* RefreshTransplantedView */;
+        updateTransplantedViewCount(insertionLContainer, -1);
+    }
+    movedViews.splice(declarationViewIndex, 1);
+}
+/**
+ * Detaches a view from a container.
+ *
+ * This method removes the view from the container's array of active views. It also
+ * removes the view's elements from the DOM.
+ *
+ * @param lContainer The container from which to detach a view
+ * @param removeIndex The index of the view to detach
+ * @returns Detached LView instance.
+ */
+function detachView(lContainer, removeIndex) {
+    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
+        return;
+    const indexInContainer = CONTAINER_HEADER_OFFSET + removeIndex;
+    const viewToDetach = lContainer[indexInContainer];
+    if (viewToDetach) {
+        const declarationLContainer = viewToDetach[DECLARATION_LCONTAINER];
+        if (declarationLContainer !== null && declarationLContainer !== lContainer) {
+            detachMovedView(declarationLContainer, viewToDetach);
+        }
+        if (removeIndex > 0) {
+            lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
+        }
+        const removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
+        removeViewFromContainer(viewToDetach[TVIEW], viewToDetach);
+        // notify query that a view has been removed
+        const lQueries = removedLView[QUERIES];
+        if (lQueries !== null) {
+            lQueries.detachView(removedLView[TVIEW]);
+        }
+        viewToDetach[PARENT] = null;
+        viewToDetach[NEXT] = null;
+        // Unsets the attached flag
+        viewToDetach[FLAGS] &= ~128 /* Attached */;
+    }
+    return viewToDetach;
+}
+/**
+ * A standalone function which destroys an LView,
+ * conducting clean up (e.g. removing listeners, calling onDestroys).
+ *
+ * @param tView The `TView' of the `LView` to be destroyed
+ * @param lView The view to be destroyed.
+ */
+function destroyLView(tView, lView) {
+    if (!(lView[FLAGS] & 256 /* Destroyed */)) {
+        const renderer = lView[RENDERER];
+        if (isProceduralRenderer(renderer) && renderer.destroyNode) {
+            applyView(tView, lView, renderer, 3 /* Destroy */, null, null);
+        }
+        destroyViewTree(lView);
+    }
+}
+/**
+ * Calls onDestroys hooks for all directives and pipes in a given view and then removes all
+ * listeners. Listeners are removed as the last step so events delivered in the onDestroys hooks
+ * can be propagated to @Output listeners.
+ *
+ * @param tView `TView` for the `LView` to clean up.
+ * @param lView The LView to clean up
+ */
+function cleanUpView(tView, lView) {
+    if (!(lView[FLAGS] & 256 /* Destroyed */)) {
+        // Usually the Attached flag is removed when the view is detached from its parent, however
+        // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
+        lView[FLAGS] &= ~128 /* Attached */;
+        // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
+        // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
+        // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
+        // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
+        // really more of an "afterDestroy" hook if you think about it.
+        lView[FLAGS] |= 256 /* Destroyed */;
+        executeOnDestroys(tView, lView);
+        removeListeners(tView, lView);
+        // For component views only, the local renderer is destroyed at clean up time.
+        if (lView[TVIEW].type === 1 /* Component */ && isProceduralRenderer(lView[RENDERER])) {
+            ngDevMode && ngDevMode.rendererDestroy++;
+            lView[RENDERER].destroy();
+        }
+        const declarationContainer = lView[DECLARATION_LCONTAINER];
+        // we are dealing with an embedded view that is still inserted into a container
+        if (declarationContainer !== null && isLContainer(lView[PARENT])) {
+            // and this is a projected view
+            if (declarationContainer !== lView[PARENT]) {
+                detachMovedView(declarationContainer, lView);
+            }
+            // For embedded views still attached to a container: remove query result from this view.
+            const lQueries = lView[QUERIES];
+            if (lQueries !== null) {
+                lQueries.detachView(tView);
+            }
+        }
+    }
+}
+/** Removes listeners and unsubscribes from output subscriptions */
+function removeListeners(tView, lView) {
+    const tCleanup = tView.cleanup;
+    if (tCleanup !== null) {
+        const lCleanup = lView[CLEANUP];
+        for (let i = 0; i < tCleanup.length - 1; i += 2) {
+            if (typeof tCleanup[i] === 'string') {
+                // This is a native DOM listener
+                const idxOrTargetGetter = tCleanup[i + 1];
+                const target = typeof idxOrTargetGetter === 'function' ?
+                    idxOrTargetGetter(lView) :
+                    unwrapRNode(lView[idxOrTargetGetter]);
+                const listener = lCleanup[tCleanup[i + 2]];
+                const useCaptureOrSubIdx = tCleanup[i + 3];
+                if (typeof useCaptureOrSubIdx === 'boolean') {
+                    // native DOM listener registered with Renderer3
+                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                }
+                else {
+                    if (useCaptureOrSubIdx >= 0) {
+                        // unregister
+                        lCleanup[useCaptureOrSubIdx]();
+                    }
+                    else {
+                        // Subscription
+                        lCleanup[-useCaptureOrSubIdx].unsubscribe();
+                    }
+                }
+                i += 2;
+            }
+            else {
+                // This is a cleanup function that is grouped with the index of its context
+                const context = lCleanup[tCleanup[i + 1]];
+                tCleanup[i].call(context);
+            }
+        }
+        lView[CLEANUP] = null;
+    }
+}
+/** Calls onDestroy hooks for this view */
+function executeOnDestroys(tView, lView) {
+    let destroyHooks;
+    if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
+        for (let i = 0; i < destroyHooks.length; i += 2) {
+            const context = lView[destroyHooks[i]];
+            // Only call the destroy hook if the context has been requested.
+            if (!(context instanceof NodeInjectorFactory)) {
+                const toCall = destroyHooks[i + 1];
+                if (Array.isArray(toCall)) {
+                    for (let j = 0; j < toCall.length; j += 2) {
+                        toCall[j + 1].call(context[toCall[j]]);
+                    }
+                }
+                else {
+                    toCall.call(context);
+                }
+            }
+        }
+    }
+}
+/**
+ * Returns a native element if a node can be inserted into the given parent.
+ *
+ * There are two reasons why we may not be able to insert a element immediately.
+ * - Projection: When creating a child content element of a component, we have to skip the
+ *   insertion because the content of a component will be projected.
+ *   `<component><content>delayed due to projection</content></component>`
+ * - Parent container is disconnected: This can happen when we are inserting a view into
+ *   parent container, which itself is disconnected. For example the parent container is part
+ *   of a View which has not be inserted or is made for projection but has not been inserted
+ *   into destination.
+ *
+ * @param tView: Current `TView`.
+ * @param tNode: `TNode` for which we wish to retrieve render parent.
+ * @param lView: Current `LView`.
+ */
+function getParentRElement(tView, tNode, lView) {
+    return getClosestRElement(tView, tNode.parent, lView);
+}
+/**
+ * Get closest `RElement` or `null` if it can't be found.
+ *
+ * If `TNode` is `TNodeType.Element` => return `RElement` at `LView[tNode.index]` location.
+ * If `TNode` is `TNodeType.ElementContainer|IcuContain` => return the parent (recursively).
+ * If `TNode` is `null` then return host `RElement`:
+ *   - return `null` if projection
+ *   - return `null` if parent container is disconnected (we have no parent.)
+ *
+ * @param tView: Current `TView`.
+ * @param tNode: `TNode` for which we wish to retrieve `RElement` (or `null` if host element is
+ *     needed).
+ * @param lView: Current `LView`.
+ * @returns `null` if the `RElement` can't be determined at this time (no parent / projection)
+ */
+function getClosestRElement(tView, tNode, lView) {
+    let parentTNode = tNode;
+    // Skip over element and ICU containers as those are represented by a comment node and
+    // can't be used as a render parent.
+    while (parentTNode !== null &&
+        (parentTNode.type & (8 /* ElementContainer */ | 32 /* Icu */))) {
+        tNode = parentTNode;
+        parentTNode = tNode.parent;
+    }
+    // If the parent tNode is null, then we are inserting across views: either into an embedded view
+    // or a component view.
+    if (parentTNode === null) {
+        // We are inserting a root element of the component view into the component host element and
+        // it should always be eager.
+        return lView[HOST];
+    }
+    else {
+        ngDevMode && assertTNodeType(parentTNode, 3 /* AnyRNode */ | 4 /* Container */);
+        if (parentTNode.flags & 2 /* isComponentHost */) {
+            ngDevMode && assertTNodeForLView(parentTNode, lView);
+            const tData = tView.data;
+            const tNode = tData[parentTNode.index];
+            const encapsulation = tData[tNode.directiveStart].encapsulation;
+            // We've got a parent which is an element in the current view. We just need to verify if the
+            // parent element is not a component. Component's content nodes are not inserted immediately
+            // because they will be projected, and so doing insert at this point would be wasteful.
+            // Since the projection would then move it to its final destination. Note that we can't
+            // make this assumption when using the Shadow DOM, because the native projection placeholders
+            // (<content> or <slot>) have to be in place as elements are being inserted.
+            if (encapsulation === ViewEncapsulation$1.None ||
+                encapsulation === ViewEncapsulation$1.Emulated) {
+                return null;
+            }
+        }
+        return getNativeByTNode(parentTNode, lView);
+    }
+}
+/**
+ * Inserts a native node before another native node for a given parent using {@link Renderer3}.
+ * This is a utility function that can be used when native nodes were determined - it abstracts an
+ * actual renderer being used.
+ */
+function nativeInsertBefore(renderer, parent, child, beforeNode, isMove) {
+    ngDevMode && ngDevMode.rendererInsertBefore++;
+    if (isProceduralRenderer(renderer)) {
+        renderer.insertBefore(parent, child, beforeNode, isMove);
+    }
+    else {
+        parent.insertBefore(child, beforeNode, isMove);
+    }
+}
+function nativeAppendChild(renderer, parent, child) {
+    ngDevMode && ngDevMode.rendererAppendChild++;
+    ngDevMode && assertDefined(parent, 'parent node must be defined');
+    if (isProceduralRenderer(renderer)) {
+        renderer.appendChild(parent, child);
+    }
+    else {
+        parent.appendChild(child);
+    }
+}
+function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove) {
+    if (beforeNode !== null) {
+        nativeInsertBefore(renderer, parent, child, beforeNode, isMove);
+    }
+    else {
+        nativeAppendChild(renderer, parent, child);
+    }
+}
+/** Removes a node from the DOM given its native parent. */
+function nativeRemoveChild(renderer, parent, child, isHostElement) {
+    if (isProceduralRenderer(renderer)) {
+        renderer.removeChild(parent, child, isHostElement);
+    }
+    else {
+        parent.removeChild(child);
+    }
+}
+/**
+ * Returns a native parent of a given native node.
+ */
+function nativeParentNode(renderer, node) {
+    return (isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode);
+}
+/**
+ * Returns a native sibling of a given native node.
+ */
+function nativeNextSibling(renderer, node) {
+    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
+}
+/**
+ * Find a node in front of which `currentTNode` should be inserted.
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * takes `TNode.insertBeforeIndex` into account if i18n code has been invoked.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
+ */
+function getInsertInFrontOfRNode(parentTNode, currentTNode, lView) {
+    return _getInsertInFrontOfRNodeWithI18n(parentTNode, currentTNode, lView);
+}
+/**
+ * Find a node in front of which `currentTNode` should be inserted. (Does not take i18n into
+ * account)
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * does not take `TNode.insertBeforeIndex` into account.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
+ */
+function getInsertInFrontOfRNodeWithNoI18n(parentTNode, currentTNode, lView) {
+    if (parentTNode.type & (8 /* ElementContainer */ | 32 /* Icu */)) {
+        return getNativeByTNode(parentTNode, lView);
+    }
+    return null;
+}
+/**
+ * Tree shakable boundary for `getInsertInFrontOfRNodeWithI18n` function.
+ *
+ * This function will only be set if i18n code runs.
+ */
+let _getInsertInFrontOfRNodeWithI18n = getInsertInFrontOfRNodeWithNoI18n;
+/**
+ * Tree shakable boundary for `processI18nInsertBefore` function.
+ *
+ * This function will only be set if i18n code runs.
+ */
+let _processI18nInsertBefore;
+function setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore) {
+    _getInsertInFrontOfRNodeWithI18n = getInsertInFrontOfRNodeWithI18n;
+    _processI18nInsertBefore = processI18nInsertBefore;
+}
+/**
+ * Appends the `child` native node (or a collection of nodes) to the `parent`.
+ *
+ * @param tView The `TView' to be appended
+ * @param lView The current LView
+ * @param childRNode The native child (or children) that should be appended
+ * @param childTNode The TNode of the child element
+ */
+function appendChild(tView, lView, childRNode, childTNode) {
+    const parentRNode = getParentRElement(tView, childTNode, lView);
+    const renderer = lView[RENDERER];
+    const parentTNode = childTNode.parent || lView[T_HOST];
+    const anchorNode = getInsertInFrontOfRNode(parentTNode, childTNode, lView);
+    if (parentRNode != null) {
+        if (Array.isArray(childRNode)) {
+            for (let i = 0; i < childRNode.length; i++) {
+                nativeAppendOrInsertBefore(renderer, parentRNode, childRNode[i], anchorNode, false);
+            }
+        }
+        else {
+            nativeAppendOrInsertBefore(renderer, parentRNode, childRNode, anchorNode, false);
+        }
+    }
+    _processI18nInsertBefore !== undefined &&
+        _processI18nInsertBefore(renderer, childTNode, lView, childRNode, parentRNode);
+}
+/**
+ * Returns the first native node for a given LView, starting from the provided TNode.
+ *
+ * Native nodes are returned in the order in which those appear in the native tree (DOM).
+ */
+function getFirstNativeNode(lView, tNode) {
+    if (tNode !== null) {
+        ngDevMode &&
+            assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */ | 32 /* Icu */ | 16 /* Projection */);
+        const tNodeType = tNode.type;
+        if (tNodeType & 3 /* AnyRNode */) {
+            return getNativeByTNode(tNode, lView);
+        }
+        else if (tNodeType & 4 /* Container */) {
+            return getBeforeNodeForView(-1, lView[tNode.index]);
+        }
+        else if (tNodeType & 8 /* ElementContainer */) {
+            const elIcuContainerChild = tNode.child;
+            if (elIcuContainerChild !== null) {
+                return getFirstNativeNode(lView, elIcuContainerChild);
+            }
+            else {
+                const rNodeOrLContainer = lView[tNode.index];
+                if (isLContainer(rNodeOrLContainer)) {
+                    return getBeforeNodeForView(-1, rNodeOrLContainer);
+                }
+                else {
+                    return unwrapRNode(rNodeOrLContainer);
+                }
+            }
+        }
+        else if (tNodeType & 32 /* Icu */) {
+            let nextRNode = icuContainerIterate(tNode, lView);
+            let rNode = nextRNode();
+            // If the ICU container has no nodes, than we use the ICU anchor as the node.
+            return rNode || unwrapRNode(lView[tNode.index]);
+        }
+        else {
+            const componentView = lView[DECLARATION_COMPONENT_VIEW];
+            const componentHost = componentView[T_HOST];
+            const parentView = getLViewParent(componentView);
+            const firstProjectedTNode = componentHost.projection[tNode.projection];
+            if (firstProjectedTNode != null) {
+                return getFirstNativeNode(parentView, firstProjectedTNode);
+            }
+            else {
+                return getFirstNativeNode(lView, tNode.next);
+            }
+        }
+    }
+    return null;
+}
+function getBeforeNodeForView(viewIndexInContainer, lContainer) {
+    const nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
+    if (nextViewIndex < lContainer.length) {
+        const lView = lContainer[nextViewIndex];
+        const firstTNodeOfView = lView[TVIEW].firstChild;
+        if (firstTNodeOfView !== null) {
+            return getFirstNativeNode(lView, firstTNodeOfView);
+        }
+    }
+    return lContainer[NATIVE];
+}
+/**
+ * Removes a native node itself using a given renderer. To remove the node we are looking up its
+ * parent from the native tree as not all platforms / browsers support the equivalent of
+ * node.remove().
+ *
+ * @param renderer A renderer to be used
+ * @param rNode The native node that should be removed
+ * @param isHostElement A flag indicating if a node to be removed is a host of a component.
+ */
+function nativeRemoveNode(renderer, rNode, isHostElement) {
+    ngDevMode && ngDevMode.rendererRemoveNode++;
+    const nativeParent = nativeParentNode(renderer, rNode);
+    if (nativeParent) {
+        nativeRemoveChild(renderer, nativeParent, rNode, isHostElement);
+    }
+}
+/**
+ * Performs the operation of `action` on the node. Typically this involves inserting or removing
+ * nodes on the LView or projection boundary.
+ */
+function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, isProjection) {
+    while (tNode != null) {
+        ngDevMode && assertTNodeForLView(tNode, lView);
+        ngDevMode &&
+            assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */ | 16 /* Projection */ | 32 /* Icu */);
+        const rawSlotValue = lView[tNode.index];
+        const tNodeType = tNode.type;
+        if (isProjection) {
+            if (action === 0 /* Create */) {
+                rawSlotValue && attachPatchData(unwrapRNode(rawSlotValue), lView);
+                tNode.flags |= 4 /* isProjected */;
+            }
+        }
+        if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
+            if (tNodeType & 8 /* ElementContainer */) {
+                applyNodes(renderer, action, tNode.child, lView, parentRElement, beforeNode, false);
+                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
+            }
+            else if (tNodeType & 32 /* Icu */) {
+                const nextRNode = icuContainerIterate(tNode, lView);
+                let rNode;
+                while (rNode = nextRNode()) {
+                    applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode);
+                }
+                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
+            }
+            else if (tNodeType & 16 /* Projection */) {
+                applyProjectionRecursive(renderer, action, lView, tNode, parentRElement, beforeNode);
+            }
+            else {
+                ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */ | 4 /* Container */);
+                applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
+            }
+        }
+        tNode = isProjection ? tNode.projectionNext : tNode.next;
+    }
+}
+function applyView(tView, lView, renderer, action, parentRElement, beforeNode) {
+    applyNodes(renderer, action, tView.firstChild, lView, parentRElement, beforeNode, false);
+}
+/**
+ * `applyProjection` performs operation on the projection.
+ *
+ * Inserting a projection requires us to locate the projected nodes from the parent component. The
+ * complication is that those nodes themselves could be re-projected from their parent component.
+ *
+ * @param tView The `TView` of `LView` which needs to be inserted, detached, destroyed
+ * @param lView The `LView` which needs to be inserted, detached, destroyed.
+ * @param tProjectionNode node to project
+ */
+function applyProjection(tView, lView, tProjectionNode) {
+    const renderer = lView[RENDERER];
+    const parentRNode = getParentRElement(tView, tProjectionNode, lView);
+    const parentTNode = tProjectionNode.parent || lView[T_HOST];
+    let beforeNode = getInsertInFrontOfRNode(parentTNode, tProjectionNode, lView);
+    applyProjectionRecursive(renderer, 0 /* Create */, lView, tProjectionNode, parentRNode, beforeNode);
+}
+/**
+ * `applyProjectionRecursive` performs operation on the projection specified by `action` (insert,
+ * detach, destroy)
+ *
+ * Inserting a projection requires us to locate the projected nodes from the parent component. The
+ * complication is that those nodes themselves could be re-projected from their parent component.
+ *
+ * @param renderer Render to use
+ * @param action action to perform (insert, detach, destroy)
+ * @param lView The LView which needs to be inserted, detached, destroyed.
+ * @param tProjectionNode node to project
+ * @param parentRElement parent DOM element for insertion/removal.
+ * @param beforeNode Before which node the insertions should happen.
+ */
+function applyProjectionRecursive(renderer, action, lView, tProjectionNode, parentRElement, beforeNode) {
+    const componentLView = lView[DECLARATION_COMPONENT_VIEW];
+    const componentNode = componentLView[T_HOST];
+    ngDevMode &&
+        assertEqual(typeof tProjectionNode.projection, 'number', 'expecting projection index');
+    const nodeToProjectOrRNodes = componentNode.projection[tProjectionNode.projection];
+    if (Array.isArray(nodeToProjectOrRNodes)) {
+        // This should not exist, it is a bit of a hack. When we bootstrap a top level node and we
+        // need to support passing projectable nodes, so we cheat and put them in the TNode
+        // of the Host TView. (Yes we put instance info at the T Level). We can get away with it
+        // because we know that that TView is not shared and therefore it will not be a problem.
+        // This should be refactored and cleaned up.
+        for (let i = 0; i < nodeToProjectOrRNodes.length; i++) {
+            const rNode = nodeToProjectOrRNodes[i];
+            applyToElementOrContainer(action, renderer, parentRElement, rNode, beforeNode);
+        }
+    }
+    else {
+        let nodeToProject = nodeToProjectOrRNodes;
+        const projectedComponentLView = componentLView[PARENT];
+        applyNodes(renderer, action, nodeToProject, projectedComponentLView, parentRElement, beforeNode, true);
+    }
+}
+/**
+ * `applyContainer` performs an operation on the container and its views as specified by
+ * `action` (insert, detach, destroy)
+ *
+ * Inserting a Container is complicated by the fact that the container may have Views which
+ * themselves have containers or projections.
+ *
+ * @param renderer Renderer to use
+ * @param action action to perform (insert, detach, destroy)
+ * @param lContainer The LContainer which needs to be inserted, detached, destroyed.
+ * @param parentRElement parent DOM element for insertion/removal.
+ * @param beforeNode Before which node the insertions should happen.
+ */
+function applyContainer(renderer, action, lContainer, parentRElement, beforeNode) {
+    ngDevMode && assertLContainer(lContainer);
+    const anchor = lContainer[NATIVE]; // LContainer has its own before node.
+    const native = unwrapRNode(lContainer);
+    // An LContainer can be created dynamically on any node by injecting ViewContainerRef.
+    // Asking for a ViewContainerRef on an element will result in a creation of a separate anchor
+    // node (comment in the DOM) that will be different from the LContainer's host node. In this
+    // particular case we need to execute action on 2 nodes:
+    // - container's host node (this is done in the executeActionOnElementOrContainer)
+    // - container's host node (this is done here)
+    if (anchor !== native) {
+        // This is very strange to me (Misko). I would expect that the native is same as anchor. I
+        // don't see a reason why they should be different, but they are.
+        //
+        // If they are we need to process the second anchor as well.
+        applyToElementOrContainer(action, renderer, parentRElement, anchor, beforeNode);
+    }
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const lView = lContainer[i];
+        applyView(lView[TVIEW], lView, renderer, action, parentRElement, anchor);
+    }
+}
+/**
+ * Writes class/style to element.
+ *
+ * @param renderer Renderer to use.
+ * @param isClassBased `true` if it should be written to `class` (`false` to write to `style`)
+ * @param rNode The Node to write to.
+ * @param prop Property to write to. This would be the class/style name.
+ * @param value Value to write. If `null`/`undefined`/`false` this is considered a remove (set/add
+ *        otherwise).
+ */
+function applyStyling(renderer, isClassBased, rNode, prop, value) {
+    const isProcedural = isProceduralRenderer(renderer);
+    if (isClassBased) {
+        // We actually want JS true/false here because any truthy value should add the class
+        if (!value) {
+            ngDevMode && ngDevMode.rendererRemoveClass++;
+            if (isProcedural) {
+                renderer.removeClass(rNode, prop);
+            }
+            else {
+                rNode.classList.remove(prop);
+            }
+        }
+        else {
+            ngDevMode && ngDevMode.rendererAddClass++;
+            if (isProcedural) {
+                renderer.addClass(rNode, prop);
+            }
+            else {
+                ngDevMode && assertDefined(rNode.classList, 'HTMLElement expected');
+                rNode.classList.add(prop);
+            }
+        }
+    }
+    else {
+        // TODO(misko): Can't import RendererStyleFlags2.DashCase as it causes imports to be resolved
+        // in different order which causes failures. Using direct constant as workaround for now.
+        const flags = prop.indexOf('-') == -1 ? undefined : 2 /* RendererStyleFlags2.DashCase */;
+        if (value == null /** || value === undefined */) {
+            ngDevMode && ngDevMode.rendererRemoveStyle++;
+            if (isProcedural) {
+                renderer.removeStyle(rNode, prop, flags);
+            }
+            else {
+                rNode.style.removeProperty(prop);
+            }
+        }
+        else {
+            ngDevMode && ngDevMode.rendererSetStyle++;
+            if (isProcedural) {
+                renderer.setStyle(rNode, prop, value, flags);
+            }
+            else {
+                ngDevMode && assertDefined(rNode.style, 'HTMLElement expected');
+                rNode.style.setProperty(prop, value);
+            }
+        }
+    }
+}
+/**
+ * Write `cssText` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+function writeDirectStyle(renderer, element, newValue) {
+    ngDevMode && assertString(newValue, '\'newValue\' should be a string');
+    if (isProceduralRenderer(renderer)) {
+        renderer.setAttribute(element, 'style', newValue);
+    }
+    else {
+        element.style.cssText = newValue;
+    }
+    ngDevMode && ngDevMode.rendererSetStyle++;
+}
+/**
+ * Write `className` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+function writeDirectClass(renderer, element, newValue) {
+    ngDevMode && assertString(newValue, '\'newValue\' should be a string');
+    if (isProceduralRenderer(renderer)) {
+        if (newValue === '') {
+            // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
+            renderer.removeAttribute(element, 'class');
+        }
+        else {
+            renderer.setAttribute(element, 'class', newValue);
+        }
+    }
+    else {
+        element.className = newValue;
+    }
+    ngDevMode && ngDevMode.rendererSetClassName++;
+}
 
 /**
  * @license
@@ -5866,7 +6970,7 @@ function classIndexOf(className, classToSearch, startingIndex) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const unusedValueToPlacateAjd = unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5;
+const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5;
 const NG_TEMPLATE_SELECTOR = 'ng-template';
 /**
  * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
@@ -5910,7 +7014,7 @@ function isCssClassMatching(attrs, cssClassToMatch, isProjectionMode) {
  * @param tNode current TNode
  */
 function isInlineTemplate(tNode) {
-    return tNode.type === 0 /* Container */ && tNode.tagName !== NG_TEMPLATE_SELECTOR;
+    return tNode.type === 4 /* Container */ && tNode.value !== NG_TEMPLATE_SELECTOR;
 }
 /**
  * Function that checks whether a given tNode matches tag-based selector and has a valid type.
@@ -5924,9 +7028,7 @@ function isInlineTemplate(tNode) {
  * (applicable to TNodeType.Container only).
  */
 function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    const tagNameToCompare = tNode.type === 0 /* Container */ && !isProjectionMode ?
-        NG_TEMPLATE_SELECTOR :
-        tNode.tagName;
+    const tagNameToCompare = tNode.type === 4 /* Container */ && !isProjectionMode ? NG_TEMPLATE_SELECTOR : tNode.value;
     return currentSelector === tagNameToCompare;
 }
 /**
@@ -6290,70 +7392,6 @@ const NO_CHANGE = (typeof ngDevMode === 'undefined' || ngDevMode) ? { __brand__:
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
- * that LContainer, which is an LView
- * @param lView the lView whose parent to get
- */
-function getLViewParent(lView) {
-    ngDevMode && assertLView(lView);
-    const parent = lView[PARENT];
-    return isLContainer(parent) ? parent[PARENT] : parent;
-}
-/**
- * Retrieve the root view from any component or `LView` by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param componentOrLView any component or `LView`
- */
-function getRootView(componentOrLView) {
-    ngDevMode && assertDefined(componentOrLView, 'component');
-    let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
-    while (lView && !(lView[FLAGS] & 512 /* IsRoot */)) {
-        lView = getLViewParent(lView);
-    }
-    ngDevMode && assertLView(lView);
-    return lView;
-}
-/**
- * Returns the `RootContext` instance that is associated with
- * the application where the target is situated. It does this by walking the parent views until it
- * gets to the root view, then getting the context off of that.
- *
- * @param viewOrComponent the `LView` or component to get the root context for.
- */
-function getRootContext(viewOrComponent) {
-    const rootView = getRootView(viewOrComponent);
-    ngDevMode &&
-        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
-    return rootView[CONTEXT];
-}
-/**
- * Gets the first `LContainer` in the LView or `null` if none exists.
- */
-function getFirstLContainer(lView) {
-    return getNearestLContainer(lView[CHILD_HEAD]);
-}
-/**
- * Gets the next `LContainer` that is a sibling of the given container.
- */
-function getNextLContainer(container) {
-    return getNearestLContainer(container[NEXT]);
-}
-function getNearestLContainer(viewOrContainer) {
-    while (viewOrContainer !== null && !isLContainer(viewOrContainer)) {
-        viewOrContainer = viewOrContainer[NEXT];
-    }
-    return viewOrContainer;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Advances to an element for later binding instructions.
  *
  * Used in conjunction with instructions like {@link property} to act on elements with specified
@@ -6381,8 +7419,7 @@ function ɵɵadvance(delta) {
     selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, isInCheckNoChangesMode());
 }
 function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
-    ngDevMode && assertGreaterThan(index, -1, 'Invalid index');
-    ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
+    ngDevMode && assertIndexInDeclRange(lView, index);
     // Flush the initial hooks for elements in the view that have been added up to this point.
     // PERF WARNING: do NOT extract this to a separate function without running benchmarks
     if (!checkNoChangesMode) {
@@ -6591,38 +7628,7 @@ function nameSuffix(text) {
  * debug tools in ngDevMode.
  */
 const TViewConstructor = class TView {
-    constructor(type, //
-    blueprint, //
-    template, //
-    queries, //
-    viewQuery, //
-    declTNode, //
-    data, //
-    bindingStartIndex, //
-    expandoStartIndex, //
-    expandoInstructions, //
-    firstCreatePass, //
-    firstUpdatePass, //
-    staticViewQueries, //
-    staticContentQueries, //
-    preOrderHooks, //
-    preOrderCheckHooks, //
-    contentHooks, //
-    contentCheckHooks, //
-    viewHooks, //
-    viewCheckHooks, //
-    destroyHooks, //
-    cleanup, //
-    contentQueries, //
-    components, //
-    directiveRegistry, //
-    pipeRegistry, //
-    firstChild, //
-    schemas, //
-    consts, //
-    incompleteFirstPass, //
-    _decls, //
-    _vars) {
+    constructor(type, blueprint, template, queries, viewQuery, declTNode, data, bindingStartIndex, expandoStartIndex, hostBindingOpCodes, firstCreatePass, firstUpdatePass, staticViewQueries, staticContentQueries, preOrderHooks, preOrderCheckHooks, contentHooks, contentCheckHooks, viewHooks, viewCheckHooks, destroyHooks, cleanup, contentQueries, components, directiveRegistry, pipeRegistry, firstChild, schemas, consts, incompleteFirstPass, _decls, _vars) {
         this.type = type;
         this.blueprint = blueprint;
         this.template = template;
@@ -6632,7 +7638,7 @@ const TViewConstructor = class TView {
         this.data = data;
         this.bindingStartIndex = bindingStartIndex;
         this.expandoStartIndex = expandoStartIndex;
-        this.expandoInstructions = expandoInstructions;
+        this.hostBindingOpCodes = hostBindingOpCodes;
         this.firstCreatePass = firstCreatePass;
         this.firstUpdatePass = firstUpdatePass;
         this.staticViewQueries = staticViewQueries;
@@ -6664,7 +7670,13 @@ const TViewConstructor = class TView {
     get type_() {
         return TViewTypeAsString[this.type] || `TViewType.?${this.type}?`;
     }
-    get i18nStartIndex() {
+    /**
+     * Returns initial value of `expandoStartIndex`.
+     */
+    // FIXME(misko): `originalExpandoStartIndex` should not be needed because it should be the same as
+    // `expandoStartIndex`. However `expandoStartIndex` is misnamed as it changes as more items get
+    // allocated in expando.
+    get originalExpandoStartIndex() {
         return HEADER_OFFSET + this._decls + this._vars;
     }
 };
@@ -6672,6 +7684,7 @@ class TNode {
     constructor(tView_, //
     type, //
     index, //
+    insertBeforeIndex, //
     injectorIndex, //
     directiveStart, //
     directiveEnd, //
@@ -6679,7 +7692,7 @@ class TNode {
     propertyBindings, //
     flags, //
     providerIndexes, //
-    tagName, //
+    value, //
     attrs, //
     mergedAttrs, //
     localNames, //
@@ -6703,6 +7716,7 @@ class TNode {
         this.tView_ = tView_;
         this.type = type;
         this.index = index;
+        this.insertBeforeIndex = insertBeforeIndex;
         this.injectorIndex = injectorIndex;
         this.directiveStart = directiveStart;
         this.directiveEnd = directiveEnd;
@@ -6710,7 +7724,7 @@ class TNode {
         this.propertyBindings = propertyBindings;
         this.flags = flags;
         this.providerIndexes = providerIndexes;
-        this.tagName = tagName;
+        this.value = value;
         this.attrs = attrs;
         this.mergedAttrs = mergedAttrs;
         this.localNames = localNames;
@@ -6764,7 +7778,7 @@ class TNode {
         return path;
     }
     get type_() {
-        return TNodeTypeAsString[this.type] || `TNodeType.?${this.type}?`;
+        return toTNodeTypeAsString(this.type) || `TNodeType.?${this.type}?`;
     }
     get flags_() {
         const flags = [];
@@ -6787,8 +7801,14 @@ class TNode {
         return flags.join('|');
     }
     get template_() {
+        if (this.type & 1 /* Text */)
+            return this.value;
         const buf = [];
-        buf.push('<', this.tagName || this.type_);
+        const tagName = typeof this.value === 'string' && this.value || this.type_;
+        buf.push('<', tagName);
+        if (this.flags) {
+            buf.push(' ', this.flags_);
+        }
         if (this.attrs) {
             for (let i = 0; i < this.attrs.length;) {
                 const attrName = this.attrs[i++];
@@ -6801,7 +7821,7 @@ class TNode {
         }
         buf.push('>');
         processTNodeChildren(this.child, buf);
-        buf.push('</', this.tagName || this.type_, '>');
+        buf.push('</', tagName, '>');
         return buf.join('');
     }
     get styleBindings_() {
@@ -6950,7 +7970,7 @@ class LViewDebug {
         return toHtml(this._raw_lView[HOST], true);
     }
     get html() {
-        return (this.nodes || []).map(node => toHtml(node.native, true)).join('');
+        return (this.nodes || []).map(mapToHTML).join('');
     }
     get context() {
         return this._raw_lView[CONTEXT];
@@ -6963,6 +7983,9 @@ class LViewDebug {
         const lView = this._raw_lView;
         const tNode = lView[TVIEW].firstChild;
         return toDebugNodes(tNode, lView);
+    }
+    get template() {
+        return this.tView.template_;
     }
     get tView() {
         return this._raw_lView[TVIEW];
@@ -7005,15 +8028,11 @@ class LViewDebug {
     }
     get vars() {
         const tView = this.tView;
-        return toLViewRange(tView, this._raw_lView, tView.bindingStartIndex, tView.i18nStartIndex);
-    }
-    get i18n() {
-        const tView = this.tView;
-        return toLViewRange(tView, this._raw_lView, tView.i18nStartIndex, tView.expandoStartIndex);
+        return toLViewRange(tView, this._raw_lView, tView.bindingStartIndex, tView.originalExpandoStartIndex);
     }
     get expando() {
         const tView = this.tView;
-        return toLViewRange(this.tView, this._raw_lView, this.tView.expandoStartIndex, this._raw_lView.length);
+        return toLViewRange(this.tView, this._raw_lView, tView.originalExpandoStartIndex, this._raw_lView.length);
     }
     /**
      * Normalized view of child views (and containers) attached at this location.
@@ -7026,6 +8045,17 @@ class LViewDebug {
             child = child.next;
         }
         return childViews;
+    }
+}
+function mapToHTML(node) {
+    if (node.type === 'ElementContainer') {
+        return (node.children || []).map(mapToHTML).join('');
+    }
+    else if (node.type === 'IcuContainer') {
+        throw new Error('Not implemented');
+    }
+    else {
+        return toHtml(node.native, true) || '';
     }
 }
 function toLViewRange(tView, lView, start, end) {
@@ -7068,7 +8098,7 @@ function buildDebugNode(tNode, lView) {
     }
     return {
         html: toHtml(native),
-        type: TNodeTypeAsString[tNode.type],
+        type: toTNodeTypeAsString(tNode.type),
         native: native,
         children: toDebugNodes(tNode.child, lView),
         factories,
@@ -7146,21 +8176,6 @@ class LContainerDebug {
         return toDebug(this._raw_lContainer[NEXT]);
     }
 }
-/**
- * Return an `LView` value if found.
- *
- * @param value `LView` if any
- */
-function readLViewValue(value) {
-    while (Array.isArray(value)) {
-        // This check is not quite right, as it does not take into account `StylingContext`
-        // This is why it is in debug, not in util.ts
-        if (value.length >= HEADER_OFFSET - 1)
-            return value;
-        value = value[HOST];
-    }
-    return null;
-}
 
 const ɵ0$4 = () => Promise.resolve(null);
 /**
@@ -7169,68 +8184,33 @@ const ɵ0$4 = () => Promise.resolve(null);
  */
 const _CLEAN_PROMISE = (ɵ0$4)();
 /**
- * Process the `TView.expandoInstructions`. (Execute the `hostBindings`.)
+ * Invoke `HostBindingsFunction`s for view.
  *
- * @param tView `TView` containing the `expandoInstructions`
- * @param lView `LView` associated with the `TView`
+ * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
+ * `HostBindingsFunction`s associated with the current `LView`.
+ *
+ * @param tView Current `TView`.
+ * @param lView Current `LView`.
  */
-function setHostBindingsByExecutingExpandoInstructions(tView, lView) {
-    ngDevMode && assertSame(tView, lView[TVIEW], '`LView` is not associated with the `TView`!');
+function processHostBindingOpCodes(tView, lView) {
+    const hostBindingOpCodes = tView.hostBindingOpCodes;
+    if (hostBindingOpCodes === null)
+        return;
     try {
-        const expandoInstructions = tView.expandoInstructions;
-        if (expandoInstructions !== null) {
-            let bindingRootIndex = tView.expandoStartIndex;
-            let currentDirectiveIndex = -1;
-            let currentElementIndex = -1;
-            // TODO(misko): PERF It is possible to get here with `TView.expandoInstructions` containing no
-            // functions to execute. This is wasteful as there is no work to be done, but we still need
-            // to iterate over the instructions.
-            // In example of this is in this test: `host_binding_spec.ts`
-            // `fit('should not cause problems if detectChanges is called when a property updates', ...`
-            // In the above test we get here with expando [0, 0, 1] which requires a lot of processing but
-            // there is no function to execute.
-            for (let i = 0; i < expandoInstructions.length; i++) {
-                const instruction = expandoInstructions[i];
-                if (typeof instruction === 'number') {
-                    if (instruction <= 0) {
-                        // Negative numbers mean that we are starting new EXPANDO block and need to update
-                        // the current element and directive index.
-                        // Important: In JS `-x` and `0-x` is not the same! If `x===0` then `-x` will produce
-                        // `-0` which requires non standard math arithmetic and it can prevent VM optimizations.
-                        // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
-                        // TODO(misko): PERF This should be refactored to use `~instruction` as that does not
-                        // suffer from `-0` and it is faster/more compact.
-                        currentElementIndex = 0 - instruction;
-                        setSelectedIndex(currentElementIndex);
-                        // Injector block and providers are taken into account.
-                        const providerCount = expandoInstructions[++i];
-                        bindingRootIndex += 9 /* SIZE */ + providerCount;
-                        currentDirectiveIndex = bindingRootIndex;
-                    }
-                    else {
-                        // This is either the injector size (so the binding root can skip over directives
-                        // and get to the first set of host bindings on this node) or the host var count
-                        // (to get to the next set of host bindings on this node).
-                        bindingRootIndex += instruction;
-                    }
-                }
-                else {
-                    // If it's not a number, it's a host binding function that needs to be executed.
-                    if (instruction !== null) {
-                        ngDevMode &&
-                            assertLessThan(currentDirectiveIndex, 1048576 /* CptViewProvidersCountShifter */, 'Reached the max number of host bindings');
-                        setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex);
-                        const hostCtx = lView[currentDirectiveIndex];
-                        instruction(2 /* Update */, hostCtx);
-                    }
-                    // TODO(misko): PERF Relying on incrementing the `currentDirectiveIndex` here is
-                    // sub-optimal. The implications are that if we have a lot of directives but none of them
-                    // have host bindings we nevertheless need to iterate over the expando instructions to
-                    // update the counter. It would be much better if we could encode the
-                    // `currentDirectiveIndex` into the `expandoInstruction` array so that we only need to
-                    // iterate over those directives which actually have `hostBindings`.
-                    currentDirectiveIndex++;
-                }
+        for (let i = 0; i < hostBindingOpCodes.length; i++) {
+            const opCode = hostBindingOpCodes[i];
+            if (opCode < 0) {
+                // Negative numbers are element indexes.
+                setSelectedIndex(~opCode);
+            }
+            else {
+                // Positive numbers are NumberTuple which store bindingRootIndex and directiveIndex.
+                const directiveIdx = opCode;
+                const bindingRootIndx = hostBindingOpCodes[++i];
+                const hostBindingFn = hostBindingOpCodes[++i];
+                setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
+                const context = lView[directiveIdx];
+                hostBindingFn(2 /* Update */, context);
             }
         }
     }
@@ -7247,6 +8227,7 @@ function refreshContentQueries(tView, lView) {
             const directiveDefIdx = contentQueries[i + 1];
             if (directiveDefIdx !== -1) {
                 const directiveDef = tView.data[directiveDefIdx];
+                ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
                 ngDevMode &&
                     assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
                 setCurrentQueryIndex(queryStartIdx);
@@ -7265,21 +8246,6 @@ function refreshChildComponents(hostLView, components) {
 function renderChildComponents(hostLView, components) {
     for (let i = 0; i < components.length; i++) {
         renderComponent(hostLView, components[i]);
-    }
-}
-/**
- * Creates a native element from a tag name, using a renderer.
- * @param name the tag name
- * @param renderer A renderer to use
- * @returns the element created
- */
-function elementCreate(name, renderer, namespace) {
-    if (isProceduralRenderer(renderer)) {
-        return renderer.createElement(name, namespace);
-    }
-    else {
-        return namespace === null ? renderer.createElement(name) :
-            renderer.createElementNS(namespace, name);
     }
 }
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector) {
@@ -7305,20 +8271,41 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     return lView;
 }
 function getOrCreateTNode(tView, index, type, name, attrs) {
+    ngDevMode && index !== 0 && // 0 are bogus nodes and they are OK. See `createContainerRef` in
+        // `view_engine_compatibility` for additional context.
+        assertGreaterThanOrEqual(index, HEADER_OFFSET, 'TNodes can\'t be in the LView header.');
     // Keep this function short, so that the VM will inline it.
-    const adjustedIndex = index + HEADER_OFFSET;
-    const tNode = tView.data[adjustedIndex] ||
-        createTNodeAtIndex(tView, adjustedIndex, type, name, attrs);
+    ngDevMode && assertPureTNodeType(type);
+    let tNode = tView.data[index];
+    if (tNode === null) {
+        tNode = createTNodeAtIndex(tView, index, type, name, attrs);
+        if (isInI18nBlock()) {
+            // If we are in i18n block then all elements should be pre declared through `Placeholder`
+            // See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
+            // If the `TNode` was not pre-declared than it means it was not mentioned which means it was
+            // removed, so we mark it as detached.
+            tNode.flags |= 64 /* isDetached */;
+        }
+    }
+    else if (tNode.type & 64 /* Placeholder */) {
+        tNode.type = type;
+        tNode.value = name;
+        tNode.attrs = attrs;
+        const parent = getCurrentParentTNode();
+        tNode.injectorIndex = parent === null ? -1 : parent.injectorIndex;
+        ngDevMode && assertTNodeForTView(tNode, tView);
+        ngDevMode && assertEqual(index, tNode.index, 'Expecting same index');
+    }
     setCurrentTNode(tNode, true);
     return tNode;
 }
-function createTNodeAtIndex(tView, adjustedIndex, type, name, attrs) {
-    const currentTNode = getCurrentTNode();
+function createTNodeAtIndex(tView, index, type, name, attrs) {
+    const currentTNode = getCurrentTNodePlaceholderOk();
     const isParent = isCurrentTNodeParent();
     const parent = isParent ? currentTNode : currentTNode && currentTNode.parent;
     // Parents cannot cross component boundaries because components will be used in multiple places.
-    const tNode = tView.data[adjustedIndex] =
-        createTNode(tView, parent, type, adjustedIndex, name, attrs);
+    const tNode = tView.data[index] =
+        createTNode(tView, parent, type, index, name, attrs);
     // Assign a pointer to the first child node of a given view. The first node is not always the one
     // at index 0, in case of i18n, index 0 can be the instruction `i18nStart` and the first node has
     // the index 1 or more, so we can't just check node index.
@@ -7326,47 +8313,50 @@ function createTNodeAtIndex(tView, adjustedIndex, type, name, attrs) {
         tView.firstChild = tNode;
     }
     if (currentTNode !== null) {
-        if (isParent && currentTNode.child == null && tNode.parent !== null) {
-            // We are in the same view, which means we are adding content node to the parent view.
-            currentTNode.child = tNode;
+        if (isParent) {
+            // FIXME(misko): This logic looks unnecessarily complicated. Could we simplify?
+            if (currentTNode.child == null && tNode.parent !== null) {
+                // We are in the same view, which means we are adding content node to the parent view.
+                currentTNode.child = tNode;
+            }
         }
-        else if (!isParent) {
-            currentTNode.next = tNode;
+        else {
+            if (currentTNode.next === null) {
+                // In the case of i18n the `currentTNode` may already be linked, in which case we don't want
+                // to break the links which i18n created.
+                currentTNode.next = tNode;
+            }
         }
     }
     return tNode;
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
- * i18nApply() or ComponentFactory.create), we need to adjust the blueprint for future
+ * i18nApply()), we need to adjust the blueprint for future
  * template passes.
  *
  * @param tView `TView` associated with `LView`
- * @param view The `LView` containing the blueprint to adjust
+ * @param lView The `LView` containing the blueprint to adjust
  * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
+ * @param initialValue Initial value to store in blueprint
  */
-function allocExpando(tView, lView, numSlotsToAlloc) {
-    ngDevMode &&
-        assertGreaterThan(numSlotsToAlloc, 0, 'The number of slots to alloc should be greater than 0');
-    if (numSlotsToAlloc > 0) {
-        if (tView.firstCreatePass) {
-            for (let i = 0; i < numSlotsToAlloc; i++) {
-                tView.blueprint.push(null);
-                tView.data.push(null);
-                lView.push(null);
-            }
-            // We should only increment the expando start index if there aren't already directives
-            // and injectors saved in the "expando" section
-            if (!tView.expandoInstructions) {
-                tView.expandoStartIndex += numSlotsToAlloc;
-            }
-            else {
-                // Since we're adding the dynamic nodes into the expando section, we need to let the host
-                // bindings know that they should skip x slots
-                tView.expandoInstructions.push(numSlotsToAlloc);
-            }
-        }
+function allocExpando(tView, lView, numSlotsToAlloc, initialValue) {
+    if (numSlotsToAlloc === 0)
+        return -1;
+    if (ngDevMode) {
+        assertFirstCreatePass(tView);
+        assertSame(tView, lView[TVIEW], '`LView` must be associated with `TView`!');
+        assertEqual(tView.data.length, lView.length, 'Expecting LView to be same size as TView');
+        assertEqual(tView.data.length, tView.blueprint.length, 'Expecting Blueprint to be same size as TView');
+        assertFirstUpdatePass(tView);
     }
+    const allocIdx = lView.length;
+    for (let i = 0; i < numSlotsToAlloc; i++) {
+        lView.push(initialValue);
+        tView.blueprint.push(initialValue);
+        tView.data.push(null);
+    }
+    return allocIdx;
 }
 //////////////////////////
 //// Render
@@ -7498,7 +8488,7 @@ function refreshView(tView, lView, templateFn, context) {
                 incrementInitPhaseFlags(lView, 1 /* AfterContentInitHooksToBeRun */);
             }
         }
-        setHostBindingsByExecutingExpandoInstructions(tView, lView);
+        processHostBindingOpCodes(tView, lView);
         // Refresh child component views.
         const components = tView.components;
         if (components !== null) {
@@ -7581,7 +8571,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
             // When we're updating, inherently select 0 so we don't
             // have to generate that instruction for most update blocks.
-            selectIndexInternal(tView, lView, 0, isInCheckNoChangesMode());
+            selectIndexInternal(tView, lView, HEADER_OFFSET, isInCheckNoChangesMode());
         }
         templateFn(rf, context);
     }
@@ -7674,7 +8664,8 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
     const consts = typeof constsOrFactory === 'function' ? constsOrFactory() : constsOrFactory;
     const tView = blueprint[TVIEW] = ngDevMode ?
-        new TViewConstructor(type, blueprint, // blueprint: LView,
+        new TViewConstructor(type, // type: TViewType,
+        blueprint, // blueprint: LView,
         templateFn, // template: ComponentTemplate<{}>|null,
         null, // queries: TQueries|null
         viewQuery, // viewQuery: ViewQueriesFunction<{}>|null,
@@ -7682,7 +8673,7 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
         cloneToTViewData(blueprint).fill(null, bindingStartIndex), // data: TData,
         bindingStartIndex, // bindingStartIndex: number,
         initialViewLength, // expandoStartIndex: number,
-        null, // expandoInstructions: ExpandoInstructions|null,
+        null, // hostBindingOpCodes: HostBindingOpCodes,
         true, // firstCreatePass: boolean,
         true, // firstUpdatePass: boolean,
         false, // staticViewQueries: boolean,
@@ -7697,8 +8688,8 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
         null, // cleanup: any[]|null,
         null, // contentQueries: number[]|null,
         null, // components: number[]|null,
-        typeof directives === 'function' ?
-            directives() :
+        typeof directives === 'function' ? //
+            directives() : //
             directives, // directiveRegistry: DirectiveDefList|null,
         typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
         null, // firstChild: TNode|null,
@@ -7717,7 +8708,7 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
             data: blueprint.slice().fill(null, bindingStartIndex),
             bindingStartIndex: bindingStartIndex,
             expandoStartIndex: initialViewLength,
-            expandoInstructions: null,
+            hostBindingOpCodes: null,
             firstCreatePass: true,
             firstUpdatePass: true,
             staticViewQueries: false,
@@ -7805,13 +8796,19 @@ function storeCleanupWithContext(tView, lView, context, cleanupFn) {
         getTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
     }
 }
-function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
+function createTNode(tView, tParent, type, index, value, attrs) {
+    ngDevMode && index !== 0 && // 0 are bogus nodes and they are OK. See `createContainerRef` in
+        // `view_engine_compatibility` for additional context.
+        assertGreaterThanOrEqual(index, HEADER_OFFSET, 'TNodes can\'t be in the LView header.');
+    ngDevMode && assertNotSame(attrs, undefined, '\'undefined\' is not valid value for \'attrs\'');
     ngDevMode && ngDevMode.tNode++;
+    ngDevMode && tParent && assertTNodeForTView(tParent, tView);
     let injectorIndex = tParent ? tParent.injectorIndex : -1;
     const tNode = ngDevMode ?
         new TNodeDebug(tView, // tView_: TView
         type, // type: TNodeType
-        adjustedIndex, // index: number
+        index, // index: number
+        null, // insertBeforeIndex: null|-1|number|number[]
         injectorIndex, // injectorIndex: number
         -1, // directiveStart: number
         -1, // directiveEnd: number
@@ -7819,7 +8816,7 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
         null, // propertyBindings: number[]|null
         0, // flags: TNodeFlags
         0, // providerIndexes: TNodeProviderIndexes
-        tagName, // tagName: string|null
+        value, // value: string|null
         attrs, // attrs: (string|AttributeMarker|(string|SelectorFlags)[])[]|null
         null, // mergedAttrs
         null, // localNames: (string|number)[]|null
@@ -7841,16 +8838,17 @@ function createTNode(tView, tParent, type, adjustedIndex, tagName, attrs) {
         0, // classBindings: TStylingRange;
         0) :
         {
-            type: type,
-            index: adjustedIndex,
-            injectorIndex: injectorIndex,
+            type,
+            index,
+            insertBeforeIndex: null,
+            injectorIndex,
             directiveStart: -1,
             directiveEnd: -1,
             directiveStylingLast: -1,
             propertyBindings: null,
             flags: 0,
             providerIndexes: 0,
-            tagName: tagName,
+            value: value,
             attrs: attrs,
             mergedAttrs: null,
             localNames: null,
@@ -7903,13 +8901,13 @@ function initializeInputAndOutputAliases(tView, tNode) {
     ngDevMode && assertFirstCreatePass(tView);
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
-    const defs = tView.data;
+    const tViewData = tView.data;
     const tNodeAttrs = tNode.attrs;
     const inputsFromAttrs = ngDevMode ? new TNodeInitialInputs() : [];
     let inputsStore = null;
     let outputsStore = null;
     for (let i = start; i < end; i++) {
-        const directiveDef = defs[i];
+        const directiveDef = tViewData[i];
         const directiveInputs = directiveDef.inputs;
         // Do not use unbound attributes as inputs to structural directives, since structural
         // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
@@ -7972,7 +8970,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
             setNgReflectProperties(lView, element, tNode.type, dataValue, value);
         }
     }
-    else if (tNode.type === 2 /* Element */) {
+    else if (tNode.type & 3 /* AnyRNode */) {
         propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
@@ -7985,7 +8983,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         }
         // It is assumed that the sanitizer is only added when the compiler determines that the
         // property is risky, so sanitization can be done without further checks.
-        value = sanitizer != null ? sanitizer(value, tNode.tagName || '', propName) : value;
+        value = sanitizer != null ? sanitizer(value, tNode.value || '', propName) : value;
         if (isProceduralRenderer(renderer)) {
             renderer.setProperty(element, propName, value);
         }
@@ -7994,10 +8992,10 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
                 element[propName] = value;
         }
     }
-    else if (tNode.type === 0 /* Container */ || tNode.type === 3 /* ElementContainer */) {
+    else if (tNode.type & 12 /* AnyContainer */) {
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
-        if (ngDevMode && !matchingSchemas(tView, tNode.tagName)) {
+        if (ngDevMode && !matchingSchemas(tView, tNode.value)) {
             logUnknownPropertyError(propName, tNode);
         }
     }
@@ -8014,7 +9012,7 @@ function setNgReflectProperty(lView, element, type, attrName, value) {
     const renderer = lView[RENDERER];
     attrName = normalizeDebugBindingName(attrName);
     const debugValue = normalizeDebugBindingValue(value);
-    if (type === 2 /* Element */) {
+    if (type & 3 /* AnyRNode */) {
         if (value == null) {
             isProceduralRenderer(renderer) ? renderer.removeAttribute(element, attrName) :
                 element.removeAttribute(attrName);
@@ -8036,7 +9034,7 @@ function setNgReflectProperty(lView, element, type, attrName, value) {
     }
 }
 function setNgReflectProperties(lView, element, type, dataValue, value) {
-    if (type === 2 /* Element */ || type === 0 /* Container */) {
+    if (type & (3 /* AnyRNode */ | 4 /* Container */)) {
         /**
          * dataValue is an array containing runtime input or output names for the directives:
          * i+0: directive instance index
@@ -8059,7 +9057,7 @@ function validateProperty(tView, element, propName, tNode) {
         return true;
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    if (matchingSchemas(tView, tNode.tagName) || propName in element || isAnimationProp(propName)) {
+    if (matchingSchemas(tView, tNode.value) || propName in element || isAnimationProp(propName)) {
         return true;
     }
     // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
@@ -8085,7 +9083,7 @@ function matchingSchemas(tView, tagName) {
  * @param tNode Node on which we encountered the property.
  */
 function logUnknownPropertyError(propName, tNode) {
-    console.error(`Can't bind to '${propName}' since it isn't a known property of '${tNode.tagName}'.`);
+    console.error(`Can't bind to '${propName}' since it isn't a known property of '${tNode.value}'.`);
 }
 /**
  * Instantiate a root component.
@@ -8095,10 +9093,12 @@ function instantiateRootComponent(tView, lView, def) {
     if (tView.firstCreatePass) {
         if (def.providersResolver)
             def.providersResolver(def);
-        generateExpandoInstructionBlock(tView, rootTNode, 1);
-        baseResolveDirective(tView, lView, def);
+        const directiveIndex = allocExpando(tView, lView, 1, null);
+        ngDevMode &&
+            assertEqual(directiveIndex, rootTNode.directiveStart, 'Because this is a root component the allocated expando should match the TNode component.');
+        configureViewWithDirective(tView, rootTNode, lView, directiveIndex, def);
     }
-    const directive = getNodeInjectable(lView, tView, lView.length - 1, rootTNode);
+    const directive = getNodeInjectable(lView, tView, rootTNode.directiveStart, rootTNode);
     attachPatchData(directive, lView);
     const native = getNativeByTNode(rootTNode, lView);
     if (native) {
@@ -8118,7 +9118,6 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
         const directiveDefs = findDirectiveDefMatches(tView, lView, tNode);
         const exportsMap = localRefs === null ? null : { '': -1 };
         if (directiveDefs !== null) {
-            let totalDirectiveHostVars = 0;
             hasDirectives = true;
             initTNodeFlags(tNode, tView.data.length, directiveDefs.length);
             // When the same token is provided by several directives on the same node, some rules apply in
@@ -8132,16 +9131,18 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
                 if (def.providersResolver)
                     def.providersResolver(def);
             }
-            generateExpandoInstructionBlock(tView, tNode, directiveDefs.length);
             let preOrderHooksFound = false;
             let preOrderCheckHooksFound = false;
+            let directiveIdx = allocExpando(tView, lView, directiveDefs.length, null);
+            ngDevMode &&
+                assertSame(directiveIdx, tNode.directiveStart, 'TNode.directiveStart should point to just allocated space');
             for (let i = 0; i < directiveDefs.length; i++) {
                 const def = directiveDefs[i];
                 // Merge the attrs in the order of matches. This assumes that the first directive is the
                 // component itself, so that the component has the least priority.
                 tNode.mergedAttrs = mergeHostAttrs(tNode.mergedAttrs, def.hostAttrs);
-                baseResolveDirective(tView, lView, def);
-                saveNameToExportMap(tView.data.length - 1, def, exportsMap);
+                configureViewWithDirective(tView, tNode, lView, directiveIdx, def);
+                saveNameToExportMap(directiveIdx, def, exportsMap);
                 if (def.contentQueries !== null)
                     tNode.flags |= 8 /* hasContentQuery */;
                 if (def.hostBindings !== null || def.hostAttrs !== null || def.hostVars !== 0)
@@ -8154,19 +9155,16 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
                     // We will push the actual hook function into this array later during dir instantiation.
                     // We cannot do it now because we must ensure hooks are registered in the same
                     // order that directives are created (i.e. injection order).
-                    (tView.preOrderHooks || (tView.preOrderHooks = [])).push(tNode.index - HEADER_OFFSET);
+                    (tView.preOrderHooks || (tView.preOrderHooks = [])).push(tNode.index);
                     preOrderHooksFound = true;
                 }
                 if (!preOrderCheckHooksFound && (lifeCycleHooks.ngOnChanges || lifeCycleHooks.ngDoCheck)) {
-                    (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
-                        .push(tNode.index - HEADER_OFFSET);
+                    (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(tNode.index);
                     preOrderCheckHooksFound = true;
                 }
-                addHostBindingsToExpandoInstructions(tView, def);
-                totalDirectiveHostVars += def.hostVars;
+                directiveIdx++;
             }
             initializeInputAndOutputAliases(tView, tNode);
-            growHostVarsSpace(tView, lView, totalDirectiveHostVars);
         }
         if (exportsMap)
             cacheMatchingLocalNames(tNode, localRefs, exportsMap);
@@ -8176,47 +9174,50 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     return hasDirectives;
 }
 /**
- * Add `hostBindings` to the `TView.expandoInstructions`.
+ * Add `hostBindings` to the `TView.hostBindingOpCodes`.
  *
  * @param tView `TView` to which the `hostBindings` should be added.
+ * @param tNode `TNode` the element which contains the directive
+ * @param lView `LView` current `LView`
+ * @param directiveIdx Directive index in view.
+ * @param directiveVarsIdx Where will the directive's vars be stored
  * @param def `ComponentDef`/`DirectiveDef`, which contains the `hostVars`/`hostBindings` to add.
  */
-function addHostBindingsToExpandoInstructions(tView, def) {
+function registerHostBindingOpCodes(tView, tNode, lView, directiveIdx, directiveVarsIdx, def) {
     ngDevMode && assertFirstCreatePass(tView);
-    const expando = tView.expandoInstructions;
-    // TODO(misko): PERF we are adding `hostBindings` even if there is nothing to add! This is
-    // suboptimal for performance. `def.hostBindings` may be null,
-    // but we still need to push null to the array as a placeholder
-    // to ensure the directive counter is incremented (so host
-    // binding functions always line up with the corrective directive).
-    // This is suboptimal for performance. See `currentDirectiveIndex`
-    //  comment in `setHostBindingsByExecutingExpandoInstructions` for more
-    // details.  expando.push(def.hostBindings);
-    expando.push(def.hostBindings);
-    const hostVars = def.hostVars;
-    if (hostVars !== 0) {
-        expando.push(def.hostVars);
+    const hostBindings = def.hostBindings;
+    if (hostBindings) {
+        let hostBindingOpCodes = tView.hostBindingOpCodes;
+        if (hostBindingOpCodes === null) {
+            hostBindingOpCodes = tView.hostBindingOpCodes = [];
+        }
+        const elementIndx = ~tNode.index;
+        if (lastSelectedElementIdx(hostBindingOpCodes) != elementIndx) {
+            // Conditionally add select element so that we are more efficient in execution.
+            // NOTE: this is strictly not necessary and it trades code size for runtime perf.
+            // (We could just always add it.)
+            hostBindingOpCodes.push(elementIndx);
+        }
+        hostBindingOpCodes.push(directiveIdx, directiveVarsIdx, hostBindings);
     }
 }
 /**
- * Grow the `LView`, blueprint and `TView.data` to accommodate the `hostBindings`.
+ * Returns the last selected element index in the `HostBindingOpCodes`
  *
- * To support locality we don't know ahead of time how many `hostVars` of the containing directives
- * we need to allocate. For this reason we allow growing these data structures as we discover more
- * directives to accommodate them.
+ * For perf reasons we don't need to update the selected element index in `HostBindingOpCodes` only
+ * if it changes. This method returns the last index (or '0' if not found.)
  *
- * @param tView `TView` which needs to be grown.
- * @param lView `LView` which needs to be grown.
- * @param count Size by which we need to grow the data structures.
+ * Selected element index are only the ones which are negative.
  */
-function growHostVarsSpace(tView, lView, count) {
-    ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && assertSame(tView, lView[TVIEW], '`LView` must be associated with `TView`!');
-    for (let i = 0; i < count; i++) {
-        lView.push(NO_CHANGE);
-        tView.blueprint.push(NO_CHANGE);
-        tView.data.push(null);
+function lastSelectedElementIdx(hostBindingOpCodes) {
+    let i = hostBindingOpCodes.length;
+    while (i > 0) {
+        const value = hostBindingOpCodes[--i];
+        if (typeof value === 'number' && value < 0) {
+            return value;
+        }
     }
+    return 0;
 }
 /**
  * Instantiate all the directives that were previously resolved on the current node.
@@ -8233,7 +9234,7 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
         const def = tView.data[i];
         const isComponent = isComponentDef(def);
         if (isComponent) {
-            ngDevMode && assertNodeOfPossibleTypes(tNode, [2 /* Element */]);
+            ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */);
             addComponentLogic(lView, tNode, def);
         }
         const directive = getNodeInjectable(lView, tView, i, tNode);
@@ -8250,9 +9251,8 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
 function invokeDirectivesHostBindings(tView, lView, tNode) {
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
-    const expando = tView.expandoInstructions;
     const firstCreatePass = tView.firstCreatePass;
-    const elementIndex = tNode.index - HEADER_OFFSET;
+    const elementIndex = tNode.index;
     const currentDirectiveIndex = getCurrentDirectiveIndex();
     try {
         setSelectedIndex(elementIndex);
@@ -8262,9 +9262,6 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
             setCurrentDirectiveIndex(dirIndex);
             if (def.hostBindings !== null || def.hostVars !== 0 || def.hostAttrs !== null) {
                 invokeHostBindingsInCreationMode(def, directive);
-            }
-            else if (firstCreatePass) {
-                expando.push(null);
             }
         }
     }
@@ -8285,31 +9282,12 @@ function invokeHostBindingsInCreationMode(def, directive) {
     }
 }
 /**
- * Generates a new block in TView.expandoInstructions for this node.
- *
- * Each expando block starts with the element index (turned negative so we can distinguish
- * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
- */
-function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
-    ngDevMode &&
-        assertEqual(tView.firstCreatePass, true, 'Expando block should only be generated on first create pass.');
-    // Important: In JS `-x` and `0-x` is not the same! If `x===0` then `-x` will produce `-0` which
-    // requires non standard math arithmetic and it can prevent VM optimizations.
-    // `0-0` will always produce `0` and will not cause a potential deoptimization in VM.
-    const elementIndex = HEADER_OFFSET - tNode.index;
-    const providerStartIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
-    const providerCount = tView.data.length - providerStartIndex;
-    (tView.expandoInstructions || (tView.expandoInstructions = []))
-        .push(elementIndex, providerCount, directiveCount);
-}
-/**
  * Matches the current node against all available selectors.
  * If a component is matched (at most one), it is returned in first position in the array.
  */
 function findDirectiveDefMatches(tView, viewData, tNode) {
     ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode &&
-        assertNodeOfPossibleTypes(tNode, [2 /* Element */, 3 /* ElementContainer */, 0 /* Container */]);
+    ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */);
     const registry = tView.directiveRegistry;
     let matches = null;
     if (registry) {
@@ -8320,7 +9298,7 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                 diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
                     if (ngDevMode) {
-                        assertNodeOfPossibleTypes(tNode, [2 /* Element */], `"${tNode.tagName}" tags cannot be used as component hosts. ` +
+                        assertTNodeType(tNode, 2 /* Element */, `"${tNode.value}" tags cannot be used as component hosts. ` +
                             `Please use a different tag to activate the ${stringify(def.type)} component.`);
                         if (tNode.flags & 2 /* isComponentHost */)
                             throwMultipleComponentError(tNode);
@@ -8367,15 +9345,15 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
  * Builds up an export map as directives are created, so local refs can be quickly mapped
  * to their directive instances.
  */
-function saveNameToExportMap(index, def, exportsMap) {
+function saveNameToExportMap(directiveIdx, def, exportsMap) {
     if (exportsMap) {
         if (def.exportAs) {
             for (let i = 0; i < def.exportAs.length; i++) {
-                exportsMap[def.exportAs[i]] = index;
+                exportsMap[def.exportAs[i]] = directiveIdx;
             }
         }
         if (isComponentDef(def))
-            exportsMap[''] = index;
+            exportsMap[''] = directiveIdx;
     }
 }
 /**
@@ -8392,12 +9370,27 @@ function initTNodeFlags(tNode, index, numberOfDirectives) {
     tNode.directiveEnd = index + numberOfDirectives;
     tNode.providerIndexes = index;
 }
-function baseResolveDirective(tView, viewData, def) {
-    tView.data.push(def);
+/**
+ * Setup directive for instantiation.
+ *
+ * We need to create a `NodeInjectorFactory` which is then inserted in both the `Blueprint` as well
+ * as `LView`. `TView` gets the `DirectiveDef`.
+ *
+ * @param tView `TView`
+ * @param tNode `TNode`
+ * @param lView `LView`
+ * @param directiveIndex Index where the directive will be stored in the Expando.
+ * @param def `DirectiveDef`
+ */
+function configureViewWithDirective(tView, tNode, lView, directiveIndex, def) {
+    ngDevMode &&
+        assertGreaterThanOrEqual(directiveIndex, HEADER_OFFSET, 'Must be in Expando section');
+    tView.data[directiveIndex] = def;
     const directiveFactory = def.factory || (def.factory = getFactoryDef(def.type, true));
     const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
-    tView.blueprint.push(nodeInjectorFactory);
-    viewData.push(nodeInjectorFactory);
+    tView.blueprint[directiveIndex] = nodeInjectorFactory;
+    lView[directiveIndex] = nodeInjectorFactory;
+    registerHostBindingOpCodes(tView, tNode, lView, directiveIndex, allocExpando(tView, lView, def.hostVars, NO_CHANGE), def);
 }
 function addComponentLogic(lView, hostTNode, def) {
     const native = getNativeByTNode(hostTNode, lView);
@@ -8414,11 +9407,13 @@ function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespac
     if (ngDevMode) {
         assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
         validateAgainstEventAttributes(name);
-        assertNodeNotOfTypes(tNode, [0 /* Container */, 3 /* ElementContainer */], `Attempted to set attribute \`${name}\` on a container node. ` +
+        assertTNodeType(tNode, 2 /* Element */, `Attempted to set attribute \`${name}\` on a container node. ` +
             `Host bindings are not valid on ng-container or ng-template.`);
     }
     const element = getNativeByTNode(tNode, lView);
-    const renderer = lView[RENDERER];
+    setElementAttribute(lView[RENDERER], element, namespace, tNode.value, name, value, sanitizer);
+}
+function setElementAttribute(renderer, element, namespace, tagName, name, value, sanitizer) {
     if (value == null) {
         ngDevMode && ngDevMode.rendererRemoveAttribute++;
         isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
@@ -8426,7 +9421,7 @@ function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespac
     }
     else {
         ngDevMode && ngDevMode.rendererSetAttribute++;
-        const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tNode.tagName || '', name);
+        const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tagName || '', name);
         if (isProceduralRenderer(renderer)) {
             renderer.setAttribute(element, name, strValue, namespace);
         }
@@ -8929,867 +9924,12 @@ function setInputsForProperty(tView, lView, inputs, publicName, value) {
  * Updates a text binding at a given index in a given LView.
  */
 function textBindingInternal(lView, index, value) {
+    ngDevMode && assertString(value, 'Value should be a string');
     ngDevMode && assertNotSame(value, NO_CHANGE, 'value should not be NO_CHANGE');
-    ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
+    ngDevMode && assertIndexInRange(lView, index);
     const element = getNativeByIndex(index, lView);
     ngDevMode && assertDefined(element, 'native element should exist');
-    ngDevMode && ngDevMode.rendererSetText++;
-    const renderer = lView[RENDERER];
-    isProceduralRenderer(renderer) ? renderer.setValue(element, value) : element.textContent = value;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$2 + unusedValueExportToPlacateAjd;
-/**
- * NOTE: for performance reasons, the possible actions are inlined within the function instead of
- * being passed as an argument.
- */
-function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, beforeNode) {
-    // If this slot was allocated for a text node dynamically created by i18n, the text node itself
-    // won't be created until i18nApply() in the update block, so this node should be skipped.
-    // For more info, see "ICU expressions should work inside an ngTemplateOutlet inside an ngFor"
-    // in `i18n_spec.ts`.
-    if (lNodeToHandle != null) {
-        let lContainer;
-        let isComponent = false;
-        // We are expecting an RNode, but in the case of a component or LContainer the `RNode` is
-        // wrapped in an array which needs to be unwrapped. We need to know if it is a component and if
-        // it has LContainer so that we can process all of those cases appropriately.
-        if (isLContainer(lNodeToHandle)) {
-            lContainer = lNodeToHandle;
-        }
-        else if (isLView(lNodeToHandle)) {
-            isComponent = true;
-            ngDevMode && assertDefined(lNodeToHandle[HOST], 'HOST must be defined for a component LView');
-            lNodeToHandle = lNodeToHandle[HOST];
-        }
-        const rNode = unwrapRNode(lNodeToHandle);
-        ngDevMode && !isProceduralRenderer(renderer) && assertDomNode(rNode);
-        if (action === 0 /* Create */ && parent !== null) {
-            if (beforeNode == null) {
-                nativeAppendChild(renderer, parent, rNode);
-            }
-            else {
-                nativeInsertBefore(renderer, parent, rNode, beforeNode || null);
-            }
-        }
-        else if (action === 1 /* Insert */ && parent !== null) {
-            nativeInsertBefore(renderer, parent, rNode, beforeNode || null);
-        }
-        else if (action === 2 /* Detach */) {
-            nativeRemoveNode(renderer, rNode, isComponent);
-        }
-        else if (action === 3 /* Destroy */) {
-            ngDevMode && ngDevMode.rendererDestroyNode++;
-            renderer.destroyNode(rNode);
-        }
-        if (lContainer != null) {
-            applyContainer(renderer, action, lContainer, parent, beforeNode);
-        }
-    }
-}
-function createTextNode(value, renderer) {
-    ngDevMode && ngDevMode.rendererCreateTextNode++;
-    ngDevMode && ngDevMode.rendererSetText++;
-    return isProceduralRenderer(renderer) ? renderer.createText(value) :
-        renderer.createTextNode(value);
-}
-/**
- * Removes all DOM elements associated with a view.
- *
- * Because some root nodes of the view may be containers, we sometimes need
- * to propagate deeply into the nested containers to remove all elements in the
- * views beneath it.
- *
- * @param tView The `TView' of the `LView` from which elements should be added or removed
- * @param lView The view from which elements should be added or removed
- */
-function removeViewFromContainer(tView, lView) {
-    const renderer = lView[RENDERER];
-    applyView(tView, lView, renderer, 2 /* Detach */, null, null);
-    lView[HOST] = null;
-    lView[T_HOST] = null;
-}
-/**
- * Adds all DOM elements associated with a view.
- *
- * Because some root nodes of the view may be containers, we sometimes need
- * to propagate deeply into the nested containers to add all elements in the
- * views beneath it.
- *
- * @param tView The `TView' of the `LView` from which elements should be added or removed
- * @param parentTNode The `TNode` where the `LView` should be attached to.
- * @param renderer Current renderer to use for DOM manipulations.
- * @param lView The view from which elements should be added or removed
- * @param parentNativeNode The parent `RElement` where it should be inserted into.
- * @param beforeNode The node before which elements should be added, if insert mode
- */
-function addViewToContainer(tView, parentTNode, renderer, lView, parentNativeNode, beforeNode) {
-    lView[HOST] = parentNativeNode;
-    lView[T_HOST] = parentTNode;
-    applyView(tView, lView, renderer, 1 /* Insert */, parentNativeNode, beforeNode);
-}
-/**
- * Detach a `LView` from the DOM by detaching its nodes.
- *
- * @param tView The `TView' of the `LView` to be detached
- * @param lView the `LView` to be detached.
- */
-function renderDetachView(tView, lView) {
-    applyView(tView, lView, lView[RENDERER], 2 /* Detach */, null, null);
-}
-/**
- * Traverses down and up the tree of views and containers to remove listeners and
- * call onDestroy callbacks.
- *
- * Notes:
- *  - Because it's used for onDestroy calls, it needs to be bottom-up.
- *  - Must process containers instead of their views to avoid splicing
- *  when views are destroyed and re-added.
- *  - Using a while loop because it's faster than recursion
- *  - Destroy only called on movement to sibling or movement to parent (laterally or up)
- *
- *  @param rootView The view to destroy
- */
-function destroyViewTree(rootView) {
-    // If the view has no children, we can clean it up and return early.
-    let lViewOrLContainer = rootView[CHILD_HEAD];
-    if (!lViewOrLContainer) {
-        return cleanUpView(rootView[TVIEW], rootView);
-    }
-    while (lViewOrLContainer) {
-        let next = null;
-        if (isLView(lViewOrLContainer)) {
-            // If LView, traverse down to child.
-            next = lViewOrLContainer[CHILD_HEAD];
-        }
-        else {
-            ngDevMode && assertLContainer(lViewOrLContainer);
-            // If container, traverse down to its first LView.
-            const firstView = lViewOrLContainer[CONTAINER_HEADER_OFFSET];
-            if (firstView)
-                next = firstView;
-        }
-        if (!next) {
-            // Only clean up view when moving to the side or up, as destroy hooks
-            // should be called in order from the bottom up.
-            while (lViewOrLContainer && !lViewOrLContainer[NEXT] && lViewOrLContainer !== rootView) {
-                if (isLView(lViewOrLContainer)) {
-                    cleanUpView(lViewOrLContainer[TVIEW], lViewOrLContainer);
-                }
-                lViewOrLContainer = lViewOrLContainer[PARENT];
-            }
-            if (lViewOrLContainer === null)
-                lViewOrLContainer = rootView;
-            if (isLView(lViewOrLContainer)) {
-                cleanUpView(lViewOrLContainer[TVIEW], lViewOrLContainer);
-            }
-            next = lViewOrLContainer && lViewOrLContainer[NEXT];
-        }
-        lViewOrLContainer = next;
-    }
-}
-/**
- * Inserts a view into a container.
- *
- * This adds the view to the container's array of active views in the correct
- * position. It also adds the view's elements to the DOM if the container isn't a
- * root node of another view (in that case, the view's elements will be added when
- * the container's parent view is added later).
- *
- * @param tView The `TView' of the `LView` to insert
- * @param lView The view to insert
- * @param lContainer The container into which the view should be inserted
- * @param index Which index in the container to insert the child view into
- */
-function insertView(tView, lView, lContainer, index) {
-    ngDevMode && assertLView(lView);
-    ngDevMode && assertLContainer(lContainer);
-    const indexInContainer = CONTAINER_HEADER_OFFSET + index;
-    const containerLength = lContainer.length;
-    if (index > 0) {
-        // This is a new view, we need to add it to the children.
-        lContainer[indexInContainer - 1][NEXT] = lView;
-    }
-    if (index < containerLength - CONTAINER_HEADER_OFFSET) {
-        lView[NEXT] = lContainer[indexInContainer];
-        addToArray(lContainer, CONTAINER_HEADER_OFFSET + index, lView);
-    }
-    else {
-        lContainer.push(lView);
-        lView[NEXT] = null;
-    }
-    lView[PARENT] = lContainer;
-    // track views where declaration and insertion points are different
-    const declarationLContainer = lView[DECLARATION_LCONTAINER];
-    if (declarationLContainer !== null && lContainer !== declarationLContainer) {
-        trackMovedView(declarationLContainer, lView);
-    }
-    // notify query that a new view has been added
-    const lQueries = lView[QUERIES];
-    if (lQueries !== null) {
-        lQueries.insertView(tView);
-    }
-    // Sets the attached flag
-    lView[FLAGS] |= 128 /* Attached */;
-}
-/**
- * Track views created from the declaration container (TemplateRef) and inserted into a
- * different LContainer.
- */
-function trackMovedView(declarationContainer, lView) {
-    ngDevMode && assertDefined(lView, 'LView required');
-    ngDevMode && assertLContainer(declarationContainer);
-    const movedViews = declarationContainer[MOVED_VIEWS];
-    const insertedLContainer = lView[PARENT];
-    ngDevMode && assertLContainer(insertedLContainer);
-    const insertedComponentLView = insertedLContainer[PARENT][DECLARATION_COMPONENT_VIEW];
-    ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
-    const declaredComponentLView = lView[DECLARATION_COMPONENT_VIEW];
-    ngDevMode && assertDefined(declaredComponentLView, 'Missing declaredComponentLView');
-    if (declaredComponentLView !== insertedComponentLView) {
-        // At this point the declaration-component is not same as insertion-component; this means that
-        // this is a transplanted view. Mark the declared lView as having transplanted views so that
-        // those views can participate in CD.
-        declarationContainer[HAS_TRANSPLANTED_VIEWS] = true;
-    }
-    if (movedViews === null) {
-        declarationContainer[MOVED_VIEWS] = [lView];
-    }
-    else {
-        movedViews.push(lView);
-    }
-}
-function detachMovedView(declarationContainer, lView) {
-    ngDevMode && assertLContainer(declarationContainer);
-    ngDevMode &&
-        assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
-    const movedViews = declarationContainer[MOVED_VIEWS];
-    const declarationViewIndex = movedViews.indexOf(lView);
-    const insertionLContainer = lView[PARENT];
-    ngDevMode && assertLContainer(insertionLContainer);
-    // If the view was marked for refresh but then detached before it was checked (where the flag
-    // would be cleared and the counter decremented), we need to decrement the view counter here
-    // instead.
-    if (lView[FLAGS] & 1024 /* RefreshTransplantedView */) {
-        lView[FLAGS] &= ~1024 /* RefreshTransplantedView */;
-        updateTransplantedViewCount(insertionLContainer, -1);
-    }
-    movedViews.splice(declarationViewIndex, 1);
-}
-/**
- * Detaches a view from a container.
- *
- * This method removes the view from the container's array of active views. It also
- * removes the view's elements from the DOM.
- *
- * @param lContainer The container from which to detach a view
- * @param removeIndex The index of the view to detach
- * @returns Detached LView instance.
- */
-function detachView(lContainer, removeIndex) {
-    if (lContainer.length <= CONTAINER_HEADER_OFFSET)
-        return;
-    const indexInContainer = CONTAINER_HEADER_OFFSET + removeIndex;
-    const viewToDetach = lContainer[indexInContainer];
-    if (viewToDetach) {
-        const declarationLContainer = viewToDetach[DECLARATION_LCONTAINER];
-        if (declarationLContainer !== null && declarationLContainer !== lContainer) {
-            detachMovedView(declarationLContainer, viewToDetach);
-        }
-        if (removeIndex > 0) {
-            lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
-        }
-        const removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
-        removeViewFromContainer(viewToDetach[TVIEW], viewToDetach);
-        // notify query that a view has been removed
-        const lQueries = removedLView[QUERIES];
-        if (lQueries !== null) {
-            lQueries.detachView(removedLView[TVIEW]);
-        }
-        viewToDetach[PARENT] = null;
-        viewToDetach[NEXT] = null;
-        // Unsets the attached flag
-        viewToDetach[FLAGS] &= ~128 /* Attached */;
-    }
-    return viewToDetach;
-}
-/**
- * A standalone function which destroys an LView,
- * conducting clean up (e.g. removing listeners, calling onDestroys).
- *
- * @param tView The `TView' of the `LView` to be destroyed
- * @param lView The view to be destroyed.
- */
-function destroyLView(tView, lView) {
-    if (!(lView[FLAGS] & 256 /* Destroyed */)) {
-        const renderer = lView[RENDERER];
-        if (isProceduralRenderer(renderer) && renderer.destroyNode) {
-            applyView(tView, lView, renderer, 3 /* Destroy */, null, null);
-        }
-        destroyViewTree(lView);
-    }
-}
-/**
- * Calls onDestroys hooks for all directives and pipes in a given view and then removes all
- * listeners. Listeners are removed as the last step so events delivered in the onDestroys hooks
- * can be propagated to @Output listeners.
- *
- * @param tView `TView` for the `LView` to clean up.
- * @param lView The LView to clean up
- */
-function cleanUpView(tView, lView) {
-    if (!(lView[FLAGS] & 256 /* Destroyed */)) {
-        // Usually the Attached flag is removed when the view is detached from its parent, however
-        // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
-        lView[FLAGS] &= ~128 /* Attached */;
-        // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
-        // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
-        // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
-        // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
-        // really more of an "afterDestroy" hook if you think about it.
-        lView[FLAGS] |= 256 /* Destroyed */;
-        executeOnDestroys(tView, lView);
-        removeListeners(tView, lView);
-        // For component views only, the local renderer is destroyed at clean up time.
-        if (lView[TVIEW].type === 1 /* Component */ && isProceduralRenderer(lView[RENDERER])) {
-            ngDevMode && ngDevMode.rendererDestroy++;
-            lView[RENDERER].destroy();
-        }
-        const declarationContainer = lView[DECLARATION_LCONTAINER];
-        // we are dealing with an embedded view that is still inserted into a container
-        if (declarationContainer !== null && isLContainer(lView[PARENT])) {
-            // and this is a projected view
-            if (declarationContainer !== lView[PARENT]) {
-                detachMovedView(declarationContainer, lView);
-            }
-            // For embedded views still attached to a container: remove query result from this view.
-            const lQueries = lView[QUERIES];
-            if (lQueries !== null) {
-                lQueries.detachView(tView);
-            }
-        }
-    }
-}
-/** Removes listeners and unsubscribes from output subscriptions */
-function removeListeners(tView, lView) {
-    const tCleanup = tView.cleanup;
-    if (tCleanup !== null) {
-        const lCleanup = lView[CLEANUP];
-        for (let i = 0; i < tCleanup.length - 1; i += 2) {
-            if (typeof tCleanup[i] === 'string') {
-                // This is a native DOM listener
-                const idxOrTargetGetter = tCleanup[i + 1];
-                const target = typeof idxOrTargetGetter === 'function' ?
-                    idxOrTargetGetter(lView) :
-                    unwrapRNode(lView[idxOrTargetGetter]);
-                const listener = lCleanup[tCleanup[i + 2]];
-                const useCaptureOrSubIdx = tCleanup[i + 3];
-                if (typeof useCaptureOrSubIdx === 'boolean') {
-                    // native DOM listener registered with Renderer3
-                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
-                }
-                else {
-                    if (useCaptureOrSubIdx >= 0) {
-                        // unregister
-                        lCleanup[useCaptureOrSubIdx]();
-                    }
-                    else {
-                        // Subscription
-                        lCleanup[-useCaptureOrSubIdx].unsubscribe();
-                    }
-                }
-                i += 2;
-            }
-            else {
-                // This is a cleanup function that is grouped with the index of its context
-                const context = lCleanup[tCleanup[i + 1]];
-                tCleanup[i].call(context);
-            }
-        }
-        lView[CLEANUP] = null;
-    }
-}
-/** Calls onDestroy hooks for this view */
-function executeOnDestroys(tView, lView) {
-    let destroyHooks;
-    if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
-        for (let i = 0; i < destroyHooks.length; i += 2) {
-            const context = lView[destroyHooks[i]];
-            // Only call the destroy hook if the context has been requested.
-            if (!(context instanceof NodeInjectorFactory)) {
-                const toCall = destroyHooks[i + 1];
-                if (Array.isArray(toCall)) {
-                    for (let j = 0; j < toCall.length; j += 2) {
-                        toCall[j + 1].call(context[toCall[j]]);
-                    }
-                }
-                else {
-                    toCall.call(context);
-                }
-            }
-        }
-    }
-}
-/**
- * Returns a native element if a node can be inserted into the given parent.
- *
- * There are two reasons why we may not be able to insert a element immediately.
- * - Projection: When creating a child content element of a component, we have to skip the
- *   insertion because the content of a component will be projected.
- *   `<component><content>delayed due to projection</content></component>`
- * - Parent container is disconnected: This can happen when we are inserting a view into
- *   parent container, which itself is disconnected. For example the parent container is part
- *   of a View which has not be inserted or is made for projection but has not been inserted
- *   into destination.
- */
-function getRenderParent(tView, tNode, currentView) {
-    // Skip over element and ICU containers as those are represented by a comment node and
-    // can't be used as a render parent.
-    let parentTNode = tNode.parent;
-    while (parentTNode != null &&
-        (parentTNode.type === 3 /* ElementContainer */ ||
-            parentTNode.type === 4 /* IcuContainer */)) {
-        tNode = parentTNode;
-        parentTNode = tNode.parent;
-    }
-    // If the parent tNode is null, then we are inserting across views: either into an embedded view
-    // or a component view.
-    if (parentTNode === null) {
-        // We are inserting a root element of the component view into the component host element and
-        // it should always be eager.
-        return currentView[HOST];
-    }
-    else {
-        const isIcuCase = tNode && tNode.type === 4 /* IcuContainer */;
-        // If the parent of this node is an ICU container, then it is represented by comment node and we
-        // need to use it as an anchor. If it is projected then it's direct parent node is the renderer.
-        if (isIcuCase && tNode.flags & 4 /* isProjected */) {
-            return getNativeByTNode(tNode, currentView).parentNode;
-        }
-        ngDevMode && assertNodeType(parentTNode, 2 /* Element */);
-        if (parentTNode.flags & 2 /* isComponentHost */) {
-            const tData = tView.data;
-            const tNode = tData[parentTNode.index];
-            const encapsulation = tData[tNode.directiveStart].encapsulation;
-            // We've got a parent which is an element in the current view. We just need to verify if the
-            // parent element is not a component. Component's content nodes are not inserted immediately
-            // because they will be projected, and so doing insert at this point would be wasteful.
-            // Since the projection would then move it to its final destination. Note that we can't
-            // make this assumption when using the Shadow DOM, because the native projection placeholders
-            // (<content> or <slot>) have to be in place as elements are being inserted.
-            if (encapsulation === ViewEncapsulation$1.None ||
-                encapsulation === ViewEncapsulation$1.Emulated) {
-                return null;
-            }
-        }
-        return getNativeByTNode(parentTNode, currentView);
-    }
-}
-/**
- * Inserts a native node before another native node for a given parent using {@link Renderer3}.
- * This is a utility function that can be used when native nodes were determined - it abstracts an
- * actual renderer being used.
- */
-function nativeInsertBefore(renderer, parent, child, beforeNode) {
-    ngDevMode && ngDevMode.rendererInsertBefore++;
-    if (isProceduralRenderer(renderer)) {
-        renderer.insertBefore(parent, child, beforeNode);
-    }
-    else {
-        parent.insertBefore(child, beforeNode, true);
-    }
-}
-function nativeAppendChild(renderer, parent, child) {
-    ngDevMode && ngDevMode.rendererAppendChild++;
-    ngDevMode && assertDefined(parent, 'parent node must be defined');
-    if (isProceduralRenderer(renderer)) {
-        renderer.appendChild(parent, child);
-    }
-    else {
-        parent.appendChild(child);
-    }
-}
-function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode) {
-    if (beforeNode !== null) {
-        nativeInsertBefore(renderer, parent, child, beforeNode);
-    }
-    else {
-        nativeAppendChild(renderer, parent, child);
-    }
-}
-/** Removes a node from the DOM given its native parent. */
-function nativeRemoveChild(renderer, parent, child, isHostElement) {
-    if (isProceduralRenderer(renderer)) {
-        renderer.removeChild(parent, child, isHostElement);
-    }
-    else {
-        parent.removeChild(child);
-    }
-}
-/**
- * Returns a native parent of a given native node.
- */
-function nativeParentNode(renderer, node) {
-    return (isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode);
-}
-/**
- * Returns a native sibling of a given native node.
- */
-function nativeNextSibling(renderer, node) {
-    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
-}
-/**
- * Finds a native "anchor" node for cases where we can't append a native child directly
- * (`appendChild`) and need to use a reference (anchor) node for the `insertBefore` operation.
- * @param parentTNode
- * @param lView
- */
-function getNativeAnchorNode(parentTNode, lView) {
-    if (parentTNode.type === 3 /* ElementContainer */ ||
-        parentTNode.type === 4 /* IcuContainer */) {
-        return getNativeByTNode(parentTNode, lView);
-    }
-    return null;
-}
-/**
- * Appends the `child` native node (or a collection of nodes) to the `parent`.
- *
- * The element insertion might be delayed {@link canInsertNativeNode}.
- *
- * @param tView The `TView' to be appended
- * @param lView The current LView
- * @param childEl The native child (or children) that should be appended
- * @param childTNode The TNode of the child element
- * @returns Whether or not the child was appended
- */
-function appendChild(tView, lView, childEl, childTNode) {
-    const renderParent = getRenderParent(tView, childTNode, lView);
-    if (renderParent != null) {
-        const renderer = lView[RENDERER];
-        const parentTNode = childTNode.parent || lView[T_HOST];
-        const anchorNode = getNativeAnchorNode(parentTNode, lView);
-        if (Array.isArray(childEl)) {
-            for (let i = 0; i < childEl.length; i++) {
-                nativeAppendOrInsertBefore(renderer, renderParent, childEl[i], anchorNode);
-            }
-        }
-        else {
-            nativeAppendOrInsertBefore(renderer, renderParent, childEl, anchorNode);
-        }
-    }
-}
-/**
- * Returns the first native node for a given LView, starting from the provided TNode.
- *
- * Native nodes are returned in the order in which those appear in the native tree (DOM).
- */
-function getFirstNativeNode(lView, tNode) {
-    if (tNode !== null) {
-        ngDevMode && assertNodeOfPossibleTypes(tNode, [
-            2 /* Element */, 0 /* Container */, 3 /* ElementContainer */, 4 /* IcuContainer */,
-            1 /* Projection */
-        ]);
-        const tNodeType = tNode.type;
-        if (tNodeType === 2 /* Element */) {
-            return getNativeByTNode(tNode, lView);
-        }
-        else if (tNodeType === 0 /* Container */) {
-            return getBeforeNodeForView(-1, lView[tNode.index]);
-        }
-        else if (tNodeType === 3 /* ElementContainer */ || tNodeType === 4 /* IcuContainer */) {
-            const elIcuContainerChild = tNode.child;
-            if (elIcuContainerChild !== null) {
-                return getFirstNativeNode(lView, elIcuContainerChild);
-            }
-            else {
-                const rNodeOrLContainer = lView[tNode.index];
-                if (isLContainer(rNodeOrLContainer)) {
-                    return getBeforeNodeForView(-1, rNodeOrLContainer);
-                }
-                else {
-                    return unwrapRNode(rNodeOrLContainer);
-                }
-            }
-        }
-        else {
-            const componentView = lView[DECLARATION_COMPONENT_VIEW];
-            const componentHost = componentView[T_HOST];
-            const parentView = getLViewParent(componentView);
-            const firstProjectedTNode = componentHost.projection[tNode.projection];
-            if (firstProjectedTNode != null) {
-                return getFirstNativeNode(parentView, firstProjectedTNode);
-            }
-            else {
-                return getFirstNativeNode(lView, tNode.next);
-            }
-        }
-    }
-    return null;
-}
-function getBeforeNodeForView(viewIndexInContainer, lContainer) {
-    const nextViewIndex = CONTAINER_HEADER_OFFSET + viewIndexInContainer + 1;
-    if (nextViewIndex < lContainer.length) {
-        const lView = lContainer[nextViewIndex];
-        const firstTNodeOfView = lView[TVIEW].firstChild;
-        if (firstTNodeOfView !== null) {
-            return getFirstNativeNode(lView, firstTNodeOfView);
-        }
-    }
-    return lContainer[NATIVE];
-}
-/**
- * Removes a native node itself using a given renderer. To remove the node we are looking up its
- * parent from the native tree as not all platforms / browsers support the equivalent of
- * node.remove().
- *
- * @param renderer A renderer to be used
- * @param rNode The native node that should be removed
- * @param isHostElement A flag indicating if a node to be removed is a host of a component.
- */
-function nativeRemoveNode(renderer, rNode, isHostElement) {
-    const nativeParent = nativeParentNode(renderer, rNode);
-    if (nativeParent) {
-        nativeRemoveChild(renderer, nativeParent, rNode, isHostElement);
-    }
-}
-/**
- * Performs the operation of `action` on the node. Typically this involves inserting or removing
- * nodes on the LView or projection boundary.
- */
-function applyNodes(renderer, action, tNode, lView, renderParent, beforeNode, isProjection) {
-    while (tNode != null) {
-        ngDevMode && assertTNodeForLView(tNode, lView);
-        ngDevMode && assertNodeOfPossibleTypes(tNode, [
-            0 /* Container */, 2 /* Element */, 3 /* ElementContainer */, 1 /* Projection */,
-            4 /* IcuContainer */
-        ]);
-        const rawSlotValue = lView[tNode.index];
-        const tNodeType = tNode.type;
-        if (isProjection) {
-            if (action === 0 /* Create */) {
-                rawSlotValue && attachPatchData(unwrapRNode(rawSlotValue), lView);
-                tNode.flags |= 4 /* isProjected */;
-            }
-        }
-        if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
-            if (tNodeType === 3 /* ElementContainer */ || tNodeType === 4 /* IcuContainer */) {
-                applyNodes(renderer, action, tNode.child, lView, renderParent, beforeNode, false);
-                applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
-            }
-            else if (tNodeType === 1 /* Projection */) {
-                applyProjectionRecursive(renderer, action, lView, tNode, renderParent, beforeNode);
-            }
-            else {
-                ngDevMode && assertNodeOfPossibleTypes(tNode, [2 /* Element */, 0 /* Container */]);
-                applyToElementOrContainer(action, renderer, renderParent, rawSlotValue, beforeNode);
-            }
-        }
-        tNode = isProjection ? tNode.projectionNext : tNode.next;
-    }
-}
-function applyView(tView, lView, renderer, action, renderParent, beforeNode) {
-    applyNodes(renderer, action, tView.firstChild, lView, renderParent, beforeNode, false);
-}
-/**
- * `applyProjection` performs operation on the projection.
- *
- * Inserting a projection requires us to locate the projected nodes from the parent component. The
- * complication is that those nodes themselves could be re-projected from their parent component.
- *
- * @param tView The `TView` of `LView` which needs to be inserted, detached, destroyed
- * @param lView The `LView` which needs to be inserted, detached, destroyed.
- * @param tProjectionNode node to project
- */
-function applyProjection(tView, lView, tProjectionNode) {
-    const renderer = lView[RENDERER];
-    const renderParent = getRenderParent(tView, tProjectionNode, lView);
-    const parentTNode = tProjectionNode.parent || lView[T_HOST];
-    let beforeNode = getNativeAnchorNode(parentTNode, lView);
-    applyProjectionRecursive(renderer, 0 /* Create */, lView, tProjectionNode, renderParent, beforeNode);
-}
-/**
- * `applyProjectionRecursive` performs operation on the projection specified by `action` (insert,
- * detach, destroy)
- *
- * Inserting a projection requires us to locate the projected nodes from the parent component. The
- * complication is that those nodes themselves could be re-projected from their parent component.
- *
- * @param renderer Render to use
- * @param action action to perform (insert, detach, destroy)
- * @param lView The LView which needs to be inserted, detached, destroyed.
- * @param tProjectionNode node to project
- * @param renderParent parent DOM element for insertion/removal.
- * @param beforeNode Before which node the insertions should happen.
- */
-function applyProjectionRecursive(renderer, action, lView, tProjectionNode, renderParent, beforeNode) {
-    const componentLView = lView[DECLARATION_COMPONENT_VIEW];
-    const componentNode = componentLView[T_HOST];
-    ngDevMode &&
-        assertEqual(typeof tProjectionNode.projection, 'number', 'expecting projection index');
-    const nodeToProjectOrRNodes = componentNode.projection[tProjectionNode.projection];
-    if (Array.isArray(nodeToProjectOrRNodes)) {
-        // This should not exist, it is a bit of a hack. When we bootstrap a top level node and we
-        // need to support passing projectable nodes, so we cheat and put them in the TNode
-        // of the Host TView. (Yes we put instance info at the T Level). We can get away with it
-        // because we know that that TView is not shared and therefore it will not be a problem.
-        // This should be refactored and cleaned up.
-        for (let i = 0; i < nodeToProjectOrRNodes.length; i++) {
-            const rNode = nodeToProjectOrRNodes[i];
-            applyToElementOrContainer(action, renderer, renderParent, rNode, beforeNode);
-        }
-    }
-    else {
-        let nodeToProject = nodeToProjectOrRNodes;
-        const projectedComponentLView = componentLView[PARENT];
-        applyNodes(renderer, action, nodeToProject, projectedComponentLView, renderParent, beforeNode, true);
-    }
-}
-/**
- * `applyContainer` performs an operation on the container and its views as specified by
- * `action` (insert, detach, destroy)
- *
- * Inserting a Container is complicated by the fact that the container may have Views which
- * themselves have containers or projections.
- *
- * @param renderer Renderer to use
- * @param action action to perform (insert, detach, destroy)
- * @param lContainer The LContainer which needs to be inserted, detached, destroyed.
- * @param renderParent parent DOM element for insertion/removal.
- * @param beforeNode Before which node the insertions should happen.
- */
-function applyContainer(renderer, action, lContainer, renderParent, beforeNode) {
-    ngDevMode && assertLContainer(lContainer);
-    const anchor = lContainer[NATIVE]; // LContainer has its own before node.
-    const native = unwrapRNode(lContainer);
-    // An LContainer can be created dynamically on any node by injecting ViewContainerRef.
-    // Asking for a ViewContainerRef on an element will result in a creation of a separate anchor node
-    // (comment in the DOM) that will be different from the LContainer's host node. In this particular
-    // case we need to execute action on 2 nodes:
-    // - container's host node (this is done in the executeActionOnElementOrContainer)
-    // - container's host node (this is done here)
-    if (anchor !== native) {
-        // This is very strange to me (Misko). I would expect that the native is same as anchor. I don't
-        // see a reason why they should be different, but they are.
-        //
-        // If they are we need to process the second anchor as well.
-        applyToElementOrContainer(action, renderer, renderParent, anchor, beforeNode);
-    }
-    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        const lView = lContainer[i];
-        applyView(lView[TVIEW], lView, renderer, action, renderParent, anchor);
-    }
-}
-/**
- * Writes class/style to element.
- *
- * @param renderer Renderer to use.
- * @param isClassBased `true` if it should be written to `class` (`false` to write to `style`)
- * @param rNode The Node to write to.
- * @param prop Property to write to. This would be the class/style name.
- * @param value Value to write. If `null`/`undefined`/`false` this is considered a remove (set/add
- *        otherwise).
- */
-function applyStyling(renderer, isClassBased, rNode, prop, value) {
-    const isProcedural = isProceduralRenderer(renderer);
-    if (isClassBased) {
-        // We actually want JS true/false here because any truthy value should add the class
-        if (!value) {
-            ngDevMode && ngDevMode.rendererRemoveClass++;
-            if (isProcedural) {
-                renderer.removeClass(rNode, prop);
-            }
-            else {
-                rNode.classList.remove(prop);
-            }
-        }
-        else {
-            ngDevMode && ngDevMode.rendererAddClass++;
-            if (isProcedural) {
-                renderer.addClass(rNode, prop);
-            }
-            else {
-                ngDevMode && assertDefined(rNode.classList, 'HTMLElement expected');
-                rNode.classList.add(prop);
-            }
-        }
-    }
-    else {
-        // TODO(misko): Can't import RendererStyleFlags2.DashCase as it causes imports to be resolved in
-        // different order which causes failures. Using direct constant as workaround for now.
-        const flags = prop.indexOf('-') == -1 ? undefined : 2 /* RendererStyleFlags2.DashCase */;
-        if (value == null /** || value === undefined */) {
-            ngDevMode && ngDevMode.rendererRemoveStyle++;
-            if (isProcedural) {
-                renderer.removeStyle(rNode, prop, flags);
-            }
-            else {
-                rNode.style.removeProperty(prop);
-            }
-        }
-        else {
-            ngDevMode && ngDevMode.rendererSetStyle++;
-            if (isProcedural) {
-                renderer.setStyle(rNode, prop, value, flags);
-            }
-            else {
-                ngDevMode && assertDefined(rNode.style, 'HTMLElement expected');
-                rNode.style.setProperty(prop, value);
-            }
-        }
-    }
-}
-/**
- * Write `cssText` to `RElement`.
- *
- * This function does direct write without any reconciliation. Used for writing initial values, so
- * that static styling values do not pull in the style parser.
- *
- * @param renderer Renderer to use
- * @param element The element which needs to be updated.
- * @param newValue The new class list to write.
- */
-function writeDirectStyle(renderer, element, newValue) {
-    ngDevMode && assertString(newValue, '\'newValue\' should be a string');
-    if (isProceduralRenderer(renderer)) {
-        renderer.setAttribute(element, 'style', newValue);
-    }
-    else {
-        element.style.cssText = newValue;
-    }
-    ngDevMode && ngDevMode.rendererSetStyle++;
-}
-/**
- * Write `className` to `RElement`.
- *
- * This function does direct write without any reconciliation. Used for writing initial values, so
- * that static styling values do not pull in the style parser.
- *
- * @param renderer Renderer to use
- * @param element The element which needs to be updated.
- * @param newValue The new class list to write.
- */
-function writeDirectClass(renderer, element, newValue) {
-    ngDevMode && assertString(newValue, '\'newValue\' should be a string');
-    if (isProceduralRenderer(renderer)) {
-        if (newValue === '') {
-            // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
-            renderer.removeAttribute(element, 'class');
-        }
-        else {
-            renderer.setAttribute(element, 'class', newValue);
-        }
-    }
-    else {
-        element.className = newValue;
-    }
-    ngDevMode && ngDevMode.rendererSetClassName++;
+    updateTextNode(lView[RENDERER], element, value);
 }
 
 /**
@@ -10072,10 +10212,8 @@ class RootViewRef extends ViewRef {
 }
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     while (tNode !== null) {
-        ngDevMode && assertNodeOfPossibleTypes(tNode, [
-            2 /* Element */, 0 /* Container */, 1 /* Projection */, 3 /* ElementContainer */,
-            4 /* IcuContainer */
-        ]);
+        ngDevMode &&
+            assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */ | 16 /* Projection */ | 32 /* Icu */);
         const lNode = lView[tNode.index];
         if (lNode !== null) {
             result.push(unwrapRNode(lNode));
@@ -10093,10 +10231,17 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
             }
         }
         const tNodeType = tNode.type;
-        if (tNodeType === 3 /* ElementContainer */ || tNodeType === 4 /* IcuContainer */) {
+        if (tNodeType & 8 /* ElementContainer */) {
             collectNativeNodes(tView, lView, tNode.child, result);
         }
-        else if (tNodeType === 1 /* Projection */) {
+        else if (tNodeType & 32 /* Icu */) {
+            const nextRNode = icuContainerIterate(tNode, lView);
+            let rNode;
+            while (rNode = nextRNode()) {
+                result.push(rNode);
+            }
+        }
+        else if (tNodeType & 16 /* Projection */) {
             const componentView = lView[DECLARATION_COMPONENT_VIEW];
             const componentHost = componentView[T_HOST];
             const slotIdx = tNode.projection;
@@ -10191,7 +10336,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
             }
         };
     }
-    if (hostTNode.type === 0 /* Container */) {
+    if (hostTNode.type & 4 /* Container */) {
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
         return new R3TemplateRef(hostView, hostTNode, createElementRef(ElementRefToken, hostTNode, hostView));
     }
@@ -10313,9 +10458,9 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 // Physical operation of adding the DOM nodes.
                 const beforeNode = getBeforeNodeForView(adjustedIdx, lContainer);
                 const renderer = lView[RENDERER];
-                const renderParent = nativeParentNode(renderer, lContainer[NATIVE]);
-                if (renderParent !== null) {
-                    addViewToContainer(tView, lContainer[T_HOST], renderer, lView, renderParent, beforeNode);
+                const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
+                if (parentRNode !== null) {
+                    addViewToContainer(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
                 }
                 viewRef.attachToViewContainerRef(this);
                 addToArray(lContainer[VIEW_REFS], adjustedIdx, viewRef);
@@ -10371,8 +10516,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
             }
         };
     }
-    ngDevMode &&
-        assertNodeOfPossibleTypes(hostTNode, [0 /* Container */, 2 /* Element */, 3 /* ElementContainer */]);
+    ngDevMode && assertTNodeType(hostTNode, 12 /* AnyContainer */ | 3 /* AnyRNode */);
     let lContainer;
     const slotValue = hostView[hostTNode.index];
     if (isLContainer(slotValue)) {
@@ -10385,7 +10529,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
         // comment and we can reuse that comment as anchor element for the new LContainer.
         // The comment node in question is already part of the DOM structure so we don't need to append
         // it again.
-        if (hostTNode.type === 3 /* ElementContainer */) {
+        if (hostTNode.type & 8 /* ElementContainer */) {
             commentNode = unwrapRNode(slotValue);
         }
         else {
@@ -10400,10 +10544,13 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 const renderer = hostView[RENDERER];
                 const hostNative = getNativeByTNode(hostTNode, hostView);
                 const parentOfHostNative = nativeParentNode(renderer, hostNative);
-                nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative));
+                nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
             }
             else {
-                appendChild(hostView[TVIEW], hostView, commentNode, hostTNode);
+                // The TNode created here is bogus, in that it is not added to the TView. It is only created
+                // to allow us to create a dynamic Comment node.
+                const commentTNode = createTNode(hostView[TVIEW], hostTNode.parent, 4 /* Container */, 0, null, null);
+                appendChild(hostView[TVIEW], hostView, commentNode, commentTNode);
             }
         }
         hostView[hostTNode.index] = lContainer =
@@ -10434,8 +10581,7 @@ function createViewRef(tNode, lView, isPipe) {
         const componentView = getComponentLViewByIndex(tNode.index, lView); // look down
         return new ViewRef(componentView, componentView);
     }
-    else if (tNode.type === 2 /* Element */ || tNode.type === 0 /* Container */ ||
-        tNode.type === 3 /* ElementContainer */ || tNode.type === 4 /* IcuContainer */) {
+    else if (tNode.type & (3 /* AnyRNode */ | 12 /* AnyContainer */ | 32 /* Icu */)) {
         // The LView represents the location where the injection is requested from.
         // We need to locate the containing LView (in case where the `lView` is an embedded view)
         const hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
@@ -11312,7 +11458,8 @@ class R3Injector {
         // Check for circular dependencies.
         if (ngDevMode && parents.indexOf(defType) !== -1) {
             const defName = stringify(defType);
-            throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map(defType => stringify(defType)).join(' > ')} > ${defName}.`);
+            const path = parents.map(stringify);
+            throwCyclicDependencyError(defName, path);
         }
         // Check for multiple imports of the same module
         const isDuplicate = dedupStack.indexOf(defType) !== -1;
@@ -13373,8 +13520,7 @@ function getDebugNode(element) {
         const valueInLView = lView[nodeIndex];
         // this means that value in the lView is a component with its own
         // data. In this situation the TNode is not accessed at the same spot.
-        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] :
-            getTNode(lView[TVIEW], nodeIndex - HEADER_OFFSET);
+        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] : getTNode(lView[TVIEW], nodeIndex);
         ngDevMode &&
             assertEqual(tNode.index, nodeIndex, 'Expecting that TNode at index is same as index');
         debugNode = buildDebugNode(tNode, lView);
@@ -13499,7 +13645,7 @@ function publishGlobalUtil(name, fn) {
  * found in the LICENSE file at https://angular.io/license
  */
 const ɵ0$b = (token, notFoundValue) => {
-    throw new Error('NullInjector: Not found: ' + stringifyForError(token));
+    throwProviderNotFoundError(token, 'NullInjector');
 };
 // TODO: A hack to not pull in the NullInjector from @angular/core.
 const NULL_INJECTOR$1 = {
@@ -13561,6 +13707,7 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
  * @param rNode Render host element.
  * @param def ComponentDef
  * @param rootView The parent view where the host node is stored
+ * @param rendererFactory Factory to be used for creating child renderers.
  * @param hostRenderer The current renderer
  * @param sanitizer The sanitizer, if provided
  *
@@ -13568,9 +13715,13 @@ function renderComponent$1(componentType /* Type as workaround for: Microsoft/Ty
  */
 function createRootComponentView(rNode, def, rootView, rendererFactory, hostRenderer, sanitizer) {
     const tView = rootView[TVIEW];
-    ngDevMode && assertIndexInRange(rootView, 0 + HEADER_OFFSET);
-    rootView[0 + HEADER_OFFSET] = rNode;
-    const tNode = getOrCreateTNode(tView, 0, 2 /* Element */, null, null);
+    const index = HEADER_OFFSET;
+    ngDevMode && assertIndexInRange(rootView, index);
+    rootView[index] = rNode;
+    // '#host' is added here as we don't know the real host DOM name (we don't want to read it) and at
+    // the same time we want to communicate the the debug `TNode` that this is a special `TNode`
+    // representing a host element.
+    const tNode = getOrCreateTNode(tView, index, 2 /* Element */, '#host', null);
     const mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
     if (mergedAttrs !== null) {
         computeStaticStyling(tNode, mergedAttrs, true);
@@ -13585,7 +13736,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
         }
     }
     const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[HEADER_OFFSET], tNode, rendererFactory, viewRenderer, sanitizer || null, null);
+    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null);
     if (tView.firstCreatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
         markAsComponentHost(tView, tNode);
@@ -13593,7 +13744,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     }
     addToViewTree(rootView, componentView);
     // Store component view at node index, with node as the HOST
-    return rootView[HEADER_OFFSET] = componentView;
+    return rootView[index] = componentView;
 }
 /**
  * Creates a root component and sets it up with features and host bindings. Shared by
@@ -13609,17 +13760,17 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
     // We want to generate an empty QueryList for root content queries for backwards
     // compatibility with ViewEngine.
     if (componentDef.contentQueries) {
-        componentDef.contentQueries(1 /* Create */, component, rootLView.length - 1);
+        const tNode = getCurrentTNode();
+        ngDevMode && assertDefined(tNode, 'TNode expected');
+        componentDef.contentQueries(1 /* Create */, component, tNode.directiveStart);
     }
     const rootTNode = getCurrentTNode();
     ngDevMode && assertDefined(rootTNode, 'tNode should have been already created');
     if (tView.firstCreatePass &&
         (componentDef.hostBindings !== null || componentDef.hostAttrs !== null)) {
-        const elementIndex = rootTNode.index - HEADER_OFFSET;
-        setSelectedIndex(elementIndex);
+        setSelectedIndex(rootTNode.index);
         const rootTView = rootLView[TVIEW];
-        addHostBindingsToExpandoInstructions(rootTView, componentDef);
-        growHostVarsSpace(rootTView, rootLView, componentDef.hostVars);
+        registerHostBindingOpCodes(rootTView, rootTNode, rootLView, rootTNode.directiveStart, rootTNode.directiveEnd, componentDef);
         invokeHostBindingsInCreationMode(componentDef, component);
     }
     return component;
@@ -13647,11 +13798,12 @@ function createRootContext(scheduler, playerHandler) {
  * ```
  */
 function LifecycleHooksFeature(component, def) {
-    const rootTView = readPatchedLView(component)[TVIEW];
-    const dirIndex = rootTView.data.length - 1;
-    // TODO(misko): replace `as TNode` with createTNode call. (needs refactoring to lose dep on
-    // LNode).
-    registerPostOrderHooks(rootTView, { directiveStart: dirIndex, directiveEnd: dirIndex + 1 });
+    const lView = readPatchedLView(component);
+    ngDevMode && assertDefined(lView, 'LView is required');
+    const tView = lView[TVIEW];
+    const tNode = getCurrentTNode();
+    ngDevMode && assertDefined(tNode, 'TNode is required');
+    registerPostOrderHooks(tView, tNode);
 }
 /**
  * Wait on component until it is rendered.
@@ -14677,7 +14829,7 @@ function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, t
     ngDevMode && ngDevMode.firstCreatePass++;
     const tViewConsts = tView.consts;
     // TODO(pk): refactor getOrCreateTNode to have the "create" only version
-    const tNode = getOrCreateTNode(tView, index, 0 /* Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
+    const tNode = getOrCreateTNode(tView, index, 4 /* Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
     resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     registerPostOrderHooks(tView, tNode);
     const embeddedTView = tNode.tViews = createTView(2 /* Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
@@ -14710,8 +14862,7 @@ function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, local
     const lView = getLView();
     const tView = getTView();
     const adjustedIndex = index + HEADER_OFFSET;
-    const tNode = tView.firstCreatePass ?
-        templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
+    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
         tView.data[adjustedIndex];
     setCurrentTNode(tNode, false);
     const comment = lView[RENDERER].createComment(ngDevMode ? 'container' : '');
@@ -14737,12 +14888,11 @@ function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, local
 function store(tView, lView, index, value) {
     // We don't store any static data for local variables, so the first time
     // we see the template, we should store as null to avoid a sparse array
-    const adjustedIndex = index + HEADER_OFFSET;
-    if (adjustedIndex >= tView.data.length) {
-        tView.data[adjustedIndex] = null;
-        tView.blueprint[adjustedIndex] = null;
+    if (index >= tView.data.length) {
+        tView.data[index] = null;
+        tView.blueprint[index] = null;
     }
-    lView[adjustedIndex] = value;
+    lView[index] = value;
 }
 /**
  * Retrieves a local reference from the current contextViewData.
@@ -14756,7 +14906,7 @@ function store(tView, lView, index, value) {
  */
 function ɵɵreference(index) {
     const contextLView = getContextLView();
-    return load(contextLView, index);
+    return load(contextLView, HEADER_OFFSET + index);
 }
 
 /**
@@ -14896,12 +15046,11 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     const adjustedIndex = HEADER_OFFSET + index;
     ngDevMode &&
         assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
-    ngDevMode && ngDevMode.rendererCreateElement++;
     ngDevMode && assertIndexInRange(lView, adjustedIndex);
     const renderer = lView[RENDERER];
-    const native = lView[adjustedIndex] = elementCreate(name, renderer, getNamespace());
+    const native = lView[adjustedIndex] = createElementNode(renderer, name, getNamespace());
     const tNode = tView.firstCreatePass ?
-        elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) :
+        elementStartFirstCreatePass(adjustedIndex, tView, lView, native, name, attrsIndex, localRefsIndex) :
         tView.data[adjustedIndex];
     setCurrentTNode(tNode, true);
     const mergedAttrs = tNode.mergedAttrs;
@@ -14916,7 +15065,11 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     if (styles !== null) {
         writeDirectStyle(renderer, native, styles);
     }
-    appendChild(tView, lView, native, tNode);
+    if ((tNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
+        // In the i18n case, the translation may have removed this element, so only add it if it is not
+        // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
+        appendChild(tView, lView, native, tNode);
+    }
     // any immediate children of a component or template container must be pre-emptively
     // monkey-patched with the component view data so that the element can be inspected
     // later on using any element discovery utility methods (see `element_discovery.ts`)
@@ -14949,7 +15102,7 @@ function ɵɵelementEnd() {
         setCurrentTNode(currentTNode, false);
     }
     const tNode = currentTNode;
-    ngDevMode && assertNodeType(tNode, 2 /* Element */);
+    ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */);
     decreaseElementDepthCount();
     const tView = getTView();
     if (tView.firstCreatePass) {
@@ -14987,7 +15140,7 @@ function logUnknownElementError(tView, element, tNode, hasDirectives) {
     // execute the check below.
     if (schemas === null)
         return;
-    const tagName = tNode.tagName;
+    const tagName = tNode.value;
     // If the element matches any directive, it's considered as valid.
     if (!hasDirectives && tagName !== null) {
         // The element is unknown if it's an instance of HTMLUnknownElement or it isn't registered
@@ -15026,7 +15179,7 @@ function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, l
     ngDevMode && ngDevMode.firstCreatePass++;
     const tViewConsts = tView.consts;
     const attrs = getConstant(tViewConsts, attrsIndex);
-    const tNode = getOrCreateTNode(tView, index, 3 /* ElementContainer */, 'ng-container', attrs);
+    const tNode = getOrCreateTNode(tView, index, 8 /* ElementContainer */, 'ng-container', attrs);
     // While ng-container doesn't necessarily support styling, we use the style context to identify
     // and execute directives on the ng-container.
     if (attrs !== null) {
@@ -15061,7 +15214,7 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
     ngDevMode &&
         assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
     const tNode = tView.firstCreatePass ?
-        elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) :
+        elementContainerStartFirstCreatePass(adjustedIndex, tView, lView, attrsIndex, localRefsIndex) :
         tView.data[adjustedIndex];
     setCurrentTNode(tNode, true);
     ngDevMode && ngDevMode.rendererCreateComment++;
@@ -15093,7 +15246,7 @@ function ɵɵelementContainerEnd() {
         currentTNode = currentTNode.parent;
         setCurrentTNode(currentTNode, false);
     }
-    ngDevMode && assertNodeType(currentTNode, 3 /* ElementContainer */);
+    ngDevMode && assertTNodeType(currentTNode, 8 /* ElementContainer */);
     if (tView.firstCreatePass) {
         registerPostOrderHooks(tView, currentTNode);
         if (isContentQueryHost(currentTNode)) {
@@ -15249,11 +15402,10 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     // native listener or a directive output on this element. As such we we know that we will have to
     // register a listener and store its cleanup function on LView.
     const lCleanup = getLCleanup(lView);
-    ngDevMode &&
-        assertNodeOfPossibleTypes(tNode, [2 /* Element */, 0 /* Container */, 3 /* ElementContainer */]);
+    ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */);
     let processOutputs = true;
     // add native event listener - applicable to elements only
-    if (tNode.type === 2 /* Element */) {
+    if (tNode.type & 3 /* AnyRNode */) {
         const native = getNativeByTNode(tNode, lView);
         const resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
         const target = resolved.target || native;
@@ -15509,10 +15661,6 @@ function ɵɵprojectionDef(projectionSlots) {
         }
     }
 }
-let delayProjection = false;
-function setDelayProjection(value) {
-    delayProjection = value;
-}
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -15527,14 +15675,13 @@ function setDelayProjection(value) {
 function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
     const lView = getLView();
     const tView = getTView();
-    const tProjectionNode = getOrCreateTNode(tView, nodeIndex, 1 /* Projection */, null, attrs || null);
+    const tProjectionNode = getOrCreateTNode(tView, HEADER_OFFSET + nodeIndex, 16 /* Projection */, null, attrs || null);
     // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
     if (tProjectionNode.projection === null)
         tProjectionNode.projection = selectorIndex;
     // `<ng-content>` has no content
     setCurrentTNodeAsNotParent();
-    // We might need to delay the projection of nodes if they are in the middle of an i18n block
-    if (!delayProjection) {
+    if ((tProjectionNode.flags & 64 /* isDetached */) !== 64 /* isDetached */) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(tView, lView, tProjectionNode);
     }
@@ -16839,7 +16986,7 @@ function checkStylingProperty(prop, value, suffix, isClassBased) {
         stylingFirstUpdatePass(tView, prop, bindingIndex, isClassBased);
     }
     if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
-        const tNode = tView.data[getSelectedIndex() + HEADER_OFFSET];
+        const tNode = tView.data[getSelectedIndex()];
         updateStyling(tView, tNode, lView, lView[RENDERER], prop, lView[bindingIndex + 1] = normalizeSuffix(value, suffix), isClassBased, bindingIndex);
     }
 }
@@ -16863,7 +17010,7 @@ function checkStylingMap(keyValueArraySet, stringParser, value, isClassBased) {
     if (value !== NO_CHANGE && bindingUpdated(lView, bindingIndex, value)) {
         // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
         // if so as not to read unnecessarily.
-        const tNode = tView.data[getSelectedIndex() + HEADER_OFFSET];
+        const tNode = tView.data[getSelectedIndex()];
         if (hasStylingInputShadow(tNode, isClassBased) && !isInHostBindings(tView, bindingIndex)) {
             if (ngDevMode) {
                 // verify that if we are shadowing then `TData` is appropriately marked so that we skip
@@ -16922,7 +17069,8 @@ function stylingFirstUpdatePass(tView, tStylingKey, bindingIndex, isClassBased) 
         // itself to the list.
         // `getSelectedIndex()` should be here (rather than in instruction) so that it is guarded by the
         // if so as not to read unnecessarily.
-        const tNode = tData[getSelectedIndex() + HEADER_OFFSET];
+        const tNode = tData[getSelectedIndex()];
+        ngDevMode && assertDefined(tNode, 'TNode expected');
         const isHostBindings = isInHostBindings(tView, bindingIndex);
         if (hasStylingInputShadow(tNode, isClassBased) && tStylingKey === null && !isHostBindings) {
             // `tStylingKey === null` implies that we are either `[style]` or `[class]` binding.
@@ -17330,7 +17478,7 @@ function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKe
  * @param bindingIndex Binding index of the binding.
  */
 function updateStyling(tView, tNode, lView, renderer, prop, value, isClassBased, bindingIndex) {
-    if (tNode.type !== 2 /* Element */) {
+    if (!(tNode.type & 3 /* AnyRNode */)) {
         // It is possible to have styling on non-elements (such as ng-container).
         // This is rare, but it does happen. In such a case, just ignore the binding.
         return;
@@ -17498,9 +17646,9 @@ function ɵɵtext(index, value = '') {
         assertEqual(getBindingIndex(), tView.bindingStartIndex, 'text nodes should be created before any bindings');
     ngDevMode && assertIndexInRange(lView, adjustedIndex);
     const tNode = tView.firstCreatePass ?
-        getOrCreateTNode(tView, index, 2 /* Element */, null, null) :
+        getOrCreateTNode(tView, adjustedIndex, 1 /* Text */, value, null) :
         tView.data[adjustedIndex];
-    const textNative = lView[adjustedIndex] = createTextNode(value, lView[RENDERER]);
+    const textNative = lView[adjustedIndex] = createTextNode(lView[RENDERER], value);
     appendChild(tView, lView, textNative, tNode);
     // Text nodes are self closing.
     setCurrentTNode(tNode, false);
@@ -19075,15 +19223,6 @@ const USD_CURRENCY_CODE = 'USD';
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function getParentFromI18nMutateOpCode(mergedCode) {
-    return mergedCode >>> 17 /* SHIFT_PARENT */;
-}
-function getRefFromI18nMutateOpCode(mergedCode) {
-    return (mergedCode & 131064 /* MASK_REF */) >>> 3 /* SHIFT_REF */;
-}
-function getInstructionFromI18nMutateOpCode(mergedCode) {
-    return mergedCode & 7 /* MASK_INSTRUCTION */;
-}
 /**
  * Marks that the next string is an element name.
  *
@@ -19093,13 +19232,32 @@ const ELEMENT_MARKER = {
     marker: 'element'
 };
 /**
- * Marks that the next string is comment text.
+ * Marks that the next string is comment text need for ICU.
  *
  * See `I18nMutateOpCodes` documentation.
  */
-const COMMENT_MARKER = {
-    marker: 'comment'
+const ICU_MARKER = {
+    marker: 'ICU'
 };
+/**
+ * See `I18nCreateOpCodes`
+ */
+var I18nCreateOpCode;
+(function (I18nCreateOpCode) {
+    /**
+     * Number of bits to shift index so that it can be combined with the `APPEND_EAGERLY` and
+     * `COMMENT`.
+     */
+    I18nCreateOpCode[I18nCreateOpCode["SHIFT"] = 2] = "SHIFT";
+    /**
+     * Should the node be appended to parent imedditatly after creation.
+     */
+    I18nCreateOpCode[I18nCreateOpCode["APPEND_EAGERLY"] = 1] = "APPEND_EAGERLY";
+    /**
+     * If set the node should be comment (rather than a text) node.
+     */
+    I18nCreateOpCode[I18nCreateOpCode["COMMENT"] = 2] = "COMMENT";
+})(I18nCreateOpCode || (I18nCreateOpCode = {}));
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$6 = 1;
@@ -19146,110 +19304,423 @@ function getLocaleId() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const i18nIndexStack = [];
-let i18nIndexStackPointer = -1;
-function popI18nIndex() {
-    return i18nIndexStack[i18nIndexStackPointer--];
-}
-function pushI18nIndex(index) {
-    i18nIndexStack[++i18nIndexStackPointer] = index;
-}
-let changeMask = 0b0;
-let shiftsCounter = 0;
-function setMaskBit(bit) {
-    if (bit) {
-        changeMask = changeMask | (1 << shiftsCounter);
+/**
+ * Find a node in front of which `currentTNode` should be inserted (takes i18n into account).
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * takes `TNode.insertBeforeIndex` into account.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
+ */
+function getInsertInFrontOfRNodeWithI18n(parentTNode, currentTNode, lView) {
+    const tNodeInsertBeforeIndex = currentTNode.insertBeforeIndex;
+    const insertBeforeIndex = Array.isArray(tNodeInsertBeforeIndex) ? tNodeInsertBeforeIndex[0] : tNodeInsertBeforeIndex;
+    if (insertBeforeIndex === null) {
+        return getInsertInFrontOfRNodeWithNoI18n(parentTNode, currentTNode, lView);
     }
-    shiftsCounter++;
+    else {
+        ngDevMode && assertIndexInRange(lView, insertBeforeIndex);
+        return unwrapRNode(lView[insertBeforeIndex]);
+    }
+}
+/**
+ * Process `TNode.insertBeforeIndex` by adding i18n text nodes.
+ *
+ * See `TNode.insertBeforeIndex`
+ */
+function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parentRElement) {
+    const tNodeInsertBeforeIndex = childTNode.insertBeforeIndex;
+    if (Array.isArray(tNodeInsertBeforeIndex)) {
+        // An array indicates that there are i18n nodes that need to be added as children of this
+        // `childRNode`. These i18n nodes were created before this `childRNode` was available and so
+        // only now can be added. The first element of the array is the normal index where we should
+        // insert the `childRNode`. Additional elements are the extra nodes to be added as children of
+        // `childRNode`.
+        ngDevMode && assertDomNode(childRNode);
+        let i18nParent = childRNode;
+        let anchorRNode = null;
+        if (!(childTNode.type & 3 /* AnyRNode */)) {
+            anchorRNode = i18nParent;
+            i18nParent = parentRElement;
+        }
+        if (i18nParent !== null && (childTNode.flags & 2 /* isComponentHost */) === 0) {
+            for (let i = 1; i < tNodeInsertBeforeIndex.length; i++) {
+                // No need to `unwrapRNode` because all of the indexes point to i18n text nodes.
+                // see `assertDomNode` below.
+                const i18nChild = lView[tNodeInsertBeforeIndex[i]];
+                nativeInsertBefore(renderer, i18nParent, i18nChild, anchorRNode, false);
+            }
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Add `tNode` to `previousTNodes` list and update relevant `TNode`s in `previousTNodes` list
+ * `tNode.insertBeforeIndex`.
+ *
+ * Things to keep in mind:
+ * 1. All i18n text nodes are encoded as `TNodeType.Element` and are created eagerly by the
+ *    `ɵɵi18nStart` instruction.
+ * 2. All `TNodeType.Placeholder` `TNodes` are elements which will be created later by
+ *    `ɵɵelementStart` instruction.
+ * 3. `ɵɵelementStart` instruction will create `TNode`s in the ascending `TNode.index` order. (So a
+ *    smaller index `TNode` is guaranteed to be created before a larger one)
+ *
+ * We use the above three invariants to determine `TNode.insertBeforeIndex`.
+ *
+ * In an ideal world `TNode.insertBeforeIndex` would always be `TNode.next.index`. However,
+ * this will not work because `TNode.next.index` may be larger than `TNode.index` which means that
+ * the next node is not yet created and therefore we can't insert in front of it.
+ *
+ * Rule1: `TNode.insertBeforeIndex = null` if `TNode.next === null` (Initial condition, as we don't
+ *        know if there will be further `TNode`s inserted after.)
+ * Rule2: If `previousTNode` is created after the `tNode` being inserted, then
+ *        `previousTNode.insertBeforeNode = tNode.index` (So when a new `tNode` is added we check
+ *        previous to see if we can update its `insertBeforeTNode`)
+ *
+ * See `TNode.insertBeforeIndex` for more context.
+ *
+ * @param previousTNodes A list of previous TNodes so that we can easily traverse `TNode`s in
+ *     reverse order. (If `TNode` would have `previous` this would not be necessary.)
+ * @param newTNode A TNode to add to the `previousTNodes` list.
+ */
+function addTNodeAndUpdateInsertBeforeIndex(previousTNodes, newTNode) {
+    // Start with Rule1
+    ngDevMode &&
+        assertEqual(newTNode.insertBeforeIndex, null, 'We expect that insertBeforeIndex is not set');
+    previousTNodes.push(newTNode);
+    if (previousTNodes.length > 1) {
+        for (let i = previousTNodes.length - 2; i >= 0; i--) {
+            const existingTNode = previousTNodes[i];
+            // Text nodes are created eagerly and so they don't need their `indexBeforeIndex` updated.
+            // It is safe to ignore them.
+            if (!isI18nText(existingTNode)) {
+                if (isNewTNodeCreatedBefore(existingTNode, newTNode) &&
+                    getInsertBeforeIndex(existingTNode) === null) {
+                    // If it was created before us in time, (and it does not yet have `insertBeforeIndex`)
+                    // then add the `insertBeforeIndex`.
+                    setInsertBeforeIndex(existingTNode, newTNode.index);
+                }
+            }
+        }
+    }
+}
+function isI18nText(tNode) {
+    return !(tNode.type & 64 /* Placeholder */);
+}
+function isNewTNodeCreatedBefore(existingTNode, newTNode) {
+    return isI18nText(newTNode) || existingTNode.index > newTNode.index;
+}
+function getInsertBeforeIndex(tNode) {
+    const index = tNode.insertBeforeIndex;
+    return Array.isArray(index) ? index[0] : index;
+}
+function setInsertBeforeIndex(tNode, value) {
+    const index = tNode.insertBeforeIndex;
+    if (Array.isArray(index)) {
+        // Array is stored if we have to insert child nodes. See `TNode.insertBeforeIndex`
+        index[0] = value;
+    }
+    else {
+        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
+        tNode.insertBeforeIndex = value;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Retrieve `TIcu` at a given `index`.
+ *
+ * The `TIcu` can be stored either directly (if it is nested ICU) OR
+ * it is stored inside tho `TIcuContainer` if it is top level ICU.
+ *
+ * The reason for this is that the top level ICU need a `TNode` so that they are part of the render
+ * tree, but nested ICU's have no TNode, because we don't know ahead of time if the nested ICU is
+ * expressed (parent ICU may have selected a case which does not contain it.)
+ *
+ * @param tView Current `TView`.
+ * @param index Index where the value should be read from.
+ */
+function getTIcu(tView, index) {
+    const value = tView.data[index];
+    if (value === null || typeof value === 'string')
+        return null;
+    if (ngDevMode &&
+        !(value.hasOwnProperty('tViews') || value.hasOwnProperty('currentCaseLViewIndex'))) {
+        throwError('We expect to get \'null\'|\'TIcu\'|\'TIcuContainer\', but got: ' + value);
+    }
+    // Here the `value.hasOwnProperty('currentCaseLViewIndex')` is a polymorphic read as it can be
+    // either TIcu or TIcuContainerNode. This is not ideal, but we still think it is OK because it
+    // will be just two cases which fits into the browser inline cache (inline cache can take up to
+    // 4)
+    const tIcu = value.hasOwnProperty('currentCaseLViewIndex') ? value :
+        value.value;
+    ngDevMode && assertTIcu(tIcu);
+    return tIcu;
+}
+/**
+ * Store `TIcu` at a give `index`.
+ *
+ * The `TIcu` can be stored either directly (if it is nested ICU) OR
+ * it is stored inside tho `TIcuContainer` if it is top level ICU.
+ *
+ * The reason for this is that the top level ICU need a `TNode` so that they are part of the render
+ * tree, but nested ICU's have no TNode, because we don't know ahead of time if the nested ICU is
+ * expressed (parent ICU may have selected a case which does not contain it.)
+ *
+ * @param tView Current `TView`.
+ * @param index Index where the value should be stored at in `Tview.data`
+ * @param tIcu The TIcu to store.
+ */
+function setTIcu(tView, index, tIcu) {
+    const tNode = tView.data[index];
+    ngDevMode &&
+        assertEqual(tNode === null || tNode.hasOwnProperty('tViews'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
+    if (tNode === null) {
+        tView.data[index] = tIcu;
+    }
+    else {
+        ngDevMode && assertTNodeType(tNode, 32 /* Icu */);
+        tNode.value = tIcu;
+    }
+}
+/**
+ * Set `TNode.insertBeforeIndex` taking the `Array` into account.
+ *
+ * See `TNode.insertBeforeIndex`
+ */
+function setTNodeInsertBeforeIndex(tNode, index) {
+    ngDevMode && assertTNode(tNode);
+    let insertBeforeIndex = tNode.insertBeforeIndex;
+    if (insertBeforeIndex === null) {
+        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
+        insertBeforeIndex = tNode.insertBeforeIndex =
+            [null /* may be updated to number later */, index];
+    }
+    else {
+        assertEqual(Array.isArray(insertBeforeIndex), true, 'Expecting array here');
+        insertBeforeIndex.push(index);
+    }
+}
+/**
+ * Create `TNode.type=TNodeType.Placeholder` node.
+ *
+ * See `TNodeType.Placeholder` for more information.
+ */
+function createTNodePlaceholder(tView, previousTNodes, index) {
+    const tNode = createTNodeAtIndex(tView, index, 64 /* Placeholder */, null, null);
+    addTNodeAndUpdateInsertBeforeIndex(previousTNodes, tNode);
+    return tNode;
+}
+/**
+ * Returns current ICU case.
+ *
+ * ICU cases are stored as index into the `TIcu.cases`.
+ * At times it is necessary to communicate that the ICU case just switched and that next ICU update
+ * should update all bindings regardless of the mask. In such a case the we store negative numbers
+ * for cases which have just been switched. This function removes the negative flag.
+ */
+function getCurrentICUCaseIndex(tIcu, lView) {
+    const currentCase = lView[tIcu.currentCaseLViewIndex];
+    return currentCase === null ? currentCase : (currentCase < 0 ? ~currentCase : currentCase);
+}
+function getParentFromIcuCreateOpCode(mergedCode) {
+    return mergedCode >>> 17 /* SHIFT_PARENT */;
+}
+function getRefFromIcuCreateOpCode(mergedCode) {
+    return (mergedCode & 131070 /* MASK_REF */) >>> 1 /* SHIFT_REF */;
+}
+function getInstructionFromIcuCreateOpCode(mergedCode) {
+    return mergedCode & 1 /* MASK_INSTRUCTION */;
+}
+function icuCreateOpCode(opCode, parentIdx, refIdx) {
+    ngDevMode && assertGreaterThanOrEqual(parentIdx, 0, 'Missing parent index');
+    ngDevMode && assertGreaterThan(refIdx, 0, 'Missing ref index');
+    return opCode | parentIdx << 17 /* SHIFT_PARENT */ | refIdx << 1 /* SHIFT_REF */;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Keep track of which input bindings in `ɵɵi18nExp` have changed.
+ *
+ * This is used to efficiently update expressions in i18n only when the corresponding input has
+ * changed.
+ *
+ * 1) Each bit represents which of the `ɵɵi18nExp` has changed.
+ * 2) There are 32 bits allowed in JS.
+ * 3) Bit 32 is special as it is shared for all changes past 32. (In other words if you have more
+ * than 32 `ɵɵi18nExp` then all changes past 32nd `ɵɵi18nExp` will be mapped to same bit. This means
+ * that we may end up changing more than we need to. But i18n expressions with 32 bindings is rare
+ * so in practice it should not be an issue.)
+ */
+let changeMask = 0b0;
+/**
+ * Keeps track of which bit needs to be updated in `changeMask`
+ *
+ * This value gets incremented on every call to `ɵɵi18nExp`
+ */
+let changeMaskCounter = 0;
+/**
+ * Keep track of which input bindings in `ɵɵi18nExp` have changed.
+ *
+ * `setMaskBit` gets invoked by each call to `ɵɵi18nExp`.
+ *
+ * @param hasChange did `ɵɵi18nExp` detect a change.
+ */
+function setMaskBit(hasChange) {
+    if (hasChange) {
+        changeMask = changeMask | (1 << Math.min(changeMaskCounter, 31));
+    }
+    changeMaskCounter++;
 }
 function applyI18n(tView, lView, index) {
-    if (shiftsCounter > 0) {
+    if (changeMaskCounter > 0) {
         ngDevMode && assertDefined(tView, `tView should be defined`);
-        const tI18n = tView.data[index + HEADER_OFFSET];
-        let updateOpCodes;
-        let tIcus = null;
-        if (Array.isArray(tI18n)) {
-            updateOpCodes = tI18n;
+        const tI18n = tView.data[index];
+        // When `index` points to an `ɵɵi18nAttributes` then we have an array otherwise `TI18n`
+        const updateOpCodes = Array.isArray(tI18n) ? tI18n : tI18n.update;
+        const bindingsStartIndex = getBindingIndex() - changeMaskCounter - 1;
+        applyUpdateOpCodes(tView, lView, updateOpCodes, bindingsStartIndex, changeMask);
+    }
+    // Reset changeMask & maskBit to default for the next update cycle
+    changeMask = 0b0;
+    changeMaskCounter = 0;
+}
+/**
+ * Apply `I18nCreateOpCodes` op-codes as stored in `TI18n.create`.
+ *
+ * Creates text (and comment) nodes which are internationalized.
+ *
+ * @param lView Current lView
+ * @param createOpCodes Set of op-codes to apply
+ * @param parentRNode Parent node (so that direct children can be added eagerly) or `null` if it is
+ *     a root node.
+ * @param insertInFrontOf DOM node that should be used as an anchor.
+ */
+function applyCreateOpCodes(lView, createOpCodes, parentRNode, insertInFrontOf) {
+    const renderer = lView[RENDERER];
+    for (let i = 0; i < createOpCodes.length; i++) {
+        const opCode = createOpCodes[i++];
+        const text = createOpCodes[i];
+        const isComment = (opCode & I18nCreateOpCode.COMMENT) === I18nCreateOpCode.COMMENT;
+        const appendNow = (opCode & I18nCreateOpCode.APPEND_EAGERLY) === I18nCreateOpCode.APPEND_EAGERLY;
+        const index = opCode >>> I18nCreateOpCode.SHIFT;
+        let rNode = lView[index];
+        if (rNode === null) {
+            // We only create new DOM nodes if they don't already exist: If ICU switches case back to a
+            // case which was already instantiated, no need to create new DOM nodes.
+            rNode = lView[index] =
+                isComment ? renderer.createComment(text) : createTextNode(renderer, text);
         }
-        else {
-            updateOpCodes = tI18n.update;
-            tIcus = tI18n.icus;
+        if (appendNow && parentRNode !== null) {
+            nativeInsertBefore(renderer, parentRNode, rNode, insertInFrontOf, false);
         }
-        const bindingsStartIndex = getBindingIndex() - shiftsCounter - 1;
-        applyUpdateOpCodes(tView, tIcus, lView, updateOpCodes, bindingsStartIndex, changeMask);
-        // Reset changeMask & maskBit to default for the next update cycle
-        changeMask = 0b0;
-        shiftsCounter = 0;
     }
 }
 /**
  * Apply `I18nMutateOpCodes` OpCodes.
  *
  * @param tView Current `TView`
- * @param rootIndex Pointer to the root (parent) tNode for the i18n.
- * @param createOpCodes OpCodes to process
+ * @param mutableOpCodes Mutable OpCodes to process
  * @param lView Current `LView`
+ * @param anchorRNode place where the i18n node should be inserted.
  */
-function applyCreateOpCodes(tView, rootindex, createOpCodes, lView) {
+function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
+    ngDevMode && assertDomNode(anchorRNode);
     const renderer = lView[RENDERER];
-    let currentTNode = null;
-    let previousTNode = null;
-    const visitedNodes = [];
-    for (let i = 0; i < createOpCodes.length; i++) {
-        const opCode = createOpCodes[i];
+    // `rootIdx` represents the node into which all inserts happen.
+    let rootIdx = null;
+    // `rootRNode` represents the real node into which we insert. This can be different from
+    // `lView[rootIdx]` if we have projection.
+    //  - null we don't have a parent (as can be the case in when we are inserting into a root of
+    //    LView which has no parent.)
+    //  - `RElement` The element representing the root after taking projection into account.
+    let rootRNode;
+    for (let i = 0; i < mutableOpCodes.length; i++) {
+        const opCode = mutableOpCodes[i];
         if (typeof opCode == 'string') {
-            const textRNode = createTextNode(opCode, renderer);
-            const textNodeIndex = createOpCodes[++i];
-            ngDevMode && ngDevMode.rendererCreateTextNode++;
-            previousTNode = currentTNode;
-            currentTNode =
-                createDynamicNodeAtIndex(tView, lView, textNodeIndex, 2 /* Element */, textRNode, null);
-            visitedNodes.push(textNodeIndex);
-            setCurrentTNodeAsNotParent();
+            const textNodeIndex = mutableOpCodes[++i];
+            if (lView[textNodeIndex] === null) {
+                ngDevMode && ngDevMode.rendererCreateTextNode++;
+                ngDevMode && assertIndexInRange(lView, textNodeIndex);
+                lView[textNodeIndex] = createTextNode(renderer, opCode);
+            }
         }
         else if (typeof opCode == 'number') {
-            switch (opCode & 7 /* MASK_INSTRUCTION */) {
-                case 1 /* AppendChild */:
-                    const destinationNodeIndex = opCode >>> 17 /* SHIFT_PARENT */;
-                    let destinationTNode;
-                    if (destinationNodeIndex === rootindex) {
-                        // If the destination node is `i18nStart`, we don't have a
-                        // top-level node and we should use the host node instead
-                        destinationTNode = lView[T_HOST];
+            switch (opCode & 1 /* MASK_INSTRUCTION */) {
+                case 0 /* AppendChild */:
+                    const parentIdx = getParentFromIcuCreateOpCode(opCode);
+                    if (rootIdx === null) {
+                        // The first operation should save the `rootIdx` because the first operation
+                        // must insert into the root. (Only subsequent operations can insert into a dynamic
+                        // parent)
+                        rootIdx = parentIdx;
+                        rootRNode = nativeParentNode(renderer, anchorRNode);
+                    }
+                    let insertInFrontOf;
+                    let parentRNode;
+                    if (parentIdx === rootIdx) {
+                        insertInFrontOf = anchorRNode;
+                        parentRNode = rootRNode;
                     }
                     else {
-                        destinationTNode = getTNode(tView, destinationNodeIndex);
+                        insertInFrontOf = null;
+                        parentRNode = unwrapRNode(lView[parentIdx]);
                     }
-                    ngDevMode &&
-                        assertDefined(currentTNode, `You need to create or select a node before you can insert it into the DOM`);
-                    previousTNode =
-                        appendI18nNode(tView, currentTNode, destinationTNode, previousTNode, lView);
-                    break;
-                case 0 /* Select */:
-                    // Negative indices indicate that a given TNode is a sibling node, not a parent node
-                    // (see `i18nStartFirstPass` for additional information).
-                    const isParent = opCode >= 0;
-                    // FIXME(misko): This SHIFT_REF looks suspect as it does not have mask.
-                    const nodeIndex = (isParent ? opCode : ~opCode) >>> 3 /* SHIFT_REF */;
-                    visitedNodes.push(nodeIndex);
-                    previousTNode = currentTNode;
-                    currentTNode = getTNode(tView, nodeIndex);
-                    if (currentTNode) {
-                        setCurrentTNode(currentTNode, isParent);
+                    // FIXME(misko): Refactor with `processI18nText`
+                    if (parentRNode !== null) {
+                        // This can happen if the `LView` we are adding to is not attached to a parent `LView`.
+                        // In such a case there is no "root" we can attach to. This is fine, as we still need to
+                        // create the elements. When the `LView` gets later added to a parent these "root" nodes
+                        // get picked up and added.
+                        ngDevMode && assertDomNode(parentRNode);
+                        const refIdx = getRefFromIcuCreateOpCode(opCode);
+                        ngDevMode && assertGreaterThan(refIdx, HEADER_OFFSET, 'Missing ref');
+                        // `unwrapRNode` is not needed here as all of these point to RNodes as part of the i18n
+                        // which can't have components.
+                        const child = lView[refIdx];
+                        ngDevMode && assertDomNode(child);
+                        nativeInsertBefore(renderer, parentRNode, child, insertInFrontOf, false);
+                        const tIcu = getTIcu(tView, refIdx);
+                        if (tIcu !== null && typeof tIcu === 'object') {
+                            // If we just added a comment node which has ICU then that ICU may have already been
+                            // rendered and therefore we need to re-add it here.
+                            ngDevMode && assertTIcu(tIcu);
+                            const caseIndex = getCurrentICUCaseIndex(tIcu, lView);
+                            if (caseIndex !== null) {
+                                applyMutableOpCodes(tView, tIcu.create[caseIndex], lView, lView[tIcu.anchorIdx]);
+                            }
+                        }
                     }
                     break;
-                case 5 /* ElementEnd */:
-                    const elementIndex = opCode >>> 3 /* SHIFT_REF */;
-                    previousTNode = currentTNode = getTNode(tView, elementIndex);
-                    setCurrentTNode(currentTNode, false);
-                    break;
-                case 4 /* Attr */:
-                    const elementNodeIndex = opCode >>> 3 /* SHIFT_REF */;
-                    const attrName = createOpCodes[++i];
-                    const attrValue = createOpCodes[++i];
+                case 1 /* Attr */:
+                    const elementNodeIndex = opCode >>> 1 /* SHIFT_REF */;
+                    const attrName = mutableOpCodes[++i];
+                    const attrValue = mutableOpCodes[++i];
                     // This code is used for ICU expressions only, since we don't support
                     // directives/components in ICUs, we don't need to worry about inputs here
-                    elementAttributeInternal(getTNode(tView, elementNodeIndex), lView, attrName, attrValue, null, null);
+                    setElementAttribute(renderer, getNativeByIndex(elementNodeIndex, lView), null, null, attrName, attrValue, null);
                     break;
                 default:
                     throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
@@ -19257,52 +19728,52 @@ function applyCreateOpCodes(tView, rootindex, createOpCodes, lView) {
         }
         else {
             switch (opCode) {
-                case COMMENT_MARKER:
-                    const commentValue = createOpCodes[++i];
-                    const commentNodeIndex = createOpCodes[++i];
-                    ngDevMode &&
-                        assertEqual(typeof commentValue, 'string', `Expected "${commentValue}" to be a comment node value`);
-                    const commentRNode = renderer.createComment(commentValue);
-                    ngDevMode && ngDevMode.rendererCreateComment++;
-                    previousTNode = currentTNode;
-                    currentTNode = createDynamicNodeAtIndex(tView, lView, commentNodeIndex, 4 /* IcuContainer */, commentRNode, null);
-                    visitedNodes.push(commentNodeIndex);
-                    attachPatchData(commentRNode, lView);
-                    // We will add the case nodes later, during the update phase
-                    setCurrentTNodeAsNotParent();
+                case ICU_MARKER:
+                    const commentValue = mutableOpCodes[++i];
+                    const commentNodeIndex = mutableOpCodes[++i];
+                    if (lView[commentNodeIndex] === null) {
+                        ngDevMode &&
+                            assertEqual(typeof commentValue, 'string', `Expected "${commentValue}" to be a comment node value`);
+                        ngDevMode && ngDevMode.rendererCreateComment++;
+                        ngDevMode && assertIndexInExpandoRange(lView, commentNodeIndex);
+                        const commentRNode = lView[commentNodeIndex] =
+                            createCommentNode(renderer, commentValue);
+                        // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
+                        attachPatchData(commentRNode, lView);
+                    }
                     break;
                 case ELEMENT_MARKER:
-                    const tagNameValue = createOpCodes[++i];
-                    const elementNodeIndex = createOpCodes[++i];
-                    ngDevMode &&
-                        assertEqual(typeof tagNameValue, 'string', `Expected "${tagNameValue}" to be an element node tag name`);
-                    const elementRNode = renderer.createElement(tagNameValue);
-                    ngDevMode && ngDevMode.rendererCreateElement++;
-                    previousTNode = currentTNode;
-                    currentTNode = createDynamicNodeAtIndex(tView, lView, elementNodeIndex, 2 /* Element */, elementRNode, tagNameValue);
-                    visitedNodes.push(elementNodeIndex);
+                    const tagName = mutableOpCodes[++i];
+                    const elementNodeIndex = mutableOpCodes[++i];
+                    if (lView[elementNodeIndex] === null) {
+                        ngDevMode &&
+                            assertEqual(typeof tagName, 'string', `Expected "${tagName}" to be an element node tag name`);
+                        ngDevMode && ngDevMode.rendererCreateElement++;
+                        ngDevMode && assertIndexInExpandoRange(lView, elementNodeIndex);
+                        const elementRNode = lView[elementNodeIndex] =
+                            createElementNode(renderer, tagName, null);
+                        // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
+                        attachPatchData(elementRNode, lView);
+                    }
                     break;
                 default:
-                    throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
+                    ngDevMode &&
+                        throwError(`Unable to determine the type of mutate operation for "${opCode}"`);
             }
         }
     }
-    setCurrentTNodeAsNotParent();
-    return visitedNodes;
 }
 /**
  * Apply `I18nUpdateOpCodes` OpCodes
  *
  * @param tView Current `TView`
- * @param tIcus If ICUs present than this contains them.
  * @param lView Current `LView`
  * @param updateOpCodes OpCodes to process
  * @param bindingsStartIndex Location of the first `ɵɵi18nApply`
  * @param changeMask Each bit corresponds to a `ɵɵi18nExp` (Counting backwards from
  *     `bindingsStartIndex`)
  */
-function applyUpdateOpCodes(tView, tIcus, lView, updateOpCodes, bindingsStartIndex, changeMask) {
-    let caseCreated = false;
+function applyUpdateOpCodes(tView, lView, updateOpCodes, bindingsStartIndex, changeMask) {
     for (let i = 0; i < updateOpCodes.length; i++) {
         // bit code to check if we should apply the next update
         const checkBit = updateOpCodes[i];
@@ -19322,25 +19793,50 @@ function applyUpdateOpCodes(tView, tIcus, lView, updateOpCodes, bindingsStartInd
                         value += renderStringify(lView[bindingsStartIndex - opCode]);
                     }
                     else {
-                        const nodeIndex = opCode >>> 2 /* SHIFT_REF */;
+                        const nodeIndex = (opCode >>> 2 /* SHIFT_REF */);
                         switch (opCode & 3 /* MASK_OPCODE */) {
                             case 1 /* Attr */:
                                 const propName = updateOpCodes[++j];
                                 const sanitizeFn = updateOpCodes[++j];
-                                elementPropertyInternal(tView, getTNode(tView, nodeIndex), lView, propName, value, lView[RENDERER], sanitizeFn, false);
+                                const tNodeOrTagName = tView.data[nodeIndex];
+                                ngDevMode && assertDefined(tNodeOrTagName, 'Experting TNode or string');
+                                if (typeof tNodeOrTagName === 'string') {
+                                    // IF we don't have a `TNode`, then we are an element in ICU (as ICU content does
+                                    // not have TNode), in which case we know that there are no directives, and hence
+                                    // we use attribute setting.
+                                    setElementAttribute(lView[RENDERER], lView[nodeIndex], null, tNodeOrTagName, propName, value, sanitizeFn);
+                                }
+                                else {
+                                    elementPropertyInternal(tView, tNodeOrTagName, lView, propName, value, lView[RENDERER], sanitizeFn, false);
+                                }
                                 break;
                             case 0 /* Text */:
-                                textBindingInternal(lView, nodeIndex, value);
+                                const rText = lView[nodeIndex];
+                                rText !== null && updateTextNode(lView[RENDERER], rText, value);
                                 break;
                             case 2 /* IcuSwitch */:
-                                caseCreated =
-                                    applyIcuSwitchCase(tView, tIcus, updateOpCodes[++j], lView, value);
+                                applyIcuSwitchCase(tView, getTIcu(tView, nodeIndex), lView, value);
                                 break;
                             case 3 /* IcuUpdate */:
-                                applyIcuUpdateCase(tView, tIcus, updateOpCodes[++j], bindingsStartIndex, lView, caseCreated);
+                                applyIcuUpdateCase(tView, getTIcu(tView, nodeIndex), bindingsStartIndex, lView);
                                 break;
                         }
                     }
+                }
+            }
+        }
+        else {
+            const opCode = updateOpCodes[i + 1];
+            if (opCode > 0 && (opCode & 3 /* MASK_OPCODE */) === 3 /* IcuUpdate */) {
+                // Special case for the `icuUpdateCase`. It could be that the mask did not match, but
+                // we still need to execute `icuUpdateCase` because the case has changed recently due to
+                // previous `icuSwitchCase` instruction. (`icuSwitchCase` and `icuUpdateCase` always come in
+                // pairs.)
+                const nodeIndex = (opCode >>> 2 /* SHIFT_REF */);
+                const tIcu = getTIcu(tView, nodeIndex);
+                const currentIndex = lView[tIcu.currentCaseLViewIndex];
+                if (currentIndex < 0) {
+                    applyIcuUpdateCase(tView, tIcu, bindingsStartIndex, lView);
                 }
             }
         }
@@ -19351,23 +19847,23 @@ function applyUpdateOpCodes(tView, tIcus, lView, updateOpCodes, bindingsStartInd
  * Apply OpCodes associated with updating an existing ICU.
  *
  * @param tView Current `TView`
- * @param tIcus ICUs active at this location.
- * @param tIcuIndex Index into `tIcus` to process.
+ * @param tIcu Current `TIcu`
  * @param bindingsStartIndex Location of the first `ɵɵi18nApply`
  * @param lView Current `LView`
- * @param changeMask Each bit corresponds to a `ɵɵi18nExp` (Counting backwards from
- *     `bindingsStartIndex`)
  */
-function applyIcuUpdateCase(tView, tIcus, tIcuIndex, bindingsStartIndex, lView, caseCreated) {
-    ngDevMode && assertIndexInRange(tIcus, tIcuIndex);
-    const tIcu = tIcus[tIcuIndex];
+function applyIcuUpdateCase(tView, tIcu, bindingsStartIndex, lView) {
     ngDevMode && assertIndexInRange(lView, tIcu.currentCaseLViewIndex);
-    const activeCaseIndex = lView[tIcu.currentCaseLViewIndex];
+    let activeCaseIndex = lView[tIcu.currentCaseLViewIndex];
     if (activeCaseIndex !== null) {
-        const mask = caseCreated ?
-            -1 : // -1 is same as all bits on, which simulates creation since it marks all bits dirty
-            changeMask;
-        applyUpdateOpCodes(tView, tIcus, lView, tIcu.update[activeCaseIndex], bindingsStartIndex, mask);
+        let mask = changeMask;
+        if (activeCaseIndex < 0) {
+            // Clear the flag.
+            // Negative number means that the ICU was freshly created and we need to force the update.
+            activeCaseIndex = lView[tIcu.currentCaseLViewIndex] = ~activeCaseIndex;
+            // -1 is same as all bits on, which simulates creation since it marks all bits dirty
+            mask = -1;
+        }
+        applyUpdateOpCodes(tView, lView, tIcu.update[activeCaseIndex], bindingsStartIndex, mask);
     }
 }
 /**
@@ -19376,180 +19872,53 @@ function applyIcuUpdateCase(tView, tIcus, tIcuIndex, bindingsStartIndex, lView, 
  * This involves tearing down existing case and than building up a new case.
  *
  * @param tView Current `TView`
- * @param tIcus ICUs active at this location.
- * @param tICuIndex Index into `tIcus` to process.
+ * @param tIcu Current `TIcu`
  * @param lView Current `LView`
  * @param value Value of the case to update to.
- * @returns true if a new case was created (needed so that the update executes regardless of the
- *     bitmask)
  */
-function applyIcuSwitchCase(tView, tIcus, tICuIndex, lView, value) {
-    applyIcuSwitchCaseRemove(tView, tIcus, tICuIndex, lView);
+function applyIcuSwitchCase(tView, tIcu, lView, value) {
     // Rebuild a new case for this ICU
-    let caseCreated = false;
-    const tIcu = tIcus[tICuIndex];
     const caseIndex = getCaseIndex(tIcu, value);
-    lView[tIcu.currentCaseLViewIndex] = caseIndex !== -1 ? caseIndex : null;
-    if (caseIndex > -1) {
-        // Add the nodes for the new case
-        applyCreateOpCodes(tView, -1, // -1 means we don't have parent node
-        tIcu.create[caseIndex], lView);
-        caseCreated = true;
-    }
-    return caseCreated;
-}
-/**
- * Apply OpCodes associated with tearing down of DOM.
- *
- * This involves tearing down existing case and than building up a new case.
- *
- * @param tView Current `TView`
- * @param tIcus ICUs active at this location.
- * @param tIcuIndex Index into `tIcus` to process.
- * @param lView Current `LView`
- * @returns true if a new case was created (needed so that the update executes regardless of the
- *     bitmask)
- */
-function applyIcuSwitchCaseRemove(tView, tIcus, tIcuIndex, lView) {
-    ngDevMode && assertIndexInRange(tIcus, tIcuIndex);
-    const tIcu = tIcus[tIcuIndex];
-    const activeCaseIndex = lView[tIcu.currentCaseLViewIndex];
-    if (activeCaseIndex !== null) {
-        const removeCodes = tIcu.remove[activeCaseIndex];
-        for (let k = 0; k < removeCodes.length; k++) {
-            const removeOpCode = removeCodes[k];
-            const nodeOrIcuIndex = removeOpCode >>> 3 /* SHIFT_REF */;
-            switch (removeOpCode & 7 /* MASK_INSTRUCTION */) {
-                case 3 /* Remove */:
-                    // FIXME(misko): this comment is wrong!
-                    // Remove DOM element, but do *not* mark TNode as detached, since we are
-                    // just switching ICU cases (while keeping the same TNode), so a DOM element
-                    // representing a new ICU case will be re-created.
-                    removeNode(tView, lView, nodeOrIcuIndex, /* markAsDetached */ false);
-                    break;
-                case 6 /* RemoveNestedIcu */:
-                    applyIcuSwitchCaseRemove(tView, tIcus, nodeOrIcuIndex, lView);
-                    break;
+    let activeCaseIndex = getCurrentICUCaseIndex(tIcu, lView);
+    if (activeCaseIndex !== caseIndex) {
+        applyIcuSwitchCaseRemove(tView, tIcu, lView);
+        lView[tIcu.currentCaseLViewIndex] = caseIndex === null ? null : ~caseIndex;
+        if (caseIndex !== null) {
+            // Add the nodes for the new case
+            const anchorRNode = lView[tIcu.anchorIdx];
+            if (anchorRNode) {
+                ngDevMode && assertDomNode(anchorRNode);
+                applyMutableOpCodes(tView, tIcu.create[caseIndex], lView, anchorRNode);
             }
         }
     }
 }
-function appendI18nNode(tView, tNode, parentTNode, previousTNode, lView) {
-    ngDevMode && ngDevMode.rendererMoveNode++;
-    const nextNode = tNode.next;
-    if (!previousTNode) {
-        previousTNode = parentTNode;
-    }
-    // Re-organize node tree to put this node in the correct position.
-    if (previousTNode === parentTNode && tNode !== parentTNode.child) {
-        tNode.next = parentTNode.child;
-        // FIXME(misko): Checking `tNode.parent` is a temporary workaround until we properly
-        // refactor the i18n code in #38707 and this code will be deleted.
-        if (tNode.parent === null) {
-            tView.firstChild = tNode;
-        }
-        else {
-            parentTNode.child = tNode;
-        }
-    }
-    else if (previousTNode !== parentTNode && tNode !== previousTNode.next) {
-        tNode.next = previousTNode.next;
-        previousTNode.next = tNode;
-    }
-    else {
-        tNode.next = null;
-    }
-    if (parentTNode !== lView[T_HOST]) {
-        tNode.parent = parentTNode;
-    }
-    // If tNode was moved around, we might need to fix a broken link.
-    let cursor = tNode.next;
-    while (cursor) {
-        if (cursor.next === tNode) {
-            cursor.next = nextNode;
-        }
-        cursor = cursor.next;
-    }
-    // If the placeholder to append is a projection, we need to move the projected nodes instead
-    if (tNode.type === 1 /* Projection */) {
-        applyProjection(tView, lView, tNode);
-        return tNode;
-    }
-    appendChild(tView, lView, getNativeByTNode(tNode, lView), tNode);
-    const slotValue = lView[tNode.index];
-    if (tNode.type !== 0 /* Container */ && isLContainer(slotValue)) {
-        // Nodes that inject ViewContainerRef also have a comment node that should be moved
-        appendChild(tView, lView, slotValue[NATIVE], tNode);
-    }
-    return tNode;
-}
 /**
- * See `i18nEnd` above.
+ * Apply OpCodes associated with tearing ICU case.
+ *
+ * This involves tearing down existing case and than building up a new case.
+ *
+ * @param tView Current `TView`
+ * @param tIcu Current `TIcu`
+ * @param lView Current `LView`
  */
-function i18nEndFirstPass(tView, lView) {
-    ngDevMode &&
-        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'i18nEnd should be called before any binding');
-    const rootIndex = popI18nIndex();
-    const tI18n = tView.data[rootIndex + HEADER_OFFSET];
-    ngDevMode && assertDefined(tI18n, `You should call i18nStart before i18nEnd`);
-    // Find the last node that was added before `i18nEnd`
-    const lastCreatedNode = getCurrentTNode();
-    // Read the instructions to insert/move/remove DOM elements
-    const visitedNodes = applyCreateOpCodes(tView, rootIndex, tI18n.create, lView);
-    // Remove deleted nodes
-    let index = rootIndex + 1;
-    while (lastCreatedNode !== null && index <= lastCreatedNode.index - HEADER_OFFSET) {
-        if (visitedNodes.indexOf(index) === -1) {
-            removeNode(tView, lView, index, /* markAsDetached */ true);
-        }
-        // Check if an element has any local refs and skip them
-        const tNode = getTNode(tView, index);
-        if (tNode &&
-            (tNode.type === 0 /* Container */ || tNode.type === 2 /* Element */ ||
-                tNode.type === 3 /* ElementContainer */) &&
-            tNode.localNames !== null) {
-            // Divide by 2 to get the number of local refs,
-            // since they are stored as an array that also includes directive indexes,
-            // i.e. ["localRef", directiveIndex, ...]
-            index += tNode.localNames.length >> 1;
-        }
-        index++;
-    }
-}
-function removeNode(tView, lView, index, markAsDetached) {
-    const removedPhTNode = getTNode(tView, index);
-    const removedPhRNode = getNativeByIndex(index, lView);
-    if (removedPhRNode) {
-        nativeRemoveNode(lView[RENDERER], removedPhRNode);
-    }
-    const slotValue = load(lView, index);
-    if (isLContainer(slotValue)) {
-        const lContainer = slotValue;
-        if (removedPhTNode.type !== 0 /* Container */) {
-            nativeRemoveNode(lView[RENDERER], lContainer[NATIVE]);
+function applyIcuSwitchCaseRemove(tView, tIcu, lView) {
+    let activeCaseIndex = getCurrentICUCaseIndex(tIcu, lView);
+    if (activeCaseIndex !== null) {
+        const removeCodes = tIcu.remove[activeCaseIndex];
+        for (let i = 0; i < removeCodes.length; i++) {
+            const nodeOrIcuIndex = removeCodes[i];
+            if (nodeOrIcuIndex > 0) {
+                // Positive numbers are `RNode`s.
+                const rNode = getNativeByIndex(nodeOrIcuIndex, lView);
+                rNode !== null && nativeRemoveNode(lView[RENDERER], rNode);
+            }
+            else {
+                // Negative numbers are ICUs
+                applyIcuSwitchCaseRemove(tView, getTIcu(tView, ~nodeOrIcuIndex), lView);
+            }
         }
     }
-    if (markAsDetached && removedPhTNode) {
-        // Define this node as detached to avoid projecting it later
-        removedPhTNode.flags |= 64 /* isDetached */;
-    }
-    ngDevMode && ngDevMode.rendererRemoveNode++;
-}
-/**
- * Creates and stores the dynamic TNode, and unhooks it from the tree for now.
- */
-function createDynamicNodeAtIndex(tView, lView, index, type, native, name) {
-    const currentTNode = getCurrentTNode();
-    ngDevMode && assertIndexInRange(lView, index + HEADER_OFFSET);
-    lView[index + HEADER_OFFSET] = native;
-    // FIXME(misko): Why does this create A TNode??? I would not expect this to be here.
-    const tNode = getOrCreateTNode(tView, index, type, name, null);
-    // We are creating a dynamic node, the previous tNode might not be pointing at this node.
-    // We will link ourselves into the tree later with `appendI18nNode`.
-    if (currentTNode && currentTNode.next === tNode) {
-        currentTNode.next = null;
-    }
-    return tNode;
 }
 /**
  * Returns the index of the current case of an ICU expression depending on the main binding value
@@ -19575,7 +19944,7 @@ function getCaseIndex(icuExpression, bindingValue) {
             }
         }
     }
-    return index;
+    return index === -1 ? null : index;
 }
 
 /**
@@ -19585,6 +19954,112 @@ function getCaseIndex(icuExpression, bindingValue) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function loadIcuContainerVisitor() {
+    const _stack = [];
+    let _index = -1;
+    let _lView;
+    let _removes;
+    /**
+     * Retrieves a set of root nodes from `TIcu.remove`. Used by `TNodeType.ICUContainer`
+     * to determine which root belong to the ICU.
+     *
+     * Example of usage.
+     * ```
+     * const nextRNode = icuContainerIteratorStart(tIcuContainerNode, lView);
+     * let rNode: RNode|null;
+     * while(rNode = nextRNode()) {
+     *   console.log(rNode);
+     * }
+     * ```
+     *
+     * @param tIcuContainerNode Current `TIcuContainerNode`
+     * @param lView `LView` where the `RNode`s should be looked up.
+     */
+    function icuContainerIteratorStart(tIcuContainerNode, lView) {
+        _lView = lView;
+        while (_stack.length)
+            _stack.pop();
+        ngDevMode && assertTNodeForLView(tIcuContainerNode, lView);
+        enterIcu(tIcuContainerNode.value, lView);
+        return icuContainerIteratorNext;
+    }
+    function enterIcu(tIcu, lView) {
+        _index = 0;
+        const currentCase = getCurrentICUCaseIndex(tIcu, lView);
+        if (currentCase !== null) {
+            ngDevMode && assertNumberInRange(currentCase, 0, tIcu.cases.length - 1);
+            _removes = tIcu.remove[currentCase];
+        }
+        else {
+            _removes = EMPTY_ARRAY;
+        }
+    }
+    function icuContainerIteratorNext() {
+        if (_index < _removes.length) {
+            const removeOpCode = _removes[_index++];
+            ngDevMode && assertNumber(removeOpCode, 'Expecting OpCode number');
+            if (removeOpCode > 0) {
+                const rNode = _lView[removeOpCode];
+                ngDevMode && assertDomNode(rNode);
+                return rNode;
+            }
+            else {
+                _stack.push(_index, _removes);
+                // ICUs are represented by negative indices
+                const tIcuIndex = ~removeOpCode;
+                const tIcu = _lView[TVIEW].data[tIcuIndex];
+                ngDevMode && assertTIcu(tIcu);
+                enterIcu(tIcu, _lView);
+                return icuContainerIteratorNext();
+            }
+        }
+        else {
+            if (_stack.length === 0) {
+                return null;
+            }
+            else {
+                _removes = _stack.pop();
+                _index = _stack.pop();
+                return icuContainerIteratorNext();
+            }
+        }
+    }
+    return icuContainerIteratorStart;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Converts `I18nCreateOpCodes` array into a human readable format.
+ *
+ * This function is attached to the `I18nCreateOpCodes.debug` property if `ngDevMode` is enabled.
+ * This function provides a human readable view of the opcodes. This is useful when debugging the
+ * application as well as writing more readable tests.
+ *
+ * @param this `I18nCreateOpCodes` if attached as a method.
+ * @param opcodes `I18nCreateOpCodes` if invoked as a function.
+ */
+function i18nCreateOpCodesToString(opcodes) {
+    const createOpCodes = opcodes || (Array.isArray(this) ? this : []);
+    let lines = [];
+    for (let i = 0; i < createOpCodes.length; i++) {
+        const opCode = createOpCodes[i++];
+        const text = createOpCodes[i];
+        const isComment = (opCode & I18nCreateOpCode.COMMENT) === I18nCreateOpCode.COMMENT;
+        const appendNow = (opCode & I18nCreateOpCode.APPEND_EAGERLY) === I18nCreateOpCode.APPEND_EAGERLY;
+        const index = opCode >>> I18nCreateOpCode.SHIFT;
+        lines.push(`lView[${index}] = document.${isComment ? 'createComment' : 'createText'}(${JSON.stringify(text)});`);
+        if (appendNow) {
+            lines.push(`parent.appendChild(lView[${index}]);`);
+        }
+    }
+    return lines;
+}
 /**
  * Converts `I18nUpdateOpCodes` array into a human readable format.
  *
@@ -19610,9 +20085,9 @@ function i18nUpdateOpCodesToString(opcodes) {
                 const value = sanitizationFn ? `(${sanitizationFn})($$$)` : '$$$';
                 return `(lView[${ref}] as Element).setAttribute('${attrName}', ${value})`;
             case 2 /* IcuSwitch */:
-                return `icuSwitchCase(lView[${ref}] as Comment, ${parser.consumeNumber()}, $$$)`;
+                return `icuSwitchCase(${ref}, $$$)`;
             case 3 /* IcuUpdate */:
-                return `icuUpdateCase(lView[${ref}] as Comment, ${parser.consumeNumber()})`;
+                return `icuUpdateCase(${ref})`;
         }
         throw new Error('unexpected OpCode');
     }
@@ -19629,7 +20104,9 @@ function i18nUpdateOpCodesToString(opcodes) {
             }
             else if (value < 0) {
                 // Negative numbers are ref indexes
-                statement += '${lView[' + (0 - value) + ']}';
+                // Here `i` refers to current binding index. It is to signify that the value is relative,
+                // rather than absolute.
+                statement += '${lView[i' + value + ']}';
             }
             else {
                 // Positive numbers are operations.
@@ -19643,42 +20120,33 @@ function i18nUpdateOpCodesToString(opcodes) {
     return lines;
 }
 /**
- * Converts `I18nMutableOpCodes` array into a human readable format.
+ * Converts `I18nCreateOpCodes` array into a human readable format.
  *
- * This function is attached to the `I18nMutableOpCodes.debug` if `ngDevMode` is enabled. This
+ * This function is attached to the `I18nCreateOpCodes.debug` if `ngDevMode` is enabled. This
  * function provides a human readable view of the opcodes. This is useful when debugging the
  * application as well as writing more readable tests.
  *
- * @param this `I18nMutableOpCodes` if attached as a method.
- * @param opcodes `I18nMutableOpCodes` if invoked as a function.
+ * @param this `I18nCreateOpCodes` if attached as a method.
+ * @param opcodes `I18nCreateOpCodes` if invoked as a function.
  */
-function i18nMutateOpCodesToString(opcodes) {
+function icuCreateOpCodesToString(opcodes) {
     const parser = new OpCodeParser(opcodes || (Array.isArray(this) ? this : []));
     let lines = [];
     function consumeOpCode(opCode) {
-        const parent = getParentFromI18nMutateOpCode(opCode);
-        const ref = getRefFromI18nMutateOpCode(opCode);
-        switch (getInstructionFromI18nMutateOpCode(opCode)) {
-            case 0 /* Select */:
-                lastRef = ref;
-                return '';
-            case 1 /* AppendChild */:
+        const parent = getParentFromIcuCreateOpCode(opCode);
+        const ref = getRefFromIcuCreateOpCode(opCode);
+        switch (getInstructionFromIcuCreateOpCode(opCode)) {
+            case 0 /* AppendChild */:
                 return `(lView[${parent}] as Element).appendChild(lView[${lastRef}])`;
-            case 3 /* Remove */:
-                return `(lView[${parent}] as Element).remove(lView[${ref}])`;
-            case 4 /* Attr */:
+            case 1 /* Attr */:
                 return `(lView[${ref}] as Element).setAttribute("${parser.consumeString()}", "${parser.consumeString()}")`;
-            case 5 /* ElementEnd */:
-                return `setCurrentTNode(tView.data[${ref}] as TNode)`;
-            case 6 /* RemoveNestedIcu */:
-                return `removeNestedICU(${ref})`;
         }
-        throw new Error('Unexpected OpCode');
+        throw new Error('Unexpected OpCode: ' + getInstructionFromIcuCreateOpCode(opCode));
     }
     let lastRef = -1;
     while (parser.hasMore()) {
         let value = parser.consumeNumberStringOrMarker();
-        if (value === COMMENT_MARKER) {
+        if (value === ICU_MARKER) {
             const text = parser.consumeString();
             lastRef = parser.consumeNumber();
             lines.push(`lView[${lastRef}] = document.createComment("${text}")`);
@@ -19698,6 +20166,32 @@ function i18nMutateOpCodesToString(opcodes) {
         }
         else {
             throw new Error('Unexpected value');
+        }
+    }
+    return lines;
+}
+/**
+ * Converts `I18nRemoveOpCodes` array into a human readable format.
+ *
+ * This function is attached to the `I18nRemoveOpCodes.debug` if `ngDevMode` is enabled. This
+ * function provides a human readable view of the opcodes. This is useful when debugging the
+ * application as well as writing more readable tests.
+ *
+ * @param this `I18nRemoveOpCodes` if attached as a method.
+ * @param opcodes `I18nRemoveOpCodes` if invoked as a function.
+ */
+function i18nRemoveOpCodesToString(opcodes) {
+    const removeCodes = opcodes || (Array.isArray(this) ? this : []);
+    let lines = [];
+    for (let i = 0; i < removeCodes.length; i++) {
+        const nodeOrIcuIndex = removeCodes[i];
+        if (nodeOrIcuIndex > 0) {
+            // Positive numbers are `RNode`s.
+            lines.push(`remove(lView[${nodeOrIcuIndex}])`);
+        }
+        else {
+            // Negative numbers are ICUs
+            lines.push(`removeNestedICU(${~nodeOrIcuIndex})`);
         }
     }
     return lines;
@@ -19737,11 +20231,11 @@ class OpCodeParser {
     }
     consumeNumberStringOrMarker() {
         let value = this.codes[this.i++];
-        if (typeof value === 'string' || typeof value === 'number' || value == COMMENT_MARKER ||
+        if (typeof value === 'string' || typeof value === 'number' || value == ICU_MARKER ||
             value == ELEMENT_MARKER) {
             return value;
         }
-        assertNumber(value, 'expecting number, string, COMMENT_MARKER or ELEMENT_MARKER in OpCode');
+        assertNumber(value, 'expecting number, string, ICU_MARKER or ELEMENT_MARKER in OpCode');
         return value;
     }
 }
@@ -19757,11 +20251,6 @@ const BINDING_REGEXP = /�(\d+):?\d*�/gi;
 const ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
 const NESTED_ICU = /�(\d+)�/;
 const ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
-// Count for the number of vars that will be allocated for each i18n block.
-// It is global because this is used in multiple functions that include loops and recursive calls.
-// This is reset to 0 when `i18nStartFirstPass` is called.
-let i18nVarsCount;
-const parentIndexStack = [];
 const MARKER = `�`;
 const SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
 const PH_REGEXP = /�(\/?[#*!]\d+):?\d*�/gi;
@@ -19777,135 +20266,164 @@ function replaceNgsp(value) {
     return value.replace(NGSP_UNICODE_REGEXP, ' ');
 }
 /**
- * See `i18nStart` above.
+ * Create dynamic nodes from i18n translation block.
+ *
+ * - Text nodes are created synchronously
+ * - TNodes are linked into tree lazily
+ *
+ * @param tView Current `TView`
+ * @parentTNodeIndex index to the parent TNode of this i18n block
+ * @param lView Current `LView`
+ * @param index Index of `ɵɵi18nStart` instruction.
+ * @param message Message to translate.
+ * @param subTemplateIndex Index into the sub template of message translation. (ie in case of
+ *     `ngIf`) (-1 otherwise)
  */
-function i18nStartFirstPass(lView, tView, index, message, subTemplateIndex) {
-    const startIndex = tView.blueprint.length - HEADER_OFFSET;
-    i18nVarsCount = 0;
-    const currentTNode = getCurrentTNode();
-    const parentTNode = isCurrentTNodeParent() ? currentTNode : currentTNode && currentTNode.parent;
-    let parentIndex = parentTNode && parentTNode !== lView[T_HOST] ? parentTNode.index - HEADER_OFFSET : index;
-    let parentIndexPointer = 0;
-    parentIndexStack[parentIndexPointer] = parentIndex;
+function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message, subTemplateIndex) {
+    const rootTNode = getCurrentParentTNode();
     const createOpCodes = [];
-    if (ngDevMode) {
-        attachDebugGetter(createOpCodes, i18nMutateOpCodesToString);
-    }
-    // If the previous node wasn't the direct parent then we have a translation without top level
-    // element and we need to keep a reference of the previous element if there is one. We should also
-    // keep track whether an element was a parent node or not, so that the logic that consumes
-    // the generated `I18nMutateOpCode`s can leverage this information to properly set TNode state
-    // (whether it's a parent or sibling).
-    if (index > 0 && currentTNode !== parentTNode) {
-        let previousTNodeIndex = currentTNode.index - HEADER_OFFSET;
-        // If current TNode is a sibling node, encode it using a negative index. This information is
-        // required when the `Select` action is processed (see the `readCreateOpCodes` function).
-        if (!isCurrentTNodeParent()) {
-            previousTNodeIndex = ~previousTNodeIndex;
-        }
-        // Create an OpCode to select the previous TNode
-        createOpCodes.push(previousTNodeIndex << 3 /* SHIFT_REF */ | 0 /* Select */);
-    }
     const updateOpCodes = [];
+    const existingTNodeStack = [[]];
     if (ngDevMode) {
+        attachDebugGetter(createOpCodes, i18nCreateOpCodesToString);
         attachDebugGetter(updateOpCodes, i18nUpdateOpCodesToString);
     }
-    const icuExpressions = [];
-    if (message === '' && isRootTemplateMessage(subTemplateIndex)) {
-        // If top level translation is an empty string, do not invoke additional processing
-        // and just create op codes for empty text node instead.
-        createOpCodes.push(message, allocNodeIndex(startIndex), parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-    }
-    else {
-        const templateTranslation = getTranslationForTemplate(message, subTemplateIndex);
-        const msgParts = replaceNgsp(templateTranslation).split(PH_REGEXP);
-        for (let i = 0; i < msgParts.length; i++) {
-            let value = msgParts[i];
-            if (i & 1) {
-                // Odd indexes are placeholders (elements and sub-templates)
-                if (value.charAt(0) === '/') {
-                    // It is a closing tag
-                    if (value.charAt(1) === "#" /* ELEMENT */) {
-                        const phIndex = parseInt(value.substr(2), 10);
-                        parentIndex = parentIndexStack[--parentIndexPointer];
-                        createOpCodes.push(phIndex << 3 /* SHIFT_REF */ | 5 /* ElementEnd */);
+    message = getTranslationForTemplate(message, subTemplateIndex);
+    const msgParts = replaceNgsp(message).split(PH_REGEXP);
+    for (let i = 0; i < msgParts.length; i++) {
+        let value = msgParts[i];
+        if ((i & 1) === 0) {
+            // Even indexes are text (including bindings & ICU expressions)
+            const parts = i18nParseTextIntoPartsAndICU(value);
+            for (let j = 0; j < parts.length; j++) {
+                let part = parts[j];
+                if ((j & 1) === 0) {
+                    // `j` is odd therefore `part` is string
+                    const text = part;
+                    ngDevMode && assertString(text, 'Parsed ICU part should be string');
+                    if (text !== '') {
+                        i18nStartFirstCreatePassProcessTextNode(tView, rootTNode, existingTNodeStack[0], createOpCodes, updateOpCodes, lView, text);
                     }
                 }
                 else {
-                    const phIndex = parseInt(value.substr(1), 10);
-                    const isElement = value.charAt(0) === "#" /* ELEMENT */;
-                    // The value represents a placeholder that we move to the designated index.
-                    // Note: positive indicies indicate that a TNode with a given index should also be marked
-                    // as parent while executing `Select` instruction.
-                    createOpCodes.push((isElement ? phIndex : ~phIndex) << 3 /* SHIFT_REF */ |
-                        0 /* Select */, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                    if (isElement) {
-                        parentIndexStack[++parentIndexPointer] = parentIndex = phIndex;
+                    // `j` is Even therefor `part` is an `ICUExpression`
+                    const icuExpression = part;
+                    // Verify that ICU expression has the right shape. Translations might contain invalid
+                    // constructions (while original messages were correct), so ICU parsing at runtime may
+                    // not succeed (thus `icuExpression` remains a string).
+                    if (ngDevMode && typeof icuExpression !== 'object') {
+                        throw new Error(`Unable to parse ICU expression in "${message}" message.`);
                     }
-                }
-            }
-            else {
-                // Even indexes are text (including bindings & ICU expressions)
-                const parts = extractParts(value);
-                for (let j = 0; j < parts.length; j++) {
-                    if (j & 1) {
-                        // Odd indexes are ICU expressions
-                        const icuExpression = parts[j];
-                        // Verify that ICU expression has the right shape. Translations might contain invalid
-                        // constructions (while original messages were correct), so ICU parsing at runtime may
-                        // not succeed (thus `icuExpression` remains a string).
-                        if (typeof icuExpression !== 'object') {
-                            throw new Error(`Unable to parse ICU expression in "${templateTranslation}" message.`);
-                        }
-                        // Create the comment node that will anchor the ICU expression
-                        const icuNodeIndex = allocNodeIndex(startIndex);
-                        createOpCodes.push(COMMENT_MARKER, ngDevMode ? `ICU ${icuNodeIndex}` : '', icuNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                        // Update codes for the ICU expression
-                        const mask = getBindingMask(icuExpression);
-                        icuStart(icuExpressions, icuExpression, icuNodeIndex, icuNodeIndex);
-                        // Since this is recursive, the last TIcu that was pushed is the one we want
-                        const tIcuIndex = icuExpressions.length - 1;
-                        updateOpCodes.push(toMaskBit(icuExpression.mainBinding), // mask of the main binding
-                        3, // skip 3 opCodes if not changed
-                        -1 - icuExpression.mainBinding, icuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, tIcuIndex, mask, // mask of all the bindings of this ICU expression
-                        2, // skip 2 opCodes if not changed
-                        icuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, tIcuIndex);
-                    }
-                    else if (parts[j] !== '') {
-                        const text = parts[j];
-                        // Even indexes are text (including bindings)
-                        const hasBinding = text.match(BINDING_REGEXP);
-                        // Create text nodes
-                        const textNodeIndex = allocNodeIndex(startIndex);
-                        createOpCodes.push(
-                        // If there is a binding, the value will be set during update
-                        hasBinding ? '' : text, textNodeIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                        if (hasBinding) {
-                            addAllToArray(generateBindingUpdateOpCodes(text, textNodeIndex), updateOpCodes);
-                        }
-                    }
+                    const icuContainerTNode = createTNodeAndAddOpCode(tView, rootTNode, existingTNodeStack[0], lView, createOpCodes, ngDevMode ? `ICU ${index}:${icuExpression.mainBinding}` : '', true);
+                    const icuNodeIndex = icuContainerTNode.index;
+                    ngDevMode &&
+                        assertGreaterThanOrEqual(icuNodeIndex, HEADER_OFFSET, 'Index must be in absolute LView offset');
+                    icuStart(tView, lView, updateOpCodes, parentTNodeIndex, icuExpression, icuNodeIndex);
                 }
             }
         }
+        else {
+            // Odd indexes are placeholders (elements and sub-templates)
+            // At this point value is something like: '/#1:2' (originally coming from '�/#1:2�')
+            const isClosing = value.charCodeAt(0) === 47 /* SLASH */;
+            const type = value.charCodeAt(isClosing ? 1 : 0);
+            ngDevMode && assertOneOf(type, 42 /* STAR */, 35 /* HASH */, 33 /* EXCLAMATION */);
+            const index = HEADER_OFFSET + Number.parseInt(value.substring((isClosing ? 2 : 1)));
+            if (isClosing) {
+                existingTNodeStack.shift();
+                setCurrentTNode(getCurrentParentTNode(), false);
+            }
+            else {
+                const tNode = createTNodePlaceholder(tView, existingTNodeStack[0], index);
+                existingTNodeStack.unshift([]);
+                setCurrentTNode(tNode, true);
+            }
+        }
     }
-    if (i18nVarsCount > 0) {
-        allocExpando(tView, lView, i18nVarsCount);
-    }
-    // NOTE: local var needed to properly assert the type of `TI18n`.
-    const tI18n = {
-        vars: i18nVarsCount,
+    tView.data[index] = {
         create: createOpCodes,
         update: updateOpCodes,
-        icus: icuExpressions.length ? icuExpressions : null,
     };
-    tView.data[index + HEADER_OFFSET] = tI18n;
+}
+/**
+ * Allocate space in i18n Range add create OpCode instruction to crete a text or comment node.
+ *
+ * @param tView Current `TView` needed to allocate space in i18n range.
+ * @param rootTNode Root `TNode` of the i18n block. This node determines if the new TNode will be
+ *     added as part of the `i18nStart` instruction or as part of the `TNode.insertBeforeIndex`.
+ * @param existingTNodes internal state for `addTNodeAndUpdateInsertBeforeIndex`.
+ * @param lView Current `LView` needed to allocate space in i18n range.
+ * @param createOpCodes Array storing `I18nCreateOpCodes` where new opCodes will be added.
+ * @param text Text to be added when the `Text` or `Comment` node will be created.
+ * @param isICU true if a `Comment` node for ICU (instead of `Text`) node should be created.
+ */
+function createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, createOpCodes, text, isICU) {
+    const i18nNodeIdx = allocExpando(tView, lView, 1, null);
+    let opCode = i18nNodeIdx << I18nCreateOpCode.SHIFT;
+    let parentTNode = getCurrentParentTNode();
+    if (rootTNode === parentTNode) {
+        // FIXME(misko): A null `parentTNode` should represent when we fall of the `LView` boundary.
+        // (there is no parent), but in some circumstances (because we are inconsistent about how we set
+        // `previousOrParentTNode`) it could point to `rootTNode` So this is a work around.
+        parentTNode = null;
+    }
+    if (parentTNode === null) {
+        // If we don't have a parent that means that we can eagerly add nodes.
+        // If we have a parent than these nodes can't be added now (as the parent has not been created
+        // yet) and instead the `parentTNode` is responsible for adding it. See
+        // `TNode.insertBeforeIndex`
+        opCode |= I18nCreateOpCode.APPEND_EAGERLY;
+    }
+    if (isICU) {
+        opCode |= I18nCreateOpCode.COMMENT;
+        ensureIcuContainerVisitorLoaded(loadIcuContainerVisitor);
+    }
+    createOpCodes.push(opCode, text === null ? '' : text);
+    // We store `{{?}}` so that when looking at debug `TNodeType.template` we can see where the
+    // bindings are.
+    const tNode = createTNodeAtIndex(tView, i18nNodeIdx, isICU ? 32 /* Icu */ : 1 /* Text */, text === null ? (ngDevMode ? '{{?}}' : '') : text, null);
+    addTNodeAndUpdateInsertBeforeIndex(existingTNodes, tNode);
+    const tNodeIdx = tNode.index;
+    setCurrentTNode(tNode, false /* Text nodes are self closing */);
+    if (parentTNode !== null && rootTNode !== parentTNode) {
+        // We are a child of deeper node (rather than a direct child of `i18nStart` instruction.)
+        // We have to make sure to add ourselves to the parent.
+        setTNodeInsertBeforeIndex(parentTNode, tNodeIdx);
+    }
+    return tNode;
+}
+/**
+ * Processes text node in i18n block.
+ *
+ * Text nodes can have:
+ * - Create instruction in `createOpCodes` for creating the text node.
+ * - Allocate spec for text node in i18n range of `LView`
+ * - If contains binding:
+ *    - bindings => allocate space in i18n range of `LView` to store the binding value.
+ *    - populate `updateOpCodes` with update instructions.
+ *
+ * @param tView Current `TView`
+ * @param rootTNode Root `TNode` of the i18n block. This node determines if the new TNode will
+ *     be added as part of the `i18nStart` instruction or as part of the
+ *     `TNode.insertBeforeIndex`.
+ * @param existingTNodes internal state for `addTNodeAndUpdateInsertBeforeIndex`.
+ * @param createOpCodes Location where the creation OpCodes will be stored.
+ * @param lView Current `LView`
+ * @param text The translated text (which may contain binding)
+ */
+function i18nStartFirstCreatePassProcessTextNode(tView, rootTNode, existingTNodes, createOpCodes, updateOpCodes, lView, text) {
+    const hasBinding = text.match(BINDING_REGEXP);
+    const tNode = createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, createOpCodes, hasBinding ? null : text, false);
+    if (hasBinding) {
+        generateBindingUpdateOpCodes(updateOpCodes, text, tNode.index);
+    }
 }
 /**
  * See `i18nAttributes` above.
  */
 function i18nAttributesFirstPass(lView, tView, index, values) {
     const previousElement = getCurrentTNode();
-    const previousElementIndex = previousElement.index - HEADER_OFFSET;
+    const previousElementIndex = previousElement.index;
     const updateOpCodes = [];
     if (ngDevMode) {
         attachDebugGetter(updateOpCodes, i18nUpdateOpCodesToString);
@@ -19925,15 +20443,15 @@ function i18nAttributesFirstPass(lView, tView, index, values) {
                 // Even indexes are text (including bindings)
                 const hasBinding = !!value.match(BINDING_REGEXP);
                 if (hasBinding) {
-                    if (tView.firstCreatePass && tView.data[index + HEADER_OFFSET] === null) {
-                        addAllToArray(generateBindingUpdateOpCodes(value, previousElementIndex, attrName), updateOpCodes);
+                    if (tView.firstCreatePass && tView.data[index] === null) {
+                        generateBindingUpdateOpCodes(updateOpCodes, value, previousElementIndex, attrName);
                     }
                 }
                 else {
                     const tNode = getTNode(tView, previousElementIndex);
                     // Set attributes for Elements only, for other types (like ElementContainer),
                     // only set inputs below
-                    if (tNode.type === 2 /* Element */) {
+                    if (tNode.type & 3 /* AnyRNode */) {
                         elementAttributeInternal(tNode, lView, attrName, value, null, null);
                     }
                     // Check if that attribute is a directive input
@@ -19949,20 +20467,26 @@ function i18nAttributesFirstPass(lView, tView, index, values) {
             }
         }
     }
-    if (tView.firstCreatePass && tView.data[index + HEADER_OFFSET] === null) {
-        tView.data[index + HEADER_OFFSET] = updateOpCodes;
+    if (tView.firstCreatePass && tView.data[index] === null) {
+        tView.data[index] = updateOpCodes;
     }
 }
 /**
  * Generate the OpCodes to update the bindings of a string.
  *
+ * @param updateOpCodes Place where the update opcodes will be stored.
  * @param str The string containing the bindings.
  * @param destinationNode Index of the destination node which will receive the binding.
  * @param attrName Name of the attribute, if the string belongs to an attribute.
  * @param sanitizeFn Sanitization function used to sanitize the string after update, if necessary.
  */
-function generateBindingUpdateOpCodes(str, destinationNode, attrName, sanitizeFn = null) {
-    const updateOpCodes = [null, null]; // Alloc space for mask and size
+function generateBindingUpdateOpCodes(updateOpCodes, str, destinationNode, attrName, sanitizeFn = null) {
+    ngDevMode &&
+        assertGreaterThanOrEqual(destinationNode, HEADER_OFFSET, 'Index must be in absolute LView offset');
+    const maskIndex = updateOpCodes.length; // Location of mask
+    const sizeIndex = maskIndex + 1; // location of size for skipping
+    updateOpCodes.push(null, null); // Alloc space for mask and size
+    const startIndex = maskIndex + 2; // location of first allocation.
     if (ngDevMode) {
         attachDebugGetter(updateOpCodes, i18nUpdateOpCodesToString);
     }
@@ -19986,45 +20510,23 @@ function generateBindingUpdateOpCodes(str, destinationNode, attrName, sanitizeFn
     if (attrName) {
         updateOpCodes.push(attrName, sanitizeFn);
     }
-    updateOpCodes[0] = mask;
-    updateOpCodes[1] = updateOpCodes.length - 2;
-    return updateOpCodes;
-}
-function getBindingMask(icuExpression, mask = 0) {
-    mask = mask | toMaskBit(icuExpression.mainBinding);
-    let match;
-    for (let i = 0; i < icuExpression.values.length; i++) {
-        const valueArr = icuExpression.values[i];
-        for (let j = 0; j < valueArr.length; j++) {
-            const value = valueArr[j];
-            if (typeof value === 'string') {
-                while (match = BINDING_REGEXP.exec(value)) {
-                    mask = mask | toMaskBit(parseInt(match[1], 10));
-                }
-            }
-            else {
-                mask = getBindingMask(value, mask);
-            }
-        }
-    }
+    updateOpCodes[maskIndex] = mask;
+    updateOpCodes[sizeIndex] = updateOpCodes.length - startIndex;
     return mask;
-}
-function allocNodeIndex(startIndex) {
-    return startIndex + i18nVarsCount++;
 }
 /**
  * Convert binding index to mask bit.
  *
  * Each index represents a single bit on the bit-mask. Because bit-mask only has 32 bits, we make
- * the 32nd bit share all masks for all bindings higher than 32. Since it is extremely rare to have
- * more than 32 bindings this will be hit very rarely. The downside of hitting this corner case is
- * that we will execute binding code more often than necessary. (penalty of performance)
+ * the 32nd bit share all masks for all bindings higher than 32. Since it is extremely rare to
+ * have more than 32 bindings this will be hit very rarely. The downside of hitting this corner
+ * case is that we will execute binding code more often than necessary. (penalty of performance)
  */
 function toMaskBit(bindingIndex) {
     return 1 << Math.min(bindingIndex, 31);
 }
 function isRootTemplateMessage(subTemplateIndex) {
-    return subTemplateIndex === undefined;
+    return subTemplateIndex === -1;
 }
 /**
  * Removes everything inside the sub-templates of a message.
@@ -20056,8 +20558,8 @@ function removeInnerTemplateTranslation(message) {
 /**
  * Extracts a part of a message and removes the rest.
  *
- * This method is used for extracting a part of the message associated with a template. A translated
- * message can span multiple templates.
+ * This method is used for extracting a part of the message associated with a template. A
+ * translated message can span multiple templates.
  *
  * Example:
  * ```
@@ -20083,17 +20585,25 @@ function getTranslationForTemplate(message, subTemplateIndex) {
 /**
  * Generate the OpCodes for ICU expressions.
  *
- * @param tIcus
  * @param icuExpression
- * @param startIndex
- * @param expandoStartIndex
+ * @param index Index where the anchor is stored and an optional `TIcuContainerNode`
+ *   - `lView[anchorIdx]` points to a `Comment` node representing the anchor for the ICU.
+ *   - `tView.data[anchorIdx]` points to the `TIcuContainerNode` if ICU is root (`null` otherwise)
  */
-function icuStart(tIcus, icuExpression, startIndex, expandoStartIndex) {
-    const createCodes = [];
-    const removeCodes = [];
-    const updateCodes = [];
-    const vars = [];
-    const childIcus = [];
+function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorIdx) {
+    ngDevMode && assertDefined(icuExpression, 'ICU expression must be defined');
+    let bindingMask = 0;
+    const tIcu = {
+        type: icuExpression.type,
+        currentCaseLViewIndex: allocExpando(tView, lView, 1, null),
+        anchorIdx,
+        cases: [],
+        create: [],
+        remove: [],
+        update: []
+    };
+    addUpdateIcuSwitch(updateOpCodes, icuExpression, anchorIdx);
+    setTIcu(tView, anchorIdx, tIcu);
     const values = icuExpression.values;
     for (let i = 0; i < values.length; i++) {
         // Each value is an array of strings & other ICU expressions
@@ -20108,28 +20618,12 @@ function icuStart(tIcus, icuExpression, startIndex, expandoStartIndex) {
                 valueArr[j] = `<!--�${icuIndex}�-->`;
             }
         }
-        const icuCase = parseIcuCase(valueArr.join(''), startIndex, nestedIcus, tIcus, expandoStartIndex);
-        createCodes.push(icuCase.create);
-        removeCodes.push(icuCase.remove);
-        updateCodes.push(icuCase.update);
-        vars.push(icuCase.vars);
-        childIcus.push(icuCase.childIcus);
+        bindingMask = parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, icuExpression.cases[i], valueArr.join(''), nestedIcus) |
+            bindingMask;
     }
-    const tIcu = {
-        type: icuExpression.type,
-        vars,
-        currentCaseLViewIndex: HEADER_OFFSET +
-            expandoStartIndex // expandoStartIndex does not include the header so add it.
-            + 1,
-        childIcus,
-        cases: icuExpression.cases,
-        create: createCodes,
-        remove: removeCodes,
-        update: updateCodes
-    };
-    tIcus.push(tIcu);
-    // Adding the maximum possible of vars needed (based on the cases with the most vars)
-    i18nVarsCount += Math.max(...vars);
+    if (bindingMask) {
+        addUpdateIcuUpdate(updateOpCodes, bindingMask, anchorIdx);
+    }
 }
 /**
  * Parses text containing an ICU expression and produces a JSON object for it.
@@ -20153,7 +20647,7 @@ function parseICUBlock(pattern) {
         mainBinding = parseInt(binding.substr(1), 10);
         return '';
     });
-    const parts = extractParts(pattern);
+    const parts = i18nParseTextIntoPartsAndICU(pattern);
     // Looking for (key block)+ sequence. One of the keys has to be "other".
     for (let pos = 0; pos < parts.length;) {
         let key = parts[pos++].trim();
@@ -20164,7 +20658,7 @@ function parseICUBlock(pattern) {
         if (key.length) {
             cases.push(key);
         }
-        const blocks = extractParts(parts[pos++]);
+        const blocks = i18nParseTextIntoPartsAndICU(parts[pos++]);
         if (cases.length > values.length) {
             values.push(blocks);
         }
@@ -20173,47 +20667,16 @@ function parseICUBlock(pattern) {
     return { type: icuType, mainBinding: mainBinding, cases, values };
 }
 /**
- * Transforms a string template into an HTML template and a list of instructions used to update
- * attributes or nodes that contain bindings.
- *
- * @param unsafeHtml The string to parse
- * @param parentIndex
- * @param nestedIcus
- * @param tIcus
- * @param expandoStartIndex
- */
-function parseIcuCase(unsafeHtml, parentIndex, nestedIcus, tIcus, expandoStartIndex) {
-    const inertBodyHelper = getInertBodyHelper(getDocument());
-    const inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
-    if (!inertBodyElement) {
-        throw new Error('Unable to generate inert body element');
-    }
-    const wrapper = getTemplateContent(inertBodyElement) || inertBodyElement;
-    const opCodes = {
-        vars: 1,
-        childIcus: [],
-        create: [],
-        remove: [],
-        update: []
-    };
-    if (ngDevMode) {
-        attachDebugGetter(opCodes.create, i18nMutateOpCodesToString);
-        attachDebugGetter(opCodes.remove, i18nMutateOpCodesToString);
-        attachDebugGetter(opCodes.update, i18nUpdateOpCodesToString);
-    }
-    parseNodes(wrapper.firstChild, opCodes, parentIndex, nestedIcus, tIcus, expandoStartIndex);
-    return opCodes;
-}
-/**
  * Breaks pattern into strings and top level {...} blocks.
- * Can be used to break a message into text and ICU expressions, or to break an ICU expression into
- * keys and cases.
- * Original code from closure library, modified for Angular.
+ * Can be used to break a message into text and ICU expressions, or to break an ICU expression
+ * into keys and cases. Original code from closure library, modified for Angular.
  *
  * @param pattern (sub)Pattern to be broken.
- *
+ * @returns An `Array<string|IcuExpression>` where:
+ *   - odd positions: `string` => text between ICU expressions
+ *   - even positions: `ICUExpression` => ICU expression parsed into `ICUExpression` record.
  */
-function extractParts(pattern) {
+function i18nParseTextIntoPartsAndICU(pattern) {
     if (!pattern) {
         return [];
     }
@@ -20256,114 +20719,129 @@ function extractParts(pattern) {
 /**
  * Parses a node, its children and its siblings, and generates the mutate & update OpCodes.
  *
- * @param currentNode The first node to parse
- * @param icuCase The data for the ICU expression case that contains those nodes
- * @param parentIndex Index of the current node's parent
- * @param nestedIcus Data for the nested ICU expressions that this case contains
- * @param tIcus Data for all ICU expressions of the current message
- * @param expandoStartIndex Expando start index for the current ICU expression
  */
-function parseNodes(currentNode, icuCase, parentIndex, nestedIcus, tIcus, expandoStartIndex) {
-    if (currentNode) {
-        const nestedIcusToCreate = [];
-        while (currentNode) {
-            const nextNode = currentNode.nextSibling;
-            const newIndex = expandoStartIndex + ++icuCase.vars;
-            switch (currentNode.nodeType) {
-                case Node.ELEMENT_NODE:
-                    const element = currentNode;
-                    const tagName = element.tagName.toLowerCase();
-                    if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
-                        // This isn't a valid element, we won't create an element for it
-                        icuCase.vars--;
-                    }
-                    else {
-                        icuCase.create.push(ELEMENT_MARKER, tagName, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                        const elAttrs = element.attributes;
-                        for (let i = 0; i < elAttrs.length; i++) {
-                            const attr = elAttrs.item(i);
-                            const lowerAttrName = attr.name.toLowerCase();
-                            const hasBinding = !!attr.value.match(BINDING_REGEXP);
-                            // we assume the input string is safe, unless it's using a binding
-                            if (hasBinding) {
-                                if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
-                                    if (URI_ATTRS[lowerAttrName]) {
-                                        addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name, _sanitizeUrl), icuCase.update);
-                                    }
-                                    else if (SRCSET_ATTRS[lowerAttrName]) {
-                                        addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name, sanitizeSrcset), icuCase.update);
-                                    }
-                                    else {
-                                        addAllToArray(generateBindingUpdateOpCodes(attr.value, newIndex, attr.name), icuCase.update);
-                                    }
+function parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, caseName, unsafeCaseHtml, nestedIcus) {
+    const create = [];
+    const remove = [];
+    const update = [];
+    if (ngDevMode) {
+        attachDebugGetter(create, icuCreateOpCodesToString);
+        attachDebugGetter(remove, i18nRemoveOpCodesToString);
+        attachDebugGetter(update, i18nUpdateOpCodesToString);
+    }
+    tIcu.cases.push(caseName);
+    tIcu.create.push(create);
+    tIcu.remove.push(remove);
+    tIcu.update.push(update);
+    const inertBodyHelper = getInertBodyHelper(getDocument());
+    const inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeCaseHtml);
+    ngDevMode && assertDefined(inertBodyElement, 'Unable to generate inert body element');
+    const inertRootNode = getTemplateContent(inertBodyElement) || inertBodyElement;
+    if (inertRootNode) {
+        return walkIcuTree(tView, tIcu, lView, updateOpCodes, create, remove, update, inertRootNode, parentIdx, nestedIcus, 0);
+    }
+    else {
+        return 0;
+    }
+}
+function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, parentNode, parentIdx, nestedIcus, depth) {
+    let bindingMask = 0;
+    let currentNode = parentNode.firstChild;
+    while (currentNode) {
+        const newIndex = allocExpando(tView, lView, 1, null);
+        switch (currentNode.nodeType) {
+            case Node.ELEMENT_NODE:
+                const element = currentNode;
+                const tagName = element.tagName.toLowerCase();
+                if (VALID_ELEMENTS.hasOwnProperty(tagName)) {
+                    addCreateNodeAndAppend(create, ELEMENT_MARKER, tagName, parentIdx, newIndex);
+                    tView.data[newIndex] = tagName;
+                    const elAttrs = element.attributes;
+                    for (let i = 0; i < elAttrs.length; i++) {
+                        const attr = elAttrs.item(i);
+                        const lowerAttrName = attr.name.toLowerCase();
+                        const hasBinding = !!attr.value.match(BINDING_REGEXP);
+                        // we assume the input string is safe, unless it's using a binding
+                        if (hasBinding) {
+                            if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
+                                if (URI_ATTRS[lowerAttrName]) {
+                                    generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, _sanitizeUrl);
+                                }
+                                else if (SRCSET_ATTRS[lowerAttrName]) {
+                                    generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, sanitizeSrcset);
                                 }
                                 else {
-                                    ngDevMode &&
-                                        console.warn(`WARNING: ignoring unsafe attribute value ${lowerAttrName} on element ${tagName} (see http://g.co/ng/security#xss)`);
+                                    generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name);
                                 }
                             }
                             else {
-                                icuCase.create.push(newIndex << 3 /* SHIFT_REF */ | 4 /* Attr */, attr.name, attr.value);
+                                ngDevMode && console.warn(` WARNING:
+      ignoring unsafe attribute value ${lowerAttrName} on element $ {
+    tagName
+  } (see http://g.co/ng/security#xss)`);
                             }
                         }
-                        // Parse the children of this node (if any)
-                        parseNodes(currentNode.firstChild, icuCase, newIndex, nestedIcus, tIcus, expandoStartIndex);
-                        // Remove the parent node after the children
-                        icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
+                        else {
+                            addCreateAttribute(create, newIndex, attr);
+                        }
                     }
-                    break;
-                case Node.TEXT_NODE:
-                    const value = currentNode.textContent || '';
-                    const hasBinding = value.match(BINDING_REGEXP);
-                    icuCase.create.push(hasBinding ? '' : value, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                    icuCase.remove.push(newIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
-                    if (hasBinding) {
-                        addAllToArray(generateBindingUpdateOpCodes(value, newIndex), icuCase.update);
-                    }
-                    break;
-                case Node.COMMENT_NODE:
-                    // Check if the comment node is a placeholder for a nested ICU
-                    const match = NESTED_ICU.exec(currentNode.textContent || '');
-                    if (match) {
-                        const nestedIcuIndex = parseInt(match[1], 10);
-                        const newLocal = ngDevMode ? `nested ICU ${nestedIcuIndex}` : '';
-                        // Create the comment node that will anchor the ICU expression
-                        icuCase.create.push(COMMENT_MARKER, newLocal, newIndex, parentIndex << 17 /* SHIFT_PARENT */ | 1 /* AppendChild */);
-                        const nestedIcu = nestedIcus[nestedIcuIndex];
-                        nestedIcusToCreate.push([nestedIcu, newIndex]);
-                    }
-                    else {
-                        // We do not handle any other type of comment
-                        icuCase.vars--;
-                    }
-                    break;
-                default:
-                    // We do not handle any other type of element
-                    icuCase.vars--;
-            }
-            currentNode = nextNode;
+                    // Parse the children of this node (if any)
+                    bindingMask = walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, currentNode, newIndex, nestedIcus, depth + 1) |
+                        bindingMask;
+                    addRemoveNode(remove, newIndex, depth);
+                }
+                break;
+            case Node.TEXT_NODE:
+                const value = currentNode.textContent || '';
+                const hasBinding = value.match(BINDING_REGEXP);
+                addCreateNodeAndAppend(create, null, hasBinding ? '' : value, parentIdx, newIndex);
+                addRemoveNode(remove, newIndex, depth);
+                if (hasBinding) {
+                    bindingMask = generateBindingUpdateOpCodes(update, value, newIndex) | bindingMask;
+                }
+                break;
+            case Node.COMMENT_NODE:
+                // Check if the comment node is a placeholder for a nested ICU
+                const isNestedIcu = NESTED_ICU.exec(currentNode.textContent || '');
+                if (isNestedIcu) {
+                    const nestedIcuIndex = parseInt(isNestedIcu[1], 10);
+                    const icuExpression = nestedIcus[nestedIcuIndex];
+                    // Create the comment node that will anchor the ICU expression
+                    addCreateNodeAndAppend(create, ICU_MARKER, ngDevMode ? `nested ICU ${nestedIcuIndex}` : '', parentIdx, newIndex);
+                    icuStart(tView, lView, sharedUpdateOpCodes, parentIdx, icuExpression, newIndex);
+                    addRemoveNestedIcu(remove, newIndex, depth);
+                }
+                break;
         }
-        for (let i = 0; i < nestedIcusToCreate.length; i++) {
-            const nestedIcu = nestedIcusToCreate[i][0];
-            const nestedIcuNodeIndex = nestedIcusToCreate[i][1];
-            icuStart(tIcus, nestedIcu, nestedIcuNodeIndex, expandoStartIndex + icuCase.vars);
-            // Since this is recursive, the last TIcu that was pushed is the one we want
-            const nestTIcuIndex = tIcus.length - 1;
-            icuCase.vars += Math.max(...tIcus[nestTIcuIndex].vars);
-            icuCase.childIcus.push(nestTIcuIndex);
-            const mask = getBindingMask(nestedIcu);
-            icuCase.update.push(toMaskBit(nestedIcu.mainBinding), // mask of the main binding
-            3, // skip 3 opCodes if not changed
-            -1 - nestedIcu.mainBinding, nestedIcuNodeIndex << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */, 
-            // FIXME(misko): Index should be part of the opcode
-            nestTIcuIndex, mask, // mask of all the bindings of this ICU expression
-            2, // skip 2 opCodes if not changed
-            nestedIcuNodeIndex << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */, nestTIcuIndex);
-            icuCase.remove.push(nestTIcuIndex << 3 /* SHIFT_REF */ | 6 /* RemoveNestedIcu */, 
-            // FIXME(misko): Index should be part of the opcode
-            nestedIcuNodeIndex << 3 /* SHIFT_REF */ | 3 /* Remove */);
-        }
+        currentNode = currentNode.nextSibling;
     }
+    return bindingMask;
+}
+function addRemoveNode(remove, index, depth) {
+    if (depth === 0) {
+        remove.push(index);
+    }
+}
+function addRemoveNestedIcu(remove, index, depth) {
+    if (depth === 0) {
+        remove.push(~index); // remove ICU at `index`
+        remove.push(index); // remove ICU comment at `index`
+    }
+}
+function addUpdateIcuSwitch(update, icuExpression, index) {
+    update.push(toMaskBit(icuExpression.mainBinding), 2, -1 - icuExpression.mainBinding, index << 2 /* SHIFT_REF */ | 2 /* IcuSwitch */);
+}
+function addUpdateIcuUpdate(update, bindingMask, index) {
+    update.push(bindingMask, 1, index << 2 /* SHIFT_REF */ | 3 /* IcuUpdate */);
+}
+function addCreateNodeAndAppend(create, marker, text, appendToParentIdx, createAtIdx) {
+    if (marker !== null) {
+        create.push(marker);
+    }
+    create.push(text, createAtIdx, icuCreateOpCode(0 /* AppendChild */, appendToParentIdx, createAtIdx));
+}
+function addCreateAttribute(create, newIndex, attr) {
+    create.push(newIndex << 1 /* SHIFT_REF */ | 1 /* Attr */, attr.name, attr.value);
 }
 
 /**
@@ -20509,10 +20987,6 @@ function i18nPostprocess(message, replacements = {}) {
  *   and end of DOM element that were embedded in the original translation block. The placeholder
  *   `index` points to the element index in the template instructions set. An optional `block` that
  *   matches the sub-template in which it was declared.
- * - `�!{index}(:{block})�`/`�/!{index}(:{block})�`: *Projection Placeholder*:  Marks the
- *   beginning and end of <ng-content> that was embedded in the original translation block.
- *   The placeholder `index` points to the element index in the template instructions set.
- *   An optional `block` that matches the sub-template in which it was declared.
  * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
  *   split up and translated separately in each angular template function. The `index` points to the
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
@@ -20523,16 +20997,26 @@ function i18nPostprocess(message, replacements = {}) {
  *
  * @codeGenApi
  */
-function ɵɵi18nStart(index, messageIndex, subTemplateIndex) {
+function ɵɵi18nStart(index, messageIndex, subTemplateIndex = -1) {
     const tView = getTView();
+    const lView = getLView();
+    const adjustedIndex = HEADER_OFFSET + index;
     ngDevMode && assertDefined(tView, `tView should be defined`);
     const message = getConstant(tView.consts, messageIndex);
-    pushI18nIndex(index);
-    // We need to delay projections until `i18nEnd`
-    setDelayProjection(true);
-    if (tView.firstCreatePass && tView.data[index + HEADER_OFFSET] === null) {
-        i18nStartFirstPass(getLView(), tView, index, message, subTemplateIndex);
+    const parentTNode = getCurrentParentTNode();
+    if (tView.firstCreatePass) {
+        i18nStartFirstCreatePass(tView, parentTNode === null ? 0 : parentTNode.index, lView, adjustedIndex, message, subTemplateIndex);
     }
+    const tI18n = tView.data[adjustedIndex];
+    const sameViewParentTNode = parentTNode === lView[T_HOST] ? null : parentTNode;
+    const parentRNode = getClosestRElement(tView, sameViewParentTNode, lView);
+    // If `parentTNode` is an `ElementContainer` than it has `<!--ng-container--->`.
+    // When we do inserts we have to make sure to insert in front of `<!--ng-container--->`.
+    const insertInFrontOf = parentTNode && (parentTNode.type & 8 /* ElementContainer */) ?
+        lView[parentTNode.index] :
+        null;
+    applyCreateOpCodes(lView, tI18n.create, parentRNode, insertInFrontOf);
+    setInI18nBlock(true);
 }
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
@@ -20541,12 +21025,7 @@ function ɵɵi18nStart(index, messageIndex, subTemplateIndex) {
  * @codeGenApi
  */
 function ɵɵi18nEnd() {
-    const lView = getLView();
-    const tView = getTView();
-    ngDevMode && assertDefined(tView, `tView should be defined`);
-    i18nEndFirstPass(tView, lView);
-    // Stop delaying projections
-    setDelayProjection(false);
+    setInI18nBlock(false);
 }
 /**
  *
@@ -20591,7 +21070,7 @@ function ɵɵi18nAttributes(index, attrsIndex) {
     const tView = getTView();
     ngDevMode && assertDefined(tView, `tView should be defined`);
     const attrs = getConstant(tView.consts, attrsIndex);
-    i18nAttributesFirstPass(lView, tView, index, attrs);
+    i18nAttributesFirstPass(lView, tView, index + HEADER_OFFSET, attrs);
 }
 /**
  * Stores the values of the bindings during each update cycle in order to determine if we need to
@@ -20617,7 +21096,7 @@ function ɵɵi18nExp(value) {
  * @codeGenApi
  */
 function ɵɵi18nApply(index) {
-    applyI18n(getTView(), getLView(), index);
+    applyI18n(getTView(), getLView(), index + HEADER_OFFSET);
 }
 /**
  * Handles message string post-processing for internationalization.
@@ -21185,7 +21664,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-rc.0+1.sha-7f79e77');
+const VERSION = new Version('11.0.0-rc.0+29.sha-6669571');
 
 /**
  * @license
@@ -24114,7 +24593,7 @@ class ComponentFactory$1 extends ComponentFactory {
         const elementName = this.componentDef.selectors[0][0] || 'div';
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
-            elementCreate(elementName, rendererFactory.createRenderer(null, this.componentDef), getNamespace$1(elementName));
+            createElementNode(rendererFactory.createRenderer(null, this.componentDef), elementName, getNamespace$1(elementName));
         const rootFlags = this.componentDef.onPush ? 64 /* Dirty */ | 512 /* IsRoot */ :
             16 /* CheckAlways */ | 512 /* IsRoot */;
         const rootContext = createRootContext();
@@ -24148,7 +24627,7 @@ class ComponentFactory$1 extends ComponentFactory {
                     }
                 }
             }
-            tElementNode = getTNode(rootTView, 0);
+            tElementNode = getTNode(rootTView, HEADER_OFFSET);
             if (projectableNodes !== undefined) {
                 const projection = tElementNode.projection = [];
                 for (let i = 0; i < this.ngContentSelectors.length; i++) {
@@ -24798,7 +25277,7 @@ function ɵɵpipe(index, pipeName) {
         const previousIncludeViewProviders = setIncludeViewProviders(false);
         const pipeInstance = pipeFactory();
         setIncludeViewProviders(previousIncludeViewProviders);
-        store(tView, getLView(), index, pipeInstance);
+        store(tView, getLView(), adjustedIndex, pipeInstance);
         return pipeInstance;
     }
     finally {
@@ -24839,9 +25318,10 @@ function getPipeDef$1(name, registry) {
  * @codeGenApi
  */
 function ɵɵpipeBind1(index, slotOffset, v1) {
+    const adjustedIndex = index + HEADER_OFFSET;
     const lView = getLView();
-    const pipeInstance = load(lView, index);
-    return unwrapValue$1(lView, isPure(lView, index) ?
+    const pipeInstance = load(lView, adjustedIndex);
+    return unwrapValue$1(lView, isPure(lView, adjustedIndex) ?
         pureFunction1Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1));
 }
@@ -24859,9 +25339,10 @@ function ɵɵpipeBind1(index, slotOffset, v1) {
  * @codeGenApi
  */
 function ɵɵpipeBind2(index, slotOffset, v1, v2) {
+    const adjustedIndex = index + HEADER_OFFSET;
     const lView = getLView();
-    const pipeInstance = load(lView, index);
-    return unwrapValue$1(lView, isPure(lView, index) ?
+    const pipeInstance = load(lView, adjustedIndex);
+    return unwrapValue$1(lView, isPure(lView, adjustedIndex) ?
         pureFunction2Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2));
 }
@@ -24880,9 +25361,10 @@ function ɵɵpipeBind2(index, slotOffset, v1, v2) {
  * @codeGenApi
  */
 function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
+    const adjustedIndex = index + HEADER_OFFSET;
     const lView = getLView();
-    const pipeInstance = load(lView, index);
-    return unwrapValue$1(lView, isPure(lView, index) ? pureFunction3Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    const pipeInstance = load(lView, adjustedIndex);
+    return unwrapValue$1(lView, isPure(lView, adjustedIndex) ? pureFunction3Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3));
 }
 /**
@@ -24901,9 +25383,10 @@ function ɵɵpipeBind3(index, slotOffset, v1, v2, v3) {
  * @codeGenApi
  */
 function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
+    const adjustedIndex = index + HEADER_OFFSET;
     const lView = getLView();
-    const pipeInstance = load(lView, index);
-    return unwrapValue$1(lView, isPure(lView, index) ? pureFunction4Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+    const pipeInstance = load(lView, adjustedIndex);
+    return unwrapValue$1(lView, isPure(lView, adjustedIndex) ? pureFunction4Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4));
 }
 /**
@@ -24919,14 +25402,15 @@ function ɵɵpipeBind4(index, slotOffset, v1, v2, v3, v4) {
  * @codeGenApi
  */
 function ɵɵpipeBindV(index, slotOffset, values) {
+    const adjustedIndex = index + HEADER_OFFSET;
     const lView = getLView();
-    const pipeInstance = load(lView, index);
-    return unwrapValue$1(lView, isPure(lView, index) ?
+    const pipeInstance = load(lView, adjustedIndex);
+    return unwrapValue$1(lView, isPure(lView, adjustedIndex) ?
         pureFunctionVInternal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values));
 }
 function isPure(lView, index) {
-    return lView[TVIEW].data[index + HEADER_OFFSET].pure;
+    return lView[TVIEW].data[index].pure;
 }
 /**
  * Unwrap the output of a pipe transformation.
@@ -25340,7 +25824,7 @@ class TQuery_ {
             // - <needs-target><ng-container><i #target></i></ng-container></needs-target>: here we need
             // to go past `<ng-container>` to determine <i #target> parent node (but we shouldn't traverse
             // up past the query's host node!).
-            while (parent !== null && parent.type === 3 /* ElementContainer */ &&
+            while (parent !== null && (parent.type & 8 /* ElementContainer */) &&
                 parent.index !== declarationNodeIdx) {
                 parent = parent.parent;
             }
@@ -25360,7 +25844,7 @@ class TQuery_ {
         }
         else {
             if (predicate === TemplateRef) {
-                if (tNode.type === 0 /* Container */) {
+                if (tNode.type & 4 /* Container */) {
                     this.matchTNodeWithReadOption(tView, tNode, -1);
                 }
             }
@@ -25374,7 +25858,7 @@ class TQuery_ {
             const read = this.metadata.read;
             if (read !== null) {
                 if (read === ElementRef || read === ViewContainerRef ||
-                    read === TemplateRef && tNode.type === 0 /* Container */) {
+                    read === TemplateRef && (tNode.type & 4 /* Container */)) {
                     this.addMatch(tNode.index, -2);
                 }
                 else {
@@ -25418,10 +25902,10 @@ function getIdxOfMatchingSelector(tNode, selector) {
     return null;
 }
 function createResultByTNodeType(tNode, currentView) {
-    if (tNode.type === 2 /* Element */ || tNode.type === 3 /* ElementContainer */) {
+    if (tNode.type & (3 /* AnyRNode */ | 8 /* ElementContainer */)) {
         return createElementRef(ElementRef, tNode, currentView);
     }
-    else if (tNode.type === 0 /* Container */) {
+    else if (tNode.type & 4 /* Container */) {
         return createTemplateRef(TemplateRef, ElementRef, tNode, currentView);
     }
     return null;
@@ -25448,8 +25932,7 @@ function createSpecialToken(lView, tNode, read) {
         return createTemplateRef(TemplateRef, ElementRef, tNode, lView);
     }
     else if (read === ViewContainerRef) {
-        ngDevMode &&
-            assertNodeOfPossibleTypes(tNode, [2 /* Element */, 0 /* Container */, 3 /* ElementContainer */]);
+        ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */);
         return createContainerRef(ViewContainerRef, ElementRef, tNode, lView);
     }
     else {
@@ -25656,7 +26139,7 @@ function createTQuery(tView, metadata, nodeIndex) {
 }
 function saveContentQueryAndDirectiveIndex(tView, directiveIndex) {
     const tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
-    const lastSavedDirectiveIndex = tView.contentQueries.length ? tViewContentQueries[tViewContentQueries.length - 1] : -1;
+    const lastSavedDirectiveIndex = tViewContentQueries.length ? tViewContentQueries[tViewContentQueries.length - 1] : -1;
     if (directiveIndex !== lastSavedDirectiveIndex) {
         tViewContentQueries.push(tView.queries.length - 1, directiveIndex);
     }
@@ -25690,7 +26173,7 @@ function ɵɵtemplateRefExtractor(tNode, currentView) {
 function ɵɵinjectPipeChangeDetectorRef(flags = InjectFlags.Default) {
     const value = injectChangeDetectorRef(true);
     if (value == null && !(flags & InjectFlags.Optional)) {
-        throw new Error(`No provider for ChangeDetectorRef!`);
+        throwProviderNotFoundError('ChangeDetectorRef');
     }
     else {
         return value;
@@ -28989,7 +29472,7 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
             const lView = context.lView;
             const tData = lView[TVIEW].data;
             const tNode = tData[context.nodeIndex];
-            return tNode.tagName;
+            return tNode.value;
         }
         catch (e) {
             return this.nativeNode.nodeName;
@@ -29206,7 +29689,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
     ngDevMode && assertTNodeForLView(tNode, lView);
     const nativeNode = getNativeByTNodeOrNull(tNode, lView);
     // For each type of TNode, specific logic is executed.
-    if (tNode.type === 2 /* Element */ || tNode.type === 3 /* ElementContainer */) {
+    if (tNode.type & (3 /* AnyRNode */ | 8 /* ElementContainer */)) {
         // Case 1: the TNode is an element
         // The native node has to be checked.
         _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
@@ -29240,7 +29723,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
             _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
-    else if (tNode.type === 0 /* Container */) {
+    else if (tNode.type & 4 /* Container */) {
         // Case 2: the TNode is a container
         // The native node has to be checked.
         const lContainer = lView[tNode.index];
@@ -29248,7 +29731,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // Each view inside the container has to be processed.
         _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode);
     }
-    else if (tNode.type === 1 /* Projection */) {
+    else if (tNode.type & 16 /* Projection */) {
         // Case 3: the TNode is a projection insertion point (i.e. a <ng-content>).
         // The nodes projected at this location all need to be processed.
         const componentView = lView[DECLARATION_COMPONENT_VIEW];
@@ -29797,7 +30280,7 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     const name = binding.name;
     switch (binding.flags & 15 /* Types */) {
         case 1 /* TypeElementAttribute */:
-            setElementAttribute(view, binding, renderNode, binding.ns, name, value);
+            setElementAttribute$1(view, binding, renderNode, binding.ns, name, value);
             break;
         case 2 /* TypeElementClass */:
             setElementClass(view, renderNode, name, value);
@@ -29815,7 +30298,7 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     }
     return true;
 }
-function setElementAttribute(view, binding, renderNode, ns, name, value) {
+function setElementAttribute$1(view, binding, renderNode, ns, name, value) {
     const securityContext = binding.securityContext;
     let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     renderValue = renderValue != null ? renderValue.toString() : null;
@@ -31689,14 +32172,14 @@ class DebugRenderer2 {
         }
         this.delegate.appendChild(parent, newChild);
     }
-    insertBefore(parent, newChild, refChild) {
+    insertBefore(parent, newChild, refChild, isMove) {
         const debugEl = getDebugNode$1(parent);
         const debugChildEl = getDebugNode$1(newChild);
         const debugRefEl = getDebugNode$1(refChild);
         if (debugEl && debugChildEl && debugEl instanceof DebugElement__PRE_R3__) {
             debugEl.insertBefore(debugRefEl, debugChildEl);
         }
-        this.delegate.insertBefore(parent, newChild, refChild);
+        this.delegate.insertBefore(parent, newChild, refChild, isMove);
     }
     removeChild(parent, oldChild) {
         const debugEl = getDebugNode$1(parent);
@@ -31917,5 +32400,5 @@ if (ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode$1 as getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ɵ0, ɵ1, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, ComponentFactory as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory$1 as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, NgModuleRef$1 as ɵRender3NgModuleRef, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, anchorDef as ɵand, isForwardRef as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, instructionState as ɵangular_packages_core_core_ba, getLView as ɵangular_packages_core_core_bb, getBindingRoot as ɵangular_packages_core_core_bc, nextContextImpl as ɵangular_packages_core_core_bd, pureFunction1Internal as ɵangular_packages_core_core_bf, pureFunction2Internal as ɵangular_packages_core_core_bg, pureFunction3Internal as ɵangular_packages_core_core_bh, pureFunction4Internal as ɵangular_packages_core_core_bi, pureFunctionVInternal as ɵangular_packages_core_core_bj, getUrlSanitizer as ɵangular_packages_core_core_bk, makeParamDecorator as ɵangular_packages_core_core_bl, makePropDecorator as ɵangular_packages_core_core_bm, getClosureSafeProperty as ɵangular_packages_core_core_bn, getRootContext as ɵangular_packages_core_core_bp, i18nPostprocess as ɵangular_packages_core_core_bq, trustedHTMLFromString as ɵangular_packages_core_core_br, trustedScriptURLFromString as ɵangular_packages_core_core_bs, trustedScriptFromString as ɵangular_packages_core_core_bt, NullInjector as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, getDebugNodeR2__PRE_R3__ as ɵangular_packages_core_core_m, DefaultIterableDifferFactory as ɵangular_packages_core_core_n, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_o, _iterableDiffersFactory as ɵangular_packages_core_core_p, _keyValueDiffersFactory as ɵangular_packages_core_core_q, _localeFactory as ɵangular_packages_core_core_r, APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_s, zoneSchedulerFactory as ɵangular_packages_core_core_t, USD_CURRENCY_CODE as ɵangular_packages_core_core_u, _def as ɵangular_packages_core_core_v, DebugContext as ɵangular_packages_core_core_w, NgOnChangesFeatureImpl as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_y, injectAttributeImpl as ɵangular_packages_core_core_z, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, createComponentFactory as ɵccf, clearOverrides as ɵclearOverrides, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, createNgModuleFactory as ɵcmf, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, createRendererType2 as ɵcrt, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, directiveDef as ɵdid, elementDef as ɵeld, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, getDebugNodeR2 as ɵgetDebugNodeR2, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, initServicesIfNeeded as ɵinitServicesIfNeeded, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, ivyEnabled as ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, noSideEffects as ɵnoSideEffects, nodeValue as ɵnov, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, pureArrayDef as ɵpad, patchComponentDefWithScope as ɵpatchComponentDefWithScope, pipeDef as ɵpid, pureObjectDef as ɵpod, purePipeDef as ɵppd, providerDef as ɵprd, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, queryDef as ɵqud, registerLocaleData as ɵregisterLocaleData, registerModuleFactory as ɵregisterModuleFactory, registerNgModuleType as ɵregisterNgModuleType, renderComponent$1 as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, textDef as ɵted, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapValue as ɵunv, unwrapSafeValue as ɵunwrapSafeValue, viewDef as ɵvid, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtrustConstantScript, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID$1 as LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef$1 as ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode$1 as getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ɵ0, ɵ1, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, ComponentFactory as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, EMPTY_ARRAY$4 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory$1 as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory$1 as ɵRender3ComponentFactory, ComponentRef$1 as ɵRender3ComponentRef, NgModuleRef$1 as ɵRender3NgModuleRef, SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ as ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, SWITCH_COMPILE_COMPONENT__POST_R3__ as ɵSWITCH_COMPILE_COMPONENT__POST_R3__, SWITCH_COMPILE_DIRECTIVE__POST_R3__ as ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, SWITCH_COMPILE_NGMODULE__POST_R3__ as ɵSWITCH_COMPILE_NGMODULE__POST_R3__, SWITCH_COMPILE_PIPE__POST_R3__ as ɵSWITCH_COMPILE_PIPE__POST_R3__, SWITCH_ELEMENT_REF_FACTORY__POST_R3__ as ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, SWITCH_RENDERER2_FACTORY__POST_R3__ as ɵSWITCH_RENDERER2_FACTORY__POST_R3__, SWITCH_TEMPLATE_REF_FACTORY__POST_R3__ as ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__ as ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, anchorDef as ɵand, isForwardRef as ɵangular_packages_core_core_a, injectInjectorOnly as ɵangular_packages_core_core_b, getLView as ɵangular_packages_core_core_ba, getBindingRoot as ɵangular_packages_core_core_bb, nextContextImpl as ɵangular_packages_core_core_bc, pureFunction1Internal as ɵangular_packages_core_core_be, pureFunction2Internal as ɵangular_packages_core_core_bf, pureFunction3Internal as ɵangular_packages_core_core_bg, pureFunction4Internal as ɵangular_packages_core_core_bh, pureFunctionVInternal as ɵangular_packages_core_core_bi, getUrlSanitizer as ɵangular_packages_core_core_bj, makeParamDecorator as ɵangular_packages_core_core_bk, makePropDecorator as ɵangular_packages_core_core_bl, getClosureSafeProperty as ɵangular_packages_core_core_bm, getRootContext as ɵangular_packages_core_core_bo, i18nPostprocess as ɵangular_packages_core_core_bp, trustedHTMLFromString as ɵangular_packages_core_core_bq, trustedScriptURLFromString as ɵangular_packages_core_core_br, trustedScriptFromString as ɵangular_packages_core_core_bs, NullInjector as ɵangular_packages_core_core_c, ReflectiveInjector_ as ɵangular_packages_core_core_d, ReflectiveDependency as ɵangular_packages_core_core_e, resolveReflectiveProviders as ɵangular_packages_core_core_f, _appIdRandomProviderFactory as ɵangular_packages_core_core_g, createElementRef as ɵangular_packages_core_core_h, createTemplateRef as ɵangular_packages_core_core_i, getModuleFactory__PRE_R3__ as ɵangular_packages_core_core_j, DebugNode__PRE_R3__ as ɵangular_packages_core_core_k, DebugElement__PRE_R3__ as ɵangular_packages_core_core_l, getDebugNodeR2__PRE_R3__ as ɵangular_packages_core_core_m, DefaultIterableDifferFactory as ɵangular_packages_core_core_n, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_o, _iterableDiffersFactory as ɵangular_packages_core_core_p, _keyValueDiffersFactory as ɵangular_packages_core_core_q, _localeFactory as ɵangular_packages_core_core_r, APPLICATION_MODULE_PROVIDERS as ɵangular_packages_core_core_s, zoneSchedulerFactory as ɵangular_packages_core_core_t, USD_CURRENCY_CODE as ɵangular_packages_core_core_u, _def as ɵangular_packages_core_core_v, DebugContext as ɵangular_packages_core_core_w, NgOnChangesFeatureImpl as ɵangular_packages_core_core_x, SCHEDULER as ɵangular_packages_core_core_y, injectAttributeImpl as ɵangular_packages_core_core_z, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, createComponentFactory as ɵccf, clearOverrides as ɵclearOverrides, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, createNgModuleFactory as ɵcmf, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory__POST_R3__ as ɵcompileNgModuleFactory__POST_R3__, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, createRendererType2 as ɵcrt, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, directiveDef as ɵdid, elementDef as ɵeld, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, getDebugNodeR2 as ɵgetDebugNodeR2, getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getModuleFactory__POST_R3__ as ɵgetModuleFactory__POST_R3__, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, initServicesIfNeeded as ɵinitServicesIfNeeded, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, isBoundToModule__POST_R3__ as ɵisBoundToModule__POST_R3__, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, ivyEnabled as ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, noSideEffects as ɵnoSideEffects, nodeValue as ɵnov, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, pureArrayDef as ɵpad, patchComponentDefWithScope as ɵpatchComponentDefWithScope, pipeDef as ɵpid, pureObjectDef as ɵpod, purePipeDef as ɵppd, providerDef as ɵprd, publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, queryDef as ɵqud, registerLocaleData as ɵregisterLocaleData, registerModuleFactory as ɵregisterModuleFactory, registerNgModuleType as ɵregisterNgModuleType, renderComponent$1 as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, textDef as ɵted, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapValue as ɵunv, unwrapSafeValue as ɵunwrapSafeValue, viewDef as ɵvid, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtrustConstantScript, ɵɵviewQuery };
 //# sourceMappingURL=core.js.map
