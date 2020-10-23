@@ -9,7 +9,7 @@ import { InjectorType } from '../di/interface/defs';
 import { TNode } from './interfaces/node';
 import { LView } from './interfaces/view';
 /** Called when directives inject each other (creating a circular dependency) */
-export declare function throwCyclicDependencyError(token: any): never;
+export declare function throwCyclicDependencyError(token: string, path?: string[]): never;
 /** Called when there are multiple component selectors that match a given node */
 export declare function throwMultipleComponentError(tNode: TNode): never;
 export declare function throwMixedMultiProviderError(): void;
@@ -29,3 +29,5 @@ export declare function getExpressionChangedErrorDetails(lView: LView, bindingIn
     oldValue: any;
     newValue: any;
 };
+/** Throws an error when a token is not found in DI. */
+export declare function throwProviderNotFoundError(token: any, injectorName?: string): never;

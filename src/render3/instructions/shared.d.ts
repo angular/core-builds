@@ -16,12 +16,15 @@ import { RComment, RElement, Renderer3, RendererFactory3 } from '../interfaces/r
 import { SanitizerFn } from '../interfaces/sanitization';
 import { LView, LViewFlags, RootContext, RootContextFlags, TData, TView, TViewType } from '../interfaces/view';
 /**
- * Process the `TView.expandoInstructions`. (Execute the `hostBindings`.)
+ * Invoke `HostBindingsFunction`s for view.
  *
- * @param tView `TView` containing the `expandoInstructions`
- * @param lView `LView` associated with the `TView`
+ * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
+ * `HostBindingsFunction`s associated with the current `LView`.
+ *
+ * @param tView Current `TView`.
+ * @param lView Current `LView`.
  */
-export declare function setHostBindingsByExecutingExpandoInstructions(tView: TView, lView: LView): void;
+export declare function processHostBindingOpCodes(tView: TView, lView: LView): void;
 export declare function createLView<T>(parentLView: LView | null, tView: TView, context: T | null, flags: LViewFlags, host: RElement | null, tHostNode: TNode | null, rendererFactory: RendererFactory3 | null, renderer: Renderer3 | null, sanitizer: Sanitizer | null, injector: Injector | null): LView;
 /**
  * Create and stores the TNode, and hooks it up to the tree.
@@ -48,8 +51,9 @@ export declare function createTNodeAtIndex(tView: TView, index: number, type: TN
  * @param tView `TView` associated with `LView`
  * @param lView The `LView` containing the blueprint to adjust
  * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
+ * @param initialValue Initial value to store in blueprint
  */
-export declare function allocExpando(tView: TView, lView: LView, numSlotsToAlloc: number): number;
+export declare function allocExpando(tView: TView, lView: LView, numSlotsToAlloc: number, initialValue: any): number;
 /**
  * Processes a view in the creation mode. This includes a number of steps in a specific order:
  * - creating view query functions (if any);
@@ -146,24 +150,16 @@ export declare function instantiateRootComponent<T>(tView: TView, lView: LView, 
  */
 export declare function resolveDirectives(tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, localRefs: string[] | null): boolean;
 /**
- * Add `hostBindings` to the `TView.expandoInstructions`.
+ * Add `hostBindings` to the `TView.hostBindingOpCodes`.
  *
  * @param tView `TView` to which the `hostBindings` should be added.
+ * @param tNode `TNode` the element which contains the directive
+ * @param lView `LView` current `LView`
+ * @param directiveIdx Directive index in view.
+ * @param directiveVarsIdx Where will the directive's vars be stored
  * @param def `ComponentDef`/`DirectiveDef`, which contains the `hostVars`/`hostBindings` to add.
  */
-export declare function addHostBindingsToExpandoInstructions(tView: TView, def: ComponentDef<any> | DirectiveDef<any>): void;
-/**
- * Grow the `LView`, blueprint and `TView.data` to accommodate the `hostBindings`.
- *
- * To support locality we don't know ahead of time how many `hostVars` of the containing directives
- * we need to allocate. For this reason we allow growing these data structures as we discover more
- * directives to accommodate them.
- *
- * @param tView `TView` which needs to be grown.
- * @param lView `LView` which needs to be grown.
- * @param count Size by which we need to grow the data structures.
- */
-export declare function growHostVarsSpace(tView: TView, lView: LView, count: number): void;
+export declare function registerHostBindingOpCodes(tView: TView, tNode: TNode, lView: LView, directiveIdx: number, directiveVarsIdx: number, def: ComponentDef<any> | DirectiveDef<any>): void;
 /**
  * Invoke the host bindings in creation mode.
  *
@@ -171,13 +167,6 @@ export declare function growHostVarsSpace(tView: TView, lView: LView, count: num
  * @param directive Instance of directive.
  */
 export declare function invokeHostBindingsInCreationMode(def: DirectiveDef<any>, directive: any): void;
-/**
- * Generates a new block in TView.expandoInstructions for this node.
- *
- * Each expando block starts with the element index (turned negative so we can distinguish
- * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
- */
-export declare function generateExpandoInstructionBlock(tView: TView, tNode: TNode, directiveCount: number): void;
 /**
  * Marks a given TNode as a component's host. This consists of:
  * - setting appropriate TNode flags;

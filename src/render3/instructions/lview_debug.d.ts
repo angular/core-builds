@@ -15,7 +15,7 @@ import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
 import { RComment, RElement, Renderer3, RendererFactory3, RNode } from '../interfaces/renderer';
 import { TStylingKey, TStylingRange } from '../interfaces/styling';
-import { DebugNode, DestroyHookData, ExpandoInstructions, HookData, LContainerDebug as ILContainerDebug, LView, LViewDebug as ILViewDebug, LViewDebugRange, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
+import { DebugNode, DestroyHookData, HookData, HostBindingOpCodes, LContainerDebug as ILContainerDebug, LView, LViewDebug as ILViewDebug, LViewDebugRange, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
 /**
  * This function clones a blueprint and creates LView.
  *
@@ -28,7 +28,7 @@ export declare function cloneToLViewFromTViewBlueprint(tView: TView): LView;
  * debug tools in ngDevMode.
  */
 export declare const TViewConstructor: {
-    new (type: TViewType, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, declTNode: ITNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, expandoInstructions: ExpandoInstructions | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: DestroyHookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null, incompleteFirstPass: boolean, _decls: number, _vars: number): {
+    new (type: TViewType, blueprint: LView, template: ComponentTemplate<{}> | null, queries: TQueries | null, viewQuery: ViewQueriesFunction<{}> | null, declTNode: ITNode | null, data: TData, bindingStartIndex: number, expandoStartIndex: number, hostBindingOpCodes: HostBindingOpCodes | null, firstCreatePass: boolean, firstUpdatePass: boolean, staticViewQueries: boolean, staticContentQueries: boolean, preOrderHooks: HookData | null, preOrderCheckHooks: HookData | null, contentHooks: HookData | null, contentCheckHooks: HookData | null, viewHooks: HookData | null, viewCheckHooks: HookData | null, destroyHooks: DestroyHookData | null, cleanup: any[] | null, contentQueries: number[] | null, components: number[] | null, directiveRegistry: DirectiveDefList | null, pipeRegistry: PipeDefList | null, firstChild: ITNode | null, schemas: SchemaMetadata[] | null, consts: TConstants | null, incompleteFirstPass: boolean, _decls: number, _vars: number): {
         type: TViewType;
         blueprint: LView;
         template: ComponentTemplate<{}> | null;
@@ -38,7 +38,7 @@ export declare const TViewConstructor: {
         data: TData;
         bindingStartIndex: number;
         expandoStartIndex: number;
-        expandoInstructions: ExpandoInstructions | null;
+        hostBindingOpCodes: HostBindingOpCodes | null;
         firstCreatePass: boolean;
         firstUpdatePass: boolean;
         staticViewQueries: boolean;

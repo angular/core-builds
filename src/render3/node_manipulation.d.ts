@@ -148,6 +148,19 @@ export declare function nativeParentNode(renderer: Renderer3, node: RNode): REle
  */
 export declare function nativeNextSibling(renderer: Renderer3, node: RNode): RNode | null;
 /**
+ * Find a node in front of which `currentTNode` should be inserted. (Does not take i18n into
+ * account)
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * does not take `TNode.insertBeforeIndex` into account.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
+ */
+export declare function getInsertInFrontOfRNodeWithNoI18n(parentTNode: TNode, currentTNode: TNode, lView: LView): RNode | null;
+export declare function setI18nHandling(getInsertInFrontOfRNodeWithI18n: (parentTNode: TNode, currentTNode: TNode, lView: LView) => RNode | null, processI18nInsertBefore: (renderer: Renderer3, childTNode: TNode, lView: LView, childRNode: RNode | RNode[], parentRElement: RElement | null) => void): void;
+/**
  * Appends the `child` native node (or a collection of nodes) to the `parent`.
  *
  * @param tView The `TView' to be appended
