@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+81.sha-08f3d62
+ * @license Angular v11.0.0-next.6+95.sha-b989ba2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2101,6 +2101,182 @@ function assertNodeInjector(lView, injectorIndex) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Used for stringify render output in Ivy.
+ * Important! This function is very performance-sensitive and we should
+ * be extra careful not to introduce megamorphic reads in it.
+ */
+function renderStringify(value) {
+    if (typeof value === 'string')
+        return value;
+    if (value == null)
+        return '';
+    return '' + value;
+}
+/**
+ * Used to stringify a value so that it can be displayed in an error message.
+ * Important! This function contains a megamorphic read and should only be
+ * used for error messages.
+ */
+function stringifyForError(value) {
+    if (typeof value === 'function')
+        return value.name || value.toString();
+    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+        return value.type.name || value.type.toString();
+    }
+    return renderStringify(value);
+}
+const ɵ0$2 = () => (typeof requestAnimationFrame !== 'undefined' &&
+    requestAnimationFrame || // browser only
+    setTimeout // everything else
+)
+    .bind(_global);
+const defaultScheduler = (ɵ0$2)();
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveWindow(element) {
+    return { name: 'window', target: element.ownerDocument.defaultView };
+}
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveDocument(element) {
+    return { name: 'document', target: element.ownerDocument };
+}
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveBody(element) {
+    return { name: 'body', target: element.ownerDocument.body };
+}
+/**
+ * The special delimiter we use to separate property names, prefixes, and suffixes
+ * in property binding metadata. See storeBindingMetadata().
+ *
+ * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+ * because it is a very uncommon character that is unlikely to be part of a user's
+ * property names or interpolation strings. If it is in fact used in a property
+ * binding, DebugElement.properties will not return the correct value for that
+ * binding. However, there should be no runtime effect for real applications.
+ *
+ * This character is typically rendered as a question mark inside of a diamond.
+ * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+ *
+ */
+const INTERPOLATION_DELIMITER = `�`;
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ */
+function maybeUnwrapFn(value) {
+    if (value instanceof Function) {
+        return value();
+    }
+    else {
+        return value;
+    }
+}
+
+/** Called when directives inject each other (creating a circular dependency) */
+function throwCyclicDependencyError(token, path) {
+    const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
+    throw new Error(`Circular dependency in DI detected for ${token}${depPath}`);
+}
+/** Called when there are multiple component selectors that match a given node */
+function throwMultipleComponentError(tNode) {
+    throw new Error(`Multiple components match node with tagname ${tNode.value}`);
+}
+function throwMixedMultiProviderError() {
+    throw new Error(`Cannot mix multi providers and regular providers`);
+}
+function throwInvalidProviderError(ngModuleType, providers, provider) {
+    let ngModuleDetail = '';
+    if (ngModuleType && providers) {
+        const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
+        ngModuleDetail =
+            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
+    }
+    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+}
+/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
+function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
+    const field = propName ? ` for '${propName}'` : '';
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.`;
+    if (creationMode) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook?`;
+    }
+    // TODO: include debug context, see `viewDebugError` function in
+    // `packages/core/src/view/errors.ts` for reference.
+    throw new Error(msg);
+}
+function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
+    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
+    let oldValue = prefix, newValue = prefix;
+    for (let i = 0; i < chunks.length; i++) {
+        const slotIdx = rootIndex + i;
+        oldValue += `${lView[slotIdx]}${chunks[i]}`;
+        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
+    }
+    return { propName, oldValue, newValue };
+}
+/**
+ * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
+ * - property name (for property bindings or interpolations)
+ * - old and new values, enriched using information from metadata
+ *
+ * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
+ * function description.
+ */
+function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
+    const tData = lView[TVIEW].data;
+    const metadata = tData[bindingIndex];
+    if (typeof metadata === 'string') {
+        // metadata for property interpolation
+        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
+            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
+        }
+        // metadata for property binding
+        return { propName: metadata, oldValue, newValue };
+    }
+    // metadata is not available for this expression, check if this expression is a part of the
+    // property interpolation by going from the current binding index left and look for a string that
+    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
+    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
+    if (metadata === null) {
+        let idx = bindingIndex - 1;
+        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
+            idx--;
+        }
+        const meta = tData[idx];
+        if (typeof meta === 'string') {
+            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
+            // first interpolation delimiter separates property name from interpolation parts (in case of
+            // property interpolations), so we subtract one from total number of found delimiters
+            if (matches && (matches.length - 1) > bindingIndex - idx) {
+                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
+            }
+        }
+    }
+    return { propName: undefined, oldValue, newValue };
+}
+/** Throws an error when a token is not found in DI. */
+function throwProviderNotFoundError(token, injectorName) {
+    const injectorDetails = injectorName ? ` in ${injectorName}` : '';
+    throw new Error(`No provider for ${stringifyForError(token)} found${injectorDetails}`);
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Represents a basic change from a previous to a new value for a single
  * property on a directive instance. Passed as a value in a
  * {@link SimpleChanges} object to the `ngOnChanges` hook.
@@ -2307,11 +2483,11 @@ var RendererStyleFlags3;
 function isProceduralRenderer(renderer) {
     return !!(renderer.listen);
 }
-const ɵ0$2 = (hostElement, rendererType) => {
+const ɵ0$3 = (hostElement, rendererType) => {
     return getDocument();
 };
 const domRendererFactory3 = {
-    createRenderer: ɵ0$2
+    createRenderer: ɵ0$3
 };
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -2990,6 +3166,7 @@ function registerPostOrderHooks(tView, tNode) {
     // hooks for projected components and directives must be called *before* their hosts.
     for (let i = tNode.directiveStart, end = tNode.directiveEnd; i < end; i++) {
         const directiveDef = tView.data[i];
+        ngDevMode && assertDefined(directiveDef, 'Expecting DirectiveDef');
         const lifecycleHooks = directiveDef.type.prototype;
         const { ngAfterContentInit, ngAfterContentChecked, ngAfterViewInit, ngAfterViewChecked, ngOnDestroy } = lifecycleHooks;
         if (ngAfterContentInit) {
@@ -3633,92 +3810,6 @@ function getParentInjectorView(location, startView) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Used for stringify render output in Ivy.
- * Important! This function is very performance-sensitive and we should
- * be extra careful not to introduce megamorphic reads in it.
- */
-function renderStringify(value) {
-    if (typeof value === 'string')
-        return value;
-    if (value == null)
-        return '';
-    return '' + value;
-}
-/**
- * Used to stringify a value so that it can be displayed in an error message.
- * Important! This function contains a megamorphic read and should only be
- * used for error messages.
- */
-function stringifyForError(value) {
-    if (typeof value === 'function')
-        return value.name || value.toString();
-    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-        return value.type.name || value.type.toString();
-    }
-    return renderStringify(value);
-}
-const ɵ0$3 = () => (typeof requestAnimationFrame !== 'undefined' &&
-    requestAnimationFrame || // browser only
-    setTimeout // everything else
-)
-    .bind(_global);
-const defaultScheduler = (ɵ0$3)();
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveWindow(element) {
-    return { name: 'window', target: element.ownerDocument.defaultView };
-}
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveDocument(element) {
-    return { name: 'document', target: element.ownerDocument };
-}
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveBody(element) {
-    return { name: 'body', target: element.ownerDocument.body };
-}
-/**
- * The special delimiter we use to separate property names, prefixes, and suffixes
- * in property binding metadata. See storeBindingMetadata().
- *
- * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
- * because it is a very uncommon character that is unlikely to be part of a user's
- * property names or interpolation strings. If it is in fact used in a property
- * binding, DebugElement.properties will not return the correct value for that
- * binding. However, there should be no runtime effect for real applications.
- *
- * This character is typically rendered as a question mark inside of a diamond.
- * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
- *
- */
-const INTERPOLATION_DELIMITER = `�`;
-/**
- * Unwrap a value which might be behind a closure (for forward declaration reasons).
- */
-function maybeUnwrapFn(value) {
-    if (value instanceof Function) {
-        return value();
-    }
-    else {
-        return value;
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Defines if the call to `inject` should include `viewProviders` in its resolution.
  *
  * This is set to true when we try to instantiate a component. This value is reset in
@@ -4034,7 +4125,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
             try {
                 const value = bloomHash();
                 if (value == null && !(flags & InjectFlags.Optional)) {
-                    throw new Error(`No provider for ${stringifyForError(token)}!`);
+                    throwProviderNotFoundError(token);
                 }
                 else {
                     return value;
@@ -4133,7 +4224,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
         return notFoundValue;
     }
     else {
-        throw new Error(`NodeInjector: NOT_FOUND [${stringifyForError(token)}]`);
+        throwProviderNotFoundError(token, 'NodeInjector');
     }
 }
 const NOT_FOUND = {};
@@ -4217,7 +4308,7 @@ function getNodeInjectable(lView, tView, index, tNode) {
     if (isFactory(value)) {
         const factory = value;
         if (factory.resolving) {
-            throw new Error(`Circular dep for ${stringifyForError(tData[index])}`);
+            throwCyclicDependencyError(stringifyForError(tData[index]));
         }
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
         factory.resolving = true;
@@ -5866,90 +5957,6 @@ function discoverLocalRefs(lView, nodeIndex) {
     return null;
 }
 
-/** Called when directives inject each other (creating a circular dependency) */
-function throwCyclicDependencyError(token) {
-    throw new Error(`Cannot instantiate cyclic dependency! ${token}`);
-}
-/** Called when there are multiple component selectors that match a given node */
-function throwMultipleComponentError(tNode) {
-    throw new Error(`Multiple components match node with tagname ${tNode.value}`);
-}
-function throwMixedMultiProviderError() {
-    throw new Error(`Cannot mix multi providers and regular providers`);
-}
-function throwInvalidProviderError(ngModuleType, providers, provider) {
-    let ngModuleDetail = '';
-    if (ngModuleType && providers) {
-        const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
-        ngModuleDetail =
-            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
-    }
-    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
-}
-/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
-    const field = propName ? ` for '${propName}'` : '';
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.`;
-    if (creationMode) {
-        msg +=
-            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                ` Has it been created in a change detection hook?`;
-    }
-    // TODO: include debug context, see `viewDebugError` function in
-    // `packages/core/src/view/errors.ts` for reference.
-    throw new Error(msg);
-}
-function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
-    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
-    let oldValue = prefix, newValue = prefix;
-    for (let i = 0; i < chunks.length; i++) {
-        const slotIdx = rootIndex + i;
-        oldValue += `${lView[slotIdx]}${chunks[i]}`;
-        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
-    }
-    return { propName, oldValue, newValue };
-}
-/**
- * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
- * - property name (for property bindings or interpolations)
- * - old and new values, enriched using information from metadata
- *
- * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
- * function description.
- */
-function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
-    const tData = lView[TVIEW].data;
-    const metadata = tData[bindingIndex];
-    if (typeof metadata === 'string') {
-        // metadata for property interpolation
-        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
-            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
-        }
-        // metadata for property binding
-        return { propName: metadata, oldValue, newValue };
-    }
-    // metadata is not available for this expression, check if this expression is a part of the
-    // property interpolation by going from the current binding index left and look for a string that
-    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
-    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
-    if (metadata === null) {
-        let idx = bindingIndex - 1;
-        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
-            idx--;
-        }
-        const meta = tData[idx];
-        if (typeof meta === 'string') {
-            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
-            // first interpolation delimiter separates property name from interpolation parts (in case of
-            // property interpolations), so we subtract one from total number of found delimiters
-            if (matches && (matches.length - 1) > bindingIndex - idx) {
-                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
-            }
-        }
-    }
-    return { propName: undefined, oldValue, newValue };
-}
-
 /**
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -6607,25 +6614,47 @@ function nativeNextSibling(renderer, node) {
  * Find a node in front of which `currentTNode` should be inserted.
  *
  * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
- * takes `TNode.insertBeforeIndex` into account.
+ * takes `TNode.insertBeforeIndex` into account if i18n code has been invoked.
  *
  * @param parentTNode parent `TNode`
  * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
  * @param lView current `LView`
  */
 function getInsertInFrontOfRNode(parentTNode, currentTNode, lView) {
-    const tNodeInsertBeforeIndex = currentTNode.insertBeforeIndex;
-    const insertBeforeIndex = Array.isArray(tNodeInsertBeforeIndex) ? tNodeInsertBeforeIndex[0] : tNodeInsertBeforeIndex;
-    if (insertBeforeIndex === null) {
-        if (parentTNode.type & (8 /* ElementContainer */ | 32 /* Icu */)) {
-            return getNativeByTNode(parentTNode, lView);
-        }
-    }
-    else {
-        ngDevMode && assertIndexInRange(lView, insertBeforeIndex);
-        return unwrapRNode(lView[insertBeforeIndex]);
+    return _getInsertInFrontOfRNodeWithI18n(parentTNode, currentTNode, lView);
+}
+/**
+ * Find a node in front of which `currentTNode` should be inserted. (Does not take i18n into
+ * account)
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * does not take `TNode.insertBeforeIndex` into account.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
+ */
+function getInsertInFrontOfRNodeWithNoI18n(parentTNode, currentTNode, lView) {
+    if (parentTNode.type & (8 /* ElementContainer */ | 32 /* Icu */)) {
+        return getNativeByTNode(parentTNode, lView);
     }
     return null;
+}
+/**
+ * Tree shakable boundary for `getInsertInFrontOfRNodeWithI18n` function.
+ *
+ * This function will only be set if i18n code runs.
+ */
+let _getInsertInFrontOfRNodeWithI18n = getInsertInFrontOfRNodeWithNoI18n;
+/**
+ * Tree shakable boundary for `processI18nInsertBefore` function.
+ *
+ * This function will only be set if i18n code runs.
+ */
+let _processI18nInsertBefore;
+function setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore) {
+    _getInsertInFrontOfRNodeWithI18n = getInsertInFrontOfRNodeWithI18n;
+    _processI18nInsertBefore = processI18nInsertBefore;
 }
 /**
  * Appends the `child` native node (or a collection of nodes) to the `parent`.
@@ -6650,47 +6679,8 @@ function appendChild(tView, lView, childRNode, childTNode) {
             nativeAppendOrInsertBefore(renderer, parentRNode, childRNode, anchorNode, false);
         }
     }
-    const tNodeInsertBeforeIndex = childTNode.insertBeforeIndex;
-    if (Array.isArray(tNodeInsertBeforeIndex) &&
-        (childTNode.flags & 2 /* isComponentHost */) === 0) {
-        // An array indicates that there are i18n nodes that need to be added as children of this
-        // `rChildNode`. These i18n nodes were created before this `rChildNode` was available and so
-        // only now can be added. The first element of the array is the normal index where we should
-        // insert the `rChildNode`. Additional elements are the extra nodes to be added as children of
-        // `rChildNode`.
-        processI18nText(renderer, childTNode, lView, childRNode, parentRNode, tNodeInsertBeforeIndex);
-    }
-}
-/**
- * Process `TNode.insertBeforeIndex` by adding i18n text nodes.
- *
- * See `TNode.insertBeforeIndex`
- *
- * @param renderer
- * @param childTNode
- * @param lView
- * @param childRNode
- * @param parentRElement
- * @param i18nChildren
- */
-function processI18nText(renderer, childTNode, lView, childRNode, parentRElement, i18nChildren) {
-    ngDevMode && assertDomNode(childRNode);
-    const isProcedural = isProceduralRenderer(renderer);
-    let i18nParent = childRNode;
-    let anchorRNode = null;
-    if (!(childTNode.type & 3 /* AnyRNode */)) {
-        anchorRNode = i18nParent;
-        i18nParent = parentRElement;
-    }
-    const isViewRoot = childTNode.parent === null;
-    if (i18nParent !== null) {
-        for (let i = 1; i < i18nChildren.length; i++) {
-            // No need to `unwrapRNode` because all of the indexes point to i18n text nodes.
-            // see `assertDomNode` below.
-            const i18nChild = lView[i18nChildren[i]];
-            nativeInsertBefore(renderer, i18nParent, i18nChild, anchorRNode, false);
-        }
-    }
+    _processI18nInsertBefore !== undefined &&
+        _processI18nInsertBefore(renderer, childTNode, lView, childRNode, parentRNode);
 }
 /**
  * Returns the first native node for a given LView, starting from the provided TNode.
@@ -7713,38 +7703,7 @@ function nameSuffix(text) {
  * debug tools in ngDevMode.
  */
 const TViewConstructor = class TView {
-    constructor(type, //
-    blueprint, //
-    template, //
-    queries, //
-    viewQuery, //
-    declTNode, //
-    data, //
-    bindingStartIndex, //
-    expandoStartIndex, //
-    expandoInstructions, //
-    firstCreatePass, //
-    firstUpdatePass, //
-    staticViewQueries, //
-    staticContentQueries, //
-    preOrderHooks, //
-    preOrderCheckHooks, //
-    contentHooks, //
-    contentCheckHooks, //
-    viewHooks, //
-    viewCheckHooks, //
-    destroyHooks, //
-    cleanup, //
-    contentQueries, //
-    components, //
-    directiveRegistry, //
-    pipeRegistry, //
-    firstChild, //
-    schemas, //
-    consts, //
-    incompleteFirstPass, //
-    _decls, //
-    _vars) {
+    constructor(type, blueprint, template, queries, viewQuery, declTNode, data, bindingStartIndex, expandoStartIndex, hostBindingOpCodes, firstCreatePass, firstUpdatePass, staticViewQueries, staticContentQueries, preOrderHooks, preOrderCheckHooks, contentHooks, contentCheckHooks, viewHooks, viewCheckHooks, destroyHooks, cleanup, contentQueries, components, directiveRegistry, pipeRegistry, firstChild, schemas, consts, incompleteFirstPass, _decls, _vars) {
         this.type = type;
         this.blueprint = blueprint;
         this.template = template;
@@ -7754,7 +7713,7 @@ const TViewConstructor = class TView {
         this.data = data;
         this.bindingStartIndex = bindingStartIndex;
         this.expandoStartIndex = expandoStartIndex;
-        this.expandoInstructions = expandoInstructions;
+        this.hostBindingOpCodes = hostBindingOpCodes;
         this.firstCreatePass = firstCreatePass;
         this.firstUpdatePass = firstUpdatePass;
         this.staticViewQueries = staticViewQueries;
@@ -8300,63 +8259,33 @@ const ɵ0$4 = () => Promise.resolve(null);
  */
 const _CLEAN_PROMISE = (ɵ0$4)();
 /**
- * Process the `TView.expandoInstructions`. (Execute the `hostBindings`.)
+ * Invoke `HostBindingsFunction`s for view.
  *
- * @param tView `TView` containing the `expandoInstructions`
- * @param lView `LView` associated with the `TView`
+ * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
+ * `HostBindingsFunction`s associated with the current `LView`.
+ *
+ * @param tView Current `TView`.
+ * @param lView Current `LView`.
  */
-function setHostBindingsByExecutingExpandoInstructions(tView, lView) {
-    ngDevMode && assertSame(tView, lView[TVIEW], '`LView` is not associated with the `TView`!');
+function processHostBindingOpCodes(tView, lView) {
+    const hostBindingOpCodes = tView.hostBindingOpCodes;
+    if (hostBindingOpCodes === null)
+        return;
     try {
-        const expandoInstructions = tView.expandoInstructions;
-        if (expandoInstructions !== null) {
-            let bindingRootIndex = tView.expandoStartIndex;
-            let currentDirectiveIndex = -1;
-            let currentElementIndex = -1;
-            // TODO(misko): PERF It is possible to get here with `TView.expandoInstructions` containing no
-            // functions to execute. This is wasteful as there is no work to be done, but we still need
-            // to iterate over the instructions.
-            // In example of this is in this test: `host_binding_spec.ts`
-            // `fit('should not cause problems if detectChanges is called when a property updates', ...`
-            // In the above test we get here with expando [0, 0, 1] which requires a lot of processing but
-            // there is no function to execute.
-            for (let i = 0; i < expandoInstructions.length; i++) {
-                const instruction = expandoInstructions[i];
-                if (typeof instruction === 'number') {
-                    if (instruction <= 0) {
-                        // Negative numbers mean that we are starting new EXPANDO block and need to update
-                        // the current element and directive index.
-                        currentElementIndex = ~instruction;
-                        setSelectedIndex(currentElementIndex);
-                        // Injector block and providers are taken into account.
-                        const providerCount = expandoInstructions[++i];
-                        bindingRootIndex += 9 /* SIZE */ + providerCount;
-                        currentDirectiveIndex = bindingRootIndex;
-                    }
-                    else {
-                        // This is either the injector size (so the binding root can skip over directives
-                        // and get to the first set of host bindings on this node) or the host var count
-                        // (to get to the next set of host bindings on this node).
-                        bindingRootIndex += instruction;
-                    }
-                }
-                else {
-                    // If it's not a number, it's a host binding function that needs to be executed.
-                    if (instruction !== null) {
-                        ngDevMode &&
-                            assertLessThan(currentDirectiveIndex, 1048576 /* CptViewProvidersCountShifter */, 'Reached the max number of host bindings');
-                        setBindingRootForHostBindings(bindingRootIndex, currentDirectiveIndex);
-                        const hostCtx = lView[currentDirectiveIndex];
-                        instruction(2 /* Update */, hostCtx);
-                    }
-                    // TODO(misko): PERF Relying on incrementing the `currentDirectiveIndex` here is
-                    // sub-optimal. The implications are that if we have a lot of directives but none of them
-                    // have host bindings we nevertheless need to iterate over the expando instructions to
-                    // update the counter. It would be much better if we could encode the
-                    // `currentDirectiveIndex` into the `expandoInstruction` array so that we only need to
-                    // iterate over those directives which actually have `hostBindings`.
-                    currentDirectiveIndex++;
-                }
+        for (let i = 0; i < hostBindingOpCodes.length; i++) {
+            const opCode = hostBindingOpCodes[i];
+            if (opCode < 0) {
+                // Negative numbers are element indexes.
+                setSelectedIndex(~opCode);
+            }
+            else {
+                // Positive numbers are NumberTuple which store bindingRootIndex and directiveIndex.
+                const directiveIdx = opCode;
+                const bindingRootIndx = hostBindingOpCodes[++i];
+                const hostBindingFn = hostBindingOpCodes[++i];
+                setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
+                const context = lView[directiveIdx];
+                hostBindingFn(2 /* Update */, context);
             }
         }
     }
@@ -8373,6 +8302,7 @@ function refreshContentQueries(tView, lView) {
             const directiveDefIdx = contentQueries[i + 1];
             if (directiveDefIdx !== -1) {
                 const directiveDef = tView.data[directiveDefIdx];
+                ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
                 ngDevMode &&
                     assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
                 setCurrentQueryIndex(queryStartIdx);
@@ -8483,31 +8413,23 @@ function createTNodeAtIndex(tView, index, type, name, attrs) {
  * @param tView `TView` associated with `LView`
  * @param lView The `LView` containing the blueprint to adjust
  * @param numSlotsToAlloc The number of slots to alloc in the LView, should be >0
+ * @param initialValue Initial value to store in blueprint
  */
-function allocExpando(tView, lView, numSlotsToAlloc) {
+function allocExpando(tView, lView, numSlotsToAlloc, initialValue) {
+    if (numSlotsToAlloc === 0)
+        return -1;
     if (ngDevMode) {
-        assertGreaterThan(numSlotsToAlloc, 0, 'The number of slots to alloc should be greater than 0');
+        assertFirstCreatePass(tView);
+        assertSame(tView, lView[TVIEW], '`LView` must be associated with `TView`!');
         assertEqual(tView.data.length, lView.length, 'Expecting LView to be same size as TView');
         assertEqual(tView.data.length, tView.blueprint.length, 'Expecting Blueprint to be same size as TView');
         assertFirstUpdatePass(tView);
     }
     const allocIdx = lView.length;
     for (let i = 0; i < numSlotsToAlloc; i++) {
-        tView.blueprint.push(null);
+        lView.push(initialValue);
+        tView.blueprint.push(initialValue);
         tView.data.push(null);
-        lView.push(null);
-    }
-    // We should only increment the expando start index if there aren't already directives
-    // and injectors saved in the "expando" section
-    if (!tView.expandoInstructions) {
-        tView.expandoStartIndex += numSlotsToAlloc;
-    }
-    else {
-        // Since we're adding the dynamic nodes into the expando section, we need to let the host
-        // bindings know that they should skip x slots
-        // FIXME(misko): Refactor `expandoInstructions` so that it does not rely on relative binding
-        // offsets, but absolute values which Means we would not have to store it here.
-        tView.expandoInstructions.push(numSlotsToAlloc);
     }
     return allocIdx;
 }
@@ -8641,7 +8563,7 @@ function refreshView(tView, lView, templateFn, context) {
                 incrementInitPhaseFlags(lView, 1 /* AfterContentInitHooksToBeRun */);
             }
         }
-        setHostBindingsByExecutingExpandoInstructions(tView, lView);
+        processHostBindingOpCodes(tView, lView);
         // Refresh child component views.
         const components = tView.components;
         if (components !== null) {
@@ -8817,7 +8739,8 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
     const consts = typeof constsOrFactory === 'function' ? constsOrFactory() : constsOrFactory;
     const tView = blueprint[TVIEW] = ngDevMode ?
-        new TViewConstructor(type, blueprint, // blueprint: LView,
+        new TViewConstructor(type, // type: TViewType,
+        blueprint, // blueprint: LView,
         templateFn, // template: ComponentTemplate<{}>|null,
         null, // queries: TQueries|null
         viewQuery, // viewQuery: ViewQueriesFunction<{}>|null,
@@ -8825,7 +8748,7 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
         cloneToTViewData(blueprint).fill(null, bindingStartIndex), // data: TData,
         bindingStartIndex, // bindingStartIndex: number,
         initialViewLength, // expandoStartIndex: number,
-        null, // expandoInstructions: ExpandoInstructions|null,
+        null, // hostBindingOpCodes: HostBindingOpCodes,
         true, // firstCreatePass: boolean,
         true, // firstUpdatePass: boolean,
         false, // staticViewQueries: boolean,
@@ -8840,8 +8763,8 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
         null, // cleanup: any[]|null,
         null, // contentQueries: number[]|null,
         null, // components: number[]|null,
-        typeof directives === 'function' ?
-            directives() :
+        typeof directives === 'function' ? //
+            directives() : //
             directives, // directiveRegistry: DirectiveDefList|null,
         typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
         null, // firstChild: TNode|null,
@@ -8860,7 +8783,7 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
             data: blueprint.slice().fill(null, bindingStartIndex),
             bindingStartIndex: bindingStartIndex,
             expandoStartIndex: initialViewLength,
-            expandoInstructions: null,
+            hostBindingOpCodes: null,
             firstCreatePass: true,
             firstUpdatePass: true,
             staticViewQueries: false,
@@ -9053,13 +8976,13 @@ function initializeInputAndOutputAliases(tView, tNode) {
     ngDevMode && assertFirstCreatePass(tView);
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
-    const defs = tView.data;
+    const tViewData = tView.data;
     const tNodeAttrs = tNode.attrs;
     const inputsFromAttrs = ngDevMode ? new TNodeInitialInputs() : [];
     let inputsStore = null;
     let outputsStore = null;
     for (let i = start; i < end; i++) {
-        const directiveDef = defs[i];
+        const directiveDef = tViewData[i];
         const directiveInputs = directiveDef.inputs;
         // Do not use unbound attributes as inputs to structural directives, since structural
         // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
@@ -9245,10 +9168,12 @@ function instantiateRootComponent(tView, lView, def) {
     if (tView.firstCreatePass) {
         if (def.providersResolver)
             def.providersResolver(def);
-        generateExpandoInstructionBlock(tView, rootTNode, 1);
-        baseResolveDirective(tView, lView, def);
+        const directiveIndex = allocExpando(tView, lView, 1, null);
+        ngDevMode &&
+            assertEqual(directiveIndex, rootTNode.directiveStart, 'Because this is a root component the allocated expando should match the TNode component.');
+        configureViewWithDirective(tView, rootTNode, lView, directiveIndex, def);
     }
-    const directive = getNodeInjectable(lView, tView, lView.length - 1, rootTNode);
+    const directive = getNodeInjectable(lView, tView, rootTNode.directiveStart, rootTNode);
     attachPatchData(directive, lView);
     const native = getNativeByTNode(rootTNode, lView);
     if (native) {
@@ -9268,7 +9193,6 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
         const directiveDefs = findDirectiveDefMatches(tView, lView, tNode);
         const exportsMap = localRefs === null ? null : { '': -1 };
         if (directiveDefs !== null) {
-            let totalDirectiveHostVars = 0;
             hasDirectives = true;
             initTNodeFlags(tNode, tView.data.length, directiveDefs.length);
             // When the same token is provided by several directives on the same node, some rules apply in
@@ -9282,16 +9206,18 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
                 if (def.providersResolver)
                     def.providersResolver(def);
             }
-            generateExpandoInstructionBlock(tView, tNode, directiveDefs.length);
             let preOrderHooksFound = false;
             let preOrderCheckHooksFound = false;
+            let directiveIdx = allocExpando(tView, lView, directiveDefs.length, null);
+            ngDevMode &&
+                assertSame(directiveIdx, tNode.directiveStart, 'TNode.directiveStart should point to just allocated space');
             for (let i = 0; i < directiveDefs.length; i++) {
                 const def = directiveDefs[i];
                 // Merge the attrs in the order of matches. This assumes that the first directive is the
                 // component itself, so that the component has the least priority.
                 tNode.mergedAttrs = mergeHostAttrs(tNode.mergedAttrs, def.hostAttrs);
-                baseResolveDirective(tView, lView, def);
-                saveNameToExportMap(tView.data.length - 1, def, exportsMap);
+                configureViewWithDirective(tView, tNode, lView, directiveIdx, def);
+                saveNameToExportMap(directiveIdx, def, exportsMap);
                 if (def.contentQueries !== null)
                     tNode.flags |= 8 /* hasContentQuery */;
                 if (def.hostBindings !== null || def.hostAttrs !== null || def.hostVars !== 0)
@@ -9311,11 +9237,9 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
                     (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(tNode.index);
                     preOrderCheckHooksFound = true;
                 }
-                addHostBindingsToExpandoInstructions(tView, def);
-                totalDirectiveHostVars += def.hostVars;
+                directiveIdx++;
             }
             initializeInputAndOutputAliases(tView, tNode);
-            growHostVarsSpace(tView, lView, totalDirectiveHostVars);
         }
         if (exportsMap)
             cacheMatchingLocalNames(tNode, localRefs, exportsMap);
@@ -9325,47 +9249,50 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     return hasDirectives;
 }
 /**
- * Add `hostBindings` to the `TView.expandoInstructions`.
+ * Add `hostBindings` to the `TView.hostBindingOpCodes`.
  *
  * @param tView `TView` to which the `hostBindings` should be added.
+ * @param tNode `TNode` the element which contains the directive
+ * @param lView `LView` current `LView`
+ * @param directiveIdx Directive index in view.
+ * @param directiveVarsIdx Where will the directive's vars be stored
  * @param def `ComponentDef`/`DirectiveDef`, which contains the `hostVars`/`hostBindings` to add.
  */
-function addHostBindingsToExpandoInstructions(tView, def) {
+function registerHostBindingOpCodes(tView, tNode, lView, directiveIdx, directiveVarsIdx, def) {
     ngDevMode && assertFirstCreatePass(tView);
-    const expando = tView.expandoInstructions;
-    // TODO(misko): PERF we are adding `hostBindings` even if there is nothing to add! This is
-    // suboptimal for performance. `def.hostBindings` may be null,
-    // but we still need to push null to the array as a placeholder
-    // to ensure the directive counter is incremented (so host
-    // binding functions always line up with the corrective directive).
-    // This is suboptimal for performance. See `currentDirectiveIndex`
-    //  comment in `setHostBindingsByExecutingExpandoInstructions` for more
-    // details.  expando.push(def.hostBindings);
-    expando.push(def.hostBindings);
-    const hostVars = def.hostVars;
-    if (hostVars !== 0) {
-        expando.push(def.hostVars);
+    const hostBindings = def.hostBindings;
+    if (hostBindings) {
+        let hostBindingOpCodes = tView.hostBindingOpCodes;
+        if (hostBindingOpCodes === null) {
+            hostBindingOpCodes = tView.hostBindingOpCodes = [];
+        }
+        const elementIndx = ~tNode.index;
+        if (lastSelectedElementIdx(hostBindingOpCodes) != elementIndx) {
+            // Conditionally add select element so that we are more efficient in execution.
+            // NOTE: this is strictly not necessary and it trades code size for runtime perf.
+            // (We could just always add it.)
+            hostBindingOpCodes.push(elementIndx);
+        }
+        hostBindingOpCodes.push(directiveIdx, directiveVarsIdx, hostBindings);
     }
 }
 /**
- * Grow the `LView`, blueprint and `TView.data` to accommodate the `hostBindings`.
+ * Returns the last selected element index in the `HostBindingOpCodes`
  *
- * To support locality we don't know ahead of time how many `hostVars` of the containing directives
- * we need to allocate. For this reason we allow growing these data structures as we discover more
- * directives to accommodate them.
+ * For perf reasons we don't need to update the selected element index in `HostBindingOpCodes` only
+ * if it changes. This method returns the last index (or '0' if not found.)
  *
- * @param tView `TView` which needs to be grown.
- * @param lView `LView` which needs to be grown.
- * @param count Size by which we need to grow the data structures.
+ * Selected element index are only the ones which are negative.
  */
-function growHostVarsSpace(tView, lView, count) {
-    ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && assertSame(tView, lView[TVIEW], '`LView` must be associated with `TView`!');
-    for (let i = 0; i < count; i++) {
-        lView.push(NO_CHANGE);
-        tView.blueprint.push(NO_CHANGE);
-        tView.data.push(null);
+function lastSelectedElementIdx(hostBindingOpCodes) {
+    let i = hostBindingOpCodes.length;
+    while (i > 0) {
+        const value = hostBindingOpCodes[--i];
+        if (typeof value === 'number' && value < 0) {
+            return value;
+        }
     }
+    return 0;
 }
 /**
  * Instantiate all the directives that were previously resolved on the current node.
@@ -9399,7 +9326,6 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
 function invokeDirectivesHostBindings(tView, lView, tNode) {
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
-    const expando = tView.expandoInstructions;
     const firstCreatePass = tView.firstCreatePass;
     const elementIndex = tNode.index;
     const currentDirectiveIndex = getCurrentDirectiveIndex();
@@ -9411,9 +9337,6 @@ function invokeDirectivesHostBindings(tView, lView, tNode) {
             setCurrentDirectiveIndex(dirIndex);
             if (def.hostBindings !== null || def.hostVars !== 0 || def.hostAttrs !== null) {
                 invokeHostBindingsInCreationMode(def, directive);
-            }
-            else if (firstCreatePass) {
-                expando.push(null);
             }
         }
     }
@@ -9432,21 +9355,6 @@ function invokeHostBindingsInCreationMode(def, directive) {
     if (def.hostBindings !== null) {
         def.hostBindings(1 /* Create */, directive);
     }
-}
-/**
- * Generates a new block in TView.expandoInstructions for this node.
- *
- * Each expando block starts with the element index (turned negative so we can distinguish
- * it from the hostVar count) and the directive count. See more in VIEW_DATA.md.
- */
-function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
-    ngDevMode &&
-        assertEqual(tView.firstCreatePass, true, 'Expando block should only be generated on first create pass.');
-    const elementIndex = ~tNode.index;
-    const providerStartIndex = tNode.providerIndexes & 1048575 /* ProvidersStartIndexMask */;
-    const providerCount = tView.data.length - providerStartIndex;
-    (tView.expandoInstructions || (tView.expandoInstructions = []))
-        .push(elementIndex, providerCount, directiveCount);
 }
 /**
  * Matches the current node against all available selectors.
@@ -9512,15 +9420,15 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
  * Builds up an export map as directives are created, so local refs can be quickly mapped
  * to their directive instances.
  */
-function saveNameToExportMap(index, def, exportsMap) {
+function saveNameToExportMap(directiveIdx, def, exportsMap) {
     if (exportsMap) {
         if (def.exportAs) {
             for (let i = 0; i < def.exportAs.length; i++) {
-                exportsMap[def.exportAs[i]] = index;
+                exportsMap[def.exportAs[i]] = directiveIdx;
             }
         }
         if (isComponentDef(def))
-            exportsMap[''] = index;
+            exportsMap[''] = directiveIdx;
     }
 }
 /**
@@ -9537,12 +9445,27 @@ function initTNodeFlags(tNode, index, numberOfDirectives) {
     tNode.directiveEnd = index + numberOfDirectives;
     tNode.providerIndexes = index;
 }
-function baseResolveDirective(tView, viewData, def) {
-    tView.data.push(def);
+/**
+ * Setup directive for instantiation.
+ *
+ * We need to create a `NodeInjectorFactory` which is then inserted in both the `Blueprint` as well
+ * as `LView`. `TView` gets the `DirectiveDef`.
+ *
+ * @param tView `TView`
+ * @param tNode `TNode`
+ * @param lView `LView`
+ * @param directiveIndex Index where the directive will be stored in the Expando.
+ * @param def `DirectiveDef`
+ */
+function configureViewWithDirective(tView, tNode, lView, directiveIndex, def) {
+    ngDevMode &&
+        assertGreaterThanOrEqual(directiveIndex, HEADER_OFFSET, 'Must be in Expando section');
+    tView.data[directiveIndex] = def;
     const directiveFactory = def.factory || (def.factory = getFactoryDef(def.type, true));
     const nodeInjectorFactory = new NodeInjectorFactory(directiveFactory, isComponentDef(def), null);
-    tView.blueprint.push(nodeInjectorFactory);
-    viewData.push(nodeInjectorFactory);
+    tView.blueprint[directiveIndex] = nodeInjectorFactory;
+    lView[directiveIndex] = nodeInjectorFactory;
+    registerHostBindingOpCodes(tView, tNode, lView, directiveIndex, allocExpando(tView, lView, def.hostVars, NO_CHANGE), def);
 }
 function addComponentLogic(lView, hostTNode, def) {
     const native = getNativeByTNode(hostTNode, lView);
@@ -11610,7 +11533,8 @@ class R3Injector {
         // Check for circular dependencies.
         if (ngDevMode && parents.indexOf(defType) !== -1) {
             const defName = stringify(defType);
-            throw new Error(`Circular dependency in DI detected for type ${defName}. Dependency path: ${parents.map(defType => stringify(defType)).join(' > ')} > ${defName}.`);
+            const path = parents.map(stringify);
+            throwCyclicDependencyError(defName, path);
         }
         // Check for multiple imports of the same module
         const isDuplicate = dedupStack.indexOf(defType) !== -1;
@@ -13796,7 +13720,7 @@ function publishGlobalUtil(name, fn) {
  * found in the LICENSE file at https://angular.io/license
  */
 const ɵ0$b = (token, notFoundValue) => {
-    throw new Error('NullInjector: Not found: ' + stringifyForError(token));
+    throwProviderNotFoundError(token, 'NullInjector');
 };
 // TODO: A hack to not pull in the NullInjector from @angular/core.
 const NULL_INJECTOR$1 = {
@@ -13911,7 +13835,9 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
     // We want to generate an empty QueryList for root content queries for backwards
     // compatibility with ViewEngine.
     if (componentDef.contentQueries) {
-        componentDef.contentQueries(1 /* Create */, component, rootLView.length - 1);
+        const tNode = getCurrentTNode();
+        ngDevMode && assertDefined(tNode, 'TNode expected');
+        componentDef.contentQueries(1 /* Create */, component, tNode.directiveStart);
     }
     const rootTNode = getCurrentTNode();
     ngDevMode && assertDefined(rootTNode, 'tNode should have been already created');
@@ -13919,8 +13845,7 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
         (componentDef.hostBindings !== null || componentDef.hostAttrs !== null)) {
         setSelectedIndex(rootTNode.index);
         const rootTView = rootLView[TVIEW];
-        addHostBindingsToExpandoInstructions(rootTView, componentDef);
-        growHostVarsSpace(rootTView, rootLView, componentDef.hostVars);
+        registerHostBindingOpCodes(rootTView, rootTNode, rootLView, rootTNode.directiveStart, rootTNode.directiveEnd, componentDef);
         invokeHostBindingsInCreationMode(componentDef, component);
     }
     return component;
@@ -13948,11 +13873,12 @@ function createRootContext(scheduler, playerHandler) {
  * ```
  */
 function LifecycleHooksFeature(component, def) {
-    const rootTView = readPatchedLView(component)[TVIEW];
-    const dirIndex = rootTView.data.length - 1;
-    // TODO(misko): replace `as TNode` with createTNode call. (needs refactoring to lose dep on
-    // LNode).
-    registerPostOrderHooks(rootTView, { directiveStart: dirIndex, directiveEnd: dirIndex + 1 });
+    const lView = readPatchedLView(component);
+    ngDevMode && assertDefined(lView, 'LView is required');
+    const tView = lView[TVIEW];
+    const tNode = getCurrentTNode();
+    ngDevMode && assertDefined(tNode, 'TNode is required');
+    registerPostOrderHooks(tView, tNode);
 }
 /**
  * Wait on component until it is rendered.
@@ -19454,6 +19380,65 @@ function getLocaleId() {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Find a node in front of which `currentTNode` should be inserted (takes i18n into account).
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * takes `TNode.insertBeforeIndex` into account.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
+ */
+function getInsertInFrontOfRNodeWithI18n(parentTNode, currentTNode, lView) {
+    const tNodeInsertBeforeIndex = currentTNode.insertBeforeIndex;
+    const insertBeforeIndex = Array.isArray(tNodeInsertBeforeIndex) ? tNodeInsertBeforeIndex[0] : tNodeInsertBeforeIndex;
+    if (insertBeforeIndex === null) {
+        return getInsertInFrontOfRNodeWithNoI18n(parentTNode, currentTNode, lView);
+    }
+    else {
+        ngDevMode && assertIndexInRange(lView, insertBeforeIndex);
+        return unwrapRNode(lView[insertBeforeIndex]);
+    }
+}
+/**
+ * Process `TNode.insertBeforeIndex` by adding i18n text nodes.
+ *
+ * See `TNode.insertBeforeIndex`
+ */
+function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parentRElement) {
+    const tNodeInsertBeforeIndex = childTNode.insertBeforeIndex;
+    if (Array.isArray(tNodeInsertBeforeIndex)) {
+        // An array indicates that there are i18n nodes that need to be added as children of this
+        // `childRNode`. These i18n nodes were created before this `childRNode` was available and so
+        // only now can be added. The first element of the array is the normal index where we should
+        // insert the `childRNode`. Additional elements are the extra nodes to be added as children of
+        // `childRNode`.
+        ngDevMode && assertDomNode(childRNode);
+        let i18nParent = childRNode;
+        let anchorRNode = null;
+        if (!(childTNode.type & 3 /* AnyRNode */)) {
+            anchorRNode = i18nParent;
+            i18nParent = parentRElement;
+        }
+        if (i18nParent !== null && (childTNode.flags & 2 /* isComponentHost */) === 0) {
+            for (let i = 1; i < tNodeInsertBeforeIndex.length; i++) {
+                // No need to `unwrapRNode` because all of the indexes point to i18n text nodes.
+                // see `assertDomNode` below.
+                const i18nChild = lView[tNodeInsertBeforeIndex[i]];
+                nativeInsertBefore(renderer, i18nParent, i18nChild, anchorRNode, false);
+            }
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Add `tNode` to `previousTNodes` list and update relevant `TNode`s in `previousTNodes` list
  * `tNode.insertBeforeIndex`.
  *
@@ -19521,6 +19506,7 @@ function setInsertBeforeIndex(tNode, value) {
         index[0] = value;
     }
     else {
+        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
         tNode.insertBeforeIndex = value;
     }
 }
@@ -19597,6 +19583,7 @@ function setTNodeInsertBeforeIndex(tNode, index) {
     ngDevMode && assertTNode(tNode);
     let insertBeforeIndex = tNode.insertBeforeIndex;
     if (insertBeforeIndex === null) {
+        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
         insertBeforeIndex = tNode.insertBeforeIndex =
             [null /* may be updated to number later */, index];
     }
@@ -20412,7 +20399,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
         }
         else {
             // Odd indexes are placeholders (elements and sub-templates)
-            // At this point value is something like: '/#1:2' (orginally coming from '�/#1:2�')
+            // At this point value is something like: '/#1:2' (originally coming from '�/#1:2�')
             const isClosing = value.charCodeAt(0) === 47 /* SLASH */;
             const type = value.charCodeAt(isClosing ? 1 : 0);
             ngDevMode && assertOneOf(type, 42 /* STAR */, 35 /* HASH */, 33 /* EXCLAMATION */);
@@ -20446,7 +20433,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
  * @param isICU true if a `Comment` node for ICU (instead of `Text`) node should be created.
  */
 function createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, createOpCodes, text, isICU) {
-    const i18nNodeIdx = allocExpando(tView, lView, 1);
+    const i18nNodeIdx = allocExpando(tView, lView, 1, null);
     let opCode = i18nNodeIdx << I18nCreateOpCode.SHIFT;
     let parentTNode = getCurrentParentTNode();
     if (rootTNode === parentTNode) {
@@ -20683,7 +20670,7 @@ function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorI
     let bindingMask = 0;
     const tIcu = {
         type: icuExpression.type,
-        currentCaseLViewIndex: allocExpando(tView, lView, 1),
+        currentCaseLViewIndex: allocExpando(tView, lView, 1, null),
         anchorIdx,
         cases: [],
         create: [],
@@ -20836,7 +20823,7 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
     let bindingMask = 0;
     let currentNode = parentNode.firstChild;
     while (currentNode) {
-        const newIndex = allocExpando(tView, lView, 1);
+        const newIndex = allocExpando(tView, lView, 1, null);
         switch (currentNode.nodeType) {
             case Node.ELEMENT_NODE:
                 const element = currentNode;
@@ -21752,7 +21739,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+81.sha-08f3d62');
+const VERSION = new Version('11.0.0-next.6+95.sha-b989ba2');
 
 /**
  * @license
@@ -26227,7 +26214,7 @@ function createTQuery(tView, metadata, nodeIndex) {
 }
 function saveContentQueryAndDirectiveIndex(tView, directiveIndex) {
     const tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
-    const lastSavedDirectiveIndex = tView.contentQueries.length ? tViewContentQueries[tViewContentQueries.length - 1] : -1;
+    const lastSavedDirectiveIndex = tViewContentQueries.length ? tViewContentQueries[tViewContentQueries.length - 1] : -1;
     if (directiveIndex !== lastSavedDirectiveIndex) {
         tViewContentQueries.push(tView.queries.length - 1, directiveIndex);
     }
@@ -26261,7 +26248,7 @@ function ɵɵtemplateRefExtractor(tNode, currentView) {
 function ɵɵinjectPipeChangeDetectorRef(flags = InjectFlags.Default) {
     const value = injectChangeDetectorRef(true);
     if (value == null && !(flags & InjectFlags.Optional)) {
-        throw new Error(`No provider for ChangeDetectorRef!`);
+        throwProviderNotFoundError('ChangeDetectorRef');
     }
     else {
         return value;
