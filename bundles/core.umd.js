@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+105.sha-3236ae0
+ * @license Angular v11.0.0-next.6+104.sha-57ead7a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22336,7 +22336,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+105.sha-3236ae0');
+    var VERSION = new Version('11.0.0-next.6+104.sha-57ead7a');
 
     /**
      * @license
