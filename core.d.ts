@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.2.0+17.sha-308b930
+ * @license Angular v10.2.0+31.sha-055f7eb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -506,7 +506,7 @@ declare interface BootstrapOptions {
      * coalesced and the change detection will be triggered multiple times.
      * And if this option be set to true, the change detection will be
      * triggered async by scheduling a animation frame. So in the case above,
-     * the change detection will only be trigged once.
+     * the change detection will only be triggered once.
      */
     ngZoneEventCoalescing?: boolean;
 }
