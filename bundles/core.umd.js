@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-rc.0+35.sha-3fbf325
+ * @license Angular v11.0.0-rc.0+58.sha-399f491
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2351,11 +2351,11 @@
     }
     function assertIndexInVarsRange(lView, index) {
         var tView = lView[1];
-        assertBetween(tView.bindingStartIndex, tView.originalExpandoStartIndex, index);
+        assertBetween(tView.bindingStartIndex, tView.expandoStartIndex, index);
     }
     function assertIndexInExpandoRange(lView, index) {
         var tView = lView[1];
-        assertBetween(tView.originalExpandoStartIndex, lView.length, index);
+        assertBetween(tView.expandoStartIndex, lView.length, index);
     }
     function assertBetween(lower, upper, index) {
         if (!(lower <= index && index < upper)) {
@@ -8013,19 +8013,6 @@
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(TView.prototype, "originalExpandoStartIndex", {
-            /**
-             * Returns initial value of `expandoStartIndex`.
-             */
-            // FIXME(misko): `originalExpandoStartIndex` should not be needed because it should be the same as
-            // `expandoStartIndex`. However `expandoStartIndex` is misnamed as it changes as more items get
-            // allocated in expando.
-            get: function () {
-                return HEADER_OFFSET + this._decls + this._vars;
-            },
-            enumerable: false,
-            configurable: true
-        });
         return TView;
     }());
     var TNode = /** @class */ (function () {
@@ -8486,16 +8473,14 @@
         });
         Object.defineProperty(LViewDebug.prototype, "vars", {
             get: function () {
-                var tView = this.tView;
-                return toLViewRange(tView, this._raw_lView, tView.bindingStartIndex, tView.originalExpandoStartIndex);
+                return toLViewRange(this.tView, this._raw_lView, this.tView.bindingStartIndex, this.tView.expandoStartIndex);
             },
             enumerable: false,
             configurable: true
         });
         Object.defineProperty(LViewDebug.prototype, "expando", {
             get: function () {
-                var tView = this.tView;
-                return toLViewRange(this.tView, this._raw_lView, tView.originalExpandoStartIndex, this._raw_lView.length);
+                return toLViewRange(this.tView, this._raw_lView, this.tView.expandoStartIndex, this._raw_lView.length);
             },
             enumerable: false,
             configurable: true
@@ -9395,7 +9380,7 @@
         return propStore;
     }
     /**
-     * Initializes data structures required to work with directive outputs and outputs.
+     * Initializes data structures required to work with directive inputs and outputs.
      * Initialization is done for all directives matched on a given TNode.
      */
     function initializeInputAndOutputAliases(tView, tNode) {
@@ -20853,7 +20838,7 @@
     var ICU_BLOCK_REGEXP = /^\s*(�\d+:?\d*�)\s*,\s*(select|plural)\s*,/;
     var MARKER = "\uFFFD";
     var SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
-    var PH_REGEXP = /�(\/?[#*!]\d+):?\d*�/gi;
+    var PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
     /**
      * Angular Dart introduced &ngsp; as a placeholder for non-removable space, see:
      * https://github.com/dart-lang/angular/blob/0bb611387d29d65b5af7f9d2515ab571fd3fbee4/_tests/test/compiler/preserve_whitespace_test.dart#L25-L32
@@ -20911,7 +20896,10 @@
                         // Verify that ICU expression has the right shape. Translations might contain invalid
                         // constructions (while original messages were correct), so ICU parsing at runtime may
                         // not succeed (thus `icuExpression` remains a string).
-                        if (ngDevMode && typeof icuExpression !== 'object') {
+                        // Note: we intentionally retain the error here by not using `ngDevMode`, because
+                        // the value can change based on the locale and users aren't guaranteed to hit
+                        // an invalid string while they're developing.
+                        if (typeof icuExpression !== 'object') {
                             throw new Error("Unable to parse ICU expression in \"" + message + "\" message.");
                         }
                         var icuContainerTNode = createTNodeAndAddOpCode(tView, rootTNode, existingTNodeStack[0], lView, createOpCodes, ngDevMode ? "ICU " + index + ":" + icuExpression.mainBinding : '', true);
@@ -20927,7 +20915,7 @@
                 // At this point value is something like: '/#1:2' (originally coming from '�/#1:2�')
                 var isClosing = value.charCodeAt(0) === 47 /* SLASH */;
                 var type = value.charCodeAt(isClosing ? 1 : 0);
-                ngDevMode && assertOneOf(type, 42 /* STAR */, 35 /* HASH */, 33 /* EXCLAMATION */);
+                ngDevMode && assertOneOf(type, 42 /* STAR */, 35 /* HASH */);
                 var index_1 = HEADER_OFFSET + Number.parseInt(value.substring((isClosing ? 2 : 1)));
                 if (isClosing) {
                     existingTNodeStack.shift();
@@ -21021,53 +21009,31 @@
     /**
      * See `i18nAttributes` above.
      */
-    function i18nAttributesFirstPass(lView, tView, index, values) {
+    function i18nAttributesFirstPass(tView, index, values) {
         var previousElement = getCurrentTNode();
         var previousElementIndex = previousElement.index;
         var updateOpCodes = [];
         if (ngDevMode) {
             attachDebugGetter(updateOpCodes, i18nUpdateOpCodesToString);
         }
-        for (var i = 0; i < values.length; i += 2) {
-            var attrName = values[i];
-            var message = values[i + 1];
-            var parts = message.split(ICU_REGEXP);
-            for (var j = 0; j < parts.length; j++) {
-                var value = parts[j];
-                if (j & 1) {
-                    // Odd indexes are ICU expressions
-                    // TODO(ocombe): support ICU expressions in attributes
-                    throw new Error('ICU expressions are not yet supported in attributes');
-                }
-                else if (value !== '') {
-                    // Even indexes are text (including bindings)
-                    var hasBinding = !!value.match(BINDING_REGEXP);
-                    if (hasBinding) {
-                        if (tView.firstCreatePass && tView.data[index] === null) {
-                            generateBindingUpdateOpCodes(updateOpCodes, value, previousElementIndex, attrName);
-                        }
+        if (tView.firstCreatePass && tView.data[index] === null) {
+            for (var i = 0; i < values.length; i += 2) {
+                var attrName = values[i];
+                var message = values[i + 1];
+                if (message !== '') {
+                    // Check if attribute value contains an ICU and throw an error if that's the case.
+                    // ICUs in element attributes are not supported.
+                    // Note: we intentionally retain the error here by not using `ngDevMode`, because
+                    // the `value` can change based on the locale and users aren't guaranteed to hit
+                    // an invalid string while they're developing.
+                    if (ICU_REGEXP.test(message)) {
+                        throw new Error("ICU expressions are not supported in attributes. Message: \"" + message + "\".");
                     }
-                    else {
-                        var tNode = getTNode(tView, previousElementIndex);
-                        // Set attributes for Elements only, for other types (like ElementContainer),
-                        // only set inputs below
-                        if (tNode.type & 3 /* AnyRNode */) {
-                            elementAttributeInternal(tNode, lView, attrName, value, null, null);
-                        }
-                        // Check if that attribute is a directive input
-                        var dataValue = tNode.inputs !== null && tNode.inputs[attrName];
-                        if (dataValue) {
-                            setInputsForProperty(tView, lView, dataValue, attrName, value);
-                            if (ngDevMode) {
-                                var element = getNativeByIndex(previousElementIndex, lView);
-                                setNgReflectProperties(lView, element, tNode.type, dataValue, value);
-                            }
-                        }
-                    }
+                    // i18n attributes that hit this code path are guaranteed to have bindings, because
+                    // the compiler treats static i18n attributes as regular attribute bindings.
+                    generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName);
                 }
             }
-        }
-        if (tView.firstCreatePass && tView.data[index] === null) {
             tView.data[index] = updateOpCodes;
         }
     }
@@ -21376,7 +21342,9 @@
                                     }
                                 }
                                 else {
-                                    ngDevMode && console.warn(" WARNING:\n      ignoring unsafe attribute value " + lowerAttrName + " on element $ {\n    tagName\n  } (see http://g.co/ng/security#xss)");
+                                    ngDevMode &&
+                                        console.warn("WARNING: ignoring unsafe attribute value " +
+                                            (lowerAttrName + " on element " + tagName + " (see http://g.co/ng/security#xss)"));
                                 }
                             }
                             else {
@@ -21666,11 +21634,10 @@
      * @codeGenApi
      */
     function ɵɵi18nAttributes(index, attrsIndex) {
-        var lView = getLView();
         var tView = getTView();
         ngDevMode && assertDefined(tView, "tView should be defined");
         var attrs = getConstant(tView.consts, attrsIndex);
-        i18nAttributesFirstPass(lView, tView, index + HEADER_OFFSET, attrs);
+        i18nAttributesFirstPass(tView, index + HEADER_OFFSET, attrs);
     }
     /**
      * Stores the values of the bindings during each update cycle in order to determine if we need to
@@ -22285,7 +22252,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-rc.0+35.sha-3fbf325');
+    var VERSION = new Version('11.0.0-rc.0+58.sha-399f491');
 
     /**
      * @license
@@ -33255,7 +33222,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    if (ngDevMode) {
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
         // This helper is to give a reasonable error message to people upgrading to v9 that have not yet
         // installed `@angular/localize` in their app.
         // tslint:disable-next-line: no-toplevel-property-access
