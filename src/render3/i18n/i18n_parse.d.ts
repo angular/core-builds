@@ -28,7 +28,7 @@ export declare function i18nStartFirstCreatePass(tView: TView, parentTNodeIndex:
 /**
  * See `i18nAttributes` above.
  */
-export declare function i18nAttributesFirstPass(lView: LView, tView: TView, index: number, values: string[]): void;
+export declare function i18nAttributesFirstPass(tView: TView, index: number, values: string[]): void;
 /**
  * Generate the OpCodes to update the bindings of a string.
  *

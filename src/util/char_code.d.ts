@@ -11,7 +11,6 @@
 export declare const enum CharCode {
     UPPER_CASE = -33,
     SPACE = 32,
-    EXCLAMATION = 33,
     DOUBLE_QUOTE = 34,
     HASH = 35,
     SINGLE_QUOTE = 39,

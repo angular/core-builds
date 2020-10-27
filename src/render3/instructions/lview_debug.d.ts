@@ -63,10 +63,6 @@ export declare const TViewConstructor: {
         _vars: number;
         readonly template_: string;
         readonly type_: string;
-        /**
-         * Returns initial value of `expandoStartIndex`.
-         */
-        readonly originalExpandoStartIndex: number;
     };
 };
 declare class TNode implements ITNode {
