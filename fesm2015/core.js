@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+131.sha-0723331
+ * @license Angular v11.0.0-next.6+132.sha-e6ca3d3
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2100,6 +2100,25 @@ function assertNodeInjector(lView, injectorIndex) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+class RuntimeError extends Error {
+    constructor(code, message) {
+        super(formatRuntimeError(code, message));
+        this.code = code;
+    }
+}
+/** Called to format a runtime error */
+function formatRuntimeError(code, message) {
+    const fullCode = code ? `NG0${code}: ` : '';
+    return `${fullCode}${message}`;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Used for stringify render output in Ivy.
  * Important! This function is very performance-sensitive and we should
@@ -2182,11 +2201,11 @@ function maybeUnwrapFn(value) {
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token, path) {
     const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
-    throw new Error(`Circular dependency in DI detected for ${token}${depPath}`);
+    throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, `Circular dependency in DI detected for ${token}${depPath}`);
 }
 /** Called when there are multiple component selectors that match a given node */
 function throwMultipleComponentError(tNode) {
-    throw new Error(`Multiple components match node with tagname ${tNode.value}`);
+    throw new RuntimeError("300" /* MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}`);
 }
 function throwMixedMultiProviderError() {
     throw new Error(`Cannot mix multi providers and regular providers`);
@@ -2211,7 +2230,7 @@ function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) 
     }
     // TODO: include debug context, see `viewDebugError` function in
     // `packages/core/src/view/errors.ts` for reference.
-    throw new Error(msg);
+    throw new RuntimeError("100" /* EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
 }
 function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
     const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
@@ -2266,7 +2285,7 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
 /** Throws an error when a token is not found in DI. */
 function throwProviderNotFoundError(token, injectorName) {
     const injectorDetails = injectorName ? ` in ${injectorName}` : '';
-    throw new Error(`No provider for ${stringifyForError(token)} found${injectorDetails}`);
+    throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -9147,7 +9166,8 @@ function matchingSchemas(tView, tagName) {
  * @param tNode Node on which we encountered the property.
  */
 function logUnknownPropertyError(propName, tNode) {
-    console.error(`Can't bind to '${propName}' since it isn't a known property of '${tNode.value}'.`);
+    let message = `Can't bind to '${propName}' since it isn't a known property of '${tNode.value}'.`;
+    console.error(formatRuntimeError("303" /* UNKNOWN_BINDING */, message));
 }
 /**
  * Instantiate a root component.
@@ -9400,7 +9420,7 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
         for (let i = 0; i < localRefs.length; i += 2) {
             const index = exportsMap[localRefs[i + 1]];
             if (index == null)
-                throw new Error(`Export of name '${localRefs[i + 1]}' not found!`);
+                throw new RuntimeError("301" /* EXPORT_NOT_FOUND */, `Export of name '${localRefs[i + 1]}' not found!`);
             localNames.push(localRefs[i], index);
         }
     }
@@ -15227,7 +15247,7 @@ function logUnknownElementError(tView, element, tNode, hasDirectives) {
                 message +=
                     `2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.`;
             }
-            console.error(message);
+            console.error(formatRuntimeError("304" /* UNKNOWN_ELEMENT */, message));
         }
     }
 }
@@ -21707,7 +21727,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+131.sha-0723331');
+const VERSION = new Version('11.0.0-next.6+132.sha-e6ca3d3');
 
 /**
  * @license
@@ -25346,7 +25366,7 @@ function getPipeDef$1(name, registry) {
             }
         }
     }
-    throw new Error(`The pipe '${name}' could not be found!`);
+    throw new RuntimeError("302" /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found!`);
 }
 /**
  * Invokes a pipe with 1 arguments.
