@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-rc.0+58.sha-399f491
+ * @license Angular v11.0.0-rc.0+60.sha-366be11
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2390,6 +2390,28 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var RuntimeError = /** @class */ (function (_super) {
+        __extends(RuntimeError, _super);
+        function RuntimeError(code, message) {
+            var _this = _super.call(this, formatRuntimeError(code, message)) || this;
+            _this.code = code;
+            return _this;
+        }
+        return RuntimeError;
+    }(Error));
+    /** Called to format a runtime error */
+    function formatRuntimeError(code, message) {
+        var fullCode = code ? "NG0" + code + ": " : '';
+        return "" + fullCode + message;
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Used for stringify render output in Ivy.
      * Important! This function is very performance-sensitive and we should
@@ -2472,11 +2494,11 @@
     /** Called when directives inject each other (creating a circular dependency) */
     function throwCyclicDependencyError(token, path) {
         var depPath = path ? ". Dependency path: " + path.join(' > ') + " > " + token : '';
-        throw new Error("Circular dependency in DI detected for " + token + depPath);
+        throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, "Circular dependency in DI detected for " + token + depPath);
     }
     /** Called when there are multiple component selectors that match a given node */
     function throwMultipleComponentError(tNode) {
-        throw new Error("Multiple components match node with tagname " + tNode.value);
+        throw new RuntimeError("300" /* MULTIPLE_COMPONENTS_MATCH */, "Multiple components match node with tagname " + tNode.value);
     }
     function throwMixedMultiProviderError() {
         throw new Error("Cannot mix multi providers and regular providers");
@@ -2501,7 +2523,7 @@
         }
         // TODO: include debug context, see `viewDebugError` function in
         // `packages/core/src/view/errors.ts` for reference.
-        throw new Error(msg);
+        throw new RuntimeError("100" /* EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
     }
     function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
         var _a = __read(meta.split(INTERPOLATION_DELIMITER)), propName = _a[0], prefix = _a[1], chunks = _a.slice(2);
@@ -2556,7 +2578,7 @@
     /** Throws an error when a token is not found in DI. */
     function throwProviderNotFoundError(token, injectorName) {
         var injectorDetails = injectorName ? " in " + injectorName : '';
-        throw new Error("No provider for " + stringifyForError(token) + " found" + injectorDetails);
+        throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, "No provider for " + stringifyForError(token) + " found" + injectorDetails);
     }
 
     /**
@@ -9570,7 +9592,8 @@
      * @param tNode Node on which we encountered the property.
      */
     function logUnknownPropertyError(propName, tNode) {
-        console.error("Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.value + "'.");
+        var message = "Can't bind to '" + propName + "' since it isn't a known property of '" + tNode.value + "'.";
+        console.error(formatRuntimeError("303" /* UNKNOWN_BINDING */, message));
     }
     /**
      * Instantiate a root component.
@@ -9823,7 +9846,7 @@
             for (var i = 0; i < localRefs.length; i += 2) {
                 var index = exportsMap[localRefs[i + 1]];
                 if (index == null)
-                    throw new Error("Export of name '" + localRefs[i + 1] + "' not found!");
+                    throw new RuntimeError("301" /* EXPORT_NOT_FOUND */, "Export of name '" + localRefs[i + 1] + "' not found!");
                 localNames.push(localRefs[i], index);
             }
         }
@@ -15745,7 +15768,7 @@
                     message +=
                         "2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.";
                 }
-                console.error(message);
+                console.error(formatRuntimeError("304" /* UNKNOWN_ELEMENT */, message));
             }
         }
     }
@@ -22252,7 +22275,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-rc.0+58.sha-399f491');
+    var VERSION = new Version('11.0.0-rc.0+60.sha-366be11');
 
     /**
      * @license
@@ -25991,7 +26014,7 @@
                 }
             }
         }
-        throw new Error("The pipe '" + name + "' could not be found!");
+        throw new RuntimeError("302" /* PIPE_NOT_FOUND */, "The pipe '" + name + "' could not be found!");
     }
     /**
      * Invokes a pipe with 1 arguments.
