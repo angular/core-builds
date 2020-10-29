@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+156.sha-8af32fc
+ * @license Angular v11.0.0-next.6+157.sha-f54662e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7656,23 +7656,24 @@ declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
  * will keep Angular's public API surface free of references to Trusted Types.
  * For internal and semi-private APIs that need to reference Trusted Types, the
  * minimal type definitions for the Trusted Types API provided by this module
- * should be used instead.
+ * should be used instead. They are marked as "declare" to prevent them from
+ * being renamed by compiler optimization.
  *
  * Adapted from
  * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
  * but restricted to the API surface used within Angular.
  */
-declare type TrustedHTML = {
+declare interface TrustedHTML {
     __brand__: 'TrustedHTML';
-};
+}
 
-declare type TrustedScript = {
+declare interface TrustedScript {
     __brand__: 'TrustedScript';
-};
+}
 
-declare type TrustedScriptURL = {
+declare interface TrustedScriptURL {
     __brand__: 'TrustedScriptURL';
-};
+}
 
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
