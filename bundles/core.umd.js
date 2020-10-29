@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-rc.1+13.sha-0e60dc5
+ * @license Angular v11.0.0-rc.1+16.sha-3091534
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10250,8 +10250,10 @@
      */
     function scheduleTick(rootContext, flags) {
         var nothingScheduled = rootContext.flags === 0 /* Empty */;
-        rootContext.flags |= flags;
         if (nothingScheduled && rootContext.clean == _CLEAN_PROMISE) {
+            // https://github.com/angular/angular/issues/39296
+            // should only attach the flags when really scheduling a tick
+            rootContext.flags |= flags;
             var res_1;
             rootContext.clean = new Promise(function (r) { return res_1 = r; });
             rootContext.scheduler(function () {
@@ -22275,7 +22277,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-rc.1+13.sha-0e60dc5');
+    var VERSION = new Version('11.0.0-rc.1+16.sha-3091534');
 
     /**
      * @license
