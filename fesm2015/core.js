@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+162.sha-170af07
+ * @license Angular v11.0.0-next.6+163.sha-4a8d5ae
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9818,8 +9818,10 @@ function markViewDirty(lView) {
  */
 function scheduleTick(rootContext, flags) {
     const nothingScheduled = rootContext.flags === 0 /* Empty */;
-    rootContext.flags |= flags;
     if (nothingScheduled && rootContext.clean == _CLEAN_PROMISE) {
+        // https://github.com/angular/angular/issues/39296
+        // should only attach the flags when really scheduling a tick
+        rootContext.flags |= flags;
         let res;
         rootContext.clean = new Promise((r) => res = r);
         rootContext.scheduler(() => {
@@ -21696,7 +21698,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+162.sha-170af07');
+const VERSION = new Version('11.0.0-next.6+163.sha-4a8d5ae');
 
 /**
  * @license
