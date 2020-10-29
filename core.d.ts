@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.2.1+10.sha-fb96c3d
+ * @license Angular v10.2.1+12.sha-90acb91
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7864,15 +7864,18 @@ declare interface TView {
      * Array of ngOnInit, ngOnChanges and ngDoCheck hooks that should be executed for this view in
      * creation mode.
      *
-     * Even indices: Directive index
-     * Odd indices: Hook function
+     * This array has a flat structure and contains TNode indices, directive indices (where an
+     * instance can be found in `LView`) and hook functions. TNode index is followed by the directive
+     * index and a hook function. If there are multiple hooks for a given TNode, the TNode index is
+     * not repeated and the next lifecycle hook information is stored right after the previous hook
+     * function. This is done so that at runtime the system can efficiently iterate over all of the
+     * functions to invoke without having to make any decisions/lookups.
      */
     preOrderHooks: HookData | null;
     /**
      * Array of ngOnChanges and ngDoCheck hooks that should be executed for this view in update mode.
      *
-     * Even indices: Directive index
-     * Odd indices: Hook function
+     * This array has the same structure as the `preOrderHooks` one.
      */
     preOrderCheckHooks: HookData | null;
     /**
@@ -7954,8 +7957,7 @@ declare interface TView {
     queries: TQueries | null;
     /**
      * An array of indices pointing to directives with content queries alongside with the
-     * corresponding
-     * query index. Each entry in this array is a tuple of:
+     * corresponding query index. Each entry in this array is a tuple of:
      * - index of the first content query index declared by a given directive;
      * - index of a directive.
      *
