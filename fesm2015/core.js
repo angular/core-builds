@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+173.sha-3b0b7d2
+ * @license Angular v11.0.0-next.6+184.sha-cf48d50
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21729,7 +21729,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+173.sha-3b0b7d2');
+const VERSION = new Version('11.0.0-next.6+184.sha-cf48d50');
 
 /**
  * @license
@@ -24840,18 +24840,25 @@ function assertSameOrNotExisting(id, type, incoming) {
     }
 }
 function registerNgModuleType(ngModuleType) {
-    if (ngModuleType.ɵmod.id !== null) {
-        const id = ngModuleType.ɵmod.id;
-        const existing = modules.get(id);
-        assertSameOrNotExisting(id, existing, ngModuleType);
-        modules.set(id, ngModuleType);
-    }
-    let imports = ngModuleType.ɵmod.imports;
-    if (imports instanceof Function) {
-        imports = imports();
-    }
-    if (imports) {
-        imports.forEach(i => registerNgModuleType(i));
+    const visited = new Set();
+    recurse(ngModuleType);
+    function recurse(ngModuleType) {
+        // The imports array of an NgModule must refer to other NgModules,
+        // so an error is thrown if no module definition is available.
+        const def = getNgModuleDef(ngModuleType, /* throwNotFound */ true);
+        const id = def.id;
+        if (id !== null) {
+            const existing = modules.get(id);
+            assertSameOrNotExisting(id, existing, ngModuleType);
+            modules.set(id, ngModuleType);
+        }
+        const imports = maybeUnwrapFn(def.imports);
+        for (const i of imports) {
+            if (!visited.has(i)) {
+                visited.add(i);
+                recurse(i);
+            }
+        }
     }
 }
 function clearModulesForTest() {
