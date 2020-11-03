@@ -1,5 +1,5 @@
 /**
- * @license Angular v10.2.1+15.sha-71d0063
+ * @license Angular v10.2.1+29.sha-aa3bd27
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21686,7 +21686,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('10.2.1+15.sha-71d0063');
+    var VERSION = new Version('10.2.1+29.sha-aa3bd27');
 
     /**
      * @license
@@ -24876,13 +24876,6 @@
     }
 
     /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
      * Map of module-id to the corresponding NgModule.
      * - In pre Ivy we track NgModuleFactory,
      * - In post Ivy we track the NgModuleType
@@ -24903,18 +24896,36 @@
         }
     }
     function registerNgModuleType(ngModuleType) {
-        if (ngModuleType.ɵmod.id !== null) {
-            var id = ngModuleType.ɵmod.id;
-            var existing = modules.get(id);
-            assertSameOrNotExisting(id, existing, ngModuleType);
-            modules.set(id, ngModuleType);
-        }
-        var imports = ngModuleType.ɵmod.imports;
-        if (imports instanceof Function) {
-            imports = imports();
-        }
-        if (imports) {
-            imports.forEach(function (i) { return registerNgModuleType(i); });
+        var visited = new Set();
+        recurse(ngModuleType);
+        function recurse(ngModuleType) {
+            var e_1, _a;
+            // The imports array of an NgModule must refer to other NgModules,
+            // so an error is thrown if no module definition is available.
+            var def = getNgModuleDef(ngModuleType, /* throwNotFound */ true);
+            var id = def.id;
+            if (id !== null) {
+                var existing = modules.get(id);
+                assertSameOrNotExisting(id, existing, ngModuleType);
+                modules.set(id, ngModuleType);
+            }
+            var imports = maybeUnwrapFn(def.imports);
+            try {
+                for (var imports_1 = __values(imports), imports_1_1 = imports_1.next(); !imports_1_1.done; imports_1_1 = imports_1.next()) {
+                    var i = imports_1_1.value;
+                    if (!visited.has(i)) {
+                        visited.add(i);
+                        recurse(i);
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (imports_1_1 && !imports_1_1.done && (_a = imports_1.return)) _a.call(imports_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
         }
     }
     function clearModulesForTest() {
