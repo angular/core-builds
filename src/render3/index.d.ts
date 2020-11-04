@@ -21,6 +21,7 @@ export { ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, 
 export { RenderFlags } from './interfaces/definition';
 export { AttributeMarker } from './interfaces/node';
 export { CssSelectorList, ProjectionSlots } from './interfaces/projection';
+export { ɵɵngDeclareDirective, } from './jit/partial';
 export { setClassMetadata, } from './metadata';
 export { NgModuleFactory, NgModuleRef, NgModuleType } from './ng_module_ref';
 export { ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, } from './pipe';

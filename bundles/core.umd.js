@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+195.sha-2d79780
+ * @license Angular v11.0.0-next.6+205.sha-27ae060
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22328,7 +22328,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+195.sha-2d79780');
+    var VERSION = new Version('11.0.0-next.6+205.sha-27ae060');
 
     /**
      * @license
@@ -25461,6 +25461,22 @@
     }(ComponentRef));
 
     /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Compiles a partial directive declaration object into a full directive definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareDirective(decl) {
+        throw new Error('Not yet implemented');
+    }
+
+    /**
      * Adds decorator, constructor, and property metadata to a given type via static metadata fields
      * on the type.
      *
@@ -27128,6 +27144,7 @@
         'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
         'ɵɵtrustConstantScript': ɵɵtrustConstantScript,
         'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
+        'ɵɵngDeclareDirective': ɵɵngDeclareDirective,
     }); })();
 
     var jitOptions = null;
@@ -33652,6 +33669,7 @@
     exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
     exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
     exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
     exports.ɵɵpipeBind2 = ɵɵpipeBind2;
