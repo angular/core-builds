@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+195.sha-2d79780
+ * @license Angular v11.0.0-next.6+205.sha-27ae060
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12762,6 +12762,14 @@ export declare function ɵɵnamespaceSVG(): void;
  * @codeGenApi
  */
 export declare function ɵɵnextContext<T = any>(level?: number): T;
+
+
+/**
+ * Compiles a partial directive declaration object into a full directive definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareDirective(decl: unknown): unknown;
 
 /**
  * @publicApi
