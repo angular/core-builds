@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+217.sha-b9b9178
+ * @license Angular v11.0.0-next.6+218.sha-290ea57
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2916,16 +2916,81 @@ function setCurrentQueryIndex(value) {
     instructionState.lFrame.currentQueryIndex = value;
 }
 /**
- * This is a light weight version of the `enterView` which is needed by the DI system.
- * @param newView
- * @param tNode
+ * Returns a `TNode` of the location where the current `LView` is declared at.
+ *
+ * @param lView an `LView` that we want to find parent `TNode` for.
  */
-function enterDI(newView, tNode) {
-    ngDevMode && assertLViewOrUndefined(newView);
-    const newLFrame = allocLFrame();
-    instructionState.lFrame = newLFrame;
-    newLFrame.currentTNode = tNode;
-    newLFrame.lView = newView;
+function getDeclarationTNode(lView) {
+    const tView = lView[TVIEW];
+    // Return the declaration parent for embedded views
+    if (tView.type === 2 /* Embedded */) {
+        ngDevMode && assertDefined(tView.declTNode, 'Embedded TNodes should have declaration parents.');
+        return tView.declTNode;
+    }
+    // Components don't have `TView.declTNode` because each instance of component could be
+    // inserted in different location, hence `TView.declTNode` is meaningless.
+    // Falling back to `T_HOST` in case we cross component boundary.
+    if (tView.type === 1 /* Component */) {
+        return lView[T_HOST];
+    }
+    // Remaining TNode type is `TViewType.Root` which doesn't have a parent TNode.
+    return null;
+}
+/**
+ * This is a light weight version of the `enterView` which is needed by the DI system.
+ *
+ * @param lView `LView` location of the DI context.
+ * @param tNode `TNode` for DI context
+ * @param flags DI context flags. if `SkipSelf` flag is set than we walk up the declaration
+ *     tree from `tNode`  until we find parent declared `TElementNode`.
+ * @returns `true` if we have successfully entered DI associated with `tNode` (or with declared
+ *     `TNode` if `flags` has  `SkipSelf`). Failing to enter DI implies that no associated
+ *     `NodeInjector` can be found and we should instead use `ModuleInjector`.
+ *     - If `true` than this call must be fallowed by `leaveDI`
+ *     - If `false` than this call failed and we should NOT call `leaveDI`
+ */
+function enterDI(lView, tNode, flags) {
+    ngDevMode && assertLViewOrUndefined(lView);
+    if (flags & InjectFlags.SkipSelf) {
+        ngDevMode && assertTNodeForTView(tNode, lView[TVIEW]);
+        let parentTNode = tNode;
+        let parentLView = lView;
+        while (true) {
+            ngDevMode && assertDefined(parentTNode, 'Parent TNode should be defined');
+            parentTNode = parentTNode.parent;
+            if (parentTNode === null && !(flags & InjectFlags.Host)) {
+                parentTNode = getDeclarationTNode(parentLView);
+                if (parentTNode === null)
+                    break;
+                // In this case, a parent exists and is definitely an element. So it will definitely
+                // have an existing lView as the declaration view, which is why we can assume it's defined.
+                ngDevMode && assertDefined(parentLView, 'Parent LView should be defined');
+                parentLView = parentLView[DECLARATION_VIEW];
+                // In Ivy there are Comment nodes that correspond to ngIf and NgFor embedded directives
+                // We want to skip those and look only at Elements and ElementContainers to ensure
+                // we're looking at true parent nodes, and not content or other types.
+                if (parentTNode.type & (2 /* Element */ | 8 /* ElementContainer */)) {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+        if (parentTNode === null) {
+            // If we failed to find a parent TNode this means that we should use module injector.
+            return false;
+        }
+        else {
+            tNode = parentTNode;
+            lView = parentLView;
+        }
+    }
+    ngDevMode && assertTNodeForLView(tNode, lView);
+    const lFrame = instructionState.lFrame = allocLFrame();
+    lFrame.currentTNode = tNode;
+    lFrame.lView = lView;
+    return true;
 }
 /**
  * Swap the current lView with a new lView.
@@ -4112,6 +4177,48 @@ function injectAttributeImpl(tNode, attrNameToInject) {
     }
     return null;
 }
+function notFoundValueOrThrow(notFoundValue, token, flags) {
+    if (flags & InjectFlags.Optional) {
+        return notFoundValue;
+    }
+    else {
+        throwProviderNotFoundError(token, 'NodeInjector');
+    }
+}
+/**
+ * Returns the value associated to the given token from the ModuleInjector or throws exception
+ *
+ * @param lView The `LView` that contains the `tNode`
+ * @param token The token to look for
+ * @param flags Injection flags
+ * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
+ * @returns the value from the injector or throws an exception
+ */
+function lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue) {
+    if (flags & InjectFlags.Optional && notFoundValue === undefined) {
+        // This must be set or the NullInjector will throw for optional deps
+        notFoundValue = null;
+    }
+    if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
+        const moduleInjector = lView[INJECTOR$1];
+        // switch to `injectInjectorOnly` implementation for module injector, since module injector
+        // should not have access to Component/Directive DI scope (that may happen through
+        // `directiveInject` implementation)
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            if (moduleInjector) {
+                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
+            }
+            else {
+                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
+            }
+        }
+        finally {
+            setInjectImplementation(previousInjectImplementation);
+        }
+    }
+    return notFoundValueOrThrow(notFoundValue, token, flags);
+}
 /**
  * Returns the value associated to the given token from the NodeInjectors => ModuleInjector.
  *
@@ -4119,8 +4226,7 @@ function injectAttributeImpl(tNode, attrNameToInject) {
  * the module injector tree.
  *
  * This function patches `token` with `__NG_ELEMENT_ID__` which contains the id for the bloom
- * filter. Negative values are reserved for special objects.
- *   - `-1` is reserved for injecting `Injector` (implemented by `NodeInjector`)
+ * filter. `-1` is reserved for injecting `Injector` (implemented by `NodeInjector`)
  *
  * @param tNode The Node where the search for the injector should start
  * @param lView The `LView` that contains the `tNode`
@@ -4135,7 +4241,10 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
         // If the ID stored here is a function, this is a special object like ElementRef or TemplateRef
         // so just call the factory function to create it.
         if (typeof bloomHash === 'function') {
-            enterDI(lView, tNode);
+            if (!enterDI(lView, tNode, flags)) {
+                // Failed to enter DI use module injector instead.
+                return lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
+            }
             try {
                 const value = bloomHash();
                 if (value == null && !(flags & InjectFlags.Optional)) {
@@ -4149,10 +4258,31 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
                 leaveDI();
             }
         }
-        else if (typeof bloomHash == 'number') {
+        else if (typeof bloomHash === 'number') {
+            // This is a value used to identify __NG_ELEMENT_ID__
+            // `-1` is a special value used to identify `Injector` types in NodeInjector
+            // This is a workaround for the fact that if the `Injector.__NG_ELEMENT_ID__`
+            // would have a factory function (such as `ElementRef`) it would cause Ivy
+            // to be pulled into the ViewEngine, because they both share `Injector` type.
+            // This should be refactored to follow `ElementRef` pattern once ViewEngine is
+            // removed
             if (bloomHash === -1) {
-                // `-1` is a special value used to identify `Injector` types.
-                return new NodeInjector(tNode, lView);
+                if (!enterDI(lView, tNode, flags)) {
+                    // Failed to enter DI, try module injector instead. If a token is injected with the @Host
+                    // flag, the module injector is not searched for that token in Ivy.
+                    return (flags & InjectFlags.Host) ?
+                        notFoundValueOrThrow(notFoundValue, token, flags) :
+                        lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
+                }
+                try {
+                    // Retrieving current `TNode` and `LView` from the state (rather than using `tNode` and
+                    // `lView`), because entering DI (by calling `enterDI`) may cause these values to change
+                    // (in case `@SkipSelf` flag is present).
+                    return new NodeInjector(getCurrentTNode(), getLView());
+                }
+                finally {
+                    leaveDI();
+                }
             }
             // If the token has a bloom hash, then it is a token which could be in NodeInjector.
             // A reference to the previous injector TView that was found while climbing the element
@@ -4212,34 +4342,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
             }
         }
     }
-    if (flags & InjectFlags.Optional && notFoundValue === undefined) {
-        // This must be set or the NullInjector will throw for optional deps
-        notFoundValue = null;
-    }
-    if ((flags & (InjectFlags.Self | InjectFlags.Host)) === 0) {
-        const moduleInjector = lView[INJECTOR$1];
-        // switch to `injectInjectorOnly` implementation for module injector, since module injector
-        // should not have access to Component/Directive DI scope (that may happen through
-        // `directiveInject` implementation)
-        const previousInjectImplementation = setInjectImplementation(undefined);
-        try {
-            if (moduleInjector) {
-                return moduleInjector.get(token, notFoundValue, flags & InjectFlags.Optional);
-            }
-            else {
-                return injectRootLimpMode(token, notFoundValue, flags & InjectFlags.Optional);
-            }
-        }
-        finally {
-            setInjectImplementation(previousInjectImplementation);
-        }
-    }
-    if (flags & InjectFlags.Optional) {
-        return notFoundValue;
-    }
-    else {
-        throwProviderNotFoundError(token, 'NodeInjector');
-    }
+    return lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
 }
 const NOT_FOUND = {};
 function searchTokensOnInjector(injectorIndex, lView, token, previousTView, flags, hostTElementNode) {
@@ -4327,7 +4430,9 @@ function getNodeInjectable(lView, tView, index, tNode) {
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
         factory.resolving = true;
         const previousInjectImplementation = factory.injectImpl ? setInjectImplementation(factory.injectImpl) : null;
-        enterDI(lView, tNode);
+        const success = enterDI(lView, tNode, InjectFlags.Default);
+        ngDevMode &&
+            assertEqual(success, true, 'Because flags do not contain \`SkipSelf\' we expect this to always succeed.');
         try {
             value = lView[index] = factory.factory(undefined, tData, lView, tNode);
             // This code path is hit for both directives and providers.
@@ -21698,7 +21803,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+217.sha-b9b9178');
+const VERSION = new Version('11.0.0-next.6+218.sha-290ea57');
 
 /**
  * @license

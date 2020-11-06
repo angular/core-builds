@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { InjectFlags } from '../di/interface/injector';
 import { DirectiveDef } from './interfaces/definition';
 import { TNode } from './interfaces/node';
 import { LView, OpaqueViewState, TData, TView } from './interfaces/view';
@@ -130,10 +131,18 @@ export declare function getCurrentQueryIndex(): number;
 export declare function setCurrentQueryIndex(value: number): void;
 /**
  * This is a light weight version of the `enterView` which is needed by the DI system.
- * @param newView
- * @param tNode
+ *
+ * @param lView `LView` location of the DI context.
+ * @param tNode `TNode` for DI context
+ * @param flags DI context flags. if `SkipSelf` flag is set than we walk up the declaration
+ *     tree from `tNode`  until we find parent declared `TElementNode`.
+ * @returns `true` if we have successfully entered DI associated with `tNode` (or with declared
+ *     `TNode` if `flags` has  `SkipSelf`). Failing to enter DI implies that no associated
+ *     `NodeInjector` can be found and we should instead use `ModuleInjector`.
+ *     - If `true` than this call must be fallowed by `leaveDI`
+ *     - If `false` than this call failed and we should NOT call `leaveDI`
  */
-export declare function enterDI(newView: LView, tNode: TNode): void;
+export declare function enterDI(lView: LView, tNode: TNode, flags: InjectFlags): boolean;
 /**
  * Swap the current lView with a new lView.
  *

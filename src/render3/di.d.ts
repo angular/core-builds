@@ -87,8 +87,7 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * the module injector tree.
  *
  * This function patches `token` with `__NG_ELEMENT_ID__` which contains the id for the bloom
- * filter. Negative values are reserved for special objects.
- *   - `-1` is reserved for injecting `Injector` (implemented by `NodeInjector`)
+ * filter. `-1` is reserved for injecting `Injector` (implemented by `NodeInjector`)
  *
  * @param tNode The Node where the search for the injector should start
  * @param lView The `LView` that contains the `tNode`
