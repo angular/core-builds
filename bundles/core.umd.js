@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+237.sha-d1355ca
+ * @license Angular v11.0.0-next.6+238.sha-4476324
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7385,9 +7385,7 @@
             }
         }
         else {
-            // TODO(misko): Can't import RendererStyleFlags2.DashCase as it causes imports to be resolved
-            // in different order which causes failures. Using direct constant as workaround for now.
-            var flags = prop.indexOf('-') == -1 ? undefined : 2 /* RendererStyleFlags2.DashCase */;
+            var flags = prop.indexOf('-') === -1 ? undefined : 2 /* DashCase */;
             if (value == null /** || value === undefined */) {
                 ngDevMode && ngDevMode.rendererRemoveStyle++;
                 if (isProcedural) {
@@ -7398,13 +7396,21 @@
                 }
             }
             else {
+                // A value is important if it ends with `!important`. The style
+                // parser strips any semicolons at the end of the value.
+                var isImportant = typeof value === 'string' ? value.endsWith('!important') : false;
+                if (isImportant) {
+                    // !important has to be stripped from the value for it to be valid.
+                    value = value.slice(0, -10);
+                    flags |= 1 /* Important */;
+                }
                 ngDevMode && ngDevMode.rendererSetStyle++;
                 if (isProcedural) {
                     renderer.setStyle(rNode, prop, value, flags);
                 }
                 else {
                     ngDevMode && assertDefined(rNode.style, 'HTMLElement expected');
-                    rNode.style.setProperty(prop, value);
+                    rNode.style.setProperty(prop, value, isImportant ? 'important' : '');
                 }
             }
         }
@@ -22433,7 +22439,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+237.sha-d1355ca');
+    var VERSION = new Version('11.0.0-next.6+238.sha-4476324');
 
     /**
      * @license
