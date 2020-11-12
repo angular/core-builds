@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+243.sha-7ce8250
+ * @license Angular v11.0.0-next.6+245.sha-8e17dc0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22451,7 +22451,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+243.sha-7ce8250');
+    var VERSION = new Version('11.0.0-next.6+245.sha-8e17dc0');
 
     /**
      * @license
@@ -28822,9 +28822,6 @@
             var self = this;
             self._nesting = 0;
             self._outer = self._inner = Zone.current;
-            if (Zone['wtfZoneSpec']) {
-                self._inner = self._inner.fork(Zone['wtfZoneSpec']);
-            }
             if (Zone['TaskTrackingZoneSpec']) {
                 self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']);
             }
