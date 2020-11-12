@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0+1.sha-92900d5
+ * @license Angular v11.0.0+6.sha-050cea9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6978,9 +6978,7 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
         }
     }
     else {
-        // TODO(misko): Can't import RendererStyleFlags2.DashCase as it causes imports to be resolved
-        // in different order which causes failures. Using direct constant as workaround for now.
-        const flags = prop.indexOf('-') == -1 ? undefined : 2 /* RendererStyleFlags2.DashCase */;
+        let flags = prop.indexOf('-') === -1 ? undefined : 2 /* DashCase */;
         if (value == null /** || value === undefined */) {
             ngDevMode && ngDevMode.rendererRemoveStyle++;
             if (isProcedural) {
@@ -6991,13 +6989,21 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
             }
         }
         else {
+            // A value is important if it ends with `!important`. The style
+            // parser strips any semicolons at the end of the value.
+            const isImportant = typeof value === 'string' ? value.endsWith('!important') : false;
+            if (isImportant) {
+                // !important has to be stripped from the value for it to be valid.
+                value = value.slice(0, -10);
+                flags |= 1 /* Important */;
+            }
             ngDevMode && ngDevMode.rendererSetStyle++;
             if (isProcedural) {
                 renderer.setStyle(rNode, prop, value, flags);
             }
             else {
                 ngDevMode && assertDefined(rNode.style, 'HTMLElement expected');
-                rNode.style.setProperty(prop, value);
+                rNode.style.setProperty(prop, value, isImportant ? 'important' : '');
             }
         }
     }
@@ -21759,7 +21765,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0+1.sha-92900d5');
+const VERSION = new Version('11.0.0+6.sha-050cea9');
 
 /**
  * @license
