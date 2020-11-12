@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+239.sha-1bc53eb
+ * @license Angular v11.0.0-next.6+240.sha-b015d3e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7001,9 +7001,7 @@
             ngDevMode && assertTNodeType(parentTNode, 3 /* AnyRNode */ | 4 /* Container */);
             if (parentTNode.flags & 2 /* isComponentHost */) {
                 ngDevMode && assertTNodeForLView(parentTNode, lView);
-                var tData = tView.data;
-                var tNode_1 = tData[parentTNode.index];
-                var encapsulation = tData[tNode_1.directiveStart].encapsulation;
+                var encapsulation = tView.data[parentTNode.directiveStart].encapsulation;
                 // We've got a parent which is an element in the current view. We just need to verify if the
                 // parent element is not a component. Component's content nodes are not inserted immediately
                 // because they will be projected, and so doing insert at this point would be wasteful.
@@ -11270,25 +11268,15 @@
                 commentNode = unwrapRNode(slotValue);
             }
             else {
+                // If the host is a regular element, we have to insert a comment node manually which will
+                // be used as an anchor when inserting elements. In this specific case we use low-level DOM
+                // manipulation to insert it.
+                var renderer = hostView[RENDERER];
                 ngDevMode && ngDevMode.rendererCreateComment++;
-                commentNode = hostView[RENDERER].createComment(ngDevMode ? 'container' : '');
-                // A `ViewContainerRef` can be injected by the root (topmost / bootstrapped) component. In
-                // this case we can't use TView / TNode data structures to insert container's marker node
-                // (both a parent of a comment node and the comment node itself are not part of any view). In
-                // this specific case we use low-level DOM manipulation to insert container's marker (comment)
-                // node.
-                if (isRootView(hostView)) {
-                    var renderer = hostView[RENDERER];
-                    var hostNative = getNativeByTNode(hostTNode, hostView);
-                    var parentOfHostNative = nativeParentNode(renderer, hostNative);
-                    nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
-                }
-                else {
-                    // The TNode created here is bogus, in that it is not added to the TView. It is only created
-                    // to allow us to create a dynamic Comment node.
-                    var commentTNode = createTNode(hostView[TVIEW], hostTNode.parent, 4 /* Container */, 0, null, null);
-                    appendChild(hostView[TVIEW], hostView, commentNode, commentTNode);
-                }
+                commentNode = renderer.createComment(ngDevMode ? 'container' : '');
+                var hostNative = getNativeByTNode(hostTNode, hostView);
+                var parentOfHostNative = nativeParentNode(renderer, hostNative);
+                nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
             }
             hostView[hostTNode.index] = lContainer =
                 createLContainer(slotValue, hostView, commentNode, hostTNode);
@@ -22463,7 +22451,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0-next.6+239.sha-1bc53eb');
+    var VERSION = new Version('11.0.0-next.6+240.sha-b015d3e');
 
     /**
      * @license
