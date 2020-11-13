@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+259.sha-25d6fca
+ * @license Angular v11.0.0-next.6+261.sha-24e13e0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13701,6 +13701,12 @@ export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 
 /**
+ * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+ * definition, when generating a direct reference in the component file would otherwise create an
+ * import cycle.
+ *
+ * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+ *
  * @codeGenApi
  */
 export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
