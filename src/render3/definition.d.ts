@@ -258,6 +258,12 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
     schemas?: SchemaMetadata[] | null;
 }): never;
 /**
+ * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+ * definition, when generating a direct reference in the component file would otherwise create an
+ * import cycle.
+ *
+ * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+ *
  * @codeGenApi
  */
 export declare function ɵɵsetComponentScope(type: ComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
