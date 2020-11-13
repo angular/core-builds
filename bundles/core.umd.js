@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0+17.sha-f1d8717
+ * @license Angular v11.0.0+19.sha-83a6ab1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1929,6 +1929,12 @@
         });
     }
     /**
+     * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+     * definition, when generating a direct reference in the component file would otherwise create an
+     * import cycle.
+     *
+     * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+     *
      * @codeGenApi
      */
     function ɵɵsetComponentScope(type, directives, pipes) {
@@ -22376,7 +22382,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0+17.sha-f1d8717');
+    var VERSION = new Version('11.0.0+19.sha-83a6ab1');
 
     /**
      * @license
