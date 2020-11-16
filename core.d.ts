@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0+20.sha-7f3314a
+ * @license Angular v11.0.0+24.sha-e05cfdd
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10277,6 +10277,12 @@ export declare function ɵisListLikeIterable(obj: any): boolean;
 
 /**
  * Determine if the argument is an Observable
+ *
+ * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
+ * types need additional methods, such as `lift()`. But it is adequate for our
+ * needs since within the Angular framework code we only ever need to use the
+ * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
+ * into `Observable` as needed.
  */
 export declare function ɵisObservable(obj: any | Observable<any>): obj is Observable<any>;
 

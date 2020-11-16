@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0+20.sha-7f3314a
+ * @license Angular v11.0.0+24.sha-e05cfdd
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16011,10 +16011,14 @@
     }
     /**
      * Determine if the argument is an Observable
+     *
+     * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
+     * types need additional methods, such as `lift()`. But it is adequate for our
+     * needs since within the Angular framework code we only ever need to use the
+     * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
+     * into `Observable` as needed.
      */
     function isObservable(obj) {
-        // TODO: use isObservable once we update pass rxjs 6.1
-        // https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#610-2018-05-03
         return !!obj && typeof obj.subscribe === 'function';
     }
 
@@ -22382,7 +22386,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.0+20.sha-7f3314a');
+    var VERSION = new Version('11.0.0+24.sha-e05cfdd');
 
     /**
      * @license
