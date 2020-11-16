@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+262.sha-d68cac6
+ * @license Angular v11.0.0-next.6+263.sha-5e92d64
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21803,7 +21803,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0-next.6+262.sha-d68cac6');
+const VERSION = new Version('11.0.0-next.6+263.sha-5e92d64');
 
 /**
  * @license
@@ -28047,7 +28047,7 @@ function getNativeRequestAnimationFrame() {
  * @publicApi
  */
 class NgZone {
-    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false }) {
+    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false }) {
         this.hasPendingMacrotasks = false;
         this.hasPendingMicrotasks = false;
         /**
@@ -28087,7 +28087,11 @@ class NgZone {
         if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
             self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
         }
-        self.shouldCoalesceEventChangeDetection = shouldCoalesceEventChangeDetection;
+        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
+        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
+        self.shouldCoalesceEventChangeDetection =
+            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
+        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
         self.lastRequestAnimationFrameId = -1;
         self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
         forkInnerZoneWithAngularBehavior(self);
@@ -28216,19 +28220,18 @@ function forkInnerZoneWithAngularBehavior(zone) {
     const delayChangeDetectionForEventsDelegate = () => {
         delayChangeDetectionForEvents(zone);
     };
-    const maybeDelayChangeDetection = !!zone.shouldCoalesceEventChangeDetection &&
-        zone.nativeRequestAnimationFrame && delayChangeDetectionForEventsDelegate;
     zone._inner = zone._inner.fork({
         name: 'angular',
-        properties: { 'isAngularZone': true, 'maybeDelayChangeDetection': maybeDelayChangeDetection },
+        properties: { 'isAngularZone': true },
         onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
             try {
                 onEnter(zone);
                 return delegate.invokeTask(target, task, applyThis, applyArgs);
             }
             finally {
-                if (maybeDelayChangeDetection && task.type === 'eventTask') {
-                    maybeDelayChangeDetection();
+                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
+                    zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
                 }
                 onLeave(zone);
             }
@@ -28239,6 +28242,9 @@ function forkInnerZoneWithAngularBehavior(zone) {
                 return delegate.invoke(target, callback, applyThis, applyArgs, source);
             }
             finally {
+                if (zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
                 onLeave(zone);
             }
         },
@@ -28266,7 +28272,8 @@ function forkInnerZoneWithAngularBehavior(zone) {
 }
 function updateMicroTaskStatus(zone) {
     if (zone._hasPendingMicrotasks ||
-        (zone.shouldCoalesceEventChangeDetection && zone.lastRequestAnimationFrameId !== -1)) {
+        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
+            zone.lastRequestAnimationFrameId !== -1)) {
         zone.hasPendingMicrotasks = true;
     }
     else {
@@ -28769,10 +28776,13 @@ class PlatformRef {
         // pass that as parent to the NgModuleFactory.
         const ngZoneOption = options ? options.ngZone : undefined;
         const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
-        const ngZone = getNgZone(ngZoneOption, ngZoneEventCoalescing);
+        const ngZoneRunCoalescing = (options && options.ngZoneRunCoalescing) || false;
+        const ngZone = getNgZone(ngZoneOption, { ngZoneEventCoalescing, ngZoneRunCoalescing });
         const providers = [{ provide: NgZone, useValue: ngZone }];
-        // Attention: Don't use ApplicationRef.run here,
-        // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+        // Note: Create ngZoneInjector within ngZone.run so that all of the instantiated services are
+        // created within the Angular zone
+        // Do not try to replace ngZone.run with ApplicationRef#run because ApplicationRef would then be
+        // created outside of the Angular zone.
         return ngZone.run(() => {
             const ngZoneInjector = Injector.create({ providers: providers, parent: this.injector, name: moduleFactory.moduleType.name });
             const moduleRef = moduleFactory.create(ngZoneInjector);
@@ -28871,7 +28881,7 @@ PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: Platfor
 /*@__PURE__*/ (function () { setClassMetadata(PlatformRef, [{
         type: Injectable
     }], function () { return [{ type: Injector }]; }, null); })();
-function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
+function getNgZone(ngZoneOption, extra) {
     let ngZone;
     if (ngZoneOption === 'noop') {
         ngZone = new NoopNgZone();
@@ -28879,7 +28889,8 @@ function getNgZone(ngZoneOption, ngZoneEventCoalescing) {
     else {
         ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) || new NgZone({
             enableLongStackTrace: isDevMode(),
-            shouldCoalesceEventChangeDetection: ngZoneEventCoalescing
+            shouldCoalesceEventChangeDetection: !!(extra === null || extra === void 0 ? void 0 : extra.ngZoneEventCoalescing),
+            shouldCoalesceRunChangeDetection: !!(extra === null || extra === void 0 ? void 0 : extra.ngZoneRunCoalescing)
         });
     }
     return ngZone;
