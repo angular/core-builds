@@ -7,13 +7,12 @@
  */
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Type } from '../interface/type';
-import { NgModuleDef } from '../metadata/ng_module';
+import { NgModuleDef, NgModuleType } from '../metadata/ng_module_def';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
 import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { TAttributes, TConstantsOrFactory } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
-import { NgModuleType } from './ng_module_ref';
 /**
  * Create a component definition object.
  *

@@ -12,5 +12,11 @@ import { Observable } from 'rxjs';
 export declare function isPromise<T = any>(obj: any): obj is Promise<T>;
 /**
  * Determine if the argument is an Observable
+ *
+ * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
+ * types need additional methods, such as `lift()`. But it is adequate for our
+ * needs since within the Angular framework code we only ever need to use the
+ * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
+ * into `Observable` as needed.
  */
 export declare function isObservable(obj: any | Observable<any>): obj is Observable<any>;

@@ -5,14 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef } from '../change_detection/change_detection';
 import { Injector } from '../di/injector';
 import { Type } from '../interface/type';
 import { ComponentFactory } from '../linker/component_factory';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { ViewContainerRef } from '../linker/view_container_ref';
-import { EmbeddedViewRef, InternalViewRef } from '../linker/view_ref';
+import { EmbeddedViewRef, InternalViewRef, ViewRefTracker } from '../linker/view_ref';
 import { ElementData, NgModuleDefinition, NodeDef, TemplateData, ViewContainerData, ViewData, ViewDefinitionFactory } from './types';
 export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
     [propName: string]: string;
@@ -37,7 +36,7 @@ export declare class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
     onDestroy(callback: Function): void;
     destroy(): void;
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ApplicationRef): void;
+    attachToAppRef(appRef: ViewRefTracker): void;
     attachToViewContainerRef(vcRef: ViewContainerRef): void;
 }
 export declare function createTemplateData(view: ViewData, def: NodeDef): TemplateData;

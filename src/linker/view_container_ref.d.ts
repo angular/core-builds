@@ -6,12 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
-import { injectViewContainerRef as render3InjectViewContainerRef } from '../render3/view_engine_compatibility';
+import { TContainerNode, TElementContainerNode, TElementNode } from '../render3/interfaces/node';
+import { LView } from '../render3/interfaces/view';
 import { ComponentFactory, ComponentRef } from './component_factory';
 import { ElementRef } from './element_ref';
 import { NgModuleRef } from './ng_module_factory';
 import { TemplateRef } from './template_ref';
 import { EmbeddedViewRef, ViewRef } from './view_ref';
+export declare const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof injectViewContainerRef;
 /**
  * Represents a container where one or more views can be attached to a component.
  *
@@ -124,4 +126,20 @@ export declare abstract class ViewContainerRef {
      */
     abstract detach(index?: number): ViewRef | null;
 }
-export declare const SWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof render3InjectViewContainerRef;
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+export declare function injectViewContainerRef(): ViewContainerRef;
+/**
+ * Creates a ViewContainerRef and stores it on the injector.
+ *
+ * @param ViewContainerRefToken The ViewContainerRef type
+ * @param ElementRefToken The ElementRef type
+ * @param hostTNode The node that is requesting a ViewContainerRef
+ * @param hostLView The view to which the node belongs
+ * @returns The ViewContainerRef instance to use
+ */
+export declare function createContainerRef(hostTNode: TElementNode | TContainerNode | TElementContainerNode, hostLView: LView): ViewContainerRef;

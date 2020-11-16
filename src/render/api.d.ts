@@ -7,7 +7,6 @@
  */
 import { InjectionToken } from '../di/injection_token';
 import { ViewEncapsulation } from '../metadata/view';
-import { injectRenderer2 as render3InjectRenderer2 } from '../render3/view_engine_compatibility';
 export declare const Renderer2Interceptor: InjectionToken<Renderer2[]>;
 /**
  * Used by `RendererFactory2` to associate custom rendering data and styles
@@ -259,4 +258,6 @@ export declare abstract class Renderer2 {
      */
     abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
-export declare const SWITCH_RENDERER2_FACTORY__POST_R3__: typeof render3InjectRenderer2;
+export declare const SWITCH_RENDERER2_FACTORY__POST_R3__: typeof injectRenderer2;
+/** Injects a Renderer2 for the current component. */
+export declare function injectRenderer2(): Renderer2;

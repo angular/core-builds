@@ -5,9 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { injectTemplateRef as render3InjectTemplateRef } from '../render3/view_engine_compatibility';
+import { TNode } from '../render3/interfaces/node';
+import { LView } from '../render3/interfaces/view';
 import { ElementRef } from './element_ref';
 import { EmbeddedViewRef } from './view_ref';
+export declare const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof injectTemplateRef;
 /**
  * Represents an embedded template that can be used to instantiate embedded views.
  * To instantiate embedded views based on a template, use the `ViewContainerRef`
@@ -48,4 +50,17 @@ export declare abstract class TemplateRef<C> {
      */
     abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
 }
-export declare const SWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof render3InjectTemplateRef;
+/**
+ * Creates a TemplateRef given a node.
+ *
+ * @returns The TemplateRef instance to use
+ */
+export declare function injectTemplateRef<T>(): TemplateRef<T> | null;
+/**
+ * Creates a TemplateRef and stores it on the injector.
+ *
+ * @param hostTNode The node on which a TemplateRef is requested
+ * @param hostLView The `LView` to which the node belongs
+ * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
+ */
+export declare function createTemplateRef<T>(hostTNode: TNode, hostLView: LView): TemplateRef<T> | null;

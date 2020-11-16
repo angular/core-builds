@@ -10,32 +10,11 @@ import { Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
 import { InjectFlags } from './interface/injector';
-/**
- * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
- *
- * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
- * project.
- *
- * @publicApi
- */
-export declare const INJECTOR: InjectionToken<Injector>;
 export declare const THROW_IF_NOT_FOUND: {};
 export declare const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
 export declare const SOURCE = "__source";
 export declare const USE_VALUE: string;
 export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
-/**
- * Sets the current inject implementation.
- */
-export declare function setInjectImplementation(impl: (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T | null) | undefined): (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T | null) | undefined;
-/**
- * Assert that `_injectImplementation` is not `fn`.
- *
- * This is useful, to prevent infinite recursion.
- *
- * @param fn Function which it should not equal to
- */
-export declare function assertInjectImplementationNot(fn: (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T | null)): void;
 export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>): T;
 export declare function injectInjectorOnly<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 /**
@@ -91,17 +70,6 @@ export declare function ɵɵinvalidFactoryDep(index: number): never;
  * @publicApi
  */
 export declare const inject: typeof ɵɵinject;
-/**
- * Injects `root` tokens in limp mode.
- *
- * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
- * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
- * `InjectableDef`.
- */
-export declare function injectRootLimpMode<T>(token: Type<T> | InjectionToken<T>, notFoundValue: T | undefined, flags: InjectFlags): T | null;
 export declare function injectArgs(types: (Type<any> | InjectionToken<any> | any[])[]): any[];
-export declare class NullInjector implements Injector {
-    get(token: any, notFoundValue?: any): any;
-}
 export declare function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never;
 export declare function formatError(text: string, obj: any, injectorErrorName: string, source?: string | null): string;

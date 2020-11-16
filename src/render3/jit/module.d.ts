@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Type } from '../../interface/type';
-import { NgModule, NgModuleTransitiveScopes } from '../../metadata/ng_module';
+import { NgModule } from '../../metadata/ng_module';
+import { NgModuleTransitiveScopes, NgModuleType } from '../../metadata/ng_module_def';
 import { ComponentDef } from '../interfaces/definition';
-import { NgModuleType } from '../ng_module_ref';
 /**
  * Loops over queued module definitions, if a given module definition has all of its
  * declarations resolved, it dequeues that module definition and sets the scope on

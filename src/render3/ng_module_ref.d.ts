@@ -10,11 +10,7 @@ import { InjectFlags } from '../di/interface/injector';
 import { R3Injector } from '../di/r3_injector';
 import { Type } from '../interface/type';
 import { InternalNgModuleRef, NgModuleFactory as viewEngine_NgModuleFactory, NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_factory';
-import { NgModuleDef } from '../metadata/ng_module';
 import { ComponentFactoryResolver } from './component_ref';
-export interface NgModuleType<T = any> extends Type<T> {
-    ɵmod: NgModuleDef<T>;
-}
 export declare class NgModuleRef<T> extends viewEngine_NgModuleRef<T> implements InternalNgModuleRef<T> {
     _parent: Injector | null;
     _bootstrapComponents: Type<any>[];

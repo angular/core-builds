@@ -7,7 +7,7 @@
  */
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { InjectFlags } from '../di/interface/injector';
-import { TemplateRef as ViewEngine_TemplateRef } from '../linker/template_ref';
+import { TemplateRef } from '../linker/template_ref';
 import { TNode } from './interfaces/node';
 import { LView } from './interfaces/view';
 /**
@@ -16,7 +16,7 @@ import { LView } from './interfaces/view';
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: LView): ViewEngine_TemplateRef<unknown> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, lView: LView): TemplateRef<any> | null;
 /**
  * Returns the appropriate `ChangeDetectorRef` for a pipe.
  *

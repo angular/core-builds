@@ -5,7 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injector, SchemaMetadata } from '../../core';
+import { Injector } from '../../di/injector';
+import { SchemaMetadata } from '../../metadata/schema';
 import { Sanitizer } from '../../sanitization/sanitizer';
 import { KeyValueArray } from '../../util/array_utils';
 import { LContainer } from '../interfaces/container';

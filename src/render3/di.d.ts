@@ -97,6 +97,7 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
 export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | null, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
+export declare function createNodeInjector(): Injector;
 /**
  * Searches for the given token among the node's directives and providers.
  *
