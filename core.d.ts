@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+262.sha-d68cac6
+ * @license Angular v11.0.0-next.6+263.sha-5e92d64
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -509,6 +509,24 @@ declare interface BootstrapOptions {
      * the change detection will only be triggered once.
      */
     ngZoneEventCoalescing?: boolean;
+    /**
+     * Optionally specify if `NgZone#run()` method invocations should be coalesced
+     * into a single change detection.
+     *
+     * Consider the following case.
+     *
+     * for (let i = 0; i < 10; i ++) {
+     *   ngZone.run(() => {
+     *     // do something
+     *   });
+     * }
+     *
+     * This case triggers the change detection multiple times.
+     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
+     * In addition, the change detection executes in requestAnimation.
+     *
+     */
+    ngZoneRunCoalescing?: boolean;
 }
 
 
@@ -4666,9 +4684,10 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
+    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection, shouldCoalesceRunChangeDetection }: {
         enableLongStackTrace?: boolean | undefined;
         shouldCoalesceEventChangeDetection?: boolean | undefined;
+        shouldCoalesceRunChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;
