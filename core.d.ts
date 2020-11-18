@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0-next.6+296.sha-7d68f92
+ * @license Angular v11.0.0-next.6+299.sha-3b2e5be
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6246,6 +6246,14 @@ export declare interface ResolvedReflectiveProvider {
  */
 export declare function resolveForwardRef<T>(type: T): T;
 
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 /** Subset of API needed for appending elements and text nodes. */
 declare interface RNode {
     /**
