@@ -5,12 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../core';
 import { Injector } from '../di/injector';
+import { Type } from '../interface/type';
 import { Sanitizer } from '../sanitization/sanitizer';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { PlayerHandler } from './interfaces/player';
-import { RElement, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { RElement } from './interfaces/renderer_dom';
 import { LView, RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {

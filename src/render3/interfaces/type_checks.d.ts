@@ -8,7 +8,7 @@
 import { LContainer } from './container';
 import { ComponentDef, DirectiveDef } from './definition';
 import { TNode } from './node';
-import { RNode } from './renderer';
+import { RNode } from './renderer_dom';
 import { LView } from './view';
 /**
  * True if `value` is `LView`.

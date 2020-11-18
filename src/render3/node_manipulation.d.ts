@@ -7,7 +7,8 @@
  */
 import { LContainer } from './interfaces/container';
 import { TNode, TProjectionNode } from './interfaces/node';
-import { RComment, RElement, Renderer3, RNode, RText } from './interfaces/renderer';
+import { Renderer3 } from './interfaces/renderer';
+import { RComment, RElement, RNode, RText } from './interfaces/renderer_dom';
 import { LView, TView } from './interfaces/view';
 export declare function createTextNode(renderer: Renderer3, value: string): RText;
 export declare function updateTextNode(renderer: Renderer3, rNode: RText, value: string): void;
