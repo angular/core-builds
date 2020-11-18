@@ -5,7 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2 } from '../render/api';
+import { Renderer2, RendererFactory2 } from '../render/api';
+import { RendererStyleFlags2, RendererType2 } from '../render/api_flags';
 import { DebugContext } from './types';
 export declare function initServicesIfNeeded(): void;
 export declare function getCurrentDebugContext(): DebugContext | null;

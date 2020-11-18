@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { I18nCreateOpCodes, I18nUpdateOpCodes, IcuCreateOpCodes } from '../interfaces/i18n';
-import { RElement, RNode } from '../interfaces/renderer';
+import { RElement, RNode } from '../interfaces/renderer_dom';
 import { LView, TView } from '../interfaces/view';
 /**
  * Keep track of which input bindings in `ɵɵi18nExp` have changed.

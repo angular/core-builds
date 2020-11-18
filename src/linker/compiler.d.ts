@@ -2,7 +2,7 @@ import { InjectionToken } from '../di/injection_token';
 import { StaticProvider } from '../di/interface/provider';
 import { MissingTranslationStrategy } from '../i18n/tokens';
 import { Type } from '../interface/type';
-import { ViewEncapsulation } from '../metadata';
+import { ViewEncapsulation } from '../metadata/view';
 import { ComponentFactory } from './component_factory';
 import { NgModuleFactory } from './ng_module_factory';
 import * as i0 from "../r3_symbols";

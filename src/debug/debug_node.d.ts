@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
-import { DebugContext } from '../view/index';
+import { DebugContext } from '../view/types';
 /**
  * @publicApi
  */

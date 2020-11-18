@@ -14,7 +14,8 @@ import { ComponentTemplate, DirectiveDefList, PipeDefList, ViewQueriesFunction }
 import { AttributeMarker, InsertBeforeIndex, PropertyAliases, TConstants, TContainerNode, TElementNode, TNode as ITNode, TNodeFlags, TNodeProviderIndexes, TNodeType } from '../interfaces/node';
 import { SelectorFlags } from '../interfaces/projection';
 import { LQueries, TQueries } from '../interfaces/query';
-import { RComment, RElement, Renderer3, RendererFactory3, RNode } from '../interfaces/renderer';
+import { Renderer3, RendererFactory3 } from '../interfaces/renderer';
+import { RComment, RElement, RNode } from '../interfaces/renderer_dom';
 import { TStylingKey, TStylingRange } from '../interfaces/styling';
 import { DebugNode, DestroyHookData, HookData, HostBindingOpCodes, LContainerDebug as ILContainerDebug, LView, LViewDebug as ILViewDebug, LViewDebugRange, LViewFlags, TData, TView as ITView, TView, TViewType } from '../interfaces/view';
 /**

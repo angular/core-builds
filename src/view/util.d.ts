@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ViewEncapsulation } from '../metadata/view';
-import { RendererType2 } from '../render/api';
+import { RendererType2 } from '../render/api_flags';
 import { BindingDef, BindingFlags, Definition, DefinitionFactory, DepDef, DepFlags, ElementData, NodeDef, QueryValueType, ViewData } from './types';
 export declare const NOOP: any;
 export declare function tokenKey(token: any): string;

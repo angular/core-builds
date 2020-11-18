@@ -1,6 +1,7 @@
 import { AttributeMarker, TAttributes } from '../interfaces/node';
 import { CssSelector } from '../interfaces/projection';
-import { RElement, Renderer3 } from '../interfaces/renderer';
+import { Renderer3 } from '../interfaces/renderer';
+import { RElement } from '../interfaces/renderer_dom';
 /**
  * Assigns all attribute values to the provided element via the inferred renderer.
  *
