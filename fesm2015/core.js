@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.0+42.sha-724dc93
+ * @license Angular v11.0.0+46.sha-5d8b5eb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21064,7 +21064,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.0+42.sha-724dc93');
+const VERSION = new Version('11.0.0+46.sha-5d8b5eb');
 
 /**
  * @license
@@ -27475,6 +27475,8 @@ const APP_INITIALIZER = new InjectionToken('Application Initializer');
 class ApplicationInitStatus {
     constructor(appInits) {
         this.appInits = appInits;
+        this.resolve = noop;
+        this.reject = noop;
         this.initialized = false;
         this.done = false;
         this.donePromise = new Promise((res, rej) => {
