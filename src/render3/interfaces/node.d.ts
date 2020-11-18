@@ -9,7 +9,7 @@ import { KeyValueArray } from '../../util/array_utils';
 import { TStylingRange } from '../interfaces/styling';
 import { TIcu } from './i18n';
 import { CssSelector } from './projection';
-import { RNode } from './renderer_dom';
+import { RNode } from './renderer';
 import { LView, TView } from './view';
 /**
  * TNodeType corresponds to the {@link TNode} `type` property.

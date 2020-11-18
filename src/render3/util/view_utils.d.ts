@@ -8,7 +8,7 @@
 import { LContainer } from '../interfaces/container';
 import { LContext } from '../interfaces/context';
 import { TConstants, TNode } from '../interfaces/node';
-import { RNode } from '../interfaces/renderer_dom';
+import { RNode } from '../interfaces/renderer';
 import { LView, TData, TView } from '../interfaces/view';
 /**
  * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)

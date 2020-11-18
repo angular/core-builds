@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectionStrategy } from '../change_detection/constants';
-import { Provider } from '../di/interface/provider';
+import { Provider } from '../di';
 import { Type } from '../interface/type';
 import { compileComponent as render3CompileComponent, compileDirective as render3CompileDirective } from '../render3/jit/directive';
 import { compilePipe as render3CompilePipe } from '../render3/jit/pipe';

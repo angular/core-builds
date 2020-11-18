@@ -6,8 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { TNode } from './interfaces/node';
-import { Renderer3 } from './interfaces/renderer';
-import { RElement, RNode } from './interfaces/renderer_dom';
+import { RElement, Renderer3, RNode } from './interfaces/renderer';
 import { LView } from './interfaces/view';
 /**
  * Find a node in front of which `currentTNode` should be inserted (takes i18n into account).

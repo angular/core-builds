@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { TNode } from './node';
-import { RComment, RElement } from './renderer_dom';
+import { RComment, RElement } from './renderer';
 import { HOST, LView, NEXT, PARENT, T_HOST, TRANSPLANTED_VIEWS_TO_REFRESH } from './view';
 /**
  * Special location which allows easy identification of type. If we have an array which was

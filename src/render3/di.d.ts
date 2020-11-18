@@ -9,7 +9,7 @@ import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/interface/injector';
 import { Type } from '../interface/type';
-import { FactoryFn } from './definition_factory';
+import { FactoryFn } from './interfaces/definition';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LView, TData, TView } from './interfaces/view';

@@ -10,7 +10,7 @@ import { Type } from '../interface/type';
 import { NgModuleDef, NgModuleType } from '../metadata/ng_module_def';
 import { SchemaMetadata } from '../metadata/schema';
 import { ViewEncapsulation } from '../metadata/view';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
+import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, ContentQueriesFunction, DirectiveDef, DirectiveDefFeature, DirectiveTypesOrFactory, FactoryFn, HostBindingsFunction, PipeDef, PipeTypesOrFactory, ViewQueriesFunction } from './interfaces/definition';
 import { TAttributes, TConstantsOrFactory } from './interfaces/node';
 import { CssSelectorList } from './interfaces/projection';
 /**
@@ -488,6 +488,8 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
 export declare function getComponentDef<T>(type: any): ComponentDef<T> | null;
 export declare function getDirectiveDef<T>(type: any): DirectiveDef<T> | null;
 export declare function getPipeDef<T>(type: any): PipeDef<T> | null;
+export declare function getFactoryDef<T>(type: any, throwNotFound: true): FactoryFn<T>;
+export declare function getFactoryDef<T>(type: any): FactoryFn<T> | null;
 export declare function getNgModuleDef<T>(type: any, throwNotFound: true): NgModuleDef<T>;
 export declare function getNgModuleDef<T>(type: any): NgModuleDef<T> | null;
 export declare function getNgLocaleIdDef(type: any): string | null;

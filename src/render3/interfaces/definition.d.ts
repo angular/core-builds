@@ -5,11 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { SchemaMetadata, ViewEncapsulation } from '../../core';
 import { ProcessProvidersFunction } from '../../di/interface/provider';
 import { Type } from '../../interface/type';
-import { SchemaMetadata } from '../../metadata/schema';
-import { ViewEncapsulation } from '../../metadata/view';
-import { FactoryFn } from '../definition_factory';
 import { TAttributes, TConstantsOrFactory } from './node';
 import { CssSelectorList } from './projection';
 import { TView } from './view';
@@ -27,6 +25,20 @@ export declare type ViewQueriesFunction<T> = <U extends T>(rf: RenderFlags, ctx:
  * Definition of what a content queries function should look like.
  */
 export declare type ContentQueriesFunction<T> = <U extends T>(rf: RenderFlags, ctx: U, directiveIndex: number) => void;
+/**
+ * Definition of what a factory function should look like.
+ */
+export declare type FactoryFn<T> = {
+    /**
+     * Subclasses without an explicit constructor call through to the factory of their base
+     * definition, providing it with their own constructor to instantiate.
+     */
+    <U extends T>(t: Type<U>): U;
+    /**
+     * If no constructor to instantiate is provided, an instance of type T itself is created.
+     */
+    (t?: undefined): T;
+};
 /**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
  * should be executed.

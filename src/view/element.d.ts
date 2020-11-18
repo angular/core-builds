@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { RendererType2 } from '../render/api_flags';
+import { RendererType2 } from '../render/api';
 import { SecurityContext } from '../sanitization/security';
 import { BindingFlags, ElementData, ElementHandleEventFn, NodeDef, NodeFlags, QueryValueType, ViewData, ViewDefinitionFactory } from './types';
 export declare function anchorDef(flags: NodeFlags, matchedQueriesDsl: null | [string | number, QueryValueType][], ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn, templateFactory?: ViewDefinitionFactory): NodeDef;
