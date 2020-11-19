@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.1+3.sha-26533a0
+ * @license Angular v11.0.1+17.sha-2fe2104
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5863,9 +5863,9 @@ declare interface RElement extends RNode {
     classList: RDomTokenList;
     className: string;
     textContent: string | null;
-    setAttribute(name: string, value: string): void;
+    setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
-    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
+    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
     setProperty?(name: string, value: any): void;
@@ -6227,6 +6227,14 @@ export declare interface ResolvedReflectiveProvider {
  */
 export declare function resolveForwardRef<T>(type: T): T;
 
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 /** Subset of API needed for appending elements and text nodes. */
 declare interface RNode {
     /**
