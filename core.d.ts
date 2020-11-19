@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.2
+ * @license Angular v11.0.2+17.sha-27152e2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -434,6 +434,7 @@ export declare interface Attribute {
  * @publicApi
  */
 export declare const Attribute: AttributeDecorator;
+
 
 /**
  * Type of the Attribute decorator / constructor function.
@@ -8999,9 +9000,9 @@ export declare function ɵangular_packages_core_core_bm(lView: ɵangular_package
  */
 export declare function ɵangular_packages_core_core_bn(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 
-export declare function ɵangular_packages_core_core_bo(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
+export declare function ɵangular_packages_core_core_bo(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
 
-export declare function ɵangular_packages_core_core_bp(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
+export declare function ɵangular_packages_core_core_bp(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
 
 
 export declare function ɵangular_packages_core_core_bq<T>(objWithPropertyToExtract: T): string;
@@ -9958,6 +9959,8 @@ export declare class ɵConsole {
     log(message: string): void;
     warn(message: string): void;
 }
+
+export declare function ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__(): AttributeDecorator;
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
