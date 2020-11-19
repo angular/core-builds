@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+24.sha-1eb4066
+ * @license Angular v11.1.0-next.0+31.sha-a965589
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21707,7 +21707,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+24.sha-1eb4066');
+    var VERSION = new Version('11.1.0-next.0+31.sha-a965589');
 
     /**
      * @license
@@ -26445,6 +26445,12 @@
             if (!proto[symbol])
                 proto[symbol] = symbolIterator;
         }
+        /**
+         * Returns the QueryList entry at `index`.
+         */
+        QueryList.prototype.get = function (index) {
+            return this._results[index];
+        };
         /**
          * See
          * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)

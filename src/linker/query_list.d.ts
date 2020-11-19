@@ -41,6 +41,10 @@ export declare class QueryList<T> implements Iterable<T> {
     readonly last: T;
     constructor();
     /**
+     * Returns the QueryList entry at `index`.
+     */
+    get(index: number): T | undefined;
+    /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
      */
