@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+22.sha-066126a
+ * @license Angular v11.1.0-next.0+21.sha-935cf43
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21134,7 +21134,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.0+22.sha-066126a');
+const VERSION = new Version('11.1.0-next.0+21.sha-935cf43');
 
 /**
  * @license
@@ -28177,7 +28177,7 @@ class NgZone {
      */
     runTask(fn, applyThis, applyArgs, name) {
         const zone = this._inner;
-        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
+        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop$1, noop$1);
         try {
             return zone.runTask(task, applyThis, applyArgs);
         }
@@ -28209,6 +28209,7 @@ class NgZone {
         return this._outer.run(fn);
     }
 }
+function noop$1() { }
 const EMPTY_PAYLOAD = {};
 function checkStable(zone) {
     if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
