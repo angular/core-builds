@@ -11,6 +11,7 @@ export { getDebugNode__POST_R3__ as ɵgetDebugNode__POST_R3__, } from './debug/d
 export { SWITCH_COMPILE_INJECTABLE__POST_R3__ as ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, } from './di/injectable';
 export { INJECTOR_IMPL__POST_R3__ as ɵINJECTOR_IMPL__POST_R3__ } from './di/injector';
 export { NG_INJ_DEF as ɵNG_INJ_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, } from './di/interface/defs';
+export { CREATE_ATTRIBUTE_DECORATOR__POST_R3__ as ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__ } from './di/metadata_attr';
 export { createInjector as ɵcreateInjector } from './di/r3_injector';
 export { SWITCH_IVY_ENABLED__POST_R3__ as ɵSWITCH_IVY_ENABLED__POST_R3__, } from './ivy_switch';
 export { Compiler_compileModuleAndAllComponentsAsync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, Compiler_compileModuleAndAllComponentsSync__POST_R3__ as ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, Compiler_compileModuleAsync__POST_R3__ as ɵCompiler_compileModuleAsync__POST_R3__, Compiler_compileModuleSync__POST_R3__ as ɵCompiler_compileModuleSync__POST_R3__, } from './linker/compiler';
