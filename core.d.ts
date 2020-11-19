@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+24.sha-1eb4066
+ * @license Angular v11.1.0-next.0+31.sha-a965589
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5478,6 +5478,10 @@ export declare class QueryList<T> implements Iterable<T> {
     readonly first: T;
     readonly last: T;
     constructor();
+    /**
+     * Returns the QueryList entry at `index`.
+     */
+    get(index: number): T | undefined;
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)

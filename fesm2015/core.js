@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+24.sha-1eb4066
+ * @license Angular v11.1.0-next.0+31.sha-a965589
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21171,7 +21171,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.0+24.sha-1eb4066');
+const VERSION = new Version('11.1.0-next.0+31.sha-a965589');
 
 /**
  * @license
@@ -25789,6 +25789,12 @@ class QueryList {
         const proto = QueryList.prototype;
         if (!proto[symbol])
             proto[symbol] = symbolIterator;
+    }
+    /**
+     * Returns the QueryList entry at `index`.
+     */
+    get(index) {
+        return this._results[index];
     }
     /**
      * See
