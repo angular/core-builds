@@ -9,10 +9,9 @@
 import * as ts from 'typescript';
 import { UpdateRecorder } from './update_recorder';
 export declare class InitialNavigationTransform {
-    private typeChecker;
     private getUpdateRecorder;
     private printer;
-    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
+    constructor(getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
     /** Migrate the ExtraOptions#InitialNavigation property assignments. */
     migrateInitialNavigationAssignments(literals: ts.PropertyAssignment[]): void;
     /** Migrate an ExtraOptions#InitialNavigation expression to use the new options format. */

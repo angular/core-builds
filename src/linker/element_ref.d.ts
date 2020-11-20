@@ -30,7 +30,7 @@ export declare const SWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof injectElement
  *
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](http://g.co/ng/security).
+ * [Security Guide](https://g.co/ng/security).
  *
  * @publicApi
  */
