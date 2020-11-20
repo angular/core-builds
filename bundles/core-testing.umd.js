@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+38.sha-66d863f
+ * @license Angular v11.1.0-next.0+39.sha-1cba56e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,109 +9,6 @@
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core', '@angular/compiler'], factory) :
     (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}), global.ng.core, global.ng.compiler));
 }(this, (function (exports, core, compiler) { 'use strict';
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var _global = (typeof window === 'undefined' ? global : window);
-    /**
-     * Wraps a test function in an asynchronous test zone. The test will automatically
-     * complete when all asynchronous calls within this zone are done. Can be used
-     * to wrap an {@link inject} call.
-     *
-     * Example:
-     *
-     * ```
-     * it('...', async(inject([AClass], (object) => {
-     *   object.doSomething.then(() => {
-     *     expect(...);
-     *   })
-     * });
-     * ```
-     *
-     *
-     */
-    function asyncFallback(fn) {
-        // If we're running using the Jasmine test framework, adapt to call the 'done'
-        // function when asynchronous activity is finished.
-        if (_global.jasmine) {
-            // Not using an arrow function to preserve context passed from call site
-            return function (done) {
-                if (!done) {
-                    // if we run beforeEach in @angular/core/testing/testing_internal then we get no done
-                    // fake it here and assume sync.
-                    done = function () { };
-                    done.fail = function (e) {
-                        throw e;
-                    };
-                }
-                runInTestZone(fn, this, done, function (err) {
-                    if (typeof err === 'string') {
-                        return done.fail(new Error(err));
-                    }
-                    else {
-                        done.fail(err);
-                    }
-                });
-            };
-        }
-        // Otherwise, return a promise which will resolve when asynchronous activity
-        // is finished. This will be correctly consumed by the Mocha framework with
-        // it('...', async(myFn)); or can be used in a custom framework.
-        // Not using an arrow function to preserve context passed from call site
-        return function () {
-            var _this = this;
-            return new Promise(function (finishCallback, failCallback) {
-                runInTestZone(fn, _this, finishCallback, failCallback);
-            });
-        };
-    }
-    function runInTestZone(fn, context, finishCallback, failCallback) {
-        var currentZone = Zone.current;
-        var AsyncTestZoneSpec = Zone['AsyncTestZoneSpec'];
-        if (AsyncTestZoneSpec === undefined) {
-            throw new Error('AsyncTestZoneSpec is needed for the async() test helper but could not be found. ' +
-                'Please make sure that your environment includes zone.js/dist/async-test.js');
-        }
-        var ProxyZoneSpec = Zone['ProxyZoneSpec'];
-        if (ProxyZoneSpec === undefined) {
-            throw new Error('ProxyZoneSpec is needed for the async() test helper but could not be found. ' +
-                'Please make sure that your environment includes zone.js/dist/proxy.js');
-        }
-        var proxyZoneSpec = ProxyZoneSpec.get();
-        ProxyZoneSpec.assertPresent();
-        // We need to create the AsyncTestZoneSpec outside the ProxyZone.
-        // If we do it in ProxyZone then we will get to infinite recursion.
-        var proxyZone = Zone.current.getZoneWith('ProxyZoneSpec');
-        var previousDelegate = proxyZoneSpec.getDelegate();
-        proxyZone.parent.run(function () {
-            var testZoneSpec = new AsyncTestZoneSpec(function () {
-                // Need to restore the original zone.
-                currentZone.run(function () {
-                    if (proxyZoneSpec.getDelegate() == testZoneSpec) {
-                        // Only reset the zone spec if it's sill this one. Otherwise, assume it's OK.
-                        proxyZoneSpec.setDelegate(previousDelegate);
-                    }
-                    finishCallback();
-                });
-            }, function (error) {
-                // Need to restore the original zone.
-                currentZone.run(function () {
-                    if (proxyZoneSpec.getDelegate() == testZoneSpec) {
-                        // Only reset the zone spec if it's sill this one. Otherwise, assume it's OK.
-                        proxyZoneSpec.setDelegate(previousDelegate);
-                    }
-                    failCallback(error);
-                });
-            }, 'test');
-            proxyZoneSpec.setDelegate(testZoneSpec);
-        });
-        return Zone.current.runGuarded(fn, context);
-    }
 
     /**
      * @license
@@ -149,10 +46,10 @@
         if (typeof asyncTest === 'function') {
             return asyncTest(fn);
         }
-        // not using new version of zone.js
-        // TODO @JiaLiPassion, remove this after all library updated to
-        // newest version of zone.js(0.8.25)
-        return asyncFallback(fn);
+        return function () {
+            return Promise.reject('zone-testing.js is needed for the async() test helper but could not be found. ' +
+                'Please make sure that your environment includes zone.js/dist/zone-testing.js');
+        };
     }
     /**
      * @deprecated use `waitForAsync()`, (expected removal in v12)
@@ -367,159 +264,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * fakeAsync has been moved to zone.js
-     * this file is for fallback in case old version of zone.js is used
-     */
     var _Zone = typeof Zone !== 'undefined' ? Zone : null;
-    var FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
-    var ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
-    var _fakeAsyncTestZoneSpec = null;
-    /**
-     * Clears out the shared fake async zone for a test.
-     * To be called in a global `beforeEach`.
-     *
-     * @publicApi
-     */
-    function resetFakeAsyncZoneFallback() {
-        if (_fakeAsyncTestZoneSpec) {
-            _fakeAsyncTestZoneSpec.unlockDatePatch();
-        }
-        _fakeAsyncTestZoneSpec = null;
-        // in node.js testing we may not have ProxyZoneSpec in which case there is nothing to reset.
-        ProxyZoneSpec && ProxyZoneSpec.assertPresent().resetDelegate();
-    }
-    var _inFakeAsyncCall = false;
-    /**
-     * Wraps a function to be executed in the fakeAsync zone:
-     * - microtasks are manually executed by calling `flushMicrotasks()`,
-     * - timers are synchronous, `tick()` simulates the asynchronous passage of time.
-     *
-     * If there are any pending timers at the end of the function, an exception will be thrown.
-     *
-     * Can be used to wrap inject() calls.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/testing/ts/fake_async.ts region='basic'}
-     *
-     * @param fn
-     * @returns The function wrapped to be executed in the fakeAsync zone
-     *
-     * @publicApi
-     */
-    function fakeAsyncFallback(fn) {
-        // Not using an arrow function to preserve context passed from call site
-        return function () {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var proxyZoneSpec = ProxyZoneSpec.assertPresent();
-            if (_inFakeAsyncCall) {
-                throw new Error('fakeAsync() calls can not be nested');
-            }
-            _inFakeAsyncCall = true;
-            try {
-                if (!_fakeAsyncTestZoneSpec) {
-                    if (proxyZoneSpec.getDelegate() instanceof FakeAsyncTestZoneSpec) {
-                        throw new Error('fakeAsync() calls can not be nested');
-                    }
-                    _fakeAsyncTestZoneSpec = new FakeAsyncTestZoneSpec();
-                }
-                var res = void 0;
-                var lastProxyZoneSpec = proxyZoneSpec.getDelegate();
-                proxyZoneSpec.setDelegate(_fakeAsyncTestZoneSpec);
-                _fakeAsyncTestZoneSpec.lockDatePatch();
-                try {
-                    res = fn.apply(this, args);
-                    flushMicrotasksFallback();
-                }
-                finally {
-                    proxyZoneSpec.setDelegate(lastProxyZoneSpec);
-                }
-                if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                    throw new Error(_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " " +
-                        "periodic timer(s) still in the queue.");
-                }
-                if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
-                    throw new Error(_fakeAsyncTestZoneSpec.pendingTimers.length + " timer(s) still in the queue.");
-                }
-                return res;
-            }
-            finally {
-                _inFakeAsyncCall = false;
-                resetFakeAsyncZoneFallback();
-            }
-        };
-    }
-    function _getFakeAsyncZoneSpec() {
-        if (_fakeAsyncTestZoneSpec == null) {
-            throw new Error('The code should be running in the fakeAsync zone to call this function');
-        }
-        return _fakeAsyncTestZoneSpec;
-    }
-    /**
-     * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
-     *
-     * The microtasks queue is drained at the very start of this function and after any timer callback
-     * has been executed.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/testing/ts/fake_async.ts region='basic'}
-     *
-     * @publicApi
-     */
-    function tickFallback(millis, tickOptions) {
-        if (millis === void 0) { millis = 0; }
-        if (tickOptions === void 0) { tickOptions = {
-            processNewMacroTasksSynchronously: true
-        }; }
-        _getFakeAsyncZoneSpec().tick(millis, null, tickOptions);
-    }
-    /**
-     * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
-     * draining the macrotask queue until it is empty. The returned value is the milliseconds
-     * of time that would have been elapsed.
-     *
-     * @param maxTurns
-     * @returns The simulated time elapsed, in millis.
-     *
-     * @publicApi
-     */
-    function flushFallback(maxTurns) {
-        return _getFakeAsyncZoneSpec().flush(maxTurns);
-    }
-    /**
-     * Discard all remaining periodic tasks.
-     *
-     * @publicApi
-     */
-    function discardPeriodicTasksFallback() {
-        var zoneSpec = _getFakeAsyncZoneSpec();
-        zoneSpec.pendingPeriodicTimers.length = 0;
-    }
-    /**
-     * Flush any pending microtasks.
-     *
-     * @publicApi
-     */
-    function flushMicrotasksFallback() {
-        _getFakeAsyncZoneSpec().flushMicrotasks();
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-    var fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
+    var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+    var fakeAsyncTestModuleNotLoadedErrorMessage = "zone-testing.js is needed for the async() test helper but could not be found.\n        Please make sure that your environment includes zone.js/dist/zone-testing.js";
     /**
      * Clears out the shared fake async zone for a test.
      * To be called in a global `beforeEach`.
@@ -530,9 +277,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.resetFakeAsyncZone();
         }
-        else {
-            return resetFakeAsyncZoneFallback();
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Wraps a function to be executed in the fakeAsync zone:
@@ -557,9 +302,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.fakeAsync(fn);
         }
-        else {
-            return fakeAsyncFallback(fn);
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
@@ -620,9 +363,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.tick(millis, tickOptions);
         }
-        else {
-            return tickFallback(millis, tickOptions);
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
@@ -638,9 +379,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.flush(maxTurns);
         }
-        else {
-            return flushFallback(maxTurns);
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Discard all remaining periodic tasks.
@@ -651,9 +390,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.discardPeriodicTasks();
         }
-        else {
-            discardPeriodicTasksFallback();
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Flush any pending microtasks.
@@ -664,9 +401,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.flushMicrotasks();
         }
-        else {
-            return flushMicrotasksFallback();
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
 
     /*! *****************************************************************************
@@ -3191,10 +2926,10 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var _global$1 = (typeof window === 'undefined' ? global : window);
+    var _global = (typeof window === 'undefined' ? global : window);
     // Reset the test providers and the fake async zone before each test.
-    if (_global$1.beforeEach) {
-        _global$1.beforeEach(function () {
+    if (_global.beforeEach) {
+        _global.beforeEach(function () {
             TestBed.resetTestingModule();
             resetFakeAsyncZone();
         });
