@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.2+31.sha-3114b0a
+ * @license Angular v11.0.2+36.sha-e32fe1a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -35,7 +35,7 @@ declare interface AbstractType<T> extends Function {
  *
  * The following example sets the `OnPush` change-detection strategy for a component
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+ * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
  *
  * <code-example path="core/ts/change_detect/change-detection.ts"
  * region="mark-for-check"></code-example>
@@ -352,7 +352,7 @@ declare type CtorDependency = {
  *
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](http://g.co/ng/security).
+ * [Security Guide](https://g.co/ng/security).
  *
  * @publicApi
  */
