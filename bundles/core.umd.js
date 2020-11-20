@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+46.sha-ff0a90e
+ * @license Angular v11.1.0-next.0+51.sha-3e1e5a1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5510,7 +5510,7 @@
         }
         SafeValueImpl.prototype.toString = function () {
             return "SafeValue must use [property]=binding: " + this.changingThisBreaksApplicationSecurity +
-                " (see http://g.co/ng/security#xss)";
+                " (see https://g.co/ng/security#xss)";
         };
         return SafeValueImpl;
     }());
@@ -5574,7 +5574,7 @@
             // Allow ResourceURLs in URL contexts, they are strictly more trusted.
             if (actualType === "ResourceURL" /* ResourceUrl */ && type === "URL" /* Url */)
                 return true;
-            throw new Error("Required a safe " + type + ", got a " + actualType + " (see http://g.co/ng/security#xss)");
+            throw new Error("Required a safe " + type + ", got a " + actualType + " (see https://g.co/ng/security#xss)");
         }
         return actualType === type;
     }
@@ -5856,7 +5856,7 @@
         if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
             return url;
         if (isDevMode()) {
-            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see http://g.co/ng/security#xss)");
+            console.warn("WARNING: sanitizing unsafe URL value " + url + " (see https://g.co/ng/security#xss)");
         }
         return 'unsafe:' + url;
     }
@@ -5909,13 +5909,13 @@
         return res;
     }
     // Good source of info about elements and attributes
-    // http://dev.w3.org/html5/spec/Overview.html#semantics
-    // http://simon.html5.org/html-elements
+    // https://html.spec.whatwg.org/#semantics
+    // https://simon.html5.org/html-elements
     // Safe Void Elements - HTML5
-    // http://dev.w3.org/html5/spec/Overview.html#void-elements
+    // https://html.spec.whatwg.org/#void-elements
     var VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
     // Elements that you can, intentionally, leave open (and which close themselves)
-    // http://dev.w3.org/html5/spec/Overview.html#optional-tags
+    // https://html.spec.whatwg.org/#optional-tags
     var OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
     var OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
     var OPTIONAL_END_TAG_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
@@ -6113,7 +6113,7 @@
             var sanitizer = new SanitizingHtmlSerializer();
             var safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
             if (isDevMode() && sanitizer.sanitizedSomething) {
-                console.warn('WARNING: sanitizing HTML stripped some content, see http://g.co/ng/security#xss');
+                console.warn('WARNING: sanitizing HTML stripped some content, see https://g.co/ng/security#xss');
             }
             return trustedHTMLFromString(safeHtml);
         }
@@ -6250,7 +6250,7 @@
         if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* ResourceUrl */)) {
             return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
         }
-        throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+        throw new Error('unsafe value used in a resource URL context (see https://g.co/ng/security#xss)');
     }
     /**
      * A `script` sanitizer which only lets trusted javascript through.
@@ -20829,7 +20829,8 @@
                                 else {
                                     ngDevMode &&
                                         console.warn("WARNING: ignoring unsafe attribute value " +
-                                            (lowerAttrName + " on element " + tagName + " (see http://g.co/ng/security#xss)"));
+                                            (lowerAttrName + " on element " + tagName + " ") +
+                                            "(see https://g.co/ng/security#xss)");
                                 }
                             }
                             else {
@@ -21628,7 +21629,7 @@
      *
      * @security Permitting direct access to the DOM can make your application more vulnerable to
      * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
-     * [Security Guide](http://g.co/ng/security).
+     * [Security Guide](https://g.co/ng/security).
      *
      * @publicApi
      */
@@ -21759,7 +21760,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+46.sha-ff0a90e');
+    var VERSION = new Version('11.1.0-next.0+51.sha-3e1e5a1');
 
     /**
      * @license
@@ -23228,7 +23229,7 @@
      *
      * The following example sets the `OnPush` change-detection strategy for a component
      * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
-     * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+     * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
      *
      * <code-example path="core/ts/change_detect/change-detection.ts"
      * region="mark-for-check"></code-example>

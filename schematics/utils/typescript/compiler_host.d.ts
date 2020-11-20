@@ -25,3 +25,10 @@ export declare function createMigrationProgram(tree: Tree, tsconfigPath: string,
     program: ts.Program;
 };
 export declare function createMigrationCompilerHost(tree: Tree, options: ts.CompilerOptions, basePath: string, fakeRead?: FakeReadFileFn): ts.CompilerHost;
+/**
+ * Checks whether a file can be migrate by our automated migrations.
+ * @param basePath Absolute path to the project.
+ * @param sourceFile File being checked.
+ * @param program Program that includes the source file.
+ */
+export declare function canMigrateFile(basePath: string, sourceFile: ts.SourceFile, program: ts.Program): boolean;
