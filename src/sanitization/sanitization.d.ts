@@ -89,18 +89,6 @@ export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | s
  */
 export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | string;
 /**
- * Promotes the given constant string to a TrustedScript.
- * @param script constant string containing a trusted script.
- * @returns TrustedScript wrapping `script`.
- *
- * @security This is a security-sensitive function and should only be used to
- * convert constant values of attributes and properties found in
- * application-provided Angular templates to TrustedScript.
- *
- * @codeGenApi
- */
-export declare function ɵɵtrustConstantScript(script: string): TrustedScript | string;
-/**
  * Promotes the given constant string to a TrustedScriptURL.
  * @param url constant string containing a trusted script URL.
  * @returns TrustedScriptURL wrapping `url`.

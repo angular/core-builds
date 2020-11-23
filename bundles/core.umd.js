@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+51.sha-3e1e5a1
+ * @license Angular v11.1.0-next.0+60.sha-938abc0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6280,20 +6280,6 @@
      */
     function ɵɵtrustConstantHtml(html) {
         return trustedHTMLFromString(html);
-    }
-    /**
-     * Promotes the given constant string to a TrustedScript.
-     * @param script constant string containing a trusted script.
-     * @returns TrustedScript wrapping `script`.
-     *
-     * @security This is a security-sensitive function and should only be used to
-     * convert constant values of attributes and properties found in
-     * application-provided Angular templates to TrustedScript.
-     *
-     * @codeGenApi
-     */
-    function ɵɵtrustConstantScript(script) {
-        return trustedScriptFromString(script);
     }
     /**
      * Promotes the given constant string to a TrustedScriptURL.
@@ -15339,6 +15325,12 @@
         return !!obj && typeof obj.then === 'function';
     }
     /**
+     * Determine if the argument is a Subscribable
+     */
+    function isSubscribable(obj) {
+        return !!obj && typeof obj.subscribe === 'function';
+    }
+    /**
      * Determine if the argument is an Observable
      *
      * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
@@ -15347,9 +15339,7 @@
      * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
      * into `Observable` as needed.
      */
-    function isObservable(obj) {
-        return !!obj && typeof obj.subscribe === 'function';
-    }
+    var isObservable = isSubscribable;
 
     /**
      * @license
@@ -21731,7 +21721,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+51.sha-3e1e5a1');
+    var VERSION = new Version('11.1.0-next.0+60.sha-938abc0');
 
     /**
      * @license
@@ -27283,7 +27273,6 @@
         'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
         'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
         'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
-        'ɵɵtrustConstantScript': ɵɵtrustConstantScript,
         'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
         'ɵɵngDeclareDirective': ɵɵngDeclareDirective,
     }); })();
@@ -33710,6 +33699,7 @@
     exports.ɵisListLikeIterable = isListLikeIterable;
     exports.ɵisObservable = isObservable;
     exports.ɵisPromise = isPromise;
+    exports.ɵisSubscribable = isSubscribable;
     exports.ɵivyEnabled = ivyEnabled;
     exports.ɵmakeDecorator = makeDecorator;
     exports.ɵmarkDirty = markDirty;
@@ -33896,7 +33886,6 @@
     exports.ɵɵtextInterpolateV = ɵɵtextInterpolateV;
     exports.ɵɵtrustConstantHtml = ɵɵtrustConstantHtml;
     exports.ɵɵtrustConstantResourceUrl = ɵɵtrustConstantResourceUrl;
-    exports.ɵɵtrustConstantScript = ɵɵtrustConstantScript;
     exports.ɵɵviewQuery = ɵɵviewQuery;
 
     Object.defineProperty(exports, '__esModule', { value: true });
