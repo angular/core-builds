@@ -1,11 +1,12 @@
 /**
- * @license Angular v11.1.0-next.0+51.sha-3e1e5a1
+ * @license Angular v11.1.0-next.0+60.sha-938abc0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
+import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
 
 /**
@@ -9384,15 +9385,6 @@ export declare class ɵangular_packages_core_core_c implements ReflectiveInjecto
 }
 
 /**
- * Unsafely promote a string to a TrustedScript, falling back to strings when
- * Trusted Types are not available.
- * @security In particular, it must be assured that the provided string will
- * never cause an XSS vulnerability if used in a context that will be
- * interpreted and executed as a script by a browser, e.g. when calling eval.
- */
-export declare function ɵangular_packages_core_core_ca(script: string): TrustedScript | string;
-
-/**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
@@ -10358,12 +10350,17 @@ export declare function ɵisListLikeIterable(obj: any): boolean;
  * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
  * into `Observable` as needed.
  */
-export declare function ɵisObservable(obj: any | Observable<any>): obj is Observable<any>;
+export declare const ɵisObservable: (obj: any | Observable<any>) => obj is Observable<any>;
 
 /**
  * Determine if the argument is shaped like a Promise
  */
 export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
+
+/**
+ * Determine if the argument is a Subscribable
+ */
+export declare function ɵisSubscribable(obj: any | Subscribable<any>): obj is Subscribable<any>;
 
 export declare const ɵivyEnabled = false;
 
@@ -14811,19 +14808,6 @@ export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | strin
  * @codeGenApi
  */
 export declare function ɵɵtrustConstantResourceUrl(url: string): TrustedScriptURL | string;
-
-/**
- * Promotes the given constant string to a TrustedScript.
- * @param script constant string containing a trusted script.
- * @returns TrustedScript wrapping `script`.
- *
- * @security This is a security-sensitive function and should only be used to
- * convert constant values of attributes and properties found in
- * application-provided Angular templates to TrustedScript.
- *
- * @codeGenApi
- */
-export declare function ɵɵtrustConstantScript(script: string): TrustedScript | string;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
