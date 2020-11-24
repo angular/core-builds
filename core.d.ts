@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.2+43.sha-7bf73d7
+ * @license Angular v11.0.2+48.sha-8634611
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1709,7 +1709,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 }
 
 /**
- * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
  * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */

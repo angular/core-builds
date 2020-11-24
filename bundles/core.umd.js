@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.2+43.sha-7bf73d7
+ * @license Angular v11.0.2+48.sha-8634611
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -266,7 +266,7 @@
         };
     }
     /**
-     * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+     * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
      * code should now use ɵɵdefineInjectable instead.
      * @publicApi
      */
@@ -972,7 +972,7 @@
         };
     }
     /**
-     * The following getter methods retrieve the definition form the type. Currently the retrieval
+     * The following getter methods retrieve the definition from the type. Currently the retrieval
      * honors inheritance, but in the future we may change the rule to require that definitions are
      * explicit. This would require some sort of migration strategy.
      */
@@ -21685,7 +21685,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.2+43.sha-7bf73d7');
+    var VERSION = new Version('11.0.2+48.sha-8634611');
 
     /**
      * @license
