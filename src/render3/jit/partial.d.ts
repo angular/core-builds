@@ -11,9 +11,3 @@
  * @codeGenApi
  */
 export declare function ɵɵngDeclareDirective(decl: unknown): unknown;
-/**
- * Compiles a partial component declaration object into a full component definition object.
- *
- * @codeGenApi
- */
-export declare function ɵɵngDeclareComponent(decl: unknown): unknown;

@@ -137,19 +137,15 @@ export interface R3ComponentMetadataFacade extends R3DirectiveMetadataFacade {
     preserveWhitespaces: boolean;
     animations: any[] | undefined;
     pipes: Map<string, any>;
-    directives: R3UsedDirectiveMetadata[];
+    directives: {
+        selector: string;
+        expression: any;
+    }[];
     styles: string[];
     encapsulation: ViewEncapsulation;
     viewProviders: Provider[] | null;
     interpolation?: [string, string];
     changeDetection?: ChangeDetectionStrategy;
-}
-export interface R3UsedDirectiveMetadata {
-    selector: string;
-    inputs: string[];
-    outputs: string[];
-    exportAs: string[] | null;
-    type: any;
 }
 export interface R3FactoryDefMetadataFacade {
     name: string;
