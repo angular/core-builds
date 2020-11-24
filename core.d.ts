@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+73.sha-266959e
+ * @license Angular v11.1.0-next.0+83.sha-3a6e7b5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12840,6 +12840,13 @@ export declare function ɵɵnamespaceSVG(): void;
  * @codeGenApi
  */
 export declare function ɵɵnextContext<T = any>(level?: number): T;
+
+/**
+ * Compiles a partial component declaration object into a full component definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareComponent(decl: unknown): unknown;
 
 
 /**
