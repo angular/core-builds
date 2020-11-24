@@ -126,7 +126,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     factory: () => T;
 }): never;
 /**
- * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
  * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */
