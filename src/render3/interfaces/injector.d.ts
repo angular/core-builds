@@ -7,7 +7,7 @@
  */
 import { InjectionToken } from '../../di/injection_token';
 import { InjectFlags } from '../../di/interface/injector';
-import { Type } from '../../interface/type';
+import { AbstractType, Type } from '../../interface/type';
 import { TDirectiveHostNode } from './node';
 import { LView, TData } from './view';
 /**
@@ -185,7 +185,7 @@ export declare class NodeInjectorFactory {
     /**
      * The inject implementation to be activated when using the factory.
      */
-    injectImpl: null | (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T);
+    injectImpl: null | (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags) => T);
     /**
      * Marker set to true during factory invocation to see if we get into recursive loop.
      * Recursive loop causes an error to be displayed.
@@ -278,7 +278,7 @@ export declare class NodeInjectorFactory {
     /**
      * Set to `true` if the token is declared in `viewProviders` (or if it is component).
      */
-    isViewProvider: boolean, injectImplementation: null | (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags) => T));
+    isViewProvider: boolean, injectImplementation: null | (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags) => T));
 }
 export declare function isFactory(obj: any): obj is NodeInjectorFactory;
 export declare const unusedValueExportToPlacateAjd = 1;

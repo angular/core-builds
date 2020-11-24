@@ -8,7 +8,7 @@
 import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/interface/injector';
-import { Type } from '../interface/type';
+import { AbstractType, Type } from '../interface/type';
 import { FactoryFn } from './definition_factory';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
@@ -96,7 +96,7 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
-export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | null, lView: LView, token: Type<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
+export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | null, lView: LView, token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
 export declare function createNodeInjector(): Injector;
 /**
  * Searches for the given token among the node's directives and providers.
@@ -108,7 +108,7 @@ export declare function createNodeInjector(): Injector;
  * @param isHostSpecialCase Whether the host special case applies.
  * @returns Index of a found directive or provider, or null when none found.
  */
-export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: Type<T> | InjectionToken<T> | string, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
+export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: Type<T> | AbstractType<T> | InjectionToken<T> | string, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
 /**
  * Retrieve or instantiate the injectable from the `LView` at particular `index`.
  *
@@ -129,7 +129,7 @@ export declare function getNodeInjectable(lView: LView, tView: TView, index: num
  * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
  *   When the returned value is negative then it represents special values such as `Injector`.
  */
-export declare function bloomHashBitOrFactory(token: Type<any> | InjectionToken<any> | string): number | Function | undefined;
+export declare function bloomHashBitOrFactory(token: Type<any> | AbstractType<any> | InjectionToken<any> | string): number | Function | undefined;
 export declare function bloomHasToken(bloomHash: number, injectorIndex: number, injectorView: LView | TData): boolean;
 export declare class NodeInjector implements Injector {
     private _tNode;

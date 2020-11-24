@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import '../util/ng_dev_mode';
-import { Type } from '../interface/type';
+import { AbstractType, Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
 import { InjectorType } from './interface/defs';
@@ -63,7 +63,7 @@ export declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
     /**
