@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+66.sha-88fbc06
+ * @license Angular v11.1.0-next.0+69.sha-b5c0f9d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -266,7 +266,7 @@
         };
     }
     /**
-     * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+     * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
      * code should now use ɵɵdefineInjectable instead.
      * @publicApi
      */
@@ -21750,7 +21750,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+66.sha-88fbc06');
+    var VERSION = new Version('11.1.0-next.0+69.sha-b5c0f9d');
 
     /**
      * @license
