@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+64.sha-6046419
+ * @license Angular v11.1.0-next.0+67.sha-2c275f6
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -972,7 +972,7 @@
         };
     }
     /**
-     * The following getter methods retrieve the definition form the type. Currently the retrieval
+     * The following getter methods retrieve the definition from the type. Currently the retrieval
      * honors inheritance, but in the future we may change the rule to require that definitions are
      * explicit. This would require some sort of migration strategy.
      */
@@ -21750,7 +21750,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+64.sha-6046419');
+    var VERSION = new Version('11.1.0-next.0+67.sha-2c275f6');
 
     /**
      * @license
