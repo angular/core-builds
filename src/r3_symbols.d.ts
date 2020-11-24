@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+70.sha-453b32f
+ * @license Angular v11.1.0-next.0+71.sha-a1b6ad0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -579,9 +579,9 @@ declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -1016,9 +1016,9 @@ export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]>
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.

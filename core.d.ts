@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+70.sha-453b32f
+ * @license Angular v11.1.0-next.0+71.sha-a1b6ad0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3395,9 +3395,9 @@ export declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -5573,7 +5573,7 @@ declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
     /**
@@ -8842,9 +8842,9 @@ export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [str
 /** Checks whether a function is wrapped by a `forwardRef`. */
 export declare function ɵangular_packages_core_core_a(fn: any): fn is () => any;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 export declare abstract class ɵangular_packages_core_core_ba {
     abstract get view(): ViewData;
@@ -9035,7 +9035,7 @@ export declare class ɵangular_packages_core_core_br implements Injector {
     get(token: any, notFoundValue?: any): any;
 }
 
-export declare function ɵangular_packages_core_core_bs(): (<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
+export declare function ɵangular_packages_core_core_bs(): (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
 
 
 /**
@@ -12378,9 +12378,9 @@ export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportA
  *
  * @codeGenApi
  */
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags: InjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -12677,9 +12677,9 @@ export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
