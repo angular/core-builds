@@ -481,7 +481,7 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     pure?: boolean;
 }): never;
 /**
- * The following getter methods retrieve the definition form the type. Currently the retrieval
+ * The following getter methods retrieve the definition from the type. Currently the retrieval
  * honors inheritance, but in the future we may change the rule to require that definitions are
  * explicit. This would require some sort of migration strategy.
  */
