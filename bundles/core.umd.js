@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+73.sha-266959e
+ * @license Angular v11.1.0-next.0+83.sha-3a6e7b5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21721,7 +21721,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+73.sha-266959e');
+    var VERSION = new Version('11.1.0-next.0+83.sha-3a6e7b5');
 
     /**
      * @license
@@ -25600,6 +25600,14 @@
     function ɵɵngDeclareDirective(decl) {
         throw new Error('Not yet implemented');
     }
+    /**
+     * Compiles a partial component declaration object into a full component definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareComponent(decl) {
+        throw new Error('Not yet implemented');
+    }
 
     /**
      * Adds decorator, constructor, and property metadata to a given type via static metadata fields
@@ -27274,7 +27282,6 @@
         'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
         'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
         'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
-        'ɵɵngDeclareDirective': ɵɵngDeclareDirective,
     }); })();
 
     var jitOptions = null;
@@ -33803,6 +33810,7 @@
     exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
     exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
     exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
