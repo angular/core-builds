@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+103.sha-e148382
+ * @license Angular v11.1.0-next.0+104.sha-68d4a74
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14988,6 +14988,11 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCapture);
         }
     }
+    else {
+        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
+        // ancestors are marked dirty when an event occurs.
+        listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+    }
     // subscribe to directive outputs
     const outputs = tNode.outputs;
     let props;
@@ -21184,7 +21189,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.0+103.sha-e148382');
+const VERSION = new Version('11.1.0-next.0+104.sha-68d4a74');
 
 /**
  * @license
