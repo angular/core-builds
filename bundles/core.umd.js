@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.0+115.sha-1de59d2
+ * @license Angular v11.1.0-next.0+116.sha-11cd37f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1589,13 +1589,16 @@
      * Used for stringify render output in Ivy.
      * Important! This function is very performance-sensitive and we should
      * be extra careful not to introduce megamorphic reads in it.
+     * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
      */
     function renderStringify(value) {
         if (typeof value === 'string')
             return value;
         if (value == null)
             return '';
-        return '' + value;
+        // Use `String` so that it invokes the `toString` method of the value. Note that this
+        // appears to be faster than calling `value.toString` (see `render_stringify` benchmark).
+        return String(value);
     }
     /**
      * Used to stringify a value so that it can be displayed in an error message.
@@ -21755,7 +21758,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.0+115.sha-1de59d2');
+    var VERSION = new Version('11.1.0-next.0+116.sha-11cd37f');
 
     /**
      * @license
