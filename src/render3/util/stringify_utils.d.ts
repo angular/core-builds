@@ -9,6 +9,7 @@
  * Used for stringify render output in Ivy.
  * Important! This function is very performance-sensitive and we should
  * be extra careful not to introduce megamorphic reads in it.
+ * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
  */
 export declare function renderStringify(value: any): string;
 /**
