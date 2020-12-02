@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.1+12.sha-eba185e
+ * @license Angular v11.1.0-next.1+20.sha-a55e01b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -343,6 +343,7 @@ export declare class ApplicationRef {
     private _runningTick;
     private _enforceNoNewChanges;
     private _stable;
+    private _onMicrotaskEmptySubscription;
     /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
@@ -397,7 +398,6 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
-    private _unloadComponent;
     /**
      * Returns the number of attached views.
      */
@@ -9155,6 +9155,10 @@ export declare interface ɵangular_packages_core_core_bv extends Array<any> {
      *
      * These change per LView instance, so they cannot be stored on TView. Instead,
      * TView.cleanup saves an index to the necessary context in this array.
+     *
+     * After `LView` is created it is possible to attach additional instance specific functions at the
+     * end of the `lView[CLENUP]` because we know that no more `T` level cleanup functions will be
+     * addeded here.
      */
     [CLEANUP]: any[] | null;
     /**
@@ -10886,7 +10890,6 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     location: ElementRef;
     private _rootLView;
     private _tNode;
-    destroyCbs: (() => void)[] | null;
     instance: T;
     hostView: ViewRef_2<T>;
     changeDetectorRef: ChangeDetectorRef;
