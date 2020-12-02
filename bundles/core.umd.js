@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.1+12.sha-eba185e
+ * @license Angular v11.1.0-next.1+20.sha-a55e01b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -152,6 +152,11 @@
     function assertString(actual, msg) {
         if (!(typeof actual === 'string')) {
             throwError(msg, actual === null ? 'null' : typeof actual, 'string', '===');
+        }
+    }
+    function assertFunction(actual, msg) {
+        if (!(typeof actual === 'function')) {
+            throwError(msg, actual === null ? 'null' : typeof actual, 'function', '===');
         }
     }
     function assertEqual(actual, expected, msg) {
@@ -7442,7 +7447,7 @@
             // really more of an "afterDestroy" hook if you think about it.
             lView[FLAGS] |= 256 /* Destroyed */;
             executeOnDestroys(tView, lView);
-            removeListeners(tView, lView);
+            processCleanups(tView, lView);
             // For component views only, the local renderer is destroyed at clean up time.
             if (lView[TVIEW].type === 1 /* Component */ && isProceduralRenderer(lView[RENDERER])) {
                 ngDevMode && ngDevMode.rendererDestroy++;
@@ -7464,10 +7469,14 @@
         }
     }
     /** Removes listeners and unsubscribes from output subscriptions */
-    function removeListeners(tView, lView) {
+    function processCleanups(tView, lView) {
         var tCleanup = tView.cleanup;
+        var lCleanup = lView[CLEANUP];
+        // `LCleanup` contains both share information with `TCleanup` as well as instance specific
+        // information appended at the end. We need to know where the end of the `TCleanup` information
+        // is, and we track this with `lastLCleanupIndex`.
+        var lastLCleanupIndex = -1;
         if (tCleanup !== null) {
-            var lCleanup = lView[CLEANUP];
             for (var i = 0; i < tCleanup.length - 1; i += 2) {
                 if (typeof tCleanup[i] === 'string') {
                     // This is a native DOM listener
@@ -7475,7 +7484,7 @@
                     var target = typeof idxOrTargetGetter === 'function' ?
                         idxOrTargetGetter(lView) :
                         unwrapRNode(lView[idxOrTargetGetter]);
-                    var listener = lCleanup[tCleanup[i + 2]];
+                    var listener = lCleanup[lastLCleanupIndex = tCleanup[i + 2]];
                     var useCaptureOrSubIdx = tCleanup[i + 3];
                     if (typeof useCaptureOrSubIdx === 'boolean') {
                         // native DOM listener registered with Renderer3
@@ -7484,19 +7493,26 @@
                     else {
                         if (useCaptureOrSubIdx >= 0) {
                             // unregister
-                            lCleanup[useCaptureOrSubIdx]();
+                            lCleanup[lastLCleanupIndex = useCaptureOrSubIdx]();
                         }
                         else {
                             // Subscription
-                            lCleanup[-useCaptureOrSubIdx].unsubscribe();
+                            lCleanup[lastLCleanupIndex = -useCaptureOrSubIdx].unsubscribe();
                         }
                     }
                     i += 2;
                 }
                 else {
                     // This is a cleanup function that is grouped with the index of its context
-                    var context = lCleanup[tCleanup[i + 1]];
+                    var context = lCleanup[lastLCleanupIndex = tCleanup[i + 1]];
                     tCleanup[i].call(context);
+                }
+            }
+            if (lCleanup !== null) {
+                for (var i = lastLCleanupIndex + 1; i < lCleanup.length; i++) {
+                    var instanceCleanupFn = lCleanup[i];
+                    ngDevMode && assertFunction(instanceCleanupFn, 'Expecting instance cleanup function.');
+                    instanceCleanupFn();
                 }
             }
             lView[CLEANUP] = null;
@@ -10055,12 +10071,25 @@
      * On the first template pass, saves in TView:
      * - Cleanup function
      * - Index of context we just saved in LView.cleanupInstances
+     *
+     * This function can also be used to store instance specific cleanup fns. In that case the `context`
+     * is `null` and the function is store in `LView` (rather than it `TView`).
      */
     function storeCleanupWithContext(tView, lView, context, cleanupFn) {
         var lCleanup = getLCleanup(lView);
-        lCleanup.push(context);
-        if (tView.firstCreatePass) {
-            getTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
+        if (context === null) {
+            // If context is null that this is instance specific callback. These callbacks can only be
+            // inserted after template shared instances. For this reason in ngDevMode we freeze the TView.
+            if (ngDevMode) {
+                Object.freeze(getTViewCleanup(tView));
+            }
+            lCleanup.push(cleanupFn);
+        }
+        else {
+            lCleanup.push(context);
+            if (tView.firstCreatePass) {
+                getTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
+            }
         }
     }
     function createTNode(tView, tParent, type, index, value, attrs) {
@@ -15438,7 +15467,7 @@
         if (useCapture === void 0) { useCapture = false; }
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
-        var tCleanup = firstCreatePass && (tView.cleanup || (tView.cleanup = []));
+        var tCleanup = firstCreatePass && getTViewCleanup(tView);
         // When the ɵɵlistener instruction was generated and is executed we know that there is either a
         // native listener or a directive output on this element. As such we we know that we will have to
         // register a listener and store its cleanup function on LView.
@@ -21729,7 +21758,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.1+12.sha-eba185e');
+    var VERSION = new Version('11.1.0-next.1+20.sha-a55e01b');
 
     /**
      * @license
@@ -25565,7 +25594,6 @@
             _this.location = location;
             _this._rootLView = _rootLView;
             _this._tNode = _tNode;
-            _this.destroyCbs = [];
             _this.instance = instance;
             _this.hostView = _this.changeDetectorRef = new RootViewRef(_rootLView);
             _this.componentType = componentType;
@@ -25579,16 +25607,10 @@
             configurable: true
         });
         ComponentRef.prototype.destroy = function () {
-            if (this.destroyCbs) {
-                this.destroyCbs.forEach(function (fn) { return fn(); });
-                this.destroyCbs = null;
-                !this.hostView.destroyed && this.hostView.destroy();
-            }
+            this.hostView.destroy();
         };
         ComponentRef.prototype.onDestroy = function (callback) {
-            if (this.destroyCbs) {
-                this.destroyCbs.push(callback);
-            }
+            this.hostView.onDestroy(callback);
         };
         return ComponentRef;
     }(ComponentRef));
@@ -29843,7 +29865,7 @@
              */
             this.components = [];
             this._enforceNoNewChanges = isDevMode();
-            this._zone.onMicrotaskEmpty.subscribe({
+            this._onMicrotaskEmptySubscription = this._zone.onMicrotaskEmpty.subscribe({
                 next: function () {
                     _this._zone.run(function () {
                         _this.tick();
@@ -29927,14 +29949,19 @@
             var ngModule = isBoundToModule(componentFactory) ? undefined : this._injector.get(NgModuleRef);
             var selectorOrNode = rootSelectorOrNode || componentFactory.selector;
             var compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
-            compRef.onDestroy(function () {
-                _this._unloadComponent(compRef);
-            });
+            var nativeElement = compRef.location.nativeElement;
             var testability = compRef.injector.get(Testability, null);
-            if (testability) {
-                compRef.injector.get(TestabilityRegistry)
-                    .registerApplication(compRef.location.nativeElement, testability);
+            var testabilityRegistry = testability && compRef.injector.get(TestabilityRegistry);
+            if (testability && testabilityRegistry) {
+                testabilityRegistry.registerApplication(nativeElement, testability);
             }
+            compRef.onDestroy(function () {
+                _this.detachView(compRef.hostView);
+                remove(_this.components, compRef);
+                if (testabilityRegistry) {
+                    testabilityRegistry.unregisterApplication(nativeElement);
+                }
+            });
             this._loadComponent(compRef);
             if (isDevMode()) {
                 this._console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
@@ -30022,14 +30049,10 @@
             var listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
             listeners.forEach(function (listener) { return listener(componentRef); });
         };
-        ApplicationRef.prototype._unloadComponent = function (componentRef) {
-            this.detachView(componentRef.hostView);
-            remove(this.components, componentRef);
-        };
         /** @internal */
         ApplicationRef.prototype.ngOnDestroy = function () {
-            // TODO(alxhub): Dispose of the NgZone.
             this._views.slice().forEach(function (view) { return view.destroy(); });
+            this._onMicrotaskEmptySubscription.unsubscribe();
         };
         Object.defineProperty(ApplicationRef.prototype, "viewCount", {
             /**

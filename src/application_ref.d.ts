@@ -301,6 +301,7 @@ export declare class ApplicationRef {
     private _runningTick;
     private _enforceNoNewChanges;
     private _stable;
+    private _onMicrotaskEmptySubscription;
     /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
@@ -355,7 +356,6 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
-    private _unloadComponent;
     /**
      * Returns the number of attached views.
      */

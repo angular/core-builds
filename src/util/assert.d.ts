@@ -8,6 +8,7 @@
 export declare function assertNumber(actual: any, msg: string): asserts actual is number;
 export declare function assertNumberInRange(actual: any, minInclusive: number, maxInclusive: number): asserts actual is number;
 export declare function assertString(actual: any, msg: string): asserts actual is string;
+export declare function assertFunction(actual: any, msg: string): asserts actual is Function;
 export declare function assertEqual<T>(actual: T, expected: T, msg: string): void;
 export declare function assertNotEqual<T>(actual: T, expected: T, msg: string): asserts actual is T;
 export declare function assertSame<T>(actual: T, expected: T, msg: string): asserts actual is T;

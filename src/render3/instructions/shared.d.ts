@@ -119,6 +119,9 @@ export declare function locateHostElement(renderer: Renderer3, elementOrSelector
  * On the first template pass, saves in TView:
  * - Cleanup function
  * - Index of context we just saved in LView.cleanupInstances
+ *
+ * This function can also be used to store instance specific cleanup fns. In that case the `context`
+ * is `null` and the function is store in `LView` (rather than it `TView`).
  */
 export declare function storeCleanupWithContext(tView: TView, lView: LView, context: any, cleanupFn: Function): void;
 /**
@@ -272,6 +275,7 @@ export declare function checkNoChangesInRootView(lView: LView): void;
 export declare function storePropertyBindingMetadata(tData: TData, tNode: TNode, propertyName: string, bindingIndex: number, ...interpolationParts: string[]): void;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare function getLCleanup(view: LView): any[];
+export declare function getTViewCleanup(tView: TView): any[];
 /**
  * There are cases where the sub component's renderer needs to be included
  * instead of the current renderer (see the componentSyntheticHost* instructions).

@@ -75,7 +75,6 @@ export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
     location: viewEngine_ElementRef;
     private _rootLView;
     private _tNode;
-    destroyCbs: (() => void)[] | null;
     instance: T;
     hostView: ViewRef<T>;
     changeDetectorRef: ViewEngine_ChangeDetectorRef;
