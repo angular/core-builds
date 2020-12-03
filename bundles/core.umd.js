@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.1+37.sha-3b70098
+ * @license Angular v11.1.0-next.1+34.sha-f01c713
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21758,7 +21758,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.1+37.sha-3b70098');
+    var VERSION = new Version('11.1.0-next.1+34.sha-f01c713');
 
     /**
      * @license
@@ -29601,17 +29601,12 @@
                 if (!exceptionHandler) {
                     throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
                 }
-                ngZone.runOutsideAngular(function () {
-                    var subscription = ngZone.onError.subscribe({
-                        next: function (error) {
-                            exceptionHandler.handleError(error);
-                        }
-                    });
-                    moduleRef.onDestroy(function () {
-                        remove(_this._modules, moduleRef);
-                        subscription.unsubscribe();
-                    });
-                });
+                moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); });
+                ngZone.runOutsideAngular(function () { return ngZone.onError.subscribe({
+                    next: function (error) {
+                        exceptionHandler.handleError(error);
+                    }
+                }); });
                 return _callAndReportToErrorHandler(exceptionHandler, ngZone, function () {
                     var initStatus = moduleRef.injector.get(ApplicationInitStatus);
                     initStatus.runInitializers();
