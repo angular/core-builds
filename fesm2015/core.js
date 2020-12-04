@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.3+24.sha-4aeb65d
+ * @license Angular v11.0.3+26.sha-1e3534f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5264,50 +5264,6 @@ function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
- *
- * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
- * please see [BAZEL.md](./docs/BAZEL.md).
- */
-let _devMode = true;
-let _runModeLocked = false;
-/**
- * Returns whether Angular is in development mode. After called once,
- * the value is locked and won't change any more.
- *
- * By default, this is true, unless a user calls `enableProdMode` before calling this.
- *
- * @publicApi
- */
-function isDevMode() {
-    _runModeLocked = true;
-    return _devMode;
-}
-/**
- * Disable Angular's development mode, which turns off assertions and other
- * checks within the framework.
- *
- * One important assertion this disables verifies that a change detection pass
- * does not result in additional changes to any bindings (also known as
- * unidirectional data flow).
- *
- * @publicApi
- */
-function enableProdMode() {
-    if (_runModeLocked) {
-        throw new Error('Cannot enable prod mode after platform setup.');
-    }
-    _devMode = false;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * This helper is used to get hold of an inert tree of DOM elements containing dirty HTML
  * that needs sanitizing.
  * Depending upon browser support we use one of two strategies for doing this.
@@ -5465,7 +5421,7 @@ function _sanitizeUrl(url) {
     url = String(url);
     if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
         return url;
-    if (isDevMode()) {
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
         console.warn(`WARNING: sanitizing unsafe URL value ${url} (see https://g.co/ng/security#xss)`);
     }
     return 'unsafe:' + url;
@@ -5701,7 +5657,7 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
         } while (unsafeHtml !== parsedHtml);
         const sanitizer = new SanitizingHtmlSerializer();
         const safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
-        if (isDevMode() && sanitizer.sanitizedSomething) {
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && sanitizer.sanitizedSomething) {
             console.warn('WARNING: sanitizing HTML stripped some content, see https://g.co/ng/security#xss');
         }
         return safeHtml;
@@ -21156,7 +21112,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.3+24.sha-4aeb65d');
+const VERSION = new Version('11.0.3+26.sha-1e3534f');
 
 /**
  * @license
@@ -28603,6 +28559,50 @@ function setTestabilityGetter(getter) {
     _testabilityGetter = getter;
 }
 let _testabilityGetter = new _NoopGetTestability();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+ *
+ * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+ * please see [BAZEL.md](./docs/BAZEL.md).
+ */
+let _devMode = true;
+let _runModeLocked = false;
+/**
+ * Returns whether Angular is in development mode. After called once,
+ * the value is locked and won't change any more.
+ *
+ * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ *
+ * @publicApi
+ */
+function isDevMode() {
+    _runModeLocked = true;
+    return _devMode;
+}
+/**
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
+ *
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
+ *
+ * @publicApi
+ */
+function enableProdMode() {
+    if (_runModeLocked) {
+        throw new Error('Cannot enable prod mode after platform setup.');
+    }
+    _devMode = false;
+}
 
 /**
  * @license
