@@ -299,7 +299,6 @@ export declare class ApplicationRef {
     private _initStatus;
     private _views;
     private _runningTick;
-    private _enforceNoNewChanges;
     private _stable;
     private _onMicrotaskEmptySubscription;
     /**
