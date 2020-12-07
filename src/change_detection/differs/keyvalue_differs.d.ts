@@ -95,6 +95,7 @@ export interface KeyValueDifferFactory {
      */
     create<K, V>(): KeyValueDiffer<K, V>;
 }
+export declare function defaultKeyValueDiffersFactory(): KeyValueDiffers;
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  *

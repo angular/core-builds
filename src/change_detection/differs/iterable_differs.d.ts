@@ -109,6 +109,7 @@ export interface IterableDifferFactory {
     supports(objects: any): boolean;
     create<V>(trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
 }
+export declare function defaultIterableDiffersFactory(): IterableDiffers;
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  *

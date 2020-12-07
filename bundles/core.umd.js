@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.1+53.sha-775394c
+ * @license Angular v11.1.0-next.1+54.sha-5fc4508
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21714,7 +21714,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.1+53.sha-775394c');
+    var VERSION = new Version('11.1.0-next.1+54.sha-5fc4508');
 
     /**
      * @license
@@ -22661,6 +22661,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function defaultIterableDiffersFactory() {
+        return new IterableDiffers([new DefaultIterableDifferFactory()]);
+    }
     /**
      * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
      *
@@ -22701,13 +22704,10 @@
             return {
                 provide: IterableDiffers,
                 useFactory: function (parent) {
-                    if (!parent) {
-                        // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
-                        // to
-                        // bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend IterableDiffers without a parent injector');
-                    }
-                    return IterableDiffers.create(factories, parent);
+                    // if parent is null, it means that we are in the root injector and we have just overridden
+                    // the default injection mechanism for IterableDiffers, in such a case just assume
+                    // `defaultIterableDiffersFactory`.
+                    return IterableDiffers.create(factories, parent || defaultIterableDiffersFactory());
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
@@ -22725,11 +22725,7 @@
         return IterableDiffers;
     }());
     /** @nocollapse */
-    IterableDiffers.ɵprov = ɵɵdefineInjectable({
-        token: IterableDiffers,
-        providedIn: 'root',
-        factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
-    });
+    IterableDiffers.ɵprov = ɵɵdefineInjectable({ token: IterableDiffers, providedIn: 'root', factory: defaultIterableDiffersFactory });
     function getTypeNameForDebugging(type) {
         return type['name'] || typeof type;
     }
@@ -22741,6 +22737,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function defaultKeyValueDiffersFactory() {
+        return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]);
+    }
     /**
      * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
      *
@@ -22781,12 +22780,10 @@
             return {
                 provide: KeyValueDiffers,
                 useFactory: function (parent) {
-                    if (!parent) {
-                        // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                        // to bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend KeyValueDiffers without a parent injector');
-                    }
-                    return KeyValueDiffers.create(factories, parent);
+                    // if parent is null, it means that we are in the root injector and we have just overridden
+                    // the default injection mechanism for KeyValueDiffers, in such a case just assume
+                    // `defaultKeyValueDiffersFactory`.
+                    return KeyValueDiffers.create(factories, parent || defaultKeyValueDiffersFactory());
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
@@ -22802,11 +22799,7 @@
         return KeyValueDiffers;
     }());
     /** @nocollapse */
-    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
-        token: KeyValueDiffers,
-        providedIn: 'root',
-        factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
-    });
+    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({ token: KeyValueDiffers, providedIn: 'root', factory: defaultKeyValueDiffersFactory });
 
     function collectNativeNodes(tView, lView, tNode, result, isProjection) {
         if (isProjection === void 0) { isProjection = false; }
