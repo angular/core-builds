@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.3+26.sha-1e3534f
+ * @license Angular v11.0.3+39.sha-6d62971
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21112,7 +21112,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.3+26.sha-1e3534f');
+const VERSION = new Version('11.0.3+39.sha-6d62971');
 
 /**
  * @license
@@ -29062,7 +29062,6 @@ class ApplicationRef {
         this._bootstrapListeners = [];
         this._views = [];
         this._runningTick = false;
-        this._enforceNoNewChanges = false;
         this._stable = true;
         /**
          * Get a list of component types registered to this application.
@@ -29073,7 +29072,6 @@ class ApplicationRef {
          * Get a list of components registered to this application.
          */
         this.components = [];
-        this._enforceNoNewChanges = isDevMode();
         this._onMicrotaskEmptySubscription = this._zone.onMicrotaskEmpty.subscribe({
             next: () => {
                 this._zone.run(() => {
@@ -29195,7 +29193,9 @@ class ApplicationRef {
             for (let view of this._views) {
                 view.detectChanges();
             }
-            if (this._enforceNoNewChanges) {
+            // Note that we have still left the `isDevMode()` condition in order to avoid
+            // creating a breaking change for projects that still use the View Engine.
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
                 for (let view of this._views) {
                     view.checkNoChanges();
                 }
