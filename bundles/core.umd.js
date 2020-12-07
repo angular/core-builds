@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.1+53.sha-775394c
+ * @license Angular v11.1.0-next.1+54.sha-5fc4508
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21743,7 +21743,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.1+53.sha-775394c');
+    var VERSION = new Version('11.1.0-next.1+54.sha-5fc4508');
 
     /**
      * @license
@@ -22691,6 +22691,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function defaultIterableDiffersFactory() {
+        return new IterableDiffers([new DefaultIterableDifferFactory()]);
+    }
     /**
      * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
      *
@@ -22731,13 +22734,10 @@
             return {
                 provide: IterableDiffers,
                 useFactory: function (parent) {
-                    if (!parent) {
-                        // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
-                        // to
-                        // bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend IterableDiffers without a parent injector');
-                    }
-                    return IterableDiffers.create(factories, parent);
+                    // if parent is null, it means that we are in the root injector and we have just overridden
+                    // the default injection mechanism for IterableDiffers, in such a case just assume
+                    // `defaultIterableDiffersFactory`.
+                    return IterableDiffers.create(factories, parent || defaultIterableDiffersFactory());
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
@@ -22755,11 +22755,7 @@
         return IterableDiffers;
     }());
     /** @nocollapse */
-    IterableDiffers.ɵprov = ɵɵdefineInjectable({
-        token: IterableDiffers,
-        providedIn: 'root',
-        factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
-    });
+    IterableDiffers.ɵprov = ɵɵdefineInjectable({ token: IterableDiffers, providedIn: 'root', factory: defaultIterableDiffersFactory });
     function getTypeNameForDebugging(type) {
         return type['name'] || typeof type;
     }
@@ -22771,6 +22767,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    function defaultKeyValueDiffersFactory() {
+        return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]);
+    }
     /**
      * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
      *
@@ -22811,12 +22810,10 @@
             return {
                 provide: KeyValueDiffers,
                 useFactory: function (parent) {
-                    if (!parent) {
-                        // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                        // to bootstrap(), which would override default pipes instead of extending them.
-                        throw new Error('Cannot extend KeyValueDiffers without a parent injector');
-                    }
-                    return KeyValueDiffers.create(factories, parent);
+                    // if parent is null, it means that we are in the root injector and we have just overridden
+                    // the default injection mechanism for KeyValueDiffers, in such a case just assume
+                    // `defaultKeyValueDiffersFactory`.
+                    return KeyValueDiffers.create(factories, parent || defaultKeyValueDiffersFactory());
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
@@ -22832,11 +22829,7 @@
         return KeyValueDiffers;
     }());
     /** @nocollapse */
-    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({
-        token: KeyValueDiffers,
-        providedIn: 'root',
-        factory: function () { return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]); }
-    });
+    KeyValueDiffers.ɵprov = ɵɵdefineInjectable({ token: KeyValueDiffers, providedIn: 'root', factory: defaultKeyValueDiffersFactory });
 
     function collectNativeNodes(tView, lView, tNode, result, isProjection) {
         if (isProjection === void 0) { isProjection = false; }
@@ -33718,30 +33711,32 @@
     exports.ɵand = anchorDef;
     exports.ɵangular_packages_core_core_a = isForwardRef;
     exports.ɵangular_packages_core_core_b = injectInjectorOnly;
-    exports.ɵangular_packages_core_core_ba = DebugContext;
-    exports.ɵangular_packages_core_core_bb = NgOnChangesFeatureImpl;
-    exports.ɵangular_packages_core_core_bc = SCHEDULER;
-    exports.ɵangular_packages_core_core_bd = injectAttributeImpl;
-    exports.ɵangular_packages_core_core_be = getLView;
-    exports.ɵangular_packages_core_core_bf = getBindingRoot;
-    exports.ɵangular_packages_core_core_bg = nextContextImpl;
-    exports.ɵangular_packages_core_core_bi = pureFunction1Internal;
-    exports.ɵangular_packages_core_core_bj = pureFunction2Internal;
-    exports.ɵangular_packages_core_core_bk = pureFunction3Internal;
-    exports.ɵangular_packages_core_core_bl = pureFunction4Internal;
-    exports.ɵangular_packages_core_core_bm = pureFunctionVInternal;
-    exports.ɵangular_packages_core_core_bn = getUrlSanitizer;
-    exports.ɵangular_packages_core_core_bo = makePropDecorator;
-    exports.ɵangular_packages_core_core_bp = makeParamDecorator;
-    exports.ɵangular_packages_core_core_bq = getClosureSafeProperty;
-    exports.ɵangular_packages_core_core_br = NullInjector;
-    exports.ɵangular_packages_core_core_bs = getInjectImplementation;
-    exports.ɵangular_packages_core_core_bu = getNativeByTNode;
-    exports.ɵangular_packages_core_core_bw = getRootContext;
-    exports.ɵangular_packages_core_core_bx = i18nPostprocess;
-    exports.ɵangular_packages_core_core_by = trustedHTMLFromString;
-    exports.ɵangular_packages_core_core_bz = trustedScriptURLFromString;
+    exports.ɵangular_packages_core_core_ba = USD_CURRENCY_CODE;
+    exports.ɵangular_packages_core_core_bb = _def;
+    exports.ɵangular_packages_core_core_bc = DebugContext;
+    exports.ɵangular_packages_core_core_bd = NgOnChangesFeatureImpl;
+    exports.ɵangular_packages_core_core_be = SCHEDULER;
+    exports.ɵangular_packages_core_core_bf = injectAttributeImpl;
+    exports.ɵangular_packages_core_core_bg = getLView;
+    exports.ɵangular_packages_core_core_bh = getBindingRoot;
+    exports.ɵangular_packages_core_core_bi = nextContextImpl;
+    exports.ɵangular_packages_core_core_bk = pureFunction1Internal;
+    exports.ɵangular_packages_core_core_bl = pureFunction2Internal;
+    exports.ɵangular_packages_core_core_bm = pureFunction3Internal;
+    exports.ɵangular_packages_core_core_bn = pureFunction4Internal;
+    exports.ɵangular_packages_core_core_bo = pureFunctionVInternal;
+    exports.ɵangular_packages_core_core_bp = getUrlSanitizer;
+    exports.ɵangular_packages_core_core_bq = makePropDecorator;
+    exports.ɵangular_packages_core_core_br = makeParamDecorator;
+    exports.ɵangular_packages_core_core_bs = getClosureSafeProperty;
+    exports.ɵangular_packages_core_core_bt = NullInjector;
+    exports.ɵangular_packages_core_core_bu = getInjectImplementation;
+    exports.ɵangular_packages_core_core_bw = getNativeByTNode;
+    exports.ɵangular_packages_core_core_by = getRootContext;
+    exports.ɵangular_packages_core_core_bz = i18nPostprocess;
     exports.ɵangular_packages_core_core_c = ReflectiveInjector_;
+    exports.ɵangular_packages_core_core_ca = trustedHTMLFromString;
+    exports.ɵangular_packages_core_core_cb = trustedScriptURLFromString;
     exports.ɵangular_packages_core_core_d = ReflectiveDependency;
     exports.ɵangular_packages_core_core_e = resolveReflectiveProviders;
     exports.ɵangular_packages_core_core_f = _appIdRandomProviderFactory;
@@ -33758,13 +33753,13 @@
     exports.ɵangular_packages_core_core_q = injectChangeDetectorRef;
     exports.ɵangular_packages_core_core_r = DefaultIterableDifferFactory;
     exports.ɵangular_packages_core_core_s = DefaultKeyValueDifferFactory;
-    exports.ɵangular_packages_core_core_t = _iterableDiffersFactory;
-    exports.ɵangular_packages_core_core_u = _keyValueDiffersFactory;
-    exports.ɵangular_packages_core_core_v = _localeFactory;
-    exports.ɵangular_packages_core_core_w = APPLICATION_MODULE_PROVIDERS;
-    exports.ɵangular_packages_core_core_x = zoneSchedulerFactory;
-    exports.ɵangular_packages_core_core_y = USD_CURRENCY_CODE;
-    exports.ɵangular_packages_core_core_z = _def;
+    exports.ɵangular_packages_core_core_t = defaultIterableDiffersFactory;
+    exports.ɵangular_packages_core_core_u = defaultKeyValueDiffersFactory;
+    exports.ɵangular_packages_core_core_v = _iterableDiffersFactory;
+    exports.ɵangular_packages_core_core_w = _keyValueDiffersFactory;
+    exports.ɵangular_packages_core_core_x = _localeFactory;
+    exports.ɵangular_packages_core_core_y = APPLICATION_MODULE_PROVIDERS;
+    exports.ɵangular_packages_core_core_z = zoneSchedulerFactory;
     exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
     exports.ɵbypassSanitizationTrustResourceUrl = bypassSanitizationTrustResourceUrl;
     exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
