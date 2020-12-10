@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.2+8.sha-85b07ad
+ * @license Angular v11.1.0-next.2+9.sha-1f73af7
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1866,7 +1866,7 @@ class TestingCompiler extends Compiler {
 TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
 TestingCompiler.ɵprov = ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac });
 const ɵTestingCompiler_BaseFactory = /*@__PURE__*/ ɵɵgetInheritedFactory(TestingCompiler);
-/*@__PURE__*/ (function () { ɵsetClassMetadata(TestingCompiler, [{
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && ɵsetClassMetadata(TestingCompiler, [{
         type: Injectable
     }], null, null); })();
 /**
