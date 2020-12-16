@@ -1,5 +1,5 @@
 /**
- * @license Angular v9.1.12+10.sha-5b38050
+ * @license Angular v9.1.12+13.sha-9ae216c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6645,6 +6645,11 @@ function enableProdMode() {
     if (_runModeLocked) {
         throw new Error('Cannot enable prod mode after platform setup.');
     }
+    // The below check is there so when ngDevMode is set via terser
+    // `global['ngDevMode'] = false;` is also dropped.
+    if (typeof ngDevMode === undefined || !!ngDevMode) {
+        _global['ngDevMode'] = false;
+    }
     _devMode = false;
 }
 
@@ -7665,6 +7670,42 @@ function getSanitizer() {
     /** @type {?} */
     const lView = getLView();
     return lView && lView[SANITIZER];
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const END_COMMENT = /-->/g;
+const END_COMMENT_ESCAPED = '-\u200B-\u200B>';
+/**
+ * Escape the content of the strings so that it can be safely inserted into a comment node.
+ *
+ * The issue is that HTML does not specify any way to escape comment end text inside the comment.
+ * `<!-- The way you close a comment is with "-->". -->`. Above the `"-->"` is meant to be text not
+ * an end to the comment. This can be created programmatically through DOM APIs.
+ *
+ * ```
+ * div.innerHTML = div.innerHTML
+ * ```
+ *
+ * One would expect that the above code would be safe to do, but it turns out that because comment
+ * text is not escaped, the comment may contain text which will prematurely close the comment
+ * opening up the application for XSS attack. (In SSR we programmatically create comment nodes which
+ * may contain such text and expect them to be safe.)
+ *
+ * This function escapes the comment text by looking for the closing char sequence `-->` and replace
+ * it with `-_-_>` where the `_` is a zero width space `\u200B`. The result is that if a comment
+ * contains `-->` text it will render normally but it will not cause the HTML parser to close the
+ * comment.
+ *
+ * @param value text to make safe for comment node by escaping the comment close character sequence
+ */
+function escapeCommentText(value) {
+    return value.replace(END_COMMENT, END_COMMENT_ESCAPED);
 }
 
 /**
@@ -12724,7 +12765,7 @@ function setNgReflectProperty(lView, element, type, attrName, value) {
     }
     else {
         /** @type {?} */
-        const textContent = `bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`;
+        const textContent = escapeCommentText(`bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`);
         if (isProceduralRenderer(renderer)) {
             renderer.setValue(((/** @type {?} */ (element))), textContent);
         }
@@ -28182,7 +28223,7 @@ if (false) {
  * \@publicApi
  * @type {?}
  */
-const VERSION = new Version('9.1.12+10.sha-5b38050');
+const VERSION = new Version('9.1.12+13.sha-9ae216c');
 
 /**
  * @fileoverview added by tsickle
@@ -47549,7 +47590,7 @@ function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
             const el = asElementData(view, elDef.nodeIndex).renderElement;
             if (!(/** @type {?} */ (elDef.element)).name) {
                 // a comment.
-                view.renderer.setValue(el, `bindings=${JSON.stringify(bindingValues, null, 2)}`);
+                view.renderer.setValue(el, escapeCommentText(`bindings=${JSON.stringify(bindingValues, null, 2)}`));
             }
             else {
                 // a regular element.
@@ -47973,7 +48014,7 @@ class DebugRenderer2 {
      */
     createComment(value) {
         /** @type {?} */
-        const comment = this.delegate.createComment(value);
+        const comment = this.delegate.createComment(escapeCommentText(value));
         /** @type {?} */
         const debugCtx = this.createDebugContext(comment);
         if (debugCtx) {
