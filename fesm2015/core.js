@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.2+55.sha-47d9b6d
+ * @license Angular v11.1.0-next.2+56.sha-70b4816
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21177,7 +21177,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.2+55.sha-47d9b6d');
+const VERSION = new Version('11.1.0-next.2+56.sha-70b4816');
 
 /**
  * @license
@@ -28691,6 +28691,11 @@ function isDevMode() {
 function enableProdMode() {
     if (_runModeLocked) {
         throw new Error('Cannot enable prod mode after platform setup.');
+    }
+    // The below check is there so when ngDevMode is set via terser
+    // `global['ngDevMode'] = false;` is also dropped.
+    if (typeof ngDevMode === undefined || !!ngDevMode) {
+        _global['ngDevMode'] = false;
     }
     _devMode = false;
 }
