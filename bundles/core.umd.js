@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.4+24.sha-a1c82e7
+ * @license Angular v11.0.4+26.sha-0aa220b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6404,6 +6404,42 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var END_COMMENT = /-->/g;
+    var END_COMMENT_ESCAPED = '-\u200B-\u200B>';
+    /**
+     * Escape the content of the strings so that it can be safely inserted into a comment node.
+     *
+     * The issue is that HTML does not specify any way to escape comment end text inside the comment.
+     * `<!-- The way you close a comment is with "-->". -->`. Above the `"-->"` is meant to be text not
+     * an end to the comment. This can be created programmatically through DOM APIs.
+     *
+     * ```
+     * div.innerHTML = div.innerHTML
+     * ```
+     *
+     * One would expect that the above code would be safe to do, but it turns out that because comment
+     * text is not escaped, the comment may contain text which will prematurely close the comment
+     * opening up the application for XSS attack. (In SSR we programmatically create comment nodes which
+     * may contain such text and expect them to be safe.)
+     *
+     * This function escapes the comment text by looking for the closing char sequence `-->` and replace
+     * it with `-_-_>` where the `_` is a zero width space `\u200B`. The result is that if a comment
+     * contains `-->` text it will render normally but it will not cause the HTML parser to close the
+     * comment.
+     *
+     * @param value text to make safe for comment node by escaping the comment close character sequence
+     */
+    function escapeCommentText(value) {
+        return value.replace(END_COMMENT, END_COMMENT_ESCAPED);
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
      */
@@ -7075,7 +7111,7 @@
         ngDevMode && ngDevMode.rendererCreateComment++;
         // isProceduralRenderer check is not needed because both `Renderer2` and `Renderer3` have the same
         // method name.
-        return renderer.createComment(value);
+        return renderer.createComment(escapeCommentText(value));
     }
     /**
      * Creates a native element from a tag name, using a renderer.
@@ -10225,7 +10261,7 @@
             }
         }
         else {
-            var textContent = "bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2);
+            var textContent = escapeCommentText("bindings=" + JSON.stringify((_a = {}, _a[attrName] = debugValue, _a), null, 2));
             if (isProceduralRenderer(renderer)) {
                 renderer.setValue(element, textContent);
             }
@@ -21678,7 +21714,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.4+24.sha-a1c82e7');
+    var VERSION = new Version('11.0.4+26.sha-0aa220b');
 
     /**
      * @license
@@ -32928,7 +32964,7 @@
                 var el = asElementData(view, elDef.nodeIndex).renderElement;
                 if (!elDef.element.name) {
                     // a comment.
-                    view.renderer.setValue(el, "bindings=" + JSON.stringify(bindingValues, null, 2));
+                    view.renderer.setValue(el, escapeCommentText("bindings=" + JSON.stringify(bindingValues, null, 2)));
                 }
                 else {
                     // a regular element.
@@ -33217,7 +33253,7 @@
             return el;
         };
         DebugRenderer2.prototype.createComment = function (value) {
-            var comment = this.delegate.createComment(value);
+            var comment = this.delegate.createComment(escapeCommentText(value));
             var debugCtx = this.createDebugContext(comment);
             if (debugCtx) {
                 indexDebugNode(new DebugNode__PRE_R3__(comment, null, debugCtx));
