@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.5+11.sha-3f4a1d6
+ * @license Angular v11.0.5+23.sha-ef13e83
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2713,8 +2713,9 @@
             (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
             0;
         var nodeIndexLimit = currentNodeIndex != null ? currentNodeIndex : -1;
+        var max = arr.length - 1; // Stop the loop at length - 1, because we look for the hook at i + 1
         var lastNodeIndexFound = 0;
-        for (var i = startIndex; i < arr.length; i++) {
+        for (var i = startIndex; i < max; i++) {
             var hook = arr[i + 1];
             if (typeof hook === 'number') {
                 lastNodeIndexFound = arr[i];
@@ -2751,8 +2752,7 @@
         var directive = currentView[directiveIndex];
         if (isInitHook) {
             var indexWithintInitPhase = currentView[FLAGS] >> 11 /* IndexWithinInitPhaseShift */;
-            // The init phase state must be always checked here as it may have been recursively
-            // updated
+            // The init phase state must be always checked here as it may have been recursively updated.
             if (indexWithintInitPhase <
                 (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
                 (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
@@ -7447,12 +7447,12 @@
                     tCleanup[i].call(context);
                 }
             }
-            if (lCleanup !== null) {
-                for (var i = lastLCleanupIndex + 1; i < lCleanup.length; i++) {
-                    var instanceCleanupFn = lCleanup[i];
-                    ngDevMode && assertFunction(instanceCleanupFn, 'Expecting instance cleanup function.');
-                    instanceCleanupFn();
-                }
+        }
+        if (lCleanup !== null) {
+            for (var i = lastLCleanupIndex + 1; i < lCleanup.length; i++) {
+                var instanceCleanupFn = lCleanup[i];
+                ngDevMode && assertFunction(instanceCleanupFn, 'Expecting instance cleanup function.');
+                instanceCleanupFn();
             }
             lView[CLEANUP] = null;
         }
@@ -10016,19 +10016,19 @@
      * is `null` and the function is store in `LView` (rather than it `TView`).
      */
     function storeCleanupWithContext(tView, lView, context, cleanupFn) {
-        var lCleanup = getLCleanup(lView);
+        var lCleanup = getOrCreateLViewCleanup(lView);
         if (context === null) {
             // If context is null that this is instance specific callback. These callbacks can only be
             // inserted after template shared instances. For this reason in ngDevMode we freeze the TView.
             if (ngDevMode) {
-                Object.freeze(getTViewCleanup(tView));
+                Object.freeze(getOrCreateTViewCleanup(tView));
             }
             lCleanup.push(cleanupFn);
         }
         else {
             lCleanup.push(context);
             if (tView.firstCreatePass) {
-                getTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
+                getOrCreateTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
             }
         }
     }
@@ -11111,11 +11111,11 @@
         }
     }
     var CLEAN_PROMISE = _CLEAN_PROMISE;
-    function getLCleanup(view) {
+    function getOrCreateLViewCleanup(view) {
         // top level variables should not be exported for performance reasons (PERF_NOTES.md)
         return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new LCleanup() : []);
     }
-    function getTViewCleanup(tView) {
+    function getOrCreateTViewCleanup(tView) {
         return tView.cleanup || (tView.cleanup = ngDevMode ? new TCleanup() : []);
     }
     /**
@@ -15416,11 +15416,11 @@
         if (useCapture === void 0) { useCapture = false; }
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
-        var tCleanup = firstCreatePass && getTViewCleanup(tView);
+        var tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
         // When the ɵɵlistener instruction was generated and is executed we know that there is either a
         // native listener or a directive output on this element. As such we we know that we will have to
         // register a listener and store its cleanup function on LView.
-        var lCleanup = getLCleanup(lView);
+        var lCleanup = getOrCreateLViewCleanup(lView);
         ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */);
         var processOutputs = true;
         // add native event listener - applicable to elements only
@@ -21714,7 +21714,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.5+11.sha-3f4a1d6');
+    var VERSION = new Version('11.0.5+23.sha-ef13e83');
 
     /**
      * @license
