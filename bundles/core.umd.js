@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+25.sha-12cb39c
+ * @license Angular v11.1.0-next.3+27.sha-e4fbab9
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2712,8 +2712,9 @@
             (currentView[PREORDER_HOOK_FLAGS] & 65535 /* IndexOfTheNextPreOrderHookMaskMask */) :
             0;
         var nodeIndexLimit = currentNodeIndex != null ? currentNodeIndex : -1;
+        var max = arr.length - 1; // Stop the loop at length - 1, because we look for the hook at i + 1
         var lastNodeIndexFound = 0;
-        for (var i = startIndex; i < arr.length; i++) {
+        for (var i = startIndex; i < max; i++) {
             var hook = arr[i + 1];
             if (typeof hook === 'number') {
                 lastNodeIndexFound = arr[i];
@@ -2750,8 +2751,7 @@
         var directive = currentView[directiveIndex];
         if (isInitHook) {
             var indexWithintInitPhase = currentView[FLAGS] >> 11 /* IndexWithinInitPhaseShift */;
-            // The init phase state must be always checked here as it may have been recursively
-            // updated
+            // The init phase state must be always checked here as it may have been recursively updated.
             if (indexWithintInitPhase <
                 (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
                 (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
@@ -21750,7 +21750,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.3+25.sha-12cb39c');
+    var VERSION = new Version('11.1.0-next.3+27.sha-e4fbab9');
 
     /**
      * @license
