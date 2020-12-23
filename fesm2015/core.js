@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+30.sha-e54261b
+ * @license Angular v11.1.0-next.3+31.sha-9186f1f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21213,7 +21213,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.3+30.sha-e54261b');
+const VERSION = new Version('11.1.0-next.3+31.sha-9186f1f');
 
 /**
  * @license
@@ -24938,30 +24938,6 @@ class ComponentRef$1 extends ComponentRef {
     onDestroy(callback) {
         this.hostView.onDestroy(callback);
     }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Compiles a partial directive declaration object into a full directive definition object.
- *
- * @codeGenApi
- */
-function ɵɵngDeclareDirective(decl) {
-    throw new Error('Not yet implemented');
-}
-/**
- * Compiles a partial component declaration object into a full component definition object.
- *
- * @codeGenApi
- */
-function ɵɵngDeclareComponent(decl) {
-    throw new Error('Not yet implemented');
 }
 
 /**
@@ -32683,6 +32659,31 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Compiles a partial directive declaration object into a full directive definition object.
+ *
+ * @codeGenApi
+ */
+function ɵɵngDeclareDirective(decl) {
+    const compiler = getCompilerFacade();
+    return compiler.compileDirectiveDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵfac.js`, decl);
+}
+/**
+ * Compiles a partial component declaration object into a full component definition object.
+ *
+ * @codeGenApi
+ */
+function ɵɵngDeclareComponent(decl) {
+    throw new Error('Not yet implemented');
+}
 
 /**
  * @license

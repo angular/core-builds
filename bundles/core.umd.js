@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+30.sha-e54261b
+ * @license Angular v11.1.0-next.3+31.sha-9186f1f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21779,7 +21779,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.3+30.sha-e54261b');
+    var VERSION = new Version('11.1.0-next.3+31.sha-9186f1f');
 
     /**
      * @license
@@ -25636,30 +25636,6 @@
         };
         return ComponentRef;
     }(ComponentRef));
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Compiles a partial directive declaration object into a full directive definition object.
-     *
-     * @codeGenApi
-     */
-    function ɵɵngDeclareDirective(decl) {
-        throw new Error('Not yet implemented');
-    }
-    /**
-     * Compiles a partial component declaration object into a full component definition object.
-     *
-     * @codeGenApi
-     */
-    function ɵɵngDeclareComponent(decl) {
-        throw new Error('Not yet implemented');
-    }
 
     /**
      * Adds decorator, constructor, and property metadata to a given type via static metadata fields
@@ -33547,6 +33523,31 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Compiles a partial directive declaration object into a full directive definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareDirective(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileDirectiveDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
+    }
+    /**
+     * Compiles a partial component declaration object into a full component definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareComponent(decl) {
+        throw new Error('Not yet implemented');
+    }
 
     /**
      * @license

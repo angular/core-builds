@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+30.sha-e54261b
+ * @license Angular v11.1.0-next.3+31.sha-9186f1f
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4919,6 +4919,8 @@ export declare interface OnInit {
     ngOnInit(): void;
 }
 
+declare type OpaqueValue = unknown;
+
 declare interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -5535,6 +5537,45 @@ export declare class QueryList<T> implements Iterable<T> {
     /** internal */
     destroy(): void;
     [Symbol.iterator]: () => Iterator<T>;
+}
+
+declare interface R3DeclareDirectiveFacade {
+    selector?: string;
+    type: Function;
+    inputs?: {
+        [classPropertyName: string]: string | [string, string];
+    };
+    outputs?: {
+        [classPropertyName: string]: string;
+    };
+    host?: {
+        attributes?: {
+            [key: string]: OpaqueValue;
+        };
+        listeners?: {
+            [key: string]: string;
+        };
+        properties?: {
+            [key: string]: string;
+        };
+        classAttribute?: string;
+        styleAttribute?: string;
+    };
+    queries?: R3DeclareQueryMetadataFacade[];
+    viewQueries?: R3DeclareQueryMetadataFacade[];
+    providers?: OpaqueValue;
+    exportAs?: string[];
+    usesInheritance?: boolean;
+    usesOnChanges?: boolean;
+}
+
+declare interface R3DeclareQueryMetadataFacade {
+    propertyName: string;
+    first?: boolean;
+    predicate: OpaqueValue | string[];
+    descendants?: boolean;
+    read?: OpaqueValue;
+    static?: boolean;
 }
 
 declare class R3Injector {
@@ -12854,13 +12895,12 @@ export declare function ɵɵnextContext<T = any>(level?: number): T;
  */
 export declare function ɵɵngDeclareComponent(decl: unknown): unknown;
 
-
 /**
  * Compiles a partial directive declaration object into a full directive definition object.
  *
  * @codeGenApi
  */
-export declare function ɵɵngDeclareDirective(decl: unknown): unknown;
+export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
 
 /**
  * @publicApi
