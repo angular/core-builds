@@ -77,8 +77,10 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): Trusted
  */
 export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | string;
 /**
- * Promotes the given constant string to a TrustedHTML.
- * @param html constant string containing trusted HTML.
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedHTML. Interpolation is explicitly not allowed.
+ *
+ * @param html constant template literal containing trusted HTML.
  * @returns TrustedHTML wrapping `html`.
  *
  * @security This is a security-sensitive function and should only be used to
@@ -87,10 +89,12 @@ export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | s
  *
  * @codeGenApi
  */
-export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | string;
+export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): TrustedHTML | string;
 /**
- * Promotes the given constant string to a TrustedScriptURL.
- * @param url constant string containing a trusted script URL.
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedScriptURL. Interpolation is explicitly not allowed.
+ *
+ * @param url constant template literal containing a trusted script URL.
  * @returns TrustedScriptURL wrapping `url`.
  *
  * @security This is a security-sensitive function and should only be used to
@@ -99,7 +103,7 @@ export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | strin
  *
  * @codeGenApi
  */
-export declare function ɵɵtrustConstantResourceUrl(url: string): TrustedScriptURL | string;
+export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
  *
