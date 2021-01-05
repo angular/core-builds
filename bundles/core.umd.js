@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.5+31.sha-ec5b09b
+ * @license Angular v11.0.5+32.sha-45838c0
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5273,6 +5273,9 @@
                     }
                     else if (meta instanceof Self || meta.ngMetadataName === 'Self' || meta === Self) {
                         flags |= exports.InjectFlags.Self;
+                    }
+                    else if (meta instanceof Host || meta.ngMetadataName === 'Host' || meta === Host) {
+                        flags |= exports.InjectFlags.Host;
                     }
                     else if (meta instanceof Inject || meta === Inject) {
                         type = meta.token;
@@ -21714,7 +21717,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.0.5+31.sha-ec5b09b');
+    var VERSION = new Version('11.0.5+32.sha-45838c0');
 
     /**
      * @license
