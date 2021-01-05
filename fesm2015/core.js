@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+54.sha-6a9d7e5
+ * @license Angular v11.1.0-next.3+51.sha-6057753
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5901,10 +5901,8 @@ function ɵɵsanitizeScript(unsafeScript) {
     throw new Error('unsafe value used in a script context');
 }
 /**
- * A template tag function for promoting the associated constant literal to a
- * TrustedHTML. Interpolation is explicitly not allowed.
- *
- * @param html constant template literal containing trusted HTML.
+ * Promotes the given constant string to a TrustedHTML.
+ * @param html constant string containing trusted HTML.
  * @returns TrustedHTML wrapping `html`.
  *
  * @security This is a security-sensitive function and should only be used to
@@ -5914,22 +5912,11 @@ function ɵɵsanitizeScript(unsafeScript) {
  * @codeGenApi
  */
 function ɵɵtrustConstantHtml(html) {
-    // The following runtime check ensures that the function was called as a
-    // template tag (e.g. ɵɵtrustConstantHtml`content`), without any interpolation
-    // (e.g. not ɵɵtrustConstantHtml`content ${variable}`). A TemplateStringsArray
-    // is an array with a `raw` property that is also an array. The associated
-    // template literal has no interpolation if and only if the length of the
-    // TemplateStringsArray is 1.
-    if (ngDevMode && (!Array.isArray(html) || !Array.isArray(html.raw) || html.length !== 1)) {
-        throw new Error(`Unexpected interpolation in trusted HTML constant: ${html.join('?')}`);
-    }
-    return trustedHTMLFromString(html[0]);
+    return trustedHTMLFromString(html);
 }
 /**
- * A template tag function for promoting the associated constant literal to a
- * TrustedScriptURL. Interpolation is explicitly not allowed.
- *
- * @param url constant template literal containing a trusted script URL.
+ * Promotes the given constant string to a TrustedScriptURL.
+ * @param url constant string containing a trusted script URL.
  * @returns TrustedScriptURL wrapping `url`.
  *
  * @security This is a security-sensitive function and should only be used to
@@ -5939,16 +5926,7 @@ function ɵɵtrustConstantHtml(html) {
  * @codeGenApi
  */
 function ɵɵtrustConstantResourceUrl(url) {
-    // The following runtime check ensures that the function was called as a
-    // template tag (e.g. ɵɵtrustConstantResourceUrl`content`), without any
-    // interpolation (e.g. not ɵɵtrustConstantResourceUrl`content ${variable}`). A
-    // TemplateStringsArray is an array with a `raw` property that is also an
-    // array. The associated template literal has no interpolation if and only if
-    // the length of the TemplateStringsArray is 1.
-    if (ngDevMode && (!Array.isArray(url) || !Array.isArray(url.raw) || url.length !== 1)) {
-        throw new Error(`Unexpected interpolation in trusted URL constant: ${url.join('?')}`);
-    }
-    return trustedScriptURLFromString(url[0]);
+    return trustedScriptURLFromString(url);
 }
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
@@ -21202,7 +21180,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.3+54.sha-6a9d7e5');
+const VERSION = new Version('11.1.0-next.3+51.sha-6057753');
 
 /**
  * @license
@@ -28797,7 +28775,7 @@ function createPlatform(injector) {
 }
 /**
  * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
- * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
+ * your applciation's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
  * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
  * to build up configurations that might be required by different libraries or parts of the
  * application.
