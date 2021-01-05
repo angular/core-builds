@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+53.sha-8cdfd77
+ * @license Angular v11.1.0-next.3+54.sha-6a9d7e5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9415,28 +9415,6 @@ export declare class ɵangular_packages_core_core_c implements ReflectiveInjecto
 }
 
 /**
- * Unsafely promote a string to a TrustedHTML, falling back to strings when
- * Trusted Types are not available.
- * @security This is a security-sensitive function; any use of this function
- * must go through security review. In particular, it must be assured that the
- * provided string will never cause an XSS vulnerability if used in a context
- * that will be interpreted as HTML by a browser, e.g. when assigning to
- * element.innerHTML.
- */
-export declare function ɵangular_packages_core_core_ca(html: string): TrustedHTML | string;
-
-/**
- * Unsafely promote a string to a TrustedScriptURL, falling back to strings
- * when Trusted Types are not available.
- * @security This is a security-sensitive function; any use of this function
- * must go through security review. In particular, it must be assured that the
- * provided string will never cause an XSS vulnerability if used in a context
- * that will cause a browser to load and execute a resource, e.g. when
- * assigning to script.src.
- */
-export declare function ɵangular_packages_core_core_cb(url: string): TrustedScriptURL | string;
-
-/**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
@@ -14837,8 +14815,10 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
 export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
 
 /**
- * Promotes the given constant string to a TrustedHTML.
- * @param html constant string containing trusted HTML.
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedHTML. Interpolation is explicitly not allowed.
+ *
+ * @param html constant template literal containing trusted HTML.
  * @returns TrustedHTML wrapping `html`.
  *
  * @security This is a security-sensitive function and should only be used to
@@ -14847,11 +14827,13 @@ export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInte
  *
  * @codeGenApi
  */
-export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | string;
+export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): TrustedHTML | string;
 
 /**
- * Promotes the given constant string to a TrustedScriptURL.
- * @param url constant string containing a trusted script URL.
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedScriptURL. Interpolation is explicitly not allowed.
+ *
+ * @param url constant template literal containing a trusted script URL.
  * @returns TrustedScriptURL wrapping `url`.
  *
  * @security This is a security-sensitive function and should only be used to
@@ -14860,7 +14842,7 @@ export declare function ɵɵtrustConstantHtml(html: string): TrustedHTML | strin
  *
  * @codeGenApi
  */
-export declare function ɵɵtrustConstantResourceUrl(url: string): TrustedScriptURL | string;
+export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
