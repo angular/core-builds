@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+40.sha-805b4f9
+ * @license Angular v11.1.0-next.3+42.sha-3735633
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4976,6 +4976,9 @@ function injectArgs(types) {
                 }
                 else if (meta instanceof Self || meta.ngMetadataName === 'Self' || meta === Self) {
                     flags |= InjectFlags.Self;
+                }
+                else if (meta instanceof Host || meta.ngMetadataName === 'Host' || meta === Host) {
+                    flags |= InjectFlags.Host;
                 }
                 else if (meta instanceof Inject || meta === Inject) {
                     type = meta.token;
@@ -21213,7 +21216,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.3+40.sha-805b4f9');
+const VERSION = new Version('11.1.0-next.3+42.sha-3735633');
 
 /**
  * @license
