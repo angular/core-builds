@@ -30,6 +30,7 @@ export interface CompilerFacade {
     compileDirective(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3DirectiveMetadataFacade): any;
     compileDirectiveDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, declaration: R3DeclareDirectiveFacade): any;
     compileComponent(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3ComponentMetadataFacade): any;
+    compileComponentDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, declaration: R3DeclareComponentFacade): any;
     compileFactory(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3FactoryDefMetadataFacade): any;
     createParseSourceSpan(kind: string, typeName: string, sourceUrl: string): ParseSourceSpan;
     R3ResolvedDependencyType: typeof R3ResolvedDependencyType;
@@ -174,6 +175,29 @@ export interface R3DeclareDirectiveFacade {
     exportAs?: string[];
     usesInheritance?: boolean;
     usesOnChanges?: boolean;
+}
+export interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
+    template: {
+        source: string;
+        isInline: boolean;
+    };
+    styles?: string[];
+    directives?: {
+        selector: string;
+        type: OpaqueValue | (() => OpaqueValue);
+        inputs?: string[];
+        outputs?: string[];
+        exportAs?: string[];
+    }[];
+    pipes?: {
+        [pipeName: string]: OpaqueValue | (() => OpaqueValue);
+    };
+    viewProviders?: OpaqueValue;
+    animations?: OpaqueValue;
+    changeDetection?: ChangeDetectionStrategy;
+    encapsulation?: ViewEncapsulation;
+    interpolation?: [string, string];
+    preserveWhitespaces?: boolean;
 }
 export interface R3UsedDirectiveMetadata {
     selector: string;

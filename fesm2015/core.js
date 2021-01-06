@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+61.sha-c130812
+ * @license Angular v11.1.0-next.3+64.sha-d4327d5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21202,7 +21202,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.3+61.sha-c130812');
+const VERSION = new Version('11.1.0-next.3+64.sha-d4327d5');
 
 /**
  * @license
@@ -26577,6 +26577,7 @@ const angularCoreEnv = (() => ({
     'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
     'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
     'forwardRef': forwardRef,
+    'resolveForwardRef': resolveForwardRef,
 }))();
 
 let jitOptions = null;
@@ -32646,7 +32647,8 @@ function ɵɵngDeclareDirective(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareComponent(decl) {
-    throw new Error('Not yet implemented');
+    const compiler = getCompilerFacade();
+    return compiler.compileComponentDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵcmp.js`, decl);
 }
 
 /**
