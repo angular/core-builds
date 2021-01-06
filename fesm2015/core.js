@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+61.sha-c130812
+ * @license Angular v11.1.0-next.3+64.sha-d4327d5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21238,7 +21238,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.3+61.sha-c130812');
+const VERSION = new Version('11.1.0-next.3+64.sha-d4327d5');
 
 /**
  * @license
@@ -26623,6 +26623,7 @@ const ɵ0$c = () => ({
     'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
     'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
     'forwardRef': forwardRef,
+    'resolveForwardRef': resolveForwardRef,
 });
 /**
  * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
@@ -32707,7 +32708,8 @@ function ɵɵngDeclareDirective(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareComponent(decl) {
-    throw new Error('Not yet implemented');
+    const compiler = getCompilerFacade();
+    return compiler.compileComponentDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵcmp.js`, decl);
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.3+61.sha-c130812
+ * @license Angular v11.1.0-next.3+64.sha-d4327d5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -553,6 +553,8 @@ export declare enum ChangeDetectionStrategy {
      */
     Default = 1
 }
+
+declare type ChangeDetectionStrategy_2 = number;
 
 /**
  * Base class that provides change detection functionality.
@@ -5539,6 +5541,30 @@ export declare class QueryList<T> implements Iterable<T> {
     [Symbol.iterator]: () => Iterator<T>;
 }
 
+declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
+    template: {
+        source: string;
+        isInline: boolean;
+    };
+    styles?: string[];
+    directives?: {
+        selector: string;
+        type: OpaqueValue | (() => OpaqueValue);
+        inputs?: string[];
+        outputs?: string[];
+        exportAs?: string[];
+    }[];
+    pipes?: {
+        [pipeName: string]: OpaqueValue | (() => OpaqueValue);
+    };
+    viewProviders?: OpaqueValue;
+    animations?: OpaqueValue;
+    changeDetection?: ChangeDetectionStrategy_2;
+    encapsulation?: ViewEncapsulation_2;
+    interpolation?: [string, string];
+    preserveWhitespaces?: boolean;
+}
+
 declare interface R3DeclareDirectiveFacade {
     selector?: string;
     type: Function;
@@ -8526,6 +8552,12 @@ export declare enum ViewEncapsulation {
      * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
      * creating a ShadowRoot for Component's Host Element.
      */
+    ShadowDom = 3
+}
+
+declare enum ViewEncapsulation_2 {
+    Emulated = 0,
+    None = 2,
     ShadowDom = 3
 }
 
@@ -12871,7 +12903,7 @@ export declare function ɵɵnextContext<T = any>(level?: number): T;
  *
  * @codeGenApi
  */
-export declare function ɵɵngDeclareComponent(decl: unknown): unknown;
+export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): unknown;
 
 /**
  * Compiles a partial directive declaration object into a full directive definition object.
