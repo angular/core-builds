@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+38.sha-fdbd3ca
+ * @license Angular v11.1.0-next.4+41.sha-1438975
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8608,7 +8608,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      */
     private _cdRefInjectingView?;
     private _appRef;
-    private _viewContainerRef;
+    private _attachedToViewContainer;
     get rootNodes(): any[];
     constructor(
     /**
@@ -8809,7 +8809,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      * introduce other changes.
      */
     checkNoChanges(): void;
-    attachToViewContainerRef(vcRef: ViewContainerRef): void;
+    attachToViewContainerRef(): void;
     detachFromAppRef(): void;
     attachToAppRef(appRef: ViewRefTracker): void;
 }
