@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.7+4.sha-40a03f0
+ * @license Angular v11.0.7+11.sha-6ccdb2d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21161,7 +21161,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.7+4.sha-40a03f0');
+const VERSION = new Version('11.0.7+11.sha-6ccdb2d');
 
 /**
  * @license
@@ -22321,7 +22321,7 @@ class ViewRef {
         this._lView = _lView;
         this._cdRefInjectingView = _cdRefInjectingView;
         this._appRef = null;
-        this._viewContainerRef = null;
+        this._attachedToViewContainer = false;
     }
     get rootNodes() {
         const lView = this._lView;
@@ -22338,12 +22338,19 @@ class ViewRef {
         if (this._appRef) {
             this._appRef.detachView(this);
         }
-        else if (this._viewContainerRef) {
-            const index = this._viewContainerRef.indexOf(this);
-            if (index > -1) {
-                this._viewContainerRef.detach(index);
+        else if (this._attachedToViewContainer) {
+            const parent = this._lView[PARENT];
+            if (isLContainer(parent)) {
+                const viewRefs = parent[VIEW_REFS];
+                const index = viewRefs ? viewRefs.indexOf(this) : -1;
+                if (index > -1) {
+                    ngDevMode &&
+                        assertEqual(index, parent.indexOf(this._lView) - CONTAINER_HEADER_OFFSET, 'An attached view should be in the same position within its container as its ViewRef in the VIEW_REFS array.');
+                    detachView(parent, index);
+                    removeFromArray(viewRefs, index);
+                }
             }
-            this._viewContainerRef = null;
+            this._attachedToViewContainer = false;
         }
         destroyLView(this._lView[TVIEW], this._lView);
     }
@@ -22535,18 +22542,18 @@ class ViewRef {
     checkNoChanges() {
         checkNoChangesInternal(this._lView[TVIEW], this._lView, this.context);
     }
-    attachToViewContainerRef(vcRef) {
+    attachToViewContainerRef() {
         if (this._appRef) {
             throw new Error('This view is already attached directly to the ApplicationRef!');
         }
-        this._viewContainerRef = vcRef;
+        this._attachedToViewContainer = true;
     }
     detachFromAppRef() {
         this._appRef = null;
         renderDetachView(this._lView[TVIEW], this._lView);
     }
     attachToAppRef(appRef) {
-        if (this._viewContainerRef) {
+        if (this._attachedToViewContainer) {
             throw new Error('This view is already attached to a ViewContainer!');
         }
         this._appRef = appRef;
@@ -22927,7 +22934,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         if (parentRNode !== null) {
             addViewToContainer(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
         }
-        viewRef.attachToViewContainerRef(this);
+        viewRef.attachToViewContainerRef();
         addToArray(getOrCreateViewRefs(lContainer), adjustedIdx, viewRef);
         return viewRef;
     }
