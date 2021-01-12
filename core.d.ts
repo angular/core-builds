@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+79.sha-bd17610
+ * @license Angular v11.1.0-next.4+80.sha-b48eabd
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5542,10 +5542,8 @@ export declare class QueryList<T> implements Iterable<T> {
 }
 
 declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
-    template: {
-        source: string;
-        isInline: boolean;
-    };
+    template: string;
+    isInline?: boolean;
     styles?: string[];
     directives?: {
         selector: string;
