@@ -9,7 +9,7 @@ import '../util/ng_dev_mode';
 import { AbstractType, Type } from '../interface/type';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
-import { InjectFlags } from './interface/injector';
+import { DecoratorFlags, InjectFlags, InternalInjectFlags } from './interface/injector';
 export declare const THROW_IF_NOT_FOUND: {};
 export declare const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
 export declare const SOURCE = "__source";
@@ -71,5 +71,22 @@ export declare function ɵɵinvalidFactoryDep(index: number): never;
  */
 export declare const inject: typeof ɵɵinject;
 export declare function injectArgs(types: (Type<any> | InjectionToken<any> | any[])[]): any[];
+/**
+ * Attaches a given InjectFlag to a given decorator using monkey-patching.
+ * Since DI decorators can be used in providers `deps` array (when provider is configured using
+ * `useFactory`) without initialization (e.g. `Host`) and as an instance (e.g. `new Host()`), we
+ * attach the flag to make it available both as a static property and as a field on decorator
+ * instance.
+ *
+ * @param decorator Provided DI decorator.
+ * @param flag InjectFlag that should be applied.
+ */
+export declare function attachInjectFlag(decorator: any, flag: InternalInjectFlags | DecoratorFlags): any;
+/**
+ * Reads monkey-patched property that contains InjectFlag attached to a decorator.
+ *
+ * @param token Token that may contain monkey-patched DI flags property.
+ */
+export declare function getInjectFlag(token: any): number | undefined;
 export declare function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never;
 export declare function formatError(text: string, obj: any, injectorErrorName: string, source?: string | null): string;
