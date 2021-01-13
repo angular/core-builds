@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+91.sha-2578810
+ * @license Angular v11.1.0-next.4+92.sha-6cff877
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3282,7 +3282,6 @@ export declare interface InjectDecorator {
     new (token: any): Inject;
 }
 
-
 /**
  * Injection flags for DI.
  *
@@ -3850,7 +3849,7 @@ declare interface LContainer extends Array<any> {
      * The host could be an LView if this container is on a component node.
      * In that case, the component LView is its HOST.
      */
-    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bx;
+    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_ca;
     /**
      * This is a type field which allows us to differentiate `LContainer` from `StylingContext` in an
      * efficient way. The value is always set to `true`
@@ -3867,12 +3866,12 @@ declare interface LContainer extends Array<any> {
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
      */
-    [PARENT]: ɵangular_packages_core_core_bx;
+    [PARENT]: ɵangular_packages_core_core_ca;
     /**
      * This allows us to jump from a container to a sibling container or component
      * view with the same parent, so we can remove listeners efficiently.
      */
-    [NEXT]: ɵangular_packages_core_core_bx | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * The number of direct transplanted views which need a refresh or have descendants themselves
      * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
@@ -3885,7 +3884,7 @@ declare interface LContainer extends Array<any> {
      * a different `LContainer`. We need to track views created from a given declaration point since
      * queries collect matches from the embedded view declaration point and _not_ the insertion point.
      */
-    [MOVED_VIEWS]: ɵangular_packages_core_core_bx[] | null;
+    [MOVED_VIEWS]: ɵangular_packages_core_core_ca[] | null;
     /**
      * Pointer to the `TNode` which represents the host of the container.
      */
@@ -3919,8 +3918,8 @@ declare interface LContainerDebug {
      */
     readonly views: LViewDebug[];
     readonly parent: LViewDebug | null;
-    readonly movedViews: ɵangular_packages_core_core_bx[] | null;
-    readonly host: RElement | RComment | ɵangular_packages_core_core_bx;
+    readonly movedViews: ɵangular_packages_core_core_ca[] | null;
+    readonly host: RElement | RComment | ɵangular_packages_core_core_ca;
     readonly next: LViewDebug | LContainerDebug | null;
     readonly hasTransplantedViews: boolean;
 }
@@ -3955,7 +3954,7 @@ export declare const LOCALE_ID: InjectionToken<string>;
  * - `<div #nativeDivEl>` - `nativeDivEl` should point to the native `<div>` element;
  * - `<ng-template #tplRef>` - `tplRef` should point to the `TemplateRef` instance;
  */
-declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_bx) => any;
+declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_ca) => any;
 
 /**
  * lQueries represent a collection of individual LQuery objects tracked in a given view.
@@ -6255,7 +6254,7 @@ export declare class ResolvedReflectiveFactory {
     /**
      * Arguments (dependencies) to the `factory` function.
      */
-    dependencies: ɵangular_packages_core_core_d[];
+    dependencies: ɵangular_packages_core_core_e[];
     constructor(
     /**
      * Factory function which can return an instance of an object represented by a key.
@@ -6264,7 +6263,7 @@ export declare class ResolvedReflectiveFactory {
     /**
      * Arguments (dependencies) to the `factory` function.
      */
-    dependencies: ɵangular_packages_core_core_d[]);
+    dependencies: ɵangular_packages_core_core_e[]);
 }
 
 /**
@@ -6745,7 +6744,7 @@ declare interface TContainerNode extends TNode {
      * - They are the first node of a component or embedded view
      * - They are dynamically created
      */
-    parent: ɵangular_packages_core_core_bj | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: TView | TView[] | null;
     projection: null;
     value: null;
@@ -6784,8 +6783,8 @@ declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponent
 declare interface TElementContainerNode extends TNode {
     /** Index in the LView[] array. */
     index: number;
-    child: ɵangular_packages_core_core_bj | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
-    parent: ɵangular_packages_core_core_bj | TElementContainerNode | null;
+    child: ɵangular_packages_core_core_bk | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -7252,7 +7251,7 @@ declare interface TNode {
      *
      * If this is an inline view node (V), the parent will be its container.
      */
-    parent: ɵangular_packages_core_core_bj | TContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TContainerNode | null;
     /**
      * List of projected TNodes for a given component host element OR index into the said nodes.
      *
@@ -7508,7 +7507,7 @@ declare const enum TNodeType {
 /**
  * Type representing a set of TNodes that can have local refs (`#foo`) placed on them.
  */
-declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bj | TElementContainerNode;
+declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bk | TElementContainerNode;
 
 /** Static data for an LProjectionNode  */
 declare interface TProjectionNode extends TNode {
@@ -7519,7 +7518,7 @@ declare interface TProjectionNode extends TNode {
      * or embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bj | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
@@ -7871,7 +7870,7 @@ declare interface TTextNode extends TNode {
      * embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bj | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -7893,7 +7892,7 @@ declare interface TView {
      * This is a blueprint used to generate LView instances for this TView. Copying this
      * blueprint is faster than creating a new LView from scratch.
      */
-    blueprint: ɵangular_packages_core_core_bx;
+    blueprint: ɵangular_packages_core_core_ca;
     /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
@@ -8620,14 +8619,14 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      *
      * @internal
      */
-    _lView: ɵangular_packages_core_core_bx, 
+    _lView: ɵangular_packages_core_core_ca, 
     /**
      * This represents the `LView` associated with the point where `ChangeDetectorRef` was
      * requested.
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: ɵangular_packages_core_core_bx | undefined);
+    _cdRefInjectingView?: ɵangular_packages_core_core_ca | undefined);
     get context(): T;
     get destroyed(): boolean;
     destroy(): void;
@@ -8917,14 +8916,25 @@ export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | Abstr
 export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
+ * Schedule work at next available slot.
+ *
+ * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
+ * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
+ * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
+ *
+ * @param ngZone NgZone to use for scheduling.
+ */
+export declare function ɵangular_packages_core_core_ba(ngZone: NgZone): (fn: () => void) => void;
+
+/**
  * USD currency code that the application uses by default for CurrencyPipe when no
  * DEFAULT_CURRENCY_CODE is provided.
  */
-export declare const ɵangular_packages_core_core_ba = "USD";
+export declare const ɵangular_packages_core_core_bb = "USD";
 
-export declare function ɵangular_packages_core_core_bb(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
+export declare function ɵangular_packages_core_core_bc(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
 
-export declare abstract class ɵangular_packages_core_core_bc {
+export declare abstract class ɵangular_packages_core_core_bd {
     abstract get view(): ViewData;
     abstract get nodeIndex(): number | null;
     abstract get injector(): Injector;
@@ -8939,13 +8949,13 @@ export declare abstract class ɵangular_packages_core_core_bc {
     abstract logError(console: Console, ...values: any[]): void;
 }
 
-export declare function ɵangular_packages_core_core_bd<T>(definition: ɵDirectiveDef<T>): typeof rememberChangeHistoryAndInvokeOnChangesHook;
+export declare function ɵangular_packages_core_core_be<T>(definition: ɵDirectiveDef<T>): typeof rememberChangeHistoryAndInvokeOnChangesHook;
 
 /**
  * A change detection scheduler token for {@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
  */
-export declare const ɵangular_packages_core_core_be: InjectionToken<(fn: () => void) => void>;
+export declare const ɵangular_packages_core_core_bf: InjectionToken<(fn: () => void) => void>;
 
 /**
  * Inject static attribute value into directive constructor.
@@ -8978,28 +8988,28 @@ export declare const ɵangular_packages_core_core_be: InjectionToken<(fn: () => 
  *
  * @publicApi
  */
-export declare function ɵangular_packages_core_core_bf(tNode: TNode, attrNameToInject: string): string | null;
+export declare function ɵangular_packages_core_core_bg(tNode: TNode, attrNameToInject: string): string | null;
 
 /**
  * Return the current `LView`.
  */
-export declare function ɵangular_packages_core_core_bg(): ɵangular_packages_core_core_bx;
+export declare function ɵangular_packages_core_core_bh(): ɵangular_packages_core_core_ca;
 
-export declare function ɵangular_packages_core_core_bh(): number;
+export declare function ɵangular_packages_core_core_bi(): number;
 
-export declare function ɵangular_packages_core_core_bi<T = any>(level: number): T;
+export declare function ɵangular_packages_core_core_bj<T = any>(level: number): T;
 
 /** Static data for an element  */
-export declare interface ɵangular_packages_core_core_bj extends TNode {
+export declare interface ɵangular_packages_core_core_bk extends TNode {
     /** Index in the data[] array */
     index: number;
-    child: ɵangular_packages_core_core_bj | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
+    child: ɵangular_packages_core_core_bk | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
     /**
      * Element nodes will have parents unless they are the first node of a component or
      * embedded view (which means their parent is in a different view and must be
      * retrieved using viewData[HOST_NODE]).
      */
-    parent: ɵangular_packages_core_core_bj | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
@@ -9025,7 +9035,7 @@ export declare interface ɵangular_packages_core_core_bj extends TNode {
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bk(lView: ɵangular_packages_core_core_bx, bindingRoot: number, slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bl(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -9040,7 +9050,7 @@ export declare function ɵangular_packages_core_core_bk(lView: ɵangular_package
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bl(lView: ɵangular_packages_core_core_bx, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bm(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -9056,7 +9066,7 @@ export declare function ɵangular_packages_core_core_bl(lView: ɵangular_package
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bm(lView: ɵangular_packages_core_core_bx, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bn(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -9074,7 +9084,7 @@ export declare function ɵangular_packages_core_core_bm(lView: ɵangular_package
  * @returns Updated or cached value
  *
  */
-export declare function ɵangular_packages_core_core_bn(lView: ɵangular_packages_core_core_bx, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bo(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
 
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -9091,7 +9101,7 @@ export declare function ɵangular_packages_core_core_bn(lView: ɵangular_package
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bo(lView: ɵangular_packages_core_core_bx, bindingRoot: number, slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bp(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
@@ -9100,20 +9110,54 @@ export declare function ɵangular_packages_core_core_bo(lView: ɵangular_package
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function ɵangular_packages_core_core_bp(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
+export declare function ɵangular_packages_core_core_bq(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 
-export declare function ɵangular_packages_core_core_bq(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
+export declare function ɵangular_packages_core_core_br(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
 
-export declare function ɵangular_packages_core_core_br(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
+export declare function ɵangular_packages_core_core_bs(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
 
 
-export declare function ɵangular_packages_core_core_bs<T>(objWithPropertyToExtract: T): string;
+/**
+ * Special flag indicating that a decorator is of type `Inject`. It's used to make `Inject`
+ * decorator tree-shakable (so we don't have to rely on the `instanceof` checks).
+ * Note: this flag is not included into the `InjectFlags` since it's an internal-only API.
+ */
+export declare const enum ɵangular_packages_core_core_bt {
+    Inject = -1
+}
 
-export declare class ɵangular_packages_core_core_bt implements Injector {
+/**
+ * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
+ * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
+ * be turned into a const enum when ViewEngine is removed (see TODO at the `InjectFlags` enum
+ * above). The benefit of inlining is that we can use these flags at the top level without affecting
+ * tree-shaking (see "no-toplevel-property-access" tslint rule for more info).
+ * Keep this enum in sync with `InjectFlags` enum above.
+ */
+export declare const enum ɵangular_packages_core_core_bu {
+    /** Check self and check parent injector if needed */
+    Default = 0,
+    /**
+     * Specifies that an injector should retrieve a dependency from any injector until reaching the
+     * host element of the current component. (Only used with Element Injector)
+     */
+    Host = 1,
+    /** Don't ascend to ancestors of the node requesting injection. */
+    Self = 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf = 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional = 8
+}
+
+
+export declare function ɵangular_packages_core_core_bv<T>(objWithPropertyToExtract: T): string;
+
+export declare class ɵangular_packages_core_core_bw implements Injector {
     get(token: any, notFoundValue?: any): any;
 }
 
-export declare function ɵangular_packages_core_core_bu(): (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
+export declare function ɵangular_packages_core_core_bx(): (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
 
 
 /**
@@ -9126,7 +9170,7 @@ export declare function ɵangular_packages_core_core_bu(): (<T>(token: Type<T> |
  * NOTE: the numbers here must be negative, because positive numbers are used as IDs for bloom
  * filter.
  */
-export declare const enum ɵangular_packages_core_core_bv {
+export declare const enum ɵangular_packages_core_core_by {
     /**
      * Marks that the current type is `Injector`
      */
@@ -9141,7 +9185,19 @@ export declare const enum ɵangular_packages_core_core_bv {
  * @param tNode
  * @param lView
  */
-export declare function ɵangular_packages_core_core_bw(tNode: TNode, lView: ɵangular_packages_core_core_bx): RNode;
+export declare function ɵangular_packages_core_core_bz(tNode: TNode, lView: ɵangular_packages_core_core_ca): RNode;
+
+/**
+ * Attaches a given InjectFlag to a given decorator using monkey-patching.
+ * Since DI decorators can be used in providers `deps` array (when provider is configured using
+ * `useFactory`) without initialization (e.g. `Host`) and as an instance (e.g. `new Host()`), we
+ * attach the flag to make it available both as a static property and as a field on decorator
+ * instance.
+ *
+ * @param decorator Provided DI decorator.
+ * @param flag InjectFlag that should be applied.
+ */
+export declare function ɵangular_packages_core_core_c(decorator: any, flag: ɵangular_packages_core_core_bu | ɵangular_packages_core_core_bt): any;
 
 /**
  * `LView` stores all of the information needed to process the instructions as
@@ -9153,7 +9209,7 @@ export declare function ɵangular_packages_core_core_bw(tNode: TNode, lView: ɵa
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-export declare interface ɵangular_packages_core_core_bx extends Array<any> {
+export declare interface ɵangular_packages_core_core_ca extends Array<any> {
     /**
      * Human readable representation of the `LView`.
      *
@@ -9183,7 +9239,7 @@ export declare interface ɵangular_packages_core_core_bx extends Array<any> {
      *
      * `LContainer` - The current view is part of a container, and is an embedded view.
      */
-    [PARENT]: ɵangular_packages_core_core_bx | LContainer | null;
+    [PARENT]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      *
      * The next sibling LView or LContainer.
@@ -9193,7 +9249,7 @@ export declare interface ɵangular_packages_core_core_bx extends Array<any> {
      * views in the same container. We need a way to link component views and views
      * across containers as well.
      */
-    [NEXT]: ɵangular_packages_core_core_bx | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_ca | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
     /**
@@ -9262,14 +9318,14 @@ export declare interface ɵangular_packages_core_core_bx extends Array<any> {
      * Necessary to store this so views can traverse through their nested views
      * to remove listeners and call onDestroy callbacks.
      */
-    [CHILD_HEAD]: ɵangular_packages_core_core_bx | LContainer | null;
+    [CHILD_HEAD]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
      * without having to propagate starting from the first child.
      */
-    [CHILD_TAIL]: ɵangular_packages_core_core_bx | LContainer | null;
+    [CHILD_TAIL]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * View where this view's template was declared.
      *
@@ -9292,7 +9348,7 @@ export declare interface ɵangular_packages_core_core_bx extends Array<any> {
      * template function during change detection, we need the declaration view to get inherited
      * context.
      */
-    [DECLARATION_VIEW]: ɵangular_packages_core_core_bx | null;
+    [DECLARATION_VIEW]: ɵangular_packages_core_core_ca | null;
     /**
      * Points to the declaration component view, used to track transplanted `LView`s.
      *
@@ -9362,7 +9418,7 @@ export declare interface ɵangular_packages_core_core_bx extends Array<any> {
      *   - `LView[DECLARATION_LCONTAINER]` similar problem for queries
      *   - `LContainer[MOVED_VIEWS]` similar problem for queries
      */
-    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bx;
+    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_ca;
     /**
      * A declaration point of embedded views (ones instantiated based on the content of a
      * <ng-template>), null for other types of views.
@@ -9392,7 +9448,7 @@ export declare interface ɵangular_packages_core_core_bx extends Array<any> {
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_by(viewOrComponent: ɵangular_packages_core_core_bx | {}): RootContext;
+export declare function ɵangular_packages_core_core_cb(viewOrComponent: ɵangular_packages_core_core_ca | {}): RootContext;
 
 
 /**
@@ -9415,11 +9471,11 @@ export declare function ɵangular_packages_core_core_by(viewOrComponent: ɵangul
  *
  * @codeGenApi
  */
-export declare function ɵangular_packages_core_core_bz(message: string, replacements?: {
+export declare function ɵangular_packages_core_core_cc(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
 
-export declare class ɵangular_packages_core_core_c implements ReflectiveInjector {
+export declare class ɵangular_packages_core_core_d implements ReflectiveInjector {
     private static INJECTOR_KEY;
     readonly parent: Injector | null;
     keyIds: number[];
@@ -9448,30 +9504,30 @@ export declare class ɵangular_packages_core_core_c implements ReflectiveInjecto
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
-export declare class ɵangular_packages_core_core_d {
+export declare class ɵangular_packages_core_core_e {
     key: ReflectiveKey;
     optional: boolean;
     visibility: Self | SkipSelf | null;
     constructor(key: ReflectiveKey, optional: boolean, visibility: Self | SkipSelf | null);
-    static fromKey(key: ReflectiveKey): ɵangular_packages_core_core_d;
+    static fromKey(key: ReflectiveKey): ɵangular_packages_core_core_e;
 }
 
 /**
  * Resolve a list of Providers.
  */
-export declare function ɵangular_packages_core_core_e(providers: Provider[]): ResolvedReflectiveProvider[];
+export declare function ɵangular_packages_core_core_f(providers: Provider[]): ResolvedReflectiveProvider[];
 
-export declare function ɵangular_packages_core_core_f(): string;
+export declare function ɵangular_packages_core_core_g(): string;
 
 /** Injects a Renderer2 for the current component. */
-export declare function ɵangular_packages_core_core_g(): Renderer2;
+export declare function ɵangular_packages_core_core_h(): Renderer2;
 
 /**
  * Creates an ElementRef from the most recent node.
  *
  * @returns The ElementRef instance to use
  */
-export declare function ɵangular_packages_core_core_h(): ElementRef;
+export declare function ɵangular_packages_core_core_i(): ElementRef;
 
 /**
  * Creates an ElementRef given a node.
@@ -9480,16 +9536,16 @@ export declare function ɵangular_packages_core_core_h(): ElementRef;
  * @param lView The view to which the node belongs
  * @returns The ElementRef instance to use
  */
-export declare function ɵangular_packages_core_core_i(tNode: TNode, lView: ɵangular_packages_core_core_bx): ElementRef;
+export declare function ɵangular_packages_core_core_j(tNode: TNode, lView: ɵangular_packages_core_core_ca): ElementRef;
 
-export declare function ɵangular_packages_core_core_j(id: string): NgModuleFactory<any>;
+export declare function ɵangular_packages_core_core_k(id: string): NgModuleFactory<any>;
 
 /**
  * Creates a TemplateRef given a node.
  *
  * @returns The TemplateRef instance to use
  */
-export declare function ɵangular_packages_core_core_k<T>(): TemplateRef<T> | null;
+export declare function ɵangular_packages_core_core_l<T>(): TemplateRef<T> | null;
 
 /**
  * Creates a TemplateRef and stores it on the injector.
@@ -9498,7 +9554,7 @@ export declare function ɵangular_packages_core_core_k<T>(): TemplateRef<T> | nu
  * @param hostLView The `LView` to which the node belongs
  * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
  */
-export declare function ɵangular_packages_core_core_l<T>(hostTNode: TNode, hostLView: ɵangular_packages_core_core_bx): TemplateRef<T> | null;
+export declare function ɵangular_packages_core_core_m<T>(hostTNode: TNode, hostLView: ɵangular_packages_core_core_ca): TemplateRef<T> | null;
 
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -9506,14 +9562,14 @@ export declare function ɵangular_packages_core_core_l<T>(hostTNode: TNode, host
  *
  * @returns The ViewContainerRef instance to use
  */
-export declare function ɵangular_packages_core_core_m(): ViewContainerRef;
+export declare function ɵangular_packages_core_core_n(): ViewContainerRef;
 
-export declare class ɵangular_packages_core_core_n {
+export declare class ɵangular_packages_core_core_o {
     readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     private readonly _debugContext;
-    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_bc);
+    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_bd);
     get injector(): Injector;
     get componentInstance(): any;
     get context(): any;
@@ -9523,7 +9579,7 @@ export declare class ɵangular_packages_core_core_n {
     get providerTokens(): any[];
 }
 
-export declare class ɵangular_packages_core_core_o extends ɵangular_packages_core_core_n implements DebugElement {
+export declare class ɵangular_packages_core_core_p extends ɵangular_packages_core_core_o implements DebugElement {
     readonly name: string;
     readonly properties: {
         [key: string]: any;
@@ -9539,7 +9595,7 @@ export declare class ɵangular_packages_core_core_o extends ɵangular_packages_c
     };
     readonly childNodes: DebugNode[];
     readonly nativeElement: any;
-    constructor(nativeNode: any, parent: any, _debugContext: ɵangular_packages_core_core_bc);
+    constructor(nativeNode: any, parent: any, _debugContext: ɵangular_packages_core_core_bd);
     addChild(child: DebugNode): void;
     removeChild(child: DebugNode): void;
     insertChildrenAfter(child: DebugNode, newChildren: DebugNode[]): void;
@@ -9551,49 +9607,38 @@ export declare class ɵangular_packages_core_core_o extends ɵangular_packages_c
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 
-export declare function ɵangular_packages_core_core_p(nativeNode: any): DebugNode | null;
+export declare function ɵangular_packages_core_core_q(nativeNode: any): DebugNode | null;
 
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-export declare function ɵangular_packages_core_core_q(isPipe?: boolean): ChangeDetectorRef;
+export declare function ɵangular_packages_core_core_r(isPipe?: boolean): ChangeDetectorRef;
 
-export declare class ɵangular_packages_core_core_r implements IterableDifferFactory {
+export declare class ɵangular_packages_core_core_s implements IterableDifferFactory {
     constructor();
     supports(obj: Object | null | undefined): boolean;
     create<V>(trackByFn?: TrackByFunction<V>): DefaultIterableDiffer<V>;
 }
 
-export declare class ɵangular_packages_core_core_s<K, V> implements KeyValueDifferFactory {
+export declare class ɵangular_packages_core_core_t<K, V> implements KeyValueDifferFactory {
     constructor();
     supports(obj: any): boolean;
     create<K, V>(): KeyValueDiffer<K, V>;
 }
 
-export declare function ɵangular_packages_core_core_t(): IterableDiffers;
+export declare function ɵangular_packages_core_core_u(): IterableDiffers;
 
-export declare function ɵangular_packages_core_core_u(): KeyValueDiffers;
+export declare function ɵangular_packages_core_core_v(): KeyValueDiffers;
 
-export declare function ɵangular_packages_core_core_v(): IterableDiffers;
+export declare function ɵangular_packages_core_core_w(): IterableDiffers;
 
-export declare function ɵangular_packages_core_core_w(): KeyValueDiffers;
+export declare function ɵangular_packages_core_core_x(): KeyValueDiffers;
 
-export declare function ɵangular_packages_core_core_x(locale?: string): string;
+export declare function ɵangular_packages_core_core_y(locale?: string): string;
 
 /**
  * A built-in [dependency injection token](guide/glossary#di-token)
  * that is used to configure the root injector for bootstrapping.
  */
-export declare const ɵangular_packages_core_core_y: StaticProvider[];
-
-/**
- * Schedule work at next available slot.
- *
- * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
- * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
- * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
- *
- * @param ngZone NgZone to use for scheduling.
- */
-export declare function ɵangular_packages_core_core_z(ngZone: NgZone): (fn: () => void) => void;
+export declare const ɵangular_packages_core_core_z: StaticProvider[];
 
 /**
  * Providers that generate a random `APP_ID_TOKEN`.
@@ -9601,7 +9646,7 @@ export declare function ɵangular_packages_core_core_z(ngZone: NgZone): (fn: () 
  */
 export declare const ɵAPP_ID_RANDOM_PROVIDER: {
     provide: InjectionToken<string>;
-    useFactory: typeof ɵangular_packages_core_core_f;
+    useFactory: typeof ɵangular_packages_core_core_g;
     deps: any[];
 };
 
@@ -10434,7 +10479,7 @@ export declare interface ɵLContext {
     /**
      * The component's parent view data.
      */
-    lView: ɵangular_packages_core_core_bx;
+    lView: ɵangular_packages_core_core_ca;
     /**
      * The index instance of the node.
      */
@@ -10946,7 +10991,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     hostView: ViewRef_2<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bx, _tNode: ɵangular_packages_core_core_bj | TContainerNode | TElementContainerNode);
+    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_ca, _tNode: ɵangular_packages_core_core_bk | TContainerNode | TElementContainerNode);
     get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
@@ -11121,13 +11166,13 @@ export declare function ɵsetLocaleId(localeId: string): void;
 export declare type ɵSetterFn = (obj: any, value: any) => void;
 
 /** Store a value in the `data` at a given `index`. */
-export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_core_bx, index: number, value: T): void;
+export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_core_ca, index: number, value: T): void;
 
 
 export declare function ɵstringify(token: any): string;
 
 
-export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_q;
+export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_r;
 
 export declare const ɵSWITCH_COMPILE_COMPONENT__POST_R3__: typeof ɵcompileComponent;
 
@@ -11139,16 +11184,16 @@ export declare const ɵSWITCH_COMPILE_NGMODULE__POST_R3__: typeof ɵcompileNgMod
 
 export declare const ɵSWITCH_COMPILE_PIPE__POST_R3__: typeof ɵcompilePipe;
 
-export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_h;
+export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_i;
 
 
 export declare const ɵSWITCH_IVY_ENABLED__POST_R3__ = true;
 
-export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_g;
+export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_h;
 
-export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_k;
+export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_l;
 
-export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_m;
+export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_n;
 
 export declare function ɵted(checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef;
 
@@ -14608,7 +14653,7 @@ export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplat
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, lView: ɵangular_packages_core_core_bx): TemplateRef<any> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, lView: ɵangular_packages_core_core_ca): TemplateRef<any> | null;
 
 /**
  * Create static text node
