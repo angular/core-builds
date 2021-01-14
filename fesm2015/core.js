@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.0.9+12.sha-72e8899
+ * @license Angular v11.0.9+17.sha-2f7e315
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -591,7 +591,7 @@ var ViewEncapsulation;
      * Use Shadow DOM to encapsulate styles.
      *
      * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
      * creating a ShadowRoot for Component's Host Element.
      */
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
@@ -21161,7 +21161,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.0.9+12.sha-72e8899');
+const VERSION = new Version('11.0.9+17.sha-2f7e315');
 
 /**
  * @license
