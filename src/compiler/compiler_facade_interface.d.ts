@@ -223,6 +223,7 @@ export interface R3QueryMetadataFacade {
     first: boolean;
     predicate: any | string[];
     descendants: boolean;
+    emitDistinctChangesOnly: boolean;
     read: any | null;
     static: boolean;
 }
@@ -233,6 +234,7 @@ export interface R3DeclareQueryMetadataFacade {
     descendants?: boolean;
     read?: OpaqueValue;
     static?: boolean;
+    emitDistinctChangesOnly?: boolean;
 }
 export interface ParseSourceSpan {
     start: any;

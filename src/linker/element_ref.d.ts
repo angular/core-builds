@@ -59,3 +59,10 @@ export declare class ElementRef<T = any> {
     nativeElement: T;
     constructor(nativeElement: T);
 }
+/**
+ * Unwraps `ElementRef` and return the `nativeElement`.
+ *
+ * @param value value to unwrap
+ * @returns `nativeElement` if `ElementRef` otherwise returns value as is.
+ */
+export declare function unwrapElementRef<T, R>(value: T | ElementRef<R>): T | R;

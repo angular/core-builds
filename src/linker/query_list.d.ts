@@ -33,13 +33,25 @@ import { Observable } from 'rxjs';
  * @publicApi
  */
 export declare class QueryList<T> implements Iterable<T> {
+    private _emitDistinctChangesOnly;
     readonly dirty = true;
     private _results;
-    readonly changes: Observable<any>;
+    private _changesDetected;
+    private _changes;
     readonly length: number;
     readonly first: T;
     readonly last: T;
-    constructor();
+    /**
+     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
+     */
+    get changes(): Observable<any>;
+    /**
+     * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
+     *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
+     *     the same result) This is set to `false` for backwards compatibility but will be changed to
+     *     true in v12.
+     */
+    constructor(_emitDistinctChangesOnly?: boolean);
     /**
      * Returns the QueryList entry at `index`.
      */
@@ -85,8 +97,13 @@ export declare class QueryList<T> implements Iterable<T> {
      * occurs.
      *
      * @param resultsTree The query results to store
+     * @param identityAccessor Optional function for extracting stable object identity from a value
+     *    in the array. This function is executed for each element of the query result list while
+     *    comparing current query list with the new one (provided as a first argument of the `reset`
+     *    function) to detect if the lists are different. If the function is not provided, elements
+     *    are compared as is (without any pre-processing).
      */
-    reset(resultsTree: Array<T | any[]>): void;
+    reset(resultsTree: Array<T | any[]>, identityAccessor?: (value: T) => unknown): void;
     /**
      * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
      */

@@ -13,6 +13,15 @@
  */
 export declare function addAllToArray(items: any[], arr: any[]): void;
 /**
+ * Determines if the contents of two arrays is identical
+ *
+ * @param a first array
+ * @param b second array
+ * @param identityAccessor Optional function for extracting stable object identity from a value in
+ *     the array.
+ */
+export declare function arrayEquals<T>(a: T[], b: T[], identityAccessor?: (value: T) => unknown): boolean;
+/**
  * Flattens an array.
  */
 export declare function flatten(list: any[], dst?: any[]): any[];

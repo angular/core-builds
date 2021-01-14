@@ -187,6 +187,7 @@ export declare const enum NodeFlags {
     StaticQuery = 268435456,
     DynamicQuery = 536870912,
     TypeNgModule = 1073741824,
+    EmitDistinctChangesOnly = -2147483648,
     CatQuery = 201326592,
     Types = 201347067
 }

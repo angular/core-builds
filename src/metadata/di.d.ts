@@ -91,12 +91,14 @@ export interface Attribute {
  */
 export interface Query {
     descendants: boolean;
+    emitDistinctChangesOnly: boolean;
     first: boolean;
     read: any;
     isViewQuery: boolean;
     selector: any;
     static?: boolean;
 }
+export declare const emitDistinctChangesOnlyDefaultValue = false;
 /**
  * Base class for query metadata.
  *
@@ -132,6 +134,9 @@ export interface ContentChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. The default value will change from `false` to `true` in
+     *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
      * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
@@ -151,10 +156,12 @@ export interface ContentChildrenDecorator {
      */
     (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): any;
     new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): Query;
 }
@@ -254,6 +261,9 @@ export interface ViewChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **read** - Used to read a different token from the queried elements.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. The default value will change from `false` to `true` in
+     *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
      *
      * @usageNotes
      *
@@ -267,9 +277,11 @@ export interface ViewChildrenDecorator {
      */
     (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): any;
     new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): ViewChildren;
 }
 /**

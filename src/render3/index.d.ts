@@ -26,7 +26,7 @@ export { setClassMetadata, } from './metadata';
 export { NgModuleFactory, NgModuleRef } from './ng_module_ref';
 export { ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, } from './pipe';
 export { ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, } from './pure_function';
-export { ɵɵcontentQuery, ɵɵloadQuery, ɵɵqueryRefresh, ɵɵstaticContentQuery, ɵɵstaticViewQuery, ɵɵviewQuery } from './query';
+export { ɵɵcontentQuery, ɵɵloadQuery, ɵɵqueryRefresh, ɵɵviewQuery } from './query';
 export { ɵɵdisableBindings, ɵɵenableBindings, ɵɵrestoreView, } from './state';
 export { NO_CHANGE } from './tokens';
 export { ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow } from './util/misc_utils';
