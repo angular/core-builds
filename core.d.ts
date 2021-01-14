@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-rc.0+12.sha-968b2bb
+ * @license Angular v11.1.0-rc.0+19.sha-63bf613
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8546,7 +8546,7 @@ export declare enum ViewEncapsulation {
      * Use Shadow DOM to encapsulate styles.
      *
      * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
      * creating a ShadowRoot for Component's Host Element.
      */
     ShadowDom = 3

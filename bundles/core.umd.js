@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-rc.0+12.sha-968b2bb
+ * @license Angular v11.1.0-rc.0+19.sha-63bf613
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -566,7 +566,7 @@
          * Use Shadow DOM to encapsulate styles.
          *
          * For the DOM this means using modern [Shadow
-         * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+         * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
          * creating a ShadowRoot for Component's Host Element.
          */
         ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
@@ -12763,7 +12763,7 @@
         ngDevMode && assertIndexInRange(rootView, index);
         rootView[index] = rNode;
         // '#host' is added here as we don't know the real host DOM name (we don't want to read it) and at
-        // the same time we want to communicate the the debug `TNode` that this is a special `TNode`
+        // the same time we want to communicate the debug `TNode` that this is a special `TNode`
         // representing a host element.
         var tNode = getOrCreateTNode(tView, index, 2 /* Element */, '#host', null);
         var mergedAttrs = tNode.mergedAttrs = def.hostAttrs;
@@ -21852,7 +21852,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-rc.0+12.sha-968b2bb');
+    var VERSION = new Version('11.1.0-rc.0+19.sha-63bf613');
 
     /**
      * @license
