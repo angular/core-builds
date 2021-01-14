@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-rc.0+19.sha-63bf613
+ * @license Angular v11.1.0-rc.0+21.sha-d5f696c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1327,6 +1327,9 @@ export declare interface ContentChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. The default value will change from `false` to `true` in
+     *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
      * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
@@ -1346,10 +1349,12 @@ export declare interface ContentChildrenDecorator {
      */
     (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): any;
     new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): Query;
 }
@@ -5417,6 +5422,7 @@ declare const QUERIES = 19;
  */
 export declare interface Query {
     descendants: boolean;
+    emitDistinctChangesOnly: boolean;
     first: boolean;
     read: any;
     isViewQuery: boolean;
@@ -5449,6 +5455,34 @@ declare interface QueryDef {
 }
 
 /**
+ * A set of flags to be used with Queries.
+ *
+ * NOTE: Ensure changes here are reflected in `packages/compiler/src/render3/view/compiler.ts`
+ */
+declare const enum QueryFlags {
+    /**
+     * No flags
+     */
+    none = 0,
+    /**
+     * Whether or not the query should descend into children.
+     */
+    descendants = 1,
+    /**
+     * The query can be computed statically and hence can be assigned eagerly.
+     *
+     * NOTE: Backwards compatibility with ViewEngine.
+     */
+    isStatic = 2,
+    /**
+     * If the `QueryList` should fire change event only if actual change to query was computed (vs old
+     * behavior where the change was fired whenever the query was recomputed, even if the recomputed
+     * query resulted in the same list.)
+     */
+    emitDistinctChangesOnly = 4
+}
+
+/**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
  *
@@ -5475,13 +5509,25 @@ declare interface QueryDef {
  * @publicApi
  */
 export declare class QueryList<T> implements Iterable<T> {
+    private _emitDistinctChangesOnly;
     readonly dirty = true;
     private _results;
-    readonly changes: Observable<any>;
+    private _changesDetected;
+    private _changes;
     readonly length: number;
     readonly first: T;
     readonly last: T;
-    constructor();
+    /**
+     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
+     */
+    get changes(): Observable<any>;
+    /**
+     * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
+     *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
+     *     the same result) This is set to `false` for backwards compatibility but will be changed to
+     *     true in v12.
+     */
+    constructor(_emitDistinctChangesOnly?: boolean);
     /**
      * Returns the QueryList entry at `index`.
      */
@@ -5527,8 +5573,13 @@ export declare class QueryList<T> implements Iterable<T> {
      * occurs.
      *
      * @param resultsTree The query results to store
+     * @param identityAccessor Optional function for extracting stable object identity from a value
+     *    in the array. This function is executed for each element of the query result list while
+     *    comparing current query list with the new one (provided as a first argument of the `reset`
+     *    function) to detect if the lists are different. If the function is not provided, elements
+     *    are compared as is (without any pre-processing).
      */
-    reset(resultsTree: Array<T | any[]>): void;
+    reset(resultsTree: Array<T | any[]>, identityAccessor?: (value: T) => unknown): void;
     /**
      * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
      */
@@ -5599,6 +5650,7 @@ declare interface R3DeclareQueryMetadataFacade {
     descendants?: boolean;
     read?: OpaqueValue;
     static?: boolean;
+    emitDistinctChangesOnly?: boolean;
 }
 
 declare class R3Injector {
@@ -7647,9 +7699,8 @@ declare interface TQuery {
  */
 declare interface TQueryMetadata {
     predicate: Type<any> | InjectionToken<unknown> | string[];
-    descendants: boolean;
     read: any;
-    isStatic: boolean;
+    flags: QueryFlags;
 }
 
 /**
@@ -8358,6 +8409,9 @@ export declare interface ViewChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **read** - Used to read a different token from the queried elements.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. The default value will change from `false` to `true` in
+     *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
      *
      * @usageNotes
      *
@@ -8371,9 +8425,11 @@ export declare interface ViewChildrenDecorator {
      */
     (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): any;
     new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): ViewChildren;
 }
 
@@ -10714,6 +10770,7 @@ export declare const enum ɵNodeFlags {
     StaticQuery = 268435456,
     DynamicQuery = 536870912,
     TypeNgModule = 1073741824,
+    EmitDistinctChangesOnly = -2147483648,
     CatQuery = 201326592,
     Types = 201347067
 }
@@ -11935,13 +11992,13 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
  *
  * @param directiveIndex Current directive index
  * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
+ * @param flags Flags associated with the query
  * @param read What to save in the query
  * @returns QueryList<T>
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -13918,31 +13975,6 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
 }): void;
 
 /**
- * Registers a QueryList, associated with a static content query, for later refresh
- * (part of a view refresh).
- *
- * @param directiveIndex Current directive index
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- * @returns QueryList<T>
- *
- * @codeGenApi
- */
-export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
-
-/**
- * Creates new QueryList for a static view query.
- *
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- *
- * @codeGenApi
- */
-export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
-
-/**
  * Update style bindings using an object literal on an element.
  *
  * This instruction is meant to apply styling via the `[style]="exp"` template bindings.
@@ -14923,11 +14955,11 @@ export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray):
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
  * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
+ * @param flags Flags associated with the query
  * @param read What to save in the query
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 export { }
