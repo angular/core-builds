@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+115.sha-4e8198d
+ * @license Angular v11.1.0-next.4+116.sha-f49447d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -266,7 +266,7 @@
      */
     var _Zone = typeof Zone !== 'undefined' ? Zone : null;
     var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
-    var fakeAsyncTestModuleNotLoadedErrorMessage = "zone-testing.js is needed for the async() test helper but could not be found.\n        Please make sure that your environment includes zone.js/dist/zone-testing.js";
+    var fakeAsyncTestModuleNotLoadedErrorMessage = "zone-testing.js is needed for the fakeAsync() test helper but could not be found.\n        Please make sure that your environment includes zone.js/dist/zone-testing.js";
     /**
      * Clears out the shared fake async zone for a test.
      * To be called in a global `beforeEach`.
