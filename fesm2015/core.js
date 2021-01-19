@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+121.sha-0568c73
+ * @license Angular v11.1.0-next.4+123.sha-afabb83
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1299,16 +1299,41 @@ function getFactoryDef(type, throwNotFound) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// Base URL for the error details page.
+// Keep this value in sync with a similar const in
+// `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
+const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
 class RuntimeError extends Error {
     constructor(code, message) {
         super(formatRuntimeError(code, message));
         this.code = code;
     }
 }
+// Contains a set of error messages that have details guides at angular.io.
+// Full list of available error guides can be found at https://angular.io/errors
+/* tslint:disable:no-toplevel-property-access */
+const RUNTIME_ERRORS_WITH_GUIDES = new Set([
+    "100" /* EXPRESSION_CHANGED_AFTER_CHECKED */,
+    "200" /* CYCLIC_DI_DEPENDENCY */,
+    "201" /* PROVIDER_NOT_FOUND */,
+    "300" /* MULTIPLE_COMPONENTS_MATCH */,
+    "301" /* EXPORT_NOT_FOUND */,
+]);
+/* tslint:enable:no-toplevel-property-access */
 /** Called to format a runtime error */
 function formatRuntimeError(code, message) {
     const fullCode = code ? `NG0${code}: ` : '';
-    return `${fullCode}${message}`;
+    let errorMessage = `${fullCode}${message}`;
+    // Some runtime errors are still thrown without `ngDevMode` (for example
+    // `throwProviderNotFoundError`), so we add `ngDevMode` check here to avoid pulling
+    // `RUNTIME_ERRORS_WITH_GUIDES` symbol into prod bundles.
+    // TODO: revisit all instances where `RuntimeError` is thrown and see if `ngDevMode` can be added
+    // there instead to tree-shake more devmode-only code (and eventually remove `ngDevMode` check
+    // from this code).
+    if (ngDevMode && RUNTIME_ERRORS_WITH_GUIDES.has(code)) {
+        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/NG0${code}`;
+    }
+    return errorMessage;
 }
 
 /**
@@ -21325,7 +21350,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.4+121.sha-0568c73');
+const VERSION = new Version('11.1.0-next.4+123.sha-afabb83');
 
 /**
  * @license
