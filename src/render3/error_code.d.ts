@@ -19,5 +19,6 @@ export declare class RuntimeError extends Error {
     code: RuntimeErrorCode;
     constructor(code: RuntimeErrorCode, message: string);
 }
+export declare const RUNTIME_ERRORS_WITH_GUIDES: Set<RuntimeErrorCode>;
 /** Called to format a runtime error */
 export declare function formatRuntimeError(code: RuntimeErrorCode, message: string): string;
