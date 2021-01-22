@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+154.sha-07b7af3
+ * @license Angular v11.1.0-next.4+155.sha-1e4b51e
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8664,8 +8664,21 @@ class TNode {
     debugNodeInjectorPath(lView) {
         const path = [];
         let injectorIndex = getInjectorIndex(this, lView);
-        ngDevMode && assertNodeInjector(lView, injectorIndex);
+        if (injectorIndex === -1) {
+            // Looks like the current `TNode` does not have `NodeInjector` associated with it => look for
+            // parent NodeInjector.
+            const parentLocation = getParentInjectorLocation(this, lView);
+            if (parentLocation !== NO_PARENT_INJECTOR) {
+                // We found a parent, so start searching from the parent location.
+                injectorIndex = getParentInjectorIndex(parentLocation);
+                lView = getParentInjectorView(parentLocation, lView);
+            }
+            else {
+                // No parents have been found, so there are no `NodeInjector`s to consult.
+            }
+        }
         while (injectorIndex !== -1) {
+            ngDevMode && assertNodeInjector(lView, injectorIndex);
             const tNode = lView[TVIEW].data[injectorIndex + 8 /* TNODE */];
             path.push(buildDebugNode(tNode, lView));
             const parentLocation = lView[injectorIndex + 8 /* PARENT */];
@@ -8999,11 +9012,15 @@ function buildDebugNode(tNode, lView) {
     return {
         html: toHtml(native),
         type: toTNodeTypeAsString(tNode.type),
+        tNode,
         native: native,
         children: toDebugNodes(tNode.child, lView),
         factories,
         instances,
-        injector: buildNodeInjectorDebug(tNode, tView, lView)
+        injector: buildNodeInjectorDebug(tNode, tView, lView),
+        get injectorResolutionPath() {
+            return tNode.debugNodeInjectorPath(lView);
+        },
     };
 }
 function buildNodeInjectorDebug(tNode, tView, lView) {
@@ -9047,6 +9064,9 @@ function binary(array, idx) {
  * @param idx
  */
 function toBloom(array, idx) {
+    if (idx < 0) {
+        return 'NO_NODE_INJECTOR';
+    }
     return `${binary(array, idx + 7)}_${binary(array, idx + 6)}_${binary(array, idx + 5)}_${binary(array, idx + 4)}_${binary(array, idx + 3)}_${binary(array, idx + 2)}_${binary(array, idx + 1)}_${binary(array, idx + 0)}`;
 }
 class LContainerDebug {
@@ -21299,7 +21319,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.4+154.sha-07b7af3');
+const VERSION = new Version('11.1.0-next.4+155.sha-1e4b51e');
 
 /**
  * @license

@@ -955,6 +955,10 @@ export interface DebugNode {
      */
     html: string | null;
     /**
+     * Associated `TNode`
+     */
+    tNode: TNode;
+    /**
      * Human readable node type.
      */
     type: string;
@@ -978,6 +982,10 @@ export interface DebugNode {
      * NodeInjector information.
      */
     injector: NodeInjectorDebug;
+    /**
+     * Injector resolution path.
+     */
+    injectorResolutionPath: any;
 }
 export interface NodeInjectorDebug {
     /**
