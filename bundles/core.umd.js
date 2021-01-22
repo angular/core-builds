@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0+19.sha-566206b
+ * @license Angular v11.1.0+22.sha-b3b80d4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9006,8 +9006,21 @@
         TNode.prototype.debugNodeInjectorPath = function (lView) {
             var path = [];
             var injectorIndex = getInjectorIndex(this, lView);
-            ngDevMode && assertNodeInjector(lView, injectorIndex);
+            if (injectorIndex === -1) {
+                // Looks like the current `TNode` does not have `NodeInjector` associated with it => look for
+                // parent NodeInjector.
+                var parentLocation = getParentInjectorLocation(this, lView);
+                if (parentLocation !== NO_PARENT_INJECTOR) {
+                    // We found a parent, so start searching from the parent location.
+                    injectorIndex = getParentInjectorIndex(parentLocation);
+                    lView = getParentInjectorView(parentLocation, lView);
+                }
+                else {
+                    // No parents have been found, so there are no `NodeInjector`s to consult.
+                }
+            }
             while (injectorIndex !== -1) {
+                ngDevMode && assertNodeInjector(lView, injectorIndex);
                 var tNode = lView[TVIEW].data[injectorIndex + 8 /* TNODE */];
                 path.push(buildDebugNode(tNode, lView));
                 var parentLocation = lView[injectorIndex + 8 /* PARENT */];
@@ -9464,11 +9477,15 @@
         return {
             html: toHtml(native),
             type: toTNodeTypeAsString(tNode.type),
+            tNode: tNode,
             native: native,
             children: toDebugNodes(tNode.child, lView),
             factories: factories,
             instances: instances,
-            injector: buildNodeInjectorDebug(tNode, tView, lView)
+            injector: buildNodeInjectorDebug(tNode, tView, lView),
+            get injectorResolutionPath() {
+                return tNode.debugNodeInjectorPath(lView);
+            },
         };
     }
     function buildNodeInjectorDebug(tNode, tView, lView) {
@@ -9512,6 +9529,9 @@
      * @param idx
      */
     function toBloom(array, idx) {
+        if (idx < 0) {
+            return 'NO_NODE_INJECTOR';
+        }
         return binary(array, idx + 7) + "_" + binary(array, idx + 6) + "_" + binary(array, idx + 5) + "_" + binary(array, idx + 4) + "_" + binary(array, idx + 3) + "_" + binary(array, idx + 2) + "_" + binary(array, idx + 1) + "_" + binary(array, idx + 0);
     }
     var LContainerDebug = /** @class */ (function () {
@@ -21899,7 +21919,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0+19.sha-566206b');
+    var VERSION = new Version('11.1.0+22.sha-b3b80d4');
 
     /**
      * @license

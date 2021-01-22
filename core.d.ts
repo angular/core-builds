@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0+19.sha-566206b
+ * @license Angular v11.1.0+22.sha-b3b80d4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1612,6 +1612,10 @@ declare interface DebugNode_2 {
      */
     html: string | null;
     /**
+     * Associated `TNode`
+     */
+    tNode: TNode;
+    /**
      * Human readable node type.
      */
     type: string;
@@ -1635,6 +1639,10 @@ declare interface DebugNode_2 {
      * NodeInjector information.
      */
     injector: NodeInjectorDebug;
+    /**
+     * Injector resolution path.
+     */
+    injectorResolutionPath: any;
 }
 
 declare class DebugNode__POST_R3__ implements DebugNode {
