@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+157.sha-c5599cc
+ * @license Angular v11.1.0-next.4+158.sha-bb3b315
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6239,14 +6239,17 @@ const NO_ERRORS_SCHEMA = {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const END_COMMENT = /-->/g;
-const END_COMMENT_ESCAPED = '-\u200B-\u200B>';
+const END_COMMENT = /(<|>)/g;
+const END_COMMENT_ESCAPED = '\u200B$1\u200B';
 /**
  * Escape the content of the strings so that it can be safely inserted into a comment node.
  *
  * The issue is that HTML does not specify any way to escape comment end text inside the comment.
- * `<!-- The way you close a comment is with "-->". -->`. Above the `"-->"` is meant to be text not
- * an end to the comment. This can be created programmatically through DOM APIs.
+ * Consider: `<!-- The way you close a comment is with ">", and "->" at the beginning or by "-->" or
+ * "--!>" at the end. -->`. Above the `"-->"` is meant to be text not an end to the comment. This
+ * can be created programmatically through DOM APIs. (`<!--` are also disallowed.)
+ *
+ * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
  *
  * ```
  * div.innerHTML = div.innerHTML
@@ -6258,7 +6261,7 @@ const END_COMMENT_ESCAPED = '-\u200B-\u200B>';
  * may contain such text and expect them to be safe.)
  *
  * This function escapes the comment text by looking for the closing char sequence `-->` and replace
- * it with `-_-_>` where the `_` is a zero width space `\u200B`. The result is that if a comment
+ * it with `--_>_` where the `_` is a zero width space `\u200B`. The result is that if a comment
  * contains `-->` text it will render normally but it will not cause the HTML parser to close the
  * comment.
  *
@@ -21319,7 +21322,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.4+157.sha-c5599cc');
+const VERSION = new Version('11.1.0-next.4+158.sha-bb3b315');
 
 /**
  * @license
