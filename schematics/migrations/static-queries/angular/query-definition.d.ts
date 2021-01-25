@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -19,10 +19,17 @@ export declare enum QueryType {
     ContentChild = 1
 }
 export interface NgQueryDefinition {
+    /** Name of the query. Set to "null" in case the query name is not statically analyzable. */
+    name: string | null;
     /** Type of the query definition. */
     type: QueryType;
-    /** Property that declares the query. */
-    property: ts.PropertyDeclaration;
+    /** Node that declares this query. */
+    node: ts.Node;
+    /**
+     * Property declaration that refers to the query value. For accessors there
+     * is no property that is guaranteed to access the query value.
+     */
+    property: ts.PropertyDeclaration | null;
     /** Decorator that declares this as a query. */
     decorator: NgDecorator;
     /** Class declaration that holds this query. */

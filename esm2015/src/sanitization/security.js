@@ -1,45 +1,26 @@
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/** @enum {number} */
-const SecurityContext = {
-    NONE: 0,
-    HTML: 1,
-    STYLE: 2,
-    SCRIPT: 3,
-    URL: 4,
-    RESOURCE_URL: 5,
-};
-export { SecurityContext };
-SecurityContext[SecurityContext.NONE] = 'NONE';
-SecurityContext[SecurityContext.HTML] = 'HTML';
-SecurityContext[SecurityContext.STYLE] = 'STYLE';
-SecurityContext[SecurityContext.SCRIPT] = 'SCRIPT';
-SecurityContext[SecurityContext.URL] = 'URL';
-SecurityContext[SecurityContext.RESOURCE_URL] = 'RESOURCE_URL';
 /**
- * Sanitizer is used by the views to sanitize potentially dangerous values.
+ * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
+ * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
+ * handled.
  *
- * \@publicApi
- * @abstract
+ * See DomSanitizer for more details on security in Angular applications.
+ *
+ * @publicApi
  */
-export class Sanitizer {
-}
-if (false) {
-    /**
-     * @abstract
-     * @param {?} context
-     * @param {?} value
-     * @return {?}
-     */
-    Sanitizer.prototype.sanitize = function (context, value) { };
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2VjdXJpdHkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9zYW5pdGl6YXRpb24vc2VjdXJpdHkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7OztJQWtCRSxPQUFRO0lBQ1IsT0FBUTtJQUNSLFFBQVM7SUFDVCxTQUFVO0lBQ1YsTUFBTztJQUNQLGVBQWdCOzs7Ozs7Ozs7Ozs7Ozs7QUFRbEIsTUFBTSxPQUFnQixTQUFTO0NBRTlCOzs7Ozs7OztJQURDLDZEQUFnRiIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuLyoqXG4gKiBBIFNlY3VyaXR5Q29udGV4dCBtYXJrcyBhIGxvY2F0aW9uIHRoYXQgaGFzIGRhbmdlcm91cyBzZWN1cml0eSBpbXBsaWNhdGlvbnMsIGUuZy4gYSBET00gcHJvcGVydHlcbiAqIGxpa2UgYGlubmVySFRNTGAgdGhhdCBjb3VsZCBjYXVzZSBDcm9zcyBTaXRlIFNjcmlwdGluZyAoWFNTKSBzZWN1cml0eSBidWdzIHdoZW4gaW1wcm9wZXJseVxuICogaGFuZGxlZC5cbiAqXG4gKiBTZWUgRG9tU2FuaXRpemVyIGZvciBtb3JlIGRldGFpbHMgb24gc2VjdXJpdHkgaW4gQW5ndWxhciBhcHBsaWNhdGlvbnMuXG4gKlxuICogQHB1YmxpY0FwaVxuICovXG5leHBvcnQgZW51bSBTZWN1cml0eUNvbnRleHQge1xuICBOT05FID0gMCxcbiAgSFRNTCA9IDEsXG4gIFNUWUxFID0gMixcbiAgU0NSSVBUID0gMyxcbiAgVVJMID0gNCxcbiAgUkVTT1VSQ0VfVVJMID0gNSxcbn1cblxuLyoqXG4gKiBTYW5pdGl6ZXIgaXMgdXNlZCBieSB0aGUgdmlld3MgdG8gc2FuaXRpemUgcG90ZW50aWFsbHkgZGFuZ2Vyb3VzIHZhbHVlcy5cbiAqXG4gKiBAcHVibGljQXBpXG4gKi9cbmV4cG9ydCBhYnN0cmFjdCBjbGFzcyBTYW5pdGl6ZXIge1xuICBhYnN0cmFjdCBzYW5pdGl6ZShjb250ZXh0OiBTZWN1cml0eUNvbnRleHQsIHZhbHVlOiB7fXxzdHJpbmd8bnVsbCk6IHN0cmluZ3xudWxsO1xufVxuIl19
+export var SecurityContext;
+(function (SecurityContext) {
+    SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
+    SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
+    SecurityContext[SecurityContext["STYLE"] = 2] = "STYLE";
+    SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
+    SecurityContext[SecurityContext["URL"] = 4] = "URL";
+    SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
+})(SecurityContext || (SecurityContext = {}));
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2VjdXJpdHkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9zYW5pdGl6YXRpb24vc2VjdXJpdHkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7OztHQU1HO0FBRUg7Ozs7Ozs7O0dBUUc7QUFDSCxNQUFNLENBQU4sSUFBWSxlQU9YO0FBUEQsV0FBWSxlQUFlO0lBQ3pCLHFEQUFRLENBQUE7SUFDUixxREFBUSxDQUFBO0lBQ1IsdURBQVMsQ0FBQTtJQUNULHlEQUFVLENBQUE7SUFDVixtREFBTyxDQUFBO0lBQ1AscUVBQWdCLENBQUE7QUFDbEIsQ0FBQyxFQVBXLGVBQWUsS0FBZixlQUFlLFFBTzFCIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBMTEMgQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbi8qKlxuICogQSBTZWN1cml0eUNvbnRleHQgbWFya3MgYSBsb2NhdGlvbiB0aGF0IGhhcyBkYW5nZXJvdXMgc2VjdXJpdHkgaW1wbGljYXRpb25zLCBlLmcuIGEgRE9NIHByb3BlcnR5XG4gKiBsaWtlIGBpbm5lckhUTUxgIHRoYXQgY291bGQgY2F1c2UgQ3Jvc3MgU2l0ZSBTY3JpcHRpbmcgKFhTUykgc2VjdXJpdHkgYnVncyB3aGVuIGltcHJvcGVybHlcbiAqIGhhbmRsZWQuXG4gKlxuICogU2VlIERvbVNhbml0aXplciBmb3IgbW9yZSBkZXRhaWxzIG9uIHNlY3VyaXR5IGluIEFuZ3VsYXIgYXBwbGljYXRpb25zLlxuICpcbiAqIEBwdWJsaWNBcGlcbiAqL1xuZXhwb3J0IGVudW0gU2VjdXJpdHlDb250ZXh0IHtcbiAgTk9ORSA9IDAsXG4gIEhUTUwgPSAxLFxuICBTVFlMRSA9IDIsXG4gIFNDUklQVCA9IDMsXG4gIFVSTCA9IDQsXG4gIFJFU09VUkNFX1VSTCA9IDUsXG59XG4iXX0=

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -15,7 +15,7 @@ import { TimingResult, TimingStrategy } from '../timing-strategy';
  * of detecting the timing of queries based on how they are used in tests.
  */
 export declare class QueryTestStrategy implements TimingStrategy {
-    setup(): boolean;
+    setup(): void;
     /**
      * Detects the timing for a given query. For queries within tests, we always
      * add a TODO and print a message saying that the timing can't be detected for tests.

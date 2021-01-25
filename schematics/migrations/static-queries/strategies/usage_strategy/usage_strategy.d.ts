@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -19,10 +19,15 @@ export declare class QueryUsageStrategy implements TimingStrategy {
     private classMetadata;
     private typeChecker;
     constructor(classMetadata: ClassMetadataMap, typeChecker: ts.TypeChecker);
-    setup(): boolean;
+    setup(): void;
     /**
      * Analyzes the usage of the given query and determines the query timing based
      * on the current usage of the query.
      */
     detectTiming(query: NgQueryDefinition): TimingResult;
+    /**
+     * Checks whether a given query is used statically within the given class, its super
+     * class or derived classes.
+     */
+    private analyzeQueryUsage;
 }

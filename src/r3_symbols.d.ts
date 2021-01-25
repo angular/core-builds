@@ -1,15 +1,30 @@
 /**
- * @license Angular v8.0.0-rc.0+81.sha-b46eb3c.with-local-changes
- * (c) 2010-2019 Google LLC. https://angular.io/
+ * @license Angular v11.1.0-next.4+175.sha-02ff4ed
+ * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
 
 /**
- * Base class for Angular Views, provides change detection functionality.
+ * @description
+ *
+ * Represents an abstract class `T`, if applied to a concrete class it would stop being
+ * instantiable.
+ *
+ * @publicApi
+ */
+declare interface AbstractType<T> extends Function {
+    prototype: T;
+}
+
+/**
+ * Base class that provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
  * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
  *
  * @usageNotes
  *
@@ -20,7 +35,7 @@
  *
  * The following example sets the `OnPush` change-detection strategy for a component
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+ * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
  *
  * <code-example path="core/ts/change_detect/change-detection.ts"
  * region="mark-for-check"></code-example>
@@ -103,11 +118,9 @@ declare abstract class ChangeDetectorRef {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
  *
@@ -127,7 +140,7 @@ declare interface ClassProvider extends ClassSansProvider {
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -135,13 +148,9 @@ declare interface ClassProvider extends ClassSansProvider {
 
 /**
  * Configures the `Injector` to return a value by invoking a `useClass` function.
+ * Base for `ClassProvider` decorator.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ClassSansProvider'}
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -153,32 +162,38 @@ declare interface ClassSansProvider {
 }
 
 /**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
+ *
  * @publicApi
  */
 declare abstract class ComponentFactory<C> {
     /**
      * The component's HTML selector.
      */
-    abstract readonly selector: string;
+    abstract get selector(): string;
     /**
-     * The component's type
+     * The type of component the factory will create.
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Selector for all <ng-content> elements in the component.
      */
-    abstract readonly ngContentSelectors: string[];
+    abstract get ngContentSelectors(): string[];
     /**
      * The inputs of the component.
      */
-    abstract readonly inputs: {
+    abstract get inputs(): {
         propName: string;
         templateName: string;
     }[];
     /**
      * The outputs of the component.
      */
-    abstract readonly outputs: {
+    abstract get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -189,10 +204,20 @@ declare abstract class ComponentFactory<C> {
 }
 
 /**
+ * A simple registry that maps `Components` to generated `ComponentFactory` classes
+ * that can be used to create instances of components.
+ * Use to obtain the factory for a given component type,
+ * then use the factory's `create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
  * @publicApi
  */
 declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
+    /**
+     * Retrieves the factory object that creates a component of the given type.
+     * @param component The component type.
+     */
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 
@@ -207,28 +232,28 @@ declare abstract class ComponentRef<C> {
     /**
      * The host or anchor [element](guide/glossary#element) for this component instance.
      */
-    abstract readonly location: ElementRef;
+    abstract get location(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this component instance.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
      * This component instance.
      */
-    abstract readonly instance: C;
+    abstract get instance(): C;
     /**
      * The [host view](guide/glossary#view-tree) defined by the template
      * for this component instance.
      */
-    abstract readonly hostView: ViewRef;
+    abstract get hostView(): ViewRef;
     /**
      * The change detector for this component instance.
      */
-    abstract readonly changeDetectorRef: ChangeDetectorRef;
+    abstract get changeDetectorRef(): ChangeDetectorRef;
     /**
-     * The component type.
+     * The type of this component (as created by a `ComponentFactory` class).
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -245,24 +270,25 @@ declare abstract class ComponentRef<C> {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
  *
  * ### Multi-value example
  *
  * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ *
+ * @publicApi
  */
 declare interface ConstructorProvider extends ConstructorSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: Type<any>;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -271,12 +297,11 @@ declare interface ConstructorProvider extends ConstructorSansProvider {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- * ### Example
  *
- * ```
+ * ```ts
  * @Injectable(SomeModule, {deps: []})
  * class MyService {}
  * ```
@@ -285,11 +310,39 @@ declare interface ConstructorProvider extends ConstructorSansProvider {
  */
 declare interface ConstructorSansProvider {
     /**
-     * A list of `token`s which need to be resolved by the injector. The list of values is then
-     * used as arguments to the `useClass` constructor.
+     * A list of `token`s to be resolved by the injector.
      */
     deps?: any[];
 }
+
+/**
+ * An object literal of this type is used to represent the metadata of a constructor dependency.
+ * The type itself is never referred to from generated code.
+ */
+declare type CtorDependency = {
+    /**
+     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
+     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
+     * type.
+     */
+    attribute?: string | unknown;
+    /**
+     * If `@Optional()` is used, this key is set to true.
+     */
+    optional?: true;
+    /**
+     * If `@Host` is used, this key is set to true.
+     */
+    host?: true;
+    /**
+     * If `@Self` is used, this key is set to true.
+     */
+    self?: true;
+    /**
+     * If `@SkipSelf` is used, this key is set to true.
+     */
+    skipSelf?: true;
+} | null;
 
 /**
  * A wrapper around a native element inside of a View.
@@ -299,7 +352,7 @@ declare interface ConstructorSansProvider {
  *
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](http://g.co/ng/security).
+ * [Security Guide](https://g.co/ng/security).
  *
  * @publicApi
  */
@@ -332,10 +385,9 @@ declare class ElementRef<T = any> {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
  *
@@ -347,11 +399,11 @@ declare class ElementRef<T = any> {
  */
 declare interface ExistingProvider extends ExistingSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -360,27 +412,23 @@ declare interface ExistingProvider extends ExistingSansProvider {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see `ExistingProvider`
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
- * @usageNotes
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ExistingSansProvider'}
+ * @publicApi
  */
 declare interface ExistingSansProvider {
     /**
-     * Existing `token` to return. (equivalent to `injector.get(useExisting)`)
+     * Existing `token` to return. (Equivalent to `injector.get(useExisting)`)
      */
     useExisting: any;
 }
 
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='FactoryProvider'}
  *
@@ -400,7 +448,7 @@ declare interface FactoryProvider extends FactorySansProvider {
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -409,12 +457,8 @@ declare interface FactoryProvider extends FactorySansProvider {
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='FactorySansProvider'}
+ * @see `FactoryProvider`
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -425,12 +469,11 @@ declare interface FactorySansProvider {
      */
     useFactory: Function;
     /**
-     * A list of `token`s which need to be resolved by the injector. The list of values is then
+     * A list of `token`s to be resolved by the injector. The list of values is then
      * used as arguments to the `useFactory` function.
      */
     deps?: any[];
 }
-
 
 /**
  * Injection flags for DI.
@@ -495,21 +538,29 @@ declare enum InjectFlags {
  */
 declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ngInjectableDef: never | undefined;
+    readonly ɵprov: never | undefined;
     constructor(_desc: string, options?: {
-        providedIn?: Type<any> | 'root' | null;
+        providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
     });
     toString(): string;
 }
 
 /**
- * Concrete injectors implement this interface.
+ * Concrete injectors implement this interface. Injectors are configured
+ * with [providers](guide/glossary#provider) that associate
+ * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see `StaticProvider`
  *
  * @usageNotes
- * ### Example
+ *
+ *  The following example creates a service injector instance.
+ *
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * ### Usage example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
@@ -520,16 +571,16 @@ declare class InjectionToken<T> {
  * @publicApi
  */
 declare abstract class Injector {
-    static THROW_IF_NOT_FOUND: Object;
+    static THROW_IF_NOT_FOUND: {};
     static NULL: Injector;
     /**
      * Retrieves an instance from the injector based on the provided token.
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -537,13 +588,25 @@ declare abstract class Injector {
      * @deprecated from v5 use the new signature Injector.create(options)
      */
     static create(providers: StaticProvider[], parent?: Injector): Injector;
+    /**
+     * Creates a new injector instance that provides one or more dependencies,
+     * according to a given type or types of `StaticProvider`.
+     *
+     * @param options An object with the following properties:
+     * * `providers`: An array of providers of the [StaticProvider type](api/core/StaticProvider).
+     * * `parent`: (optional) A parent injector.
+     * * `name`: (optional) A developer-defined identifying name for the new injector.
+     *
+     * @returns The new injector instance.
+     *
+     */
     static create(options: {
         providers: StaticProvider[];
         parent?: Injector;
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ngInjectableDef: never;
+    static ɵprov: never;
 }
 
 /**
@@ -557,7 +620,7 @@ declare interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ngInjectorDef: never;
+    ɵinj: never;
 }
 
 /**
@@ -611,6 +674,8 @@ export declare interface NgModuleDef<T> {
     transitiveCompileScopes: NgModuleTransitiveScopes | null;
     /** The set of schemas that declare elements to be allowed in the NgModule. */
     schemas: SchemaMetadata[] | null;
+    /** Unique ID for the module with which it should be registered.  */
+    id: string | null;
 }
 
 export declare class NgModuleFactory<T> extends NgModuleFactory_2<T> {
@@ -623,38 +688,36 @@ export declare class NgModuleFactory<T> extends NgModuleFactory_2<T> {
  * @publicApi
  */
 declare abstract class NgModuleFactory_2<T> {
-    abstract readonly moduleType: Type<T>;
+    abstract get moduleType(): Type<T>;
     abstract create(parentInjector: Injector | null): NgModuleRef<T>;
 }
 
 /**
- * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
- *
- * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
- * NgModule Instance.
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
  *
  * @publicApi
  */
 declare abstract class NgModuleRef<T> {
     /**
-     * The injector that contains all of the providers of the NgModule.
+     * The injector that contains all of the providers of the `NgModule`.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
-     * The ComponentFactoryResolver to get hold of the ComponentFactories
+     * The resolver that can retrieve the component factories
      * declared in the `entryComponents` property of the module.
      */
-    abstract readonly componentFactoryResolver: ComponentFactoryResolver;
+    abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
-     * The NgModule instance.
+     * The `NgModule` instance.
      */
-    abstract readonly instance: T;
+    abstract get instance(): T;
     /**
      * Destroys the module instance and all of the data structures associated with it.
      */
     abstract destroy(): void;
     /**
-     * Allows to register a callback that will be called when the module is destroyed.
+     * Registers a callback to be executed when the module is destroyed.
      */
     abstract onDestroy(callback: () => void): void;
 }
@@ -700,8 +763,8 @@ declare interface SchemaMetadata {
  *
  * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
  *
- * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
- * tree-shaken away during production builds.
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
  */
 export declare function setClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
     [field: string]: any;
@@ -709,11 +772,9 @@ export declare function setClassMetadata(type: Type<any>, decorators: any[] | nu
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
- * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='StaticClassProvider'}
  *
@@ -724,14 +785,16 @@ export declare function setClassMetadata(type: Type<any>, decorators: any[] | nu
  * ### Multi-value example
  *
  * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
+ *
+ * @publicApi
  */
 declare interface StaticClassProvider extends StaticClassSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -739,37 +802,29 @@ declare interface StaticClassProvider extends StaticClassSansProvider {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='StaticClassSansProvider'}
+ * Base for `StaticClassProvider` decorator.
  *
  * @publicApi
  */
 declare interface StaticClassSansProvider {
     /**
-     * An optional class to instantiate for the `token`. (If not provided `provide` is assumed to be a
-     * class to instantiate)
+     * An optional class to instantiate for the `token`. By default, the `provide`
+     * class is instantiated.
      */
     useClass: Type<any>;
     /**
-     * A list of `token`s which need to be resolved by the injector. The list of values is then
+     * A list of `token`s to be resolved by the injector. The list of values is then
      * used as arguments to the `useClass` constructor.
      */
     deps: any[];
 }
 
 /**
- * Describes how the `Injector` should be configured in a static way (Without reflection).
+ * Describes how an `Injector` should be configured as static (that is, without reflection).
+ * A static provider provides tokens to an injector for various types of dependencies.
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @see `ValueProvider`
- * @see `ExistingProvider`
- * @see `FactoryProvider`
+ * @see [Injector.create()](/api/core/Injector#create).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
  */
@@ -780,7 +835,7 @@ declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProv
  *
  * Represents a type that a Component or other object is instances of.
  *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+ * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is represented by
  * the `MyCustomComponent` constructor function.
  *
  * @publicApi
@@ -793,10 +848,10 @@ declare interface Type<T> extends Function {
 
 /**
  * Configures the `Injector` to return a value for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @usageNotes
+ *
  * ### Example
  *
  * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
@@ -809,11 +864,11 @@ declare interface Type<T> extends Function {
  */
 declare interface ValueProvider extends ValueSansProvider {
     /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
+     * An injection token. Typically an instance of `Type` or `InjectionToken`, but can be `any`.
      */
     provide: any;
     /**
-     * If true, then injector returns an array of instances. This is useful to allow multiple
+     * When true, injector returns an array of instances. This is useful to allow multiple
      * providers spread across many files to provide configuration information to a common token.
      */
     multi?: boolean;
@@ -821,13 +876,7 @@ declare interface ValueProvider extends ValueSansProvider {
 
 /**
  * Configures the `Injector` to return a value for a token.
- *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- * ### Example
- *
- * {@example core/di/ts/provider_spec.ts region='ValueSansProvider'}
+ * Base for `ValueProvider` decorator.
  *
  * @publicApi
  */
@@ -839,12 +888,9 @@ declare interface ValueSansProvider {
 }
 
 /**
- * Represents an Angular [view](guide/glossary#view),
- * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
- * Also serves as the base class
- * that adds destroy methods for [embedded views](guide/glossary#view-tree).
+ * Represents an Angular [view](guide/glossary#view "Definition").
  *
- * @see `EmbeddedViewRef`
+ * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *
  * @publicApi
  */
@@ -857,7 +903,7 @@ declare abstract class ViewRef extends ChangeDetectorRef {
      * Reports whether this view has been destroyed.
      * @returns True after the `destroy()` method has been called, false otherwise.
      */
-    abstract readonly destroyed: boolean;
+    abstract get destroyed(): boolean;
     /**
      * A lifecycle hook that provides additional developer-defined cleanup
      * functionality for views.
@@ -867,11 +913,23 @@ declare abstract class ViewRef extends ChangeDetectorRef {
     abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
 
+
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+export declare function ɵnoSideEffects<T>(fn: () => T): T;
+
 /**
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
  * in which injectors (if any) it will be available.
  *
- * This should be assigned to a static `ngInjectableDef` field on a type, which will then be an
+ * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
  *
  * Options:
@@ -881,17 +939,19 @@ declare abstract class ViewRef extends ChangeDetectorRef {
  * * `factory` gives the zero argument function which will create an instance of the injectable.
  *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
  *
- * @publicApi
+ * @codeGenApi
+ * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
-    providedIn?: Type<any> | 'root' | 'any' | null;
+    token: unknown;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
 }): never;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
  *
- * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * This should be assigned to a static injector def (`ɵinj`) field on a type, which will then be an
  * `InjectorType`.
  *
  * Options:
@@ -900,13 +960,13 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *   create the type must be provided. If that factory function needs to inject arguments, it can
  *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
- *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
  * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
  *   whose providers will also be added to the injector. Locally provided types will override
  *   providers from imports.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
     factory: () => any;
@@ -933,7 +993,14 @@ export declare function ɵɵdefineNgModule<T>(def: {
     exports?: Type<any>[] | (() => Type<any>[]);
     /** The set of schemas that declare elements to be allowed in the NgModule. */
     schemas?: SchemaMetadata[] | null;
+    /** Unique ID for the module that is used with `getModuleFactory`. */
+    id?: string | null;
 }): never;
+
+/**
+ * @codeGenApi
+ */
+export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
 
 /**
  * Generated instruction: Injects a token from the currently active injector.
@@ -941,14 +1008,16 @@ export declare function ɵɵdefineNgModule<T>(def: {
  * Must be used in the context of a factory function such as one defined for an
  * `InjectionToken`. Throws an error if not called from such a context.
  *
- * (Additional documentation moved to `inject`, as it is the public API, and an alias for this instruction)
+ * (Additional documentation moved to `inject`, as it is the public API, and an alias for this
+ * instruction)
  *
  * @see inject
  * @codeGenApi
+ * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -960,9 +1029,10 @@ export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?
  * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
  * that the injectable does not belong to any scope.
  *
- * NOTE: This is a private type and should not be exported
- *
- * @publicApi
+ * @codeGenApi
+ * @publicApi The ViewEngine compiler emits code with this type for injectables. This code is
+ *   deployed to npm, and should be treated as public api.
+
  */
 export declare interface ɵɵInjectableDef<T> {
     /**
@@ -973,11 +1043,17 @@ export declare interface ɵɵInjectableDef<T> {
      * - `null`, does not belong to any injector. Must be explicitly listed in the injector
      *   `providers`.
      */
-    providedIn: InjectorType<any> | 'root' | 'any' | null;
+    providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | null;
+    /**
+     * The token to which this definition belongs.
+     *
+     * Note that this may not be the same as the type that the `factory` will create.
+     */
+    token: unknown;
     /**
      * Factory method to execute to create an instance of the injectable.
      */
-    factory: () => T;
+    factory: (t?: Type<any>) => T;
     /**
      * In a case of no explicit injector, a location where the instance of the injectable is stored.
      */
@@ -994,7 +1070,7 @@ export declare interface ɵɵInjectableDef<T> {
  *
  * NOTE: This is a private type and should not be exported
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
     factory: () => T;

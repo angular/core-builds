@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -22,7 +22,7 @@ export declare class QueryTemplateStrategy implements TimingStrategy {
      * Sets up the template strategy by creating the AngularCompilerProgram. Returns false if
      * the AOT compiler program could not be created due to failure diagnostics.
      */
-    setup(): boolean;
+    setup(): void;
     /** Analyzes a given directive by determining the timing of all matched view queries. */
     private _analyzeDirective;
     /** Detects the timing of the query definition. */
@@ -33,6 +33,6 @@ export declare class QueryTemplateStrategy implements TimingStrategy {
      */
     private _getQueryTimingFromClass;
     private _parseTemplate;
-    private _printDiagnosticFailures;
+    private _createDiagnosticsError;
     private _getViewQueryUniqueKey;
 }

@@ -1,9 +1,10 @@
 /**
- * @license Angular v8.0.0-rc.0+81.sha-b46eb3c.with-local-changes
- * (c) 2010-2019 Google LLC. https://angular.io/
+ * @license Angular v11.1.0-next.4+175.sha-02ff4ed
+ * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import { AbstractType } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { Compiler } from '@angular/core';
 import { CompilerOptions } from '@angular/core';
@@ -23,27 +24,21 @@ import { PlatformRef } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
 
-
+/**
+ * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
+ * investigation.
+ *
+ * A work around is to mark it as `@codeGenApi` for now and investigate later.
+ *
+ * @codeGenApi
+ */
 export declare const __core_private_testing_placeholder__ = "";
 
-
 /**
- * Wraps a test function in an asynchronous test zone. The test will automatically
- * complete when all asynchronous calls within this zone are done. Can be used
- * to wrap an {@link inject} call.
- *
- * Example:
- *
- * ```
- * it('...', async(inject([AClass], (object) => {
- *   object.doSomething.then(() => {
- *     expect(...);
- *   })
- * });
- * ```
- *
+ * @deprecated use `waitForAsync()`, (expected removal in v12)
+ * @see {@link waitForAsync}
  * @publicApi
- */
+ * */
 export declare function async(fn: Function): (done: any) => any;
 
 /**
@@ -114,8 +109,8 @@ export declare class ComponentFixture<T> {
     whenStable(): Promise<any>;
     private _getRenderer;
     /**
-      * Get a promise that resolves when the ui state is stable following animations.
-      */
+     * Get a promise that resolves when the ui state is stable following animations.
+     */
     whenRenderingDone(): Promise<any>;
     /**
      * Trigger component destruction.
@@ -274,10 +269,11 @@ export declare interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -295,23 +291,6 @@ export declare interface TestBed {
         useValue: any;
     }): void;
     overrideProvider(token: any, provider: {
-        useFactory?: Function;
-        useValue?: any;
-        deps?: any[];
-    }): void;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
         useFactory?: Function;
         useValue?: any;
         deps?: any[];
@@ -395,27 +374,11 @@ export declare interface TestBedStatic {
         useValue?: any;
         deps?: any[];
     }): TestBedStatic;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory?: Function;
-        useValue?: any;
-        deps?: any[];
-    }): TestBedStatic;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
@@ -451,9 +414,69 @@ export declare type TestModuleMetadata = {
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
+ * @param millis, the number of millisecond to advance the virtual timer
+ * @param tickOptions, the options of tick with a flag called
+ * processNewMacroTasksSynchronously, whether to invoke the new macroTasks, by default is
+ * false, means the new macroTasks will be invoked
+ *
+ * For example,
+ *
+ * it ('test with nested setTimeout', fakeAsync(() => {
+ *   let nestedTimeoutInvoked = false;
+ *   function funcWithNestedTimeout() {
+ *     setTimeout(() => {
+ *       nestedTimeoutInvoked = true;
+ *     });
+ *   };
+ *   setTimeout(funcWithNestedTimeout);
+ *   tick();
+ *   expect(nestedTimeoutInvoked).toBe(true);
+ * }));
+ *
+ * in this case, we have a nested timeout (new macroTask), when we tick, both the
+ * funcWithNestedTimeout and the nested timeout both will be invoked.
+ *
+ * it ('test with nested setTimeout', fakeAsync(() => {
+ *   let nestedTimeoutInvoked = false;
+ *   function funcWithNestedTimeout() {
+ *     setTimeout(() => {
+ *       nestedTimeoutInvoked = true;
+ *     });
+ *   };
+ *   setTimeout(funcWithNestedTimeout);
+ *   tick(0, {processNewMacroTasksSynchronously: false});
+ *   expect(nestedTimeoutInvoked).toBe(false);
+ * }));
+ *
+ * if we pass the tickOptions with processNewMacroTasksSynchronously to be false, the nested timeout
+ * will not be invoked.
+ *
+ *
  * @publicApi
  */
-export declare function tick(millis?: number): void;
+export declare function tick(millis?: number, tickOptions?: {
+    processNewMacroTasksSynchronously: boolean;
+}): void;
+
+
+/**
+ * Wraps a test function in an asynchronous test zone. The test will automatically
+ * complete when all asynchronous calls within this zone are done. Can be used
+ * to wrap an {@link inject} call.
+ *
+ * Example:
+ *
+ * ```
+ * it('...', waitForAsync(inject([AClass], (object) => {
+ *   object.doSomething.then(() => {
+ *     expect(...);
+ *   })
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+export declare function waitForAsync(fn: Function): (done: any) => any;
 
 /**
  * @publicApi
@@ -472,7 +495,7 @@ export declare function withModule(moduleDef: TestModuleMetadata, fn: Function):
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
  */
-export declare class ɵangular_packages_core_testing_testing_a implements Injector, TestBed {
+export declare class ɵangular_packages_core_testing_testing_a implements TestBed {
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -533,21 +556,12 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    static deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    static deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** @deprecated from v9.0.0 use TestBed.inject */
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
+     * @deprecated from v9.0.0 use TestBed.inject
      * @suppress {duplicate}
      */
     static get(token: any, notFoundValue?: any): any;
@@ -599,10 +613,11 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
     private _initIfNeeded;
     private _createCompilerAndModule;
     private _assertNotInstantiated;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -617,18 +632,6 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
         deps: any[];
     }): void;
     overrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
     private overrideProviderImpl;
@@ -646,7 +649,7 @@ export declare class ɵangular_packages_core_testing_testing_a implements Inject
  * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
  * according to the compiler used.
  */
-export declare class ɵangular_packages_core_testing_testing_b implements Injector, TestBed {
+export declare class ɵangular_packages_core_testing_testing_b implements TestBed {
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -701,22 +704,11 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    static deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    static deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** @deprecated from v9.0.0 use TestBed.inject */
     static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     static resetTestingModule(): TestBedStatic;
@@ -753,10 +745,11 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /**
-     * @deprecated from v8.0.0 use Type<T> or InjectionToken<T>
-     */
+    /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -772,21 +765,7 @@ export declare class ɵangular_packages_core_testing_testing_b implements Inject
         useValue?: any;
         deps?: any[];
     }): void;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * @deprecated as it makes all NgModules lazy. Introduced only for migrating off of it.
-     */
-    deprecatedOverrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): void;
-    deprecatedOverrideProvider(token: any, provider: {
-        useValue: any;
-    }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
-    private readonly compiler;
-    private readonly testModuleRef;
     private assertNotInstantiated;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
@@ -823,7 +802,7 @@ export declare class ɵMetadataOverrider {
  * @publicApi
  */
 export declare class ɵTestingCompiler extends Compiler {
-    readonly injector: Injector;
+    get injector(): Injector;
     overrideModule(module: Type<any>, overrides: MetadataOverride<NgModule>): void;
     overrideDirective(directive: Type<any>, overrides: MetadataOverride<Directive>): void;
     overrideComponent(component: Type<any>, overrides: MetadataOverride<Component>): void;
