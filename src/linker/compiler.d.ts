@@ -7,7 +7,7 @@ import { ComponentFactory } from './component_factory';
 import { NgModuleFactory } from './ng_module_factory';
 import * as i0 from "../r3_symbols";
 /**
- * Combination of NgModuleFactory and ComponentFactorys.
+ * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
  */

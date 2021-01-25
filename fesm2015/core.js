@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+174.sha-ecae75f
+ * @license Angular v11.1.0-next.4+176.sha-b630b09
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21319,7 +21319,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.4+174.sha-ecae75f');
+const VERSION = new Version('11.1.0-next.4+176.sha-b630b09');
 
 /**
  * @license
@@ -28022,7 +28022,7 @@ const ivyEnabled = SWITCH_IVY_ENABLED__POST_R3__;
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Combination of NgModuleFactory and ComponentFactorys.
+ * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
  */
