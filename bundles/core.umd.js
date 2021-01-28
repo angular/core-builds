@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.0-next.0+1.sha-e11e6cf
+ * @license Angular v11.2.0-next.0+10.sha-9d396f8
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -695,6 +695,28 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * This file contains reuseable "empty" symbols that can be used as default return values
+     * in different parts of the rendering code. Because the same symbols are returned, this
+     * allows for identity checks against these values to be consistently used by the framework
+     * code.
+     */
+    var EMPTY_OBJ$1 = {};
+    // freezing the values prevents any code from accidentally inserting new values in
+    if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
+        // These property accesses can be ignored because ngDevMode will be set to false
+        // when optimizing code and the whole if statement will be dropped.
+        // tslint:disable-next-line:no-toplevel-property-access
+        Object.freeze(EMPTY_OBJ$1);
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
     var NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
     var NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
@@ -917,7 +939,7 @@
      */
     function invertObject(obj, secondary) {
         if (obj == null)
-            return EMPTY_OBJ;
+            return EMPTY_OBJ$1;
         var newLookup = {};
         for (var minifiedKey in obj) {
             if (obj.hasOwnProperty(minifiedKey)) {
@@ -1757,7 +1779,7 @@
         var current = simpleChangesStore === null || simpleChangesStore === void 0 ? void 0 : simpleChangesStore.current;
         if (current) {
             var previous = simpleChangesStore.previous;
-            if (previous === EMPTY_OBJ) {
+            if (previous === EMPTY_OBJ$1) {
                 simpleChangesStore.previous = current;
             }
             else {
@@ -1773,12 +1795,12 @@
     }
     function ngOnChangesSetInput(instance, value, publicName, privateName) {
         var simpleChangesStore = getSimpleChangesStore(instance) ||
-            setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+            setSimpleChangesStore(instance, { previous: EMPTY_OBJ$1, current: null });
         var current = simpleChangesStore.current || (simpleChangesStore.current = {});
         var previous = simpleChangesStore.previous;
         var declaredName = this.declaredInputs[publicName];
         var previousChange = previous[declaredName];
-        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
+        current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ$1);
         instance[privateName] = value;
     }
     var SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
@@ -11544,7 +11566,6 @@
      * a circular dependency among the providers.
      */
     var CIRCULAR = {};
-    var EMPTY_ARRAY$1 = [];
     /**
      * A lazily initialized NullInjector.
      */
@@ -11793,7 +11814,7 @@
                 if (importTypesWithProviders_1 !== undefined) {
                     var _loop_1 = function (i) {
                         var _a = importTypesWithProviders_1[i], ngModule_1 = _a.ngModule, providers = _a.providers;
-                        deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModule_1, providers || EMPTY_ARRAY$1); });
+                        deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModule_1, providers || EMPTY_ARRAY); });
                     };
                     for (var i = 0; i < importTypesWithProviders_1.length; i++) {
                         _loop_1(i);
@@ -13049,7 +13070,7 @@
         }
     }
     function maybeUnwrapEmpty(value) {
-        if (value === EMPTY_OBJ) {
+        if (value === EMPTY_OBJ$1) {
             return {};
         }
         else if (value === EMPTY_ARRAY) {
@@ -14169,7 +14190,6 @@
 
     var ɵ0$9 = getClosureSafeProperty;
     var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$9 });
-    var EMPTY_ARRAY$2 = [];
     function convertInjectableProviderToFactory(type, provider) {
         if (!provider) {
             var reflectionCapabilities = new ReflectionCapabilities();
@@ -14187,7 +14207,7 @@
         }
         else if (provider.useFactory) {
             var factoryProvider_1 = provider;
-            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY$2))); };
+            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY))); };
         }
         else if (provider.useClass) {
             var classProvider_1 = provider;
@@ -15635,7 +15655,7 @@
         // add native event listener - applicable to elements only
         if (tNode.type & 3 /* AnyRNode */) {
             var native = getNativeByTNode(tNode, lView);
-            var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
+            var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ$1;
             var target = resolved.target || native;
             var lCleanupIndex = lCleanup.length;
             var idxOrTargetGetter = eventTargetResolver ?
@@ -16383,31 +16403,6 @@
             }
         }
         return ɵɵpropertyInterpolateV;
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This file contains reuseable "empty" symbols that can be used as default return values
-     * in different parts of the rendering code. Because the same symbols are returned, this
-     * allows for identity checks against these values to be consistently used by the framework
-     * code.
-     */
-    var EMPTY_OBJ$1 = {};
-    var EMPTY_ARRAY$3 = [];
-    // freezing the values prevents any code from accidentally inserting new values in
-    if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
-        // These property accesses can be ignored because ngDevMode will be set to false
-        // when optimizing code and the whole if statement will be dropped.
-        // tslint:disable-next-line:no-toplevel-property-access
-        Object.freeze(EMPTY_OBJ$1);
-        // tslint:disable-next-line:no-toplevel-property-access
-        Object.freeze(EMPTY_ARRAY$3);
     }
 
     /**
@@ -17592,7 +17587,7 @@
      */
     function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
         if (value == null /*|| value === undefined */ || value === '')
-            return EMPTY_ARRAY$3;
+            return EMPTY_ARRAY;
         var styleKeyValueArray = [];
         var unwrappedValue = unwrapSafeValue(value);
         if (Array.isArray(unwrappedValue)) {
@@ -17649,7 +17644,7 @@
     function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
         if (oldKeyValueArray === NO_CHANGE) {
             // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
-            oldKeyValueArray = EMPTY_ARRAY$3;
+            oldKeyValueArray = EMPTY_ARRAY;
         }
         var oldIndex = 0;
         var newIndex = 0;
@@ -17787,7 +17782,7 @@
                 // we have `undefined` (or empty array in case of styling-map instruction) instead. This
                 // allows the resolution to apply the value (which may later be overwritten when the
                 // binding actually executes.)
-                valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY$3 : undefined;
+                valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY : undefined;
             }
             var currentValue = isStylingMap ? keyValueArrayGet(valueAtLViewIndex, prop) :
                 key === prop ? valueAtLViewIndex : undefined;
@@ -21932,7 +21927,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.0-next.0+1.sha-e11e6cf');
+    var VERSION = new Version('11.2.0-next.0+10.sha-9d396f8');
 
     /**
      * @license
@@ -24371,7 +24366,6 @@
     function _toStringWithNull(v) {
         return v != null ? v.toString() : '';
     }
-    var EMPTY_ARRAY$4 = [];
     var EMPTY_MAP = {};
 
     var UNDEFINED_VALUE = {};
@@ -27504,7 +27498,6 @@
         jitOptions = null;
     }
 
-    var EMPTY_ARRAY$5 = [];
     var moduleQueue = [];
     /**
      * Enqueues moduleDef to be checked later to see if scope can be set on its
@@ -27572,7 +27565,7 @@
         if (allowDuplicateDeclarationsInRoot === void 0) { allowDuplicateDeclarationsInRoot = false; }
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$5);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MOD_DEF, {
             configurable: true,
@@ -27585,12 +27578,12 @@
                     }
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275mod.js", {
                         type: moduleType,
-                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$5).map(resolveForwardRef),
+                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY).map(resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten(ngModule.imports || EMPTY_ARRAY$5)
+                        imports: flatten(ngModule.imports || EMPTY_ARRAY)
                             .map(resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten(ngModule.exports || EMPTY_ARRAY$5)
+                        exports: flatten(ngModule.exports || EMPTY_ARRAY)
                             .map(resolveForwardRef)
                             .map(expandModuleWithProviders),
                         schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
@@ -27617,10 +27610,10 @@
                         name: moduleType.name,
                         type: moduleType,
                         deps: reflectDependencies(moduleType),
-                        providers: ngModule.providers || EMPTY_ARRAY$5,
+                        providers: ngModule.providers || EMPTY_ARRAY,
                         imports: [
-                            (ngModule.imports || EMPTY_ARRAY$5).map(resolveForwardRef),
-                            (ngModule.exports || EMPTY_ARRAY$5).map(resolveForwardRef),
+                            (ngModule.imports || EMPTY_ARRAY).map(resolveForwardRef),
+                            (ngModule.exports || EMPTY_ARRAY).map(resolveForwardRef),
                         ],
                     };
                     ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275inj.js", meta);
@@ -27820,7 +27813,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$5);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMP_DEF)) {
@@ -28129,7 +28122,7 @@
             typeArgumentCount: 0,
             selector: metadata.selector !== undefined ? metadata.selector : null,
             deps: reflectDependencies(type),
-            host: metadata.host || EMPTY_OBJ,
+            host: metadata.host || EMPTY_OBJ$1,
             propMetadata: propMetadata,
             inputs: metadata.inputs || EMPTY_ARRAY,
             outputs: metadata.outputs || EMPTY_ARRAY,
@@ -33887,7 +33880,7 @@
     exports.ɵComponentFactory = ComponentFactory;
     exports.ɵConsole = Console;
     exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
-    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
+    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
     exports.ɵINJECTOR_IMPL__POST_R3__ = INJECTOR_IMPL__POST_R3__;
     exports.ɵINJECTOR_SCOPE = INJECTOR_SCOPE;
