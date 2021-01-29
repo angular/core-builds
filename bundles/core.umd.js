@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+208.sha-88f8ddd
+ * @license Angular v11.1.0-next.4+209.sha-22f9e45
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21932,7 +21932,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.4+208.sha-88f8ddd');
+    var VERSION = new Version('11.1.0-next.4+209.sha-22f9e45');
 
     /**
      * @license
@@ -29039,6 +29039,7 @@
                 !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
             self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
             self.lastRequestAnimationFrameId = -1;
+            self.isCheckStableRunning = false;
             self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
             forkInnerZoneWithAngularBehavior(self);
         }
@@ -29119,7 +29120,9 @@
     }());
     var EMPTY_PAYLOAD = {};
     function checkStable(zone) {
-        if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
+        if (!zone.isCheckStableRunning && zone._nesting == 0 && !zone.hasPendingMicrotasks &&
+            !zone.isStable) {
+            zone.isCheckStableRunning = true;
             try {
                 zone._nesting++;
                 zone.onMicrotaskEmpty.emit(null);
@@ -29134,11 +29137,25 @@
                         zone.isStable = true;
                     }
                 }
+                zone.isCheckStableRunning = false;
             }
         }
     }
     function delayChangeDetectionForEvents(zone) {
-        if (zone.lastRequestAnimationFrameId !== -1) {
+        /**
+         * We also need to check isCheckStableRunning here
+         * Consider the following case with shouldCoalesceRunChangeDetection = true
+         *
+         * ngZone.run(() => {});
+         * ngZone.run(() => {});
+         *
+         * We want the two `ngZone.run()` only trigger one change detection
+         * when shouldCoalesceRunChangeDetection is true.
+         * And because in this case, change detection run in async way(requestAnimationFrame),
+         * so we also need to check the isCheckStableRunning here to prevent multiple
+         * change detections.
+         */
+        if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
             return;
         }
         zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, function () {
