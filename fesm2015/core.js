@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+211.sha-2ba62e8
+ * @license Angular v11.1.0-next.4+212.sha-028b383
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1318,6 +1318,7 @@ const RUNTIME_ERRORS_WITH_GUIDES = new Set([
     "201" /* PROVIDER_NOT_FOUND */,
     "300" /* MULTIPLE_COMPONENTS_MATCH */,
     "301" /* EXPORT_NOT_FOUND */,
+    "302" /* PIPE_NOT_FOUND */,
 ]);
 /* tslint:enable:no-toplevel-property-access */
 /** Called to format a runtime error */
@@ -21332,7 +21333,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.1.0-next.4+211.sha-2ba62e8');
+const VERSION = new Version('11.1.0-next.4+212.sha-028b383');
 
 /**
  * @license
