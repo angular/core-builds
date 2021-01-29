@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.1+10.sha-e706f46
+ * @license Angular v11.1.1+14.sha-cafd4f5
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1591,6 +1591,7 @@
         "201" /* PROVIDER_NOT_FOUND */,
         "300" /* MULTIPLE_COMPONENTS_MATCH */,
         "301" /* EXPORT_NOT_FOUND */,
+        "302" /* PIPE_NOT_FOUND */,
     ]);
     /* tslint:enable:no-toplevel-property-access */
     /** Called to format a runtime error */
@@ -21932,7 +21933,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.1+10.sha-e706f46');
+    var VERSION = new Version('11.1.1+14.sha-cafd4f5');
 
     /**
      * @license
