@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.0-next.0+32.sha-4cc15fe
+ * @license Angular v11.2.0-next.0+37.sha-7c38a4a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21933,7 +21933,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.0-next.0+32.sha-4cc15fe');
+    var VERSION = new Version('11.2.0-next.0+37.sha-7c38a4a');
 
     /**
      * @license
@@ -26547,36 +26547,36 @@
         EventEmitter_.prototype.emit = function (value) {
             _super.prototype.next.call(this, value);
         };
-        EventEmitter_.prototype.subscribe = function (generatorOrNext, error, complete) {
+        EventEmitter_.prototype.subscribe = function (observerOrNext, error, complete) {
             var schedulerFn;
             var errorFn = function (err) { return null; };
             var completeFn = function () { return null; };
-            if (generatorOrNext && typeof generatorOrNext === 'object') {
+            if (observerOrNext && typeof observerOrNext === 'object') {
                 schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return generatorOrNext.next(value); });
+                    setTimeout(function () { return observerOrNext.next(value); });
                 } : function (value) {
-                    generatorOrNext.next(value);
+                    observerOrNext.next(value);
                 };
-                if (generatorOrNext.error) {
+                if (observerOrNext.error) {
                     errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return generatorOrNext.error(err); });
+                        setTimeout(function () { return observerOrNext.error(err); });
                     } : function (err) {
-                        generatorOrNext.error(err);
+                        observerOrNext.error(err);
                     };
                 }
-                if (generatorOrNext.complete) {
+                if (observerOrNext.complete) {
                     completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return generatorOrNext.complete(); });
+                        setTimeout(function () { return observerOrNext.complete(); });
                     } : function () {
-                        generatorOrNext.complete();
+                        observerOrNext.complete();
                     };
                 }
             }
             else {
                 schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return generatorOrNext(value); });
+                    setTimeout(function () { return observerOrNext(value); });
                 } : function (value) {
-                    generatorOrNext(value);
+                    observerOrNext(value);
                 };
                 if (error) {
                     errorFn = this.__isAsync ? function (err) {
@@ -26594,8 +26594,8 @@
                 }
             }
             var sink = _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
-            if (generatorOrNext instanceof rxjs.Subscription) {
-                generatorOrNext.add(sink);
+            if (observerOrNext instanceof rxjs.Subscription) {
+                observerOrNext.add(sink);
             }
             return sink;
         };

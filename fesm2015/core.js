@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.0-next.0+32.sha-4cc15fe
+ * @license Angular v11.2.0-next.0+37.sha-7c38a4a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21369,7 +21369,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.2.0-next.0+32.sha-4cc15fe');
+const VERSION = new Version('11.2.0-next.0+37.sha-7c38a4a');
 
 /**
  * @license
@@ -25857,36 +25857,36 @@ class EventEmitter_ extends Subject {
     emit(value) {
         super.next(value);
     }
-    subscribe(generatorOrNext, error, complete) {
+    subscribe(observerOrNext, error, complete) {
         let schedulerFn;
         let errorFn = (err) => null;
         let completeFn = () => null;
-        if (generatorOrNext && typeof generatorOrNext === 'object') {
+        if (observerOrNext && typeof observerOrNext === 'object') {
             schedulerFn = this.__isAsync ? (value) => {
-                setTimeout(() => generatorOrNext.next(value));
+                setTimeout(() => observerOrNext.next(value));
             } : (value) => {
-                generatorOrNext.next(value);
+                observerOrNext.next(value);
             };
-            if (generatorOrNext.error) {
+            if (observerOrNext.error) {
                 errorFn = this.__isAsync ? (err) => {
-                    setTimeout(() => generatorOrNext.error(err));
+                    setTimeout(() => observerOrNext.error(err));
                 } : (err) => {
-                    generatorOrNext.error(err);
+                    observerOrNext.error(err);
                 };
             }
-            if (generatorOrNext.complete) {
+            if (observerOrNext.complete) {
                 completeFn = this.__isAsync ? () => {
-                    setTimeout(() => generatorOrNext.complete());
+                    setTimeout(() => observerOrNext.complete());
                 } : () => {
-                    generatorOrNext.complete();
+                    observerOrNext.complete();
                 };
             }
         }
         else {
             schedulerFn = this.__isAsync ? (value) => {
-                setTimeout(() => generatorOrNext(value));
+                setTimeout(() => observerOrNext(value));
             } : (value) => {
-                generatorOrNext(value);
+                observerOrNext(value);
             };
             if (error) {
                 errorFn = this.__isAsync ? (err) => {
@@ -25904,8 +25904,8 @@ class EventEmitter_ extends Subject {
             }
         }
         const sink = super.subscribe(schedulerFn, errorFn, completeFn);
-        if (generatorOrNext instanceof Subscription) {
-            generatorOrNext.add(sink);
+        if (observerOrNext instanceof Subscription) {
+            observerOrNext.add(sink);
         }
         return sink;
     }

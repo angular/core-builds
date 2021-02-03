@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.0-next.0+32.sha-4cc15fe
+ * @license Angular v11.2.0-next.0+37.sha-7c38a4a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2417,13 +2417,21 @@ export declare interface EventEmitter<T> extends Subject<T> {
     emit(value?: T): void;
     /**
      * Registers handlers for events emitted by this instance.
-     * @param generatorOrNext When supplied, a custom handler for emitted events.
-     * @param error When supplied, a custom handler for an error notification
-     * from this emitter.
-     * @param complete When supplied, a custom handler for a completion
-     * notification from this emitter.
+     * @param next When supplied, a custom handler for emitted events.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
      */
-    subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
+    subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+    /**
+     * Registers handlers for events emitted by this instance.
+     * @param observerOrNext When supplied, a custom handler for emitted events, or an observer
+     *     object.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
+     */
+    subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
 }
 
 /**
