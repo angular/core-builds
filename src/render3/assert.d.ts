@@ -33,6 +33,8 @@ export declare function assertIndexInDeclRange(lView: LView, index: number): voi
 export declare function assertIndexInVarsRange(lView: LView, index: number): void;
 export declare function assertIndexInExpandoRange(lView: LView, index: number): void;
 export declare function assertBetween(lower: number, upper: number, index: number): void;
+export declare function assertProjectionSlots(lView: LView, errMessage?: string): void;
+export declare function assertParentView(lView: LView | null, errMessage?: string): void;
 /**
  * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
  * NodeInjector data structure.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+313.sha-378da71
+ * @license Angular v11.1.0-next.4+316.sha-03f0b15
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1224,6 +1224,14 @@
         if (!(lower <= index && index < upper)) {
             throwError("Index out of range (expecting " + lower + " <= " + index + " < " + upper + ")");
         }
+    }
+    function assertProjectionSlots(lView, errMessage) {
+        assertDefined(lView[DECLARATION_COMPONENT_VIEW], 'Component views should exist.');
+        assertDefined(lView[DECLARATION_COMPONENT_VIEW][T_HOST].projection, errMessage ||
+            'Components with projection nodes (<ng-content>) must have projection slots defined.');
+    }
+    function assertParentView(lView, errMessage) {
+        assertDefined(lView, errMessage || 'Component views should always have a parent view (component\'s host view)');
     }
     /**
      * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
@@ -7888,17 +7896,29 @@
                 return rNode || unwrapRNode(lView[tNode.index]);
             }
             else {
-                var componentView = lView[DECLARATION_COMPONENT_VIEW];
-                var componentHost = componentView[T_HOST];
-                var parentView = getLViewParent(componentView);
-                var firstProjectedTNode = componentHost.projection[tNode.projection];
-                if (firstProjectedTNode != null) {
-                    return getFirstNativeNode(parentView, firstProjectedTNode);
+                var projectionNodes = getProjectionNodes(lView, tNode);
+                if (projectionNodes !== null) {
+                    if (Array.isArray(projectionNodes)) {
+                        return projectionNodes[0];
+                    }
+                    var parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
+                    ngDevMode && assertParentView(parentView);
+                    return getFirstNativeNode(parentView, projectionNodes);
                 }
                 else {
                     return getFirstNativeNode(lView, tNode.next);
                 }
             }
+        }
+        return null;
+    }
+    function getProjectionNodes(lView, tNode) {
+        if (tNode !== null) {
+            var componentView = lView[DECLARATION_COMPONENT_VIEW];
+            var componentHost = componentView[T_HOST];
+            var slotIdx = tNode.projection;
+            ngDevMode && assertProjectionSlots(lView);
+            return componentHost.projection[slotIdx];
         }
         return null;
     }
@@ -21904,7 +21924,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.4+313.sha-378da71');
+    var VERSION = new Version('11.1.0-next.4+316.sha-03f0b15');
 
     /**
      * @license
@@ -23025,19 +23045,13 @@
                 }
             }
             else if (tNodeType & 16 /* Projection */) {
-                var componentView = lView[DECLARATION_COMPONENT_VIEW];
-                var componentHost = componentView[T_HOST];
-                var slotIdx = tNode.projection;
-                ngDevMode &&
-                    assertDefined(componentHost.projection, 'Components with projection nodes (<ng-content>) must have projection slots defined.');
-                var nodesInSlot = componentHost.projection[slotIdx];
+                var nodesInSlot = getProjectionNodes(lView, tNode);
                 if (Array.isArray(nodesInSlot)) {
                     result.push.apply(result, __spread(nodesInSlot));
                 }
                 else {
-                    var parentView = getLViewParent(componentView);
-                    ngDevMode &&
-                        assertDefined(parentView, 'Component views should always have a parent view (component\'s host view)');
+                    var parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
+                    ngDevMode && assertParentView(parentView);
                     collectNativeNodes(parentView[TVIEW], parentView, nodesInSlot, result, true);
                 }
             }

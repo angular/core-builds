@@ -170,6 +170,7 @@ export declare function setI18nHandling(getInsertInFrontOfRNodeWithI18n: (parent
  * @param childTNode The TNode of the child element
  */
 export declare function appendChild(tView: TView, lView: LView, childRNode: RNode | RNode[], childTNode: TNode): void;
+export declare function getProjectionNodes(lView: LView, tNode: TNode | null): TNode | RNode[] | null;
 export declare function getBeforeNodeForView(viewIndexInContainer: number, lContainer: LContainer): RNode | null;
 /**
  * Removes a native node itself using a given renderer. To remove the node we are looking up its
