@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+4.sha-68da05d
+ * @license Angular v12.0.0-next.0+6.sha-7ca244a
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -859,7 +859,7 @@ export declare interface Component extends Directive {
      */
     encapsulation?: ViewEncapsulation;
     /**
-     * Overrides the default encapsulation start and end delimiters (`{{` and `}}`)
+     * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
      */
     interpolation?: [string, string];
     /**
