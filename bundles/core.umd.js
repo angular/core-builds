@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+26.sha-6425a6d
+ * @license Angular v12.0.0-next.0+27.sha-9cb43fb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21953,7 +21953,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.0+26.sha-6425a6d');
+    var VERSION = new Version('12.0.0-next.0+27.sha-9cb43fb');
 
     /**
      * @license
@@ -33733,6 +33733,15 @@
         var compiler = getCompilerFacade();
         return compiler.compileComponentDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275cmp.js", decl);
     }
+    /**
+     * Compiles a partial pipe declaration object into a full pipe definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclarePipe(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compilePipeDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275pipe.js", decl);
+    }
 
     /**
      * @license
@@ -34138,6 +34147,7 @@
     exports.ɵɵnextContext = ɵɵnextContext;
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
+    exports.ɵɵngDeclarePipe = ɵɵngDeclarePipe;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
     exports.ɵɵpipeBind2 = ɵɵpipeBind2;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+26.sha-6425a6d
+ * @license Angular v12.0.0-next.0+27.sha-9cb43fb
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5657,6 +5657,12 @@ declare interface R3DeclareDirectiveFacade {
     exportAs?: string[];
     usesInheritance?: boolean;
     usesOnChanges?: boolean;
+}
+
+declare interface R3DeclarePipeFacade {
+    type: Function;
+    name: string;
+    pure?: boolean;
 }
 
 declare interface R3DeclareQueryMetadataFacade {
@@ -13027,6 +13033,13 @@ export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): 
  * @codeGenApi
  */
 export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+
+/**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
 
 /**
  * @publicApi
