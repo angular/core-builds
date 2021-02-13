@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+33.sha-5554a3f
+ * @license Angular v12.0.0-next.0+35.sha-980f6a4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5208,7 +5208,7 @@ function newTrustedFunctionForDev(...args) {
     // below, where the Chromium bug is also referenced:
     // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
     const fnArgs = args.slice(0, -1).join(',');
-    const fnBody = args.pop().toString();
+    const fnBody = args[args.length - 1];
     const body = `(function anonymous(${fnArgs}
 ) { ${fnBody}
 })`;
@@ -5216,6 +5216,13 @@ function newTrustedFunctionForDev(...args) {
     // being stripped out of JS binaries even if not used. The global['eval']
     // indirection fixes that.
     const fn = _global['eval'](trustedScriptFromString(body));
+    if (fn.bind === undefined) {
+        // Workaround for a browser bug that only exists in Chrome 83, where passing
+        // a TrustedScript to eval just returns the TrustedScript back without
+        // evaluating it. In that case, fall back to the most straightforward
+        // implementation:
+        return new Function(...args);
+    }
     // To completely mimic the behavior of calling "new Function", two more
     // things need to happen:
     // 1. Stringifying the resulting function should return its source code
@@ -21389,7 +21396,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.0+33.sha-5554a3f');
+const VERSION = new Version('12.0.0-next.0+35.sha-980f6a4');
 
 /**
  * @license
