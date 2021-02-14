@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.1.0-next.4+308.sha-0d8e6b4
+ * @license Angular v12.0.0-next.0+37.sha-1646f8d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -859,7 +859,7 @@ export declare interface Component extends Directive {
      */
     encapsulation?: ViewEncapsulation;
     /**
-     * Overrides the default encapsulation start and end delimiters (`{{` and `}}`)
+     * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
      */
     interpolation?: [string, string];
     /**
@@ -5657,6 +5657,12 @@ declare interface R3DeclareDirectiveFacade {
     exportAs?: string[];
     usesInheritance?: boolean;
     usesOnChanges?: boolean;
+}
+
+declare interface R3DeclarePipeFacade {
+    type: Function;
+    name: string;
+    pure?: boolean;
 }
 
 declare interface R3DeclareQueryMetadataFacade {
@@ -13027,6 +13033,13 @@ export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): 
  * @codeGenApi
  */
 export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+
+/**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
 
 /**
  * @publicApi
