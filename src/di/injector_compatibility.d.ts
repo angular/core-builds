@@ -59,7 +59,7 @@ export declare function ɵɵinvalidFactoryDep(index: number): never;
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
