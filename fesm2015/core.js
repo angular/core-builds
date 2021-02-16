@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+44.sha-7fa8819
+ * @license Angular v12.0.0-next.0+66.sha-95ad452
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4761,7 +4761,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
@@ -21396,7 +21396,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.0+44.sha-7fa8819');
+const VERSION = new Version('12.0.0-next.0+66.sha-95ad452');
 
 /**
  * @license

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+44.sha-7fa8819
+ * @license Angular v12.0.0-next.0+66.sha-95ad452
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2806,7 +2806,7 @@ export declare interface HostDecorator {
      *
      * @usageNotes
      *
-     * The following shows use with the `@Optional` decorator, and allows for a null result.
+     * The following shows use with the `@Optional` decorator, and allows for a `null` result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
@@ -3178,7 +3178,7 @@ export declare const Inject: InjectDecorator;
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
@@ -4972,14 +4972,14 @@ export declare interface OptionalDecorator {
     /**
      * Parameter decorator to be used on constructor parameters,
      * which marks the parameter as being an optional dependency.
-     * The DI framework provides null if the dependency is not found.
+     * The DI framework provides `null` if the dependency is not found.
      *
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
      * @usageNotes
      *
-     * The following code allows the possibility of a null result:
+     * The following code allows the possibility of a `null` result:
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
@@ -6572,7 +6572,7 @@ export declare interface SelfDecorator {
      * which tells the DI framework to start dependency resolution from the local injector.
      *
      * Resolution works upward through the injector hierarchy, so the children
-     * of this class must configure their own providers or be prepared for a null result.
+     * of this class must configure their own providers or be prepared for a `null` result.
      *
      * @usageNotes
      *
