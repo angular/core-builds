@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.0+37.sha-7f09945
+ * @license Angular v11.2.0+61.sha-53865c4
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5058,7 +5058,7 @@
      * @param flags Optional flags that control how injection is executed.
      * The flags correspond to injection strategies that can be specified with
      * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
-     * @returns True if injection is successful, null otherwise.
+     * @returns the injected value if injection is successful, `null` otherwise.
      *
      * @usageNotes
      *
@@ -21960,7 +21960,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.0+37.sha-7f09945');
+    var VERSION = new Version('11.2.0+61.sha-53865c4');
 
     /**
      * @license
