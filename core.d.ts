@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+2.sha-b7a2d0d
+ * @license Angular v12.0.0-next.1+4.sha-1de999b
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13877,10 +13877,11 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
