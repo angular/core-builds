@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+1.sha-8658cd5
+ * @license Angular v12.0.0-next.1+3.sha-cdf1ea1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2186,11 +2186,13 @@
      * walking the declaration view tree in listeners to get vars from parent views.
      *
      * @param viewToRestore The OpaqueViewState instance to restore.
+     * @returns Context of the restored OpaqueViewState instance.
      *
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
         instructionState.lFrame.contextLView = viewToRestore;
+        return viewToRestore[CONTEXT];
     }
     function getCurrentTNode() {
         var currentTNode = getCurrentTNodePlaceholderOk();
@@ -21960,7 +21962,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.1+1.sha-8658cd5');
+    var VERSION = new Version('12.0.0-next.1+3.sha-cdf1ea1');
 
     /**
      * @license
@@ -30059,10 +30061,9 @@
      */
     var ApplicationRef = /** @class */ (function () {
         /** @internal */
-        function ApplicationRef(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+        function ApplicationRef(_zone, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
             var _this = this;
             this._zone = _zone;
-            this._console = _console;
             this._injector = _injector;
             this._exceptionHandler = _exceptionHandler;
             this._componentFactoryResolver = _componentFactoryResolver;
@@ -30179,8 +30180,11 @@
                 }
             });
             this._loadComponent(compRef);
-            if (isDevMode()) {
-                this._console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
+            // Note that we have still left the `isDevMode()` condition in order to avoid
+            // creating a breaking change for projects that still use the View Engine.
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
+                var _console = this._injector.get(Console);
+                _console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
             }
             return compRef;
         };
@@ -30289,7 +30293,6 @@
     ];
     ApplicationRef.ctorParameters = function () { return [
         { type: NgZone },
-        { type: Console },
         { type: Injector },
         { type: ErrorHandler },
         { type: ComponentFactoryResolver },
@@ -31336,7 +31339,7 @@
         {
             provide: ApplicationRef,
             useClass: ApplicationRef,
-            deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
+            deps: [NgZone, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
         },
         { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
         {
