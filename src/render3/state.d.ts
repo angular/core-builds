@@ -75,11 +75,10 @@ export declare function getTView(): TView;
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
- * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
+export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
 export declare function getCurrentTNode(): TNode | null;
 export declare function getCurrentTNodePlaceholderOk(): TNode | null;
 export declare function getCurrentParentTNode(): TNode | null;
