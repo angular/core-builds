@@ -292,7 +292,6 @@ export declare class PlatformRef {
  */
 export declare class ApplicationRef {
     private _zone;
-    private _console;
     private _injector;
     private _exceptionHandler;
     private _componentFactoryResolver;

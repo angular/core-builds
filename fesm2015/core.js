@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+1.sha-8658cd5
+ * @license Angular v12.0.0-next.1+3.sha-cdf1ea1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1911,11 +1911,13 @@ function getTView() {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
 function ɵɵrestoreView(viewToRestore) {
     instructionState.lFrame.contextLView = viewToRestore;
+    return viewToRestore[CONTEXT];
 }
 function getCurrentTNode() {
     let currentTNode = getCurrentTNodePlaceholderOk();
@@ -21360,7 +21362,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.1+1.sha-8658cd5');
+const VERSION = new Version('12.0.0-next.1+3.sha-cdf1ea1');
 
 /**
  * @license
@@ -29314,9 +29316,8 @@ function optionsReducer(dst, objs) {
  */
 class ApplicationRef {
     /** @internal */
-    constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+    constructor(_zone, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
         this._zone = _zone;
-        this._console = _console;
         this._injector = _injector;
         this._exceptionHandler = _exceptionHandler;
         this._componentFactoryResolver = _componentFactoryResolver;
@@ -29432,8 +29433,11 @@ class ApplicationRef {
             }
         });
         this._loadComponent(compRef);
-        if (isDevMode()) {
-            this._console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
+        // Note that we have still left the `isDevMode()` condition in order to avoid
+        // creating a breaking change for projects that still use the View Engine.
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
+            const _console = this._injector.get(Console);
+            _console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
         }
         return compRef;
     }
@@ -29510,11 +29514,11 @@ class ApplicationRef {
         return this._views.length;
     }
 }
-ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
+ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
 ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable
-    }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null); })();
+    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null); })();
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
@@ -30437,7 +30441,7 @@ const APPLICATION_MODULE_PROVIDERS = [
     {
         provide: ApplicationRef,
         useClass: ApplicationRef,
-        deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
+        deps: [NgZone, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
     },
     { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
     {

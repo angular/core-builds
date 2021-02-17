@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+1.sha-8658cd5
+ * @license Angular v12.0.0-next.1+3.sha-cdf1ea1
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2185,11 +2185,13 @@
      * walking the declaration view tree in listeners to get vars from parent views.
      *
      * @param viewToRestore The OpaqueViewState instance to restore.
+     * @returns Context of the restored OpaqueViewState instance.
      *
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
         instructionState.lFrame.contextLView = viewToRestore;
+        return viewToRestore[CONTEXT];
     }
     function getCurrentTNode() {
         var currentTNode = getCurrentTNodePlaceholderOk();
@@ -21931,7 +21933,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.1+1.sha-8658cd5');
+    var VERSION = new Version('12.0.0-next.1+3.sha-cdf1ea1');
 
     /**
      * @license
@@ -28594,6 +28596,35 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var Console = /** @class */ (function () {
+        function Console() {
+        }
+        Console.prototype.log = function (message) {
+            // tslint:disable-next-line:no-console
+            console.log(message);
+        };
+        // Note: for reporting errors use `DOM.logError()` as it is platform specific
+        Console.prototype.warn = function (message) {
+            // tslint:disable-next-line:no-console
+            console.warn(message);
+        };
+        return Console;
+    }());
+    Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
+    Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
+    (function () {
+        (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
+                type: Injectable
+            }], null, null);
+    })();
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Provide this token to set the locale of your application.
      * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
@@ -29558,35 +29589,6 @@
         _devMode = false;
     }
 
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var Console = /** @class */ (function () {
-        function Console() {
-        }
-        Console.prototype.log = function (message) {
-            // tslint:disable-next-line:no-console
-            console.log(message);
-        };
-        // Note: for reporting errors use `DOM.logError()` as it is platform specific
-        Console.prototype.warn = function (message) {
-            // tslint:disable-next-line:no-console
-            console.warn(message);
-        };
-        return Console;
-    }());
-    Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-    Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
-    (function () {
-        (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
-                type: Injectable
-            }], null, null);
-    })();
-
     var _platform;
     var compileNgModuleFactory = compileNgModuleFactory__POST_R3__;
     function compileNgModuleFactory__PRE_R3__(injector, options, moduleType) {
@@ -30047,10 +30049,9 @@
      */
     var ApplicationRef = /** @class */ (function () {
         /** @internal */
-        function ApplicationRef(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+        function ApplicationRef(_zone, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
             var _this = this;
             this._zone = _zone;
-            this._console = _console;
             this._injector = _injector;
             this._exceptionHandler = _exceptionHandler;
             this._componentFactoryResolver = _componentFactoryResolver;
@@ -30167,8 +30168,11 @@
                 }
             });
             this._loadComponent(compRef);
-            if (isDevMode()) {
-                this._console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
+            // Note that we have still left the `isDevMode()` condition in order to avoid
+            // creating a breaking change for projects that still use the View Engine.
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
+                var _console = this._injector.get(Console);
+                _console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
             }
             return compRef;
         };
@@ -30272,12 +30276,12 @@
         });
         return ApplicationRef;
     }());
-    ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Console), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
+    ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
     ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
     (function () {
         (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
                 type: Injectable
-            }], function () { return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
+            }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null);
     })();
     function remove(list, el) {
         var index = list.indexOf(el);
@@ -31316,7 +31320,7 @@
         {
             provide: ApplicationRef,
             useClass: ApplicationRef,
-            deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
+            deps: [NgZone, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
         },
         { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
         {
