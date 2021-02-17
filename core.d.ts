@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+73.sha-322951a
+ * @license Angular v12.0.0-next.0+77.sha-a9936c2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2904,6 +2904,11 @@ export declare interface HostListenerDecorator {
     /**
      * Decorator that declares a DOM event to listen for,
      * and provides a handler method to run when that event occurs.
+     *
+     * Angular invokes the supplied handler method when the host element emits the specified event,
+     * and updates the bound element with the result.
+     *
+     * If the handler method returns false, applies `preventDefault` on the bound element.
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
