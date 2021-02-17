@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+3.sha-cdf1ea1
+ * @license Angular v12.0.0-next.1+2.sha-b7a2d0d
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2186,13 +2186,11 @@
      * walking the declaration view tree in listeners to get vars from parent views.
      *
      * @param viewToRestore The OpaqueViewState instance to restore.
-     * @returns Context of the restored OpaqueViewState instance.
      *
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
         instructionState.lFrame.contextLView = viewToRestore;
-        return viewToRestore[CONTEXT];
     }
     function getCurrentTNode() {
         var currentTNode = getCurrentTNodePlaceholderOk();
@@ -21962,7 +21960,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.1+3.sha-cdf1ea1');
+    var VERSION = new Version('12.0.0-next.1+2.sha-b7a2d0d');
 
     /**
      * @license
