@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+34.sha-f340a5b
+ * @license Angular v12.0.0-next.1+35.sha-d1d1dad
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -127,6 +127,110 @@ function resolveForwardRef(type) {
 function isForwardRef(fn) {
     return typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) &&
         fn.__forward_ref__ === forwardRef;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// Base URL for the error details page.
+// Keep this value in sync with a similar const in
+// `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
+const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+class RuntimeError extends Error {
+    constructor(code, message) {
+        super(formatRuntimeError(code, message));
+        this.code = code;
+    }
+}
+// Contains a set of error messages that have details guides at angular.io.
+// Full list of available error guides can be found at https://angular.io/errors
+/* tslint:disable:no-toplevel-property-access */
+const RUNTIME_ERRORS_WITH_GUIDES = new Set([
+    "100" /* EXPRESSION_CHANGED_AFTER_CHECKED */,
+    "200" /* CYCLIC_DI_DEPENDENCY */,
+    "201" /* PROVIDER_NOT_FOUND */,
+    "300" /* MULTIPLE_COMPONENTS_MATCH */,
+    "301" /* EXPORT_NOT_FOUND */,
+    "302" /* PIPE_NOT_FOUND */,
+]);
+/* tslint:enable:no-toplevel-property-access */
+/** Called to format a runtime error */
+function formatRuntimeError(code, message) {
+    const fullCode = code ? `NG0${code}: ` : '';
+    let errorMessage = `${fullCode}${message}`;
+    // Some runtime errors are still thrown without `ngDevMode` (for example
+    // `throwProviderNotFoundError`), so we add `ngDevMode` check here to avoid pulling
+    // `RUNTIME_ERRORS_WITH_GUIDES` symbol into prod bundles.
+    // TODO: revisit all instances where `RuntimeError` is thrown and see if `ngDevMode` can be added
+    // there instead to tree-shake more devmode-only code (and eventually remove `ngDevMode` check
+    // from this code).
+    if (ngDevMode && RUNTIME_ERRORS_WITH_GUIDES.has(code)) {
+        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/NG0${code}`;
+    }
+    return errorMessage;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used for stringify render output in Ivy.
+ * Important! This function is very performance-sensitive and we should
+ * be extra careful not to introduce megamorphic reads in it.
+ * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
+ */
+function renderStringify(value) {
+    if (typeof value === 'string')
+        return value;
+    if (value == null)
+        return '';
+    // Use `String` so that it invokes the `toString` method of the value. Note that this
+    // appears to be faster than calling `value.toString` (see `render_stringify` benchmark).
+    return String(value);
+}
+/**
+ * Used to stringify a value so that it can be displayed in an error message.
+ * Important! This function contains a megamorphic read and should only be
+ * used for error messages.
+ */
+function stringifyForError(value) {
+    if (typeof value === 'function')
+        return value.name || value.toString();
+    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+        return value.type.name || value.type.toString();
+    }
+    return renderStringify(value);
+}
+
+/** Called when directives inject each other (creating a circular dependency) */
+function throwCyclicDependencyError(token, path) {
+    const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
+    throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, `Circular dependency in DI detected for ${token}${depPath}`);
+}
+function throwMixedMultiProviderError() {
+    throw new Error(`Cannot mix multi providers and regular providers`);
+}
+function throwInvalidProviderError(ngModuleType, providers, provider) {
+    let ngModuleDetail = '';
+    if (ngModuleType && providers) {
+        const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
+        ngModuleDetail =
+            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
+    }
+    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+}
+/** Throws an error when a token is not found in DI. */
+function throwProviderNotFoundError(token, injectorName) {
+    const injectorDetails = injectorName ? ` in ${injectorName}` : '';
+    throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -440,7 +544,7 @@ function injectRootLimpMode(token, notFoundValue, flags) {
         return null;
     if (notFoundValue !== undefined)
         return notFoundValue;
-    throw new Error(`Injector: NOT_FOUND [${stringify(token)}]`);
+    throwProviderNotFoundError(stringify(token), 'Injector');
 }
 /**
  * Assert that `_injectImplementation` is not `fn`.
@@ -1298,110 +1402,6 @@ function getFactoryDef(type, throwNotFound) {
         throw new Error(`Type ${stringify(type)} does not have 'ɵfac' property.`);
     }
     return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// Base URL for the error details page.
-// Keep this value in sync with a similar const in
-// `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
-const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
-class RuntimeError extends Error {
-    constructor(code, message) {
-        super(formatRuntimeError(code, message));
-        this.code = code;
-    }
-}
-// Contains a set of error messages that have details guides at angular.io.
-// Full list of available error guides can be found at https://angular.io/errors
-/* tslint:disable:no-toplevel-property-access */
-const RUNTIME_ERRORS_WITH_GUIDES = new Set([
-    "100" /* EXPRESSION_CHANGED_AFTER_CHECKED */,
-    "200" /* CYCLIC_DI_DEPENDENCY */,
-    "201" /* PROVIDER_NOT_FOUND */,
-    "300" /* MULTIPLE_COMPONENTS_MATCH */,
-    "301" /* EXPORT_NOT_FOUND */,
-    "302" /* PIPE_NOT_FOUND */,
-]);
-/* tslint:enable:no-toplevel-property-access */
-/** Called to format a runtime error */
-function formatRuntimeError(code, message) {
-    const fullCode = code ? `NG0${code}: ` : '';
-    let errorMessage = `${fullCode}${message}`;
-    // Some runtime errors are still thrown without `ngDevMode` (for example
-    // `throwProviderNotFoundError`), so we add `ngDevMode` check here to avoid pulling
-    // `RUNTIME_ERRORS_WITH_GUIDES` symbol into prod bundles.
-    // TODO: revisit all instances where `RuntimeError` is thrown and see if `ngDevMode` can be added
-    // there instead to tree-shake more devmode-only code (and eventually remove `ngDevMode` check
-    // from this code).
-    if (ngDevMode && RUNTIME_ERRORS_WITH_GUIDES.has(code)) {
-        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/NG0${code}`;
-    }
-    return errorMessage;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Used for stringify render output in Ivy.
- * Important! This function is very performance-sensitive and we should
- * be extra careful not to introduce megamorphic reads in it.
- * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
- */
-function renderStringify(value) {
-    if (typeof value === 'string')
-        return value;
-    if (value == null)
-        return '';
-    // Use `String` so that it invokes the `toString` method of the value. Note that this
-    // appears to be faster than calling `value.toString` (see `render_stringify` benchmark).
-    return String(value);
-}
-/**
- * Used to stringify a value so that it can be displayed in an error message.
- * Important! This function contains a megamorphic read and should only be
- * used for error messages.
- */
-function stringifyForError(value) {
-    if (typeof value === 'function')
-        return value.name || value.toString();
-    if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-        return value.type.name || value.type.toString();
-    }
-    return renderStringify(value);
-}
-
-/** Called when directives inject each other (creating a circular dependency) */
-function throwCyclicDependencyError(token, path) {
-    const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
-    throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, `Circular dependency in DI detected for ${token}${depPath}`);
-}
-function throwMixedMultiProviderError() {
-    throw new Error(`Cannot mix multi providers and regular providers`);
-}
-function throwInvalidProviderError(ngModuleType, providers, provider) {
-    let ngModuleDetail = '';
-    if (ngModuleType && providers) {
-        const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
-        ngModuleDetail =
-            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
-    }
-    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
-}
-/** Throws an error when a token is not found in DI. */
-function throwProviderNotFoundError(token, injectorName) {
-    const injectorDetails = injectorName ? ` in ${injectorName}` : '';
-    throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -21398,7 +21398,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.1+34.sha-f340a5b');
+const VERSION = new Version('12.0.0-next.1+35.sha-d1d1dad');
 
 /**
  * @license
