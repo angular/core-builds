@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.0+37.sha-1646f8d
+ * @license Angular v12.0.0-next.1+38.sha-44ffa8c
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -334,7 +334,6 @@ export declare class ApplicationModule {
  */
 export declare class ApplicationRef {
     private _zone;
-    private _console;
     private _injector;
     private _exceptionHandler;
     private _componentFactoryResolver;
@@ -2806,7 +2805,7 @@ export declare interface HostDecorator {
      *
      * @usageNotes
      *
-     * The following shows use with the `@Optional` decorator, and allows for a null result.
+     * The following shows use with the `@Optional` decorator, and allows for a `null` result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
@@ -2904,6 +2903,11 @@ export declare interface HostListenerDecorator {
     /**
      * Decorator that declares a DOM event to listen for,
      * and provides a handler method to run when that event occurs.
+     *
+     * Angular invokes the supplied handler method when the host element emits the specified event,
+     * and updates the bound element with the result.
+     *
+     * If the handler method returns false, applies `preventDefault` on the bound element.
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
@@ -3178,7 +3182,7 @@ export declare const Inject: InjectDecorator;
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
@@ -4972,14 +4976,14 @@ export declare interface OptionalDecorator {
     /**
      * Parameter decorator to be used on constructor parameters,
      * which marks the parameter as being an optional dependency.
-     * The DI framework provides null if the dependency is not found.
+     * The DI framework provides `null` if the dependency is not found.
      *
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
      * @usageNotes
      *
-     * The following code allows the possibility of a null result:
+     * The following code allows the possibility of a `null` result:
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
@@ -6572,7 +6576,7 @@ export declare interface SelfDecorator {
      * which tells the DI framework to start dependency resolution from the local injector.
      *
      * Resolution works upward through the injector hierarchy, so the children
-     * of this class must configure their own providers or be prepared for a null result.
+     * of this class must configure their own providers or be prepared for a `null` result.
      *
      * @usageNotes
      *
@@ -13873,10 +13877,11 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
