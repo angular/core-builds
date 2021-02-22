@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+37.sha-53c65f4
+ * @license Angular v12.0.0-next.1+39.sha-995adb2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21398,7 +21398,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.1+37.sha-53c65f4');
+const VERSION = new Version('12.0.0-next.1+39.sha-995adb2');
 
 /**
  * @license
@@ -27784,8 +27784,8 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
  * one or more initialization functions.
  *
  * The provided functions are injected at application startup and executed during
- * app initialization. If any of these functions returns a Promise, initialization
- * does not complete until the Promise is resolved.
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
  *
  * You can, for example, create a factory function that loads language data
  * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
@@ -27829,6 +27829,12 @@ class ApplicationInitStatus {
                 const initResult = this.appInits[i]();
                 if (isPromise(initResult)) {
                     asyncInitPromises.push(initResult);
+                }
+                else if (isObservable(initResult)) {
+                    const observableAsPromise = new Promise((resolve, reject) => {
+                        initResult.subscribe({ complete: resolve, error: reject });
+                    });
+                    asyncInitPromises.push(observableAsPromise);
                 }
             }
         }

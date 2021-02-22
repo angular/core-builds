@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+37.sha-53c65f4
+ * @license Angular v12.0.0-next.1+39.sha-995adb2
  * (c) 2010-2020 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21962,7 +21962,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.1+37.sha-53c65f4');
+    var VERSION = new Version('12.0.0-next.1+39.sha-995adb2');
 
     /**
      * @license
@@ -28481,8 +28481,8 @@
      * one or more initialization functions.
      *
      * The provided functions are injected at application startup and executed during
-     * app initialization. If any of these functions returns a Promise, initialization
-     * does not complete until the Promise is resolved.
+     * app initialization. If any of these functions returns a Promise or an Observable, initialization
+     * does not complete until the Promise is resolved or the Observable is completed.
      *
      * You can, for example, create a factory function that loads language data
      * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
@@ -28524,11 +28524,21 @@
                 _this.resolve();
             };
             if (this.appInits) {
-                for (var i = 0; i < this.appInits.length; i++) {
-                    var initResult = this.appInits[i]();
+                var _loop_1 = function (i) {
+                    var initResult = this_1.appInits[i]();
                     if (isPromise(initResult)) {
                         asyncInitPromises.push(initResult);
                     }
+                    else if (isObservable(initResult)) {
+                        var observableAsPromise = new Promise(function (resolve, reject) {
+                            initResult.subscribe({ complete: resolve, error: reject });
+                        });
+                        asyncInitPromises.push(observableAsPromise);
+                    }
+                };
+                var this_1 = this;
+                for (var i = 0; i < this.appInits.length; i++) {
+                    _loop_1(i);
                 }
             }
             Promise.all(asyncInitPromises)
