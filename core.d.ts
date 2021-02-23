@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+45.sha-ddf7970
+ * @license Angular v12.0.0-next.1+47.sha-d3705b3
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2300,7 +2300,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract get context(): C;
+    abstract context: C;
     /**
      * The root nodes for this embedded view.
      */
@@ -8710,6 +8710,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      */
     _cdRefInjectingView?: ɵangular_packages_core_core_ca | undefined);
     get context(): T;
+    set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
