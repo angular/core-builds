@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+45.sha-ddf7970
+ * @license Angular v12.0.0-next.1+47.sha-d3705b3
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21362,7 +21362,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.1+45.sha-ddf7970');
+const VERSION = new Version('12.0.0-next.1+47.sha-d3705b3');
 
 /**
  * @license
@@ -22518,6 +22518,9 @@ class ViewRef {
     }
     get context() {
         return this._lView[CONTEXT];
+    }
+    set context(value) {
+        this._lView[CONTEXT] = value;
     }
     get destroyed() {
         return (this._lView[FLAGS] & 256 /* Destroyed */) === 256 /* Destroyed */;
@@ -24237,6 +24240,9 @@ class ViewRef_ {
     }
     get context() {
         return this._view.context;
+    }
+    set context(value) {
+        this._view.context = value;
     }
     get destroyed() {
         return (this._view.state & 128 /* Destroyed */) !== 0;

@@ -88,7 +88,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract get context(): C;
+    abstract context: C;
     /**
      * The root nodes for this embedded view.
      */

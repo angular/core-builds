@@ -42,6 +42,7 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEn
      */
     _cdRefInjectingView?: LView | undefined);
     get context(): T;
+    set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
