@@ -1,6 +1,6 @@
 /**
- * @license Angular v12.0.0-next.1+41.sha-e6bf7c2
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.1+51.sha-206ec9b
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -196,8 +196,8 @@ export declare const APP_ID: InjectionToken<string>;
  * one or more initialization functions.
  *
  * The provided functions are injected at application startup and executed during
- * app initialization. If any of these functions returns a Promise, initialization
- * does not complete until the Promise is resolved.
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
  *
  * You can, for example, create a factory function that loads language data
  * or an external configuration, and provide that function to the `APP_INITIALIZER` token.

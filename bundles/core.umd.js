@@ -1,6 +1,6 @@
 /**
- * @license Angular v12.0.0-next.1+41.sha-e6bf7c2
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.1+51.sha-206ec9b
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -21962,7 +21962,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.1+41.sha-e6bf7c2');
+    var VERSION = new Version('12.0.0-next.1+51.sha-206ec9b');
 
     /**
      * @license
@@ -28481,8 +28481,8 @@
      * one or more initialization functions.
      *
      * The provided functions are injected at application startup and executed during
-     * app initialization. If any of these functions returns a Promise, initialization
-     * does not complete until the Promise is resolved.
+     * app initialization. If any of these functions returns a Promise or an Observable, initialization
+     * does not complete until the Promise is resolved or the Observable is completed.
      *
      * You can, for example, create a factory function that loads language data
      * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
@@ -28524,11 +28524,21 @@
                 _this.resolve();
             };
             if (this.appInits) {
-                for (var i = 0; i < this.appInits.length; i++) {
-                    var initResult = this.appInits[i]();
+                var _loop_1 = function (i) {
+                    var initResult = this_1.appInits[i]();
                     if (isPromise(initResult)) {
                         asyncInitPromises.push(initResult);
                     }
+                    else if (isObservable(initResult)) {
+                        var observableAsPromise = new Promise(function (resolve, reject) {
+                            initResult.subscribe({ complete: resolve, error: reject });
+                        });
+                        asyncInitPromises.push(observableAsPromise);
+                    }
+                };
+                var this_1 = this;
+                for (var i = 0; i < this.appInits.length; i++) {
+                    _loop_1(i);
                 }
             }
             Promise.all(asyncInitPromises)
@@ -29143,6 +29153,21 @@
     }());
     var EMPTY_PAYLOAD = {};
     function checkStable(zone) {
+        // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
+        // re-entry. The case is:
+        //
+        // @Component({...})
+        // export class AppComponent {
+        // constructor(private ngZone: NgZone) {
+        //   this.ngZone.onStable.subscribe(() => {
+        //     this.ngZone.run(() => console.log('stable'););
+        //   });
+        // }
+        //
+        // The onStable subscriber run another function inside ngZone
+        // which causes `checkStable()` re-entry.
+        // But this fix causes some issues in g3, so this fix will be
+        // launched in another PR.
         if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
             try {
                 zone._nesting++;
@@ -29162,7 +29187,20 @@
         }
     }
     function delayChangeDetectionForEvents(zone) {
-        if (zone.lastRequestAnimationFrameId !== -1) {
+        /**
+         * We also need to check _nesting here
+         * Consider the following case with shouldCoalesceRunChangeDetection = true
+         *
+         * ngZone.run(() => {});
+         * ngZone.run(() => {});
+         *
+         * We want the two `ngZone.run()` only trigger one change detection
+         * when shouldCoalesceRunChangeDetection is true.
+         * And because in this case, change detection run in async way(requestAnimationFrame),
+         * so we also need to check the _nesting here to prevent multiple
+         * change detections.
+         */
+        if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
             return;
         }
         zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, function () {
@@ -29179,7 +29217,9 @@
                 zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', function () {
                     zone.lastRequestAnimationFrameId = -1;
                     updateMicroTaskStatus(zone);
+                    zone.isCheckStableRunning = true;
                     checkStable(zone);
+                    zone.isCheckStableRunning = false;
                 }, undefined, function () { }, function () { });
             }
             zone.fakeTopEventTask.invoke();
