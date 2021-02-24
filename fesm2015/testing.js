@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+60.sha-03de2f2
+ * @license Angular v12.0.0-next.1+63.sha-aaf9b31
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -37,7 +37,7 @@ function waitForAsync(fn) {
     if (!_Zone) {
         return function () {
             return Promise.reject('Zone is needed for the waitForAsync() test helper but could not be found. ' +
-                'Please make sure that your environment includes zone.js/dist/zone.js');
+                'Please make sure that your environment includes zone.js');
         };
     }
     const asyncTest = _Zone && _Zone[_Zone.__symbol__('asyncTest')];
@@ -46,7 +46,7 @@ function waitForAsync(fn) {
     }
     return function () {
         return Promise.reject('zone-testing.js is needed for the async() test helper but could not be found. ' +
-            'Please make sure that your environment includes zone.js/dist/zone-testing.js');
+            'Please make sure that your environment includes zone.js/testing');
     };
 }
 /**
@@ -259,7 +259,7 @@ function scheduleMicroTask(fn) {
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
 const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
 const fakeAsyncTestModuleNotLoadedErrorMessage = `zone-testing.js is needed for the fakeAsync() test helper but could not be found.
-        Please make sure that your environment includes zone.js/dist/zone-testing.js`;
+        Please make sure that your environment includes zone.js/testing`;
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
