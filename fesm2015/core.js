@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+47.sha-b5f9d86
+ * @license Angular v12.0.0-next.2+16.sha-3df1582
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21398,7 +21398,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.1+47.sha-b5f9d86');
+const VERSION = new Version('12.0.0-next.2+16.sha-3df1582');
 
 /**
  * @license
@@ -22555,6 +22555,9 @@ class ViewRef {
     }
     get context() {
         return this._lView[CONTEXT];
+    }
+    set context(value) {
+        this._lView[CONTEXT] = value;
     }
     get destroyed() {
         return (this._lView[FLAGS] & 256 /* Destroyed */) === 256 /* Destroyed */;
@@ -24288,6 +24291,9 @@ class ViewRef_ {
     }
     get context() {
         return this._view.context;
+    }
+    set context(value) {
+        this._view.context = value;
     }
     get destroyed() {
         return (this._view.state & 128 /* Destroyed */) !== 0;
@@ -28783,7 +28789,7 @@ class Testability {
     whenStable(doneCb, timeout, updateCb) {
         if (updateCb && !this.taskTrackingZone) {
             throw new Error('Task tracking zone is required when passing an update callback to ' +
-                'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
+                'whenStable(). Is "zone.js/plugins/task-tracking" loaded?');
         }
         // These arguments are 'Function' above to keep the public API simple.
         this.addCallback(doneCb, timeout, updateCb);

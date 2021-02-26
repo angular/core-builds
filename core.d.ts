@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.1+47.sha-b5f9d86
+ * @license Angular v12.0.0-next.2+16.sha-3df1582
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2300,7 +2300,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract get context(): C;
+    abstract context: C;
     /**
      * The root nodes for this embedded view.
      */
@@ -5141,20 +5141,19 @@ declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
  *
  * @usageNotes
  *
- * In the following example, `RepeatPipe` repeats a given value a given number of times.
+ * In the following example, `TruncatePipe` returns the shortened value with an added ellipses.
  *
- * ```ts
- * import {Pipe, PipeTransform} from '@angular/core';
+ * <code-example path="core/ts/pipes/simple_truncate.ts" header="simple_truncate.ts"></code-example>
  *
- * @Pipe({name: 'repeat'})
- * export class RepeatPipe implements PipeTransform {
- *   transform(value: any, times: number) {
- *     return value.repeat(times);
- *   }
- * }
- * ```
+ * Invoking `{{ 'It was the best of times' | truncate }}` in a template will produce `It was...`.
  *
- * Invoking `{{ 'ok' | repeat:3 }}` in a template produces `okokok`.
+ * In the following example, `TruncatePipe` takes parameters that sets the truncated length and the
+ * string to append with.
+ *
+ * <code-example path="core/ts/pipes/truncate.ts" header="truncate.ts"></code-example>
+ *
+ * Invoking `{{ 'It was the best of times' | truncate:4:'....' }}` in a template will produce `It
+ * was the best....`.
  *
  * @publicApi
  */
@@ -8710,6 +8709,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      */
     _cdRefInjectingView?: ɵangular_packages_core_core_ca | undefined);
     get context(): T;
+    set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
