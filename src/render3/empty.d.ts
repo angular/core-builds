@@ -5,4 +5,3 @@
  * code.
  */
 export declare const EMPTY_OBJ: {};
-export declare const EMPTY_ARRAY: any[];
