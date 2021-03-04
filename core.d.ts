@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+4.sha-d9acaa8
+ * @license Angular v12.0.0-next.3+10.sha-d44c7c2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3276,7 +3276,7 @@ export declare interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵprov: never;
+    ɵprov: unknown;
 }
 
 
@@ -3370,7 +3370,7 @@ export declare enum InjectFlags {
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ɵprov: never | undefined;
+    readonly ɵprov: unknown;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -3448,7 +3448,7 @@ export declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 declare const INJECTOR_2 = 9;
@@ -3464,7 +3464,7 @@ export declare interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵinj: never;
+    ɵinj: unknown;
 }
 
 /**
@@ -3681,7 +3681,7 @@ export declare interface IterableDifferFactory {
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private
      */
@@ -3828,7 +3828,7 @@ export declare interface KeyValueDifferFactory {
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private.
      */
@@ -5166,7 +5166,7 @@ export declare interface PipeTransform {
  * consumable for rendering.
  */
 declare interface PipeType<T> extends Type<T> {
-    ɵpipe: never;
+    ɵpipe: unknown;
 }
 
 declare type PipeTypeList = (PipeType<any> | Type<any>)[];
@@ -6495,7 +6495,7 @@ declare const SANITIZER = 12;
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 /**
@@ -10141,7 +10141,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
      */
-    readonly _?: never;
+    readonly _?: unknown;
 }
 
 /**
@@ -10149,7 +10149,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵComponentType<T> extends Type<T> {
-    ɵcmp: never;
+    ɵcmp: unknown;
 }
 
 
@@ -10351,8 +10351,8 @@ export declare interface ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵDirectiveType<T> extends Type<T> {
-    ɵdir: never;
-    ɵfac: () => T;
+    ɵdir: unknown;
+    ɵfac: unknown;
 }
 
 export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
@@ -12286,7 +12286,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas?: SchemaMetadata[] | null;
-}): never;
+}): unknown;
 
 /**
  * Create a directive definition object.
@@ -12452,7 +12452,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
@@ -12478,7 +12478,7 @@ export declare function ɵɵdefineInjector(options: {
     factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -12501,7 +12501,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 
 /**
  * Create a pipe definition object.
@@ -12526,7 +12526,7 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     type: Type<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -12693,11 +12693,6 @@ export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]>
  * @codeGenApi
  */
 export declare function ɵɵgetCurrentView(): OpaqueViewState;
-
-/**
- * @codeGenApi
- */
-export declare function ɵɵgetFactoryOf<T>(type: Type<any>): FactoryFn<T> | null;
 
 /**
  * @codeGenApi
@@ -14006,7 +14001,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
      * module.
      */
     exports?: Type<any>[] | (() => Type<any>[]);
-}): void;
+}): unknown;
 
 /**
  * Update style bindings using an object literal on an element.

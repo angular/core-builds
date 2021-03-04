@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+4.sha-d9acaa8
+ * @license Angular v12.0.0-next.3+10.sha-d44c7c2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -538,7 +538,7 @@ declare enum InjectFlags {
  */
 declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ɵprov: never | undefined;
+    readonly ɵprov: unknown;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -606,7 +606,7 @@ declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 /**
@@ -620,7 +620,7 @@ declare interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵinj: never;
+    ɵinj: unknown;
 }
 
 /**
@@ -946,7 +946,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
@@ -972,7 +972,7 @@ export declare function ɵɵdefineInjector(options: {
     factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -995,7 +995,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
