@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+11.sha-bf158e7
+ * @license Angular v12.0.0-next.3+12.sha-ca721c2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -208,7 +208,7 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * @publicApi
  */
-export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
+export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
 
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER} functions.
@@ -216,13 +216,13 @@ export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
  * @publicApi
  */
 export declare class ApplicationInitStatus {
-    private appInits;
+    private readonly appInits;
     private resolve;
     private reject;
     private initialized;
     readonly donePromise: Promise<any>;
     readonly done = false;
-    constructor(appInits: (() => any)[]);
+    constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+11.sha-bf158e7
+ * @license Angular v12.0.0-next.3+12.sha-ca721c2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21351,7 +21351,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.3+11.sha-bf158e7');
+const VERSION = new Version('12.0.0-next.3+12.sha-ca721c2');
 
 /**
  * @license
@@ -27811,7 +27811,7 @@ ApplicationInitStatus.decorators = [
     { type: Injectable }
 ];
 ApplicationInitStatus.ctorParameters = () => [
-    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
+    { type: undefined, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
 ];
 
 /**
