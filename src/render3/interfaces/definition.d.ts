@@ -44,22 +44,22 @@ export declare const enum RenderFlags {
  * consumable for rendering.
  */
 export interface ComponentType<T> extends Type<T> {
-    ɵcmp: never;
+    ɵcmp: unknown;
 }
 /**
  * A subclass of `Type` which has a static `ɵdir`:`DirectiveDef` field making it
  * consumable for rendering.
  */
 export interface DirectiveType<T> extends Type<T> {
-    ɵdir: never;
-    ɵfac: () => T;
+    ɵdir: unknown;
+    ɵfac: unknown;
 }
 /**
  * A subclass of `Type` which has a static `ɵpipe`:`PipeDef` field making it
  * consumable for rendering.
  */
 export interface PipeType<T> extends Type<T> {
-    ɵpipe: never;
+    ɵpipe: unknown;
 }
 /**
  * An object literal of this type is used to represent the metadata of a constructor dependency.
@@ -315,7 +315,7 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
      */
-    readonly _?: never;
+    readonly _?: unknown;
 }
 /**
  * Runtime link information for Pipes.

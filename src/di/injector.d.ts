@@ -72,7 +72,7 @@ export declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;

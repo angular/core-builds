@@ -76,7 +76,7 @@ export interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵprov: never;
+    ɵprov: unknown;
 }
 /**
  * A type which has an `InjectorDef` static field.
@@ -89,7 +89,7 @@ export interface InjectorType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵinj: never;
+    ɵinj: unknown;
 }
 /**
  * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
@@ -124,7 +124,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 /**
  * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
  * code should now use ɵɵdefineInjectable instead.
@@ -155,7 +155,7 @@ export declare function ɵɵdefineInjector(options: {
     factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 /**
  * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
  * inherited value.

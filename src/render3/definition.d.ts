@@ -255,7 +255,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas?: SchemaMetadata[] | null;
-}): never;
+}): unknown;
 /**
  * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
  * definition, when generating a direct reference in the component file would otherwise create an
@@ -292,7 +292,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 /**
  * Adds the module metadata that is necessary to compute the module's transitive scope to an
  * existing module definition.
@@ -313,7 +313,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
      * module.
      */
     exports?: Type<any>[] | (() => Type<any>[]);
-}): void;
+}): unknown;
 /**
  * Create a directive definition object.
  *
@@ -479,7 +479,7 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     type: Type<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): never;
+}): unknown;
 /**
  * The following getter methods retrieve the definition from the type. Currently the retrieval
  * honors inheritance, but in the future we may change the rule to require that definitions are

@@ -117,7 +117,7 @@ export declare function defaultIterableDiffersFactory(): IterableDiffers;
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private
      */

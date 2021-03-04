@@ -9,7 +9,6 @@ import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/interface/injector';
 import { AbstractType, Type } from '../interface/type';
-import { FactoryFn } from './definition_factory';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LView, TData, TView } from './interfaces/view';
@@ -137,10 +136,6 @@ export declare class NodeInjector implements Injector {
     constructor(_tNode: TElementNode | TContainerNode | TElementContainerNode | null, _lView: LView);
     get(token: any, notFoundValue?: any): any;
 }
-/**
- * @codeGenApi
- */
-export declare function ɵɵgetFactoryOf<T>(type: Type<any>): FactoryFn<T> | null;
 /**
  * @codeGenApi
  */

@@ -3,7 +3,7 @@ import { LView } from './interfaces/view';
 /** Called when there are multiple component selectors that match a given node */
 export declare function throwMultipleComponentError(tNode: TNode): never;
 /** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-export declare function throwErrorIfNoChangesMode(creationMode: boolean, oldValue: any, currValue: any, propName?: string): never | void;
+export declare function throwErrorIfNoChangesMode(creationMode: boolean, oldValue: any, currValue: any, propName?: string): never;
 /**
  * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
  * - property name (for property bindings or interpolations)

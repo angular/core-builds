@@ -103,7 +103,7 @@ export declare function defaultKeyValueDiffersFactory(): KeyValueDiffers;
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private.
      */
