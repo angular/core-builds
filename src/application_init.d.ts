@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Observable } from 'rxjs';
 import { InjectionToken } from './di';
 import * as i0 from "./r3_symbols";
 /**
@@ -24,20 +25,20 @@ import * as i0 from "./r3_symbols";
  *
  * @publicApi
  */
-export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
+export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER} functions.
  *
  * @publicApi
  */
 export declare class ApplicationInitStatus {
-    private appInits;
+    private readonly appInits;
     private resolve;
     private reject;
     private initialized;
     readonly donePromise: Promise<any>;
     readonly done = false;
-    constructor(appInits: (() => any)[]);
+    constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
     static ɵfac: i0.ɵɵFactoryDef<ApplicationInitStatus, [{ optional: true; }]>;
     static ɵprov: i0.ɵɵInjectableDef<ApplicationInitStatus>;
 }

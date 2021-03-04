@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+11.sha-bf158e7
+ * @license Angular v12.0.0-next.3+12.sha-ca721c2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21315,7 +21315,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.3+11.sha-bf158e7');
+const VERSION = new Version('12.0.0-next.3+12.sha-ca721c2');
 
 /**
  * @license
@@ -27681,13 +27681,6 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__POST_R3__;
  */
 const ITS_JUST_ANGULAR = true;
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
  * one or more initialization functions.
