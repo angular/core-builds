@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.4+3.sha-4f4454d
+ * @license Angular v11.2.4+11.sha-1d4fc94
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1147,7 +1147,6 @@
             // See the `initNgDevMode` docstring for more information.
             (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
             var type = componentDefinition.type;
-            var typePrototype = type.prototype;
             var declaredInputs = {};
             var def = {
                 type: type,
@@ -3894,33 +3893,15 @@
     /**
      * @codeGenApi
      */
-    function ɵɵgetFactoryOf(type) {
-        var typeAny = type;
-        if (isForwardRef(type)) {
-            return (function () {
-                var factory = ɵɵgetFactoryOf(resolveForwardRef(typeAny));
-                return factory ? factory() : null;
-            });
-        }
-        var factory = getFactoryDef(typeAny);
-        if (factory === null) {
-            var injectorDef = getInjectorDef(typeAny);
-            factory = injectorDef && injectorDef.factory;
-        }
-        return factory || null;
-    }
-    /**
-     * @codeGenApi
-     */
     function ɵɵgetInheritedFactory(type) {
         return noSideEffects(function () {
             var ownConstructor = type.prototype.constructor;
-            var ownFactory = ownConstructor[NG_FACTORY_DEF] || ɵɵgetFactoryOf(ownConstructor);
+            var ownFactory = ownConstructor[NG_FACTORY_DEF] || getFactoryOf(ownConstructor);
             var objectPrototype = Object.prototype;
             var parent = Object.getPrototypeOf(type.prototype).constructor;
             // Go up the prototype until we hit `Object`.
             while (parent && parent !== objectPrototype) {
-                var factory = parent[NG_FACTORY_DEF] || ɵɵgetFactoryOf(parent);
+                var factory = parent[NG_FACTORY_DEF] || getFactoryOf(parent);
                 // If we hit something that has a factory and the factory isn't the same as the type,
                 // we've found the inherited factory. Note the check that the factory isn't the type's
                 // own factory is redundant in most cases, but if the user has custom decorators on the
@@ -3937,6 +3918,21 @@
             // latter has to be assumed.
             return function (t) { return new t(); };
         });
+    }
+    function getFactoryOf(type) {
+        var typeAny = type;
+        if (isForwardRef(type)) {
+            return (function () {
+                var factory = getFactoryOf(resolveForwardRef(typeAny));
+                return factory ? factory() : null;
+            });
+        }
+        var factory = getFactoryDef(typeAny);
+        if (factory === null) {
+            var injectorDef = getInjectorDef(typeAny);
+            factory = injectorDef && injectorDef.factory;
+        }
+        return factory || null;
     }
 
     /**
@@ -14082,23 +14078,8 @@
         'ɵɵdefineInjectable': ɵɵdefineInjectable,
         'ɵɵdefineInjector': ɵɵdefineInjector,
         'ɵɵinject': ɵɵinject,
-        'ɵɵgetFactoryOf': getFactoryOf,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
     };
-    function getFactoryOf(type) {
-        var typeAny = type;
-        if (isForwardRef(type)) {
-            return (function () {
-                var factory = getFactoryOf(resolveForwardRef(typeAny));
-                return factory ? factory() : null;
-            });
-        }
-        var def = getInjectableDef(typeAny) || getInjectorDef(typeAny);
-        if (!def || def.factory === undefined) {
-            return null;
-        }
-        return def.factory;
-    }
 
     /**
      * @license
@@ -21959,7 +21940,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.4+3.sha-4f4454d');
+    var VERSION = new Version('11.2.4+11.sha-1d4fc94');
 
     /**
      * @license
@@ -27364,7 +27345,6 @@
         'ɵɵdefineNgModule': ɵɵdefineNgModule,
         'ɵɵdefinePipe': ɵɵdefinePipe,
         'ɵɵdirectiveInject': ɵɵdirectiveInject,
-        'ɵɵgetFactoryOf': ɵɵgetFactoryOf,
         'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
         'ɵɵinject': ɵɵinject,
         'ɵɵinjectAttribute': ɵɵinjectAttribute,
@@ -34131,7 +34111,6 @@
     exports.ɵɵelementStart = ɵɵelementStart;
     exports.ɵɵenableBindings = ɵɵenableBindings;
     exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
-    exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
     exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
     exports.ɵɵhostProperty = ɵɵhostProperty;
     exports.ɵɵi18n = ɵɵi18n;
