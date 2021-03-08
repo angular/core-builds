@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+40.sha-bdf13fe
+ * @license Angular v12.0.0-next.3+42.sha-2ebe2bc
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -692,9 +692,6 @@
      *
      * Options:
      *
-     * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
-     *   create the type must be provided. If that factory function needs to inject arguments, it can
-     *   use the `inject` function.
      * * `providers`: an optional array of providers to add to the injector. Each provider must
      *   either have a factory or point to a type which has a `ɵprov` static property (the
      *   type must be an `InjectableType`).
@@ -705,11 +702,7 @@
      * @codeGenApi
      */
     function ɵɵdefineInjector(options) {
-        return {
-            factory: options.factory,
-            providers: options.providers || [],
-            imports: options.imports || [],
-        };
+        return { providers: options.providers || [], imports: options.imports || [] };
     }
     /**
      * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -3895,19 +3888,13 @@
         });
     }
     function getFactoryOf(type) {
-        var typeAny = type;
         if (isForwardRef(type)) {
-            return (function () {
-                var factory = getFactoryOf(resolveForwardRef(typeAny));
-                return factory ? factory() : null;
-            });
+            return function () {
+                var factory = getFactoryOf(resolveForwardRef(type));
+                return factory && factory();
+            };
         }
-        var factory = getFactoryDef(typeAny);
-        if (factory === null) {
-            var injectorDef = getInjectorDef(typeAny);
-            factory = injectorDef && injectorDef.factory;
-        }
-        return factory || null;
+        return getFactoryDef(type);
     }
 
     /**
@@ -11820,7 +11807,8 @@
             // Track the InjectorType and add a provider for it. It's important that this is done after the
             // def's imports.
             this.injectorDefTypes.add(defType);
-            this.records.set(defType, makeRecord(def.factory, NOT_YET));
+            var factory = getFactoryDef(defType) || (function () { return new defType(); });
+            this.records.set(defType, makeRecord(factory, NOT_YET));
             // Next, include providers listed on the definition itself.
             var defProviders = def.providers;
             if (defProviders != null && !isDuplicate) {
@@ -11898,12 +11886,6 @@
         var factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
         if (factory !== null) {
             return factory;
-        }
-        // If the token is an NgModule, it's also injectable but the factory is on its injector def
-        // (`ɵinj`)
-        var injectorDef = getInjectorDef(token);
-        if (injectorDef !== null) {
-            return injectorDef.factory;
         }
         // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
         // If it's missing that, it's an error.
@@ -21908,7 +21890,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.3+40.sha-bdf13fe');
+    var VERSION = new Version('12.0.0-next.3+42.sha-2ebe2bc');
 
     /**
      * @license
@@ -27536,7 +27518,7 @@
         enqueueModuleForDelayedScoping(moduleType, ngModule);
     }
     /**
-     * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+     * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
      *
      * It's possible to compile a module via this API which will allow duplicate declarations in its
      * root.
@@ -27580,6 +27562,25 @@
                 return ngModuleDef;
             }
         });
+        var ngFactoryDef = null;
+        Object.defineProperty(moduleType, NG_FACTORY_DEF, {
+            get: function () {
+                if (ngFactoryDef === null) {
+                    var compiler = getCompilerFacade();
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275fac.js", {
+                        name: moduleType.name,
+                        type: moduleType,
+                        deps: reflectDependencies(moduleType),
+                        injectFn: 'inject',
+                        target: compiler.R3FactoryTarget.NgModule,
+                        typeArgumentCount: 0,
+                    });
+                }
+                return ngFactoryDef;
+            },
+            // Make the property configurable in dev mode to allow overriding in tests
+            configurable: !!ngDevMode,
+        });
         var ngInjectorDef = null;
         Object.defineProperty(moduleType, NG_INJ_DEF, {
             get: function () {
@@ -27589,7 +27590,6 @@
                     var meta = {
                         name: moduleType.name,
                         type: moduleType,
-                        deps: reflectDependencies(moduleType),
                         providers: ngModule.providers || EMPTY_ARRAY,
                         imports: [
                             (ngModule.imports || EMPTY_ARRAY).map(resolveForwardRef),
@@ -28400,11 +28400,10 @@
         if (metadata && metadata.exports) {
             imports = __spread(imports, [metadata.exports]);
         }
-        moduleType.ɵinj = ɵɵdefineInjector({
-            factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-            providers: metadata && metadata.providers,
-            imports: imports,
-        });
+        var moduleInjectorType = moduleType;
+        moduleInjectorType.ɵfac = convertInjectableProviderToFactory(moduleType, { useClass: moduleType });
+        moduleInjectorType.ɵinj =
+            ɵɵdefineInjector({ providers: metadata && metadata.providers, imports: imports });
     }
     var SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule;
     var SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;

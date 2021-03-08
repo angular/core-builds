@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+40.sha-bdf13fe
+ * @license Angular v12.0.0-next.3+42.sha-2ebe2bc
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -614,12 +614,13 @@ declare abstract class Injector {
  *
  * `InjectorDefTypes` can be used to configure a `StaticInjector`.
  *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
+ *
  * @publicApi
  */
 declare interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
+    ɵfac?: unknown;
     ɵinj: unknown;
 }
 
@@ -956,9 +957,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -969,7 +967,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
 }): unknown;
@@ -1073,7 +1070,6 @@ export declare interface ɵɵInjectableDef<T> {
  * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
-    factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
