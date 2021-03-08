@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.3+33.sha-1735430
+ * @license Angular v12.0.0-next.3+36.sha-03d47d5
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21308,7 +21308,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.3+33.sha-1735430');
+const VERSION = new Version('12.0.0-next.3+36.sha-03d47d5');
 
 /**
  * @license
@@ -27800,7 +27800,7 @@ class ApplicationInitStatus {
     }
 }
 ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
-ApplicationInitStatus.ɵprov = ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac });
+ApplicationInitStatus.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
         type: Injectable
     }], function () { return [{ type: undefined, decorators: [{
@@ -27891,7 +27891,7 @@ class Console {
     }
 }
 Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-Console.ɵprov = ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
+Console.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
         type: Injectable
     }], null, null); })();
@@ -28149,7 +28149,7 @@ class Compiler {
     }
 }
 Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
-Compiler.ɵprov = ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
+Compiler.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
         type: Injectable
     }], null, null); })();
@@ -28764,7 +28764,7 @@ class Testability {
     }
 }
 Testability.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone)); };
-Testability.ɵprov = ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
+Testability.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Testability, [{
         type: Injectable
     }], function () { return [{ type: NgZone }]; }, null); })();
@@ -28829,7 +28829,7 @@ class TestabilityRegistry {
     }
 }
 TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-TestabilityRegistry.ɵprov = ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
+TestabilityRegistry.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TestabilityRegistry, [{
         type: Injectable
     }], function () { return []; }, null); })();
@@ -29207,7 +29207,7 @@ class PlatformRef {
     }
 }
 PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
-PlatformRef.ɵprov = ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
+PlatformRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
         type: Injectable
     }], function () { return [{ type: Injector }]; }, null); })();
@@ -29546,7 +29546,7 @@ class ApplicationRef {
     }
 }
 ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver), ɵɵinject(ApplicationInitStatus)); };
-ApplicationRef.ɵprov = ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
+ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable
     }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }]; }, null); })();
@@ -29679,7 +29679,7 @@ class SystemJsNgModuleLoader {
     }
 }
 SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
-SystemJsNgModuleLoader.ɵprov = ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
+SystemJsNgModuleLoader.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SystemJsNgModuleLoader, [{
         type: Injectable
     }], function () { return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
@@ -30525,8 +30525,8 @@ class ApplicationModule {
     // Inject ApplicationRef to make it eager...
     constructor(appRef) { }
 }
-ApplicationModule.ɵmod = ɵɵdefineNgModule({ type: ApplicationModule });
-ApplicationModule.ɵinj = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
+ApplicationModule.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule });
+ApplicationModule.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationModule, [{
         type: NgModule,
         args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
