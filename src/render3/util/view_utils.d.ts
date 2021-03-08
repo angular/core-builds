@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from '../interfaces/container';
-import { LContext } from '../interfaces/context';
 import { TConstants, TNode } from '../interfaces/node';
 import { RNode } from '../interfaces/renderer_dom';
 import { LView, TData, TView } from '../interfaces/view';
@@ -68,12 +67,6 @@ export declare function getTNode(tView: TView, index: number): TNode;
 /** Retrieves a value from any `LView` or `TData`. */
 export declare function load<T>(view: LView | TData, index: number): T;
 export declare function getComponentLViewByIndex(nodeIndex: number, hostView: LView): LView;
-/**
- * Returns the monkey-patch value data present on the target (which could be
- * a component, directive or a DOM node).
- */
-export declare function readPatchedData(target: any): LView | LContext | null;
-export declare function readPatchedLView(target: any): LView | null;
 /** Checks whether a given view is in creation mode */
 export declare function isCreationMode(view: LView): boolean;
 /**

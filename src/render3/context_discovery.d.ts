@@ -41,6 +41,12 @@ export declare function getComponentViewByInstance(componentInstance: {}): LView
  * directive or DOM node instance) using monkey-patching.
  */
 export declare function attachPatchData(target: any, data: LView | LContext): void;
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ */
+export declare function readPatchedData(target: any): LView | LContext | null;
+export declare function readPatchedLView(target: any): LView | null;
 export declare function isComponentInstance(instance: any): boolean;
 export declare function isDirectiveInstance(instance: any): boolean;
 /**
