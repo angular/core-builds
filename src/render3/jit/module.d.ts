@@ -22,7 +22,7 @@ export declare function flushModuleScopingQueueAsMuchAsPossible(): void;
  */
 export declare function compileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.

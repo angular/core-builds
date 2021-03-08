@@ -60,7 +60,6 @@ export interface ɵɵInjectableDef<T> {
  * @codeGenApi
  */
 export interface ɵɵInjectorDef<T> {
-    factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
@@ -83,12 +82,13 @@ export interface InjectableType<T> extends Type<T> {
  *
  * `InjectorDefTypes` can be used to configure a `StaticInjector`.
  *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
+ *
  * @publicApi
  */
 export interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
+    ɵfac?: unknown;
     ɵinj: unknown;
 }
 /**
@@ -139,9 +139,6 @@ export declare const defineInjectable: typeof ɵɵdefineInjectable;
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -152,7 +149,6 @@ export declare const defineInjectable: typeof ɵɵdefineInjectable;
  * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
 }): unknown;
