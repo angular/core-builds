@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.4+31.sha-c5ead38
+ * @license Angular v11.2.4+50.sha-e7ce857
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2492,7 +2492,7 @@ declare type FactoryFn<T> = {
      * Subclasses without an explicit constructor call through to the factory of their base
      * definition, providing it with their own constructor to instantiate.
      */
-    <U extends T>(t: Type<U>): U;
+    <U extends T>(t?: Type<U>): U;
     /**
      * If no constructor to instantiate is provided, an instance of type T itself is created.
      */
@@ -3458,12 +3458,13 @@ declare const INJECTOR_2 = 9;
  *
  * `InjectorDefTypes` can be used to configure a `StaticInjector`.
  *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
+ *
  * @publicApi
  */
 export declare interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
+    ɵfac?: unknown;
     ɵinj: unknown;
 }
 
@@ -10026,7 +10027,7 @@ export declare function ɵcompileDirective(type: Type<any>, directive: Directive
 export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -12461,9 +12462,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -12474,7 +12472,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
 }): unknown;
@@ -12919,7 +12916,6 @@ export declare function ɵɵinjectAttribute(attrNameToInject: string): string | 
  * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
-    factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }

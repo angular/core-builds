@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.4+31.sha-c5ead38
+ * @license Angular v11.2.4+50.sha-e7ce857
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -381,9 +381,6 @@ const defineInjectable = ɵɵdefineInjectable;
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -394,11 +391,7 @@ const defineInjectable = ɵɵdefineInjectable;
  * @codeGenApi
  */
 function ɵɵdefineInjector(options) {
-    return {
-        factory: options.factory,
-        providers: options.providers || [],
-        imports: options.imports || [],
-    };
+    return { providers: options.providers || [], imports: options.imports || [] };
 }
 /**
  * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -3643,19 +3636,13 @@ function ɵɵgetInheritedFactory(type) {
     });
 }
 function getFactoryOf(type) {
-    const typeAny = type;
     if (isForwardRef(type)) {
-        return (() => {
-            const factory = getFactoryOf(resolveForwardRef(typeAny));
-            return factory ? factory() : null;
-        });
+        return () => {
+            const factory = getFactoryOf(resolveForwardRef(type));
+            return factory && factory();
+        };
     }
-    let factory = getFactoryDef(typeAny);
-    if (factory === null) {
-        const injectorDef = getInjectorDef(typeAny);
-        factory = injectorDef && injectorDef.factory;
-    }
-    return factory || null;
+    return getFactoryDef(type);
 }
 
 /**
@@ -11320,7 +11307,8 @@ class R3Injector {
         // Track the InjectorType and add a provider for it. It's important that this is done after the
         // def's imports.
         this.injectorDefTypes.add(defType);
-        this.records.set(defType, makeRecord(def.factory, NOT_YET));
+        const factory = getFactoryDef(defType) || (() => new defType());
+        this.records.set(defType, makeRecord(factory, NOT_YET));
         // Next, include providers listed on the definition itself.
         const defProviders = def.providers;
         if (defProviders != null && !isDuplicate) {
@@ -11397,12 +11385,6 @@ function injectableDefOrInjectorDefFactory(token) {
     const factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
     if (factory !== null) {
         return factory;
-    }
-    // If the token is an NgModule, it's also injectable but the factory is on its injector def
-    // (`ɵinj`)
-    const injectorDef = getInjectorDef(token);
-    if (injectorDef !== null) {
-        return injectorDef.factory;
     }
     // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
     // If it's missing that, it's an error.
@@ -21376,7 +21358,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.2.4+31.sha-c5ead38');
+const VERSION = new Version('11.2.4+50.sha-e7ce857');
 
 /**
  * @license
@@ -26859,7 +26841,7 @@ function compileNgModule(moduleType, ngModule = {}) {
     enqueueModuleForDelayedScoping(moduleType, ngModule);
 }
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -26902,6 +26884,25 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
             return ngModuleDef;
         }
     });
+    let ngFactoryDef = null;
+    Object.defineProperty(moduleType, NG_FACTORY_DEF, {
+        get: () => {
+            if (ngFactoryDef === null) {
+                const compiler = getCompilerFacade();
+                ngFactoryDef = compiler.compileFactory(angularCoreEnv, `ng:///${moduleType.name}/ɵfac.js`, {
+                    name: moduleType.name,
+                    type: moduleType,
+                    deps: reflectDependencies(moduleType),
+                    injectFn: 'inject',
+                    target: compiler.R3FactoryTarget.NgModule,
+                    typeArgumentCount: 0,
+                });
+            }
+            return ngFactoryDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
     let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJ_DEF, {
         get: () => {
@@ -26911,7 +26912,6 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
                 const meta = {
                     name: moduleType.name,
                     type: moduleType,
-                    deps: reflectDependencies(moduleType),
                     providers: ngModule.providers || EMPTY_ARRAY$5,
                     imports: [
                         (ngModule.imports || EMPTY_ARRAY$5).map(resolveForwardRef),
@@ -27723,11 +27723,10 @@ function preR3NgModuleCompile(moduleType, metadata) {
     if (metadata && metadata.exports) {
         imports = [...imports, metadata.exports];
     }
-    moduleType.ɵinj = ɵɵdefineInjector({
-        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-        providers: metadata && metadata.providers,
-        imports: imports,
-    });
+    const moduleInjectorType = moduleType;
+    moduleInjectorType.ɵfac = convertInjectableProviderToFactory(moduleType, { useClass: moduleType });
+    moduleInjectorType.ɵinj =
+        ɵɵdefineInjector({ providers: metadata && metadata.providers, imports: imports });
 }
 const SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule;
 const SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;
