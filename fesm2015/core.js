@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+11.sha-012a2b5
+ * @license Angular v12.0.0-next.4+12.sha-7096246
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3896,9 +3896,8 @@ class InjectionToken {
  */
 const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
 // Stores the default value of `emitDistinctChangesOnly` when the `emitDistinctChangesOnly` is not
-// explicitly set. This value will be changed to `true` in v12.
-// TODO(misko): switch the default in v12 to `true`. See: packages/compiler/src/core.ts
-const emitDistinctChangesOnlyDefaultValue = false;
+// explicitly set.
+const emitDistinctChangesOnlyDefaultValue = true;
 /**
  * Base class for query metadata.
  *
@@ -21290,7 +21289,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.4+11.sha-012a2b5');
+const VERSION = new Version('12.0.0-next.4+12.sha-7096246');
 
 /**
  * @license
@@ -25860,8 +25859,7 @@ class QueryList {
     /**
      * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
      *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
-     *     the same result) This is set to `false` for backwards compatibility but will be changed to
-     *     true in v12.
+     *     the same result)
      */
     constructor(_emitDistinctChangesOnly = false) {
         this._emitDistinctChangesOnly = _emitDistinctChangesOnly;

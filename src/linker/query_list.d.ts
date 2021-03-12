@@ -48,8 +48,7 @@ export declare class QueryList<T> implements Iterable<T> {
     /**
      * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
      *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
-     *     the same result) This is set to `false` for backwards compatibility but will be changed to
-     *     true in v12.
+     *     the same result)
      */
     constructor(_emitDistinctChangesOnly?: boolean);
     /**
