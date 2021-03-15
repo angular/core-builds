@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { R3DeclareComponentFacade, R3DeclareDirectiveFacade, R3DeclarePipeFacade } from '../../compiler/compiler_facade';
+import { R3DeclareComponentFacade, R3DeclareDirectiveFacade, R3DeclareInjectorFacade, R3DeclareNgModuleFacade, R3DeclarePipeFacade } from '../../compiler/compiler_facade';
 /**
  * Compiles a partial directive declaration object into a full directive definition object.
  *
@@ -18,6 +18,18 @@ export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): 
  * @codeGenApi
  */
 export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): unknown;
+/**
+ * Compiles a partial injector declaration object into a full injector definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): unknown;
+/**
+ * Compiles a partial NgModule declaration object into a full NgModule definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): unknown;
 /**
  * Compiles a partial pipe declaration object into a full pipe definition object.
  *

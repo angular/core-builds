@@ -34,7 +34,7 @@ export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayerHandler as 
 export { compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, } from './render3/jit/directive';
 export { resetJitOptions as ɵresetJitOptions, } from './render3/jit/jit_options';
 export { compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, transitiveScopesFor as ɵtransitiveScopesFor, } from './render3/jit/module';
-export { ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclarePipe, } from './render3/jit/partial';
+export { ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, } from './render3/jit/partial';
 export { compilePipe as ɵcompilePipe, } from './render3/jit/pipe';
 export { publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil } from './render3/util/global_utils';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, } from './sanitization/bypass';
