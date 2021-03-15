@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+26.sha-cc75e1d
+ * @license Angular v12.0.0-next.4+34.sha-1a9f526
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21889,7 +21889,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.4+26.sha-cc75e1d');
+    var VERSION = new Version('12.0.0-next.4+34.sha-1a9f526');
 
     /**
      * @license
@@ -33783,6 +33783,24 @@
         return compiler.compileComponentDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275cmp.js", decl);
     }
     /**
+     * Compiles a partial injector declaration object into a full injector definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareInjector(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileInjectorDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275inj.js", decl);
+    }
+    /**
+     * Compiles a partial NgModule declaration object into a full NgModule definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareNgModule(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileNgModuleDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275mod.js", decl);
+    }
+    /**
      * Compiles a partial pipe declaration object into a full pipe definition object.
      *
      * @codeGenApi
@@ -34195,6 +34213,8 @@
     exports.ɵɵnextContext = ɵɵnextContext;
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
+    exports.ɵɵngDeclareInjector = ɵɵngDeclareInjector;
+    exports.ɵɵngDeclareNgModule = ɵɵngDeclareNgModule;
     exports.ɵɵngDeclarePipe = ɵɵngDeclarePipe;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;

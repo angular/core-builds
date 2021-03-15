@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+26.sha-cc75e1d
+ * @license Angular v12.0.0-next.4+34.sha-1a9f526
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5715,6 +5715,22 @@ declare interface R3DeclareDirectiveFacade {
     exportAs?: string[];
     usesInheritance?: boolean;
     usesOnChanges?: boolean;
+}
+
+declare interface R3DeclareInjectorFacade {
+    type: Function;
+    imports?: OpaqueValue[];
+    providers?: OpaqueValue[];
+}
+
+declare interface R3DeclareNgModuleFacade {
+    type: Function;
+    bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
+    declarations?: OpaqueValue[] | (() => OpaqueValue[]);
+    imports?: OpaqueValue[] | (() => OpaqueValue[]);
+    exports?: OpaqueValue[] | (() => OpaqueValue[]);
+    schemas?: OpaqueValue[];
+    id?: string;
 }
 
 declare interface R3DeclarePipeFacade {
@@ -13084,6 +13100,20 @@ export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): 
  * @codeGenApi
  */
 export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+
+/**
+ * Compiles a partial injector declaration object into a full injector definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): unknown;
+
+/**
+ * Compiles a partial NgModule declaration object into a full NgModule definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): unknown;
 
 /**
  * Compiles a partial pipe declaration object into a full pipe definition object.
