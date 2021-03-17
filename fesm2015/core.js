@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+48.sha-eb74a96
+ * @license Angular v12.0.0-next.4+50.sha-fa04894
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1170,7 +1170,7 @@ const HEADER_OFFSET = 20;
 const TViewTypeAsString = [
     'Root',
     'Component',
-    'Embedded',
+    'Embedded', // 2
 ];
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -12586,6 +12586,8 @@ function inheritHostBindings(definition, superHostBindings) {
 const COPY_DIRECTIVE_FIELDS = [
     // The child class should use the providers of its parent.
     'providersResolver',
+    // Not listed here are any fields which are handled by the `ɵɵInheritDefinitionFeature`, such
+    // as inputs, outputs, and host binding functions.
 ];
 /**
  * Fields which exist only on component definitions, and need to be copied from parent to child
@@ -21289,7 +21291,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.4+48.sha-eb74a96');
+const VERSION = new Version('12.0.0-next.4+50.sha-fa04894');
 
 /**
  * @license
