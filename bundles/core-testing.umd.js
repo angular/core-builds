@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+48.sha-eb74a96
+ * @license Angular v12.0.0-next.4+50.sha-fa04894
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -423,11 +423,13 @@
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b)
-                if (b.hasOwnProperty(p))
+                if (Object.prototype.hasOwnProperty.call(b, p))
                     d[p] = b[p]; };
         return extendStatics(d, b);
     };
     function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -570,10 +572,10 @@
             k2 = k;
         o[k2] = m[k];
     });
-    function __exportStar(m, exports) {
+    function __exportStar(m, o) {
         for (var p in m)
-            if (p !== "default" && !exports.hasOwnProperty(p))
-                __createBinding(exports, m, p);
+            if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+                __createBinding(o, m, p);
     }
     function __values(o) {
         var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
@@ -613,11 +615,13 @@
         }
         return ar;
     }
+    /** @deprecated */
     function __spread() {
         for (var ar = [], i = 0; i < arguments.length; i++)
             ar = ar.concat(__read(arguments[i]));
         return ar;
     }
+    /** @deprecated */
     function __spreadArrays() {
         for (var s = 0, i = 0, il = arguments.length; i < il; i++)
             s += arguments[i].length;
@@ -626,7 +630,11 @@
                 r[k] = a[j];
         return r;
     }
-    ;
+    function __spreadArray(to, from) {
+        for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+            to[j] = from[i];
+        return to;
+    }
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
     }
@@ -683,7 +691,7 @@
         var result = {};
         if (mod != null)
             for (var k in mod)
-                if (Object.hasOwnProperty.call(mod, k))
+                if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
                     __createBinding(result, mod, k);
         __setModuleDefault(result, mod);
         return result;
@@ -1160,18 +1168,18 @@
             // Enqueue any compilation tasks for the directly declared component.
             if (moduleDef.declarations !== undefined) {
                 this.queueTypeArray(moduleDef.declarations, TestingModuleOverride.DECLARATION);
-                (_a = this.declarations).push.apply(_a, __spread(moduleDef.declarations));
+                (_a = this.declarations).push.apply(_a, __spreadArray([], __read(moduleDef.declarations)));
             }
             // Enqueue any compilation tasks for imported modules.
             if (moduleDef.imports !== undefined) {
                 this.queueTypesFromModulesArray(moduleDef.imports);
-                (_b = this.imports).push.apply(_b, __spread(moduleDef.imports));
+                (_b = this.imports).push.apply(_b, __spreadArray([], __read(moduleDef.imports)));
             }
             if (moduleDef.providers !== undefined) {
-                (_c = this.providers).push.apply(_c, __spread(moduleDef.providers));
+                (_c = this.providers).push.apply(_c, __spreadArray([], __read(moduleDef.providers)));
             }
             if (moduleDef.schemas !== undefined) {
-                (_d = this.schemas).push.apply(_d, __spread(moduleDef.schemas));
+                (_d = this.schemas).push.apply(_d, __spreadArray([], __read(moduleDef.schemas)));
             }
         };
         R3TestBedCompiler.prototype.overrideModule = function (ngModule, override) {
@@ -1446,7 +1454,7 @@
             this.moduleProvidersOverridden.add(moduleType);
             var injectorDef = moduleType[core.ɵNG_INJ_DEF];
             if (this.providerOverridesByToken.size > 0) {
-                var providers = __spread(injectorDef.providers, (this.providerOverridesByModule.get(moduleType) || []));
+                var providers = __spreadArray(__spreadArray([], __read(injectorDef.providers)), __read((this.providerOverridesByModule.get(moduleType) || [])));
                 if (this.hasProviderOverrides(providers)) {
                     this.maybeStoreNgDef(core.ɵNG_INJ_DEF, moduleType);
                     this.storeFieldOfDefOnType(moduleType, core.ɵNG_INJ_DEF, 'providers');
@@ -1728,13 +1736,13 @@
                 return RootScopeModule;
             }());
             core.ɵcompileNgModuleDefs(RootScopeModule, {
-                providers: __spread(this.rootProviderOverrides),
+                providers: __spreadArray([], __read(this.rootProviderOverrides)),
             });
             var ngZone = new core.NgZone({ enableLongStackTrace: true });
-            var providers = __spread([
+            var providers = __spreadArray(__spreadArray([
                 { provide: core.NgZone, useValue: ngZone },
                 { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
-            ], this.providers, this.providerOverrides);
+            ], __read(this.providers)), __read(this.providerOverrides));
             var imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
             // clang-format off
             core.ɵcompileNgModuleDefs(this.testModuleType, {
@@ -1759,7 +1767,7 @@
                     }
                 });
                 if (this.compilerProviders !== null) {
-                    providers.push.apply(providers, __spread(this.compilerProviders));
+                    providers.push.apply(providers, __spreadArray([], __read(this.compilerProviders)));
                 }
                 // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
                 var CompilerModule = /** @class */ (function () {
@@ -1797,7 +1805,7 @@
                 return [];
             var flattenedProviders = flatten(providers);
             var overrides = this.getProviderOverrides(flattenedProviders);
-            var overriddenProviders = __spread(flattenedProviders, overrides);
+            var overriddenProviders = __spreadArray(__spreadArray([], __read(flattenedProviders)), __read(overrides));
             var final = [];
             var seenOverriddenProviders = new Set();
             // We iterate through the list of providers in reverse order to make sure provider overrides
@@ -1855,7 +1863,7 @@
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten(value, mapFn)));
+                out.push.apply(out, __spreadArray([], __read(flatten(value, mapFn))));
             }
             else {
                 out.push(mapFn ? mapFn(value) : value);
@@ -2552,16 +2560,16 @@
             var _a, _b, _c, _d;
             this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
             if (moduleDef.providers) {
-                (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
+                (_a = this._providers).push.apply(_a, __spreadArray([], __read(moduleDef.providers)));
             }
             if (moduleDef.declarations) {
-                (_b = this._declarations).push.apply(_b, __spread(moduleDef.declarations));
+                (_b = this._declarations).push.apply(_b, __spreadArray([], __read(moduleDef.declarations)));
             }
             if (moduleDef.imports) {
-                (_c = this._imports).push.apply(_c, __spread(moduleDef.imports));
+                (_c = this._imports).push.apply(_c, __spreadArray([], __read(moduleDef.imports)));
             }
             if (moduleDef.schemas) {
-                (_d = this._schemas).push.apply(_d, __spread(moduleDef.schemas));
+                (_d = this._schemas).push.apply(_d, __spreadArray([], __read(moduleDef.schemas)));
             }
             if (moduleDef.aotSummaries) {
                 this._aotSummaries.push(moduleDef.aotSummaries);
@@ -2631,7 +2639,7 @@
             var e_2, _a;
             var _this = this;
             var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-            var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
+            var declarations = __spreadArray(__spreadArray([], __read(this._declarations)), __read(this._templateOverrides.map(function (entry) { return entry.templateOf; })));
             var rootScopeImports = [];
             var rootProviderOverrides = this._rootProviderOverrides;
             if (this._isRoot) {
@@ -2642,7 +2650,7 @@
                 }());
                 RootScopeModule.decorators = [
                     { type: core.NgModule, args: [{
-                                providers: __spread(rootProviderOverrides),
+                                providers: __spreadArray([], __read(rootProviderOverrides)),
                                 jit: true,
                             },] }
                 ];
@@ -2662,7 +2670,7 @@
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
             this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
             try {
-                for (var _b = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                for (var _b = __values(__spreadArray([this._testEnvAotSummaries], __read(this._aotSummaries))), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var summary = _c.value;
                     this._compiler.loadAotSummaries(summary);
                 }

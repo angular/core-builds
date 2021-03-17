@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+48.sha-eb74a96
+ * @license Angular v12.0.0-next.4+50.sha-fa04894
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -151,11 +151,13 @@
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b)
-                if (b.hasOwnProperty(p))
+                if (Object.prototype.hasOwnProperty.call(b, p))
                     d[p] = b[p]; };
         return extendStatics(d, b);
     };
     function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -298,10 +300,10 @@
             k2 = k;
         o[k2] = m[k];
     });
-    function __exportStar(m, exports) {
+    function __exportStar(m, o) {
         for (var p in m)
-            if (p !== "default" && !exports.hasOwnProperty(p))
-                __createBinding(exports, m, p);
+            if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+                __createBinding(o, m, p);
     }
     function __values(o) {
         var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
@@ -341,11 +343,13 @@
         }
         return ar;
     }
+    /** @deprecated */
     function __spread() {
         for (var ar = [], i = 0; i < arguments.length; i++)
             ar = ar.concat(__read(arguments[i]));
         return ar;
     }
+    /** @deprecated */
     function __spreadArrays() {
         for (var s = 0, i = 0, il = arguments.length; i < il; i++)
             s += arguments[i].length;
@@ -354,7 +358,11 @@
                 r[k] = a[j];
         return r;
     }
-    ;
+    function __spreadArray(to, from) {
+        for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+            to[j] = from[i];
+        return to;
+    }
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
     }
@@ -411,7 +419,7 @@
         var result = {};
         if (mod != null)
             for (var k in mod)
-                if (Object.hasOwnProperty.call(mod, k))
+                if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
                     __createBinding(result, mod, k);
         __setModuleDefault(result, mod);
         return result;
@@ -1486,7 +1494,7 @@
     var TViewTypeAsString = [
         'Root',
         'Component',
-        'Embedded',
+        'Embedded', // 2
     ];
     // Note: This hack is necessary so we don't erroneously get a circular dependency
     // failure based on types.
@@ -3928,13 +3936,13 @@
                     args[_i] = arguments[_i];
                 }
                 if (this instanceof DecoratorFactory) {
-                    metaCtor.call.apply(metaCtor, __spread([this], args));
+                    metaCtor.call.apply(metaCtor, __spreadArray([this], __read(args)));
                     return this;
                 }
-                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spread([void 0], args)))();
+                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spreadArray([void 0], __read(args))))();
                 return function TypeDecorator(cls) {
                     if (typeFn)
-                        typeFn.apply(void 0, __spread([cls], args));
+                        typeFn.apply(void 0, __spreadArray([cls], __read(args)));
                     // Use of Object.defineProperty is important since it creates non-enumerable property which
                     // prevents the property is copied during subclassing.
                     var annotations = cls.hasOwnProperty(ANNOTATIONS) ?
@@ -3961,7 +3969,7 @@
                 args[_i] = arguments[_i];
             }
             if (props) {
-                var values = props.apply(void 0, __spread(args));
+                var values = props.apply(void 0, __spreadArray([], __read(args)));
                 for (var propName in values) {
                     this[propName] = values[propName];
                 }
@@ -3980,7 +3988,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spread([void 0], args)))();
+                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spreadArray([void 0], __read(args))))();
                 ParamDecorator.annotation = annotationInstance;
                 return ParamDecorator;
                 function ParamDecorator(cls, unusedKey, index) {
@@ -4018,7 +4026,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spread([void 0], args)))();
+                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spreadArray([void 0], __read(args))))();
                 function PropDecorator(target, name) {
                     var constructor = target.constructor;
                     // Use of Object.defineProperty is important because it creates a non-enumerable property
@@ -4029,7 +4037,7 @@
                     meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
                     meta[name].unshift(decoratorInstance);
                     if (additionalProcessing)
-                        additionalProcessing.apply(void 0, __spread([target, name], args));
+                        additionalProcessing.apply(void 0, __spreadArray([target, name], __read(args)));
                 }
                 return PropDecorator;
             }
@@ -4710,7 +4718,7 @@
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                return new (t.bind.apply(t, __spread([void 0], args)))();
+                return new (t.bind.apply(t, __spreadArray([void 0], __read(args))))();
             };
         };
         /** @internal */
@@ -4864,9 +4872,9 @@
                 Object.keys(ownPropMetadata).forEach(function (propName) {
                     var decorators = [];
                     if (propMetadata.hasOwnProperty(propName)) {
-                        decorators.push.apply(decorators, __spread(propMetadata[propName]));
+                        decorators.push.apply(decorators, __spreadArray([], __read(propMetadata[propName])));
                     }
-                    decorators.push.apply(decorators, __spread(ownPropMetadata[propName]));
+                    decorators.push.apply(decorators, __spreadArray([], __read(ownPropMetadata[propName])));
                     propMetadata[propName] = decorators;
                 });
             }
@@ -4922,7 +4930,7 @@
             var decoratorType = decoratorInvocation.type;
             var annotationCls = decoratorType.annotationCls;
             var annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
-            return new (annotationCls.bind.apply(annotationCls, __spread([void 0], annotationArgs)))();
+            return new (annotationCls.bind.apply(annotationCls, __spreadArray([void 0], __read(annotationArgs))))();
         });
     }
     function getParentCtor(ctor) {
@@ -5453,7 +5461,7 @@
         if (!_global.trustedTypes) {
             // In environments that don't support Trusted Types, fall back to the most
             // straightforward implementation:
-            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+            return new (Function.bind.apply(Function, __spreadArray([void 0], __read(args))))();
         }
         // Chrome currently does not support passing TrustedScript to the Function
         // constructor. The following implements the workaround proposed on the page
@@ -5471,7 +5479,7 @@
             // a TrustedScript to eval just returns the TrustedScript back without
             // evaluating it. In that case, fall back to the most straightforward
             // implementation:
-            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+            return new (Function.bind.apply(Function, __spreadArray([void 0], __read(args))))();
         }
         // To completely mimic the behavior of calling "new Function", two more
         // things need to happen:
@@ -6745,7 +6753,7 @@
         for (var _i = 1; _i < arguments.length; _i++) {
             values[_i - 1] = arguments[_i];
         }
-        console.error.apply(console, __spread(values));
+        console.error.apply(console, __spreadArray([], __read(values)));
     }
 
     /**
@@ -11943,7 +11951,7 @@
                 factory = function () { return resolveForwardRef(provider.useValue); };
             }
             else if (isFactoryProvider(provider)) {
-                factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
+                factory = function () { return provider.useFactory.apply(provider, __spreadArray([], __read(injectArgs(provider.deps || [])))); };
             }
             else if (isExistingProvider(provider)) {
                 factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
@@ -11955,7 +11963,7 @@
                     throwInvalidProviderError(ngModuleType, providers, provider);
                 }
                 if (hasDeps(provider)) {
-                    factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
+                    factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spreadArray([void 0], __read(injectArgs(provider.deps)))))(); };
                 }
                 else {
                     return getFactoryDef(classRef_1) || injectableDefOrInjectorDefFactory(classRef_1);
@@ -12255,7 +12263,7 @@
                         !childRecord && !(options & 4 /* CheckParent */) ? Injector.NULL : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, exports.InjectFlags.Default));
                     }
                 }
-                record.value = value = useNew ? new (fn.bind.apply(fn, __spread([void 0], deps)))() : fn.apply(obj, deps);
+                record.value = value = useNew ? new (fn.bind.apply(fn, __spreadArray([void 0], __read(deps))))() : fn.apply(obj, deps);
             }
         }
         else if (!(flags & exports.InjectFlags.Self)) {
@@ -12405,7 +12413,7 @@
      * @globalApi ng
      */
     function getRootComponents(elementOrDir) {
-        return __spread(getRootContext(elementOrDir).components);
+        return __spreadArray([], __read(getRootContext(elementOrDir).components));
     }
     /**
      * Retrieves an `Injector` associated with an element, component or directive instance.
@@ -12482,7 +12490,7 @@
         }
         // The `directives` in this case are a named array called `LComponentView`. Clone the
         // result so we don't expose an internal data structure in the user's console.
-        return context.directives === null ? [] : __spread(context.directives);
+        return context.directives === null ? [] : __spreadArray([], __read(context.directives));
     }
     function loadLContext(target, throwOnNotFound) {
         if (throwOnNotFound === void 0) { throwOnNotFound = true; }
@@ -13101,6 +13109,8 @@
     var COPY_DIRECTIVE_FIELDS = [
         // The child class should use the providers of its parent.
         'providersResolver',
+        // Not listed here are any fields which are handled by the `ɵɵInheritDefinitionFeature`, such
+        // as inputs, outputs, and host binding functions.
     ];
     /**
      * Fields which exist only on component definitions, and need to be copied from parent to child
@@ -13939,7 +13949,7 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spreadArray([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], __read(interpolationInBetween)));
             }
         }
         return ɵɵattributeInterpolateV;
@@ -14157,7 +14167,7 @@
             var reflectionCapabilities = new ReflectionCapabilities();
             var deps_1 = reflectionCapabilities.parameters(type);
             // TODO - convert to flags.
-            return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_1))))(); };
+            return function () { return new (type.bind.apply(type, __spreadArray([void 0], __read(injectArgs(deps_1)))))(); };
         }
         if (USE_VALUE$2 in provider) {
             var valueProvider_1 = provider;
@@ -14169,7 +14179,7 @@
         }
         else if (provider.useFactory) {
             var factoryProvider_1 = provider;
-            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY))); };
+            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spreadArray([], __read(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY)))); };
         }
         else if (provider.useClass) {
             var classProvider_1 = provider;
@@ -14180,7 +14190,7 @@
             }
             return function () {
                 var _a;
-                return new ((_a = (resolveForwardRef(classProvider_1.useClass))).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
+                return new ((_a = (resolveForwardRef(classProvider_1.useClass))).bind.apply(_a, __spreadArray([void 0], __read(injectArgs(deps_2)))))();
             };
         }
         else {
@@ -14189,7 +14199,7 @@
                 var reflectionCapabilities = new ReflectionCapabilities();
                 deps_3 = reflectionCapabilities.parameters(type);
             }
-            return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_3))))(); };
+            return function () { return new (type.bind.apply(type, __spreadArray([void 0], __read(injectArgs(deps_3)))))(); };
         }
     }
 
@@ -15007,7 +15017,7 @@
             }
             var obj;
             try {
-                obj = factory.apply(void 0, __spread(deps));
+                obj = factory.apply(void 0, __spreadArray([], __read(deps)));
             }
             catch (e) {
                 throw instantiationError(this, e, e.stack, provider.key);
@@ -16361,7 +16371,7 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spreadArray([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], __read(interpolationInBetween)));
             }
         }
         return ɵɵpropertyInterpolateV;
@@ -21889,7 +21899,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.4+48.sha-eb74a96');
+    var VERSION = new Version('12.0.0-next.4+50.sha-fa04894');
 
     /**
      * @license
@@ -23013,7 +23023,7 @@
             else if (tNodeType & 16 /* Projection */) {
                 var nodesInSlot = getProjectionNodes(lView, tNode);
                 if (Array.isArray(nodesInSlot)) {
-                    result.push.apply(result, __spread(nodesInSlot));
+                    result.push.apply(result, __spreadArray([], __read(nodesInSlot)));
                 }
                 else {
                     var parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
@@ -24486,7 +24496,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
                 }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+                return new (ctor.bind.apply(ctor, __spreadArray([void 0], __read(depValues))))();
         }
     }
     function _callFactory(ngModule, factory, deps) {
@@ -24505,7 +24515,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
                 }
-                return factory.apply(void 0, __spread(depValues));
+                return factory.apply(void 0, __spreadArray([], __read(depValues)));
         }
     }
     function callNgModuleLifecycle(ngModule, lifecycles) {
@@ -25284,7 +25294,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
                 }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+                return new (ctor.bind.apply(ctor, __spreadArray([void 0], __read(depValues))))();
         }
     }
     function callFactory(view, elDef, allowPrivateServices, factory, deps) {
@@ -25303,7 +25313,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
                 }
-                return factory.apply(void 0, __spread(depValues));
+                return factory.apply(void 0, __spreadArray([], __read(depValues)));
         }
     }
     // This default value is when checking the hierarchy for a token.
@@ -25769,7 +25779,7 @@
             var clazz = type;
             if (decorators !== null) {
                 if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                    (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+                    (_a = clazz.decorators).push.apply(_a, __spreadArray([], __read(decorators)));
                 }
                 else {
                     clazz.decorators = decorators;
@@ -27627,7 +27637,7 @@
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
         declarations.forEach(verifyDirectivesHaveSelector);
-        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
+        var combinedDeclarations = __spreadArray(__spreadArray([], __read(declarations.map(resolveForwardRef))), __read(flatten(imports.map(computeCombinedExports)).map(resolveForwardRef)));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(function (decl) { return verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot); });
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
@@ -27774,7 +27784,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+        return __spreadArray([], __read(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type, false);
@@ -27783,7 +27793,7 @@
             else {
                 return type;
             }
-        })));
+        }))));
     }
     /**
      * Some declared components may be compiled asynchronously, and thus may not have their
@@ -28396,7 +28406,7 @@
     function preR3NgModuleCompile(moduleType, metadata) {
         var imports = (metadata && metadata.imports) || [];
         if (metadata && metadata.exports) {
-            imports = __spread(imports, [metadata.exports]);
+            imports = __spreadArray(__spreadArray([], __read(imports)), [metadata.exports]);
         }
         var moduleInjectorType = moduleType;
         moduleInjectorType.ɵfac = convertInjectableProviderToFactory(moduleType, { useClass: moduleType });
@@ -30353,7 +30363,7 @@
     }
     function _mergeArrays(parts) {
         var result = [];
-        parts.forEach(function (part) { return part && result.push.apply(result, __spread(part)); });
+        parts.forEach(function (part) { return part && result.push.apply(result, __spreadArray([], __read(part))); });
         return result;
     }
 
@@ -30657,7 +30667,7 @@
             var _this = this;
             var siblingIndex = this.childNodes.indexOf(child);
             if (siblingIndex !== -1) {
-                (_a = this.childNodes).splice.apply(_a, __spread([siblingIndex + 1, 0], newChildren));
+                (_a = this.childNodes).splice.apply(_a, __spreadArray([siblingIndex + 1, 0], __read(newChildren)));
                 newChildren.forEach(function (c) {
                     if (c.parent) {
                         c.parent.removeChild(c);
@@ -32152,7 +32162,7 @@
                 case 128 /* TypePurePipe */:
                     var pipe = values[0];
                     var params = values.slice(1);
-                    value = pipe.transform.apply(pipe, __spread(params));
+                    value = pipe.transform.apply(pipe, __spreadArray([], __read(params)));
                     break;
             }
             data.value = value;
@@ -33260,7 +33270,7 @@
         }
     }
     function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
-        var changed = checkAndUpdateNode.apply(void 0, __spread([view, nodeDef, argStyle], givenValues));
+        var changed = checkAndUpdateNode.apply(void 0, __spreadArray([view, nodeDef, argStyle], __read(givenValues)));
         if (changed) {
             var values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
             if (nodeDef.flags & 16384 /* TypeDirective */) {
@@ -33295,7 +33305,7 @@
         }
     }
     function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
-        checkNoChangesNode.apply(void 0, __spread([view, nodeDef, argStyle], values));
+        checkNoChangesNode.apply(void 0, __spreadArray([view, nodeDef, argStyle], __read(values)));
     }
     function nextDirectiveWithBinding(view, nodeIndex) {
         for (var i = nodeIndex; i < view.def.nodes.length; i++) {
@@ -33440,7 +33450,7 @@
                 var _a;
                 currRenderNodeIndex++;
                 if (currRenderNodeIndex === renderNodeIndex) {
-                    return (_a = console.error).bind.apply(_a, __spread([console], values));
+                    return (_a = console.error).bind.apply(_a, __spreadArray([console], __read(values)));
                 }
                 else {
                     return NOOP;
@@ -33449,7 +33459,7 @@
             logViewDef.factory(nodeLogger);
             if (currRenderNodeIndex < renderNodeIndex) {
                 console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
-                console.error.apply(console, __spread(values));
+                console.error.apply(console, __spreadArray([], __read(values)));
             }
         };
         return DebugContext_;
