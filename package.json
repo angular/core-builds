@@ -1,15 +1,15 @@
 {
   "name": "@angular/core",
-  "version": "10.1.0-next.4+26.sha-6248d6c",
+  "version": "12.0.0-next.5+9.sha-bff0d8f",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.1.0"
   },
   "peerDependencies": {
     "rxjs": "^6.5.3",
-    "zone.js": "~0.10.3"
+    "zone.js": "~0.11.4"
   },
   "repository": {
     "type": "git",
@@ -30,8 +30,6 @@
       "@angular/platform-browser-dynamic",
       "@angular/forms",
       "@angular/platform-server",
-      "@angular/platform-webworker",
-      "@angular/platform-webworker-dynamic",
       "@angular/upgrade",
       "@angular/router",
       "@angular/language-service",

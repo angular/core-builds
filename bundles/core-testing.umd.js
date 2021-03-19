@@ -1,6 +1,6 @@
 /**
- * @license Angular v10.1.0-next.4+26.sha-6248d6c
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.5+9.sha-bff0d8f
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -9,109 +9,6 @@
     typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core', '@angular/compiler'], factory) :
     (global = global || self, factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}), global.ng.core, global.ng.compiler));
 }(this, (function (exports, core, compiler) { 'use strict';
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var _global = (typeof window === 'undefined' ? global : window);
-    /**
-     * Wraps a test function in an asynchronous test zone. The test will automatically
-     * complete when all asynchronous calls within this zone are done. Can be used
-     * to wrap an {@link inject} call.
-     *
-     * Example:
-     *
-     * ```
-     * it('...', async(inject([AClass], (object) => {
-     *   object.doSomething.then(() => {
-     *     expect(...);
-     *   })
-     * });
-     * ```
-     *
-     *
-     */
-    function asyncFallback(fn) {
-        // If we're running using the Jasmine test framework, adapt to call the 'done'
-        // function when asynchronous activity is finished.
-        if (_global.jasmine) {
-            // Not using an arrow function to preserve context passed from call site
-            return function (done) {
-                if (!done) {
-                    // if we run beforeEach in @angular/core/testing/testing_internal then we get no done
-                    // fake it here and assume sync.
-                    done = function () { };
-                    done.fail = function (e) {
-                        throw e;
-                    };
-                }
-                runInTestZone(fn, this, done, function (err) {
-                    if (typeof err === 'string') {
-                        return done.fail(new Error(err));
-                    }
-                    else {
-                        done.fail(err);
-                    }
-                });
-            };
-        }
-        // Otherwise, return a promise which will resolve when asynchronous activity
-        // is finished. This will be correctly consumed by the Mocha framework with
-        // it('...', async(myFn)); or can be used in a custom framework.
-        // Not using an arrow function to preserve context passed from call site
-        return function () {
-            var _this = this;
-            return new Promise(function (finishCallback, failCallback) {
-                runInTestZone(fn, _this, finishCallback, failCallback);
-            });
-        };
-    }
-    function runInTestZone(fn, context, finishCallback, failCallback) {
-        var currentZone = Zone.current;
-        var AsyncTestZoneSpec = Zone['AsyncTestZoneSpec'];
-        if (AsyncTestZoneSpec === undefined) {
-            throw new Error('AsyncTestZoneSpec is needed for the async() test helper but could not be found. ' +
-                'Please make sure that your environment includes zone.js/dist/async-test.js');
-        }
-        var ProxyZoneSpec = Zone['ProxyZoneSpec'];
-        if (ProxyZoneSpec === undefined) {
-            throw new Error('ProxyZoneSpec is needed for the async() test helper but could not be found. ' +
-                'Please make sure that your environment includes zone.js/dist/proxy.js');
-        }
-        var proxyZoneSpec = ProxyZoneSpec.get();
-        ProxyZoneSpec.assertPresent();
-        // We need to create the AsyncTestZoneSpec outside the ProxyZone.
-        // If we do it in ProxyZone then we will get to infinite recursion.
-        var proxyZone = Zone.current.getZoneWith('ProxyZoneSpec');
-        var previousDelegate = proxyZoneSpec.getDelegate();
-        proxyZone.parent.run(function () {
-            var testZoneSpec = new AsyncTestZoneSpec(function () {
-                // Need to restore the original zone.
-                currentZone.run(function () {
-                    if (proxyZoneSpec.getDelegate() == testZoneSpec) {
-                        // Only reset the zone spec if it's sill this one. Otherwise, assume it's OK.
-                        proxyZoneSpec.setDelegate(previousDelegate);
-                    }
-                    finishCallback();
-                });
-            }, function (error) {
-                // Need to restore the original zone.
-                currentZone.run(function () {
-                    if (proxyZoneSpec.getDelegate() == testZoneSpec) {
-                        // Only reset the zone spec if it's sill this one. Otherwise, assume it's OK.
-                        proxyZoneSpec.setDelegate(previousDelegate);
-                    }
-                    failCallback(error);
-                });
-            }, 'test');
-            proxyZoneSpec.setDelegate(testZoneSpec);
-        });
-        return Zone.current.runGuarded(fn, context);
-    }
 
     /**
      * @license
@@ -142,17 +39,17 @@
         if (!_Zone) {
             return function () {
                 return Promise.reject('Zone is needed for the waitForAsync() test helper but could not be found. ' +
-                    'Please make sure that your environment includes zone.js/dist/zone.js');
+                    'Please make sure that your environment includes zone.js');
             };
         }
         var asyncTest = _Zone && _Zone[_Zone.__symbol__('asyncTest')];
         if (typeof asyncTest === 'function') {
             return asyncTest(fn);
         }
-        // not using new version of zone.js
-        // TODO @JiaLiPassion, remove this after all library updated to
-        // newest version of zone.js(0.8.25)
-        return asyncFallback(fn);
+        return function () {
+            return Promise.reject('zone-testing.js is needed for the async() test helper but could not be found. ' +
+                'Please make sure that your environment includes zone.js/testing');
+        };
     }
     /**
      * @deprecated use `waitForAsync()`, (expected removal in v12)
@@ -367,159 +264,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * fakeAsync has been moved to zone.js
-     * this file is for fallback in case old version of zone.js is used
-     */
     var _Zone = typeof Zone !== 'undefined' ? Zone : null;
-    var FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
-    var ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
-    var _fakeAsyncTestZoneSpec = null;
-    /**
-     * Clears out the shared fake async zone for a test.
-     * To be called in a global `beforeEach`.
-     *
-     * @publicApi
-     */
-    function resetFakeAsyncZoneFallback() {
-        if (_fakeAsyncTestZoneSpec) {
-            _fakeAsyncTestZoneSpec.unlockDatePatch();
-        }
-        _fakeAsyncTestZoneSpec = null;
-        // in node.js testing we may not have ProxyZoneSpec in which case there is nothing to reset.
-        ProxyZoneSpec && ProxyZoneSpec.assertPresent().resetDelegate();
-    }
-    var _inFakeAsyncCall = false;
-    /**
-     * Wraps a function to be executed in the fakeAsync zone:
-     * - microtasks are manually executed by calling `flushMicrotasks()`,
-     * - timers are synchronous, `tick()` simulates the asynchronous passage of time.
-     *
-     * If there are any pending timers at the end of the function, an exception will be thrown.
-     *
-     * Can be used to wrap inject() calls.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/testing/ts/fake_async.ts region='basic'}
-     *
-     * @param fn
-     * @returns The function wrapped to be executed in the fakeAsync zone
-     *
-     * @publicApi
-     */
-    function fakeAsyncFallback(fn) {
-        // Not using an arrow function to preserve context passed from call site
-        return function () {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var proxyZoneSpec = ProxyZoneSpec.assertPresent();
-            if (_inFakeAsyncCall) {
-                throw new Error('fakeAsync() calls can not be nested');
-            }
-            _inFakeAsyncCall = true;
-            try {
-                if (!_fakeAsyncTestZoneSpec) {
-                    if (proxyZoneSpec.getDelegate() instanceof FakeAsyncTestZoneSpec) {
-                        throw new Error('fakeAsync() calls can not be nested');
-                    }
-                    _fakeAsyncTestZoneSpec = new FakeAsyncTestZoneSpec();
-                }
-                var res = void 0;
-                var lastProxyZoneSpec = proxyZoneSpec.getDelegate();
-                proxyZoneSpec.setDelegate(_fakeAsyncTestZoneSpec);
-                _fakeAsyncTestZoneSpec.lockDatePatch();
-                try {
-                    res = fn.apply(this, args);
-                    flushMicrotasksFallback();
-                }
-                finally {
-                    proxyZoneSpec.setDelegate(lastProxyZoneSpec);
-                }
-                if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                    throw new Error(_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " " +
-                        "periodic timer(s) still in the queue.");
-                }
-                if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
-                    throw new Error(_fakeAsyncTestZoneSpec.pendingTimers.length + " timer(s) still in the queue.");
-                }
-                return res;
-            }
-            finally {
-                _inFakeAsyncCall = false;
-                resetFakeAsyncZoneFallback();
-            }
-        };
-    }
-    function _getFakeAsyncZoneSpec() {
-        if (_fakeAsyncTestZoneSpec == null) {
-            throw new Error('The code should be running in the fakeAsync zone to call this function');
-        }
-        return _fakeAsyncTestZoneSpec;
-    }
-    /**
-     * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
-     *
-     * The microtasks queue is drained at the very start of this function and after any timer callback
-     * has been executed.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * {@example core/testing/ts/fake_async.ts region='basic'}
-     *
-     * @publicApi
-     */
-    function tickFallback(millis, tickOptions) {
-        if (millis === void 0) { millis = 0; }
-        if (tickOptions === void 0) { tickOptions = {
-            processNewMacroTasksSynchronously: true
-        }; }
-        _getFakeAsyncZoneSpec().tick(millis, null, tickOptions);
-    }
-    /**
-     * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
-     * draining the macrotask queue until it is empty. The returned value is the milliseconds
-     * of time that would have been elapsed.
-     *
-     * @param maxTurns
-     * @returns The simulated time elapsed, in millis.
-     *
-     * @publicApi
-     */
-    function flushFallback(maxTurns) {
-        return _getFakeAsyncZoneSpec().flush(maxTurns);
-    }
-    /**
-     * Discard all remaining periodic tasks.
-     *
-     * @publicApi
-     */
-    function discardPeriodicTasksFallback() {
-        var zoneSpec = _getFakeAsyncZoneSpec();
-        zoneSpec.pendingPeriodicTimers.length = 0;
-    }
-    /**
-     * Flush any pending microtasks.
-     *
-     * @publicApi
-     */
-    function flushMicrotasksFallback() {
-        _getFakeAsyncZoneSpec().flushMicrotasks();
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
-    var fakeAsyncTestModule = _Zone$1 && _Zone$1[_Zone$1.__symbol__('fakeAsyncTest')];
+    var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+    var fakeAsyncTestModuleNotLoadedErrorMessage = "zone-testing.js is needed for the fakeAsync() test helper but could not be found.\n        Please make sure that your environment includes zone.js/testing";
     /**
      * Clears out the shared fake async zone for a test.
      * To be called in a global `beforeEach`.
@@ -530,9 +277,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.resetFakeAsyncZone();
         }
-        else {
-            return resetFakeAsyncZoneFallback();
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Wraps a function to be executed in the fakeAsync zone:
@@ -557,9 +302,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.fakeAsync(fn);
         }
-        else {
-            return fakeAsyncFallback(fn);
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
@@ -620,9 +363,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.tick(millis, tickOptions);
         }
-        else {
-            return tickFallback(millis, tickOptions);
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
@@ -638,9 +379,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.flush(maxTurns);
         }
-        else {
-            return flushFallback(maxTurns);
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Discard all remaining periodic tasks.
@@ -651,9 +390,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.discardPeriodicTasks();
         }
-        else {
-            discardPeriodicTasksFallback();
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
     /**
      * Flush any pending microtasks.
@@ -664,9 +401,7 @@
         if (fakeAsyncTestModule) {
             return fakeAsyncTestModule.flushMicrotasks();
         }
-        else {
-            return flushMicrotasksFallback();
-        }
+        throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
     }
 
     /*! *****************************************************************************
@@ -688,11 +423,13 @@
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b)
-                if (b.hasOwnProperty(p))
+                if (Object.prototype.hasOwnProperty.call(b, p))
                     d[p] = b[p]; };
         return extendStatics(d, b);
     };
     function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -835,10 +572,10 @@
             k2 = k;
         o[k2] = m[k];
     });
-    function __exportStar(m, exports) {
+    function __exportStar(m, o) {
         for (var p in m)
-            if (p !== "default" && !exports.hasOwnProperty(p))
-                __createBinding(exports, m, p);
+            if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+                __createBinding(o, m, p);
     }
     function __values(o) {
         var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
@@ -878,11 +615,13 @@
         }
         return ar;
     }
+    /** @deprecated */
     function __spread() {
         for (var ar = [], i = 0; i < arguments.length; i++)
             ar = ar.concat(__read(arguments[i]));
         return ar;
     }
+    /** @deprecated */
     function __spreadArrays() {
         for (var s = 0, i = 0, il = arguments.length; i < il; i++)
             s += arguments[i].length;
@@ -891,7 +630,11 @@
                 r[k] = a[j];
         return r;
     }
-    ;
+    function __spreadArray(to, from) {
+        for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+            to[j] = from[i];
+        return to;
+    }
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
     }
@@ -948,7 +691,7 @@
         var result = {};
         if (mod != null)
             for (var k in mod)
-                if (Object.hasOwnProperty.call(mod, k))
+                if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
                     __createBinding(result, mod, k);
         __setModuleDefault(result, mod);
         return result;
@@ -1425,18 +1168,18 @@
             // Enqueue any compilation tasks for the directly declared component.
             if (moduleDef.declarations !== undefined) {
                 this.queueTypeArray(moduleDef.declarations, TestingModuleOverride.DECLARATION);
-                (_a = this.declarations).push.apply(_a, __spread(moduleDef.declarations));
+                (_a = this.declarations).push.apply(_a, __spreadArray([], __read(moduleDef.declarations)));
             }
             // Enqueue any compilation tasks for imported modules.
             if (moduleDef.imports !== undefined) {
                 this.queueTypesFromModulesArray(moduleDef.imports);
-                (_b = this.imports).push.apply(_b, __spread(moduleDef.imports));
+                (_b = this.imports).push.apply(_b, __spreadArray([], __read(moduleDef.imports)));
             }
             if (moduleDef.providers !== undefined) {
-                (_c = this.providers).push.apply(_c, __spread(moduleDef.providers));
+                (_c = this.providers).push.apply(_c, __spreadArray([], __read(moduleDef.providers)));
             }
             if (moduleDef.schemas !== undefined) {
-                (_d = this.schemas).push.apply(_d, __spread(moduleDef.schemas));
+                (_d = this.schemas).push.apply(_d, __spreadArray([], __read(moduleDef.schemas)));
             }
         };
         R3TestBedCompiler.prototype.overrideModule = function (ngModule, override) {
@@ -1680,6 +1423,11 @@
                 var moduleScope = getScopeOfModule(moduleType);
                 _this.storeFieldOfDefOnType(componentType, core.ɵNG_COMP_DEF, 'directiveDefs');
                 _this.storeFieldOfDefOnType(componentType, core.ɵNG_COMP_DEF, 'pipeDefs');
+                // `tView` that is stored on component def contains information about directives and pipes
+                // that are in the scope of this component. Patching component scope will cause `tView` to be
+                // changed. Store original `tView` before patching scope, so the `tView` (including scope
+                // information) is restored back to its previous/original state before running next test.
+                _this.storeFieldOfDefOnType(componentType, core.ɵNG_COMP_DEF, 'tView');
                 core.ɵpatchComponentDefWithScope(componentType.ɵcmp, moduleScope);
             });
             this.componentToModuleScope.clear();
@@ -1706,7 +1454,7 @@
             this.moduleProvidersOverridden.add(moduleType);
             var injectorDef = moduleType[core.ɵNG_INJ_DEF];
             if (this.providerOverridesByToken.size > 0) {
-                var providers = __spread(injectorDef.providers, (this.providerOverridesByModule.get(moduleType) || []));
+                var providers = __spreadArray(__spreadArray([], __read(injectorDef.providers)), __read((this.providerOverridesByModule.get(moduleType) || [])));
                 if (this.hasProviderOverrides(providers)) {
                     this.maybeStoreNgDef(core.ɵNG_INJ_DEF, moduleType);
                     this.storeFieldOfDefOnType(moduleType, core.ɵNG_INJ_DEF, 'providers');
@@ -1988,13 +1736,13 @@
                 return RootScopeModule;
             }());
             core.ɵcompileNgModuleDefs(RootScopeModule, {
-                providers: __spread(this.rootProviderOverrides),
+                providers: __spreadArray([], __read(this.rootProviderOverrides)),
             });
             var ngZone = new core.NgZone({ enableLongStackTrace: true });
-            var providers = __spread([
+            var providers = __spreadArray(__spreadArray([
                 { provide: core.NgZone, useValue: ngZone },
                 { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
-            ], this.providers, this.providerOverrides);
+            ], __read(this.providers)), __read(this.providerOverrides));
             var imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
             // clang-format off
             core.ɵcompileNgModuleDefs(this.testModuleType, {
@@ -2019,7 +1767,7 @@
                     }
                 });
                 if (this.compilerProviders !== null) {
-                    providers.push.apply(providers, __spread(this.compilerProviders));
+                    providers.push.apply(providers, __spreadArray([], __read(this.compilerProviders)));
                 }
                 // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
                 var CompilerModule = /** @class */ (function () {
@@ -2057,7 +1805,7 @@
                 return [];
             var flattenedProviders = flatten(providers);
             var overrides = this.getProviderOverrides(flattenedProviders);
-            var overriddenProviders = __spread(flattenedProviders, overrides);
+            var overriddenProviders = __spreadArray(__spreadArray([], __read(flattenedProviders)), __read(overrides));
             var final = [];
             var seenOverriddenProviders = new Set();
             // We iterate through the list of providers in reverse order to make sure provider overrides
@@ -2115,7 +1863,7 @@
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spread(flatten(value, mapFn)));
+                out.push.apply(out, __spreadArray([], __read(flatten(value, mapFn))));
             }
             else {
                 out.push(mapFn ? mapFn(value) : value);
@@ -2440,6 +2188,7 @@
          * Overwrites all providers for the given token with the given provider definition.
          */
         TestBedRender3.prototype.overrideProvider = function (token, provider) {
+            this.assertNotInstantiated('overrideProvider', 'override provider');
             this.compiler.overrideProvider(token, provider);
         };
         TestBedRender3.prototype.createComponent = function (type) {
@@ -2811,16 +2560,16 @@
             var _a, _b, _c, _d;
             this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
             if (moduleDef.providers) {
-                (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
+                (_a = this._providers).push.apply(_a, __spreadArray([], __read(moduleDef.providers)));
             }
             if (moduleDef.declarations) {
-                (_b = this._declarations).push.apply(_b, __spread(moduleDef.declarations));
+                (_b = this._declarations).push.apply(_b, __spreadArray([], __read(moduleDef.declarations)));
             }
             if (moduleDef.imports) {
-                (_c = this._imports).push.apply(_c, __spread(moduleDef.imports));
+                (_c = this._imports).push.apply(_c, __spreadArray([], __read(moduleDef.imports)));
             }
             if (moduleDef.schemas) {
-                (_d = this._schemas).push.apply(_d, __spread(moduleDef.schemas));
+                (_d = this._schemas).push.apply(_d, __spreadArray([], __read(moduleDef.schemas)));
             }
             if (moduleDef.aotSummaries) {
                 this._aotSummaries.push(moduleDef.aotSummaries);
@@ -2890,7 +2639,7 @@
             var e_2, _a;
             var _this = this;
             var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-            var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
+            var declarations = __spreadArray(__spreadArray([], __read(this._declarations)), __read(this._templateOverrides.map(function (entry) { return entry.templateOf; })));
             var rootScopeImports = [];
             var rootProviderOverrides = this._rootProviderOverrides;
             if (this._isRoot) {
@@ -2901,7 +2650,7 @@
                 }());
                 RootScopeModule.decorators = [
                     { type: core.NgModule, args: [{
-                                providers: __spread(rootProviderOverrides),
+                                providers: __spreadArray([], __read(rootProviderOverrides)),
                                 jit: true,
                             },] }
                 ];
@@ -2921,7 +2670,7 @@
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
             this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
             try {
-                for (var _b = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                for (var _b = __values(__spreadArray([this._testEnvAotSummaries], __read(this._aotSummaries))), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var summary = _c.value;
                     this._compiler.loadAotSummaries(summary);
                 }
@@ -2986,6 +2735,7 @@
             this._pipeOverrides.push([pipe, override]);
         };
         TestBedViewEngine.prototype.overrideProvider = function (token, provider) {
+            this._assertNotInstantiated('overrideProvider', 'override provider');
             this.overrideProviderImpl(token, provider);
         };
         TestBedViewEngine.prototype.overrideProviderImpl = function (token, provider, deprecated) {
@@ -3184,10 +2934,10 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var _global$1 = (typeof window === 'undefined' ? global : window);
+    var _global = (typeof window === 'undefined' ? global : window);
     // Reset the test providers and the fake async zone before each test.
-    if (_global$1.beforeEach) {
-        _global$1.beforeEach(function () {
+    if (_global.beforeEach) {
+        _global.beforeEach(function () {
             TestBed.resetTestingModule();
             resetFakeAsyncZone();
         });
@@ -3202,14 +2952,6 @@
      */
     // TODO(iminar): Remove this code in a safe way.
     var __core_private_testing_placeholder__ = '';
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
 
     /**
      * @license

@@ -1,18 +1,19 @@
 /**
- * @license Angular v10.1.0-next.4+26.sha-6248d6c
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.5+9.sha-bff0d8f
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
+import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
 
 /**
  * @description
  *
  * Represents an abstract class `T`, if applied to a concrete class it would stop being
- * instantiatable.
+ * instantiable.
  *
  * @publicApi
  */
@@ -195,8 +196,8 @@ export declare const APP_ID: InjectionToken<string>;
  * one or more initialization functions.
  *
  * The provided functions are injected at application startup and executed during
- * app initialization. If any of these functions returns a Promise, initialization
- * does not complete until the Promise is resolved.
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
  *
  * You can, for example, create a factory function that loads language data
  * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
@@ -205,9 +206,62 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * @see `ApplicationInitStatus`
  *
+ * @usageNotes
+ *
+ * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
+ * and a function returning a promise.
+ *
+ * ```
+ *  function initializeApp(): Promise<any> {
+ *    return new Promise((resolve, reject) => {
+ *      // Do some asynchronous stuff
+ *      resolve();
+ *    });
+ *  }
+ *
+ *  @NgModule({
+ *   imports: [BrowserModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useFactory: () => initializeApp,
+ *     multi: true
+ *    }]
+ *   })
+ *  export class AppModule {}
+ * ```
+ *
+ * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
+ * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
+ * demo purposes to illustrate how the factory function can work with other providers available
+ * through DI.
+ *
+ * ```
+ *  function initializeApp(httpClient: HttpClient): Observable<any> {
+ *   return httpClient.get("https://someUrl.com/api/user")
+ *     .pipe(
+ *        tap(user => { ... })
+ *     )
+ *  }
+ *
+ *  @NgModule({
+ *    imports: [BrowserModule, HttpClientModule],
+ *    declarations: [AppComponent],
+ *    bootstrap: [AppComponent],
+ *    providers: [{
+ *      provide: APP_INITIALIZER,
+ *      useFactory: initializeApp,
+ *      deps: [HttpClient],
+ *      multi: true
+ *    }]
+ *  })
+ *  export class AppModule {}
+ * ```
+ *
  * @publicApi
  */
-export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
+export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
 
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER} functions.
@@ -215,13 +269,13 @@ export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
  * @publicApi
  */
 export declare class ApplicationInitStatus {
-    private appInits;
+    private readonly appInits;
     private resolve;
     private reject;
     private initialized;
     readonly donePromise: Promise<any>;
     readonly done = false;
-    constructor(appInits: (() => any)[]);
+    constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
 }
 
 /**
@@ -333,15 +387,14 @@ export declare class ApplicationModule {
  */
 export declare class ApplicationRef {
     private _zone;
-    private _console;
     private _injector;
     private _exceptionHandler;
     private _componentFactoryResolver;
     private _initStatus;
     private _views;
     private _runningTick;
-    private _enforceNoNewChanges;
     private _stable;
+    private _onMicrotaskEmptySubscription;
     /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
@@ -396,7 +449,6 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
-    private _unloadComponent;
     /**
      * Returns the number of attached views.
      */
@@ -434,6 +486,7 @@ export declare interface Attribute {
  * @publicApi
  */
 export declare const Attribute: AttributeDecorator;
+
 
 /**
  * Type of the Attribute decorator / constructor function.
@@ -506,9 +559,27 @@ declare interface BootstrapOptions {
      * coalesced and the change detection will be triggered multiple times.
      * And if this option be set to true, the change detection will be
      * triggered async by scheduling a animation frame. So in the case above,
-     * the change detection will only be trigged once.
+     * the change detection will only be triggered once.
      */
     ngZoneEventCoalescing?: boolean;
+    /**
+     * Optionally specify if `NgZone#run()` method invocations should be coalesced
+     * into a single change detection.
+     *
+     * Consider the following case.
+     *
+     * for (let i = 0; i < 10; i ++) {
+     *   ngZone.run(() => {
+     *     // do something
+     *   });
+     * }
+     *
+     * This case triggers the change detection multiple times.
+     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
+     * In addition, the change detection executes in requestAnimation.
+     *
+     */
+    ngZoneRunCoalescing?: boolean;
 }
 
 
@@ -535,6 +606,8 @@ export declare enum ChangeDetectionStrategy {
     Default = 1
 }
 
+declare type ChangeDetectionStrategy_2 = number;
+
 /**
  * Base class that provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
@@ -553,7 +626,7 @@ export declare enum ChangeDetectionStrategy {
  *
  * The following example sets the `OnPush` change-detection strategy for a component
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+ * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
  *
  * <code-example path="core/ts/change_detect/change-detection.ts"
  * region="mark-for-check"></code-example>
@@ -684,24 +757,6 @@ export declare interface ClassSansProvider {
 }
 
 declare const CLEANUP = 7;
-
-/**
- * @deprecated v4.0.0 - Use IterableChangeRecord instead.
- * @publicApi
- */
-export declare interface CollectionChangeRecord<V> extends IterableChangeRecord<V> {
-}
-
-/**
- * Marks that the next string is comment text.
- *
- * See `I18nMutateOpCodes` documentation.
- */
-declare const COMMENT_MARKER: COMMENT_MARKER;
-
-declare interface COMMENT_MARKER {
-    marker: 'comment';
-}
 
 /**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
@@ -842,7 +897,6 @@ export declare interface Component extends Directive {
     animations?: any[];
     /**
      * An encapsulation policy for the template and CSS styles. One of:
-     * - `ViewEncapsulation.Native`: Deprecated. Use `ViewEncapsulation.ShadowDom` instead.
      * - `ViewEncapsulation.Emulated`: Use shimmed CSS that
      * emulates the native behavior.
      * - `ViewEncapsulation.None`: Use global CSS without any
@@ -857,7 +911,7 @@ export declare interface Component extends Directive {
      */
     encapsulation?: ViewEncapsulation;
     /**
-     * Overrides the default encapsulation start and end delimiters (`{{` and `}}`)
+     * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
      */
     interpolation?: [string, string];
     /**
@@ -1010,8 +1064,8 @@ export declare interface ComponentDecorator {
      *
      * ```html
      * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
-     * <!-->compiled to be equivalent to:</>
-     *  <a>Spaces</a> <a>between</a> <a>links.</a>
+     * <!-- compiled to be equivalent to:
+     *  <a>Spaces</a> <a>between</a> <a>links.</a>  -->
      * ```
      *
      * Note that sequences of `&ngsp;` are still collapsed to just one space character when
@@ -1019,8 +1073,8 @@ export declare interface ComponentDecorator {
      *
      * ```html
      * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
-     * <!-->compiled to be equivalent to:</>
-     *  <a>Spaces</a> <a>between</a> <a>links.</a>
+     * <!-- compiled to be equivalent to:
+     *  <a>before</a> <a>after</a> -->
      * ```
      *
      * To preserve sequences of whitespace characters, use the
@@ -1325,6 +1379,11 @@ export declare interface ContentChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     *   removed in future versions of Angular.
      * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
@@ -1344,10 +1403,12 @@ export declare interface ContentChildrenDecorator {
      */
     (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): any;
     new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): Query;
 }
@@ -1412,7 +1473,7 @@ export declare function createPlatform(injector: Injector): PlatformRef;
 
 /**
  * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
- * your applciation's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
+ * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
  * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
  * to build up configurations that might be required by different libraries or parts of the
  * application.
@@ -1605,9 +1666,13 @@ declare interface DebugNode_2 {
      */
     html: string | null;
     /**
+     * Associated `TNode`
+     */
+    tNode: TNode;
+    /**
      * Human readable node type.
      */
-    type: typeof TNodeTypeAsString[number];
+    type: string;
     /**
      * DOM native node.
      */
@@ -1616,6 +1681,22 @@ declare interface DebugNode_2 {
      * Child nodes
      */
     children: DebugNode_2[];
+    /**
+     * A list of Component/Directive types which need to be instantiated an this location.
+     */
+    factories: Type<unknown>[];
+    /**
+     * A list of Component/Directive instances which were instantiated an this location.
+     */
+    instances: unknown[];
+    /**
+     * NodeInjector information.
+     */
+    injector: NodeInjectorDebug;
+    /**
+     * Injector resolution path.
+     */
+    injectorResolutionPath: any;
 }
 
 declare class DebugNode__POST_R3__ implements DebugNode {
@@ -1715,7 +1796,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 }
 
 /**
- * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
  * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */
@@ -2187,7 +2268,7 @@ declare interface ElementHandleEventFn {
  *
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](http://g.co/ng/security).
+ * [Security Guide](https://g.co/ng/security).
  *
  * @publicApi
  */
@@ -2274,7 +2355,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract get context(): C;
+    abstract context: C;
     /**
      * The root nodes for this embedded view.
      */
@@ -2390,13 +2471,21 @@ export declare interface EventEmitter<T> extends Subject<T> {
     emit(value?: T): void;
     /**
      * Registers handlers for events emitted by this instance.
-     * @param generatorOrNext When supplied, a custom handler for emitted events.
-     * @param error When supplied, a custom handler for an error notification
-     * from this emitter.
-     * @param complete When supplied, a custom handler for a completion
-     * notification from this emitter.
+     * @param next When supplied, a custom handler for emitted events.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
      */
-    subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
+    subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+    /**
+     * Registers handlers for events emitted by this instance.
+     * @param observerOrNext When supplied, a custom handler for emitted events, or an observer
+     *     object.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
+     */
+    subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
 }
 
 /**
@@ -2451,14 +2540,6 @@ export declare interface ExistingSansProvider {
 }
 
 /**
- * Set of instructions used to process host bindings efficiently.
- *
- * See VIEW_DATA.md for more information.
- */
-declare interface ExpandoInstructions extends Array<number | HostBindingsFunction<any> | null> {
-}
-
-/**
  * Definition of what a factory function should look like.
  */
 declare type FactoryFn<T> = {
@@ -2466,7 +2547,7 @@ declare type FactoryFn<T> = {
      * Subclasses without an explicit constructor call through to the factory of their base
      * definition, providing it with their own constructor to instantiate.
      */
-    <U extends T>(t: Type<U>): U;
+    <U extends T>(t?: Type<U>): U;
     /**
      * If no constructor to instantiate is provided, an instance of type T itself is created.
      */
@@ -2699,6 +2780,71 @@ export declare interface HostBindingDecorator {
     new (hostPropertyName?: string): any;
 }
 
+/**
+ * Stores a set of OpCodes to process `HostBindingsFunction` associated with a current view.
+ *
+ * In order to invoke `HostBindingsFunction` we need:
+ * 1. 'elementIdx`: Index to the element associated with the `HostBindingsFunction`.
+ * 2. 'directiveIdx`: Index to the directive associated with the `HostBindingsFunction`. (This will
+ *    become the context for the `HostBindingsFunction` invocation.)
+ * 3. `bindingRootIdx`: Location where the bindings for the `HostBindingsFunction` start. Internally
+ *    `HostBindingsFunction` binding indexes start from `0` so we need to add `bindingRootIdx` to
+ *    it.
+ * 4. `HostBindingsFunction`: A host binding function to execute.
+ *
+ * The above information needs to be encoded into the `HostBindingOpCodes` in an efficient manner.
+ *
+ * 1. `elementIdx` is encoded into the `HostBindingOpCodes` as `~elementIdx` (so a negative number);
+ * 2. `directiveIdx`
+ * 3. `bindingRootIdx`
+ * 4. `HostBindingsFunction` is passed in as is.
+ *
+ * The `HostBindingOpCodes` array contains:
+ * - negative number to select the element index.
+ * - followed by 1 or more of:
+ *    - a number to select the directive index
+ *    - a number to select the bindingRoot index
+ *    - and a function to invoke.
+ *
+ * ## Example
+ *
+ * ```
+ * const hostBindingOpCodes = [
+ *   ~30,                               // Select element 30
+ *   40, 45, MyDir.ɵdir.hostBindings    // Invoke host bindings on MyDir on element 30;
+ *                                      // directiveIdx = 40; bindingRootIdx = 45;
+ *   50, 55, OtherDir.ɵdir.hostBindings // Invoke host bindings on OtherDire on element 30
+ *                                      // directiveIdx = 50; bindingRootIdx = 55;
+ * ]
+ * ```
+ *
+ * ## Pseudocode
+ * ```
+ * const hostBindingOpCodes = tView.hostBindingOpCodes;
+ * if (hostBindingOpCodes === null) return;
+ * for (let i = 0; i < hostBindingOpCodes.length; i++) {
+ *   const opCode = hostBindingOpCodes[i] as number;
+ *   if (opCode < 0) {
+ *     // Negative numbers are element indexes.
+ *     setSelectedIndex(~opCode);
+ *   } else {
+ *     // Positive numbers are NumberTuple which store bindingRootIndex and directiveIndex.
+ *     const directiveIdx = opCode;
+ *     const bindingRootIndx = hostBindingOpCodes[++i] as number;
+ *     const hostBindingFn = hostBindingOpCodes[++i] as HostBindingsFunction<any>;
+ *     setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
+ *     const context = lView[directiveIdx];
+ *     hostBindingFn(RenderFlags.Update, context);
+ *   }
+ * }
+ * ```
+ *
+ */
+declare interface HostBindingOpCodes extends Array<number | HostBindingsFunction<any>> {
+    __brand__: 'HostBindingOpCodes';
+    debug?: string[];
+}
+
 declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
@@ -2714,7 +2860,7 @@ export declare interface HostDecorator {
      *
      * @usageNotes
      *
-     * The following shows use with the `@Optional` decorator, and allows for a null result.
+     * The following shows use with the `@Optional` decorator, and allows for a `null` result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
@@ -2812,9 +2958,51 @@ export declare interface HostListenerDecorator {
     /**
      * Decorator that declares a DOM event to listen for,
      * and provides a handler method to run when that event occurs.
+     *
+     * Angular invokes the supplied handler method when the host element emits the specified event,
+     * and updates the bound element with the result.
+     *
+     * If the handler method returns false, applies `preventDefault` on the bound element.
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
+}
+
+/**
+ * Array storing OpCode for dynamically creating `i18n` translation DOM elements.
+ *
+ * This array creates a sequence of `Text` and `Comment` (as ICU anchor) DOM elements. It consists
+ * of a pair of `number` and `string` pairs which encode the operations for the creation of the
+ * translated block.
+ *
+ * The number is shifted and encoded according to `I18nCreateOpCode`
+ *
+ * Pseudocode:
+ * ```
+ * const i18nCreateOpCodes = [
+ *   10 << I18nCreateOpCode.SHIFT, "Text Node add to DOM",
+ *   11 << I18nCreateOpCode.SHIFT | I18nCreateOpCode.COMMENT, "Comment Node add to DOM",
+ *   12 << I18nCreateOpCode.SHIFT | I18nCreateOpCode.APPEND_LATER, "Text Node added later"
+ * ];
+ *
+ * for(var i=0; i<i18nCreateOpCodes.length; i++) {
+ *   const opcode = i18NCreateOpCodes[i++];
+ *   const index = opcode >> I18nCreateOpCode.SHIFT;
+ *   const text = i18NCreateOpCodes[i];
+ *   let node: Text|Comment;
+ *   if (opcode & I18nCreateOpCode.COMMENT === I18nCreateOpCode.COMMENT) {
+ *     node = lView[~index] = document.createComment(text);
+ *   } else {
+ *     node = lView[index] = document.createText(text);
+ *   }
+ *   if (opcode & I18nCreateOpCode.APPEND_EAGERLY !== I18nCreateOpCode.APPEND_EAGERLY) {
+ *     parentNode.appendChild(node);
+ *   }
+ * }
+ * ```
+ */
+declare interface I18nCreateOpCodes extends Array<number | string>, I18nDebug {
+    __brand__: 'I18nCreateOpCodes';
 }
 
 declare interface I18nDebug {
@@ -2829,53 +3017,14 @@ declare interface I18nDebug {
 }
 
 /**
- * Array storing OpCode for dynamically creating `i18n` blocks.
+ * Stores a list of nodes which need to be removed.
  *
- * Example:
- * ```ts
- * <I18nCreateOpCode>[
- *   // For adding text nodes
- *   // ---------------------
- *   // Equivalent to:
- *   //   lView[1].appendChild(lView[0] = document.createTextNode('xyz'));
- *   'xyz', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
- *
- *   // For adding element nodes
- *   // ---------------------
- *   // Equivalent to:
- *   //   lView[1].appendChild(lView[0] = document.createElement('div'));
- *   ELEMENT_MARKER, 'div', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
- *
- *   // For adding comment nodes
- *   // ---------------------
- *   // Equivalent to:
- *   //   lView[1].appendChild(lView[0] = document.createComment(''));
- *   COMMENT_MARKER, '', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
- *
- *   // For moving existing nodes to a different location
- *   // --------------------------------------------------
- *   // Equivalent to:
- *   //   const node = lView[1];
- *   //   lView[2].appendChild(node);
- *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
- *
- *   // For removing existing nodes
- *   // --------------------------------------------------
- *   //   const node = lView[1];
- *   //   removeChild(tView.data(1), node, lView);
- *   1 << SHIFT_REF | Remove,
- *
- *   // For writing attributes
- *   // --------------------------------------------------
- *   //   const node = lView[1];
- *   //   node.setAttribute('attr', 'value');
- *   1 << SHIFT_REF | Attr, 'attr', 'value'
- * ];
- * ```
- *
- * See: `applyI18nCreateOpCodes`;
+ * Numbers are indexes into the `LView`
+ * - index > 0: `removeRNode(lView[0])`
+ * - index < 0: `removeICU(~lView[0])`
  */
-declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARKER | COMMENT_MARKER | null>, I18nDebug {
+declare interface I18nRemoveOpCodes extends Array<number> {
+    __brand__: 'I18nRemoveOpCodes';
 }
 
 /**
@@ -2951,6 +3100,67 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  *
  */
 declare interface I18nUpdateOpCodes extends Array<string | number | SanitizerFn | null>, I18nDebug {
+    __brand__: 'I18nUpdateOpCodes';
+}
+
+/**
+ * Marks that the next string is comment text need for ICU.
+ *
+ * See `I18nMutateOpCodes` documentation.
+ */
+declare const ICU_MARKER: ICU_MARKER;
+
+declare interface ICU_MARKER {
+    marker: 'ICU';
+}
+
+/**
+ * Array storing OpCode for dynamically creating `i18n` blocks.
+ *
+ * Example:
+ * ```ts
+ * <I18nCreateOpCode>[
+ *   // For adding text nodes
+ *   // ---------------------
+ *   // Equivalent to:
+ *   //   lView[1].appendChild(lView[0] = document.createTextNode('xyz'));
+ *   'xyz', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For adding element nodes
+ *   // ---------------------
+ *   // Equivalent to:
+ *   //   lView[1].appendChild(lView[0] = document.createElement('div'));
+ *   ELEMENT_MARKER, 'div', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For adding comment nodes
+ *   // ---------------------
+ *   // Equivalent to:
+ *   //   lView[1].appendChild(lView[0] = document.createComment(''));
+ *   ICU_MARKER, '', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For moving existing nodes to a different location
+ *   // --------------------------------------------------
+ *   // Equivalent to:
+ *   //   const node = lView[1];
+ *   //   lView[2].appendChild(node);
+ *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For removing existing nodes
+ *   // --------------------------------------------------
+ *   //   const node = lView[1];
+ *   //   removeChild(tView.data(1), node, lView);
+ *   1 << SHIFT_REF | Remove,
+ *
+ *   // For writing attributes
+ *   // --------------------------------------------------
+ *   //   const node = lView[1];
+ *   //   node.setAttribute('attr', 'value');
+ *   1 << SHIFT_REF | Attr, 'attr', 'value'
+ * ];
+ * ```
+ */
+declare interface IcuCreateOpCodes extends Array<number | string | ELEMENT_MARKER | ICU_MARKER | null>, I18nDebug {
+    __brand__: 'I18nCreateOpCodes';
 }
 
 /**
@@ -3027,7 +3237,7 @@ export declare const Inject: InjectDecorator;
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
@@ -3121,11 +3331,8 @@ export declare interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵprov: never;
+    ɵprov: unknown;
 }
-
-/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-declare function injectChangeDetectorRef(isPipe?: boolean): ChangeDetectorRef;
 
 
 /**
@@ -3154,14 +3361,6 @@ export declare interface InjectDecorator {
     (token: any): any;
     new (token: any): Inject;
 }
-
-/**
- * Creates an ElementRef from the most recent node.
- *
- * @returns The ElementRef instance to use
- */
-declare function injectElementRef(ElementRefToken: typeof ElementRef): ElementRef;
-
 
 /**
  * Injection flags for DI.
@@ -3226,7 +3425,7 @@ export declare enum InjectFlags {
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ɵprov: never | undefined;
+    readonly ɵprov: unknown;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -3276,9 +3475,9 @@ export declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -3304,7 +3503,7 @@ export declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 declare const INJECTOR_2 = 9;
@@ -3314,13 +3513,14 @@ declare const INJECTOR_2 = 9;
  *
  * `InjectorDefTypes` can be used to configure a `StaticInjector`.
  *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
+ *
  * @publicApi
  */
 export declare interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
-    ɵinj: never;
+    ɵfac?: unknown;
+    ɵinj: unknown;
 }
 
 /**
@@ -3335,24 +3535,6 @@ declare interface InjectorTypeWithProviders<T> {
     ngModule: InjectorType<T>;
     providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
 }
-
-/** Injects a Renderer2 for the current component. */
-declare function injectRenderer2(): Renderer2;
-
-/**
- * Creates a TemplateRef given a node.
- *
- * @returns The TemplateRef instance to use
- */
-declare function injectTemplateRef<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef): TemplateRef<T> | null;
-
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-declare function injectViewContainerRef(ViewContainerRefToken: typeof ViewContainerRef, ElementRefToken: typeof ElementRef): ViewContainerRef;
 
 /**
  * Type of metadata for an `Input` property.
@@ -3426,47 +3608,9 @@ export declare interface InputDecorator {
 }
 
 /**
- * All implicit instruction state is stored here.
- *
- * It is useful to have a single object where all of the state is stored as a mental model
- * (rather it being spread across many different variables.)
- *
- * PERF NOTE: Turns out that writing to a true global variable is slower than
- * having an intermediate object with properties.
+ * See `TNode.insertBeforeIndex`
  */
-declare interface InstructionState {
-    /**
-     * Current `LFrame`
-     *
-     * `null` if we have not called `enterView`
-     */
-    lFrame: LFrame;
-    /**
-     * Stores whether directives should be matched to elements.
-     *
-     * When template contains `ngNonBindable` then we need to prevent the runtime from matching
-     * directives on children of that element.
-     *
-     * Example:
-     * ```
-     * <my-comp my-directive>
-     *   Should match component / directive.
-     * </my-comp>
-     * <div ngNonBindable>
-     *   <my-comp my-directive>
-     *     Should not match component / directive because we are in ngNonBindable.
-     *   </my-comp>
-     * </div>
-     * ```
-     */
-    bindingsEnabled: boolean;
-    /**
-     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
-     *
-     * Necessary to support ChangeDetectorRef.checkNoChanges().
-     */
-    checkNoChangesMode: boolean;
-}
+declare type InsertBeforeIndex = null | number | number[];
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
     _bootstrapComponents: Type<any>[];
@@ -3474,7 +3618,7 @@ declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
 
 declare interface InternalViewRef extends ViewRef {
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ApplicationRef): void;
+    attachToAppRef(appRef: ViewRefTracker): void;
 }
 
 
@@ -3593,7 +3737,7 @@ export declare interface IterableDifferFactory {
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private
      */
@@ -3740,7 +3884,7 @@ export declare interface KeyValueDifferFactory {
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private.
      */
@@ -3786,7 +3930,7 @@ declare interface LContainer extends Array<any> {
      * The host could be an LView if this container is on a component node.
      * In that case, the component LView is its HOST.
      */
-    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bp;
+    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_ca;
     /**
      * This is a type field which allows us to differentiate `LContainer` from `StylingContext` in an
      * efficient way. The value is always set to `true`
@@ -3803,12 +3947,12 @@ declare interface LContainer extends Array<any> {
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
      */
-    [PARENT]: ɵangular_packages_core_core_bp;
+    [PARENT]: ɵangular_packages_core_core_ca;
     /**
      * This allows us to jump from a container to a sibling container or component
      * view with the same parent, so we can remove listeners efficiently.
      */
-    [NEXT]: ɵangular_packages_core_core_bp | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * The number of direct transplanted views which need a refresh or have descendants themselves
      * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
@@ -3821,7 +3965,7 @@ declare interface LContainer extends Array<any> {
      * a different `LContainer`. We need to track views created from a given declaration point since
      * queries collect matches from the embedded view declaration point and _not_ the insertion point.
      */
-    [MOVED_VIEWS]: ɵangular_packages_core_core_bp[] | null;
+    [MOVED_VIEWS]: ɵangular_packages_core_core_ca[] | null;
     /**
      * Pointer to the `TNode` which represents the host of the container.
      */
@@ -3832,8 +3976,11 @@ declare interface LContainer extends Array<any> {
      * Array of `ViewRef`s used by any `ViewContainerRef`s that point to this container.
      *
      * This is lazily initialized by `ViewContainerRef` when the first view is inserted.
+     *
+     * NOTE: This is stored as `any[]` because render3 should really not be aware of `ViewRef` and
+     * doing so creates circular dependency.
      */
-    [VIEW_REFS]: ViewRef[] | null;
+    [VIEW_REFS]: unknown[] | null;
 }
 
 /**
@@ -3852,99 +3999,10 @@ declare interface LContainerDebug {
      */
     readonly views: LViewDebug[];
     readonly parent: LViewDebug | null;
-    readonly movedViews: ɵangular_packages_core_core_bp[] | null;
-    readonly host: RElement | RComment | ɵangular_packages_core_core_bp;
+    readonly movedViews: ɵangular_packages_core_core_ca[] | null;
+    readonly host: RElement | RComment | ɵangular_packages_core_core_ca;
     readonly next: LViewDebug | LContainerDebug | null;
     readonly hasTransplantedViews: boolean;
-}
-
-/**
- *
- */
-declare interface LFrame {
-    /**
-     * Parent LFrame.
-     *
-     * This is needed when `leaveView` is called to restore the previous state.
-     */
-    parent: LFrame;
-    /**
-     * Child LFrame.
-     *
-     * This is used to cache existing LFrames to relieve the memory pressure.
-     */
-    child: LFrame | null;
-    /**
-     * State of the current view being processed.
-     *
-     * An array of nodes (text, element, container, etc), pipes, their bindings, and
-     * any local variables that need to be stored between invocations.
-     */
-    lView: ɵangular_packages_core_core_bp;
-    /**
-     * Current `TView` associated with the `LFrame.lView`.
-     *
-     * One can get `TView` from `lFrame[TVIEW]` however because it is so common it makes sense to
-     * store it in `LFrame` for perf reasons.
-     */
-    tView: TView;
-    /**
-     * Used to set the parent property when nodes are created and track query results.
-     *
-     * This is used in conjunction with `isParent`.
-     */
-    previousOrParentTNode: TNode;
-    /**
-     * If `isParent` is:
-     *  - `true`: then `previousOrParentTNode` points to a parent node.
-     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
-     */
-    isParent: boolean;
-    /**
-     * Index of currently selected element in LView.
-     *
-     * Used by binding instructions. Updated as part of advance instruction.
-     */
-    selectedIndex: number;
-    /**
-     * Current pointer to the binding index.
-     */
-    bindingIndex: number;
-    /**
-     * The last viewData retrieved by nextContext().
-     * Allows building nextContext() and reference() calls.
-     *
-     * e.g. const inner = x().$implicit; const outer = x().$implicit;
-     */
-    contextLView: ɵangular_packages_core_core_bp;
-    /**
-     * Store the element depth count. This is used to identify the root elements of the template
-     * so that we can then attach patch data `LView` to only those elements. We know that those
-     * are the only places where the patch data could change, this way we will save on number
-     * of places where tha patching occurs.
-     */
-    elementDepthCount: number;
-    /**
-     * Current namespace to be used when creating elements
-     */
-    currentNamespace: string | null;
-    /**
-     * The root index from which pure function instructions should calculate their binding
-     * indices. In component views, this is TView.bindingStartIndex. In a host binding
-     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
-     */
-    bindingRootIndex: number;
-    /**
-     * Current index of a View or Content Query which needs to be processed next.
-     * We iterate over the list of Queries and increment current query index at every step.
-     */
-    currentQueryIndex: number;
-    /**
-     * When host binding is executing this points to the directive index.
-     * `TView.data[currentDirectiveIndex]` is `DirectiveDef`
-     * `LView[currentDirectiveIndex]` is directive instance.
-     */
-    currentDirectiveIndex: number;
 }
 
 /**
@@ -3977,7 +4035,7 @@ export declare const LOCALE_ID: InjectionToken<string>;
  * - `<div #nativeDivEl>` - `nativeDivEl` should point to the native `<div>` element;
  * - `<ng-template #tplRef>` - `tplRef` should point to the `TemplateRef` instance;
  */
-declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_bp) => any;
+declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_ca) => any;
 
 /**
  * lQueries represent a collection of individual LQuery objects tracked in a given view.
@@ -4061,6 +4119,10 @@ declare interface LViewDebug {
         indexWithinInitPhase: number;
     };
     /**
+     * Associated TView
+     */
+    readonly tView: TView;
+    /**
      * Parent view (or container)
      */
     readonly parent: LViewDebug | LContainerDebug | null;
@@ -4078,6 +4140,11 @@ declare interface LViewDebug {
      * Hierarchical tree of nodes.
      */
     readonly nodes: DebugNode_2[];
+    /**
+     * Template structure (no instance data).
+     * (Shows how TNodes are connected)
+     */
+    readonly template: string;
     /**
      * HTML representation of the `LView`.
      *
@@ -4100,10 +4167,6 @@ declare interface LViewDebug {
      * Sub range of `LView` containing vars (bindings).
      */
     readonly vars: LViewDebugRange;
-    /**
-     * Sub range of `LView` containing i18n (translated DOM elements).
-     */
-    readonly i18n: LViewDebugRange;
     /**
      * Sub range of `LView` containing expando (used by DI).
      */
@@ -4245,7 +4308,7 @@ export declare enum MissingTranslationStrategy {
 }
 
 /**
- * Combination of NgModuleFactory and ComponentFactorys.
+ * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
  */
@@ -4679,9 +4742,10 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
+    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection, shouldCoalesceRunChangeDetection }: {
         enableLongStackTrace?: boolean | undefined;
         shouldCoalesceEventChangeDetection?: boolean | undefined;
+        shouldCoalesceRunChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;
@@ -4812,6 +4876,29 @@ declare interface NodeDef {
     ngContent: NgContentDef | null;
 }
 
+declare interface NodeInjectorDebug {
+    /**
+     * Instance bloom. Does the current injector have a provider with a given bloom mask.
+     */
+    bloom: string;
+    /**
+     * Cumulative bloom. Do any of the above injectors have a provider with a given bloom mask.
+     */
+    cumulativeBloom: string;
+    /**
+     * A list of providers associated with this injector.
+     */
+    providers: (Type<unknown> | ɵDirectiveDef<unknown> | ɵComponentDef<unknown>)[];
+    /**
+     * A list of providers associated with this injector visible to the view of the component only.
+     */
+    viewProviders: Type<unknown>[];
+    /**
+     * Location of the parent `TNode`.
+     */
+    parentInjectorIndex: number;
+}
+
 /**
  * Function to call console.error at the right source location. This is an indirection
  * via another function as browser will log the location that actually called
@@ -4914,6 +5001,8 @@ export declare interface OnInit {
     ngOnInit(): void;
 }
 
+declare type OpaqueValue = unknown;
+
 declare interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -4943,14 +5032,14 @@ export declare interface OptionalDecorator {
     /**
      * Parameter decorator to be used on constructor parameters,
      * which marks the parameter as being an optional dependency.
-     * The DI framework provides null if the dependency is not found.
+     * The DI framework provides `null` if the dependency is not found.
      *
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
      * @usageNotes
      *
-     * The following code allows the possibility of a null result:
+     * The following code allows the possibility of a `null` result:
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
@@ -5108,20 +5197,19 @@ declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
  *
  * @usageNotes
  *
- * In the following example, `RepeatPipe` repeats a given value a given number of times.
+ * In the following example, `TruncatePipe` returns the shortened value with an added ellipses.
  *
- * ```ts
- * import {Pipe, PipeTransform} from '@angular/core';
+ * <code-example path="core/ts/pipes/simple_truncate.ts" header="simple_truncate.ts"></code-example>
  *
- * @Pipe({name: 'repeat'})
- * export class RepeatPipe implements PipeTransform {
- *   transform(value: any, times: number) {
- *     return value.repeat(times);
- *   }
- * }
- * ```
+ * Invoking `{{ 'It was the best of times' | truncate }}` in a template will produce `It was...`.
  *
- * Invoking `{{ 'ok' | repeat:3 }}` in a template produces `okokok`.
+ * In the following example, `TruncatePipe` takes parameters that sets the truncated length and the
+ * string to append with.
+ *
+ * <code-example path="core/ts/pipes/truncate.ts" header="truncate.ts"></code-example>
+ *
+ * Invoking `{{ 'It was the best of times' | truncate:4:'....' }}` in a template will produce `It
+ * was the best....`.
  *
  * @publicApi
  */
@@ -5134,7 +5222,7 @@ export declare interface PipeTransform {
  * consumable for rendering.
  */
 declare interface PipeType<T> extends Type<T> {
-    ɵpipe: never;
+    ɵpipe: unknown;
 }
 
 declare type PipeTypeList = (PipeType<any> | Type<any>)[];
@@ -5308,12 +5396,12 @@ declare interface ProceduralRenderer3 {
      */
     destroyNode?: ((node: RNode) => void) | null;
     appendChild(parent: RElement, newChild: RNode): void;
-    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null): void;
+    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
     removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
     removeClass(el: RElement, name: string): void;
@@ -5409,6 +5497,7 @@ declare const QUERIES = 19;
  */
 export declare interface Query {
     descendants: boolean;
+    emitDistinctChangesOnly: boolean;
     first: boolean;
     read: any;
     isViewQuery: boolean;
@@ -5441,6 +5530,34 @@ declare interface QueryDef {
 }
 
 /**
+ * A set of flags to be used with Queries.
+ *
+ * NOTE: Ensure changes here are reflected in `packages/compiler/src/render3/view/compiler.ts`
+ */
+declare const enum QueryFlags {
+    /**
+     * No flags
+     */
+    none = 0,
+    /**
+     * Whether or not the query should descend into children.
+     */
+    descendants = 1,
+    /**
+     * The query can be computed statically and hence can be assigned eagerly.
+     *
+     * NOTE: Backwards compatibility with ViewEngine.
+     */
+    isStatic = 2,
+    /**
+     * If the `QueryList` should fire change event only if actual change to query was computed (vs old
+     * behavior where the change was fired whenever the query was recomputed, even if the recomputed
+     * query resulted in the same list.)
+     */
+    emitDistinctChangesOnly = 4
+}
+
+/**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
  *
@@ -5467,13 +5584,28 @@ declare interface QueryDef {
  * @publicApi
  */
 export declare class QueryList<T> implements Iterable<T> {
+    private _emitDistinctChangesOnly;
     readonly dirty = true;
     private _results;
-    readonly changes: Observable<any>;
+    private _changesDetected;
+    private _changes;
     readonly length: number;
     readonly first: T;
     readonly last: T;
-    constructor();
+    /**
+     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
+     */
+    get changes(): Observable<any>;
+    /**
+     * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
+     *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
+     *     the same result)
+     */
+    constructor(_emitDistinctChangesOnly?: boolean);
+    /**
+     * Returns the QueryList entry at `index`.
+     */
+    get(index: number): T | undefined;
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
@@ -5515,8 +5647,13 @@ export declare class QueryList<T> implements Iterable<T> {
      * occurs.
      *
      * @param resultsTree The query results to store
+     * @param identityAccessor Optional function for extracting stable object identity from a value
+     *    in the array. This function is executed for each element of the query result list while
+     *    comparing current query list with the new one (provided as a first argument of the `reset`
+     *    function) to detect if the lists are different. If the function is not provided, elements
+     *    are compared as is (without any pre-processing).
      */
-    reset(resultsTree: Array<T | any[]>): void;
+    reset(resultsTree: Array<T | any[]>, identityAccessor?: (value: T) => unknown): void;
     /**
      * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
      */
@@ -5526,6 +5663,90 @@ export declare class QueryList<T> implements Iterable<T> {
     /** internal */
     destroy(): void;
     [Symbol.iterator]: () => Iterator<T>;
+}
+
+declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
+    template: string;
+    isInline?: boolean;
+    styles?: string[];
+    directives?: {
+        selector: string;
+        type: OpaqueValue | (() => OpaqueValue);
+        inputs?: string[];
+        outputs?: string[];
+        exportAs?: string[];
+    }[];
+    pipes?: {
+        [pipeName: string]: OpaqueValue | (() => OpaqueValue);
+    };
+    viewProviders?: OpaqueValue;
+    animations?: OpaqueValue;
+    changeDetection?: ChangeDetectionStrategy_2;
+    encapsulation?: ViewEncapsulation_2;
+    interpolation?: [string, string];
+    preserveWhitespaces?: boolean;
+}
+
+declare interface R3DeclareDirectiveFacade {
+    selector?: string;
+    type: Function;
+    inputs?: {
+        [classPropertyName: string]: string | [string, string];
+    };
+    outputs?: {
+        [classPropertyName: string]: string;
+    };
+    host?: {
+        attributes?: {
+            [key: string]: OpaqueValue;
+        };
+        listeners?: {
+            [key: string]: string;
+        };
+        properties?: {
+            [key: string]: string;
+        };
+        classAttribute?: string;
+        styleAttribute?: string;
+    };
+    queries?: R3DeclareQueryMetadataFacade[];
+    viewQueries?: R3DeclareQueryMetadataFacade[];
+    providers?: OpaqueValue;
+    exportAs?: string[];
+    usesInheritance?: boolean;
+    usesOnChanges?: boolean;
+}
+
+declare interface R3DeclareInjectorFacade {
+    type: Function;
+    imports?: OpaqueValue[];
+    providers?: OpaqueValue[];
+}
+
+declare interface R3DeclareNgModuleFacade {
+    type: Function;
+    bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
+    declarations?: OpaqueValue[] | (() => OpaqueValue[]);
+    imports?: OpaqueValue[] | (() => OpaqueValue[]);
+    exports?: OpaqueValue[] | (() => OpaqueValue[]);
+    schemas?: OpaqueValue[];
+    id?: string;
+}
+
+declare interface R3DeclarePipeFacade {
+    type: Function;
+    name: string;
+    pure?: boolean;
+}
+
+declare interface R3DeclareQueryMetadataFacade {
+    propertyName: string;
+    first?: boolean;
+    predicate: OpaqueValue | string[];
+    descendants?: boolean;
+    read?: OpaqueValue;
+    static?: boolean;
+    emitDistinctChangesOnly?: boolean;
 }
 
 declare class R3Injector {
@@ -5563,7 +5784,7 @@ declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
     /**
@@ -5878,9 +6099,9 @@ declare interface RElement extends RNode {
     classList: RDomTokenList;
     className: string;
     textContent: string | null;
-    setAttribute(name: string, value: string): void;
+    setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
-    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
+    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
     setProperty?(name: string, value: any): void;
@@ -5964,8 +6185,13 @@ export declare abstract class Renderer2 {
      * @param parent The parent node.
      * @param newChild The new child nodes.
      * @param refChild The existing child node before which `newChild` is inserted.
+     * @param isMove Optional argument which signifies if the current `insertBefore` is a result of a
+     *     move. Animation uses this information to trigger move animations. In the past the Animation
+     *     would always assume that any `insertBefore` is a move. This is not strictly true because
+     *     with runtime i18n it is possible to invoke `insertBefore` as a result of i18n and it should
+     *     not trigger an animation move.
      */
-    abstract insertBefore(parent: any, newChild: any, refChild: any): void;
+    abstract insertBefore(parent: any, newChild: any, refChild: any, isMove?: boolean): void;
     /**
      * Implement this callback to remove a child node from the host element's DOM.
      * @param parent The parent node.
@@ -6237,6 +6463,14 @@ export declare interface ResolvedReflectiveProvider {
  */
 export declare function resolveForwardRef<T>(type: T): T;
 
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 /** Subset of API needed for appending elements and text nodes. */
 declare interface RNode {
     /**
@@ -6332,14 +6566,13 @@ declare const SANITIZER = 12;
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
-
 
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string;
+declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
 
 
 /**
@@ -6413,7 +6646,7 @@ export declare interface SelfDecorator {
      * which tells the DI framework to start dependency resolution from the local injector.
      *
      * Resolution works upward through the injector hierarchy, so the children
-     * of this class must configure their own providers or be prepared for a null result.
+     * of this class must configure their own providers or be prepared for a `null` result.
      *
      * @usageNotes
      *
@@ -6625,8 +6858,23 @@ declare type TAttributes = (string | ɵAttributeMarker | CssSelector)[];
  * Constants that are associated with a view. Includes:
  * - Attribute arrays.
  * - Local definition arrays.
+ * - Translated messages (i18n).
  */
 declare type TConstants = (TAttributes | string)[];
+
+/**
+ * Factory function that returns an array of consts. Consts can be represented as a function in
+ * case any additional statements are required to define consts in the list. An example is i18n
+ * where additional i18n calls are generated, which should be executed when consts are requested
+ * for the first time.
+ */
+declare type TConstantsFactory = () => TConstants;
+
+/**
+ * TConstants type that describes how the `consts` field is generated on ComponentDef: it can be
+ * either an array or a factory function that returns that array.
+ */
+declare type TConstantsOrFactory = TConstants | TConstantsFactory;
 
 /** Static data for an LContainer */
 declare interface TContainerNode extends TNode {
@@ -6644,9 +6892,10 @@ declare interface TContainerNode extends TNode {
      * - They are the first node of a component or embedded view
      * - They are dynamically created
      */
-    parent: ɵangular_packages_core_core_bf | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: TView | TView[] | null;
     projection: null;
+    value: null;
 }
 
 /**
@@ -6676,14 +6925,14 @@ declare interface TContainerNode extends TNode {
  *
  * Injector bloom filters are also stored here.
  */
-declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
+declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
 
 /** Static data for an <ng-container> */
 declare interface TElementContainerNode extends TNode {
     /** Index in the LView[] array. */
     index: number;
-    child: ɵangular_packages_core_core_bf | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
-    parent: ɵangular_packages_core_core_bf | TElementContainerNode | null;
+    child: ɵangular_packages_core_core_bk | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -6839,34 +7088,16 @@ declare interface TextDef {
  */
 declare interface TI18n {
     /**
-     * Number of slots to allocate in expando.
-     *
-     * This is the max number of DOM elements which will be created by this i18n + ICU blocks. When
-     * the DOM elements are being created they are stored in the EXPANDO, so that update OpCodes can
-     * write into them.
-     */
-    vars: number;
-    /**
      * A set of OpCodes which will create the Text Nodes and ICU anchors for the translation blocks.
      *
      * NOTE: The ICU anchors are filled in with ICU Update OpCode.
      */
-    create: I18nMutateOpCodes;
+    create: I18nCreateOpCodes;
     /**
      * A set of OpCodes which will be executed on each change detection to determine if any changes to
      * DOM are required.
      */
     update: I18nUpdateOpCodes;
-    /**
-     * A list of ICUs in a translation block (or `null` if block has no ICUs).
-     *
-     * Example:
-     * Given: `<div i18n>You have {count, plural, ...} and {state, switch, ...}</div>`
-     * There would be 2 ICUs in this array.
-     *   1. `{count, plural, ...}`
-     *   2. `{state, switch, ...}`
-     */
-    icus: TIcu[] | null;
 }
 
 declare interface TIcu {
@@ -6875,43 +7106,22 @@ declare interface TIcu {
      */
     type: IcuType;
     /**
-     * Number of slots to allocate in expando for each case.
-     *
-     * This is the max number of DOM elements which will be created by this i18n + ICU blocks. When
-     * the DOM elements are being created they are stored in the EXPANDO, so that update OpCodes can
-     * write into them.
+     * Index in `LView` where the anchor node is stored. `<!-- ICU 0:0 -->`
      */
-    vars: number[];
+    anchorIdx: number;
     /**
-     * An optional array of child/sub ICUs.
+     * Currently selected ICU case pointer.
      *
-     * In case of nested ICUs such as:
-     * ```
-     * {�0�, plural,
-     *   =0 {zero}
-     *   other {�0� {�1�, select,
-     *                     cat {cats}
-     *                     dog {dogs}
-     *                     other {animals}
-     *                   }!
-     *   }
-     * }
-     * ```
-     * When the parent ICU is changing it must clean up child ICUs as well. For this reason it needs
-     * to know which child ICUs to run clean up for as well.
+     * `lView[currentCaseLViewIndex]` stores the currently selected case. This is needed to know how
+     * to clean up the current case when transitioning no the new case.
      *
-     * In the above example this would be:
-     * ```ts
-     * [
-     *   [],   // `=0` has no sub ICUs
-     *   [1],  // `other` has one subICU at `1`st index.
-     * ]
-     * ```
-     *
-     * The reason why it is Array of Arrays is because first array represents the case, and second
-     * represents the child ICUs to clean up. There may be more than one child ICUs per case.
+     * If the value stored is:
+     * `null`: No current case selected.
+     *   `<0`: A flag which means that the ICU just switched and that `icuUpdate` must be executed
+     *         regardless of the `mask`. (After the execution the flag is cleared)
+     *   `>=0` A currently selected case index.
      */
-    childIcus: number[][];
+    currentCaseLViewIndex: number;
     /**
      * A list of case values which the current ICU will try to match.
      *
@@ -6921,11 +7131,11 @@ declare interface TIcu {
     /**
      * A set of OpCodes to apply in order to build up the DOM render tree for the ICU
      */
-    create: I18nMutateOpCodes[];
+    create: IcuCreateOpCodes[];
     /**
      * A set of OpCodes to apply in order to destroy the DOM render tree for the ICU.
      */
-    remove: I18nMutateOpCodes[];
+    remove: I18nRemoveOpCodes[];
     /**
      * A set of OpCodes to apply in order to update the DOM render tree for the ICU bindings.
      */
@@ -6956,14 +7166,67 @@ declare interface TNode {
      */
     index: number;
     /**
+     * Insert before existing DOM node index.
+     *
+     * When DOM nodes are being inserted, normally they are being appended as they are created.
+     * Under i18n case, the translated text nodes are created ahead of time as part of the
+     * `ɵɵi18nStart` instruction which means that this `TNode` can't just be appended and instead
+     * needs to be inserted using `insertBeforeIndex` semantics.
+     *
+     * Additionally sometimes it is necessary to insert new text nodes as a child of this `TNode`. In
+     * such a case the value stores an array of text nodes to insert.
+     *
+     * Example:
+     * ```
+     * <div i18n>
+     *   Hello <span>World</span>!
+     * </div>
+     * ```
+     * In the above example the `ɵɵi18nStart` instruction can create `Hello `, `World` and `!` text
+     * nodes. It can also insert `Hello ` and `!` text node as a child of `<div>`, but it can't
+     * insert `World` because the `<span>` node has not yet been created. In such a case the
+     * `<span>` `TNode` will have an array which will direct the `<span>` to not only insert
+     * itself in front of `!` but also to insert the `World` (created by `ɵɵi18nStart`) into
+     * `<span>` itself.
+     *
+     * Pseudo code:
+     * ```
+     *   if (insertBeforeIndex === null) {
+     *     // append as normal
+     *   } else if (Array.isArray(insertBeforeIndex)) {
+     *     // First insert current `TNode` at correct location
+     *     const currentNode = lView[this.index];
+     *     parentNode.insertBefore(currentNode, lView[this.insertBeforeIndex[0]]);
+     *     // Now append all of the children
+     *     for(let i=1; i<this.insertBeforeIndex; i++) {
+     *       currentNode.appendChild(lView[this.insertBeforeIndex[i]]);
+     *     }
+     *   } else {
+     *     parentNode.insertBefore(lView[this.index], lView[this.insertBeforeIndex])
+     *   }
+     * ```
+     * - null: Append as normal using `parentNode.appendChild`
+     * - `number`: Append using
+     *      `parentNode.insertBefore(lView[this.index], lView[this.insertBeforeIndex])`
+     *
+     * *Initialization*
+     *
+     * Because `ɵɵi18nStart` executes before nodes are created, on `TView.firstCreatePass` it is not
+     * possible for `ɵɵi18nStart` to set the `insertBeforeIndex` value as the corresponding `TNode`
+     * has not yet been created. For this reason the `ɵɵi18nStart` creates a `TNodeType.Placeholder`
+     * `TNode` at that location. See `TNodeType.Placeholder` for more information.
+     */
+    insertBeforeIndex: InsertBeforeIndex;
+    /**
      * The index of the closest injector in this node's LView.
      *
      * If the index === -1, there is no injector on this node or any ancestor node in this view.
      *
-     * If the index !== -1, it is the index of this node's injector OR the index of a parent injector
-     * in the same view. We pass the parent injector index down the node tree of a view so it's
-     * possible to find the parent injector without walking a potentially deep node tree. Injector
-     * indices are not set across view boundaries because there could be multiple component hosts.
+     * If the index !== -1, it is the index of this node's injector OR the index of a parent
+     * injector in the same view. We pass the parent injector index down the node tree of a view so
+     * it's possible to find the parent injector without walking a potentially deep node tree.
+     * Injector indices are not set across view boundaries because there could be multiple component
+     * hosts.
      *
      * If tNode.injectorIndex === tNode.parent.injectorIndex, then the index belongs to a parent
      * injector.
@@ -6971,10 +7234,16 @@ declare interface TNode {
     injectorIndex: number;
     /**
      * Stores starting index of the directives.
+     *
+     * NOTE: The first directive is always component (if present).
      */
     directiveStart: number;
     /**
      * Stores final exclusive index of the directives.
+     *
+     * The area right behind the `directiveStart-directiveEnd` range is used to allocate the
+     * `HostBindingFunction` `vars` (or null if no bindings.) Therefore `directiveEnd` is used to set
+     * `LFrame.bindingRootIndex` before `HostBindingFunction` is executed.
      */
     directiveEnd: number;
     /**
@@ -6986,8 +7255,8 @@ declare interface TNode {
      *
      * Valid values are:
      * - `-1` No `hostBindings` instruction has executed.
-     * - `directiveStart <= directiveStylingLast < directiveEnd`: Points to the `DirectiveDef` of the
-     *   last styling instruction which executed in the `hostBindings`.
+     * - `directiveStart <= directiveStylingLast < directiveEnd`: Points to the `DirectiveDef` of
+     * the last styling instruction which executed in the `hostBindings`.
      *
      * This data is needed so that styling instructions know which static styling data needs to be
      * collected from the `DirectiveDef.hostAttrs`. A styling instruction needs to collect all data
@@ -6995,12 +7264,13 @@ declare interface TNode {
      */
     directiveStylingLast: number;
     /**
-     * Stores indexes of property bindings. This field is only set in the ngDevMode and holds indexes
-     * of property bindings so TestBed can get bound property metadata for a given node.
+     * Stores indexes of property bindings. This field is only set in the ngDevMode and holds
+     * indexes of property bindings so TestBed can get bound property metadata for a given node.
      */
     propertyBindings: number[] | null;
     /**
-     * Stores if Node isComponent, isProjected, hasContentQuery, hasClassInput and hasStyleInput etc.
+     * Stores if Node isComponent, isProjected, hasContentQuery, hasClassInput and hasStyleInput
+     * etc.
      */
     flags: TNodeFlags;
     /**
@@ -7010,11 +7280,17 @@ declare interface TNode {
      * - the count of view providers from the component on this node (last 16 bits)
      */
     providerIndexes: TNodeProviderIndexes;
-    /** The tag name associated with this node. */
-    tagName: string | null;
     /**
-     * Attributes associated with an element. We need to store attributes to support various use-cases
-     * (attribute injection, content projection with selectors, directives matching).
+     * The value name associated with this node.
+     * if type:
+     *   `TNodeType.Text`: text value
+     *   `TNodeType.Element`: tag name
+     *   `TNodeType.ICUContainer`: `TIcu`
+     */
+    value: any;
+    /**
+     * Attributes associated with an element. We need to store attributes to support various
+     * use-cases (attribute injection, content projection with selectors, directives matching).
      * Attributes are stored statically because reading them from the DOM would be way too slow for
      * content projection and queries.
      *
@@ -7096,10 +7372,10 @@ declare interface TNode {
      */
     next: TNode | null;
     /**
-     * The next projected sibling. Since in Angular content projection works on the node-by-node basis
-     * the act of projecting nodes might change nodes relationship at the insertion point (target
-     * view). At the same time we need to keep initial relationship between nodes as expressed in
-     * content view.
+     * The next projected sibling. Since in Angular content projection works on the node-by-node
+     * basis the act of projecting nodes might change nodes relationship at the insertion point
+     * (target view). At the same time we need to keep initial relationship between nodes as
+     * expressed in content view.
      */
     projectionNext: TNode | null;
     /**
@@ -7123,7 +7399,7 @@ declare interface TNode {
      *
      * If this is an inline view node (V), the parent will be its container.
      */
-    parent: ɵangular_packages_core_core_bf | TContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TContainerNode | null;
     /**
      * List of projected TNodes for a given component host element OR index into the said nodes.
      *
@@ -7149,8 +7425,8 @@ declare interface TNode {
      *    - `projection` size is equal to the number of projections `<ng-content>`. The size of
      *      `c1` will be `1` because `<child>` has only one `<ng-content>`.
      * - we store `projection` with the host (`c1`, `c2`) rather than the `<ng-content>` (`cont1`)
-     *   because the same component (`<child>`) can be used in multiple locations (`c1`, `c2`) and as
-     *   a result have different set of nodes to project.
+     *   because the same component (`<child>`) can be used in multiple locations (`c1`, `c2`) and
+     * as a result have different set of nodes to project.
      * - without `projection` it would be difficult to efficiently traverse nodes to be projected.
      *
      * If `typeof projection == 'number'` then `TNode` is a `<ng-content>` element:
@@ -7181,17 +7457,17 @@ declare interface TNode {
      * (e.g. `<div style="width:200px;">`)
      * Must be stored separately from `tNode.styles` to facilitate setting directive
      * inputs that shadow the `style` property. If we used `tNode.styles` as is for shadowed inputs,
-     * we would feed host styles back into directives as "inputs". If we used `tNode.attrs`, we would
-     * have to concatenate the attributes on every template pass. Instead, we process once on first
-     * create pass and store here.
+     * we would feed host styles back into directives as "inputs". If we used `tNode.attrs`, we
+     * would have to concatenate the attributes on every template pass. Instead, we process once on
+     * first create pass and store here.
      */
     stylesWithoutHost: string | null;
     /**
      * A `KeyValueArray` version of residual `styles`.
      *
      * When there are styling instructions than each instruction stores the static styling
-     * which is of lower priority than itself. This means that there may be a higher priority styling
-     * than the instruction.
+     * which is of lower priority than itself. This means that there may be a higher priority
+     * styling than the instruction.
      *
      * Imagine:
      * ```
@@ -7230,10 +7506,10 @@ declare interface TNode {
      * Populated when there are one or more initial classes on an element
      * (e.g. `<div class="SOME_CLASS">`)
      * Must be stored separately from `tNode.classes` to facilitate setting directive
-     * inputs that shadow the `class` property. If we used `tNode.classes` as is for shadowed inputs,
-     * we would feed host classes back into directives as "inputs". If we used `tNode.attrs`, we would
-     * have to concatenate the attributes on every template pass. Instead, we process once on first
-     * create pass and store here.
+     * inputs that shadow the `class` property. If we used `tNode.classes` as is for shadowed
+     * inputs, we would feed host classes back into directives as "inputs". If we used
+     * `tNode.attrs`, we would have to concatenate the attributes on every template pass. Instead,
+     * we process once on first create pass and store here.
      */
     classesWithoutHost: string | null;
     /**
@@ -7323,44 +7599,63 @@ declare const enum TNodeProviderIndexes {
 
 /**
  * TNodeType corresponds to the {@link TNode} `type` property.
+ *
+ * NOTE: type IDs are such that we use each bit to denote a type. This is done so that we can easily
+ * check if the `TNode` is of more than one type.
+ *
+ * `if (tNode.type === TNodeType.Text || tNode.type === TNode.Element)`
+ * can be written as:
+ * `if (tNode.type & (TNodeType.Text | TNodeType.Element))`
+ *
+ * However any given `TNode` can only be of one type.
  */
 declare const enum TNodeType {
     /**
+     * The TNode contains information about a DOM element aka {@link RText}.
+     */
+    Text = 1,
+    /**
+     * The TNode contains information about a DOM element aka {@link RElement}.
+     */
+    Element = 2,
+    /**
      * The TNode contains information about an {@link LContainer} for embedded views.
      */
-    Container = 0,
-    /**
-     * The TNode contains information about an `<ng-content>` projection
-     */
-    Projection = 1,
-    /**
-     * The TNode contains information about an {@link LView}
-     */
-    View = 2,
-    /**
-     * The TNode contains information about a DOM element aka {@link RNode}.
-     */
-    Element = 3,
+    Container = 4,
     /**
      * The TNode contains information about an `<ng-container>` element {@link RNode}.
      */
-    ElementContainer = 4,
+    ElementContainer = 8,
+    /**
+     * The TNode contains information about an `<ng-content>` projection
+     */
+    Projection = 16,
     /**
      * The TNode contains information about an ICU comment used in `i18n`.
      */
-    IcuContainer = 5
+    Icu = 32,
+    /**
+     * Special node type representing a placeholder for future `TNode` at this location.
+     *
+     * I18n translation blocks are created before the element nodes which they contain. (I18n blocks
+     * can span over many elements.) Because i18n `TNode`s (representing text) are created first they
+     * often may need to point to element `TNode`s which are not yet created. In such a case we create
+     * a `Placeholder` `TNode`. This allows the i18n to structurally link the `TNode`s together
+     * without knowing any information about the future nodes which will be at that location.
+     *
+     * On `firstCreatePass` When element instruction executes it will try to create a `TNode` at that
+     * location. Seeing a `Placeholder` `TNode` already there tells the system that it should reuse
+     * existing `TNode` (rather than create a new one) and just update the missing information.
+     */
+    Placeholder = 64,
+    AnyRNode = 3,
+    AnyContainer = 12
 }
-
-/**
- * Converts `TNodeType` into human readable text.
- * Make sure this matches with `TNodeType`
- */
-declare const TNodeTypeAsString: readonly ["Container", "Projection", "View", "Element", "ElementContainer", "IcuContainer"];
 
 /**
  * Type representing a set of TNodes that can have local refs (`#foo`) placed on them.
  */
-declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bf | TElementContainerNode;
+declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bk | TElementContainerNode;
 
 /** Static data for an LProjectionNode  */
 declare interface TProjectionNode extends TNode {
@@ -7371,10 +7666,11 @@ declare interface TProjectionNode extends TNode {
      * or embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bf | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
+    value: null;
 }
 
 /**
@@ -7499,9 +7795,8 @@ declare interface TQuery {
  */
 declare interface TQueryMetadata {
     predicate: Type<any> | InjectionToken<unknown> | string[];
-    descendants: boolean;
     read: any;
-    isStatic: boolean;
+    flags: QueryFlags;
 }
 
 /**
@@ -7566,6 +7861,37 @@ export declare const TRANSLATIONS: InjectionToken<string>;
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
 declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
+
+
+/**
+ * @fileoverview
+ * While Angular only uses Trusted Types internally for the time being,
+ * references to Trusted Types could leak into our core.d.ts, which would force
+ * anyone compiling against @angular/core to provide the @types/trusted-types
+ * package in their compilation unit.
+ *
+ * Until https://github.com/microsoft/TypeScript/issues/30024 is resolved, we
+ * will keep Angular's public API surface free of references to Trusted Types.
+ * For internal and semi-private APIs that need to reference Trusted Types, the
+ * minimal type definitions for the Trusted Types API provided by this module
+ * should be used instead. They are marked as "declare" to prevent them from
+ * being renamed by compiler optimization.
+ *
+ * Adapted from
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
+ * but restricted to the API surface used within Angular.
+ */
+declare interface TrustedHTML {
+    __brand__: 'TrustedHTML';
+}
+
+declare interface TrustedScript {
+    __brand__: 'TrustedScript';
+}
+
+declare interface TrustedScriptURL {
+    __brand__: 'TrustedScriptURL';
+}
 
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
@@ -7691,7 +8017,7 @@ declare interface TTextNode extends TNode {
      * embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bf | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -7710,18 +8036,10 @@ declare interface TView {
      */
     type: TViewType;
     /**
-     * ID for inline views to determine whether a view is the same as the previous view
-     * in a certain position. If it's not, we know the new view needs to be inserted
-     * and the one that exists needs to be removed (e.g. if/else statements)
-     *
-     * If this is -1, then this is a component view or a dynamically created view.
-     */
-    readonly id: number;
-    /**
      * This is a blueprint used to generate LView instances for this TView. Copying this
      * blueprint is faster than creating a new LView from scratch.
      */
-    blueprint: ɵangular_packages_core_core_bp;
+    blueprint: ɵangular_packages_core_core_ca;
     /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
@@ -7732,21 +8050,9 @@ declare interface TView {
      */
     viewQuery: ViewQueriesFunction<{}> | null;
     /**
-     * Pointer to the host `TNode` (not part of this TView).
-     *
-     * If this is a `TViewNode` for an `LViewNode`, this is an embedded view of a container.
-     * We need this pointer to be able to efficiently find this node when inserting the view
-     * into an anchor.
-     *
-     * If this is a `TElementNode`, this is the view of a root component. It has exactly one
-     * root TNode.
-     *
-     * If this is null, this is the view of a component that is not at root. We do not store
-     * the host TNodes for child component views because they can potentially have several
-     * different host TNodes, depending on where the component is being used. These host
-     * TNodes cannot be shared (due to different indices, etc).
+     * A `TNode` representing the declaration location of this `TView` (not part of this TView).
      */
-    node: TViewNode | ɵangular_packages_core_core_bf | null;
+    declTNode: TNode | null;
     /** Whether or not this template has been processed in creation mode. */
     firstCreatePass: boolean;
     /**
@@ -7802,11 +8108,11 @@ declare interface TView {
      */
     firstChild: TNode | null;
     /**
-     * Set of instructions used to process host bindings efficiently.
+     * Stores the OpCodes to be replayed during change-detection to process the `HostBindings`
      *
-     * See VIEW_DATA.md for more information.
+     * See `HostBindingOpCodes` for encoding details.
      */
-    expandoInstructions: ExpandoInstructions | null;
+    hostBindingOpCodes: HostBindingOpCodes | null;
     /**
      * Full registry of directives and components that may be found in this view.
      *
@@ -7828,15 +8134,18 @@ declare interface TView {
      * Array of ngOnInit, ngOnChanges and ngDoCheck hooks that should be executed for this view in
      * creation mode.
      *
-     * Even indices: Directive index
-     * Odd indices: Hook function
+     * This array has a flat structure and contains TNode indices, directive indices (where an
+     * instance can be found in `LView`) and hook functions. TNode index is followed by the directive
+     * index and a hook function. If there are multiple hooks for a given TNode, the TNode index is
+     * not repeated and the next lifecycle hook information is stored right after the previous hook
+     * function. This is done so that at runtime the system can efficiently iterate over all of the
+     * functions to invoke without having to make any decisions/lookups.
      */
     preOrderHooks: HookData | null;
     /**
      * Array of ngOnChanges and ngDoCheck hooks that should be executed for this view in update mode.
      *
-     * Even indices: Directive index
-     * Odd indices: Hook function
+     * This array has the same structure as the `preOrderHooks` one.
      */
     preOrderCheckHooks: HookData | null;
     /**
@@ -7918,8 +8227,7 @@ declare interface TView {
     queries: TQueries | null;
     /**
      * An array of indices pointing to directives with content queries alongside with the
-     * corresponding
-     * query index. Each entry in this array is a tuple of:
+     * corresponding query index. Each entry in this array is a tuple of:
      * - index of the first content query index declared by a given directive;
      * - index of a directive.
      *
@@ -7941,16 +8249,6 @@ declare interface TView {
      * view. This means that the view is likely corrupted and we should try to recover it.
      */
     incompleteFirstPass: boolean;
-}
-
-/** Static data for a view  */
-declare interface TViewNode extends TNode {
-    /** If -1, it's a dynamically created view. Otherwise, it is the view block ID. */
-    index: number;
-    child: ɵangular_packages_core_core_bf | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
-    parent: TContainerNode | null;
-    tViews: null;
-    projection: null;
 }
 
 /**
@@ -8207,6 +8505,11 @@ export declare interface ViewChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **read** - Used to read a different token from the queried elements.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     * removed in future versions of Angular.
      *
      * @usageNotes
      *
@@ -8220,9 +8523,11 @@ export declare interface ViewChildrenDecorator {
      */
     (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): any;
     new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): ViewChildren;
 }
 
@@ -8388,15 +8693,6 @@ export declare enum ViewEncapsulation {
      */
     Emulated = 0,
     /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    Native = 1,
-    /**
      * Don't provide any template or style encapsulation.
      */
     None = 2,
@@ -8404,9 +8700,15 @@ export declare enum ViewEncapsulation {
      * Use Shadow DOM to encapsulate styles.
      *
      * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
      * creating a ShadowRoot for Component's Host Element.
      */
+    ShadowDom = 3
+}
+
+declare enum ViewEncapsulation_2 {
+    Emulated = 0,
+    None = 2,
     ShadowDom = 3
 }
 
@@ -8457,7 +8759,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      */
     private _cdRefInjectingView?;
     private _appRef;
-    private _viewContainerRef;
+    private _attachedToViewContainer;
     get rootNodes(): any[];
     constructor(
     /**
@@ -8471,15 +8773,16 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      *
      * @internal
      */
-    _lView: ɵangular_packages_core_core_bp, 
+    _lView: ɵangular_packages_core_core_ca, 
     /**
      * This represents the `LView` associated with the point where `ChangeDetectorRef` was
      * requested.
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: ɵangular_packages_core_core_bp | undefined);
+    _cdRefInjectingView?: ɵangular_packages_core_core_ca | undefined);
     get context(): T;
+    set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
@@ -8658,9 +8961,19 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      * introduce other changes.
      */
     checkNoChanges(): void;
-    attachToViewContainerRef(vcRef: ViewContainerRef): void;
+    attachToViewContainerRef(): void;
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ApplicationRef): void;
+    attachToAppRef(appRef: ViewRefTracker): void;
+}
+
+/**
+ * Interface for tracking root `ViewRef`s in `ApplicationRef`.
+ *
+ * NOTE: Importing `ApplicationRef` here directly creates circular dependency, which is why we have
+ * a subset of the `ApplicationRef` interface `ViewRefTracker` here.
+ */
+declare interface ViewRefTracker {
+    detachView(viewRef: ViewRef): void;
 }
 
 /**
@@ -8729,7 +9042,7 @@ export declare class WrappedValue {
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
-export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): string;
+export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): TrustedHTML | string;
 
 
 export declare function ɵ_sanitizeUrl(url: string): string;
@@ -8753,41 +9066,116 @@ export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [str
 /** Checks whether a function is wrapped by a `forwardRef`. */
 export declare function ɵangular_packages_core_core_a(fn: any): fn is () => any;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
-export declare const ɵangular_packages_core_core_ba: InstructionState;
+/**
+ * Schedule work at next available slot.
+ *
+ * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
+ * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
+ * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
+ *
+ * @param ngZone NgZone to use for scheduling.
+ */
+export declare function ɵangular_packages_core_core_ba(ngZone: NgZone): (fn: () => void) => void;
+
+/**
+ * USD currency code that the application uses by default for CurrencyPipe when no
+ * DEFAULT_CURRENCY_CODE is provided.
+ */
+export declare const ɵangular_packages_core_core_bb = "USD";
+
+export declare function ɵangular_packages_core_core_bc(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
+
+export declare abstract class ɵangular_packages_core_core_bd {
+    abstract get view(): ViewData;
+    abstract get nodeIndex(): number | null;
+    abstract get injector(): Injector;
+    abstract get component(): any;
+    abstract get providerTokens(): any[];
+    abstract get references(): {
+        [key: string]: any;
+    };
+    abstract get context(): any;
+    abstract get componentRenderElement(): any;
+    abstract get renderNode(): any;
+    abstract logError(console: Console, ...values: any[]): void;
+}
+
+export declare function ɵangular_packages_core_core_be<T>(definition: ɵDirectiveDef<T>): typeof rememberChangeHistoryAndInvokeOnChangesHook;
+
+/**
+ * A change detection scheduler token for {@link RootContext}. This token is the default value used
+ * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
+ */
+export declare const ɵangular_packages_core_core_bf: InjectionToken<(fn: () => void) => void>;
+
+/**
+ * Inject static attribute value into directive constructor.
+ *
+ * This method is used with `factory` functions which are generated as part of
+ * `defineDirective` or `defineComponent`. The method retrieves the static value
+ * of an attribute. (Dynamic attributes are not supported since they are not resolved
+ *  at the time of injection and can change over time.)
+ *
+ * # Example
+ * Given:
+ * ```
+ * @Component(...)
+ * class MyComponent {
+ *   constructor(@Attribute('title') title: string) { ... }
+ * }
+ * ```
+ * When instantiated with
+ * ```
+ * <my-component title="Hello"></my-component>
+ * ```
+ *
+ * Then factory method generated is:
+ * ```
+ * MyComponent.ɵcmp = defineComponent({
+ *   factory: () => new MyComponent(injectAttribute('title'))
+ *   ...
+ * })
+ * ```
+ *
+ * @publicApi
+ */
+export declare function ɵangular_packages_core_core_bg(tNode: TNode, attrNameToInject: string): string | null;
 
 /**
  * Return the current `LView`.
  */
-export declare function ɵangular_packages_core_core_bb(): ɵangular_packages_core_core_bp;
+export declare function ɵangular_packages_core_core_bh(): ɵangular_packages_core_core_ca;
 
-export declare function ɵangular_packages_core_core_bc(): TNode;
+export declare function ɵangular_packages_core_core_bi(): number;
 
-export declare function ɵangular_packages_core_core_bd(): number;
-
-export declare function ɵangular_packages_core_core_be<T = any>(level: number): T;
+export declare function ɵangular_packages_core_core_bj<T = any>(level: number): T;
 
 /** Static data for an element  */
-export declare interface ɵangular_packages_core_core_bf extends TNode {
+export declare interface ɵangular_packages_core_core_bk extends TNode {
     /** Index in the data[] array */
     index: number;
-    child: ɵangular_packages_core_core_bf | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
+    child: ɵangular_packages_core_core_bk | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
     /**
      * Element nodes will have parents unless they are the first node of a component or
      * embedded view (which means their parent is in a different view and must be
      * retrieved using viewData[HOST_NODE]).
      */
-    parent: ɵangular_packages_core_core_bf | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
-     * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node or
-     * a component without projection, it will be null.
+     * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node
+     * or a component without projection, it will be null.
      */
     projection: (TNode | RNode[])[] | null;
+    /**
+     * Stores TagName
+     */
+    value: string;
 }
 
 /**
@@ -8802,7 +9190,7 @@ export declare interface ɵangular_packages_core_core_bf extends TNode {
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bg(lView: ɵangular_packages_core_core_bp, bindingRoot: number, slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bl(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -8817,7 +9205,7 @@ export declare function ɵangular_packages_core_core_bg(lView: ɵangular_package
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bh(lView: ɵangular_packages_core_core_bp, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bm(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -8833,7 +9221,7 @@ export declare function ɵangular_packages_core_core_bh(lView: ɵangular_package
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bi(lView: ɵangular_packages_core_core_bp, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bn(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
 
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -8851,7 +9239,7 @@ export declare function ɵangular_packages_core_core_bi(lView: ɵangular_package
  * @returns Updated or cached value
  *
  */
-export declare function ɵangular_packages_core_core_bj(lView: ɵangular_packages_core_core_bp, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bo(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
 
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -8868,7 +9256,7 @@ export declare function ɵangular_packages_core_core_bj(lView: ɵangular_package
  * @param thisArg Optional calling context of pureFn
  * @returns Updated or cached value
  */
-export declare function ɵangular_packages_core_core_bk(lView: ɵangular_packages_core_core_bp, bindingRoot: number, slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
+export declare function ɵangular_packages_core_core_bp(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
@@ -8877,14 +9265,94 @@ export declare function ɵangular_packages_core_core_bk(lView: ɵangular_package
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function ɵangular_packages_core_core_bl(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
+export declare function ɵangular_packages_core_core_bq(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 
-export declare function ɵangular_packages_core_core_bm(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
+export declare function ɵangular_packages_core_core_br(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
 
-export declare function ɵangular_packages_core_core_bn(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
+export declare function ɵangular_packages_core_core_bs(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
 
 
-export declare function ɵangular_packages_core_core_bo<T>(objWithPropertyToExtract: T): string;
+/**
+ * Special flag indicating that a decorator is of type `Inject`. It's used to make `Inject`
+ * decorator tree-shakable (so we don't have to rely on the `instanceof` checks).
+ * Note: this flag is not included into the `InjectFlags` since it's an internal-only API.
+ */
+export declare const enum ɵangular_packages_core_core_bt {
+    Inject = -1
+}
+
+/**
+ * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
+ * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
+ * be turned into a const enum when ViewEngine is removed (see TODO at the `InjectFlags` enum
+ * above). The benefit of inlining is that we can use these flags at the top level without affecting
+ * tree-shaking (see "no-toplevel-property-access" tslint rule for more info).
+ * Keep this enum in sync with `InjectFlags` enum above.
+ */
+export declare const enum ɵangular_packages_core_core_bu {
+    /** Check self and check parent injector if needed */
+    Default = 0,
+    /**
+     * Specifies that an injector should retrieve a dependency from any injector until reaching the
+     * host element of the current component. (Only used with Element Injector)
+     */
+    Host = 1,
+    /** Don't ascend to ancestors of the node requesting injection. */
+    Self = 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf = 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional = 8
+}
+
+
+export declare function ɵangular_packages_core_core_bv<T>(objWithPropertyToExtract: T): string;
+
+export declare class ɵangular_packages_core_core_bw implements Injector {
+    get(token: any, notFoundValue?: any): any;
+}
+
+export declare function ɵangular_packages_core_core_bx(): (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
+
+
+/**
+ * Special markers which can be left on `Type.__NG_ELEMENT_ID__` which are used by the Ivy's
+ * `NodeInjector`. Usually these markers contain factory functions. But in case of this special
+ * marker we can't leave behind a function because it would create tree shaking problem.
+ *
+ * Currently only `Injector` is special.
+ *
+ * NOTE: the numbers here must be negative, because positive numbers are used as IDs for bloom
+ * filter.
+ */
+export declare const enum ɵangular_packages_core_core_by {
+    /**
+     * Marks that the current type is `Injector`
+     */
+    Injector = -1
+}
+
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param tNode
+ * @param lView
+ */
+export declare function ɵangular_packages_core_core_bz(tNode: TNode, lView: ɵangular_packages_core_core_ca): RNode;
+
+/**
+ * Attaches a given InjectFlag to a given decorator using monkey-patching.
+ * Since DI decorators can be used in providers `deps` array (when provider is configured using
+ * `useFactory`) without initialization (e.g. `Host`) and as an instance (e.g. `new Host()`), we
+ * attach the flag to make it available both as a static property and as a field on decorator
+ * instance.
+ *
+ * @param decorator Provided DI decorator.
+ * @param flag InjectFlag that should be applied.
+ */
+export declare function ɵangular_packages_core_core_c(decorator: any, flag: ɵangular_packages_core_core_bu | ɵangular_packages_core_core_bt): any;
 
 /**
  * `LView` stores all of the information needed to process the instructions as
@@ -8896,7 +9364,7 @@ export declare function ɵangular_packages_core_core_bo<T>(objWithPropertyToExtr
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-export declare interface ɵangular_packages_core_core_bp extends Array<any> {
+export declare interface ɵangular_packages_core_core_ca extends Array<any> {
     /**
      * Human readable representation of the `LView`.
      *
@@ -8906,8 +9374,7 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      */
     debug?: LViewDebug;
     /**
-     * The host node for this LView instance, if this is a component view.
-     * If this is an embedded view, HOST will be null.
+     * The node into which this `LView` is inserted.
      */
     [HOST]: RElement | null;
     /**
@@ -8927,7 +9394,7 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      *
      * `LContainer` - The current view is part of a container, and is an embedded view.
      */
-    [PARENT]: ɵangular_packages_core_core_bp | LContainer | null;
+    [PARENT]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      *
      * The next sibling LView or LContainer.
@@ -8937,20 +9404,39 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      * views in the same container. We need a way to link component views and views
      * across containers as well.
      */
-    [NEXT]: ɵangular_packages_core_core_bp | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_ca | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
     /**
-     * Pointer to the `TViewNode` or `TElementNode` which represents the root of the view.
+     * Store the `TNode` of the location where the current `LView` is inserted into.
      *
-     * If `TViewNode`, this is an embedded view of a container. We need this to be able to
-     * efficiently find the `LViewNode` when inserting the view into an anchor.
+     * Given:
+     * ```
+     * <div>
+     *   <ng-template><span></span></ng-template>
+     * </div>
+     * ```
      *
-     * If `TElementNode`, this is the LView of a component.
+     * We end up with two `TView`s.
+     * - `parent` `TView` which contains `<div><!-- anchor --></div>`
+     * - `child` `TView` which contains `<span></span>`
      *
-     * If null, this is the root view of an application (root component is in this view).
+     * Typically the `child` is inserted into the declaration location of the `parent`, but it can be
+     * inserted anywhere. Because it can be inserted anywhere it is not possible to store the
+     * insertion information in the `TView` and instead we must store it in the `LView[T_HOST]`.
+     *
+     * So to determine where is our insertion parent we would execute:
+     * ```
+     * const parentLView = lView[PARENT];
+     * const parentTNode = lView[T_HOST];
+     * const insertionParent = parentLView[parentTNode.index];
+     * ```
+     *
+     *
+     * If `null`, this is the root view of an application (root component is in this view) and it has
+     * no parents.
      */
-    [T_HOST]: TViewNode | ɵangular_packages_core_core_bf | null;
+    [T_HOST]: TNode | null;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with
@@ -8958,6 +9444,10 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      *
      * These change per LView instance, so they cannot be stored on TView. Instead,
      * TView.cleanup saves an index to the necessary context in this array.
+     *
+     * After `LView` is created it is possible to attach additional instance specific functions at the
+     * end of the `lView[CLENUP]` because we know that no more `T` level cleanup functions will be
+     * addeded here.
      */
     [CLEANUP]: any[] | null;
     /**
@@ -8983,18 +9473,16 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      * Necessary to store this so views can traverse through their nested views
      * to remove listeners and call onDestroy callbacks.
      */
-    [CHILD_HEAD]: ɵangular_packages_core_core_bp | LContainer | null;
+    [CHILD_HEAD]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
      * without having to propagate starting from the first child.
      */
-    [CHILD_TAIL]: ɵangular_packages_core_core_bp | LContainer | null;
+    [CHILD_TAIL]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * View where this view's template was declared.
-     *
-     * Only applicable for dynamically created views. Will be null for inline/component views.
      *
      * The template for a dynamically created view may be declared in a different view than
      * it is inserted. We already track the "insertion view" (view where the template was
@@ -9015,7 +9503,7 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      * template function during change detection, we need the declaration view to get inherited
      * context.
      */
-    [DECLARATION_VIEW]: ɵangular_packages_core_core_bp | null;
+    [DECLARATION_VIEW]: ɵangular_packages_core_core_ca | null;
     /**
      * Points to the declaration component view, used to track transplanted `LView`s.
      *
@@ -9085,7 +9573,7 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
      *   - `LView[DECLARATION_LCONTAINER]` similar problem for queries
      *   - `LContainer[MOVED_VIEWS]` similar problem for queries
      */
-    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bp;
+    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_ca;
     /**
      * A declaration point of embedded views (ones instantiated based on the content of a
      * <ng-template>), null for other types of views.
@@ -9115,11 +9603,32 @@ export declare interface ɵangular_packages_core_core_bp extends Array<any> {
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_bq(viewOrComponent: ɵangular_packages_core_core_bp | {}): RootContext;
+export declare function ɵangular_packages_core_core_cb(viewOrComponent: ɵangular_packages_core_core_ca | {}): RootContext;
 
-export declare class ɵangular_packages_core_core_c implements Injector {
-    get(token: any, notFoundValue?: any): any;
-}
+
+/**
+ * Handles message string post-processing for internationalization.
+ *
+ * Handles message string post-processing by transforming it from intermediate
+ * format (that might contain some markers that we need to replace) to the final
+ * form, consumable by i18nStart instruction. Post processing steps include:
+ *
+ * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
+ * 2. Replace all ICU vars (like "VAR_PLURAL")
+ * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+ * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+ *    in case multiple ICUs have the same placeholder name
+ *
+ * @param message Raw translation string for post processing
+ * @param replacements Set of replacements that should be applied
+ *
+ * @returns Transformed string that can be consumed by i18nStart instruction
+ *
+ * @codeGenApi
+ */
+export declare function ɵangular_packages_core_core_cc(message: string, replacements?: {
+    [key: string]: (string | string[]);
+}): string;
 
 export declare class ɵangular_packages_core_core_d implements ReflectiveInjector {
     private static INJECTOR_KEY;
@@ -9165,35 +9674,57 @@ export declare function ɵangular_packages_core_core_f(providers: Provider[]): R
 
 export declare function ɵangular_packages_core_core_g(): string;
 
+/** Injects a Renderer2 for the current component. */
+export declare function ɵangular_packages_core_core_h(): Renderer2;
+
+/**
+ * Creates an ElementRef from the most recent node.
+ *
+ * @returns The ElementRef instance to use
+ */
+export declare function ɵangular_packages_core_core_i(): ElementRef;
+
 /**
  * Creates an ElementRef given a node.
  *
- * @param ElementRefToken The ElementRef type
  * @param tNode The node for which you'd like an ElementRef
- * @param view The view to which the node belongs
+ * @param lView The view to which the node belongs
  * @returns The ElementRef instance to use
  */
-export declare function ɵangular_packages_core_core_h(ElementRefToken: typeof ElementRef, tNode: TNode, view: ɵangular_packages_core_core_bp): ElementRef;
+export declare function ɵangular_packages_core_core_j(tNode: TNode, lView: ɵangular_packages_core_core_ca): ElementRef;
+
+export declare function ɵangular_packages_core_core_k(id: string): NgModuleFactory<any>;
+
+/**
+ * Creates a TemplateRef given a node.
+ *
+ * @returns The TemplateRef instance to use
+ */
+export declare function ɵangular_packages_core_core_l<T>(): TemplateRef<T> | null;
 
 /**
  * Creates a TemplateRef and stores it on the injector.
  *
- * @param TemplateRefToken The TemplateRef type
- * @param ElementRefToken The ElementRef type
  * @param hostTNode The node on which a TemplateRef is requested
- * @param hostView The view to which the node belongs
+ * @param hostLView The `LView` to which the node belongs
  * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
  */
-export declare function ɵangular_packages_core_core_i<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef, hostTNode: TNode, hostView: ɵangular_packages_core_core_bp): TemplateRef<T> | null;
+export declare function ɵangular_packages_core_core_m<T>(hostTNode: TNode, hostLView: ɵangular_packages_core_core_ca): TemplateRef<T> | null;
 
-export declare function ɵangular_packages_core_core_j(id: string): NgModuleFactory<any>;
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+export declare function ɵangular_packages_core_core_n(): ViewContainerRef;
 
-export declare class ɵangular_packages_core_core_k {
+export declare class ɵangular_packages_core_core_o {
     readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     private readonly _debugContext;
-    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_w);
+    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_bd);
     get injector(): Injector;
     get componentInstance(): any;
     get context(): any;
@@ -9203,7 +9734,7 @@ export declare class ɵangular_packages_core_core_k {
     get providerTokens(): any[];
 }
 
-export declare class ɵangular_packages_core_core_l extends ɵangular_packages_core_core_k implements DebugElement {
+export declare class ɵangular_packages_core_core_p extends ɵangular_packages_core_core_o implements DebugElement {
     readonly name: string;
     readonly properties: {
         [key: string]: any;
@@ -9219,7 +9750,7 @@ export declare class ɵangular_packages_core_core_l extends ɵangular_packages_c
     };
     readonly childNodes: DebugNode[];
     readonly nativeElement: any;
-    constructor(nativeNode: any, parent: any, _debugContext: ɵangular_packages_core_core_w);
+    constructor(nativeNode: any, parent: any, _debugContext: ɵangular_packages_core_core_bd);
     addChild(child: DebugNode): void;
     removeChild(child: DebugNode): void;
     insertChildrenAfter(child: DebugNode, newChildren: DebugNode[]): void;
@@ -9231,106 +9762,38 @@ export declare class ɵangular_packages_core_core_l extends ɵangular_packages_c
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 
-export declare function ɵangular_packages_core_core_m(nativeNode: any): DebugNode | null;
+export declare function ɵangular_packages_core_core_q(nativeNode: any): DebugNode | null;
 
-export declare class ɵangular_packages_core_core_n implements IterableDifferFactory {
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+export declare function ɵangular_packages_core_core_r(isPipe?: boolean): ChangeDetectorRef;
+
+export declare class ɵangular_packages_core_core_s implements IterableDifferFactory {
     constructor();
     supports(obj: Object | null | undefined): boolean;
     create<V>(trackByFn?: TrackByFunction<V>): DefaultIterableDiffer<V>;
 }
 
-export declare class ɵangular_packages_core_core_o<K, V> implements KeyValueDifferFactory {
+export declare class ɵangular_packages_core_core_t<K, V> implements KeyValueDifferFactory {
     constructor();
     supports(obj: any): boolean;
     create<K, V>(): KeyValueDiffer<K, V>;
 }
 
-export declare function ɵangular_packages_core_core_p(): IterableDiffers;
+export declare function ɵangular_packages_core_core_u(): IterableDiffers;
 
-export declare function ɵangular_packages_core_core_q(): KeyValueDiffers;
+export declare function ɵangular_packages_core_core_v(): KeyValueDiffers;
 
-export declare function ɵangular_packages_core_core_r(locale?: string): string;
+export declare function ɵangular_packages_core_core_w(): IterableDiffers;
+
+export declare function ɵangular_packages_core_core_x(): KeyValueDiffers;
+
+export declare function ɵangular_packages_core_core_y(locale?: string): string;
 
 /**
  * A built-in [dependency injection token](guide/glossary#di-token)
  * that is used to configure the root injector for bootstrapping.
  */
-export declare const ɵangular_packages_core_core_s: StaticProvider[];
-
-/**
- * Schedule work at next available slot.
- *
- * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
- * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
- * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
- *
- * @param ngZone NgZone to use for scheduling.
- */
-export declare function ɵangular_packages_core_core_t(ngZone: NgZone): (fn: () => void) => void;
-
-/**
- * USD currency code that the application uses by default for CurrencyPipe when no
- * DEFAULT_CURRENCY_CODE is provided.
- */
-export declare const ɵangular_packages_core_core_u = "USD";
-
-export declare function ɵangular_packages_core_core_v(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
-
-export declare abstract class ɵangular_packages_core_core_w {
-    abstract get view(): ViewData;
-    abstract get nodeIndex(): number | null;
-    abstract get injector(): Injector;
-    abstract get component(): any;
-    abstract get providerTokens(): any[];
-    abstract get references(): {
-        [key: string]: any;
-    };
-    abstract get context(): any;
-    abstract get componentRenderElement(): any;
-    abstract get renderNode(): any;
-    abstract logError(console: Console, ...values: any[]): void;
-}
-
-export declare function ɵangular_packages_core_core_x<T>(definition: ɵDirectiveDef<T>): typeof rememberChangeHistoryAndInvokeOnChangesHook;
-
-/**
- * A change detection scheduler token for {@link RootContext}. This token is the default value used
- * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
- */
-export declare const ɵangular_packages_core_core_y: InjectionToken<(fn: () => void) => void>;
-
-/**
- * Inject static attribute value into directive constructor.
- *
- * This method is used with `factory` functions which are generated as part of
- * `defineDirective` or `defineComponent`. The method retrieves the static value
- * of an attribute. (Dynamic attributes are not supported since they are not resolved
- *  at the time of injection and can change over time.)
- *
- * # Example
- * Given:
- * ```
- * @Component(...)
- * class MyComponent {
- *   constructor(@Attribute('title') title: string) { ... }
- * }
- * ```
- * When instantiated with
- * ```
- * <my-component title="Hello"></my-component>
- * ```
- *
- * Then factory method generated is:
- * ```
- * MyComponent.ɵcmp = defineComponent({
- *   factory: () => new MyComponent(injectAttribute('title'))
- *   ...
- * })
- * ```
- *
- * @publicApi
- */
-export declare function ɵangular_packages_core_core_z(tNode: TNode, attrNameToInject: string): string | null;
+export declare const ɵangular_packages_core_core_z: StaticProvider[];
 
 /**
  * Providers that generate a random `APP_ID_TOKEN`.
@@ -9442,7 +9905,8 @@ export declare const enum ɵAttributeMarker {
      */
     Template = 4,
     /**
-     * Signals that the following attribute is `ngProjectAs` and its value is a parsed `CssSelector`.
+     * Signals that the following attribute is `ngProjectAs` and its value is a parsed
+     * `CssSelector`.
      *
      * For example, given the following HTML:
      *
@@ -9636,7 +10100,7 @@ export declare function ɵcompileDirective(type: Type<any>, directive: Directive
 export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -9677,7 +10141,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     readonly template: ComponentTemplate<T>;
     /** Constants associated with the component's view. */
-    readonly consts: TConstants | null;
+    readonly consts: TConstantsOrFactory | null;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -9750,7 +10214,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
      */
-    readonly _?: never;
+    readonly _?: unknown;
 }
 
 /**
@@ -9758,7 +10222,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵComponentType<T> extends Type<T> {
-    ɵcmp: never;
+    ɵcmp: unknown;
 }
 
 
@@ -9766,6 +10230,8 @@ export declare class ɵConsole {
     log(message: string): void;
     warn(message: string): void;
 }
+
+export declare function ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__(): AttributeDecorator;
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
@@ -9958,8 +10424,8 @@ export declare interface ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵDirectiveType<T> extends Type<T> {
-    ɵdir: never;
-    ɵfac: () => T;
+    ɵdir: unknown;
+    ɵfac: unknown;
 }
 
 export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
@@ -10133,13 +10599,24 @@ export declare function ɵisListLikeIterable(obj: any): boolean;
 
 /**
  * Determine if the argument is an Observable
+ *
+ * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
+ * types need additional methods, such as `lift()`. But it is adequate for our
+ * needs since within the Angular framework code we only ever need to use the
+ * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
+ * into `Observable` as needed.
  */
-export declare function ɵisObservable(obj: any | Observable<any>): obj is Observable<any>;
+export declare const ɵisObservable: (obj: any | Observable<any>) => obj is Observable<any>;
 
 /**
  * Determine if the argument is shaped like a Promise
  */
 export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
+
+/**
+ * Determine if the argument is a Subscribable
+ */
+export declare function ɵisSubscribable(obj: any | Subscribable<any>): obj is Subscribable<any>;
 
 export declare const ɵivyEnabled = false;
 
@@ -10157,7 +10634,7 @@ export declare interface ɵLContext {
     /**
      * The component's parent view data.
      */
-    lView: ɵangular_packages_core_core_bp;
+    lView: ɵangular_packages_core_core_ca;
     /**
      * The index instance of the node.
      */
@@ -10392,6 +10869,7 @@ export declare const enum ɵNodeFlags {
     StaticQuery = 268435456,
     DynamicQuery = 536870912,
     TypeNgModule = 1073741824,
+    EmitDistinctChangesOnly = -2147483648,
     CatQuery = 201326592,
     Types = 201347067
 }
@@ -10665,12 +11143,11 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     location: ElementRef;
     private _rootLView;
     private _tNode;
-    destroyCbs: (() => void)[] | null;
     instance: T;
     hostView: ViewRef_2<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bp, _tNode: ɵangular_packages_core_core_bf | TContainerNode | TElementContainerNode);
+    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_ca, _tNode: ɵangular_packages_core_core_bk | TContainerNode | TElementContainerNode);
     get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
@@ -10812,8 +11289,8 @@ export declare interface ɵSafeValue {
  *
  * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
  *
- * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
- * tree-shaken away during production builds.
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
  */
 export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
     [field: string]: any;
@@ -10831,6 +11308,7 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
  */
 export declare function ɵsetDocument(document: Document | undefined): void;
 
+
 /**
  * Sets the locale id that will be used for translations and ICU expressions.
  * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
@@ -10844,12 +11322,13 @@ export declare function ɵsetLocaleId(localeId: string): void;
 export declare type ɵSetterFn = (obj: any, value: any) => void;
 
 /** Store a value in the `data` at a given `index`. */
-export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_core_bp, index: number, value: T): void;
+export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_core_ca, index: number, value: T): void;
 
 
 export declare function ɵstringify(token: any): string;
 
-export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof injectChangeDetectorRef;
+
+export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_r;
 
 export declare const ɵSWITCH_COMPILE_COMPONENT__POST_R3__: typeof ɵcompileComponent;
 
@@ -10861,16 +11340,16 @@ export declare const ɵSWITCH_COMPILE_NGMODULE__POST_R3__: typeof ɵcompileNgMod
 
 export declare const ɵSWITCH_COMPILE_PIPE__POST_R3__: typeof ɵcompilePipe;
 
-export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof injectElementRef;
+export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_i;
 
 
 export declare const ɵSWITCH_IVY_ENABLED__POST_R3__ = true;
 
-export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof injectRenderer2;
+export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_h;
 
-export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof injectTemplateRef;
+export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_l;
 
-export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof injectViewContainerRef;
+export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_n;
 
 export declare function ɵted(checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef;
 
@@ -11612,13 +12091,13 @@ export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportA
  *
  * @param directiveIndex Current directive index
  * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
+ * @param flags Flags associated with the query
  * @param read What to save in the query
  * @returns QueryList<T>
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -11820,7 +12299,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * Constants for the nodes in the component's view.
      * Includes attribute arrays, local definition arrays etc.
      */
-    consts?: TConstants;
+    consts?: TConstantsOrFactory;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11880,7 +12359,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas?: SchemaMetadata[] | null;
-}): never;
+}): unknown;
 
 /**
  * Create a directive definition object.
@@ -12046,7 +12525,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
@@ -12056,9 +12535,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -12069,10 +12545,9 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -12095,7 +12570,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 
 /**
  * Create a pipe definition object.
@@ -12120,7 +12595,7 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     type: Type<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -12155,9 +12630,9 @@ export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportA
  *
  * @codeGenApi
  */
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags: InjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -12291,11 +12766,6 @@ export declare function ɵɵgetCurrentView(): OpaqueViewState;
 /**
  * @codeGenApi
  */
-export declare function ɵɵgetFactoryOf<T>(type: Type<any>): FactoryFn<T> | null;
-
-/**
- * @codeGenApi
- */
 export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
 
 /**
@@ -12335,12 +12805,12 @@ export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitize
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18n(index: number, messageIndex: number, subTemplateIndex?: number): void;
 
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
@@ -12360,7 +12830,7 @@ export declare function ɵɵi18nApply(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nAttributes(index: number, values: string[]): void;
+export declare function ɵɵi18nAttributes(index: number, attrsIndex: number): void;
 
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
@@ -12421,21 +12891,17 @@ export declare function ɵɵi18nPostprocess(message: string, replacements?: {
  *   and end of DOM element that were embedded in the original translation block. The placeholder
  *   `index` points to the element index in the template instructions set. An optional `block` that
  *   matches the sub-template in which it was declared.
- * - `�!{index}(:{block})�`/`�/!{index}(:{block})�`: *Projection Placeholder*:  Marks the
- *   beginning and end of <ng-content> that was embedded in the original translation block.
- *   The placeholder `index` points to the element index in the template instructions set.
- *   An optional `block` that matches the sub-template in which it was declared.
  * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
  *   split up and translated separately in each angular template function. The `index` points to the
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18nStart(index: number, messageIndex: number, subTemplateIndex?: number): void;
 
 /**
  * Merges the definition from a super class to a sub class.
@@ -12458,9 +12924,9 @@ export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -12523,7 +12989,6 @@ export declare function ɵɵinjectAttribute(attrNameToInject: string): string | 
  * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
-    factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
@@ -12621,6 +13086,41 @@ export declare function ɵɵnamespaceSVG(): void;
  * @codeGenApi
  */
 export declare function ɵɵnextContext<T = any>(level?: number): T;
+
+/**
+ * Compiles a partial component declaration object into a full component definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): unknown;
+
+/**
+ * Compiles a partial directive declaration object into a full directive definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+
+/**
+ * Compiles a partial injector declaration object into a full injector definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): unknown;
+
+/**
+ * Compiles a partial NgModule declaration object into a full NgModule definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): unknown;
+
+/**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
 
 /**
  * @publicApi
@@ -13192,7 +13692,7 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  *        ɵɵtextInterpolate(ctx.greeter.greet());
  *      }
  *    },
- *    features: [ProvidersFeature([GreeterDE])]
+ *    features: [ɵɵProvidersFeature([GreeterDE])]
  *  });
  * }
  * ```
@@ -13454,11 +13954,11 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
-
+export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -13475,7 +13975,7 @@ export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
 
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
@@ -13488,7 +13988,7 @@ export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): TrustedScriptURL | string;
 
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -13502,7 +14002,7 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  *
  * @codeGenApi
  */
-export declare function ɵɵsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | string;
 
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
@@ -13553,13 +14053,12 @@ export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 
 /**
- * Selects an element for later binding instructions.
- * @deprecated No longer being generated, but still used in unit tests.
- * @codeGenApi
- */
-export declare function ɵɵselect(index: number): void;
-
-/**
+ * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+ * definition, when generating a direct reference in the component file would otherwise create an
+ * import cycle.
+ *
+ * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+ *
  * @codeGenApi
  */
 export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
@@ -13584,32 +14083,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
      * module.
      */
     exports?: Type<any>[] | (() => Type<any>[]);
-}): void;
-
-/**
- * Registers a QueryList, associated with a static content query, for later refresh
- * (part of a view refresh).
- *
- * @param directiveIndex Current directive index
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- * @returns QueryList<T>
- *
- * @codeGenApi
- */
-export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
-
-/**
- * Creates new QueryList for a static view query.
- *
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- *
- * @codeGenApi
- */
-export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
+}): unknown;
 
 /**
  * Update style bindings using an object literal on an element.
@@ -14322,7 +14796,7 @@ export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplat
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bp): TemplateRef<unknown> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, lView: ɵangular_packages_core_core_ca): TemplateRef<any> | null;
 
 /**
  * Create static text node
@@ -14559,14 +15033,44 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
 export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
 
 /**
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedHTML. Interpolation is explicitly not allowed.
+ *
+ * @param html constant template literal containing trusted HTML.
+ * @returns TrustedHTML wrapping `html`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedHTML.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): TrustedHTML | string;
+
+/**
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedScriptURL. Interpolation is explicitly not allowed.
+ *
+ * @param url constant template literal containing a trusted script URL.
+ * @returns TrustedScriptURL wrapping `url`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScriptURL.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
+
+/**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
  * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
+ * @param flags Flags associated with the query
  * @param read What to save in the query
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 export { }
