@@ -40,7 +40,7 @@ export declare function zoneSchedulerFactory(ngZone: NgZone): (fn: () => void) =
  */
 export declare class ApplicationModule {
     constructor(appRef: ApplicationRef);
-    static ɵfac: i0.ɵɵFactoryDef<ApplicationModule, never>;
-    static ɵmod: i0.ɵɵNgModuleDefWithMeta<ApplicationModule, never, never, never>;
-    static ɵinj: i0.ɵɵInjectorDef<ApplicationModule>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationModule, never>;
+    static ɵmod: i0.ɵɵNgModuleDeclaration<ApplicationModule, never, never, never>;
+    static ɵinj: i0.ɵɵInjectorDeclaration<ApplicationModule>;
 }

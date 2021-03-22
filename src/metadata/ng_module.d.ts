@@ -10,11 +10,6 @@ import { Type } from '../interface/type';
 import { SchemaMetadata } from '../metadata/schema';
 import { compileNgModule as render3CompileNgModule } from '../render3/jit/module';
 import { TypeDecorator } from '../util/decorators';
-import { NgModuleDef } from './ng_module_def';
-/**
- * @publicApi
- */
-export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
 /**
  * A wrapper around an NgModule that associates it with [providers](guide/glossary#provider
  * "Definition"). Usage without a generic type is deprecated.

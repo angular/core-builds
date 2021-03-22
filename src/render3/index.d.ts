@@ -11,7 +11,8 @@ import { ɵɵCopyDefinitionFeature } from './features/copy_definition_feature';
 import { ɵɵInheritDefinitionFeature } from './features/inherit_definition_feature';
 import { ɵɵNgOnChangesFeature } from './features/ng_onchanges_feature';
 import { ɵɵProvidersFeature } from './features/providers_feature';
-import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, PipeDef, ɵɵComponentDefWithMeta, ɵɵDirectiveDefWithMeta, ɵɵFactoryDef, ɵɵPipeDefWithMeta } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, PipeDef } from './interfaces/definition';
+import { ɵɵComponentDeclaration, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInjectorDeclaration, ɵɵNgModuleDeclaration, ɵɵPipeDeclaration } from './interfaces/public_definitions';
 import { getComponent, getDirectives, getHostElement, getRenderedText } from './util/discovery_utils';
 export { NgModuleType } from '../metadata/ng_module_def';
 export { ComponentFactory, ComponentFactoryResolver, ComponentRef, injectComponentFactoryResolver } from './component_ref';
@@ -31,4 +32,4 @@ export { ɵɵdisableBindings, ɵɵenableBindings, ɵɵrestoreView, } from './sta
 export { NO_CHANGE } from './tokens';
 export { ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow } from './util/misc_utils';
 export { ɵɵinjectPipeChangeDetectorRef, ɵɵtemplateRefExtractor } from './view_engine_compatibility_prebound';
-export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, getComponent, getDirectives, getHostElement, getRenderedText, LifecycleHooksFeature, PipeDef, renderComponent, whenRendered, ɵɵComponentDefWithMeta, ɵɵCopyDefinitionFeature, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵDirectiveDefWithMeta, ɵɵFactoryDef, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵPipeDefWithMeta, ɵɵProvidersFeature, ɵɵsetComponentScope, ɵɵsetNgModuleScope, };
+export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, getComponent, getDirectives, getHostElement, getRenderedText, LifecycleHooksFeature, PipeDef, renderComponent, whenRendered, ɵɵComponentDeclaration, ɵɵCopyDefinitionFeature, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInheritDefinitionFeature, ɵɵInjectorDeclaration, ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, ɵɵPipeDeclaration, ɵɵProvidersFeature, ɵɵsetComponentScope, ɵɵsetNgModuleScope, };

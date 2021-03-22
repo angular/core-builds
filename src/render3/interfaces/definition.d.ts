@@ -62,42 +62,6 @@ export interface PipeType<T> extends Type<T> {
     ɵpipe: unknown;
 }
 /**
- * An object literal of this type is used to represent the metadata of a constructor dependency.
- * The type itself is never referred to from generated code.
- */
-export declare type CtorDependency = {
-    /**
-     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
-     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
-     * type.
-     */
-    attribute?: string | unknown;
-    /**
-     * If `@Optional()` is used, this key is set to true.
-     */
-    optional?: true;
-    /**
-     * If `@Host` is used, this key is set to true.
-     */
-    host?: true;
-    /**
-     * If `@Self` is used, this key is set to true.
-     */
-    self?: true;
-    /**
-     * If `@SkipSelf` is used, this key is set to true.
-     */
-    skipSelf?: true;
-} | null;
-/**
- * @codeGenApi
- */
-export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
-    [key: string]: string;
-}, OutputMap extends {
-    [key: string]: string;
-}, QueryFields extends string[]> = DirectiveDef<T>;
-/**
  * Runtime link information for Directives.
  *
  * This is an internal data structure used by the render to link
@@ -208,18 +172,6 @@ export interface DirectiveDef<T> {
     readonly features: DirectiveDefFeature[] | null;
     setInput: (<U extends T>(this: DirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
 }
-/**
- * @codeGenApi
- */
-export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
-    [key: string]: string;
-}, OutputMap extends {
-    [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[]> = ComponentDef<T>;
-/**
- * @codeGenApi
- */
-export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
 /**
  * Runtime link information for Components.
  *
@@ -352,10 +304,6 @@ export interface PipeDef<T> {
     readonly pure: boolean;
     onDestroy: (() => void) | null;
 }
-/**
- * @codeGenApi
- */
-export declare type ɵɵPipeDefWithMeta<T, Name extends string> = PipeDef<T>;
 export interface DirectiveDefFeature {
     <T>(directiveDef: DirectiveDef<T>): void;
     /**
