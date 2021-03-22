@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.5+19.sha-efe02d8
+ * @license Angular v12.0.0-next.5+23.sha-e7b1d43
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1519,6 +1519,8 @@ declare type CssSelector = (string | SelectorFlags)[];
 /**
  * An object literal of this type is used to represent the metadata of a constructor dependency.
  * The type itself is never referred to from generated code.
+ *
+ * @publicApi
  */
 declare type CtorDependency = {
     /**
@@ -3322,7 +3324,7 @@ export declare type InjectableProvider = ValueSansProvider | ExistingSansProvide
 /**
  * A `Type` which has an `InjectableDef` static field.
  *
- * `InjectableDefType`s contain their own Dependency Injection metadata and are usable in an
+ * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
  * `InjectorDef`-based `StaticInjector.
  *
  * @publicApi
@@ -3511,7 +3513,7 @@ declare const INJECTOR_2 = 9;
 /**
  * A type which has an `InjectorDef` static field.
  *
- * `InjectorDefTypes` can be used to configure a `StaticInjector`.
+ * `InjectorTypes` can be used to configure a `StaticInjector`.
  *
  * This is an opaque type whose structure is highly version dependent. Do not rely on any
  * properties.
@@ -3524,7 +3526,7 @@ export declare interface InjectorType<T> extends Type<T> {
 }
 
 /**
- * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
+ * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorType` with an
  * associated array of providers.
  *
  * Objects of this type can be listed in the imports section of an `InjectorDef`.
@@ -12077,13 +12079,13 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
 export declare function ɵɵclassProp(className: string, value: boolean | undefined | null): typeof ɵɵclassProp;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
+export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[]> = ɵComponentDef<T>;
+}, QueryFields extends string[], NgContentSelectors extends string[]> = unknown;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -12597,14 +12599,15 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     pure?: boolean;
 }): unknown;
 
+
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
+export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = ɵDirectiveDef<T>;
+}, QueryFields extends string[]> = unknown;
 
 /**
  * Returns the value associated to the given token from the injectors.
@@ -12748,9 +12751,9 @@ export declare function ɵɵelementStart(index: number, name: string, attrsIndex
 export declare function ɵɵenableBindings(): void;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
+export declare type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
 
 /**
  * Returns the current OpaqueViewState instance.
@@ -12935,7 +12938,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  * requesting injection of other types if necessary.
  *
  * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
- * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
+ * `Injector`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
  * that the injectable does not belong to any scope.
  *
  * @codeGenApi
@@ -12975,6 +12978,11 @@ export declare interface ɵɵInjectableDef<T> {
  * @codeGenApi
  */
 export declare function ɵɵinjectAttribute(attrNameToInject: string): string | null;
+
+/**
+ * @publicApi
+ */
+export declare type ɵɵInjectorDeclaration<T> = unknown;
 
 /**
  * Information about the providers to be included in an `Injector` as well as how the given type
@@ -13125,7 +13133,7 @@ export declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
 /**
  * @publicApi
  */
-export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
+export declare type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> = unknown;
 
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
@@ -13240,9 +13248,9 @@ export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any
 export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: [any, ...any[]]): any;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
+export declare type ɵɵPipeDeclaration<T, Name extends string> = unknown;
 
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
