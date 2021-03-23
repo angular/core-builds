@@ -11,3 +11,10 @@ import * as ts from 'typescript';
 export declare function hasModifier(node: ts.Node, modifierKind: ts.SyntaxKind): boolean;
 /** Find the closest parent node of a particular kind. */
 export declare function closestNode<T extends ts.Node>(node: ts.Node, kind: ts.SyntaxKind): T | null;
+/**
+ * Checks whether a particular node is part of a null check. E.g. given:
+ * `foo.bar ? foo.bar.value : null` the null check would be `foo.bar`.
+ */
+export declare function isNullCheck(node: ts.Node): boolean;
+/** Checks whether a property access is safe (e.g. `foo.parent?.value`). */
+export declare function isSafeAccess(node: ts.Node): boolean;
