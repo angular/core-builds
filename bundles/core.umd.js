@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.5+33.sha-65f7d53
+ * @license Angular v12.0.0-next.5+35.sha-274dc15
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4667,14 +4667,21 @@
      *     var _this = _super.apply(this, arguments) || this;
      * ```
      *
+     * downleveled to ES5 with `downlevelIteration` for TypeScript < 4.2:
      * ```
      *   function MyClass() {
      *     var _this = _super.apply(this, __spread(arguments)) || this;
      * ```
      *
+     * or downleveled to ES5 with `downlevelIteration` for TypeScript >= 4.2:
+     * ```
+     *   function MyClass() {
+     *     var _this = _super.apply(this, __spreadArray([], __read(arguments))) || this;
+     * ```
+     *
      * More details can be found in: https://github.com/angular/angular/issues/38453.
      */
-    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|[^()]+\(arguments\))\)/;
+    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|(?:[^()]+\(\[\],)?[^()]+\(arguments\))\)/;
     /** Regular expression that detects ES2015 classes which extend from other classes. */
     var ES2015_INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
     /**
@@ -21870,7 +21877,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.5+33.sha-65f7d53');
+    var VERSION = new Version('12.0.0-next.5+35.sha-274dc15');
 
     /**
      * @license

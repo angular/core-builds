@@ -19,9 +19,16 @@ import { GetterFn, MethodFn, SetterFn } from './types';
  *     var _this = _super.apply(this, arguments) || this;
  * ```
  *
+ * downleveled to ES5 with `downlevelIteration` for TypeScript < 4.2:
  * ```
  *   function MyClass() {
  *     var _this = _super.apply(this, __spread(arguments)) || this;
+ * ```
+ *
+ * or downleveled to ES5 with `downlevelIteration` for TypeScript >= 4.2:
+ * ```
+ *   function MyClass() {
+ *     var _this = _super.apply(this, __spreadArray([], __read(arguments))) || this;
  * ```
  *
  * More details can be found in: https://github.com/angular/angular/issues/38453.
