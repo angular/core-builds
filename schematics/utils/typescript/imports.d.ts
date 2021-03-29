@@ -39,3 +39,5 @@ export declare function getImportSpecifier(sourceFile: ts.SourceFile, moduleName
  * @param newImportName Import that should be inserted.
  */
 export declare function replaceImport(node: ts.NamedImports, existingImport: string, newImportName: string): ts.NamedImports;
+/** Finds an import specifier with a particular name. */
+export declare function findImportSpecifier(nodes: ts.NodeArray<ts.ImportSpecifier>, specifierName: string): ts.ImportSpecifier | undefined;
