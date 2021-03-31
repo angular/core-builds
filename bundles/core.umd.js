@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.6+10.sha-d35751d
+ * @license Angular v12.0.0-next.6+18.sha-2d3cd2b
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3617,7 +3617,7 @@
                         lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
                 }
                 try {
-                    var value = bloomHash();
+                    var value = bloomHash(flags);
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
                         throwProviderNotFoundError(token);
                     }
@@ -4261,21 +4261,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var R3ResolvedDependencyType;
-    (function (R3ResolvedDependencyType) {
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Token"] = 0] = "Token";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Attribute"] = 1] = "Attribute";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["ChangeDetectorRef"] = 2] = "ChangeDetectorRef";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Invalid"] = 3] = "Invalid";
-    })(R3ResolvedDependencyType || (R3ResolvedDependencyType = {}));
-    var R3FactoryTarget;
-    (function (R3FactoryTarget) {
-        R3FactoryTarget[R3FactoryTarget["Directive"] = 0] = "Directive";
-        R3FactoryTarget[R3FactoryTarget["Component"] = 1] = "Component";
-        R3FactoryTarget[R3FactoryTarget["Injectable"] = 2] = "Injectable";
-        R3FactoryTarget[R3FactoryTarget["Pipe"] = 3] = "Pipe";
-        R3FactoryTarget[R3FactoryTarget["NgModule"] = 4] = "NgModule";
-    })(R3FactoryTarget || (R3FactoryTarget = {}));
+    (function (FactoryTarget) {
+        FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
+        FactoryTarget[FactoryTarget["Component"] = 1] = "Component";
+        FactoryTarget[FactoryTarget["Injectable"] = 2] = "Injectable";
+        FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
+        FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
+    })(exports.ɵɵFactoryTarget || (exports.ɵɵFactoryTarget = {}));
     var ViewEncapsulation;
     (function (ViewEncapsulation) {
         ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
@@ -5202,22 +5194,17 @@
         return convertDependencies(getReflect().parameters(type));
     }
     function convertDependencies(deps) {
-        var compiler = getCompilerFacade();
-        return deps.map(function (dep) { return reflectDependency(compiler, dep); });
+        return deps.map(function (dep) { return reflectDependency(dep); });
     }
-    function reflectDependency(compiler, dep) {
+    function reflectDependency(dep) {
         var meta = {
             token: null,
+            attribute: null,
             host: false,
             optional: false,
-            resolved: compiler.R3ResolvedDependencyType.Token,
             self: false,
             skipSelf: false,
         };
-        function setTokenAndResolvedType(token) {
-            meta.resolved = compiler.R3ResolvedDependencyType.Token;
-            meta.token = token;
-        }
         if (Array.isArray(dep) && dep.length > 0) {
             for (var j = 0; j < dep.length; j++) {
                 var param = dep[j];
@@ -5245,24 +5232,18 @@
                     if (param.attributeName === undefined) {
                         throw new Error("Attribute name must be defined.");
                     }
-                    meta.token = param.attributeName;
-                    meta.resolved = compiler.R3ResolvedDependencyType.Attribute;
-                }
-                else if (param.__ChangeDetectorRef__ === true) {
-                    meta.token = param;
-                    meta.resolved = compiler.R3ResolvedDependencyType.ChangeDetectorRef;
+                    meta.attribute = param.attributeName;
                 }
                 else {
-                    setTokenAndResolvedType(param);
+                    meta.token = param;
                 }
             }
         }
         else if (dep === undefined || (Array.isArray(dep) && dep.length === 0)) {
-            meta.token = undefined;
-            meta.resolved = R3ResolvedDependencyType.Invalid;
+            meta.token = null;
         }
         else {
-            setTokenAndResolvedType(dep);
+            meta.token = dep;
         }
         return meta;
     }
@@ -14110,8 +14091,7 @@
                             type: metadata.type,
                             typeArgumentCount: metadata.typeArgumentCount,
                             deps: reflectDependencies(type),
-                            injectFn: 'inject',
-                            target: compiler.R3FactoryTarget.Injectable
+                            target: compiler.FactoryTarget.Injectable
                         });
                     }
                     return ngFactoryDef;
@@ -21906,7 +21886,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.6+10.sha-d35751d');
+    var VERSION = new Version('12.0.0-next.6+18.sha-2d3cd2b');
 
     /**
      * @license
@@ -23410,17 +23390,9 @@
      * @nocollapse
      */
     ChangeDetectorRef.__NG_ELEMENT_ID__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY;
-    /**
-     * This marker is need so that the JIT compiler can correctly identify this class as special.
-     *
-     * @internal
-     * @nocollapse
-     */
-    ChangeDetectorRef.__ChangeDetectorRef__ = true;
     /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-    function injectChangeDetectorRef(isPipe) {
-        if (isPipe === void 0) { isPipe = false; }
-        return createViewRef(getCurrentTNode(), getLView(), isPipe);
+    function injectChangeDetectorRef(flags) {
+        return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* ForPipe */) === 16 /* ForPipe */);
     }
     /**
      * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
@@ -23431,10 +23403,7 @@
      * @returns The ChangeDetectorRef to use
      */
     function createViewRef(tNode, lView, isPipe) {
-        // `isComponentView` will be true for Component and Directives (but not for Pipes).
-        // See https://github.com/angular/angular/pull/33072 for proper fix
-        var isComponentView = !isPipe && isComponentHost(tNode);
-        if (isComponentView) {
+        if (isComponentHost(tNode) && !isPipe) {
             // The LView represents the location where the component is declared.
             // Instead we want the LView for the component View and so we need to look it up.
             var componentView = getComponentLViewByIndex(tNode.index, lView); // look down
@@ -27266,21 +27235,6 @@
     function ɵɵtemplateRefExtractor(tNode, lView) {
         return createTemplateRef(tNode, lView);
     }
-    /**
-     * Returns the appropriate `ChangeDetectorRef` for a pipe.
-     *
-     * @codeGenApi
-     */
-    function ɵɵinjectPipeChangeDetectorRef(flags) {
-        if (flags === void 0) { flags = exports.InjectFlags.Default; }
-        var value = injectChangeDetectorRef(true);
-        if (value == null && !(flags & exports.InjectFlags.Optional)) {
-            throwProviderNotFoundError('ChangeDetectorRef');
-        }
-        else {
-            return value;
-        }
-    }
 
     /**
      * @license
@@ -27320,7 +27274,6 @@
         'ɵɵinjectAttribute': ɵɵinjectAttribute,
         'ɵɵinvalidFactory': ɵɵinvalidFactory,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
-        'ɵɵinjectPipeChangeDetectorRef': ɵɵinjectPipeChangeDetectorRef,
         'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
         'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
         'ɵɵProvidersFeature': ɵɵProvidersFeature,
@@ -27586,8 +27539,7 @@
                         name: moduleType.name,
                         type: moduleType,
                         deps: reflectDependencies(moduleType),
-                        injectFn: 'inject',
-                        target: compiler.R3FactoryTarget.NgModule,
+                        target: compiler.FactoryTarget.NgModule,
                         typeArgumentCount: 0,
                     });
                 }
@@ -28092,7 +28044,13 @@
                 if (ngFactoryDef === null) {
                     var meta = getDirectiveMetadata(type, metadata);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", Object.assign(Object.assign({}, meta.metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Directive }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", {
+                        name: meta.metadata.name,
+                        type: meta.metadata.type,
+                        typeArgumentCount: 0,
+                        deps: reflectDependencies(type),
+                        target: compiler.FactoryTarget.Directive
+                    });
                 }
                 return ngFactoryDef;
             },
@@ -28114,9 +28072,7 @@
         return {
             name: type.name,
             type: type,
-            typeArgumentCount: 0,
             selector: metadata.selector !== undefined ? metadata.selector : null,
-            deps: reflectDependencies(type),
             host: metadata.host || EMPTY_OBJ,
             propMetadata: propMetadata,
             inputs: metadata.inputs || EMPTY_ARRAY,
@@ -28242,7 +28198,13 @@
                 if (ngFactoryDef === null) {
                     var metadata = getPipeMetadata(type, meta);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", Object.assign(Object.assign({}, metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Pipe }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", {
+                        name: metadata.name,
+                        type: metadata.type,
+                        typeArgumentCount: 0,
+                        deps: reflectDependencies(type),
+                        target: compiler.FactoryTarget.Pipe
+                    });
                 }
                 return ngFactoryDef;
             },
@@ -28264,9 +28226,7 @@
     function getPipeMetadata(type, meta) {
         return {
             type: type,
-            typeArgumentCount: 0,
             name: type.name,
-            deps: reflectDependencies(type),
             pipeName: meta.name,
             pure: meta.pure !== undefined ? meta.pure : true
         };
@@ -33800,6 +33760,15 @@
         return compiler.compileComponentDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275cmp.js", decl);
     }
     /**
+     * Compiles a partial pipe declaration object into a full pipe definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareFactory(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileFactoryDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
+    }
+    /**
      * Compiles a partial injector declaration object into a full injector definition object.
      *
      * @codeGenApi
@@ -34219,7 +34188,6 @@
     exports.ɵɵi18nStart = ɵɵi18nStart;
     exports.ɵɵinject = ɵɵinject;
     exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
-    exports.ɵɵinjectPipeChangeDetectorRef = ɵɵinjectPipeChangeDetectorRef;
     exports.ɵɵinvalidFactory = ɵɵinvalidFactory;
     exports.ɵɵinvalidFactoryDep = ɵɵinvalidFactoryDep;
     exports.ɵɵlistener = ɵɵlistener;
@@ -34230,6 +34198,7 @@
     exports.ɵɵnextContext = ɵɵnextContext;
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
+    exports.ɵɵngDeclareFactory = ɵɵngDeclareFactory;
     exports.ɵɵngDeclareInjector = ɵɵngDeclareInjector;
     exports.ɵɵngDeclareNgModule = ɵɵngDeclareNgModule;
     exports.ɵɵngDeclarePipe = ɵɵngDeclarePipe;
