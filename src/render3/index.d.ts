@@ -31,5 +31,5 @@ export { ɵɵcontentQuery, ɵɵloadQuery, ɵɵqueryRefresh, ɵɵviewQuery } from
 export { ɵɵdisableBindings, ɵɵenableBindings, ɵɵrestoreView, } from './state';
 export { NO_CHANGE } from './tokens';
 export { ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow } from './util/misc_utils';
-export { ɵɵinjectPipeChangeDetectorRef, ɵɵtemplateRefExtractor } from './view_engine_compatibility_prebound';
+export { ɵɵtemplateRefExtractor } from './view_engine_compatibility_prebound';
 export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, getComponent, getDirectives, getHostElement, getRenderedText, LifecycleHooksFeature, PipeDef, renderComponent, whenRendered, ɵɵComponentDeclaration, ɵɵCopyDefinitionFeature, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵDirectiveDeclaration, ɵɵFactoryDeclaration, ɵɵInheritDefinitionFeature, ɵɵInjectorDeclaration, ɵɵNgModuleDeclaration, ɵɵNgOnChangesFeature, ɵɵPipeDeclaration, ɵɵProvidersFeature, ɵɵsetComponentScope, ɵɵsetNgModuleScope, };

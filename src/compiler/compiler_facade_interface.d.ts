@@ -35,9 +35,9 @@ export interface CompilerFacade {
     compileComponent(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3ComponentMetadataFacade): any;
     compileComponentDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, declaration: R3DeclareComponentFacade): any;
     compileFactory(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3FactoryDefMetadataFacade): any;
+    compileFactoryDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3DeclareFactoryFacade): any;
     createParseSourceSpan(kind: string, typeName: string, sourceUrl: string): ParseSourceSpan;
-    R3ResolvedDependencyType: typeof R3ResolvedDependencyType;
-    R3FactoryTarget: typeof R3FactoryTarget;
+    FactoryTarget: typeof FactoryTarget;
     ResourceLoader: {
         new (): ResourceLoader;
     };
@@ -55,13 +55,7 @@ export declare type StringMapWithRename = {
     [key: string]: string | [string, string];
 };
 export declare type Provider = any;
-export declare enum R3ResolvedDependencyType {
-    Token = 0,
-    Attribute = 1,
-    ChangeDetectorRef = 2,
-    Invalid = 3
-}
-export declare enum R3FactoryTarget {
+export declare enum FactoryTarget {
     Directive = 0,
     Component = 1,
     Injectable = 2,
@@ -69,19 +63,25 @@ export declare enum R3FactoryTarget {
     NgModule = 4
 }
 export interface R3DependencyMetadataFacade {
-    token: any;
-    resolved: R3ResolvedDependencyType;
+    token: unknown;
+    attribute: string | null;
     host: boolean;
     optional: boolean;
     self: boolean;
     skipSelf: boolean;
 }
+export interface R3DeclareDependencyMetadataFacade {
+    token: unknown;
+    attribute?: boolean;
+    host?: boolean;
+    optional?: boolean;
+    self?: boolean;
+    skipSelf?: boolean;
+}
 export interface R3PipeMetadataFacade {
     name: string;
     type: any;
-    typeArgumentCount: number;
     pipeName: string;
-    deps: R3DependencyMetadataFacade[] | null;
     pure: boolean;
 }
 export interface R3InjectableMetadataFacade {
@@ -115,9 +115,7 @@ export interface R3InjectorMetadataFacade {
 export interface R3DirectiveMetadataFacade {
     name: string;
     type: any;
-    typeArgumentCount: number;
     typeSourceSpan: ParseSourceSpan;
-    deps: R3DependencyMetadataFacade[] | null;
     selector: string | null;
     queries: R3QueryMetadataFacade[];
     host: {
@@ -211,8 +209,12 @@ export interface R3FactoryDefMetadataFacade {
     type: any;
     typeArgumentCount: number;
     deps: R3DependencyMetadataFacade[] | null;
-    injectFn: 'directiveInject' | 'inject';
-    target: R3FactoryTarget;
+    target: FactoryTarget;
+}
+export interface R3DeclareFactoryFacade {
+    type: Function;
+    deps: R3DeclareDependencyMetadataFacade[] | null;
+    target: FactoryTarget;
 }
 export declare enum ViewEncapsulation {
     Emulated = 0,
@@ -250,7 +252,7 @@ export interface R3DeclareNgModuleFacade {
     imports?: OpaqueValue[] | (() => OpaqueValue[]);
     exports?: OpaqueValue[] | (() => OpaqueValue[]);
     schemas?: OpaqueValue[];
-    id?: string;
+    id?: OpaqueValue;
 }
 export interface R3DeclarePipeFacade {
     type: Function;

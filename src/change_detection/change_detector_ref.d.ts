@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { InjectFlags } from '../di';
 export declare const SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof injectChangeDetectorRef;
 /**
  * Base class that provides change detection functionality.
@@ -105,4 +106,4 @@ export declare abstract class ChangeDetectorRef {
     abstract reattach(): void;
 }
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-export declare function injectChangeDetectorRef(isPipe?: boolean): ChangeDetectorRef;
+export declare function injectChangeDetectorRef(flags: InjectFlags): ChangeDetectorRef;

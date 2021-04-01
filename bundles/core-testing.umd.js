@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.6+3.sha-b61c009
+ * @license Angular v12.0.0-next.6+36.sha-18bc9ff
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2345,9 +2345,8 @@
         };
         return TestingCompiler;
     }(i0.Compiler));
-    TestingCompiler.ɵfac = function TestingCompiler_Factory(t) { return ɵTestingCompiler_BaseFactory(t || TestingCompiler); };
+    TestingCompiler.ɵfac = /*@__PURE__*/ function () { var ɵTestingCompiler_BaseFactory; return function TestingCompiler_Factory(t) { return (ɵTestingCompiler_BaseFactory || (ɵTestingCompiler_BaseFactory = i0.ɵɵgetInheritedFactory(TestingCompiler)))(t || TestingCompiler); }; }();
     TestingCompiler.ɵprov = /*@__PURE__*/ i0.ɵɵdefineInjectable({ token: TestingCompiler, factory: TestingCompiler.ɵfac });
-    var ɵTestingCompiler_BaseFactory = /*@__PURE__*/ i0.ɵɵgetInheritedFactory(TestingCompiler);
     (function () {
         (typeof ngDevMode === "undefined" || ngDevMode) && i0.ɵsetClassMetadata(TestingCompiler, [{
                 type: i0.Injectable

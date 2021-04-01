@@ -54,5 +54,12 @@ export declare const enum InternalInjectFlags {
     /** Skip the node that is requesting injection. */
     SkipSelf = 4,
     /** Inject `defaultValue` instead if token not found. */
-    Optional = 8
+    Optional = 8,
+    /**
+     * This token is being injected into a pipe.
+     *
+     * This flag is intentionally not in the public facing `InjectFlags` because it is only added by
+     * the compiler and is not a developer applicable flag.
+     */
+    ForPipe = 16
 }
