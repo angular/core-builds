@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.6+41.sha-0226a11
+ * @license Angular v12.0.0-next.6+42.sha-ff9470b
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5671,13 +5671,8 @@ declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     template: string;
     isInline?: boolean;
     styles?: string[];
-    directives?: {
-        selector: string;
-        type: OpaqueValue | (() => OpaqueValue);
-        inputs?: string[];
-        outputs?: string[];
-        exportAs?: string[];
-    }[];
+    components?: R3DeclareUsedDirectiveFacade[];
+    directives?: R3DeclareUsedDirectiveFacade[];
     pipes?: {
         [pipeName: string]: OpaqueValue | (() => OpaqueValue);
     };
@@ -5764,6 +5759,14 @@ declare interface R3DeclareQueryMetadataFacade {
     read?: OpaqueValue;
     static?: boolean;
     emitDistinctChangesOnly?: boolean;
+}
+
+declare interface R3DeclareUsedDirectiveFacade {
+    selector: string;
+    type: OpaqueValue | (() => OpaqueValue);
+    inputs?: string[];
+    outputs?: string[];
+    exportAs?: string[];
 }
 
 declare class R3Injector {
