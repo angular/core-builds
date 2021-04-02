@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.7+3.sha-a43f36b
+ * @license Angular v12.0.0-next.7+5.sha-03a46af
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11055,6 +11055,61 @@ export declare function ɵpod(checkIndex: number, propToIndex: {
 export declare function ɵppd(checkIndex: number, argCount: number): NodeDef;
 
 export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
+
+/**
+ * Profiler function which the runtime will invoke before and after user code.
+ */
+export declare interface ɵProfiler {
+    (event: ɵProfilerEvent, instance: {} | null, hookOrListener?: (e?: any) => any): void;
+}
+
+
+/**
+ * Profiler events is an enum used by the profiler to distinguish between different calls of user
+ * code invoked throughout the application lifecycle.
+ */
+export declare const enum ɵProfilerEvent {
+    /**
+     * Corresponds to the point in time before the runtime has called the template function of a
+     * component with `RenderFlags.Create`.
+     */
+    TemplateCreateStart = 0,
+    /**
+     * Corresponds to the point in time after the runtime has called the template function of a
+     * component with `RenderFlags.Create`.
+     */
+    TemplateCreateEnd = 1,
+    /**
+     * Corresponds to the point in time before the runtime has called the template function of a
+     * component with `RenderFlags.Update`.
+     */
+    TemplateUpdateStart = 2,
+    /**
+     * Corresponds to the point in time after the runtime has called the template function of a
+     * component with `RenderFlags.Update`.
+     */
+    TemplateUpdateEnd = 3,
+    /**
+     * Corresponds to the point in time before the runtime has called a lifecycle hook of a component
+     * or directive.
+     */
+    LifecycleHookStart = 4,
+    /**
+     * Corresponds to the point in time after the runtime has called a lifecycle hook of a component
+     * or directive.
+     */
+    LifecycleHookEnd = 5,
+    /**
+     * Corresponds to the point in time before the runtime has evaluated an expression associated with
+     * an event or an output.
+     */
+    OutputStart = 6,
+    /**
+     * Corresponds to the point in time after the runtime has evaluated an expression associated with
+     * an event or an output.
+     */
+    OutputEnd = 7
+}
 
 /**
  * Publishes a collection of default debug tools onto`window.ng`.
