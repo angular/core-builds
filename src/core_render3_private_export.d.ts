@@ -35,6 +35,7 @@ export { resetJitOptions as ɵresetJitOptions, } from './render3/jit/jit_options
 export { compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, transitiveScopesFor as ɵtransitiveScopesFor, } from './render3/jit/module';
 export { FactoryTarget as ɵɵFactoryTarget, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, } from './render3/jit/partial';
 export { compilePipe as ɵcompilePipe, } from './render3/jit/pipe';
+export { Profiler as ɵProfiler, ProfilerEvent as ɵProfilerEvent } from './render3/profiler';
 export { publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil } from './render3/util/global_utils';
 export { bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, } from './sanitization/bypass';
 export { ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, } from './sanitization/sanitization';
