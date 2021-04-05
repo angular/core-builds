@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.8+3.sha-d4f739f
+ * @license Angular v11.2.8+6.sha-103f05a
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1819,6 +1819,42 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var profilerCallback = null;
+    /**
+     * Sets the callback function which will be invoked before and after performing certain actions at
+     * runtime (for example, before and after running change detection).
+     *
+     * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+     * The contract of the function might be changed in any release and/or the function can be removed
+     * completely.
+     *
+     * @param profiler function provided by the caller or null value to disable profiling.
+     */
+    var setProfiler = function (profiler) {
+        profilerCallback = profiler;
+    };
+    /**
+     * Profiler function which wraps user code executed by the runtime.
+     *
+     * @param event ProfilerEvent corresponding to the execution context
+     * @param instance component instance
+     * @param hookOrListener lifecycle hook function or output listener. The value depends on the
+     *  execution context
+     * @returns
+     */
+    var profiler = function (event, instance, hookOrListener) {
+        if (profilerCallback != null /* both `null` and `undefined` */) {
+            profilerCallback(event, instance, hookOrListener);
+        }
+    };
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
     var MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
 
@@ -2806,11 +2842,23 @@
                 (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
                 (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
                 currentView[FLAGS] += 2048 /* IndexWithinInitPhaseIncrementer */;
-                hook.call(directive);
+                profiler(4 /* LifecycleHookStart */, directive, hook);
+                try {
+                    hook.call(directive);
+                }
+                finally {
+                    profiler(5 /* LifecycleHookEnd */, directive, hook);
+                }
             }
         }
         else {
-            hook.call(directive);
+            profiler(4 /* LifecycleHookStart */, directive, hook);
+            try {
+                hook.call(directive);
+            }
+            finally {
+                profiler(5 /* LifecycleHookEnd */, directive, hook);
+            }
         }
     }
 
@@ -10025,17 +10073,22 @@
     }
     function executeTemplate(tView, lView, templateFn, rf, context) {
         var prevSelectedIndex = getSelectedIndex();
+        var isUpdatePhase = rf & 2 /* Update */;
         try {
             setSelectedIndex(-1);
-            if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
+            if (isUpdatePhase && lView.length > HEADER_OFFSET) {
                 // When we're updating, inherently select 0 so we don't
                 // have to generate that instruction for most update blocks.
                 selectIndexInternal(tView, lView, HEADER_OFFSET, isInCheckNoChangesMode());
             }
+            var preHookType = isUpdatePhase ? 2 /* TemplateUpdateStart */ : 0 /* TemplateCreateStart */;
+            profiler(preHookType, context);
             templateFn(rf, context);
         }
         finally {
             setSelectedIndex(prevSelectedIndex);
+            var postHookType = isUpdatePhase ? 3 /* TemplateUpdateEnd */ : 1 /* TemplateCreateEnd */;
+            profiler(postHookType, context);
         }
     }
     //////////////////////////
@@ -12745,6 +12798,12 @@
     function publishDefaultGlobalUtils() {
         if (!_published) {
             _published = true;
+            /**
+             * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+             * The contract of the function might be changed in any release and/or the function can be
+             * removed completely.
+             */
+            publishGlobalUtil('ɵsetProfiler', setProfiler);
             publishGlobalUtil('getComponent', getComponent);
             publishGlobalUtil('getContext', getContext);
             publishGlobalUtil('getListeners', getListeners);
@@ -15638,6 +15697,7 @@
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
         var tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
+        var context = lView[CONTEXT];
         // When the ɵɵlistener instruction was generated and is executed we know that there is either a
         // native listener or a directive output on this element. As such we we know that we will have to
         // register a listener and store its cleanup function on LView.
@@ -15690,7 +15750,7 @@
                     // The first argument of `listen` function in Procedural Renderer is:
                     // - either a target name (as a string) in case of global target (window, document, body)
                     // - or element reference (in all other cases)
-                    listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                    listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
                     var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
                     ngDevMode && ngDevMode.rendererAddEventListener++;
                     lCleanup.push(listenerFn, cleanupFn);
@@ -15698,7 +15758,7 @@
                 }
             }
             else {
-                listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+                listenerFn = wrapListener(tNode, lView, context, listenerFn, true /** preventDefault */);
                 target.addEventListener(eventName, listenerFn, useCapture);
                 ngDevMode && ngDevMode.rendererAddEventListener++;
                 lCleanup.push(listenerFn);
@@ -15708,7 +15768,7 @@
         else {
             // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
             // ancestors are marked dirty when an event occurs.
-            listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+            listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
         }
         // subscribe to directive outputs
         var outputs = tNode.outputs;
@@ -15733,14 +15793,18 @@
             }
         }
     }
-    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+    function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
         try {
+            profiler(6 /* OutputStart */, context, listenerFn);
             // Only explicitly returning false from a listener should preventDefault
             return listenerFn(e) !== false;
         }
         catch (error) {
             handleError(lView, error);
             return false;
+        }
+        finally {
+            profiler(7 /* OutputEnd */, context, listenerFn);
         }
     }
     /**
@@ -15753,7 +15817,7 @@
      * @param wrapWithPreventDefault Whether or not to prevent default behavior
      * (the procedural renderer does this already, so in those cases, we should skip)
      */
-    function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+    function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault) {
         // Note: we are performing most of the work in the listener function itself
         // to optimize listener registration.
         return function wrapListenerIn_markDirtyAndPreventDefault(e) {
@@ -15771,13 +15835,13 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            var result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
             // A just-invoked listener function might have coalesced listeners so we need to check for
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
                 // We should prevent default if any of the listeners explicitly return false
-                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+                result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -21919,7 +21983,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.8+3.sha-d4f739f');
+    var VERSION = new Version('11.2.8+6.sha-103f05a');
 
     /**
      * @license
