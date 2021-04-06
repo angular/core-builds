@@ -1,10 +1,10 @@
 /**
- * @license Angular v12.0.0-next.7+21.sha-acebe92
+ * @license Angular v12.0.0-next.7+25.sha-575f537
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -864,19 +864,18 @@ class R3TestBedCompiler {
             providerDef = { provide: token };
         }
         const injectableDef = typeof token !== 'string' ? ɵgetInjectableDef(token) : null;
-        const isRoot = injectableDef !== null && injectableDef.providedIn === 'root';
-        const overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
+        const providedIn = injectableDef === null ? null : resolveForwardRef(injectableDef.providedIn);
+        const overridesBucket = providedIn === 'root' ? this.rootProviderOverrides : this.providerOverrides;
         overridesBucket.push(providerDef);
         // Keep overrides grouped by token as well for fast lookups using token
         this.providerOverridesByToken.set(token, providerDef);
-        if (injectableDef !== null && injectableDef.providedIn !== null &&
-            typeof injectableDef.providedIn !== 'string') {
-            const existingOverrides = this.providerOverridesByModule.get(injectableDef.providedIn);
+        if (injectableDef !== null && providedIn !== null && typeof providedIn !== 'string') {
+            const existingOverrides = this.providerOverridesByModule.get(providedIn);
             if (existingOverrides !== undefined) {
                 existingOverrides.push(providerDef);
             }
             else {
-                this.providerOverridesByModule.set(injectableDef.providedIn, [providerDef]);
+                this.providerOverridesByModule.set(providedIn, [providerDef]);
             }
         }
     }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.7+21.sha-acebe92
+ * @license Angular v12.0.0-next.7+25.sha-575f537
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1225,19 +1225,18 @@
                 providerDef = { provide: token };
             }
             var injectableDef = typeof token !== 'string' ? core.ɵgetInjectableDef(token) : null;
-            var isRoot = injectableDef !== null && injectableDef.providedIn === 'root';
-            var overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
+            var providedIn = injectableDef === null ? null : core.resolveForwardRef(injectableDef.providedIn);
+            var overridesBucket = providedIn === 'root' ? this.rootProviderOverrides : this.providerOverrides;
             overridesBucket.push(providerDef);
             // Keep overrides grouped by token as well for fast lookups using token
             this.providerOverridesByToken.set(token, providerDef);
-            if (injectableDef !== null && injectableDef.providedIn !== null &&
-                typeof injectableDef.providedIn !== 'string') {
-                var existingOverrides = this.providerOverridesByModule.get(injectableDef.providedIn);
+            if (injectableDef !== null && providedIn !== null && typeof providedIn !== 'string') {
+                var existingOverrides = this.providerOverridesByModule.get(providedIn);
                 if (existingOverrides !== undefined) {
                     existingOverrides.push(providerDef);
                 }
                 else {
-                    this.providerOverridesByModule.set(injectableDef.providedIn, [providerDef]);
+                    this.providerOverridesByModule.set(providedIn, [providerDef]);
                 }
             }
         };
