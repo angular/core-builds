@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.7+21.sha-acebe92
+ * @license Angular v12.0.0-next.7+25.sha-575f537
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11397,11 +11397,12 @@ class R3Injector {
         if (!def.providedIn) {
             return false;
         }
-        else if (typeof def.providedIn === 'string') {
-            return def.providedIn === 'any' || (def.providedIn === this.scope);
+        const providedIn = resolveForwardRef(def.providedIn);
+        if (typeof providedIn === 'string') {
+            return providedIn === 'any' || (providedIn === this.scope);
         }
         else {
-            return this.injectorDefTypes.has(def.providedIn);
+            return this.injectorDefTypes.has(providedIn);
         }
     }
 }
@@ -11603,7 +11604,7 @@ class StaticInjector {
             // This means we have never seen this record, see if it is tree shakable provider.
             const injectableDef = getInjectableDef(token);
             if (injectableDef) {
-                const providedIn = injectableDef && injectableDef.providedIn;
+                const providedIn = injectableDef && resolveForwardRef(injectableDef.providedIn);
                 if (providedIn === 'any' || providedIn != null && providedIn === this.scope) {
                     records.set(token, record = resolveProvider({ provide: token, useFactory: injectableDef.factory, deps: EMPTY }));
                 }
@@ -21343,7 +21344,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.7+21.sha-acebe92');
+const VERSION = new Version('12.0.0-next.7+25.sha-575f537');
 
 /**
  * @license
@@ -23815,7 +23816,7 @@ function moduleTransitivelyPresent(ngModule, scope) {
     return ngModule._def.modules.indexOf(scope) > -1;
 }
 function targetsModule(ngModule, def) {
-    const providedIn = def.providedIn;
+    const providedIn = resolveForwardRef(def.providedIn);
     return providedIn != null &&
         (providedIn === 'any' || providedIn === ngModule._def.scope ||
             moduleTransitivelyPresent(ngModule, providedIn));
@@ -32267,7 +32268,7 @@ function applyProviderOverridesToNgModule(def) {
         });
         def.modules.forEach(module => {
             providerOverridesWithScope.forEach((override, token) => {
-                if (getInjectableDef(token).providedIn === module) {
+                if (resolveForwardRef(getInjectableDef(token).providedIn) === module) {
                     hasOverrides = true;
                     hasDeprecatedOverrides = hasDeprecatedOverrides || override.deprecatedBehavior;
                 }
@@ -32294,7 +32295,7 @@ function applyProviderOverridesToNgModule(def) {
         if (providerOverridesWithScope.size > 0) {
             let moduleSet = new Set(def.modules);
             providerOverridesWithScope.forEach((override, token) => {
-                if (moduleSet.has(getInjectableDef(token).providedIn)) {
+                if (moduleSet.has(resolveForwardRef(getInjectableDef(token).providedIn))) {
                     let provider = {
                         token: token,
                         flags: override.flags | (hasDeprecatedOverrides ? 4096 /* LazyProvider */ : 0 /* None */),
