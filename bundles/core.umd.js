@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+6.sha-7a49aa5
+ * @license Angular v12.0.0-next.8+7.sha-d641542
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21951,7 +21951,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+6.sha-7a49aa5');
+    var VERSION = new Version('12.0.0-next.8+7.sha-d641542');
 
     /**
      * @license
@@ -26554,52 +26554,26 @@
             _super.prototype.next.call(this, value);
         };
         EventEmitter_.prototype.subscribe = function (observerOrNext, error, complete) {
-            var schedulerFn;
-            var errorFn = function (err) { return null; };
-            var completeFn = function () { return null; };
+            var _a, _b, _c;
+            var nextFn = observerOrNext;
+            var errorFn = error || (function () { return null; });
+            var completeFn = complete;
             if (observerOrNext && typeof observerOrNext === 'object') {
-                schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return observerOrNext.next(value); });
-                } : function (value) {
-                    observerOrNext.next(value);
-                };
-                if (observerOrNext.error) {
-                    errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return observerOrNext.error(err); });
-                    } : function (err) {
-                        observerOrNext.error(err);
-                    };
+                var observer = observerOrNext;
+                nextFn = (_a = observer.next) === null || _a === void 0 ? void 0 : _a.bind(observer);
+                errorFn = (_b = observer.error) === null || _b === void 0 ? void 0 : _b.bind(observer);
+                completeFn = (_c = observer.complete) === null || _c === void 0 ? void 0 : _c.bind(observer);
+            }
+            if (this.__isAsync) {
+                errorFn = _wrapInTimeout(errorFn);
+                if (nextFn) {
+                    nextFn = _wrapInTimeout(nextFn);
                 }
-                if (observerOrNext.complete) {
-                    completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return observerOrNext.complete(); });
-                    } : function () {
-                        observerOrNext.complete();
-                    };
+                if (completeFn) {
+                    completeFn = _wrapInTimeout(completeFn);
                 }
             }
-            else {
-                schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return observerOrNext(value); });
-                } : function (value) {
-                    observerOrNext(value);
-                };
-                if (error) {
-                    errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return error(err); });
-                    } : function (err) {
-                        error(err);
-                    };
-                }
-                if (complete) {
-                    completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return complete(); });
-                    } : function () {
-                        complete();
-                    };
-                }
-            }
-            var sink = _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
+            var sink = _super.prototype.subscribe.call(this, { next: nextFn, error: errorFn, complete: completeFn });
             if (observerOrNext instanceof rxjs.Subscription) {
                 observerOrNext.add(sink);
             }
@@ -26607,6 +26581,11 @@
         };
         return EventEmitter_;
     }(rxjs.Subject));
+    function _wrapInTimeout(fn) {
+        return function (value) {
+            setTimeout(fn, undefined, value);
+        };
+    }
     /**
      * @publicApi
      */
