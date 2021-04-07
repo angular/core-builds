@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+13.sha-d28a391
+ * @license Angular v12.0.0-next.8+16.sha-10a7c87
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -662,8 +662,8 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
-     * in which injectors (if any) it will be available.
+     * Construct an injectable definition which defines how a token will be constructed by the DI
+     * system, and in which injectors (if any) it will be available.
      *
      * This should be assigned to a static `ɵprov` field on a type, which will then be an
      * `InjectableType`.
@@ -838,7 +838,7 @@
      *
      * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
      * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
-     * `InjectableDef`.
+     * injectable definition.
      */
     function injectRootLimpMode(token, notFoundValue, flags) {
         var injectableDef = getInjectableDef(token);
@@ -14100,6 +14100,7 @@
         'ɵɵdefineInjector': ɵɵdefineInjector,
         'ɵɵinject': ɵɵinject,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
+        'resolveForwardRef': resolveForwardRef,
     };
 
     /**
@@ -14113,7 +14114,7 @@
      * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
      * injectable def (`ɵprov`) onto the injectable type.
      */
-    function compileInjectable(type, srcMeta) {
+    function compileInjectable(type, meta) {
         var ngInjectableDef = null;
         var ngFactoryDef = null;
         // if NG_PROV_DEF is already defined on this class then don't overwrite it
@@ -14121,7 +14122,7 @@
             Object.defineProperty(type, NG_PROV_DEF, {
                 get: function () {
                     if (ngInjectableDef === null) {
-                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, srcMeta));
+                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, meta));
                     }
                     return ngInjectableDef;
                 },
@@ -14132,12 +14133,11 @@
             Object.defineProperty(type, NG_FACTORY_DEF, {
                 get: function () {
                     if (ngFactoryDef === null) {
-                        var metadata = getInjectableMetadata(type, srcMeta);
                         var compiler = getCompilerFacade();
                         ngFactoryDef = compiler.compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
-                            name: metadata.name,
-                            type: metadata.type,
-                            typeArgumentCount: metadata.typeArgumentCount,
+                            name: type.name,
+                            type: type,
+                            typeArgumentCount: 0,
                             deps: reflectDependencies(type),
                             target: compiler.FactoryTarget.Injectable
                         });
@@ -14170,26 +14170,22 @@
             type: type,
             typeArgumentCount: 0,
             providedIn: meta.providedIn,
-            userDeps: undefined,
         };
         if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
-            compilerMeta.userDeps = convertDependencies(meta.deps);
+            compilerMeta.deps = convertDependencies(meta.deps);
         }
+        // Check to see if the user explicitly provided a `useXxxx` property.
         if (isUseClassProvider(meta)) {
-            // The user explicitly specified useClass, and may or may not have provided deps.
-            compilerMeta.useClass = resolveForwardRef(meta.useClass);
+            compilerMeta.useClass = meta.useClass;
         }
         else if (isUseValueProvider(meta)) {
-            // The user explicitly specified useValue.
-            compilerMeta.useValue = resolveForwardRef(meta.useValue);
+            compilerMeta.useValue = meta.useValue;
         }
         else if (isUseFactoryProvider(meta)) {
-            // The user explicitly specified useFactory.
             compilerMeta.useFactory = meta.useFactory;
         }
         else if (isUseExistingProvider(meta)) {
-            // The user explicitly specified useExisting.
-            compilerMeta.useExisting = resolveForwardRef(meta.useExisting);
+            compilerMeta.useExisting = meta.useExisting;
         }
         return compilerMeta;
     }
@@ -21922,7 +21918,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+13.sha-d28a391');
+    var VERSION = new Version('12.0.0-next.8+16.sha-10a7c87');
 
     /**
      * @license
@@ -33041,7 +33037,7 @@
     // 1) Locate the providers of an element and check if one of them was overwritten
     // 2) Change the providers of that element
     //
-    // We only create new datastructures if we need to, to keep perf impact
+    // We only create new data structures if we need to, to keep perf impact
     // reasonable.
     function applyProviderOverridesToView(def) {
         if (providerOverrides.size === 0) {
@@ -33094,7 +33090,7 @@
         }
     }
     // Notes about the algorithm:
-    // We only create new datastructures if we need to, to keep perf impact
+    // We only create new data structures if we need to, to keep perf impact
     // reasonable.
     function applyProviderOverridesToNgModule(def) {
         var _a = calcHasOverrides(def), hasOverrides = _a.hasOverrides, hasDeprecatedOverrides = _a.hasDeprecatedOverrides;
@@ -33790,6 +33786,15 @@
         return compiler.compileFactoryDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
     }
     /**
+     * Compiles a partial injectable declaration object into a full injectable definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareInjectable(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileInjectableDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275prov.js", decl);
+    }
+    /**
      * Compiles a partial injector declaration object into a full injector definition object.
      *
      * @codeGenApi
@@ -34169,6 +34174,7 @@
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
     exports.ɵɵngDeclareFactory = ɵɵngDeclareFactory;
+    exports.ɵɵngDeclareInjectable = ɵɵngDeclareInjectable;
     exports.ɵɵngDeclareInjector = ɵɵngDeclareInjector;
     exports.ɵɵngDeclareNgModule = ɵɵngDeclareNgModule;
     exports.ɵɵngDeclarePipe = ɵɵngDeclarePipe;

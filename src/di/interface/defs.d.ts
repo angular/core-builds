@@ -22,7 +22,7 @@ import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, 
  *   deployed to npm, and should be treated as public api.
 
  */
-export interface ɵɵInjectableDef<T> {
+export interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -64,7 +64,7 @@ export interface ɵɵInjectorDef<T> {
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
 /**
- * A `Type` which has an `InjectableDef` static field.
+ * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
  *
  * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
  * `InjectorDef`-based `StaticInjector.
@@ -104,8 +104,8 @@ export interface InjectorTypeWithProviders<T> {
     providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
 }
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
+ * Construct an injectable definition which defines how a token will be constructed by the DI
+ * system, and in which injectors (if any) it will be available.
  *
  * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
@@ -158,7 +158,7 @@ export declare function ɵɵdefineInjector(options: {
  *
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
-export declare function getInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
+export declare function getInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null;
 /**
  * Read the injectable def (`ɵprov`) for `type` or read the `ɵprov` from one of its ancestors.
  *
@@ -167,7 +167,7 @@ export declare function getInjectableDef<T>(type: any): ɵɵInjectableDef<T> | n
  * @deprecated Will be removed in a future version of Angular, where an error will occur in the
  *     scenario if we find the `ɵprov` on an ancestor only.
  */
-export declare function getInheritedInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
+export declare function getInheritedInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null;
 /**
  * Read the injector def type in a way which is immune to accidentally reading inherited value.
  *

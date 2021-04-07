@@ -7,5 +7,5 @@ export declare class Log {
     clear(): void;
     result(): string;
     static ɵfac: i0.ɵɵFactoryDeclaration<Log, never>;
-    static ɵprov: i0.ɵɵInjectableDef<Log>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<Log>;
 }

@@ -62,7 +62,7 @@ export declare class Compiler {
      */
     getModuleId(moduleType: Type<any>): string | undefined;
     static ɵfac: i0.ɵɵFactoryDeclaration<Compiler, never>;
-    static ɵprov: i0.ɵɵInjectableDef<Compiler>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<Compiler>;
 }
 /**
  * Options for creating a compiler

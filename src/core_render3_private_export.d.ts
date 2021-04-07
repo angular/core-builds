@@ -33,7 +33,7 @@ export { Player as ɵPlayer, PlayerFactory as ɵPlayerFactory, PlayerHandler as 
 export { compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, } from './render3/jit/directive';
 export { resetJitOptions as ɵresetJitOptions, } from './render3/jit/jit_options';
 export { compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, patchComponentDefWithScope as ɵpatchComponentDefWithScope, resetCompiledComponents as ɵresetCompiledComponents, transitiveScopesFor as ɵtransitiveScopesFor, } from './render3/jit/module';
-export { FactoryTarget as ɵɵFactoryTarget, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, } from './render3/jit/partial';
+export { FactoryTarget as ɵɵFactoryTarget, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, } from './render3/jit/partial';
 export { compilePipe as ɵcompilePipe, } from './render3/jit/pipe';
 export { Profiler as ɵProfiler, ProfilerEvent as ɵProfilerEvent } from './render3/profiler';
 export { publishDefaultGlobalUtils as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil } from './render3/util/global_utils';

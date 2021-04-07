@@ -18,7 +18,7 @@ export declare function setInjectImplementation(impl: (<T>(token: Type<T> | Abst
  *
  * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
  * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
- * `InjectableDef`.
+ * injectable definition.
  */
 export declare function injectRootLimpMode<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue: T | undefined, flags: InjectFlags): T | null;
 /**

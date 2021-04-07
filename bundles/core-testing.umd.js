@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+13.sha-d28a391
+ * @license Angular v12.0.0-next.8+16.sha-10a7c87
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1399,7 +1399,7 @@
             if (this.overriddenModules.size > 0) {
                 // Module overrides (via `TestBed.overrideModule`) might affect scopes that were previously
                 // calculated and stored in `transitiveCompileScopes`. If module overrides are present,
-                // collect all affected modules and reset scopes to force their re-calculatation.
+                // collect all affected modules and reset scopes to force their re-calculation.
                 var testingModuleDef = this.testModuleType[i0.ɵNG_MOD_DEF];
                 var affectedModules = this.collectModulesAffectedByOverrides(testingModuleDef.imports);
                 if (affectedModules.size > 0) {

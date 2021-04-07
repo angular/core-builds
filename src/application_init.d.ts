@@ -93,5 +93,5 @@ export declare class ApplicationInitStatus {
     readonly done = false;
     constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
     static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationInitStatus, [{ optional: true; }]>;
-    static ɵprov: i0.ɵɵInjectableDef<ApplicationInitStatus>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationInitStatus>;
 }

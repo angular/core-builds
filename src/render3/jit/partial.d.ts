@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { R3DeclareComponentFacade, R3DeclareDirectiveFacade, R3DeclareFactoryFacade, R3DeclareInjectorFacade, R3DeclareNgModuleFacade, R3DeclarePipeFacade } from '../../compiler/compiler_facade';
+import { R3DeclareComponentFacade, R3DeclareDirectiveFacade, R3DeclareFactoryFacade, R3DeclareInjectableFacade, R3DeclareInjectorFacade, R3DeclareNgModuleFacade, R3DeclarePipeFacade } from '../../compiler/compiler_facade';
 /**
  * Compiles a partial directive declaration object into a full directive definition object.
  *
@@ -24,6 +24,12 @@ export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): 
  * @codeGenApi
  */
 export declare function ɵɵngDeclareFactory(decl: R3DeclareFactoryFacade): unknown;
+/**
+ * Compiles a partial injectable declaration object into a full injectable definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjectable(decl: R3DeclareInjectableFacade): unknown;
 /**
  * These enums are used in the partial factory declaration calls.
  */

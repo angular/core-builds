@@ -26,6 +26,7 @@ export interface CompilerFacade {
     compilePipe(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3PipeMetadataFacade): any;
     compilePipeDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, declaration: R3DeclarePipeFacade): any;
     compileInjectable(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3InjectableMetadataFacade): any;
+    compileInjectableDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3DeclareInjectableFacade): any;
     compileInjector(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3InjectorMetadataFacade): any;
     compileInjectorDeclaration(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, declaration: R3DeclareInjectorFacade): any;
     compileNgModule(angularCoreEnv: CoreEnvironment, sourceMapUrl: string, meta: R3NgModuleMetadataFacade): any;
@@ -54,7 +55,9 @@ export declare type StringMap = {
 export declare type StringMapWithRename = {
     [key: string]: string | [string, string];
 };
-export declare type Provider = any;
+export declare type Provider = unknown;
+export declare type Type = Function;
+export declare type OpaqueValue = unknown;
 export declare enum FactoryTarget {
     Directive = 0,
     Component = 1,
@@ -63,7 +66,7 @@ export declare enum FactoryTarget {
     NgModule = 4
 }
 export interface R3DependencyMetadataFacade {
-    token: unknown;
+    token: OpaqueValue;
     attribute: string | null;
     host: boolean;
     optional: boolean;
@@ -71,7 +74,7 @@ export interface R3DependencyMetadataFacade {
     skipSelf: boolean;
 }
 export interface R3DeclareDependencyMetadataFacade {
-    token: unknown;
+    token: OpaqueValue;
     attribute?: boolean;
     host?: boolean;
     optional?: boolean;
@@ -80,23 +83,23 @@ export interface R3DeclareDependencyMetadataFacade {
 }
 export interface R3PipeMetadataFacade {
     name: string;
-    type: any;
+    type: Type;
     pipeName: string;
     pure: boolean;
 }
 export interface R3InjectableMetadataFacade {
     name: string;
-    type: any;
+    type: Type;
     typeArgumentCount: number;
-    providedIn: any;
-    useClass?: any;
-    useFactory?: any;
-    useExisting?: any;
-    useValue?: any;
-    userDeps?: R3DependencyMetadataFacade[];
+    providedIn?: Type | 'root' | 'platform' | 'any' | null;
+    useClass?: OpaqueValue;
+    useFactory?: OpaqueValue;
+    useExisting?: OpaqueValue;
+    useValue?: OpaqueValue;
+    deps?: R3DependencyMetadataFacade[];
 }
 export interface R3NgModuleMetadataFacade {
-    type: any;
+    type: Type;
     bootstrap: Function[];
     declarations: Function[];
     imports: Function[];
@@ -108,13 +111,13 @@ export interface R3NgModuleMetadataFacade {
 }
 export interface R3InjectorMetadataFacade {
     name: string;
-    type: any;
-    providers: any[];
-    imports: any[];
+    type: Type;
+    providers: Provider[];
+    imports: OpaqueValue[];
 }
 export interface R3DirectiveMetadataFacade {
     name: string;
-    type: any;
+    type: Type;
     typeSourceSpan: ParseSourceSpan;
     selector: string | null;
     queries: R3QueryMetadataFacade[];
@@ -122,7 +125,7 @@ export interface R3DirectiveMetadataFacade {
         [key: string]: string;
     };
     propMetadata: {
-        [key: string]: any[];
+        [key: string]: OpaqueValue[];
     };
     lifecycle: {
         usesOnChanges: boolean;
@@ -137,7 +140,7 @@ export interface R3DirectiveMetadataFacade {
 export interface R3ComponentMetadataFacade extends R3DirectiveMetadataFacade {
     template: string;
     preserveWhitespaces: boolean;
-    animations: any[] | undefined;
+    animations: OpaqueValue[] | undefined;
     pipes: Map<string, any>;
     directives: R3UsedDirectiveMetadata[];
     styles: string[];
@@ -146,10 +149,9 @@ export interface R3ComponentMetadataFacade extends R3DirectiveMetadataFacade {
     interpolation?: [string, string];
     changeDetection?: ChangeDetectionStrategy;
 }
-export declare type OpaqueValue = unknown;
 export interface R3DeclareDirectiveFacade {
     selector?: string;
-    type: Function;
+    type: Type;
     inputs?: {
         [classPropertyName: string]: string | [string, string];
     };
@@ -208,15 +210,24 @@ export interface R3UsedDirectiveMetadata {
 }
 export interface R3FactoryDefMetadataFacade {
     name: string;
-    type: any;
+    type: Type;
     typeArgumentCount: number;
     deps: R3DependencyMetadataFacade[] | null;
     target: FactoryTarget;
 }
 export interface R3DeclareFactoryFacade {
-    type: Function;
+    type: Type;
     deps: R3DeclareDependencyMetadataFacade[] | null;
     target: FactoryTarget;
+}
+export interface R3DeclareInjectableFacade {
+    type: Type;
+    providedIn?: Type | 'root' | 'platform' | 'any' | null;
+    useClass?: OpaqueValue;
+    useFactory?: OpaqueValue;
+    useExisting?: OpaqueValue;
+    useValue?: OpaqueValue;
+    deps?: R3DeclareDependencyMetadataFacade[];
 }
 export declare enum ViewEncapsulation {
     Emulated = 0,
@@ -227,10 +238,10 @@ export declare type ChangeDetectionStrategy = number;
 export interface R3QueryMetadataFacade {
     propertyName: string;
     first: boolean;
-    predicate: any | string[];
+    predicate: OpaqueValue | string[];
     descendants: boolean;
     emitDistinctChangesOnly: boolean;
-    read: any | null;
+    read: OpaqueValue | null;
     static: boolean;
 }
 export interface R3DeclareQueryMetadataFacade {
@@ -243,12 +254,12 @@ export interface R3DeclareQueryMetadataFacade {
     emitDistinctChangesOnly?: boolean;
 }
 export interface R3DeclareInjectorFacade {
-    type: Function;
+    type: Type;
     imports?: OpaqueValue[];
     providers?: OpaqueValue[];
 }
 export interface R3DeclareNgModuleFacade {
-    type: Function;
+    type: Type;
     bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
     declarations?: OpaqueValue[] | (() => OpaqueValue[]);
     imports?: OpaqueValue[] | (() => OpaqueValue[]);
@@ -257,7 +268,7 @@ export interface R3DeclareNgModuleFacade {
     id?: OpaqueValue;
 }
 export interface R3DeclarePipeFacade {
-    type: Function;
+    type: Type;
     name: string;
     pure?: boolean;
 }
