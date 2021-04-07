@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+13.sha-d28a391
+ * @license Angular v12.0.0-next.8+16.sha-10a7c87
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -871,8 +871,8 @@ declare abstract class ViewRef extends ChangeDetectorRef {
 export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
+ * Construct an injectable definition which defines how a token will be constructed by the DI
+ * system, and in which injectors (if any) it will be available.
  *
  * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
@@ -975,7 +975,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  *   deployed to npm, and should be treated as public api.
 
  */
-export declare interface ɵɵInjectableDef<T> {
+export declare interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,

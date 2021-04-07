@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+13.sha-d28a391
+ * @license Angular v12.0.0-next.8+16.sha-10a7c87
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -762,7 +762,7 @@ declare const CLEANUP = 7;
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * injectable def (`ɵprov`) onto the injectable type.
  */
-declare function compileInjectable(type: Type<any>, srcMeta?: Injectable): void;
+declare function compileInjectable(type: Type<any>, meta?: Injectable): void;
 
 /**
  * Low-level service for running the angular compiler during runtime
@@ -3322,7 +3322,7 @@ export declare interface InjectableDecorator {
 export declare type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 
 /**
- * A `Type` which has an `InjectableDef` static field.
+ * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
  *
  * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
  * `InjectorDef`-based `StaticInjector.
@@ -5685,7 +5685,7 @@ declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
 }
 
 declare interface R3DeclareDependencyMetadataFacade {
-    token: unknown;
+    token: OpaqueValue;
     attribute?: boolean;
     host?: boolean;
     optional?: boolean;
@@ -5695,7 +5695,7 @@ declare interface R3DeclareDependencyMetadataFacade {
 
 declare interface R3DeclareDirectiveFacade {
     selector?: string;
-    type: Function;
+    type: Type_2;
     inputs?: {
         [classPropertyName: string]: string | [string, string];
     };
@@ -5724,19 +5724,29 @@ declare interface R3DeclareDirectiveFacade {
 }
 
 declare interface R3DeclareFactoryFacade {
-    type: Function;
+    type: Type_2;
     deps: R3DeclareDependencyMetadataFacade[] | null;
     target: ɵɵFactoryTarget;
 }
 
+declare interface R3DeclareInjectableFacade {
+    type: Type_2;
+    providedIn?: Type_2 | 'root' | 'platform' | 'any' | null;
+    useClass?: OpaqueValue;
+    useFactory?: OpaqueValue;
+    useExisting?: OpaqueValue;
+    useValue?: OpaqueValue;
+    deps?: R3DeclareDependencyMetadataFacade[];
+}
+
 declare interface R3DeclareInjectorFacade {
-    type: Function;
+    type: Type_2;
     imports?: OpaqueValue[];
     providers?: OpaqueValue[];
 }
 
 declare interface R3DeclareNgModuleFacade {
-    type: Function;
+    type: Type_2;
     bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
     declarations?: OpaqueValue[] | (() => OpaqueValue[]);
     imports?: OpaqueValue[] | (() => OpaqueValue[]);
@@ -5746,7 +5756,7 @@ declare interface R3DeclareNgModuleFacade {
 }
 
 declare interface R3DeclarePipeFacade {
-    type: Function;
+    type: Type_2;
     name: string;
     pure?: boolean;
 }
@@ -8321,6 +8331,8 @@ export declare interface Type<T> extends Function {
     new (...args: any[]): T;
 }
 
+declare type Type_2 = Function;
+
 /**
  * An interface implemented by all Angular type decorators, which allows them to be used as
  * decorators as well as Angular syntax.
@@ -10542,7 +10554,7 @@ export declare function ɵgetHostElement(componentOrDirective: {}): Element;
  *
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
-export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
+export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null;
 
 /**
  * Returns the matching `LContext` data for a given DOM node, directive or component instance.
@@ -12586,8 +12598,8 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
 }) => never;
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
+ * Construct an injectable definition which defines how a token will be constructed by the DI
+ * system, and in which injectors (if any) it will be available.
  *
  * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
@@ -13033,7 +13045,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  *   deployed to npm, and should be treated as public api.
 
  */
-export declare interface ɵɵInjectableDef<T> {
+export declare interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -13195,6 +13207,13 @@ export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): 
  * @codeGenApi
  */
 export declare function ɵɵngDeclareFactory(decl: R3DeclareFactoryFacade): unknown;
+
+/**
+ * Compiles a partial injectable declaration object into a full injectable definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjectable(decl: R3DeclareInjectableFacade): unknown;
 
 /**
  * Compiles a partial injector declaration object into a full injector definition object.
