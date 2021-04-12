@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+33.sha-6ba67c6
+ * @license Angular v12.0.0-next.8+36.sha-c20db69
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13186,6 +13186,20 @@ export declare function ɵɵnamespaceSVG(): void;
  * @codeGenApi
  */
 export declare function ɵɵnextContext<T = any>(level?: number): T;
+
+/**
+ * Evaluates the class metadata declaration.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareClassMetadata(decl: {
+    type: Type<any>;
+    decorators: any[];
+    ctorParameters?: () => any[];
+    propDecorators?: {
+        [field: string]: any;
+    };
+}): void;
 
 /**
  * Compiles a partial component declaration object into a full component definition object.
