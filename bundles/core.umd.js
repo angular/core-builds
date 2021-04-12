@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+33.sha-6ba67c6
+ * @license Angular v12.0.0-next.8+36.sha-c20db69
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21918,7 +21918,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+33.sha-6ba67c6');
+    var VERSION = new Version('12.0.0-next.8+36.sha-c20db69');
 
     /**
      * @license
@@ -33770,6 +33770,15 @@
         return compiler.compileDirectiveDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
     }
     /**
+     * Evaluates the class metadata declaration.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareClassMetadata(decl) {
+        var _a, _b;
+        setClassMetadata(decl.type, decl.decorators, (_a = decl.ctorParameters) !== null && _a !== void 0 ? _a : null, (_b = decl.propDecorators) !== null && _b !== void 0 ? _b : null);
+    }
+    /**
      * Compiles a partial component declaration object into a full component definition object.
      *
      * @codeGenApi
@@ -34173,6 +34182,7 @@
     exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
     exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
     exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵngDeclareClassMetadata = ɵɵngDeclareClassMetadata;
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
     exports.ɵɵngDeclareFactory = ɵɵngDeclareFactory;

@@ -6,12 +6,26 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { R3DeclareComponentFacade, R3DeclareDirectiveFacade, R3DeclareFactoryFacade, R3DeclareInjectableFacade, R3DeclareInjectorFacade, R3DeclareNgModuleFacade, R3DeclarePipeFacade } from '../../compiler/compiler_facade';
+import { Type } from '../../interface/type';
 /**
  * Compiles a partial directive declaration object into a full directive definition object.
  *
  * @codeGenApi
  */
 export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+/**
+ * Evaluates the class metadata declaration.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareClassMetadata(decl: {
+    type: Type<any>;
+    decorators: any[];
+    ctorParameters?: () => any[];
+    propDecorators?: {
+        [field: string]: any;
+    };
+}): void;
 /**
  * Compiles a partial component declaration object into a full component definition object.
  *
