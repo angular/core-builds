@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+31.sha-ebc80b3
+ * @license Angular v12.0.0-next.8+32.sha-aa0e54f
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21947,7 +21947,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+31.sha-ebc80b3');
+    var VERSION = new Version('12.0.0-next.8+32.sha-aa0e54f');
 
     /**
      * @license
@@ -33561,9 +33561,11 @@
         };
         DebugRenderer2.prototype.destroyNode = function (node) {
             var debugNode = getDebugNode$1(node);
-            removeDebugNodeFromIndex(debugNode);
-            if (debugNode instanceof DebugNode__PRE_R3__) {
-                debugNode.listeners.length = 0;
+            if (debugNode) {
+                removeDebugNodeFromIndex(debugNode);
+                if (debugNode instanceof DebugNode__PRE_R3__) {
+                    debugNode.listeners.length = 0;
+                }
             }
             if (this.delegate.destroyNode) {
                 this.delegate.destroyNode(node);
