@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+72.sha-1d12c50
+ * @license Angular v12.0.0-next.8+74.sha-f7e391a
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10511,7 +10511,7 @@ export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
 export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
 
 /**
- * Retrieves directive instances associated with a given DOM element. Does not include
+ * Retrieves directive instances associated with a given DOM node. Does not include
  * component instances.
  *
  * @usageNotes
@@ -10523,17 +10523,17 @@ export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
  * </my-app>
  * ```
  * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
- * directive that is associated with the DOM element.
+ * directive that is associated with the DOM node.
  *
  * Calling `getDirectives` on `<my-comp>` will return an empty array.
  *
- * @param element DOM element for which to get the directives.
- * @returns Array of directives associated with the element.
+ * @param node DOM node for which to get the directives.
+ * @returns Array of directives associated with the node.
  *
  * @publicApi
  * @globalApi ng
  */
-export declare function ɵgetDirectives(element: Element): {}[];
+export declare function ɵgetDirectives(node: Node): {}[];
 
 /**
  * Retrieves the host element of a component or directive instance.

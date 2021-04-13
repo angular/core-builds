@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+72.sha-1d12c50
+ * @license Angular v12.0.0-next.8+74.sha-f7e391a
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12506,7 +12506,7 @@
         return providerTokens;
     }
     /**
-     * Retrieves directive instances associated with a given DOM element. Does not include
+     * Retrieves directive instances associated with a given DOM node. Does not include
      * component instances.
      *
      * @usageNotes
@@ -12518,24 +12518,71 @@
      * </my-app>
      * ```
      * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
-     * directive that is associated with the DOM element.
+     * directive that is associated with the DOM node.
      *
      * Calling `getDirectives` on `<my-comp>` will return an empty array.
      *
-     * @param element DOM element for which to get the directives.
-     * @returns Array of directives associated with the element.
+     * @param node DOM node for which to get the directives.
+     * @returns Array of directives associated with the node.
      *
      * @publicApi
      * @globalApi ng
      */
-    function getDirectives(element) {
-        var context = loadLContext(element);
+    function getDirectives(node) {
+        // Skip text nodes because we can't have directives associated with them.
+        if (node instanceof Text) {
+            return [];
+        }
+        var context = loadLContext(node, false);
+        if (context === null) {
+            return [];
+        }
+        var lView = context.lView;
+        var tView = lView[TVIEW];
+        var nodeIndex = context.nodeIndex;
+        if (!(tView === null || tView === void 0 ? void 0 : tView.data[nodeIndex])) {
+            return [];
+        }
         if (context.directives === undefined) {
-            context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
+            context.directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
         }
         // The `directives` in this case are a named array called `LComponentView`. Clone the
         // result so we don't expose an internal data structure in the user's console.
         return context.directives === null ? [] : __spreadArray([], __read(context.directives));
+    }
+    /**
+     * Returns the debug (partial) metadata for a particular directive or component instance.
+     * The function accepts an instance of a directive or component and returns the corresponding
+     * metadata.
+     *
+     * @param directiveOrComponentInstance Instance of a directive or component
+     * @returns metadata of the passed directive or component
+     *
+     * @publicApi
+     * @globalApi ng
+     */
+    function getDirectiveMetadata(directiveOrComponentInstance) {
+        var constructor = directiveOrComponentInstance.constructor;
+        if (!constructor) {
+            throw new Error('Unable to find the instance constructor');
+        }
+        // In case a component inherits from a directive, we may have component and directive metadata
+        // To ensure we don't get the metadata of the directive, we want to call `getComponentDef` first.
+        var componentDef = getComponentDef(constructor);
+        if (componentDef) {
+            return {
+                inputs: componentDef.inputs,
+                outputs: componentDef.outputs,
+                encapsulation: componentDef.encapsulation,
+                changeDetection: componentDef.onPush ? exports.ChangeDetectionStrategy.OnPush :
+                    exports.ChangeDetectionStrategy.Default
+            };
+        }
+        var directiveDef = getDirectiveDef(constructor);
+        if (directiveDef) {
+            return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
+        }
+        return null;
     }
     function loadLContext(target, throwOnNotFound) {
         if (throwOnNotFound === void 0) { throwOnNotFound = true; }
@@ -12775,6 +12822,7 @@
              * removed completely.
              */
             publishGlobalUtil('ɵsetProfiler', setProfiler);
+            publishGlobalUtil('getDirectiveMetadata', getDirectiveMetadata);
             publishGlobalUtil('getComponent', getComponent);
             publishGlobalUtil('getContext', getContext);
             publishGlobalUtil('getListeners', getListeners);
@@ -21950,7 +21998,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+72.sha-1d12c50');
+    var VERSION = new Version('12.0.0-next.8+74.sha-f7e391a');
 
     /**
      * @license
@@ -28059,7 +28107,7 @@
                     // `directive` can be null in the case of abstract directives as a base class
                     // that use `@Directive()` with no selector. In that case, pass empty object to the
                     // `directiveMetadata` function instead of null.
-                    var meta = getDirectiveMetadata(type, directive || {});
+                    var meta = getDirectiveMetadata$1(type, directive || {});
                     ngDirectiveDef =
                         getCompilerFacade().compileDirective(angularCoreEnv, meta.sourceMapUrl, meta.metadata);
                 }
@@ -28069,7 +28117,7 @@
             configurable: !!ngDevMode,
         });
     }
-    function getDirectiveMetadata(type, metadata) {
+    function getDirectiveMetadata$1(type, metadata) {
         var name = type && type.name;
         var sourceMapUrl = "ng:///" + name + "/\u0275dir.js";
         var compiler = getCompilerFacade();
@@ -28085,7 +28133,7 @@
         Object.defineProperty(type, NG_FACTORY_DEF, {
             get: function () {
                 if (ngFactoryDef === null) {
-                    var meta = getDirectiveMetadata(type, metadata);
+                    var meta = getDirectiveMetadata$1(type, metadata);
                     var compiler = getCompilerFacade();
                     ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", {
                         name: meta.metadata.name,
