@@ -5,7 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ChangeDetectionStrategy } from '../../change_detection/constants';
 import { Injector } from '../../di/injector';
+import { ViewEncapsulation } from '../../metadata/view';
 import { LContext } from '../interfaces/context';
 import { DebugNode, LView } from '../interfaces/view';
 /**
@@ -93,7 +95,7 @@ export declare function getInjector(elementOrDir: Element | {}): Injector;
  */
 export declare function getInjectionTokens(element: Element): any[];
 /**
- * Retrieves directive instances associated with a given DOM element. Does not include
+ * Retrieves directive instances associated with a given DOM node. Does not include
  * component instances.
  *
  * @usageNotes
@@ -105,17 +107,55 @@ export declare function getInjectionTokens(element: Element): any[];
  * </my-app>
  * ```
  * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
- * directive that is associated with the DOM element.
+ * directive that is associated with the DOM node.
  *
  * Calling `getDirectives` on `<my-comp>` will return an empty array.
  *
- * @param element DOM element for which to get the directives.
- * @returns Array of directives associated with the element.
+ * @param node DOM node for which to get the directives.
+ * @returns Array of directives associated with the node.
  *
  * @publicApi
  * @globalApi ng
  */
-export declare function getDirectives(element: Element): {}[];
+export declare function getDirectives(node: Node): {}[];
+/**
+ * Partial metadata for a given directive instance.
+ * This information might be useful for debugging purposes or tooling.
+ * Currently only `inputs` and `outputs` metadata is available.
+ *
+ * @publicApi
+ */
+export interface DirectiveDebugMetadata {
+    inputs: Record<string, string>;
+    outputs: Record<string, string>;
+}
+/**
+ * Partial metadata for a given component instance.
+ * This information might be useful for debugging purposes or tooling.
+ * Currently the following fields are available:
+ *  - inputs
+ *  - outputs
+ *  - encapsulation
+ *  - changeDetection
+ *
+ * @publicApi
+ */
+export interface ComponentDebugMetadata extends DirectiveDebugMetadata {
+    encapsulation: ViewEncapsulation;
+    changeDetection: ChangeDetectionStrategy;
+}
+/**
+ * Returns the debug (partial) metadata for a particular directive or component instance.
+ * The function accepts an instance of a directive or component and returns the corresponding
+ * metadata.
+ *
+ * @param directiveOrComponentInstance Instance of a directive or component
+ * @returns metadata of the passed directive or component
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+export declare function getDirectiveMetadata(directiveOrComponentInstance: any): ComponentDebugMetadata | DirectiveDebugMetadata | null;
 /**
  * Returns LContext associated with a target passed as an argument.
  * Throws if a given target doesn't have associated LContext.
