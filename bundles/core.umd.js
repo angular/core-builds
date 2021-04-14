@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.4+10.sha-69afeb3
+ * @license Angular v12.0.0-next.8+99.sha-886bf37
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -151,11 +151,13 @@
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b)
-                if (b.hasOwnProperty(p))
+                if (Object.prototype.hasOwnProperty.call(b, p))
                     d[p] = b[p]; };
         return extendStatics(d, b);
     };
     function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -298,10 +300,10 @@
             k2 = k;
         o[k2] = m[k];
     });
-    function __exportStar(m, exports) {
+    function __exportStar(m, o) {
         for (var p in m)
-            if (p !== "default" && !exports.hasOwnProperty(p))
-                __createBinding(exports, m, p);
+            if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+                __createBinding(o, m, p);
     }
     function __values(o) {
         var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
@@ -341,11 +343,13 @@
         }
         return ar;
     }
+    /** @deprecated */
     function __spread() {
         for (var ar = [], i = 0; i < arguments.length; i++)
             ar = ar.concat(__read(arguments[i]));
         return ar;
     }
+    /** @deprecated */
     function __spreadArrays() {
         for (var s = 0, i = 0, il = arguments.length; i < il; i++)
             s += arguments[i].length;
@@ -354,7 +358,11 @@
                 r[k] = a[j];
         return r;
     }
-    ;
+    function __spreadArray(to, from) {
+        for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+            to[j] = from[i];
+        return to;
+    }
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
     }
@@ -411,7 +419,7 @@
         var result = {};
         if (mod != null)
             for (var k in mod)
-                if (Object.hasOwnProperty.call(mod, k))
+                if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
                     __createBinding(result, mod, k);
         __setModuleDefault(result, mod);
         return result;
@@ -419,18 +427,21 @@
     function __importDefault(mod) {
         return (mod && mod.__esModule) ? mod : { default: mod };
     }
-    function __classPrivateFieldGet(receiver, privateMap) {
-        if (!privateMap.has(receiver)) {
-            throw new TypeError("attempted to get private field on non-instance");
-        }
-        return privateMap.get(receiver);
+    function __classPrivateFieldGet(receiver, state, kind, f) {
+        if (kind === "a" && !f)
+            throw new TypeError("Private accessor was defined without a getter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+            throw new TypeError("Cannot read private member from an object whose class did not declare it");
+        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
     }
-    function __classPrivateFieldSet(receiver, privateMap, value) {
-        if (!privateMap.has(receiver)) {
-            throw new TypeError("attempted to set private field on non-instance");
-        }
-        privateMap.set(receiver, value);
-        return value;
+    function __classPrivateFieldSet(receiver, state, value, kind, f) {
+        if (kind === "m")
+            throw new TypeError("Private method is not writable");
+        if (kind === "a" && !f)
+            throw new TypeError("Private accessor was defined without a setter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+            throw new TypeError("Cannot write private member to an object whose class did not declare it");
+        return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
     }
 
     /**
@@ -654,8 +665,8 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
-     * in which injectors (if any) it will be available.
+     * Construct an injectable definition which defines how a token will be constructed by the DI
+     * system, and in which injectors (if any) it will be available.
      *
      * This should be assigned to a static `ɵprov` field on a type, which will then be an
      * `InjectableType`.
@@ -830,7 +841,7 @@
      *
      * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
      * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
-     * `InjectableDef`.
+     * injectable definition.
      */
     function injectRootLimpMode(token, notFoundValue, flags) {
         var injectableDef = getInjectableDef(token);
@@ -1486,7 +1497,7 @@
     var TViewTypeAsString = [
         'Root',
         'Component',
-        'Embedded',
+        'Embedded', // 2
     ];
     // Note: This hack is necessary so we don't erroneously get a circular dependency
     // failure based on types.
@@ -1789,6 +1800,42 @@
     function setSimpleChangesStore(instance, store) {
         return instance[SIMPLE_CHANGES_STORE] = store;
     }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var profilerCallback = null;
+    /**
+     * Sets the callback function which will be invoked before and after performing certain actions at
+     * runtime (for example, before and after running change detection).
+     *
+     * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+     * The contract of the function might be changed in any release and/or the function can be removed
+     * completely.
+     *
+     * @param profiler function provided by the caller or null value to disable profiling.
+     */
+    var setProfiler = function (profiler) {
+        profilerCallback = profiler;
+    };
+    /**
+     * Profiler function which wraps user code executed by the runtime.
+     *
+     * @param event ProfilerEvent corresponding to the execution context
+     * @param instance component instance
+     * @param hookOrListener lifecycle hook function or output listener. The value depends on the
+     *  execution context
+     * @returns
+     */
+    var profiler = function (event, instance, hookOrListener) {
+        if (profilerCallback != null /* both `null` and `undefined` */) {
+            profilerCallback(event, instance, hookOrListener);
+        }
+    };
 
     /**
      * @license
@@ -2759,11 +2806,23 @@
                 (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
                 (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
                 currentView[FLAGS] += 2048 /* IndexWithinInitPhaseIncrementer */;
-                hook.call(directive);
+                profiler(4 /* LifecycleHookStart */, directive, hook);
+                try {
+                    hook.call(directive);
+                }
+                finally {
+                    profiler(5 /* LifecycleHookEnd */, directive, hook);
+                }
             }
         }
         else {
-            hook.call(directive);
+            profiler(4 /* LifecycleHookStart */, directive, hook);
+            try {
+                hook.call(directive);
+            }
+            finally {
+                profiler(5 /* LifecycleHookEnd */, directive, hook);
+            }
         }
     }
 
@@ -3609,7 +3668,7 @@
                         lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
                 }
                 try {
-                    var value = bloomHash();
+                    var value = bloomHash(flags);
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
                         throwProviderNotFoundError(token);
                     }
@@ -3928,13 +3987,13 @@
                     args[_i] = arguments[_i];
                 }
                 if (this instanceof DecoratorFactory) {
-                    metaCtor.call.apply(metaCtor, __spread([this], args));
+                    metaCtor.call.apply(metaCtor, __spreadArray([this], __read(args)));
                     return this;
                 }
-                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spread([void 0], args)))();
+                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spreadArray([void 0], __read(args))))();
                 return function TypeDecorator(cls) {
                     if (typeFn)
-                        typeFn.apply(void 0, __spread([cls], args));
+                        typeFn.apply(void 0, __spreadArray([cls], __read(args)));
                     // Use of Object.defineProperty is important since it creates non-enumerable property which
                     // prevents the property is copied during subclassing.
                     var annotations = cls.hasOwnProperty(ANNOTATIONS) ?
@@ -3961,7 +4020,7 @@
                 args[_i] = arguments[_i];
             }
             if (props) {
-                var values = props.apply(void 0, __spread(args));
+                var values = props.apply(void 0, __spreadArray([], __read(args)));
                 for (var propName in values) {
                     this[propName] = values[propName];
                 }
@@ -3980,7 +4039,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spread([void 0], args)))();
+                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spreadArray([void 0], __read(args))))();
                 ParamDecorator.annotation = annotationInstance;
                 return ParamDecorator;
                 function ParamDecorator(cls, unusedKey, index) {
@@ -4018,7 +4077,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spread([void 0], args)))();
+                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spreadArray([void 0], __read(args))))();
                 function PropDecorator(target, name) {
                     var constructor = target.constructor;
                     // Use of Object.defineProperty is important because it creates a non-enumerable property
@@ -4029,7 +4088,7 @@
                     meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
                     meta[name].unshift(decoratorInstance);
                     if (additionalProcessing)
-                        additionalProcessing.apply(void 0, __spread([target, name], args));
+                        additionalProcessing.apply(void 0, __spreadArray([target, name], __read(args)));
                 }
                 return PropDecorator;
             }
@@ -4184,9 +4243,8 @@
      */
     var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
     // Stores the default value of `emitDistinctChangesOnly` when the `emitDistinctChangesOnly` is not
-    // explicitly set. This value will be changed to `true` in v12.
-    // TODO(misko): switch the default in v12 to `true`. See: packages/compiler/src/core.ts
-    var emitDistinctChangesOnlyDefaultValue = false;
+    // explicitly set.
+    var emitDistinctChangesOnlyDefaultValue = true;
     /**
      * Base class for query metadata.
      *
@@ -4254,21 +4312,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var R3ResolvedDependencyType;
-    (function (R3ResolvedDependencyType) {
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Token"] = 0] = "Token";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Attribute"] = 1] = "Attribute";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["ChangeDetectorRef"] = 2] = "ChangeDetectorRef";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Invalid"] = 3] = "Invalid";
-    })(R3ResolvedDependencyType || (R3ResolvedDependencyType = {}));
-    var R3FactoryTarget;
-    (function (R3FactoryTarget) {
-        R3FactoryTarget[R3FactoryTarget["Directive"] = 0] = "Directive";
-        R3FactoryTarget[R3FactoryTarget["Component"] = 1] = "Component";
-        R3FactoryTarget[R3FactoryTarget["Injectable"] = 2] = "Injectable";
-        R3FactoryTarget[R3FactoryTarget["Pipe"] = 3] = "Pipe";
-        R3FactoryTarget[R3FactoryTarget["NgModule"] = 4] = "NgModule";
-    })(R3FactoryTarget || (R3FactoryTarget = {}));
+    (function (FactoryTarget) {
+        FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
+        FactoryTarget[FactoryTarget["Component"] = 1] = "Component";
+        FactoryTarget[FactoryTarget["Injectable"] = 2] = "Injectable";
+        FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
+        FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
+    })(exports.ɵɵFactoryTarget || (exports.ɵɵFactoryTarget = {}));
     var ViewEncapsulation;
     (function (ViewEncapsulation) {
         ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
@@ -4665,14 +4715,21 @@
      *     var _this = _super.apply(this, arguments) || this;
      * ```
      *
+     * downleveled to ES5 with `downlevelIteration` for TypeScript < 4.2:
      * ```
      *   function MyClass() {
      *     var _this = _super.apply(this, __spread(arguments)) || this;
      * ```
      *
+     * or downleveled to ES5 with `downlevelIteration` for TypeScript >= 4.2:
+     * ```
+     *   function MyClass() {
+     *     var _this = _super.apply(this, __spreadArray([], __read(arguments))) || this;
+     * ```
+     *
      * More details can be found in: https://github.com/angular/angular/issues/38453.
      */
-    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|[^()]+\(arguments\))\)/;
+    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|(?:[^()]+\(\[\],)?[^()]+\(arguments\))\)/;
     /** Regular expression that detects ES2015 classes which extend from other classes. */
     var ES2015_INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
     /**
@@ -4711,7 +4768,7 @@
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                return new (t.bind.apply(t, __spread([void 0], args)))();
+                return new (t.bind.apply(t, __spreadArray([void 0], __read(args))))();
             };
         };
         /** @internal */
@@ -4865,9 +4922,9 @@
                 Object.keys(ownPropMetadata).forEach(function (propName) {
                     var decorators = [];
                     if (propMetadata.hasOwnProperty(propName)) {
-                        decorators.push.apply(decorators, __spread(propMetadata[propName]));
+                        decorators.push.apply(decorators, __spreadArray([], __read(propMetadata[propName])));
                     }
-                    decorators.push.apply(decorators, __spread(ownPropMetadata[propName]));
+                    decorators.push.apply(decorators, __spreadArray([], __read(ownPropMetadata[propName])));
                     propMetadata[propName] = decorators;
                 });
             }
@@ -4923,7 +4980,7 @@
             var decoratorType = decoratorInvocation.type;
             var annotationCls = decoratorType.annotationCls;
             var annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
-            return new (annotationCls.bind.apply(annotationCls, __spread([void 0], annotationArgs)))();
+            return new (annotationCls.bind.apply(annotationCls, __spreadArray([void 0], __read(annotationArgs))))();
         });
     }
     function getParentCtor(ctor) {
@@ -5188,22 +5245,17 @@
         return convertDependencies(getReflect().parameters(type));
     }
     function convertDependencies(deps) {
-        var compiler = getCompilerFacade();
-        return deps.map(function (dep) { return reflectDependency(compiler, dep); });
+        return deps.map(function (dep) { return reflectDependency(dep); });
     }
-    function reflectDependency(compiler, dep) {
+    function reflectDependency(dep) {
         var meta = {
             token: null,
+            attribute: null,
             host: false,
             optional: false,
-            resolved: compiler.R3ResolvedDependencyType.Token,
             self: false,
             skipSelf: false,
         };
-        function setTokenAndResolvedType(token) {
-            meta.resolved = compiler.R3ResolvedDependencyType.Token;
-            meta.token = token;
-        }
         if (Array.isArray(dep) && dep.length > 0) {
             for (var j = 0; j < dep.length; j++) {
                 var param = dep[j];
@@ -5231,24 +5283,18 @@
                     if (param.attributeName === undefined) {
                         throw new Error("Attribute name must be defined.");
                     }
-                    meta.token = param.attributeName;
-                    meta.resolved = compiler.R3ResolvedDependencyType.Attribute;
-                }
-                else if (param.__ChangeDetectorRef__ === true) {
-                    meta.token = param;
-                    meta.resolved = compiler.R3ResolvedDependencyType.ChangeDetectorRef;
+                    meta.attribute = param.attributeName;
                 }
                 else {
-                    setTokenAndResolvedType(param);
+                    meta.token = param;
                 }
             }
         }
         else if (dep === undefined || (Array.isArray(dep) && dep.length === 0)) {
-            meta.token = undefined;
-            meta.resolved = R3ResolvedDependencyType.Invalid;
+            meta.token = null;
         }
         else {
-            setTokenAndResolvedType(dep);
+            meta.token = dep;
         }
         return meta;
     }
@@ -5454,7 +5500,7 @@
         if (!_global.trustedTypes) {
             // In environments that don't support Trusted Types, fall back to the most
             // straightforward implementation:
-            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+            return new (Function.bind.apply(Function, __spreadArray([void 0], __read(args))))();
         }
         // Chrome currently does not support passing TrustedScript to the Function
         // constructor. The following implements the workaround proposed on the page
@@ -5472,7 +5518,7 @@
             // a TrustedScript to eval just returns the TrustedScript back without
             // evaluating it. In that case, fall back to the most straightforward
             // implementation:
-            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+            return new (Function.bind.apply(Function, __spreadArray([void 0], __read(args))))();
         }
         // To completely mimic the behavior of calling "new Function", two more
         // things need to happen:
@@ -6746,7 +6792,7 @@
         for (var _i = 1; _i < arguments.length; _i++) {
             values[_i - 1] = arguments[_i];
         }
-        console.error.apply(console, __spread(values));
+        console.error.apply(console, __spreadArray([], __read(values)));
     }
 
     /**
@@ -9998,17 +10044,22 @@
     }
     function executeTemplate(tView, lView, templateFn, rf, context) {
         var prevSelectedIndex = getSelectedIndex();
+        var isUpdatePhase = rf & 2 /* Update */;
         try {
             setSelectedIndex(-1);
-            if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
+            if (isUpdatePhase && lView.length > HEADER_OFFSET) {
                 // When we're updating, inherently select 0 so we don't
                 // have to generate that instruction for most update blocks.
                 selectIndexInternal(tView, lView, HEADER_OFFSET, isInCheckNoChangesMode());
             }
+            var preHookType = isUpdatePhase ? 2 /* TemplateUpdateStart */ : 0 /* TemplateCreateStart */;
+            profiler(preHookType, context);
             templateFn(rf, context);
         }
         finally {
             setSelectedIndex(prevSelectedIndex);
+            var postHookType = isUpdatePhase ? 3 /* TemplateUpdateEnd */ : 1 /* TemplateCreateEnd */;
+            profiler(postHookType, context);
         }
     }
     //////////////////////////
@@ -11871,11 +11922,12 @@
             if (!def.providedIn) {
                 return false;
             }
-            else if (typeof def.providedIn === 'string') {
-                return def.providedIn === 'any' || (def.providedIn === this.scope);
+            var providedIn = resolveForwardRef(def.providedIn);
+            if (typeof providedIn === 'string') {
+                return providedIn === 'any' || (providedIn === this.scope);
             }
             else {
-                return this.injectorDefTypes.has(def.providedIn);
+                return this.injectorDefTypes.has(providedIn);
             }
         };
         return R3Injector;
@@ -11944,7 +11996,7 @@
                 factory = function () { return resolveForwardRef(provider.useValue); };
             }
             else if (isFactoryProvider(provider)) {
-                factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
+                factory = function () { return provider.useFactory.apply(provider, __spreadArray([], __read(injectArgs(provider.deps || [])))); };
             }
             else if (isExistingProvider(provider)) {
                 factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
@@ -11956,7 +12008,7 @@
                     throwInvalidProviderError(ngModuleType, providers, provider);
                 }
                 if (hasDeps(provider)) {
-                    factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
+                    factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spreadArray([void 0], __read(injectArgs(provider.deps)))))(); };
                 }
                 else {
                     return getFactoryDef(classRef_1) || injectableDefOrInjectorDefFactory(classRef_1);
@@ -12087,7 +12139,7 @@
                 // This means we have never seen this record, see if it is tree shakable provider.
                 var injectableDef = getInjectableDef(token);
                 if (injectableDef) {
-                    var providedIn = injectableDef && injectableDef.providedIn;
+                    var providedIn = injectableDef && resolveForwardRef(injectableDef.providedIn);
                     if (providedIn === 'any' || providedIn != null && providedIn === this.scope) {
                         records.set(token, record = resolveProvider({ provide: token, useFactory: injectableDef.factory, deps: EMPTY }));
                     }
@@ -12256,7 +12308,7 @@
                         !childRecord && !(options & 4 /* CheckParent */) ? Injector.NULL : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, exports.InjectFlags.Default));
                     }
                 }
-                record.value = value = useNew ? new (fn.bind.apply(fn, __spread([void 0], deps)))() : fn.apply(obj, deps);
+                record.value = value = useNew ? new (fn.bind.apply(fn, __spreadArray([void 0], __read(deps))))() : fn.apply(obj, deps);
             }
         }
         else if (!(flags & exports.InjectFlags.Self)) {
@@ -12406,7 +12458,7 @@
      * @globalApi ng
      */
     function getRootComponents(elementOrDir) {
-        return __spread(getRootContext(elementOrDir).components);
+        return __spreadArray([], __read(getRootContext(elementOrDir).components));
     }
     /**
      * Retrieves an `Injector` associated with an element, component or directive instance.
@@ -12454,7 +12506,7 @@
         return providerTokens;
     }
     /**
-     * Retrieves directive instances associated with a given DOM element. Does not include
+     * Retrieves directive instances associated with a given DOM node. Does not include
      * component instances.
      *
      * @usageNotes
@@ -12466,24 +12518,71 @@
      * </my-app>
      * ```
      * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
-     * directive that is associated with the DOM element.
+     * directive that is associated with the DOM node.
      *
      * Calling `getDirectives` on `<my-comp>` will return an empty array.
      *
-     * @param element DOM element for which to get the directives.
-     * @returns Array of directives associated with the element.
+     * @param node DOM node for which to get the directives.
+     * @returns Array of directives associated with the node.
      *
      * @publicApi
      * @globalApi ng
      */
-    function getDirectives(element) {
-        var context = loadLContext(element);
+    function getDirectives(node) {
+        // Skip text nodes because we can't have directives associated with them.
+        if (node instanceof Text) {
+            return [];
+        }
+        var context = loadLContext(node, false);
+        if (context === null) {
+            return [];
+        }
+        var lView = context.lView;
+        var tView = lView[TVIEW];
+        var nodeIndex = context.nodeIndex;
+        if (!(tView === null || tView === void 0 ? void 0 : tView.data[nodeIndex])) {
+            return [];
+        }
         if (context.directives === undefined) {
-            context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
+            context.directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
         }
         // The `directives` in this case are a named array called `LComponentView`. Clone the
         // result so we don't expose an internal data structure in the user's console.
-        return context.directives === null ? [] : __spread(context.directives);
+        return context.directives === null ? [] : __spreadArray([], __read(context.directives));
+    }
+    /**
+     * Returns the debug (partial) metadata for a particular directive or component instance.
+     * The function accepts an instance of a directive or component and returns the corresponding
+     * metadata.
+     *
+     * @param directiveOrComponentInstance Instance of a directive or component
+     * @returns metadata of the passed directive or component
+     *
+     * @publicApi
+     * @globalApi ng
+     */
+    function getDirectiveMetadata(directiveOrComponentInstance) {
+        var constructor = directiveOrComponentInstance.constructor;
+        if (!constructor) {
+            throw new Error('Unable to find the instance constructor');
+        }
+        // In case a component inherits from a directive, we may have component and directive metadata
+        // To ensure we don't get the metadata of the directive, we want to call `getComponentDef` first.
+        var componentDef = getComponentDef(constructor);
+        if (componentDef) {
+            return {
+                inputs: componentDef.inputs,
+                outputs: componentDef.outputs,
+                encapsulation: componentDef.encapsulation,
+                changeDetection: componentDef.onPush ? exports.ChangeDetectionStrategy.OnPush :
+                    exports.ChangeDetectionStrategy.Default
+            };
+        }
+        var directiveDef = getDirectiveDef(constructor);
+        if (directiveDef) {
+            return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
+        }
+        return null;
     }
     function loadLContext(target, throwOnNotFound) {
         if (throwOnNotFound === void 0) { throwOnNotFound = true; }
@@ -12717,6 +12816,13 @@
     function publishDefaultGlobalUtils() {
         if (!_published) {
             _published = true;
+            /**
+             * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+             * The contract of the function might be changed in any release and/or the function can be
+             * removed completely.
+             */
+            publishGlobalUtil('ɵsetProfiler', setProfiler);
+            publishGlobalUtil('getDirectiveMetadata', getDirectiveMetadata);
             publishGlobalUtil('getComponent', getComponent);
             publishGlobalUtil('getContext', getContext);
             publishGlobalUtil('getListeners', getListeners);
@@ -13102,6 +13208,8 @@
     var COPY_DIRECTIVE_FIELDS = [
         // The child class should use the providers of its parent.
         'providersResolver',
+        // Not listed here are any fields which are handled by the `ɵɵInheritDefinitionFeature`, such
+        // as inputs, outputs, and host binding functions.
     ];
     /**
      * Fields which exist only on component definitions, and need to be copied from parent to child
@@ -13940,7 +14048,7 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spreadArray([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], __read(interpolationInBetween)));
             }
         }
         return ɵɵattributeInterpolateV;
@@ -14055,6 +14163,7 @@
         'ɵɵdefineInjector': ɵɵdefineInjector,
         'ɵɵinject': ɵɵinject,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
+        'resolveForwardRef': resolveForwardRef,
     };
 
     /**
@@ -14068,7 +14177,7 @@
      * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
      * injectable def (`ɵprov`) onto the injectable type.
      */
-    function compileInjectable(type, srcMeta) {
+    function compileInjectable(type, meta) {
         var ngInjectableDef = null;
         var ngFactoryDef = null;
         // if NG_PROV_DEF is already defined on this class then don't overwrite it
@@ -14076,7 +14185,7 @@
             Object.defineProperty(type, NG_PROV_DEF, {
                 get: function () {
                     if (ngInjectableDef === null) {
-                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, srcMeta));
+                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, meta));
                     }
                     return ngInjectableDef;
                 },
@@ -14087,15 +14196,13 @@
             Object.defineProperty(type, NG_FACTORY_DEF, {
                 get: function () {
                     if (ngFactoryDef === null) {
-                        var metadata = getInjectableMetadata(type, srcMeta);
                         var compiler = getCompilerFacade();
                         ngFactoryDef = compiler.compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
-                            name: metadata.name,
-                            type: metadata.type,
-                            typeArgumentCount: metadata.typeArgumentCount,
+                            name: type.name,
+                            type: type,
+                            typeArgumentCount: 0,
                             deps: reflectDependencies(type),
-                            injectFn: 'inject',
-                            target: compiler.R3FactoryTarget.Injectable
+                            target: compiler.FactoryTarget.Injectable
                         });
                     }
                     return ngFactoryDef;
@@ -14127,26 +14234,22 @@
             type: type,
             typeArgumentCount: 0,
             providedIn: meta.providedIn,
-            userDeps: undefined,
         };
         if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
-            compilerMeta.userDeps = convertDependencies(meta.deps);
+            compilerMeta.deps = convertDependencies(meta.deps);
         }
+        // Check to see if the user explicitly provided a `useXxxx` property.
         if (isUseClassProvider(meta)) {
-            // The user explicitly specified useClass, and may or may not have provided deps.
-            compilerMeta.useClass = resolveForwardRef(meta.useClass);
+            compilerMeta.useClass = meta.useClass;
         }
         else if (isUseValueProvider(meta)) {
-            // The user explicitly specified useValue.
-            compilerMeta.useValue = resolveForwardRef(meta.useValue);
+            compilerMeta.useValue = meta.useValue;
         }
         else if (isUseFactoryProvider(meta)) {
-            // The user explicitly specified useFactory.
             compilerMeta.useFactory = meta.useFactory;
         }
         else if (isUseExistingProvider(meta)) {
-            // The user explicitly specified useExisting.
-            compilerMeta.useExisting = resolveForwardRef(meta.useExisting);
+            compilerMeta.useExisting = meta.useExisting;
         }
         return compilerMeta;
     }
@@ -14158,7 +14261,7 @@
             var reflectionCapabilities = new ReflectionCapabilities();
             var deps_1 = reflectionCapabilities.parameters(type);
             // TODO - convert to flags.
-            return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_1))))(); };
+            return function () { return new (type.bind.apply(type, __spreadArray([void 0], __read(injectArgs(deps_1)))))(); };
         }
         if (USE_VALUE$2 in provider) {
             var valueProvider_1 = provider;
@@ -14170,7 +14273,7 @@
         }
         else if (provider.useFactory) {
             var factoryProvider_1 = provider;
-            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY))); };
+            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spreadArray([], __read(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY)))); };
         }
         else if (provider.useClass) {
             var classProvider_1 = provider;
@@ -14181,7 +14284,7 @@
             }
             return function () {
                 var _a;
-                return new ((_a = (resolveForwardRef(classProvider_1.useClass))).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
+                return new ((_a = (resolveForwardRef(classProvider_1.useClass))).bind.apply(_a, __spreadArray([void 0], __read(injectArgs(deps_2)))))();
             };
         }
         else {
@@ -14190,7 +14293,7 @@
                 var reflectionCapabilities = new ReflectionCapabilities();
                 deps_3 = reflectionCapabilities.parameters(type);
             }
-            return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_3))))(); };
+            return function () { return new (type.bind.apply(type, __spreadArray([void 0], __read(injectArgs(deps_3)))))(); };
         }
     }
 
@@ -15008,7 +15111,7 @@
             }
             var obj;
             try {
-                obj = factory.apply(void 0, __spread(deps));
+                obj = factory.apply(void 0, __spreadArray([], __read(deps)));
             }
             catch (e) {
                 throw instantiationError(this, e, e.stack, provider.key);
@@ -15609,6 +15712,7 @@
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
         var tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
+        var context = lView[CONTEXT];
         // When the ɵɵlistener instruction was generated and is executed we know that there is either a
         // native listener or a directive output on this element. As such we we know that we will have to
         // register a listener and store its cleanup function on LView.
@@ -15661,7 +15765,7 @@
                     // The first argument of `listen` function in Procedural Renderer is:
                     // - either a target name (as a string) in case of global target (window, document, body)
                     // - or element reference (in all other cases)
-                    listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                    listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
                     var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
                     ngDevMode && ngDevMode.rendererAddEventListener++;
                     lCleanup.push(listenerFn, cleanupFn);
@@ -15669,7 +15773,7 @@
                 }
             }
             else {
-                listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+                listenerFn = wrapListener(tNode, lView, context, listenerFn, true /** preventDefault */);
                 target.addEventListener(eventName, listenerFn, useCapture);
                 ngDevMode && ngDevMode.rendererAddEventListener++;
                 lCleanup.push(listenerFn);
@@ -15679,7 +15783,7 @@
         else {
             // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
             // ancestors are marked dirty when an event occurs.
-            listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+            listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
         }
         // subscribe to directive outputs
         var outputs = tNode.outputs;
@@ -15704,14 +15808,18 @@
             }
         }
     }
-    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+    function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
         try {
+            profiler(6 /* OutputStart */, context, listenerFn);
             // Only explicitly returning false from a listener should preventDefault
             return listenerFn(e) !== false;
         }
         catch (error) {
             handleError(lView, error);
             return false;
+        }
+        finally {
+            profiler(7 /* OutputEnd */, context, listenerFn);
         }
     }
     /**
@@ -15724,7 +15832,7 @@
      * @param wrapWithPreventDefault Whether or not to prevent default behavior
      * (the procedural renderer does this already, so in those cases, we should skip)
      */
-    function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+    function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault) {
         // Note: we are performing most of the work in the listener function itself
         // to optimize listener registration.
         return function wrapListenerIn_markDirtyAndPreventDefault(e) {
@@ -15742,13 +15850,13 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            var result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
             // A just-invoked listener function might have coalesced listeners so we need to check for
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
                 // We should prevent default if any of the listeners explicitly return false
-                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+                result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -16362,7 +16470,7 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spreadArray([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], __read(interpolationInBetween)));
             }
         }
         return ɵɵpropertyInterpolateV;
@@ -21890,7 +21998,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.4+10.sha-69afeb3');
+    var VERSION = new Version('12.0.0-next.8+99.sha-886bf37');
 
     /**
      * @license
@@ -23014,7 +23122,7 @@
             else if (tNodeType & 16 /* Projection */) {
                 var nodesInSlot = getProjectionNodes(lView, tNode);
                 if (Array.isArray(nodesInSlot)) {
-                    result.push.apply(result, __spread(nodesInSlot));
+                    result.push.apply(result, __spreadArray([], __read(nodesInSlot)));
                 }
                 else {
                     var parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
@@ -23394,17 +23502,9 @@
      * @nocollapse
      */
     ChangeDetectorRef.__NG_ELEMENT_ID__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY;
-    /**
-     * This marker is need so that the JIT compiler can correctly identify this class as special.
-     *
-     * @internal
-     * @nocollapse
-     */
-    ChangeDetectorRef.__ChangeDetectorRef__ = true;
     /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-    function injectChangeDetectorRef(isPipe) {
-        if (isPipe === void 0) { isPipe = false; }
-        return createViewRef(getCurrentTNode(), getLView(), isPipe);
+    function injectChangeDetectorRef(flags) {
+        return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* ForPipe */) === 16 /* ForPipe */);
     }
     /**
      * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
@@ -23415,10 +23515,7 @@
      * @returns The ChangeDetectorRef to use
      */
     function createViewRef(tNode, lView, isPipe) {
-        // `isComponentView` will be true for Component and Directives (but not for Pipes).
-        // See https://github.com/angular/angular/pull/33072 for proper fix
-        var isComponentView = !isPipe && isComponentHost(tNode);
-        if (isComponentView) {
+        if (isComponentHost(tNode) && !isPipe) {
             // The LView represents the location where the component is declared.
             // Instead we want the LView for the component View and so we need to look it up.
             var componentView = getComponentLViewByIndex(tNode.index, lView); // look down
@@ -24440,7 +24537,7 @@
         return ngModule._def.modules.indexOf(scope) > -1;
     }
     function targetsModule(ngModule, def) {
-        var providedIn = def.providedIn;
+        var providedIn = resolveForwardRef(def.providedIn);
         return providedIn != null &&
             (providedIn === 'any' || providedIn === ngModule._def.scope ||
                 moduleTransitivelyPresent(ngModule, providedIn));
@@ -24487,7 +24584,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
                 }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+                return new (ctor.bind.apply(ctor, __spreadArray([void 0], __read(depValues))))();
         }
     }
     function _callFactory(ngModule, factory, deps) {
@@ -24506,7 +24603,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
                 }
-                return factory.apply(void 0, __spread(depValues));
+                return factory.apply(void 0, __spreadArray([], __read(depValues)));
         }
     }
     function callNgModuleLifecycle(ngModule, lifecycles) {
@@ -25285,7 +25382,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
                 }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+                return new (ctor.bind.apply(ctor, __spreadArray([void 0], __read(depValues))))();
         }
     }
     function callFactory(view, elDef, allowPrivateServices, factory, deps) {
@@ -25304,7 +25401,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
                 }
-                return factory.apply(void 0, __spread(depValues));
+                return factory.apply(void 0, __spreadArray([], __read(depValues)));
         }
     }
     // This default value is when checking the hierarchy for a token.
@@ -25770,7 +25867,7 @@
             var clazz = type;
             if (decorators !== null) {
                 if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                    (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+                    (_a = clazz.decorators).push.apply(_a, __spreadArray([], __read(decorators)));
                 }
                 else {
                     clazz.decorators = decorators;
@@ -26504,52 +26601,26 @@
             _super.prototype.next.call(this, value);
         };
         EventEmitter_.prototype.subscribe = function (observerOrNext, error, complete) {
-            var schedulerFn;
-            var errorFn = function (err) { return null; };
-            var completeFn = function () { return null; };
+            var _a, _b, _c;
+            var nextFn = observerOrNext;
+            var errorFn = error || (function () { return null; });
+            var completeFn = complete;
             if (observerOrNext && typeof observerOrNext === 'object') {
-                schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return observerOrNext.next(value); });
-                } : function (value) {
-                    observerOrNext.next(value);
-                };
-                if (observerOrNext.error) {
-                    errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return observerOrNext.error(err); });
-                    } : function (err) {
-                        observerOrNext.error(err);
-                    };
+                var observer = observerOrNext;
+                nextFn = (_a = observer.next) === null || _a === void 0 ? void 0 : _a.bind(observer);
+                errorFn = (_b = observer.error) === null || _b === void 0 ? void 0 : _b.bind(observer);
+                completeFn = (_c = observer.complete) === null || _c === void 0 ? void 0 : _c.bind(observer);
+            }
+            if (this.__isAsync) {
+                errorFn = _wrapInTimeout(errorFn);
+                if (nextFn) {
+                    nextFn = _wrapInTimeout(nextFn);
                 }
-                if (observerOrNext.complete) {
-                    completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return observerOrNext.complete(); });
-                    } : function () {
-                        observerOrNext.complete();
-                    };
+                if (completeFn) {
+                    completeFn = _wrapInTimeout(completeFn);
                 }
             }
-            else {
-                schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return observerOrNext(value); });
-                } : function (value) {
-                    observerOrNext(value);
-                };
-                if (error) {
-                    errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return error(err); });
-                    } : function (err) {
-                        error(err);
-                    };
-                }
-                if (complete) {
-                    completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return complete(); });
-                    } : function () {
-                        complete();
-                    };
-                }
-            }
-            var sink = _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
+            var sink = _super.prototype.subscribe.call(this, { next: nextFn, error: errorFn, complete: completeFn });
             if (observerOrNext instanceof rxjs.Subscription) {
                 observerOrNext.add(sink);
             }
@@ -26557,6 +26628,11 @@
         };
         return EventEmitter_;
     }(rxjs.Subject));
+    function _wrapInTimeout(fn) {
+        return function (value) {
+            setTimeout(fn, undefined, value);
+        };
+    }
     /**
      * @publicApi
      */
@@ -26602,8 +26678,7 @@
         /**
          * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
          *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
-         *     the same result) This is set to `false` for backwards compatibility but will be changed to
-         *     true in v12.
+         *     the same result)
          */
         function QueryList(_emitDistinctChangesOnly) {
             if (_emitDistinctChangesOnly === void 0) { _emitDistinctChangesOnly = false; }
@@ -27251,21 +27326,6 @@
     function ɵɵtemplateRefExtractor(tNode, lView) {
         return createTemplateRef(tNode, lView);
     }
-    /**
-     * Returns the appropriate `ChangeDetectorRef` for a pipe.
-     *
-     * @codeGenApi
-     */
-    function ɵɵinjectPipeChangeDetectorRef(flags) {
-        if (flags === void 0) { flags = exports.InjectFlags.Default; }
-        var value = injectChangeDetectorRef(true);
-        if (value == null && !(flags & exports.InjectFlags.Optional)) {
-            throwProviderNotFoundError('ChangeDetectorRef');
-        }
-        else {
-            return value;
-        }
-    }
 
     /**
      * @license
@@ -27305,7 +27365,6 @@
         'ɵɵinjectAttribute': ɵɵinjectAttribute,
         'ɵɵinvalidFactory': ɵɵinvalidFactory,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
-        'ɵɵinjectPipeChangeDetectorRef': ɵɵinjectPipeChangeDetectorRef,
         'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
         'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
         'ɵɵProvidersFeature': ɵɵProvidersFeature,
@@ -27571,8 +27630,7 @@
                         name: moduleType.name,
                         type: moduleType,
                         deps: reflectDependencies(moduleType),
-                        injectFn: 'inject',
-                        target: compiler.R3FactoryTarget.NgModule,
+                        target: compiler.FactoryTarget.NgModule,
                         typeArgumentCount: 0,
                     });
                 }
@@ -27629,7 +27687,7 @@
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
         declarations.forEach(verifyDirectivesHaveSelector);
-        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
+        var combinedDeclarations = __spreadArray(__spreadArray([], __read(declarations.map(resolveForwardRef))), __read(flatten(imports.map(computeCombinedExports)).map(resolveForwardRef)));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(function (decl) { return verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot); });
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
@@ -27776,7 +27834,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+        return __spreadArray([], __read(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type, false);
@@ -27785,7 +27843,7 @@
             else {
                 return type;
             }
-        })));
+        }))));
     }
     /**
      * Some declared components may be compiled asynchronously, and thus may not have their
@@ -28049,7 +28107,7 @@
                     // `directive` can be null in the case of abstract directives as a base class
                     // that use `@Directive()` with no selector. In that case, pass empty object to the
                     // `directiveMetadata` function instead of null.
-                    var meta = getDirectiveMetadata(type, directive || {});
+                    var meta = getDirectiveMetadata$1(type, directive || {});
                     ngDirectiveDef =
                         getCompilerFacade().compileDirective(angularCoreEnv, meta.sourceMapUrl, meta.metadata);
                 }
@@ -28059,7 +28117,7 @@
             configurable: !!ngDevMode,
         });
     }
-    function getDirectiveMetadata(type, metadata) {
+    function getDirectiveMetadata$1(type, metadata) {
         var name = type && type.name;
         var sourceMapUrl = "ng:///" + name + "/\u0275dir.js";
         var compiler = getCompilerFacade();
@@ -28075,9 +28133,15 @@
         Object.defineProperty(type, NG_FACTORY_DEF, {
             get: function () {
                 if (ngFactoryDef === null) {
-                    var meta = getDirectiveMetadata(type, metadata);
+                    var meta = getDirectiveMetadata$1(type, metadata);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", Object.assign(Object.assign({}, meta.metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Directive }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", {
+                        name: meta.metadata.name,
+                        type: meta.metadata.type,
+                        typeArgumentCount: 0,
+                        deps: reflectDependencies(type),
+                        target: compiler.FactoryTarget.Directive
+                    });
                 }
                 return ngFactoryDef;
             },
@@ -28099,9 +28163,7 @@
         return {
             name: type.name,
             type: type,
-            typeArgumentCount: 0,
             selector: metadata.selector !== undefined ? metadata.selector : null,
-            deps: reflectDependencies(type),
             host: metadata.host || EMPTY_OBJ,
             propMetadata: propMetadata,
             inputs: metadata.inputs || EMPTY_ARRAY,
@@ -28227,7 +28289,13 @@
                 if (ngFactoryDef === null) {
                     var metadata = getPipeMetadata(type, meta);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", Object.assign(Object.assign({}, metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Pipe }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", {
+                        name: metadata.name,
+                        type: metadata.type,
+                        typeArgumentCount: 0,
+                        deps: reflectDependencies(type),
+                        target: compiler.FactoryTarget.Pipe
+                    });
                 }
                 return ngFactoryDef;
             },
@@ -28249,9 +28317,7 @@
     function getPipeMetadata(type, meta) {
         return {
             type: type,
-            typeArgumentCount: 0,
             name: type.name,
-            deps: reflectDependencies(type),
             pipeName: meta.name,
             pure: meta.pure !== undefined ? meta.pure : true
         };
@@ -28398,7 +28464,7 @@
     function preR3NgModuleCompile(moduleType, metadata) {
         var imports = (metadata && metadata.imports) || [];
         if (metadata && metadata.exports) {
-            imports = __spread(imports, [metadata.exports]);
+            imports = __spreadArray(__spreadArray([], __read(imports)), [metadata.exports]);
         }
         var moduleInjectorType = moduleType;
         moduleInjectorType.ɵfac = convertInjectableProviderToFactory(moduleType, { useClass: moduleType });
@@ -30355,7 +30421,7 @@
     }
     function _mergeArrays(parts) {
         var result = [];
-        parts.forEach(function (part) { return part && result.push.apply(result, __spread(part)); });
+        parts.forEach(function (part) { return part && result.push.apply(result, __spreadArray([], __read(part))); });
         return result;
     }
 
@@ -30659,7 +30725,7 @@
             var _this = this;
             var siblingIndex = this.childNodes.indexOf(child);
             if (siblingIndex !== -1) {
-                (_a = this.childNodes).splice.apply(_a, __spread([siblingIndex + 1, 0], newChildren));
+                (_a = this.childNodes).splice.apply(_a, __spreadArray([siblingIndex + 1, 0], __read(newChildren)));
                 newChildren.forEach(function (c) {
                     if (c.parent) {
                         c.parent.removeChild(c);
@@ -32154,7 +32220,7 @@
                 case 128 /* TypePurePipe */:
                     var pipe = values[0];
                     var params = values.slice(1);
-                    value = pipe.transform.apply(pipe, __spread(params));
+                    value = pipe.transform.apply(pipe, __spreadArray([], __read(params)));
                     break;
             }
             data.value = value;
@@ -33045,7 +33111,7 @@
     // 1) Locate the providers of an element and check if one of them was overwritten
     // 2) Change the providers of that element
     //
-    // We only create new datastructures if we need to, to keep perf impact
+    // We only create new data structures if we need to, to keep perf impact
     // reasonable.
     function applyProviderOverridesToView(def) {
         if (providerOverrides.size === 0) {
@@ -33098,7 +33164,7 @@
         }
     }
     // Notes about the algorithm:
-    // We only create new datastructures if we need to, to keep perf impact
+    // We only create new data structures if we need to, to keep perf impact
     // reasonable.
     function applyProviderOverridesToNgModule(def) {
         var _a = calcHasOverrides(def), hasOverrides = _a.hasOverrides, hasDeprecatedOverrides = _a.hasDeprecatedOverrides;
@@ -33125,7 +33191,7 @@
             });
             def.modules.forEach(function (module) {
                 providerOverridesWithScope.forEach(function (override, token) {
-                    if (getInjectableDef(token).providedIn === module) {
+                    if (resolveForwardRef(getInjectableDef(token).providedIn) === module) {
                         hasOverrides = true;
                         hasDeprecatedOverrides = hasDeprecatedOverrides || override.deprecatedBehavior;
                     }
@@ -33152,7 +33218,7 @@
             if (providerOverridesWithScope.size > 0) {
                 var moduleSet_1 = new Set(def.modules);
                 providerOverridesWithScope.forEach(function (override, token) {
-                    if (moduleSet_1.has(getInjectableDef(token).providedIn)) {
+                    if (moduleSet_1.has(resolveForwardRef(getInjectableDef(token).providedIn))) {
                         var provider = {
                             token: token,
                             flags: override.flags | (hasDeprecatedOverrides ? 4096 /* LazyProvider */ : 0 /* None */),
@@ -33262,7 +33328,7 @@
         }
     }
     function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
-        var changed = checkAndUpdateNode.apply(void 0, __spread([view, nodeDef, argStyle], givenValues));
+        var changed = checkAndUpdateNode.apply(void 0, __spreadArray([view, nodeDef, argStyle], __read(givenValues)));
         if (changed) {
             var values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
             if (nodeDef.flags & 16384 /* TypeDirective */) {
@@ -33297,7 +33363,7 @@
         }
     }
     function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
-        checkNoChangesNode.apply(void 0, __spread([view, nodeDef, argStyle], values));
+        checkNoChangesNode.apply(void 0, __spreadArray([view, nodeDef, argStyle], __read(values)));
     }
     function nextDirectiveWithBinding(view, nodeIndex) {
         for (var i = nodeIndex; i < view.def.nodes.length; i++) {
@@ -33442,7 +33508,7 @@
                 var _a;
                 currRenderNodeIndex++;
                 if (currRenderNodeIndex === renderNodeIndex) {
-                    return (_a = console.error).bind.apply(_a, __spread([console], values));
+                    return (_a = console.error).bind.apply(_a, __spreadArray([console], __read(values)));
                 }
                 else {
                     return NOOP;
@@ -33451,7 +33517,7 @@
             logViewDef.factory(nodeLogger);
             if (currRenderNodeIndex < renderNodeIndex) {
                 console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
-                console.error.apply(console, __spread(values));
+                console.error.apply(console, __spreadArray([], __read(values)));
             }
         };
         return DebugContext_;
@@ -33546,9 +33612,11 @@
         };
         DebugRenderer2.prototype.destroyNode = function (node) {
             var debugNode = getDebugNode$1(node);
-            removeDebugNodeFromIndex(debugNode);
-            if (debugNode instanceof DebugNode__PRE_R3__) {
-                debugNode.listeners.length = 0;
+            if (debugNode) {
+                removeDebugNodeFromIndex(debugNode);
+                if (debugNode instanceof DebugNode__PRE_R3__) {
+                    debugNode.listeners.length = 0;
+                }
             }
             if (this.delegate.destroyNode) {
                 this.delegate.destroyNode(node);
@@ -33776,6 +33844,15 @@
         return compiler.compileDirectiveDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
     }
     /**
+     * Evaluates the class metadata declaration.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareClassMetadata(decl) {
+        var _a, _b;
+        setClassMetadata(decl.type, decl.decorators, (_a = decl.ctorParameters) !== null && _a !== void 0 ? _a : null, (_b = decl.propDecorators) !== null && _b !== void 0 ? _b : null);
+    }
+    /**
      * Compiles a partial component declaration object into a full component definition object.
      *
      * @codeGenApi
@@ -33783,6 +33860,42 @@
     function ɵɵngDeclareComponent(decl) {
         var compiler = getCompilerFacade();
         return compiler.compileComponentDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275cmp.js", decl);
+    }
+    /**
+     * Compiles a partial pipe declaration object into a full pipe definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareFactory(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileFactoryDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
+    }
+    /**
+     * Compiles a partial injectable declaration object into a full injectable definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareInjectable(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileInjectableDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275prov.js", decl);
+    }
+    /**
+     * Compiles a partial injector declaration object into a full injector definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareInjector(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileInjectorDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275inj.js", decl);
+    }
+    /**
+     * Compiles a partial NgModule declaration object into a full NgModule definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareNgModule(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileNgModuleDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275mod.js", decl);
     }
     /**
      * Compiles a partial pipe declaration object into a full pipe definition object.
@@ -34186,7 +34299,6 @@
     exports.ɵɵi18nStart = ɵɵi18nStart;
     exports.ɵɵinject = ɵɵinject;
     exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
-    exports.ɵɵinjectPipeChangeDetectorRef = ɵɵinjectPipeChangeDetectorRef;
     exports.ɵɵinvalidFactory = ɵɵinvalidFactory;
     exports.ɵɵinvalidFactoryDep = ɵɵinvalidFactoryDep;
     exports.ɵɵlistener = ɵɵlistener;
@@ -34195,8 +34307,13 @@
     exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
     exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
     exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵngDeclareClassMetadata = ɵɵngDeclareClassMetadata;
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
+    exports.ɵɵngDeclareFactory = ɵɵngDeclareFactory;
+    exports.ɵɵngDeclareInjectable = ɵɵngDeclareInjectable;
+    exports.ɵɵngDeclareInjector = ɵɵngDeclareInjector;
+    exports.ɵɵngDeclareNgModule = ɵɵngDeclareNgModule;
     exports.ɵɵngDeclarePipe = ɵɵngDeclarePipe;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
