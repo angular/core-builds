@@ -1,42 +1,27 @@
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
 import { getLocalePluralCase } from './locale_data_api';
+const pluralMapping = ['zero', 'one', 'two', 'few', 'many'];
 /**
  * Returns the plural case based on the locale
- * @param {?} value
- * @param {?} locale
- * @return {?}
  */
 export function getPluralCase(value, locale) {
-    /** @type {?} */
-    const plural = getLocalePluralCase(locale)(value);
-    switch (plural) {
-        case 0:
-            return 'zero';
-        case 1:
-            return 'one';
-        case 2:
-            return 'two';
-        case 3:
-            return 'few';
-        case 4:
-            return 'many';
-        default:
-            return 'other';
-    }
+    const plural = getLocalePluralCase(locale)(parseInt(value, 10));
+    const result = pluralMapping[plural];
+    return (result !== undefined) ? result : 'other';
 }
 /**
  * The locale id that the application is using by default (for translations and ICU expressions).
- * @type {?}
  */
 export const DEFAULT_LOCALE_ID = 'en-US';
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9jYWxpemF0aW9uLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvaTE4bi9sb2NhbGl6YXRpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFRQSxPQUFPLEVBQUMsbUJBQW1CLEVBQUMsTUFBTSxtQkFBbUIsQ0FBQzs7Ozs7OztBQUt0RCxNQUFNLFVBQVUsYUFBYSxDQUFDLEtBQVUsRUFBRSxNQUFjOztVQUNoRCxNQUFNLEdBQUcsbUJBQW1CLENBQUMsTUFBTSxDQUFDLENBQUMsS0FBSyxDQUFDO0lBRWpELFFBQVEsTUFBTSxFQUFFO1FBQ2QsS0FBSyxDQUFDO1lBQ0osT0FBTyxNQUFNLENBQUM7UUFDaEIsS0FBSyxDQUFDO1lBQ0osT0FBTyxLQUFLLENBQUM7UUFDZixLQUFLLENBQUM7WUFDSixPQUFPLEtBQUssQ0FBQztRQUNmLEtBQUssQ0FBQztZQUNKLE9BQU8sS0FBSyxDQUFDO1FBQ2YsS0FBSyxDQUFDO1lBQ0osT0FBTyxNQUFNLENBQUM7UUFDaEI7WUFDRSxPQUFPLE9BQU8sQ0FBQztLQUNsQjtBQUNILENBQUM7Ozs7O0FBS0QsTUFBTSxPQUFPLGlCQUFpQixHQUFHLE9BQU8iLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIEluYy4gQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7Z2V0TG9jYWxlUGx1cmFsQ2FzZX0gZnJvbSAnLi9sb2NhbGVfZGF0YV9hcGknO1xuXG4vKipcbiAqIFJldHVybnMgdGhlIHBsdXJhbCBjYXNlIGJhc2VkIG9uIHRoZSBsb2NhbGVcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldFBsdXJhbENhc2UodmFsdWU6IGFueSwgbG9jYWxlOiBzdHJpbmcpOiBzdHJpbmcge1xuICBjb25zdCBwbHVyYWwgPSBnZXRMb2NhbGVQbHVyYWxDYXNlKGxvY2FsZSkodmFsdWUpO1xuXG4gIHN3aXRjaCAocGx1cmFsKSB7XG4gICAgY2FzZSAwOlxuICAgICAgcmV0dXJuICd6ZXJvJztcbiAgICBjYXNlIDE6XG4gICAgICByZXR1cm4gJ29uZSc7XG4gICAgY2FzZSAyOlxuICAgICAgcmV0dXJuICd0d28nO1xuICAgIGNhc2UgMzpcbiAgICAgIHJldHVybiAnZmV3JztcbiAgICBjYXNlIDQ6XG4gICAgICByZXR1cm4gJ21hbnknO1xuICAgIGRlZmF1bHQ6XG4gICAgICByZXR1cm4gJ290aGVyJztcbiAgfVxufVxuXG4vKipcbiAqIFRoZSBsb2NhbGUgaWQgdGhhdCB0aGUgYXBwbGljYXRpb24gaXMgdXNpbmcgYnkgZGVmYXVsdCAoZm9yIHRyYW5zbGF0aW9ucyBhbmQgSUNVIGV4cHJlc3Npb25zKS5cbiAqL1xuZXhwb3J0IGNvbnN0IERFRkFVTFRfTE9DQUxFX0lEID0gJ2VuLVVTJztcbiJdfQ==
+/**
+ * USD currency code that the application uses by default for CurrencyPipe when no
+ * DEFAULT_CURRENCY_CODE is provided.
+ */
+export const USD_CURRENCY_CODE = 'USD';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9jYWxpemF0aW9uLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvaTE4bi9sb2NhbGl6YXRpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7OztHQU1HO0FBRUgsT0FBTyxFQUFDLG1CQUFtQixFQUFDLE1BQU0sbUJBQW1CLENBQUM7QUFFdEQsTUFBTSxhQUFhLEdBQUcsQ0FBQyxNQUFNLEVBQUUsS0FBSyxFQUFFLEtBQUssRUFBRSxLQUFLLEVBQUUsTUFBTSxDQUFDLENBQUM7QUFFNUQ7O0dBRUc7QUFDSCxNQUFNLFVBQVUsYUFBYSxDQUFDLEtBQWEsRUFBRSxNQUFjO0lBQ3pELE1BQU0sTUFBTSxHQUFHLG1CQUFtQixDQUFDLE1BQU0sQ0FBQyxDQUFDLFFBQVEsQ0FBQyxLQUFLLEVBQUUsRUFBRSxDQUFDLENBQUMsQ0FBQztJQUNoRSxNQUFNLE1BQU0sR0FBRyxhQUFhLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDckMsT0FBTyxDQUFDLE1BQU0sS0FBSyxTQUFTLENBQUMsQ0FBQyxDQUFDLENBQUMsTUFBTSxDQUFDLENBQUMsQ0FBQyxPQUFPLENBQUM7QUFDbkQsQ0FBQztBQUVEOztHQUVHO0FBQ0gsTUFBTSxDQUFDLE1BQU0saUJBQWlCLEdBQUcsT0FBTyxDQUFDO0FBRXpDOzs7R0FHRztBQUNILE1BQU0sQ0FBQyxNQUFNLGlCQUFpQixHQUFHLEtBQUssQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgTExDIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5pbXBvcnQge2dldExvY2FsZVBsdXJhbENhc2V9IGZyb20gJy4vbG9jYWxlX2RhdGFfYXBpJztcblxuY29uc3QgcGx1cmFsTWFwcGluZyA9IFsnemVybycsICdvbmUnLCAndHdvJywgJ2ZldycsICdtYW55J107XG5cbi8qKlxuICogUmV0dXJucyB0aGUgcGx1cmFsIGNhc2UgYmFzZWQgb24gdGhlIGxvY2FsZVxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0UGx1cmFsQ2FzZSh2YWx1ZTogc3RyaW5nLCBsb2NhbGU6IHN0cmluZyk6IHN0cmluZyB7XG4gIGNvbnN0IHBsdXJhbCA9IGdldExvY2FsZVBsdXJhbENhc2UobG9jYWxlKShwYXJzZUludCh2YWx1ZSwgMTApKTtcbiAgY29uc3QgcmVzdWx0ID0gcGx1cmFsTWFwcGluZ1twbHVyYWxdO1xuICByZXR1cm4gKHJlc3VsdCAhPT0gdW5kZWZpbmVkKSA/IHJlc3VsdCA6ICdvdGhlcic7XG59XG5cbi8qKlxuICogVGhlIGxvY2FsZSBpZCB0aGF0IHRoZSBhcHBsaWNhdGlvbiBpcyB1c2luZyBieSBkZWZhdWx0IChmb3IgdHJhbnNsYXRpb25zIGFuZCBJQ1UgZXhwcmVzc2lvbnMpLlxuICovXG5leHBvcnQgY29uc3QgREVGQVVMVF9MT0NBTEVfSUQgPSAnZW4tVVMnO1xuXG4vKipcbiAqIFVTRCBjdXJyZW5jeSBjb2RlIHRoYXQgdGhlIGFwcGxpY2F0aW9uIHVzZXMgYnkgZGVmYXVsdCBmb3IgQ3VycmVuY3lQaXBlIHdoZW4gbm9cbiAqIERFRkFVTFRfQ1VSUkVOQ1lfQ09ERSBpcyBwcm92aWRlZC5cbiAqL1xuZXhwb3J0IGNvbnN0IFVTRF9DVVJSRU5DWV9DT0RFID0gJ1VTRCc7XG4iXX0=

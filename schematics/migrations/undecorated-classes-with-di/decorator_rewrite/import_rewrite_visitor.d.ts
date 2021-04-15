@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -8,7 +8,7 @@
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/decorator_rewrite/import_rewrite_visitor" />
 import { AotCompilerHost } from '@angular/compiler';
 import * as ts from 'typescript';
-import { ImportManager } from '../import_manager';
+import { ImportManager } from '../../../utils/import_manager';
 /**
  * Factory that creates a TypeScript transformer which ensures that
  * referenced identifiers are available at the target file location.

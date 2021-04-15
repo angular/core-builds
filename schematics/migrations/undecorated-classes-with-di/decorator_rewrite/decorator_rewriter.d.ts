@@ -1,7 +1,7 @@
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/decorator_rewrite/decorator_rewriter" />
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -9,8 +9,8 @@
 import { AotCompiler } from '@angular/compiler';
 import { PartialEvaluator } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
 import * as ts from 'typescript';
+import { ImportManager } from '../../../utils/import_manager';
 import { NgDecorator } from '../../../utils/ng_decorators';
-import { ImportManager } from '../import_manager';
 /**
  * Class that can be used to copy decorators to a new location. The rewriter ensures that
  * identifiers and imports are rewritten to work in the new file location. Fields in a
