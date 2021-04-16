@@ -1,6 +1,6 @@
 /**
- * @license Angular v11.1.0-next.4+175.sha-02ff4ed
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.8+133.sha-d5b13ce
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -196,8 +196,8 @@ export declare const APP_ID: InjectionToken<string>;
  * one or more initialization functions.
  *
  * The provided functions are injected at application startup and executed during
- * app initialization. If any of these functions returns a Promise, initialization
- * does not complete until the Promise is resolved.
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
  *
  * You can, for example, create a factory function that loads language data
  * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
@@ -206,9 +206,62 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * @see `ApplicationInitStatus`
  *
+ * @usageNotes
+ *
+ * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
+ * and a function returning a promise.
+ *
+ * ```
+ *  function initializeApp(): Promise<any> {
+ *    return new Promise((resolve, reject) => {
+ *      // Do some asynchronous stuff
+ *      resolve();
+ *    });
+ *  }
+ *
+ *  @NgModule({
+ *   imports: [BrowserModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useFactory: () => initializeApp,
+ *     multi: true
+ *    }]
+ *   })
+ *  export class AppModule {}
+ * ```
+ *
+ * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
+ * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
+ * demo purposes to illustrate how the factory function can work with other providers available
+ * through DI.
+ *
+ * ```
+ *  function initializeApp(httpClient: HttpClient): Observable<any> {
+ *   return httpClient.get("https://someUrl.com/api/user")
+ *     .pipe(
+ *        tap(user => { ... })
+ *     )
+ *  }
+ *
+ *  @NgModule({
+ *    imports: [BrowserModule, HttpClientModule],
+ *    declarations: [AppComponent],
+ *    bootstrap: [AppComponent],
+ *    providers: [{
+ *      provide: APP_INITIALIZER,
+ *      useFactory: initializeApp,
+ *      deps: [HttpClient],
+ *      multi: true
+ *    }]
+ *  })
+ *  export class AppModule {}
+ * ```
+ *
  * @publicApi
  */
-export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
+export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
 
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER} functions.
@@ -216,13 +269,13 @@ export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
  * @publicApi
  */
 export declare class ApplicationInitStatus {
-    private appInits;
+    private readonly appInits;
     private resolve;
     private reject;
     private initialized;
     readonly donePromise: Promise<any>;
     readonly done = false;
-    constructor(appInits: (() => any)[]);
+    constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
 }
 
 /**
@@ -334,7 +387,6 @@ export declare class ApplicationModule {
  */
 export declare class ApplicationRef {
     private _zone;
-    private _console;
     private _injector;
     private _exceptionHandler;
     private _componentFactoryResolver;
@@ -710,7 +762,7 @@ declare const CLEANUP = 7;
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * injectable def (`ɵprov`) onto the injectable type.
  */
-declare function compileInjectable(type: Type<any>, srcMeta?: Injectable): void;
+declare function compileInjectable(type: Type<any>, meta?: Injectable): void;
 
 /**
  * Low-level service for running the angular compiler during runtime
@@ -859,7 +911,7 @@ export declare interface Component extends Directive {
      */
     encapsulation?: ViewEncapsulation;
     /**
-     * Overrides the default encapsulation start and end delimiters (`{{` and `}}`)
+     * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
      */
     interpolation?: [string, string];
     /**
@@ -1328,8 +1380,10 @@ export declare interface ContentChildrenDecorator {
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
      * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
-     *   if the QueryList result has changed. The default value will change from `false` to `true` in
-     *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     *   removed in future versions of Angular.
      * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
@@ -1465,6 +1519,8 @@ declare type CssSelector = (string | SelectorFlags)[];
 /**
  * An object literal of this type is used to represent the metadata of a constructor dependency.
  * The type itself is never referred to from generated code.
+ *
+ * @publicApi
  */
 declare type CtorDependency = {
     /**
@@ -2301,7 +2357,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract get context(): C;
+    abstract context: C;
     /**
      * The root nodes for this embedded view.
      */
@@ -2417,13 +2473,21 @@ export declare interface EventEmitter<T> extends Subject<T> {
     emit(value?: T): void;
     /**
      * Registers handlers for events emitted by this instance.
-     * @param generatorOrNext When supplied, a custom handler for emitted events.
-     * @param error When supplied, a custom handler for an error notification
-     * from this emitter.
-     * @param complete When supplied, a custom handler for a completion
-     * notification from this emitter.
+     * @param next When supplied, a custom handler for emitted events.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
      */
-    subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
+    subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+    /**
+     * Registers handlers for events emitted by this instance.
+     * @param observerOrNext When supplied, a custom handler for emitted events, or an observer
+     *     object.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
+     */
+    subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
 }
 
 /**
@@ -2485,7 +2549,7 @@ declare type FactoryFn<T> = {
      * Subclasses without an explicit constructor call through to the factory of their base
      * definition, providing it with their own constructor to instantiate.
      */
-    <U extends T>(t: Type<U>): U;
+    <U extends T>(t?: Type<U>): U;
     /**
      * If no constructor to instantiate is provided, an instance of type T itself is created.
      */
@@ -2798,7 +2862,7 @@ export declare interface HostDecorator {
      *
      * @usageNotes
      *
-     * The following shows use with the `@Optional` decorator, and allows for a null result.
+     * The following shows use with the `@Optional` decorator, and allows for a `null` result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
@@ -2896,6 +2960,11 @@ export declare interface HostListenerDecorator {
     /**
      * Decorator that declares a DOM event to listen for,
      * and provides a handler method to run when that event occurs.
+     *
+     * Angular invokes the supplied handler method when the host element emits the specified event,
+     * and updates the bound element with the result.
+     *
+     * If the handler method returns false, applies `preventDefault` on the bound element.
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
@@ -3170,7 +3239,7 @@ export declare const Inject: InjectDecorator;
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
@@ -3253,9 +3322,9 @@ export declare interface InjectableDecorator {
 export declare type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 
 /**
- * A `Type` which has an `InjectableDef` static field.
+ * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
  *
- * `InjectableDefType`s contain their own Dependency Injection metadata and are usable in an
+ * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
  * `InjectorDef`-based `StaticInjector.
  *
  * @publicApi
@@ -3264,7 +3333,7 @@ export declare interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵprov: never;
+    ɵprov: unknown;
 }
 
 
@@ -3358,7 +3427,7 @@ export declare enum InjectFlags {
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ɵprov: never | undefined;
+    readonly ɵprov: unknown;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -3436,7 +3505,7 @@ export declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 declare const INJECTOR_2 = 9;
@@ -3444,19 +3513,20 @@ declare const INJECTOR_2 = 9;
 /**
  * A type which has an `InjectorDef` static field.
  *
- * `InjectorDefTypes` can be used to configure a `StaticInjector`.
+ * `InjectorTypes` can be used to configure a `StaticInjector`.
+ *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
  *
  * @publicApi
  */
 export declare interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
-    ɵinj: never;
+    ɵfac?: unknown;
+    ɵinj: unknown;
 }
 
 /**
- * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
+ * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorType` with an
  * associated array of providers.
  *
  * Objects of this type can be listed in the imports section of an `InjectorDef`.
@@ -3669,7 +3739,7 @@ export declare interface IterableDifferFactory {
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private
      */
@@ -3816,7 +3886,7 @@ export declare interface KeyValueDifferFactory {
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private.
      */
@@ -4964,14 +5034,14 @@ export declare interface OptionalDecorator {
     /**
      * Parameter decorator to be used on constructor parameters,
      * which marks the parameter as being an optional dependency.
-     * The DI framework provides null if the dependency is not found.
+     * The DI framework provides `null` if the dependency is not found.
      *
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
      * @usageNotes
      *
-     * The following code allows the possibility of a null result:
+     * The following code allows the possibility of a `null` result:
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
@@ -5129,20 +5199,19 @@ declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
  *
  * @usageNotes
  *
- * In the following example, `RepeatPipe` repeats a given value a given number of times.
+ * In the following example, `TruncatePipe` returns the shortened value with an added ellipses.
  *
- * ```ts
- * import {Pipe, PipeTransform} from '@angular/core';
+ * <code-example path="core/ts/pipes/simple_truncate.ts" header="simple_truncate.ts"></code-example>
  *
- * @Pipe({name: 'repeat'})
- * export class RepeatPipe implements PipeTransform {
- *   transform(value: any, times: number) {
- *     return value.repeat(times);
- *   }
- * }
- * ```
+ * Invoking `{{ 'It was the best of times' | truncate }}` in a template will produce `It was...`.
  *
- * Invoking `{{ 'ok' | repeat:3 }}` in a template produces `okokok`.
+ * In the following example, `TruncatePipe` takes parameters that sets the truncated length and the
+ * string to append with.
+ *
+ * <code-example path="core/ts/pipes/truncate.ts" header="truncate.ts"></code-example>
+ *
+ * Invoking `{{ 'It was the best of times' | truncate:4:'....' }}` in a template will produce `It
+ * was the best....`.
  *
  * @publicApi
  */
@@ -5155,7 +5224,7 @@ export declare interface PipeTransform {
  * consumable for rendering.
  */
 declare interface PipeType<T> extends Type<T> {
-    ɵpipe: never;
+    ɵpipe: unknown;
 }
 
 declare type PipeTypeList = (PipeType<any> | Type<any>)[];
@@ -5532,8 +5601,7 @@ export declare class QueryList<T> implements Iterable<T> {
     /**
      * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
      *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
-     *     the same result) This is set to `false` for backwards compatibility but will be changed to
-     *     true in v12.
+     *     the same result)
      */
     constructor(_emitDistinctChangesOnly?: boolean);
     /**
@@ -5603,13 +5671,8 @@ declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     template: string;
     isInline?: boolean;
     styles?: string[];
-    directives?: {
-        selector: string;
-        type: OpaqueValue | (() => OpaqueValue);
-        inputs?: string[];
-        outputs?: string[];
-        exportAs?: string[];
-    }[];
+    components?: R3DeclareUsedDirectiveFacade[];
+    directives?: R3DeclareUsedDirectiveFacade[];
     pipes?: {
         [pipeName: string]: OpaqueValue | (() => OpaqueValue);
     };
@@ -5621,9 +5684,18 @@ declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     preserveWhitespaces?: boolean;
 }
 
+declare interface R3DeclareDependencyMetadataFacade {
+    token: OpaqueValue;
+    attribute?: boolean;
+    host?: boolean;
+    optional?: boolean;
+    self?: boolean;
+    skipSelf?: boolean;
+}
+
 declare interface R3DeclareDirectiveFacade {
     selector?: string;
-    type: Function;
+    type: Type_2;
     inputs?: {
         [classPropertyName: string]: string | [string, string];
     };
@@ -5651,6 +5723,44 @@ declare interface R3DeclareDirectiveFacade {
     usesOnChanges?: boolean;
 }
 
+declare interface R3DeclareFactoryFacade {
+    type: Type_2;
+    deps: R3DeclareDependencyMetadataFacade[] | null;
+    target: ɵɵFactoryTarget;
+}
+
+declare interface R3DeclareInjectableFacade {
+    type: Type_2;
+    providedIn?: Type_2 | 'root' | 'platform' | 'any' | null;
+    useClass?: OpaqueValue;
+    useFactory?: OpaqueValue;
+    useExisting?: OpaqueValue;
+    useValue?: OpaqueValue;
+    deps?: R3DeclareDependencyMetadataFacade[];
+}
+
+declare interface R3DeclareInjectorFacade {
+    type: Type_2;
+    imports?: OpaqueValue[];
+    providers?: OpaqueValue[];
+}
+
+declare interface R3DeclareNgModuleFacade {
+    type: Type_2;
+    bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
+    declarations?: OpaqueValue[] | (() => OpaqueValue[]);
+    imports?: OpaqueValue[] | (() => OpaqueValue[]);
+    exports?: OpaqueValue[] | (() => OpaqueValue[]);
+    schemas?: OpaqueValue[];
+    id?: OpaqueValue;
+}
+
+declare interface R3DeclarePipeFacade {
+    type: Type_2;
+    name: string;
+    pure?: boolean;
+}
+
 declare interface R3DeclareQueryMetadataFacade {
     propertyName: string;
     first?: boolean;
@@ -5659,6 +5769,14 @@ declare interface R3DeclareQueryMetadataFacade {
     read?: OpaqueValue;
     static?: boolean;
     emitDistinctChangesOnly?: boolean;
+}
+
+declare interface R3DeclareUsedDirectiveFacade {
+    selector: string;
+    type: OpaqueValue | (() => OpaqueValue);
+    inputs?: string[];
+    outputs?: string[];
+    exportAs?: string[];
 }
 
 declare class R3Injector {
@@ -6478,7 +6596,7 @@ declare const SANITIZER = 12;
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 /**
@@ -6558,7 +6676,7 @@ export declare interface SelfDecorator {
      * which tells the DI framework to start dependency resolution from the local injector.
      *
      * Resolution works upward through the injector hierarchy, so the children
-     * of this class must configure their own providers or be prepared for a null result.
+     * of this class must configure their own providers or be prepared for a `null` result.
      *
      * @usageNotes
      *
@@ -8213,6 +8331,8 @@ export declare interface Type<T> extends Function {
     new (...args: any[]): T;
 }
 
+declare type Type_2 = Function;
+
 /**
  * An interface implemented by all Angular type decorators, which allows them to be used as
  * decorators as well as Angular syntax.
@@ -8418,8 +8538,10 @@ export declare interface ViewChildrenDecorator {
      * * **selector** - The directive type or the name used for querying.
      * * **read** - Used to read a different token from the queried elements.
      * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
-     *   if the QueryList result has changed. The default value will change from `false` to `true` in
-     *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     * removed in future versions of Angular.
      *
      * @usageNotes
      *
@@ -8692,6 +8814,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      */
     _cdRefInjectingView?: ɵangular_packages_core_core_ca | undefined);
     get context(): T;
+    set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
@@ -9211,7 +9334,14 @@ export declare const enum ɵangular_packages_core_core_bu {
     /** Skip the node that is requesting injection. */
     SkipSelf = 4,
     /** Inject `defaultValue` instead if token not found. */
-    Optional = 8
+    Optional = 8,
+    /**
+     * This token is being injected into a pipe.
+     *
+     * This flag is intentionally not in the public facing `InjectFlags` because it is only added by
+     * the compiler and is not a developer applicable flag.
+     */
+    ForPipe = 16
 }
 
 
@@ -9674,7 +9804,7 @@ export declare class ɵangular_packages_core_core_p extends ɵangular_packages_c
 export declare function ɵangular_packages_core_core_q(nativeNode: any): DebugNode | null;
 
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-export declare function ɵangular_packages_core_core_r(isPipe?: boolean): ChangeDetectorRef;
+export declare function ɵangular_packages_core_core_r(flags: InjectFlags): ChangeDetectorRef;
 
 export declare class ɵangular_packages_core_core_s implements IterableDifferFactory {
     constructor();
@@ -10009,7 +10139,7 @@ export declare function ɵcompileDirective(type: Type<any>, directive: Directive
 export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -10123,7 +10253,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
      */
-    readonly _?: never;
+    readonly _?: unknown;
 }
 
 /**
@@ -10131,7 +10261,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵComponentType<T> extends Type<T> {
-    ɵcmp: never;
+    ɵcmp: unknown;
 }
 
 
@@ -10333,8 +10463,8 @@ export declare interface ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵDirectiveType<T> extends Type<T> {
-    ɵdir: never;
-    ɵfac: () => T;
+    ɵdir: unknown;
+    ɵfac: unknown;
 }
 
 export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
@@ -10381,7 +10511,7 @@ export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
 export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
 
 /**
- * Retrieves directive instances associated with a given DOM element. Does not include
+ * Retrieves directive instances associated with a given DOM node. Does not include
  * component instances.
  *
  * @usageNotes
@@ -10393,17 +10523,17 @@ export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
  * </my-app>
  * ```
  * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
- * directive that is associated with the DOM element.
+ * directive that is associated with the DOM node.
  *
  * Calling `getDirectives` on `<my-comp>` will return an empty array.
  *
- * @param element DOM element for which to get the directives.
- * @returns Array of directives associated with the element.
+ * @param node DOM node for which to get the directives.
+ * @returns Array of directives associated with the node.
  *
  * @publicApi
  * @globalApi ng
  */
-export declare function ɵgetDirectives(element: Element): {}[];
+export declare function ɵgetDirectives(node: Node): {}[];
 
 /**
  * Retrieves the host element of a component or directive instance.
@@ -10424,7 +10554,7 @@ export declare function ɵgetHostElement(componentOrDirective: {}): Element;
  *
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
-export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
+export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null;
 
 /**
  * Returns the matching `LContext` data for a given DOM node, directive or component instance.
@@ -10939,6 +11069,61 @@ export declare function ɵppd(checkIndex: number, argCount: number): NodeDef;
 export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
 
 /**
+ * Profiler function which the runtime will invoke before and after user code.
+ */
+export declare interface ɵProfiler {
+    (event: ɵProfilerEvent, instance: {} | null, hookOrListener?: (e?: any) => any): void;
+}
+
+
+/**
+ * Profiler events is an enum used by the profiler to distinguish between different calls of user
+ * code invoked throughout the application lifecycle.
+ */
+export declare const enum ɵProfilerEvent {
+    /**
+     * Corresponds to the point in time before the runtime has called the template function of a
+     * component with `RenderFlags.Create`.
+     */
+    TemplateCreateStart = 0,
+    /**
+     * Corresponds to the point in time after the runtime has called the template function of a
+     * component with `RenderFlags.Create`.
+     */
+    TemplateCreateEnd = 1,
+    /**
+     * Corresponds to the point in time before the runtime has called the template function of a
+     * component with `RenderFlags.Update`.
+     */
+    TemplateUpdateStart = 2,
+    /**
+     * Corresponds to the point in time after the runtime has called the template function of a
+     * component with `RenderFlags.Update`.
+     */
+    TemplateUpdateEnd = 3,
+    /**
+     * Corresponds to the point in time before the runtime has called a lifecycle hook of a component
+     * or directive.
+     */
+    LifecycleHookStart = 4,
+    /**
+     * Corresponds to the point in time after the runtime has called a lifecycle hook of a component
+     * or directive.
+     */
+    LifecycleHookEnd = 5,
+    /**
+     * Corresponds to the point in time before the runtime has evaluated an expression associated with
+     * an event or an output.
+     */
+    OutputStart = 6,
+    /**
+     * Corresponds to the point in time after the runtime has evaluated an expression associated with
+     * an event or an output.
+     */
+    OutputEnd = 7
+}
+
+/**
  * Publishes a collection of default debug tools onto`window.ng`.
  *
  * These functions are available globally when Angular is in development
@@ -11235,7 +11420,6 @@ export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_
 
 
 export declare function ɵstringify(token: any): string;
-
 
 export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_r;
 
@@ -11986,13 +12170,13 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
 export declare function ɵɵclassProp(className: string, value: boolean | undefined | null): typeof ɵɵclassProp;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
+export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[]> = ɵComponentDef<T>;
+}, QueryFields extends string[], NgContentSelectors extends string[]> = unknown;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -12268,7 +12452,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas?: SchemaMetadata[] | null;
-}): never;
+}): unknown;
 
 /**
  * Create a directive definition object.
@@ -12414,8 +12598,8 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
 }) => never;
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
+ * Construct an injectable definition which defines how a token will be constructed by the DI
+ * system, and in which injectors (if any) it will be available.
  *
  * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
@@ -12434,7 +12618,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
@@ -12444,9 +12628,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -12457,10 +12638,9 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -12483,7 +12663,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 
 /**
  * Create a pipe definition object.
@@ -12508,16 +12688,17 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     type: Type<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): never;
+}): unknown;
+
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
+export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = ɵDirectiveDef<T>;
+}, QueryFields extends string[]> = unknown;
 
 /**
  * Returns the value associated to the given token from the injectors.
@@ -12661,9 +12842,17 @@ export declare function ɵɵelementStart(index: number, name: string, attrsIndex
 export declare function ɵɵenableBindings(): void;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
+export declare type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
+
+export declare enum ɵɵFactoryTarget {
+    Directive = 0,
+    Component = 1,
+    Injectable = 2,
+    Pipe = 3,
+    NgModule = 4
+}
 
 /**
  * Returns the current OpaqueViewState instance.
@@ -12675,11 +12864,6 @@ export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]>
  * @codeGenApi
  */
 export declare function ɵɵgetCurrentView(): OpaqueViewState;
-
-/**
- * @codeGenApi
- */
-export declare function ɵɵgetFactoryOf<T>(type: Type<any>): FactoryFn<T> | null;
 
 /**
  * @codeGenApi
@@ -12853,7 +13037,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  * requesting injection of other types if necessary.
  *
  * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
- * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
+ * `Injector`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
  * that the injectable does not belong to any scope.
  *
  * @codeGenApi
@@ -12861,7 +13045,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  *   deployed to npm, and should be treated as public api.
 
  */
-export declare interface ɵɵInjectableDef<T> {
+export declare interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -12895,6 +13079,11 @@ export declare interface ɵɵInjectableDef<T> {
 export declare function ɵɵinjectAttribute(attrNameToInject: string): string | null;
 
 /**
+ * @publicApi
+ */
+export declare type ɵɵInjectorDeclaration<T> = unknown;
+
+/**
  * Information about the providers to be included in an `Injector` as well as how the given type
  * which carries the information should be created by the DI system.
  *
@@ -12907,17 +13096,9 @@ export declare function ɵɵinjectAttribute(attrNameToInject: string): string | 
  * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
-    factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
-
-/**
- * Returns the appropriate `ChangeDetectorRef` for a pipe.
- *
- * @codeGenApi
- */
-export declare function ɵɵinjectPipeChangeDetectorRef(flags?: InjectFlags): ChangeDetectorRef | null;
 
 /**
  * Throws an error indicating that a factory function could not be generated by the compiler for a
@@ -13007,6 +13188,20 @@ export declare function ɵɵnamespaceSVG(): void;
 export declare function ɵɵnextContext<T = any>(level?: number): T;
 
 /**
+ * Evaluates the class metadata declaration.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareClassMetadata(decl: {
+    type: Type<any>;
+    decorators: any[];
+    ctorParameters?: () => any[];
+    propDecorators?: {
+        [field: string]: any;
+    };
+}): void;
+
+/**
  * Compiles a partial component declaration object into a full component definition object.
  *
  * @codeGenApi
@@ -13021,9 +13216,44 @@ export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): 
 export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
 
 /**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareFactory(decl: R3DeclareFactoryFacade): unknown;
+
+/**
+ * Compiles a partial injectable declaration object into a full injectable definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjectable(decl: R3DeclareInjectableFacade): unknown;
+
+/**
+ * Compiles a partial injector declaration object into a full injector definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): unknown;
+
+/**
+ * Compiles a partial NgModule declaration object into a full NgModule definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): unknown;
+
+/**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
+
+/**
  * @publicApi
  */
-export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
+export declare type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> = unknown;
 
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
@@ -13138,9 +13368,9 @@ export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any
 export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: [any, ...any[]]): any;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
+export declare type ɵɵPipeDeclaration<T, Name extends string> = unknown;
 
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
@@ -13852,10 +14082,11 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -13980,7 +14211,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
      * module.
      */
     exports?: Type<any>[] | (() => Type<any>[]);
-}): void;
+}): unknown;
 
 /**
  * Update style bindings using an object literal on an element.

@@ -1,6 +1,6 @@
 /**
- * @license Angular v11.1.0-next.4+175.sha-02ff4ed
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.8+133.sha-d5b13ce
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -114,51 +114,6 @@ declare abstract class ChangeDetectorRef {
      *
      */
     abstract reattach(): void;
-}
-
-/**
- * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @usageNotes
- *
- * {@example core/di/ts/provider_spec.ts region='ClassProvider'}
- *
- * Note that following two providers are not equal:
- *
- * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
- *
- * ### Multi-value example
- *
- * {@example core/di/ts/provider_spec.ts region='MultiProviderAspect'}
- *
- * @publicApi
- */
-declare interface ClassProvider extends ClassSansProvider {
-    /**
-     * An injection token. (Typically an instance of `Type` or `InjectionToken`, but can be `any`).
-     */
-    provide: any;
-    /**
-     * When true, injector returns an array of instances. This is useful to allow multiple
-     * providers spread across many files to provide configuration information to a common token.
-     */
-    multi?: boolean;
-}
-
-/**
- * Configures the `Injector` to return a value by invoking a `useClass` function.
- * Base for `ClassProvider` decorator.
- *
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
- *
- * @publicApi
- */
-declare interface ClassSansProvider {
-    /**
-     * Class to instantiate for the `token`.
-     */
-    useClass: Type<any>;
 }
 
 /**
@@ -318,6 +273,8 @@ declare interface ConstructorSansProvider {
 /**
  * An object literal of this type is used to represent the metadata of a constructor dependency.
  * The type itself is never referred to from generated code.
+ *
+ * @publicApi
  */
 declare type CtorDependency = {
     /**
@@ -538,7 +495,7 @@ declare enum InjectFlags {
  */
 declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ɵprov: never | undefined;
+    readonly ɵprov: unknown;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -606,34 +563,22 @@ declare abstract class Injector {
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 /**
  * A type which has an `InjectorDef` static field.
  *
- * `InjectorDefTypes` can be used to configure a `StaticInjector`.
+ * `InjectorTypes` can be used to configure a `StaticInjector`.
+ *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
  *
  * @publicApi
  */
 declare interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
-    ɵinj: never;
-}
-
-/**
- * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
- * associated array of providers.
- *
- * Objects of this type can be listed in the imports section of an `InjectorDef`.
- *
- * NOTE: This is a private type and should not be exported
- */
-declare interface InjectorTypeWithProviders<T> {
-    ngModule: InjectorType<T>;
-    providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
+    ɵfac?: unknown;
+    ɵinj: unknown;
 }
 
 /**
@@ -926,8 +871,8 @@ declare abstract class ViewRef extends ChangeDetectorRef {
 export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
+ * Construct an injectable definition which defines how a token will be constructed by the DI
+ * system, and in which injectors (if any) it will be available.
  *
  * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
@@ -946,7 +891,7 @@ export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
@@ -956,9 +901,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -969,10 +911,9 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -995,12 +936,12 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵFactoryDef<T, CtorDependencies extends CtorDependency[]> = () => T;
+export declare type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
 
 /**
  * Generated instruction: Injects a token from the currently active injector.
@@ -1026,7 +967,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  * requesting injection of other types if necessary.
  *
  * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
- * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
+ * `Injector`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
  * that the injectable does not belong to any scope.
  *
  * @codeGenApi
@@ -1034,7 +975,7 @@ export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | Injecti
  *   deployed to npm, and should be treated as public api.
 
  */
-export declare interface ɵɵInjectableDef<T> {
+export declare interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -1061,26 +1002,13 @@ export declare interface ɵɵInjectableDef<T> {
 }
 
 /**
- * Information about the providers to be included in an `Injector` as well as how the given type
- * which carries the information should be created by the DI system.
- *
- * An `InjectorDef` can import other types which have `InjectorDefs`, forming a deep nested
- * structure of providers with a defined priority (identically to how `NgModule`s also have
- * an import/dependency structure).
- *
- * NOTE: This is a private type and should not be exported
- *
- * @codeGenApi
+ * @publicApi
  */
-export declare interface ɵɵInjectorDef<T> {
-    factory: () => T;
-    providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
-    imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
-}
+export declare type ɵɵInjectorDeclaration<T> = unknown;
 
 /**
  * @publicApi
  */
-export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = NgModuleDef<T>;
+export declare type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> = unknown;
 
 export { }

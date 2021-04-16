@@ -8,7 +8,7 @@
  */
 import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
-export declare type FakeReadFileFn = (fileName: string) => string | null;
+export declare type FakeReadFileFn = (fileName: string) => string | undefined;
 /**
  * Creates a TypeScript program instance for a TypeScript project within
  * the virtual file system tree.

@@ -1,6 +1,6 @@
 /**
- * @license Angular v11.1.0-next.4+175.sha-02ff4ed
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.8+133.sha-d5b13ce
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -132,6 +132,425 @@
             fn.__forward_ref__ === forwardRef;
     }
 
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+    /* global Reflect, Promise */
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b)
+                if (Object.prototype.hasOwnProperty.call(b, p))
+                    d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+    var __assign = function () {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s)
+                    if (Object.prototype.hasOwnProperty.call(s, p))
+                        t[p] = s[p];
+            }
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+    function __rest(s, e) {
+        var t = {};
+        for (var p in s)
+            if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+                t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+                if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                    t[p[i]] = s[p[i]];
+            }
+        return t;
+    }
+    function __decorate(decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+            r = Reflect.decorate(decorators, target, key, desc);
+        else
+            for (var i = decorators.length - 1; i >= 0; i--)
+                if (d = decorators[i])
+                    r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+    }
+    function __param(paramIndex, decorator) {
+        return function (target, key) { decorator(target, key, paramIndex); };
+    }
+    function __metadata(metadataKey, metadataValue) {
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+            return Reflect.metadata(metadataKey, metadataValue);
+    }
+    function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try {
+                step(generator.next(value));
+            }
+            catch (e) {
+                reject(e);
+            } }
+            function rejected(value) { try {
+                step(generator["throw"](value));
+            }
+            catch (e) {
+                reject(e);
+            } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+    function __generator(thisArg, body) {
+        var _ = { label: 0, sent: function () { if (t[0] & 1)
+                throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
+        function verb(n) { return function (v) { return step([n, v]); }; }
+        function step(op) {
+            if (f)
+                throw new TypeError("Generator is already executing.");
+            while (_)
+                try {
+                    if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
+                        return t;
+                    if (y = 0, t)
+                        op = [op[0] & 2, t.value];
+                    switch (op[0]) {
+                        case 0:
+                        case 1:
+                            t = op;
+                            break;
+                        case 4:
+                            _.label++;
+                            return { value: op[1], done: false };
+                        case 5:
+                            _.label++;
+                            y = op[1];
+                            op = [0];
+                            continue;
+                        case 7:
+                            op = _.ops.pop();
+                            _.trys.pop();
+                            continue;
+                        default:
+                            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                                _ = 0;
+                                continue;
+                            }
+                            if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) {
+                                _.label = op[1];
+                                break;
+                            }
+                            if (op[0] === 6 && _.label < t[1]) {
+                                _.label = t[1];
+                                t = op;
+                                break;
+                            }
+                            if (t && _.label < t[2]) {
+                                _.label = t[2];
+                                _.ops.push(op);
+                                break;
+                            }
+                            if (t[2])
+                                _.ops.pop();
+                            _.trys.pop();
+                            continue;
+                    }
+                    op = body.call(thisArg, _);
+                }
+                catch (e) {
+                    op = [6, e];
+                    y = 0;
+                }
+                finally {
+                    f = t = 0;
+                }
+            if (op[0] & 5)
+                throw op[1];
+            return { value: op[0] ? op[1] : void 0, done: true };
+        }
+    }
+    var __createBinding = Object.create ? (function (o, m, k, k2) {
+        if (k2 === undefined)
+            k2 = k;
+        Object.defineProperty(o, k2, { enumerable: true, get: function () { return m[k]; } });
+    }) : (function (o, m, k, k2) {
+        if (k2 === undefined)
+            k2 = k;
+        o[k2] = m[k];
+    });
+    function __exportStar(m, o) {
+        for (var p in m)
+            if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+                __createBinding(o, m, p);
+    }
+    function __values(o) {
+        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+        if (m)
+            return m.call(o);
+        if (o && typeof o.length === "number")
+            return {
+                next: function () {
+                    if (o && i >= o.length)
+                        o = void 0;
+                    return { value: o && o[i++], done: !o };
+                }
+            };
+        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+    }
+    function __read(o, n) {
+        var m = typeof Symbol === "function" && o[Symbol.iterator];
+        if (!m)
+            return o;
+        var i = m.call(o), r, ar = [], e;
+        try {
+            while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+                ar.push(r.value);
+        }
+        catch (error) {
+            e = { error: error };
+        }
+        finally {
+            try {
+                if (r && !r.done && (m = i["return"]))
+                    m.call(i);
+            }
+            finally {
+                if (e)
+                    throw e.error;
+            }
+        }
+        return ar;
+    }
+    /** @deprecated */
+    function __spread() {
+        for (var ar = [], i = 0; i < arguments.length; i++)
+            ar = ar.concat(__read(arguments[i]));
+        return ar;
+    }
+    /** @deprecated */
+    function __spreadArrays() {
+        for (var s = 0, i = 0, il = arguments.length; i < il; i++)
+            s += arguments[i].length;
+        for (var r = Array(s), k = 0, i = 0; i < il; i++)
+            for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+                r[k] = a[j];
+        return r;
+    }
+    function __spreadArray(to, from) {
+        for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+            to[j] = from[i];
+        return to;
+    }
+    function __await(v) {
+        return this instanceof __await ? (this.v = v, this) : new __await(v);
+    }
+    function __asyncGenerator(thisArg, _arguments, generator) {
+        if (!Symbol.asyncIterator)
+            throw new TypeError("Symbol.asyncIterator is not defined.");
+        var g = generator.apply(thisArg, _arguments || []), i, q = [];
+        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+        function verb(n) { if (g[n])
+            i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+        function resume(n, v) { try {
+            step(g[n](v));
+        }
+        catch (e) {
+            settle(q[0][3], e);
+        } }
+        function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+        function fulfill(value) { resume("next", value); }
+        function reject(value) { resume("throw", value); }
+        function settle(f, v) { if (f(v), q.shift(), q.length)
+            resume(q[0][0], q[0][1]); }
+    }
+    function __asyncDelegator(o) {
+        var i, p;
+        return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+        function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+    }
+    function __asyncValues(o) {
+        if (!Symbol.asyncIterator)
+            throw new TypeError("Symbol.asyncIterator is not defined.");
+        var m = o[Symbol.asyncIterator], i;
+        return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+        function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+        function settle(resolve, reject, d, v) { Promise.resolve(v).then(function (v) { resolve({ value: v, done: d }); }, reject); }
+    }
+    function __makeTemplateObject(cooked, raw) {
+        if (Object.defineProperty) {
+            Object.defineProperty(cooked, "raw", { value: raw });
+        }
+        else {
+            cooked.raw = raw;
+        }
+        return cooked;
+    }
+    ;
+    var __setModuleDefault = Object.create ? (function (o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function (o, v) {
+        o["default"] = v;
+    };
+    function __importStar(mod) {
+        if (mod && mod.__esModule)
+            return mod;
+        var result = {};
+        if (mod != null)
+            for (var k in mod)
+                if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+                    __createBinding(result, mod, k);
+        __setModuleDefault(result, mod);
+        return result;
+    }
+    function __importDefault(mod) {
+        return (mod && mod.__esModule) ? mod : { default: mod };
+    }
+    function __classPrivateFieldGet(receiver, state, kind, f) {
+        if (kind === "a" && !f)
+            throw new TypeError("Private accessor was defined without a getter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+            throw new TypeError("Cannot read private member from an object whose class did not declare it");
+        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+    }
+    function __classPrivateFieldSet(receiver, state, value, kind, f) {
+        if (kind === "m")
+            throw new TypeError("Private method is not writable");
+        if (kind === "a" && !f)
+            throw new TypeError("Private accessor was defined without a setter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+            throw new TypeError("Cannot write private member to an object whose class did not declare it");
+        return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    // Base URL for the error details page.
+    // Keep this value in sync with a similar const in
+    // `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
+    var ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+    var RuntimeError = /** @class */ (function (_super) {
+        __extends(RuntimeError, _super);
+        function RuntimeError(code, message) {
+            var _this = _super.call(this, formatRuntimeError(code, message)) || this;
+            _this.code = code;
+            return _this;
+        }
+        return RuntimeError;
+    }(Error));
+    // Contains a set of error messages that have details guides at angular.io.
+    // Full list of available error guides can be found at https://angular.io/errors
+    /* tslint:disable:no-toplevel-property-access */
+    var RUNTIME_ERRORS_WITH_GUIDES = new Set([
+        "100" /* EXPRESSION_CHANGED_AFTER_CHECKED */,
+        "200" /* CYCLIC_DI_DEPENDENCY */,
+        "201" /* PROVIDER_NOT_FOUND */,
+        "300" /* MULTIPLE_COMPONENTS_MATCH */,
+        "301" /* EXPORT_NOT_FOUND */,
+        "302" /* PIPE_NOT_FOUND */,
+    ]);
+    /* tslint:enable:no-toplevel-property-access */
+    /** Called to format a runtime error */
+    function formatRuntimeError(code, message) {
+        var fullCode = code ? "NG0" + code + ": " : '';
+        var errorMessage = "" + fullCode + message;
+        // Some runtime errors are still thrown without `ngDevMode` (for example
+        // `throwProviderNotFoundError`), so we add `ngDevMode` check here to avoid pulling
+        // `RUNTIME_ERRORS_WITH_GUIDES` symbol into prod bundles.
+        // TODO: revisit all instances where `RuntimeError` is thrown and see if `ngDevMode` can be added
+        // there instead to tree-shake more devmode-only code (and eventually remove `ngDevMode` check
+        // from this code).
+        if (ngDevMode && RUNTIME_ERRORS_WITH_GUIDES.has(code)) {
+            errorMessage = errorMessage + ". Find more at " + ERROR_DETAILS_PAGE_BASE_URL + "/NG0" + code;
+        }
+        return errorMessage;
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Used for stringify render output in Ivy.
+     * Important! This function is very performance-sensitive and we should
+     * be extra careful not to introduce megamorphic reads in it.
+     * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
+     */
+    function renderStringify(value) {
+        if (typeof value === 'string')
+            return value;
+        if (value == null)
+            return '';
+        // Use `String` so that it invokes the `toString` method of the value. Note that this
+        // appears to be faster than calling `value.toString` (see `render_stringify` benchmark).
+        return String(value);
+    }
+    /**
+     * Used to stringify a value so that it can be displayed in an error message.
+     * Important! This function contains a megamorphic read and should only be
+     * used for error messages.
+     */
+    function stringifyForError(value) {
+        if (typeof value === 'function')
+            return value.name || value.toString();
+        if (typeof value === 'object' && value != null && typeof value.type === 'function') {
+            return value.type.name || value.type.toString();
+        }
+        return renderStringify(value);
+    }
+
+    /** Called when directives inject each other (creating a circular dependency) */
+    function throwCyclicDependencyError(token, path) {
+        var depPath = path ? ". Dependency path: " + path.join(' > ') + " > " + token : '';
+        throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, "Circular dependency in DI detected for " + token + depPath);
+    }
+    function throwMixedMultiProviderError() {
+        throw new Error("Cannot mix multi providers and regular providers");
+    }
+    function throwInvalidProviderError(ngModuleType, providers, provider) {
+        var ngModuleDetail = '';
+        if (ngModuleType && providers) {
+            var providerDetail = providers.map(function (v) { return v == provider ? '?' + provider + '?' : '...'; });
+            ngModuleDetail =
+                " - only instances of Provider and Type are allowed, got: [" + providerDetail.join(', ') + "]";
+        }
+        throw new Error("Invalid provider for the NgModule '" + stringify(ngModuleType) + "'" + ngModuleDetail);
+    }
+    /** Throws an error when a token is not found in DI. */
+    function throwProviderNotFoundError(token, injectorName) {
+        var injectorDetails = injectorName ? " in " + injectorName : '';
+        throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, "No provider for " + stringifyForError(token) + " found" + injectorDetails);
+    }
+
     /**
      * @license
      * Copyright Google LLC All Rights Reserved.
@@ -246,8 +665,8 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
-     * in which injectors (if any) it will be available.
+     * Construct an injectable definition which defines how a token will be constructed by the DI
+     * system, and in which injectors (if any) it will be available.
      *
      * This should be assigned to a static `ɵprov` field on a type, which will then be an
      * `InjectableType`.
@@ -284,9 +703,6 @@
      *
      * Options:
      *
-     * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
-     *   create the type must be provided. If that factory function needs to inject arguments, it can
-     *   use the `inject` function.
      * * `providers`: an optional array of providers to add to the injector. Each provider must
      *   either have a factory or point to a type which has a `ɵprov` static property (the
      *   type must be an `InjectableType`).
@@ -297,11 +713,7 @@
      * @codeGenApi
      */
     function ɵɵdefineInjector(options) {
-        return {
-            factory: options.factory,
-            providers: options.providers || [],
-            imports: options.imports || [],
-        };
+        return { providers: options.providers || [], imports: options.imports || [] };
     }
     /**
      * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -429,7 +841,7 @@
      *
      * If no injector exists, we can still inject tree-shakable providers which have `providedIn` set to
      * `"root"`. This is known as the limp mode injection. In such case the value is stored in the
-     * `InjectableDef`.
+     * injectable definition.
      */
     function injectRootLimpMode(token, notFoundValue, flags) {
         var injectableDef = getInjectableDef(token);
@@ -441,7 +853,7 @@
             return null;
         if (notFoundValue !== undefined)
             return notFoundValue;
-        throw new Error("Injector: NOT_FOUND [" + stringify(token) + "]");
+        throwProviderNotFoundError(stringify(token), 'Injector');
     }
     /**
      * Assert that `_injectImplementation` is not `fn`.
@@ -739,7 +1151,6 @@
             // See the `initNgDevMode` docstring for more information.
             (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
             var type = componentDefinition.type;
-            var typePrototype = type.prototype;
             var declaredInputs = {};
             var def = {
                 type: type,
@@ -1086,7 +1497,7 @@
     var TViewTypeAsString = [
         'Root',
         'Component',
-        'Embedded',
+        'Embedded', // 2
     ];
     // Note: This hack is necessary so we don't erroneously get a circular dependency
     // failure based on types.
@@ -1225,6 +1636,14 @@
             throwError("Index out of range (expecting " + lower + " <= " + index + " < " + upper + ")");
         }
     }
+    function assertProjectionSlots(lView, errMessage) {
+        assertDefined(lView[DECLARATION_COMPONENT_VIEW], 'Component views should exist.');
+        assertDefined(lView[DECLARATION_COMPONENT_VIEW][T_HOST].projection, errMessage ||
+            'Components with projection nodes (<ng-content>) must have projection slots defined.');
+    }
+    function assertParentView(lView, errMessage) {
+        assertDefined(lView, errMessage || 'Component views should always have a parent view (component\'s host view)');
+    }
     /**
      * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
      * NodeInjector data structure.
@@ -1259,413 +1678,6 @@
             throw new Error("Type " + stringify(type) + " does not have '\u0275fac' property.");
         }
         return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
-    }
-
-    /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation.
-
-    Permission to use, copy, modify, and/or distribute this software for any
-    purpose with or without fee is hereby granted.
-
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-    PERFORMANCE OF THIS SOFTWARE.
-    ***************************************************************************** */
-    /* global Reflect, Promise */
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b)
-                if (b.hasOwnProperty(p))
-                    d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    function __extends(d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    }
-    var __assign = function () {
-        __assign = Object.assign || function __assign(t) {
-            for (var s, i = 1, n = arguments.length; i < n; i++) {
-                s = arguments[i];
-                for (var p in s)
-                    if (Object.prototype.hasOwnProperty.call(s, p))
-                        t[p] = s[p];
-            }
-            return t;
-        };
-        return __assign.apply(this, arguments);
-    };
-    function __rest(s, e) {
-        var t = {};
-        for (var p in s)
-            if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-                t[p] = s[p];
-        if (s != null && typeof Object.getOwnPropertySymbols === "function")
-            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-                if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                    t[p[i]] = s[p[i]];
-            }
-        return t;
-    }
-    function __decorate(decorators, target, key, desc) {
-        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-        if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-            r = Reflect.decorate(decorators, target, key, desc);
-        else
-            for (var i = decorators.length - 1; i >= 0; i--)
-                if (d = decorators[i])
-                    r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-        return c > 3 && r && Object.defineProperty(target, key, r), r;
-    }
-    function __param(paramIndex, decorator) {
-        return function (target, key) { decorator(target, key, paramIndex); };
-    }
-    function __metadata(metadataKey, metadataValue) {
-        if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-            return Reflect.metadata(metadataKey, metadataValue);
-    }
-    function __awaiter(thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-        return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try {
-                step(generator.next(value));
-            }
-            catch (e) {
-                reject(e);
-            } }
-            function rejected(value) { try {
-                step(generator["throw"](value));
-            }
-            catch (e) {
-                reject(e);
-            } }
-            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-    }
-    function __generator(thisArg, body) {
-        var _ = { label: 0, sent: function () { if (t[0] & 1)
-                throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
-        function verb(n) { return function (v) { return step([n, v]); }; }
-        function step(op) {
-            if (f)
-                throw new TypeError("Generator is already executing.");
-            while (_)
-                try {
-                    if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
-                        return t;
-                    if (y = 0, t)
-                        op = [op[0] & 2, t.value];
-                    switch (op[0]) {
-                        case 0:
-                        case 1:
-                            t = op;
-                            break;
-                        case 4:
-                            _.label++;
-                            return { value: op[1], done: false };
-                        case 5:
-                            _.label++;
-                            y = op[1];
-                            op = [0];
-                            continue;
-                        case 7:
-                            op = _.ops.pop();
-                            _.trys.pop();
-                            continue;
-                        default:
-                            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-                                _ = 0;
-                                continue;
-                            }
-                            if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) {
-                                _.label = op[1];
-                                break;
-                            }
-                            if (op[0] === 6 && _.label < t[1]) {
-                                _.label = t[1];
-                                t = op;
-                                break;
-                            }
-                            if (t && _.label < t[2]) {
-                                _.label = t[2];
-                                _.ops.push(op);
-                                break;
-                            }
-                            if (t[2])
-                                _.ops.pop();
-                            _.trys.pop();
-                            continue;
-                    }
-                    op = body.call(thisArg, _);
-                }
-                catch (e) {
-                    op = [6, e];
-                    y = 0;
-                }
-                finally {
-                    f = t = 0;
-                }
-            if (op[0] & 5)
-                throw op[1];
-            return { value: op[0] ? op[1] : void 0, done: true };
-        }
-    }
-    var __createBinding = Object.create ? (function (o, m, k, k2) {
-        if (k2 === undefined)
-            k2 = k;
-        Object.defineProperty(o, k2, { enumerable: true, get: function () { return m[k]; } });
-    }) : (function (o, m, k, k2) {
-        if (k2 === undefined)
-            k2 = k;
-        o[k2] = m[k];
-    });
-    function __exportStar(m, exports) {
-        for (var p in m)
-            if (p !== "default" && !exports.hasOwnProperty(p))
-                __createBinding(exports, m, p);
-    }
-    function __values(o) {
-        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-        if (m)
-            return m.call(o);
-        if (o && typeof o.length === "number")
-            return {
-                next: function () {
-                    if (o && i >= o.length)
-                        o = void 0;
-                    return { value: o && o[i++], done: !o };
-                }
-            };
-        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-    }
-    function __read(o, n) {
-        var m = typeof Symbol === "function" && o[Symbol.iterator];
-        if (!m)
-            return o;
-        var i = m.call(o), r, ar = [], e;
-        try {
-            while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
-                ar.push(r.value);
-        }
-        catch (error) {
-            e = { error: error };
-        }
-        finally {
-            try {
-                if (r && !r.done && (m = i["return"]))
-                    m.call(i);
-            }
-            finally {
-                if (e)
-                    throw e.error;
-            }
-        }
-        return ar;
-    }
-    function __spread() {
-        for (var ar = [], i = 0; i < arguments.length; i++)
-            ar = ar.concat(__read(arguments[i]));
-        return ar;
-    }
-    function __spreadArrays() {
-        for (var s = 0, i = 0, il = arguments.length; i < il; i++)
-            s += arguments[i].length;
-        for (var r = Array(s), k = 0, i = 0; i < il; i++)
-            for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-                r[k] = a[j];
-        return r;
-    }
-    ;
-    function __await(v) {
-        return this instanceof __await ? (this.v = v, this) : new __await(v);
-    }
-    function __asyncGenerator(thisArg, _arguments, generator) {
-        if (!Symbol.asyncIterator)
-            throw new TypeError("Symbol.asyncIterator is not defined.");
-        var g = generator.apply(thisArg, _arguments || []), i, q = [];
-        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-        function verb(n) { if (g[n])
-            i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
-        function resume(n, v) { try {
-            step(g[n](v));
-        }
-        catch (e) {
-            settle(q[0][3], e);
-        } }
-        function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
-        function fulfill(value) { resume("next", value); }
-        function reject(value) { resume("throw", value); }
-        function settle(f, v) { if (f(v), q.shift(), q.length)
-            resume(q[0][0], q[0][1]); }
-    }
-    function __asyncDelegator(o) {
-        var i, p;
-        return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
-        function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
-    }
-    function __asyncValues(o) {
-        if (!Symbol.asyncIterator)
-            throw new TypeError("Symbol.asyncIterator is not defined.");
-        var m = o[Symbol.asyncIterator], i;
-        return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-        function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-        function settle(resolve, reject, d, v) { Promise.resolve(v).then(function (v) { resolve({ value: v, done: d }); }, reject); }
-    }
-    function __makeTemplateObject(cooked, raw) {
-        if (Object.defineProperty) {
-            Object.defineProperty(cooked, "raw", { value: raw });
-        }
-        else {
-            cooked.raw = raw;
-        }
-        return cooked;
-    }
-    ;
-    var __setModuleDefault = Object.create ? (function (o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function (o, v) {
-        o["default"] = v;
-    };
-    function __importStar(mod) {
-        if (mod && mod.__esModule)
-            return mod;
-        var result = {};
-        if (mod != null)
-            for (var k in mod)
-                if (Object.hasOwnProperty.call(mod, k))
-                    __createBinding(result, mod, k);
-        __setModuleDefault(result, mod);
-        return result;
-    }
-    function __importDefault(mod) {
-        return (mod && mod.__esModule) ? mod : { default: mod };
-    }
-    function __classPrivateFieldGet(receiver, privateMap) {
-        if (!privateMap.has(receiver)) {
-            throw new TypeError("attempted to get private field on non-instance");
-        }
-        return privateMap.get(receiver);
-    }
-    function __classPrivateFieldSet(receiver, privateMap, value) {
-        if (!privateMap.has(receiver)) {
-            throw new TypeError("attempted to set private field on non-instance");
-        }
-        privateMap.set(receiver, value);
-        return value;
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    // Base URL for the error details page.
-    // Keep this value in sync with a similar const in
-    // `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
-    var ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
-    var RuntimeError = /** @class */ (function (_super) {
-        __extends(RuntimeError, _super);
-        function RuntimeError(code, message) {
-            var _this = _super.call(this, formatRuntimeError(code, message)) || this;
-            _this.code = code;
-            return _this;
-        }
-        return RuntimeError;
-    }(Error));
-    // Contains a set of error messages that have details guides at angular.io.
-    // Full list of available error guides can be found at https://angular.io/errors
-    /* tslint:disable:no-toplevel-property-access */
-    var RUNTIME_ERRORS_WITH_GUIDES = new Set([
-        "100" /* EXPRESSION_CHANGED_AFTER_CHECKED */,
-        "200" /* CYCLIC_DI_DEPENDENCY */,
-        "201" /* PROVIDER_NOT_FOUND */,
-        "300" /* MULTIPLE_COMPONENTS_MATCH */,
-        "301" /* EXPORT_NOT_FOUND */,
-    ]);
-    /* tslint:enable:no-toplevel-property-access */
-    /** Called to format a runtime error */
-    function formatRuntimeError(code, message) {
-        var fullCode = code ? "NG0" + code + ": " : '';
-        var errorMessage = "" + fullCode + message;
-        // Some runtime errors are still thrown without `ngDevMode` (for example
-        // `throwProviderNotFoundError`), so we add `ngDevMode` check here to avoid pulling
-        // `RUNTIME_ERRORS_WITH_GUIDES` symbol into prod bundles.
-        // TODO: revisit all instances where `RuntimeError` is thrown and see if `ngDevMode` can be added
-        // there instead to tree-shake more devmode-only code (and eventually remove `ngDevMode` check
-        // from this code).
-        if (ngDevMode && RUNTIME_ERRORS_WITH_GUIDES.has(code)) {
-            errorMessage = errorMessage + ". Find more at " + ERROR_DETAILS_PAGE_BASE_URL + "/NG0" + code;
-        }
-        return errorMessage;
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Used for stringify render output in Ivy.
-     * Important! This function is very performance-sensitive and we should
-     * be extra careful not to introduce megamorphic reads in it.
-     * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
-     */
-    function renderStringify(value) {
-        if (typeof value === 'string')
-            return value;
-        if (value == null)
-            return '';
-        // Use `String` so that it invokes the `toString` method of the value. Note that this
-        // appears to be faster than calling `value.toString` (see `render_stringify` benchmark).
-        return String(value);
-    }
-    /**
-     * Used to stringify a value so that it can be displayed in an error message.
-     * Important! This function contains a megamorphic read and should only be
-     * used for error messages.
-     */
-    function stringifyForError(value) {
-        if (typeof value === 'function')
-            return value.name || value.toString();
-        if (typeof value === 'object' && value != null && typeof value.type === 'function') {
-            return value.type.name || value.type.toString();
-        }
-        return renderStringify(value);
-    }
-
-    /** Called when directives inject each other (creating a circular dependency) */
-    function throwCyclicDependencyError(token, path) {
-        var depPath = path ? ". Dependency path: " + path.join(' > ') + " > " + token : '';
-        throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, "Circular dependency in DI detected for " + token + depPath);
-    }
-    function throwMixedMultiProviderError() {
-        throw new Error("Cannot mix multi providers and regular providers");
-    }
-    function throwInvalidProviderError(ngModuleType, providers, provider) {
-        var ngModuleDetail = '';
-        if (ngModuleType && providers) {
-            var providerDetail = providers.map(function (v) { return v == provider ? '?' + provider + '?' : '...'; });
-            ngModuleDetail =
-                " - only instances of Provider and Type are allowed, got: [" + providerDetail.join(', ') + "]";
-        }
-        throw new Error("Invalid provider for the NgModule '" + stringify(ngModuleType) + "'" + ngModuleDetail);
-    }
-    /** Throws an error when a token is not found in DI. */
-    function throwProviderNotFoundError(token, injectorName) {
-        var injectorDetails = injectorName ? " in " + injectorName : '';
-        throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, "No provider for " + stringifyForError(token) + " found" + injectorDetails);
     }
 
     /**
@@ -1796,8 +1808,34 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-    var MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
+    var profilerCallback = null;
+    /**
+     * Sets the callback function which will be invoked before and after performing certain actions at
+     * runtime (for example, before and after running change detection).
+     *
+     * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+     * The contract of the function might be changed in any release and/or the function can be removed
+     * completely.
+     *
+     * @param profiler function provided by the caller or null value to disable profiling.
+     */
+    var setProfiler = function (profiler) {
+        profilerCallback = profiler;
+    };
+    /**
+     * Profiler function which wraps user code executed by the runtime.
+     *
+     * @param event ProfilerEvent corresponding to the execution context
+     * @param instance component instance
+     * @param hookOrListener lifecycle hook function or output listener. The value depends on the
+     *  execution context
+     * @returns
+     */
+    var profiler = function (event, instance, hookOrListener) {
+        if (profilerCallback != null /* both `null` and `undefined` */) {
+            profilerCallback(event, instance, hookOrListener);
+        }
+    };
 
     /**
      * @license
@@ -1806,10 +1844,8 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * This property will be monkey-patched on elements, components and directives
-     */
-    var MONKEY_PATCH_KEY_NAME = '__ngContext__';
+    var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+    var MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
 
     /**
      * @license
@@ -2016,21 +2052,6 @@
         var lView = isLView(slotValue) ? slotValue : slotValue[HOST];
         return lView;
     }
-    /**
-     * Returns the monkey-patch value data present on the target (which could be
-     * a component, directive or a DOM node).
-     */
-    function readPatchedData(target) {
-        ngDevMode && assertDefined(target, 'Target expected');
-        return target[MONKEY_PATCH_KEY_NAME] || null;
-    }
-    function readPatchedLView(target) {
-        var value = readPatchedData(target);
-        if (value) {
-            return Array.isArray(value) ? value : value.lView;
-        }
-        return null;
-    }
     /** Checks whether a given view is in creation mode */
     function isCreationMode(view) {
         return (view[FLAGS] & 4 /* CreationMode */) === 4 /* CreationMode */;
@@ -2177,11 +2198,13 @@
      * walking the declaration view tree in listeners to get vars from parent views.
      *
      * @param viewToRestore The OpaqueViewState instance to restore.
+     * @returns Context of the restored OpaqueViewState instance.
      *
      * @codeGenApi
      */
     function ɵɵrestoreView(viewToRestore) {
         instructionState.lFrame.contextLView = viewToRestore;
+        return viewToRestore[CONTEXT];
     }
     function getCurrentTNode() {
         var currentTNode = getCurrentTNodePlaceholderOk();
@@ -2783,11 +2806,23 @@
                 (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
                 (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
                 currentView[FLAGS] += 2048 /* IndexWithinInitPhaseIncrementer */;
-                hook.call(directive);
+                profiler(4 /* LifecycleHookStart */, directive, hook);
+                try {
+                    hook.call(directive);
+                }
+                finally {
+                    profiler(5 /* LifecycleHookEnd */, directive, hook);
+                }
             }
         }
         else {
-            hook.call(directive);
+            profiler(4 /* LifecycleHookStart */, directive, hook);
+            try {
+                hook.call(directive);
+            }
+            finally {
+                profiler(5 /* LifecycleHookEnd */, directive, hook);
+            }
         }
     }
 
@@ -3633,7 +3668,7 @@
                         lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
                 }
                 try {
-                    var value = bloomHash();
+                    var value = bloomHash(flags);
                     if (value == null && !(flags & exports.InjectFlags.Optional)) {
                         throwProviderNotFoundError(token);
                     }
@@ -3885,33 +3920,15 @@
     /**
      * @codeGenApi
      */
-    function ɵɵgetFactoryOf(type) {
-        var typeAny = type;
-        if (isForwardRef(type)) {
-            return (function () {
-                var factory = ɵɵgetFactoryOf(resolveForwardRef(typeAny));
-                return factory ? factory() : null;
-            });
-        }
-        var factory = getFactoryDef(typeAny);
-        if (factory === null) {
-            var injectorDef = getInjectorDef(typeAny);
-            factory = injectorDef && injectorDef.factory;
-        }
-        return factory || null;
-    }
-    /**
-     * @codeGenApi
-     */
     function ɵɵgetInheritedFactory(type) {
         return noSideEffects(function () {
             var ownConstructor = type.prototype.constructor;
-            var ownFactory = ownConstructor[NG_FACTORY_DEF] || ɵɵgetFactoryOf(ownConstructor);
+            var ownFactory = ownConstructor[NG_FACTORY_DEF] || getFactoryOf(ownConstructor);
             var objectPrototype = Object.prototype;
             var parent = Object.getPrototypeOf(type.prototype).constructor;
             // Go up the prototype until we hit `Object`.
             while (parent && parent !== objectPrototype) {
-                var factory = parent[NG_FACTORY_DEF] || ɵɵgetFactoryOf(parent);
+                var factory = parent[NG_FACTORY_DEF] || getFactoryOf(parent);
                 // If we hit something that has a factory and the factory isn't the same as the type,
                 // we've found the inherited factory. Note the check that the factory isn't the type's
                 // own factory is redundant in most cases, but if the user has custom decorators on the
@@ -3928,6 +3945,15 @@
             // latter has to be assumed.
             return function (t) { return new t(); };
         });
+    }
+    function getFactoryOf(type) {
+        if (isForwardRef(type)) {
+            return function () {
+                var factory = getFactoryOf(resolveForwardRef(type));
+                return factory && factory();
+            };
+        }
+        return getFactoryDef(type);
     }
 
     /**
@@ -3961,13 +3987,13 @@
                     args[_i] = arguments[_i];
                 }
                 if (this instanceof DecoratorFactory) {
-                    metaCtor.call.apply(metaCtor, __spread([this], args));
+                    metaCtor.call.apply(metaCtor, __spreadArray([this], __read(args)));
                     return this;
                 }
-                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spread([void 0], args)))();
+                var annotationInstance = new (DecoratorFactory.bind.apply(DecoratorFactory, __spreadArray([void 0], __read(args))))();
                 return function TypeDecorator(cls) {
                     if (typeFn)
-                        typeFn.apply(void 0, __spread([cls], args));
+                        typeFn.apply(void 0, __spreadArray([cls], __read(args)));
                     // Use of Object.defineProperty is important since it creates non-enumerable property which
                     // prevents the property is copied during subclassing.
                     var annotations = cls.hasOwnProperty(ANNOTATIONS) ?
@@ -3994,7 +4020,7 @@
                 args[_i] = arguments[_i];
             }
             if (props) {
-                var values = props.apply(void 0, __spread(args));
+                var values = props.apply(void 0, __spreadArray([], __read(args)));
                 for (var propName in values) {
                     this[propName] = values[propName];
                 }
@@ -4013,7 +4039,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spread([void 0], args)))();
+                var annotationInstance = new (ParamDecoratorFactory.bind.apply(ParamDecoratorFactory, __spreadArray([void 0], __read(args))))();
                 ParamDecorator.annotation = annotationInstance;
                 return ParamDecorator;
                 function ParamDecorator(cls, unusedKey, index) {
@@ -4051,7 +4077,7 @@
                     metaCtor.apply(this, args);
                     return this;
                 }
-                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spread([void 0], args)))();
+                var decoratorInstance = new (PropDecoratorFactory.bind.apply(PropDecoratorFactory, __spreadArray([void 0], __read(args))))();
                 function PropDecorator(target, name) {
                     var constructor = target.constructor;
                     // Use of Object.defineProperty is important because it creates a non-enumerable property
@@ -4062,7 +4088,7 @@
                     meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
                     meta[name].unshift(decoratorInstance);
                     if (additionalProcessing)
-                        additionalProcessing.apply(void 0, __spread([target, name], args));
+                        additionalProcessing.apply(void 0, __spreadArray([target, name], __read(args)));
                 }
                 return PropDecorator;
             }
@@ -4217,9 +4243,8 @@
      */
     var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
     // Stores the default value of `emitDistinctChangesOnly` when the `emitDistinctChangesOnly` is not
-    // explicitly set. This value will be changed to `true` in v12.
-    // TODO(misko): switch the default in v12 to `true`. See: packages/compiler/src/core.ts
-    var emitDistinctChangesOnlyDefaultValue = false;
+    // explicitly set.
+    var emitDistinctChangesOnlyDefaultValue = true;
     /**
      * Base class for query metadata.
      *
@@ -4287,21 +4312,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var R3ResolvedDependencyType;
-    (function (R3ResolvedDependencyType) {
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Token"] = 0] = "Token";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Attribute"] = 1] = "Attribute";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["ChangeDetectorRef"] = 2] = "ChangeDetectorRef";
-        R3ResolvedDependencyType[R3ResolvedDependencyType["Invalid"] = 3] = "Invalid";
-    })(R3ResolvedDependencyType || (R3ResolvedDependencyType = {}));
-    var R3FactoryTarget;
-    (function (R3FactoryTarget) {
-        R3FactoryTarget[R3FactoryTarget["Directive"] = 0] = "Directive";
-        R3FactoryTarget[R3FactoryTarget["Component"] = 1] = "Component";
-        R3FactoryTarget[R3FactoryTarget["Injectable"] = 2] = "Injectable";
-        R3FactoryTarget[R3FactoryTarget["Pipe"] = 3] = "Pipe";
-        R3FactoryTarget[R3FactoryTarget["NgModule"] = 4] = "NgModule";
-    })(R3FactoryTarget || (R3FactoryTarget = {}));
+    (function (FactoryTarget) {
+        FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
+        FactoryTarget[FactoryTarget["Component"] = 1] = "Component";
+        FactoryTarget[FactoryTarget["Injectable"] = 2] = "Injectable";
+        FactoryTarget[FactoryTarget["Pipe"] = 3] = "Pipe";
+        FactoryTarget[FactoryTarget["NgModule"] = 4] = "NgModule";
+    })(exports.ɵɵFactoryTarget || (exports.ɵɵFactoryTarget = {}));
     var ViewEncapsulation;
     (function (ViewEncapsulation) {
         ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
@@ -4698,14 +4715,21 @@
      *     var _this = _super.apply(this, arguments) || this;
      * ```
      *
+     * downleveled to ES5 with `downlevelIteration` for TypeScript < 4.2:
      * ```
      *   function MyClass() {
      *     var _this = _super.apply(this, __spread(arguments)) || this;
      * ```
      *
+     * or downleveled to ES5 with `downlevelIteration` for TypeScript >= 4.2:
+     * ```
+     *   function MyClass() {
+     *     var _this = _super.apply(this, __spreadArray([], __read(arguments))) || this;
+     * ```
+     *
      * More details can be found in: https://github.com/angular/angular/issues/38453.
      */
-    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|[^()]+\(arguments\))\)/;
+    var ES5_DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*(arguments|(?:[^()]+\(\[\],)?[^()]+\(arguments\))\)/;
     /** Regular expression that detects ES2015 classes which extend from other classes. */
     var ES2015_INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{/;
     /**
@@ -4744,7 +4768,7 @@
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                return new (t.bind.apply(t, __spread([void 0], args)))();
+                return new (t.bind.apply(t, __spreadArray([void 0], __read(args))))();
             };
         };
         /** @internal */
@@ -4898,9 +4922,9 @@
                 Object.keys(ownPropMetadata).forEach(function (propName) {
                     var decorators = [];
                     if (propMetadata.hasOwnProperty(propName)) {
-                        decorators.push.apply(decorators, __spread(propMetadata[propName]));
+                        decorators.push.apply(decorators, __spreadArray([], __read(propMetadata[propName])));
                     }
-                    decorators.push.apply(decorators, __spread(ownPropMetadata[propName]));
+                    decorators.push.apply(decorators, __spreadArray([], __read(ownPropMetadata[propName])));
                     propMetadata[propName] = decorators;
                 });
             }
@@ -4956,7 +4980,7 @@
             var decoratorType = decoratorInvocation.type;
             var annotationCls = decoratorType.annotationCls;
             var annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
-            return new (annotationCls.bind.apply(annotationCls, __spread([void 0], annotationArgs)))();
+            return new (annotationCls.bind.apply(annotationCls, __spreadArray([void 0], __read(annotationArgs))))();
         });
     }
     function getParentCtor(ctor) {
@@ -5049,7 +5073,7 @@
      * @param flags Optional flags that control how injection is executed.
      * The flags correspond to injection strategies that can be specified with
      * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
-     * @returns True if injection is successful, null otherwise.
+     * @returns the injected value if injection is successful, `null` otherwise.
      *
      * @usageNotes
      *
@@ -5221,22 +5245,17 @@
         return convertDependencies(getReflect().parameters(type));
     }
     function convertDependencies(deps) {
-        var compiler = getCompilerFacade();
-        return deps.map(function (dep) { return reflectDependency(compiler, dep); });
+        return deps.map(function (dep) { return reflectDependency(dep); });
     }
-    function reflectDependency(compiler, dep) {
+    function reflectDependency(dep) {
         var meta = {
             token: null,
+            attribute: null,
             host: false,
             optional: false,
-            resolved: compiler.R3ResolvedDependencyType.Token,
             self: false,
             skipSelf: false,
         };
-        function setTokenAndResolvedType(token) {
-            meta.resolved = compiler.R3ResolvedDependencyType.Token;
-            meta.token = token;
-        }
         if (Array.isArray(dep) && dep.length > 0) {
             for (var j = 0; j < dep.length; j++) {
                 var param = dep[j];
@@ -5264,24 +5283,18 @@
                     if (param.attributeName === undefined) {
                         throw new Error("Attribute name must be defined.");
                     }
-                    meta.token = param.attributeName;
-                    meta.resolved = compiler.R3ResolvedDependencyType.Attribute;
-                }
-                else if (param.__ChangeDetectorRef__ === true) {
-                    meta.token = param;
-                    meta.resolved = compiler.R3ResolvedDependencyType.ChangeDetectorRef;
+                    meta.attribute = param.attributeName;
                 }
                 else {
-                    setTokenAndResolvedType(param);
+                    meta.token = param;
                 }
             }
         }
         else if (dep === undefined || (Array.isArray(dep) && dep.length === 0)) {
-            meta.token = undefined;
-            meta.resolved = R3ResolvedDependencyType.Invalid;
+            meta.token = null;
         }
         else {
-            setTokenAndResolvedType(dep);
+            meta.token = dep;
         }
         return meta;
     }
@@ -5487,19 +5500,26 @@
         if (!_global.trustedTypes) {
             // In environments that don't support Trusted Types, fall back to the most
             // straightforward implementation:
-            return new (Function.bind.apply(Function, __spread([void 0], args)))();
+            return new (Function.bind.apply(Function, __spreadArray([void 0], __read(args))))();
         }
         // Chrome currently does not support passing TrustedScript to the Function
         // constructor. The following implements the workaround proposed on the page
         // below, where the Chromium bug is also referenced:
         // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
         var fnArgs = args.slice(0, -1).join(',');
-        var fnBody = args.pop().toString();
+        var fnBody = args[args.length - 1];
         var body = "(function anonymous(" + fnArgs + "\n) { " + fnBody + "\n})";
         // Using eval directly confuses the compiler and prevents this module from
         // being stripped out of JS binaries even if not used. The global['eval']
         // indirection fixes that.
         var fn = _global['eval'](trustedScriptFromString(body));
+        if (fn.bind === undefined) {
+            // Workaround for a browser bug that only exists in Chrome 83, where passing
+            // a TrustedScript to eval just returns the TrustedScript back without
+            // evaluating it. In that case, fall back to the most straightforward
+            // implementation:
+            return new (Function.bind.apply(Function, __spreadArray([void 0], __read(args))))();
+        }
         // To completely mimic the behavior of calling "new Function", two more
         // things need to happen:
         // 1. Stringifying the resulting function should return its source code
@@ -6439,249 +6459,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var ERROR_TYPE = 'ngType';
-    var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
-    var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-    var ERROR_LOGGER = 'ngErrorLogger';
-    function wrappedError(message, originalError) {
-        var msg = message + " caused by: " + (originalError instanceof Error ? originalError.message : originalError);
-        var error = Error(msg);
-        error[ERROR_ORIGINAL_ERROR] = originalError;
-        return error;
-    }
-
-    function getType(error) {
-        return error[ERROR_TYPE];
-    }
-    function getDebugContext(error) {
-        return error[ERROR_DEBUG_CONTEXT];
-    }
-    function getOriginalError(error) {
-        return error[ERROR_ORIGINAL_ERROR];
-    }
-    function getErrorLogger(error) {
-        return error[ERROR_LOGGER] || defaultErrorLogger;
-    }
-    function defaultErrorLogger(console) {
-        var values = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            values[_i - 1] = arguments[_i];
-        }
-        console.error.apply(console, __spread(values));
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Provides a hook for centralized exception handling.
-     *
-     * The default implementation of `ErrorHandler` prints error messages to the `console`. To
-     * intercept error handling, write a custom exception handler that replaces this default as
-     * appropriate for your app.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * ```
-     * class MyErrorHandler implements ErrorHandler {
-     *   handleError(error) {
-     *     // do something with the exception
-     *   }
-     * }
-     *
-     * @NgModule({
-     *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
-     * })
-     * class MyModule {}
-     * ```
-     *
-     * @publicApi
-     */
-    var ErrorHandler = /** @class */ (function () {
-        function ErrorHandler() {
-            /**
-             * @internal
-             */
-            this._console = console;
-        }
-        ErrorHandler.prototype.handleError = function (error) {
-            var originalError = this._findOriginalError(error);
-            var context = this._findContext(error);
-            // Note: Browser consoles show the place from where console.error was called.
-            // We can use this to give users additional information about the error.
-            var errorLogger = getErrorLogger(error);
-            errorLogger(this._console, "ERROR", error);
-            if (originalError) {
-                errorLogger(this._console, "ORIGINAL ERROR", originalError);
-            }
-            if (context) {
-                errorLogger(this._console, 'ERROR CONTEXT', context);
-            }
-        };
-        /** @internal */
-        ErrorHandler.prototype._findContext = function (error) {
-            if (error) {
-                return getDebugContext(error) ? getDebugContext(error) :
-                    this._findContext(getOriginalError(error));
-            }
-            return null;
-        };
-        /** @internal */
-        ErrorHandler.prototype._findOriginalError = function (error) {
-            var e = getOriginalError(error);
-            while (e && getOriginalError(e)) {
-                e = getOriginalError(e);
-            }
-            return e;
-        };
-        return ErrorHandler;
-    }());
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Defines a schema that allows an NgModule to contain the following:
-     * - Non-Angular elements named with dash case (`-`).
-     * - Element properties named with dash case (`-`).
-     * Dash case is the naming convention for custom elements.
-     *
-     * @publicApi
-     */
-    var CUSTOM_ELEMENTS_SCHEMA = {
-        name: 'custom-elements'
-    };
-    /**
-     * Defines a schema that allows any property on any element.
-     *
-     * @publicApi
-     */
-    var NO_ERRORS_SCHEMA = {
-        name: 'no-errors-schema'
-    };
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var END_COMMENT = /-->/g;
-    var END_COMMENT_ESCAPED = '-\u200B-\u200B>';
-    /**
-     * Escape the content of the strings so that it can be safely inserted into a comment node.
-     *
-     * The issue is that HTML does not specify any way to escape comment end text inside the comment.
-     * `<!-- The way you close a comment is with "-->". -->`. Above the `"-->"` is meant to be text not
-     * an end to the comment. This can be created programmatically through DOM APIs.
-     *
-     * ```
-     * div.innerHTML = div.innerHTML
-     * ```
-     *
-     * One would expect that the above code would be safe to do, but it turns out that because comment
-     * text is not escaped, the comment may contain text which will prematurely close the comment
-     * opening up the application for XSS attack. (In SSR we programmatically create comment nodes which
-     * may contain such text and expect them to be safe.)
-     *
-     * This function escapes the comment text by looking for the closing char sequence `-->` and replace
-     * it with `-_-_>` where the `_` is a zero width space `\u200B`. The result is that if a comment
-     * contains `-->` text it will render normally but it will not cause the HTML parser to close the
-     * comment.
-     *
-     * @param value text to make safe for comment node by escaping the comment close character sequence
-     */
-    function escapeCommentText(value) {
-        return value.replace(END_COMMENT, END_COMMENT_ESCAPED);
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
-     */
-    /**
-     * Creates an `Array` construction with a given name. This is useful when
-     * looking for memory consumption to see what time of array it is.
-     *
-     *
-     * @param name Name to give to the constructor
-     * @returns A subclass of `Array` if possible. This can only be done in
-     *          environments which support `class` construct.
-     */
-    function createNamedArrayType(name) {
-        // This should never be called in prod mode, so let's verify that is the case.
-        if (ngDevMode) {
-            try {
-                // If this function were compromised the following could lead to arbitrary
-                // script execution. We bless it with Trusted Types anyway since this
-                // function is stripped out of production binaries.
-                return (newTrustedFunctionForDev('Array', "return class " + name + " extends Array{}"))(Array);
-            }
-            catch (e) {
-                // If it does not work just give up and fall back to regular Array.
-                return Array;
-            }
-        }
-        else {
-            throw new Error('Looks like we are in \'prod mode\', but we are creating a named Array type, which is wrong! Check your code');
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    function normalizeDebugBindingName(name) {
-        // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-        name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-        return "ng-reflect-" + name;
-    }
-    var CAMEL_CASE_REGEXP = /([A-Z])/g;
-    function camelCaseToDashCase(input) {
-        return input.replace(CAMEL_CASE_REGEXP, function () {
-            var m = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                m[_i] = arguments[_i];
-            }
-            return '-' + m[1].toLowerCase();
-        });
-    }
-    function normalizeDebugBindingValue(value) {
-        try {
-            // Limit the size of the value as otherwise the DOM just gets polluted.
-            return value != null ? value.toString().slice(0, 30) : value;
-        }
-        catch (e) {
-            return '[ERROR] Exception while trying to serialize the value';
-        }
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     /**
      * Returns the matching `LContext` data for a given DOM node, directive or component instance.
      *
@@ -6828,11 +6605,31 @@
         return view;
     }
     /**
+     * This property will be monkey-patched on elements, components and directives.
+     */
+    var MONKEY_PATCH_KEY_NAME = '__ngContext__';
+    /**
      * Assigns the given data to the given target (which could be a component,
      * directive or DOM node instance) using monkey-patching.
      */
     function attachPatchData(target, data) {
+        ngDevMode && assertDefined(target, 'Target expected');
         target[MONKEY_PATCH_KEY_NAME] = data;
+    }
+    /**
+     * Returns the monkey-patch value data present on the target (which could be
+     * a component, directive or a DOM node).
+     */
+    function readPatchedData(target) {
+        ngDevMode && assertDefined(target, 'Target expected');
+        return target[MONKEY_PATCH_KEY_NAME] || null;
+    }
+    function readPatchedLView(target) {
+        var value = readPatchedData(target);
+        if (value) {
+            return Array.isArray(value) ? value : value.lView;
+        }
+        return null;
     }
     function isComponentInstance(instance) {
         return instance && instance.constructor && instance.constructor.ɵcmp;
@@ -6958,6 +6755,262 @@
             return result;
         }
         return null;
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var ERROR_TYPE = 'ngType';
+    var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
+    var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+    var ERROR_LOGGER = 'ngErrorLogger';
+    function wrappedError(message, originalError) {
+        var msg = message + " caused by: " + (originalError instanceof Error ? originalError.message : originalError);
+        var error = Error(msg);
+        error[ERROR_ORIGINAL_ERROR] = originalError;
+        return error;
+    }
+
+    function getType(error) {
+        return error[ERROR_TYPE];
+    }
+    function getDebugContext(error) {
+        return error[ERROR_DEBUG_CONTEXT];
+    }
+    function getOriginalError(error) {
+        return error[ERROR_ORIGINAL_ERROR];
+    }
+    function getErrorLogger(error) {
+        return error[ERROR_LOGGER] || defaultErrorLogger;
+    }
+    function defaultErrorLogger(console) {
+        var values = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            values[_i - 1] = arguments[_i];
+        }
+        console.error.apply(console, __spreadArray([], __read(values)));
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Provides a hook for centralized exception handling.
+     *
+     * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+     * intercept error handling, write a custom exception handler that replaces this default as
+     * appropriate for your app.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```
+     * class MyErrorHandler implements ErrorHandler {
+     *   handleError(error) {
+     *     // do something with the exception
+     *   }
+     * }
+     *
+     * @NgModule({
+     *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+     * })
+     * class MyModule {}
+     * ```
+     *
+     * @publicApi
+     */
+    var ErrorHandler = /** @class */ (function () {
+        function ErrorHandler() {
+            /**
+             * @internal
+             */
+            this._console = console;
+        }
+        ErrorHandler.prototype.handleError = function (error) {
+            var originalError = this._findOriginalError(error);
+            var context = this._findContext(error);
+            // Note: Browser consoles show the place from where console.error was called.
+            // We can use this to give users additional information about the error.
+            var errorLogger = getErrorLogger(error);
+            errorLogger(this._console, "ERROR", error);
+            if (originalError) {
+                errorLogger(this._console, "ORIGINAL ERROR", originalError);
+            }
+            if (context) {
+                errorLogger(this._console, 'ERROR CONTEXT', context);
+            }
+        };
+        /** @internal */
+        ErrorHandler.prototype._findContext = function (error) {
+            if (error) {
+                return getDebugContext(error) ? getDebugContext(error) :
+                    this._findContext(getOriginalError(error));
+            }
+            return null;
+        };
+        /** @internal */
+        ErrorHandler.prototype._findOriginalError = function (error) {
+            var e = getOriginalError(error);
+            while (e && getOriginalError(e)) {
+                e = getOriginalError(e);
+            }
+            return e;
+        };
+        return ErrorHandler;
+    }());
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Defines a schema that allows an NgModule to contain the following:
+     * - Non-Angular elements named with dash case (`-`).
+     * - Element properties named with dash case (`-`).
+     * Dash case is the naming convention for custom elements.
+     *
+     * @publicApi
+     */
+    var CUSTOM_ELEMENTS_SCHEMA = {
+        name: 'custom-elements'
+    };
+    /**
+     * Defines a schema that allows any property on any element.
+     *
+     * @publicApi
+     */
+    var NO_ERRORS_SCHEMA = {
+        name: 'no-errors-schema'
+    };
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Disallowed strings in the comment.
+     *
+     * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
+     */
+    var COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
+    /**
+     * Delimiter in the disallowed strings which needs to be wrapped with zero with character.
+     */
+    var COMMENT_DELIMITER = /(<|>)/;
+    var COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
+    /**
+     * Escape the content of comment strings so that it can be safely inserted into a comment node.
+     *
+     * The issue is that HTML does not specify any way to escape comment end text inside the comment.
+     * Consider: `<!-- The way you close a comment is with ">", and "->" at the beginning or by "-->" or
+     * "--!>" at the end. -->`. Above the `"-->"` is meant to be text not an end to the comment. This
+     * can be created programmatically through DOM APIs. (`<!--` are also disallowed.)
+     *
+     * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
+     *
+     * ```
+     * div.innerHTML = div.innerHTML
+     * ```
+     *
+     * One would expect that the above code would be safe to do, but it turns out that because comment
+     * text is not escaped, the comment may contain text which will prematurely close the comment
+     * opening up the application for XSS attack. (In SSR we programmatically create comment nodes which
+     * may contain such text and expect them to be safe.)
+     *
+     * This function escapes the comment text by looking for comment delimiters (`<` and `>`) and
+     * surrounding them with `_>_` where the `_` is a zero width space `\u200B`. The result is that if a
+     * comment contains any of the comment start/end delimiters (such as `<!--`, `-->` or `--!>`) the
+     * text it will render normally but it will not cause the HTML parser to close/open the comment.
+     *
+     * @param value text to make safe for comment node by escaping the comment open/close character
+     *     sequence.
+     */
+    function escapeCommentText(value) {
+        return value.replace(COMMENT_DISALLOWED, function (text) { return text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED); });
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
+     */
+    /**
+     * Creates an `Array` construction with a given name. This is useful when
+     * looking for memory consumption to see what time of array it is.
+     *
+     *
+     * @param name Name to give to the constructor
+     * @returns A subclass of `Array` if possible. This can only be done in
+     *          environments which support `class` construct.
+     */
+    function createNamedArrayType(name) {
+        // This should never be called in prod mode, so let's verify that is the case.
+        if (ngDevMode) {
+            try {
+                // If this function were compromised the following could lead to arbitrary
+                // script execution. We bless it with Trusted Types anyway since this
+                // function is stripped out of production binaries.
+                return (newTrustedFunctionForDev('Array', "return class " + name + " extends Array{}"))(Array);
+            }
+            catch (e) {
+                // If it does not work just give up and fall back to regular Array.
+                return Array;
+            }
+        }
+        else {
+            throw new Error('Looks like we are in \'prod mode\', but we are creating a named Array type, which is wrong! Check your code');
+        }
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function normalizeDebugBindingName(name) {
+        // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+        name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+        return "ng-reflect-" + name;
+    }
+    var CAMEL_CASE_REGEXP = /([A-Z])/g;
+    function camelCaseToDashCase(input) {
+        return input.replace(CAMEL_CASE_REGEXP, function () {
+            var m = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                m[_i] = arguments[_i];
+            }
+            return '-' + m[1].toLowerCase();
+        });
+    }
+    function normalizeDebugBindingValue(value) {
+        try {
+            // Limit the size of the value as otherwise the DOM just gets polluted.
+            return value != null ? value.toString().slice(0, 30) : value;
+        }
+        catch (e) {
+            return '[ERROR] Exception while trying to serialize the value';
+        }
     }
 
     /**
@@ -7882,17 +7935,29 @@
                 return rNode || unwrapRNode(lView[tNode.index]);
             }
             else {
-                var componentView = lView[DECLARATION_COMPONENT_VIEW];
-                var componentHost = componentView[T_HOST];
-                var parentView = getLViewParent(componentView);
-                var firstProjectedTNode = componentHost.projection[tNode.projection];
-                if (firstProjectedTNode != null) {
-                    return getFirstNativeNode(parentView, firstProjectedTNode);
+                var projectionNodes = getProjectionNodes(lView, tNode);
+                if (projectionNodes !== null) {
+                    if (Array.isArray(projectionNodes)) {
+                        return projectionNodes[0];
+                    }
+                    var parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
+                    ngDevMode && assertParentView(parentView);
+                    return getFirstNativeNode(parentView, projectionNodes);
                 }
                 else {
                     return getFirstNativeNode(lView, tNode.next);
                 }
             }
+        }
+        return null;
+    }
+    function getProjectionNodes(lView, tNode) {
+        if (tNode !== null) {
+            var componentView = lView[DECLARATION_COMPONENT_VIEW];
+            var componentHost = componentView[T_HOST];
+            var slotIdx = tNode.projection;
+            ngDevMode && assertProjectionSlots(lView);
+            return componentHost.projection[slotIdx];
         }
         return null;
     }
@@ -8858,7 +8923,6 @@
                 }
                 return embeddedArray;
         }
-        throw new Error('unreachable code');
     }
     function nameSuffix(text) {
         if (text == null)
@@ -9980,17 +10044,22 @@
     }
     function executeTemplate(tView, lView, templateFn, rf, context) {
         var prevSelectedIndex = getSelectedIndex();
+        var isUpdatePhase = rf & 2 /* Update */;
         try {
             setSelectedIndex(-1);
-            if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
+            if (isUpdatePhase && lView.length > HEADER_OFFSET) {
                 // When we're updating, inherently select 0 so we don't
                 // have to generate that instruction for most update blocks.
                 selectIndexInternal(tView, lView, HEADER_OFFSET, isInCheckNoChangesMode());
             }
+            var preHookType = isUpdatePhase ? 2 /* TemplateUpdateStart */ : 0 /* TemplateCreateStart */;
+            profiler(preHookType, context);
             templateFn(rf, context);
         }
         finally {
             setSelectedIndex(prevSelectedIndex);
+            var postHookType = isUpdatePhase ? 3 /* TemplateUpdateEnd */ : 1 /* TemplateCreateEnd */;
+            profiler(postHookType, context);
         }
     }
     //////////////////////////
@@ -11531,7 +11600,6 @@
      * a circular dependency among the providers.
      */
     var CIRCULAR = {};
-    var EMPTY_ARRAY$1 = [];
     /**
      * A lazily initialized NullInjector.
      */
@@ -11780,7 +11848,7 @@
                 if (importTypesWithProviders_1 !== undefined) {
                     var _loop_1 = function (i) {
                         var _a = importTypesWithProviders_1[i], ngModule_1 = _a.ngModule, providers = _a.providers;
-                        deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModule_1, providers || EMPTY_ARRAY$1); });
+                        deepForEach(providers, function (provider) { return _this.processProvider(provider, ngModule_1, providers || EMPTY_ARRAY); });
                     };
                     for (var i = 0; i < importTypesWithProviders_1.length; i++) {
                         _loop_1(i);
@@ -11790,7 +11858,8 @@
             // Track the InjectorType and add a provider for it. It's important that this is done after the
             // def's imports.
             this.injectorDefTypes.add(defType);
-            this.records.set(defType, makeRecord(def.factory, NOT_YET));
+            var factory = getFactoryDef(defType) || (function () { return new defType(); });
+            this.records.set(defType, makeRecord(factory, NOT_YET));
             // Next, include providers listed on the definition itself.
             var defProviders = def.providers;
             if (defProviders != null && !isDuplicate) {
@@ -11853,11 +11922,12 @@
             if (!def.providedIn) {
                 return false;
             }
-            else if (typeof def.providedIn === 'string') {
-                return def.providedIn === 'any' || (def.providedIn === this.scope);
+            var providedIn = resolveForwardRef(def.providedIn);
+            if (typeof providedIn === 'string') {
+                return providedIn === 'any' || (providedIn === this.scope);
             }
             else {
-                return this.injectorDefTypes.has(def.providedIn);
+                return this.injectorDefTypes.has(providedIn);
             }
         };
         return R3Injector;
@@ -11868,12 +11938,6 @@
         var factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
         if (factory !== null) {
             return factory;
-        }
-        // If the token is an NgModule, it's also injectable but the factory is on its injector def
-        // (`ɵinj`)
-        var injectorDef = getInjectorDef(token);
-        if (injectorDef !== null) {
-            return injectorDef.factory;
         }
         // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
         // If it's missing that, it's an error.
@@ -11932,7 +11996,7 @@
                 factory = function () { return resolveForwardRef(provider.useValue); };
             }
             else if (isFactoryProvider(provider)) {
-                factory = function () { return provider.useFactory.apply(provider, __spread(injectArgs(provider.deps || []))); };
+                factory = function () { return provider.useFactory.apply(provider, __spreadArray([], __read(injectArgs(provider.deps || [])))); };
             }
             else if (isExistingProvider(provider)) {
                 factory = function () { return ɵɵinject(resolveForwardRef(provider.useExisting)); };
@@ -11944,7 +12008,7 @@
                     throwInvalidProviderError(ngModuleType, providers, provider);
                 }
                 if (hasDeps(provider)) {
-                    factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spread([void 0], injectArgs(provider.deps))))(); };
+                    factory = function () { return new ((classRef_1).bind.apply((classRef_1), __spreadArray([void 0], __read(injectArgs(provider.deps)))))(); };
                 }
                 else {
                     return getFactoryDef(classRef_1) || injectableDefOrInjectorDefFactory(classRef_1);
@@ -12075,7 +12139,7 @@
                 // This means we have never seen this record, see if it is tree shakable provider.
                 var injectableDef = getInjectableDef(token);
                 if (injectableDef) {
-                    var providedIn = injectableDef && injectableDef.providedIn;
+                    var providedIn = injectableDef && resolveForwardRef(injectableDef.providedIn);
                     if (providedIn === 'any' || providedIn != null && providedIn === this.scope) {
                         records.set(token, record = resolveProvider({ provide: token, useFactory: injectableDef.factory, deps: EMPTY }));
                     }
@@ -12244,7 +12308,7 @@
                         !childRecord && !(options & 4 /* CheckParent */) ? Injector.NULL : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND, exports.InjectFlags.Default));
                     }
                 }
-                record.value = value = useNew ? new (fn.bind.apply(fn, __spread([void 0], deps)))() : fn.apply(obj, deps);
+                record.value = value = useNew ? new (fn.bind.apply(fn, __spreadArray([void 0], __read(deps))))() : fn.apply(obj, deps);
             }
         }
         else if (!(flags & exports.InjectFlags.Self)) {
@@ -12394,7 +12458,7 @@
      * @globalApi ng
      */
     function getRootComponents(elementOrDir) {
-        return __spread(getRootContext(elementOrDir).components);
+        return __spreadArray([], __read(getRootContext(elementOrDir).components));
     }
     /**
      * Retrieves an `Injector` associated with an element, component or directive instance.
@@ -12442,7 +12506,7 @@
         return providerTokens;
     }
     /**
-     * Retrieves directive instances associated with a given DOM element. Does not include
+     * Retrieves directive instances associated with a given DOM node. Does not include
      * component instances.
      *
      * @usageNotes
@@ -12454,24 +12518,71 @@
      * </my-app>
      * ```
      * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
-     * directive that is associated with the DOM element.
+     * directive that is associated with the DOM node.
      *
      * Calling `getDirectives` on `<my-comp>` will return an empty array.
      *
-     * @param element DOM element for which to get the directives.
-     * @returns Array of directives associated with the element.
+     * @param node DOM node for which to get the directives.
+     * @returns Array of directives associated with the node.
      *
      * @publicApi
      * @globalApi ng
      */
-    function getDirectives(element) {
-        var context = loadLContext(element);
+    function getDirectives(node) {
+        // Skip text nodes because we can't have directives associated with them.
+        if (node instanceof Text) {
+            return [];
+        }
+        var context = loadLContext(node, false);
+        if (context === null) {
+            return [];
+        }
+        var lView = context.lView;
+        var tView = lView[TVIEW];
+        var nodeIndex = context.nodeIndex;
+        if (!(tView === null || tView === void 0 ? void 0 : tView.data[nodeIndex])) {
+            return [];
+        }
         if (context.directives === undefined) {
-            context.directives = getDirectivesAtNodeIndex(context.nodeIndex, context.lView, false);
+            context.directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
         }
         // The `directives` in this case are a named array called `LComponentView`. Clone the
         // result so we don't expose an internal data structure in the user's console.
-        return context.directives === null ? [] : __spread(context.directives);
+        return context.directives === null ? [] : __spreadArray([], __read(context.directives));
+    }
+    /**
+     * Returns the debug (partial) metadata for a particular directive or component instance.
+     * The function accepts an instance of a directive or component and returns the corresponding
+     * metadata.
+     *
+     * @param directiveOrComponentInstance Instance of a directive or component
+     * @returns metadata of the passed directive or component
+     *
+     * @publicApi
+     * @globalApi ng
+     */
+    function getDirectiveMetadata(directiveOrComponentInstance) {
+        var constructor = directiveOrComponentInstance.constructor;
+        if (!constructor) {
+            throw new Error('Unable to find the instance constructor');
+        }
+        // In case a component inherits from a directive, we may have component and directive metadata
+        // To ensure we don't get the metadata of the directive, we want to call `getComponentDef` first.
+        var componentDef = getComponentDef(constructor);
+        if (componentDef) {
+            return {
+                inputs: componentDef.inputs,
+                outputs: componentDef.outputs,
+                encapsulation: componentDef.encapsulation,
+                changeDetection: componentDef.onPush ? exports.ChangeDetectionStrategy.OnPush :
+                    exports.ChangeDetectionStrategy.Default
+            };
+        }
+        var directiveDef = getDirectiveDef(constructor);
+        if (directiveDef) {
+            return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
+        }
+        return null;
     }
     function loadLContext(target, throwOnNotFound) {
         if (throwOnNotFound === void 0) { throwOnNotFound = true; }
@@ -12705,6 +12816,13 @@
     function publishDefaultGlobalUtils() {
         if (!_published) {
             _published = true;
+            /**
+             * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+             * The contract of the function might be changed in any release and/or the function can be
+             * removed completely.
+             */
+            publishGlobalUtil('ɵsetProfiler', setProfiler);
+            publishGlobalUtil('getDirectiveMetadata', getDirectiveMetadata);
             publishGlobalUtil('getComponent', getComponent);
             publishGlobalUtil('getContext', getContext);
             publishGlobalUtil('getListeners', getListeners);
@@ -13090,6 +13208,8 @@
     var COPY_DIRECTIVE_FIELDS = [
         // The child class should use the providers of its parent.
         'providersResolver',
+        // Not listed here are any fields which are handled by the `ɵɵInheritDefinitionFeature`, such
+        // as inputs, outputs, and host binding functions.
     ];
     /**
      * Fields which exist only on component definitions, and need to be copied from parent to child
@@ -13928,7 +14048,7 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spreadArray([getTView().data, tNode, 'attr.' + attrName, getBindingIndex() - interpolationInBetween.length + 1], __read(interpolationInBetween)));
             }
         }
         return ɵɵattributeInterpolateV;
@@ -14042,23 +14162,9 @@
         'ɵɵdefineInjectable': ɵɵdefineInjectable,
         'ɵɵdefineInjector': ɵɵdefineInjector,
         'ɵɵinject': ɵɵinject,
-        'ɵɵgetFactoryOf': getFactoryOf,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
+        'resolveForwardRef': resolveForwardRef,
     };
-    function getFactoryOf(type) {
-        var typeAny = type;
-        if (isForwardRef(type)) {
-            return (function () {
-                var factory = getFactoryOf(resolveForwardRef(typeAny));
-                return factory ? factory() : null;
-            });
-        }
-        var def = getInjectableDef(typeAny) || getInjectorDef(typeAny);
-        if (!def || def.factory === undefined) {
-            return null;
-        }
-        return def.factory;
-    }
 
     /**
      * @license
@@ -14071,7 +14177,7 @@
      * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
      * injectable def (`ɵprov`) onto the injectable type.
      */
-    function compileInjectable(type, srcMeta) {
+    function compileInjectable(type, meta) {
         var ngInjectableDef = null;
         var ngFactoryDef = null;
         // if NG_PROV_DEF is already defined on this class then don't overwrite it
@@ -14079,7 +14185,7 @@
             Object.defineProperty(type, NG_PROV_DEF, {
                 get: function () {
                     if (ngInjectableDef === null) {
-                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, srcMeta));
+                        ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, "ng:///" + type.name + "/\u0275prov.js", getInjectableMetadata(type, meta));
                     }
                     return ngInjectableDef;
                 },
@@ -14090,15 +14196,13 @@
             Object.defineProperty(type, NG_FACTORY_DEF, {
                 get: function () {
                     if (ngFactoryDef === null) {
-                        var metadata = getInjectableMetadata(type, srcMeta);
                         var compiler = getCompilerFacade();
                         ngFactoryDef = compiler.compileFactory(angularCoreDiEnv, "ng:///" + type.name + "/\u0275fac.js", {
-                            name: metadata.name,
-                            type: metadata.type,
-                            typeArgumentCount: metadata.typeArgumentCount,
+                            name: type.name,
+                            type: type,
+                            typeArgumentCount: 0,
                             deps: reflectDependencies(type),
-                            injectFn: 'inject',
-                            target: compiler.R3FactoryTarget.Injectable
+                            target: compiler.FactoryTarget.Injectable
                         });
                     }
                     return ngFactoryDef;
@@ -14130,39 +14234,34 @@
             type: type,
             typeArgumentCount: 0,
             providedIn: meta.providedIn,
-            userDeps: undefined,
         };
         if ((isUseClassProvider(meta) || isUseFactoryProvider(meta)) && meta.deps !== undefined) {
-            compilerMeta.userDeps = convertDependencies(meta.deps);
+            compilerMeta.deps = convertDependencies(meta.deps);
         }
+        // Check to see if the user explicitly provided a `useXxxx` property.
         if (isUseClassProvider(meta)) {
-            // The user explicitly specified useClass, and may or may not have provided deps.
-            compilerMeta.useClass = resolveForwardRef(meta.useClass);
+            compilerMeta.useClass = meta.useClass;
         }
         else if (isUseValueProvider(meta)) {
-            // The user explicitly specified useValue.
-            compilerMeta.useValue = resolveForwardRef(meta.useValue);
+            compilerMeta.useValue = meta.useValue;
         }
         else if (isUseFactoryProvider(meta)) {
-            // The user explicitly specified useFactory.
             compilerMeta.useFactory = meta.useFactory;
         }
         else if (isUseExistingProvider(meta)) {
-            // The user explicitly specified useExisting.
-            compilerMeta.useExisting = resolveForwardRef(meta.useExisting);
+            compilerMeta.useExisting = meta.useExisting;
         }
         return compilerMeta;
     }
 
     var ɵ0$9 = getClosureSafeProperty;
     var USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$9 });
-    var EMPTY_ARRAY$2 = [];
     function convertInjectableProviderToFactory(type, provider) {
         if (!provider) {
             var reflectionCapabilities = new ReflectionCapabilities();
             var deps_1 = reflectionCapabilities.parameters(type);
             // TODO - convert to flags.
-            return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_1))))(); };
+            return function () { return new (type.bind.apply(type, __spreadArray([void 0], __read(injectArgs(deps_1)))))(); };
         }
         if (USE_VALUE$2 in provider) {
             var valueProvider_1 = provider;
@@ -14174,7 +14273,7 @@
         }
         else if (provider.useFactory) {
             var factoryProvider_1 = provider;
-            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY$2))); };
+            return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spreadArray([], __read(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY)))); };
         }
         else if (provider.useClass) {
             var classProvider_1 = provider;
@@ -14185,7 +14284,7 @@
             }
             return function () {
                 var _a;
-                return new ((_a = (resolveForwardRef(classProvider_1.useClass))).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
+                return new ((_a = (resolveForwardRef(classProvider_1.useClass))).bind.apply(_a, __spreadArray([void 0], __read(injectArgs(deps_2)))))();
             };
         }
         else {
@@ -14194,7 +14293,7 @@
                 var reflectionCapabilities = new ReflectionCapabilities();
                 deps_3 = reflectionCapabilities.parameters(type);
             }
-            return function () { return new (type.bind.apply(type, __spread([void 0], injectArgs(deps_3))))(); };
+            return function () { return new (type.bind.apply(type, __spreadArray([void 0], __read(injectArgs(deps_3)))))(); };
         }
     }
 
@@ -15012,7 +15111,7 @@
             }
             var obj;
             try {
-                obj = factory.apply(void 0, __spread(deps));
+                obj = factory.apply(void 0, __spreadArray([], __read(deps)));
             }
             catch (e) {
                 throw instantiationError(this, e, e.stack, provider.key);
@@ -15613,6 +15712,7 @@
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
         var tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
+        var context = lView[CONTEXT];
         // When the ɵɵlistener instruction was generated and is executed we know that there is either a
         // native listener or a directive output on this element. As such we we know that we will have to
         // register a listener and store its cleanup function on LView.
@@ -15665,7 +15765,7 @@
                     // The first argument of `listen` function in Procedural Renderer is:
                     // - either a target name (as a string) in case of global target (window, document, body)
                     // - or element reference (in all other cases)
-                    listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                    listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
                     var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
                     ngDevMode && ngDevMode.rendererAddEventListener++;
                     lCleanup.push(listenerFn, cleanupFn);
@@ -15673,7 +15773,7 @@
                 }
             }
             else {
-                listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+                listenerFn = wrapListener(tNode, lView, context, listenerFn, true /** preventDefault */);
                 target.addEventListener(eventName, listenerFn, useCapture);
                 ngDevMode && ngDevMode.rendererAddEventListener++;
                 lCleanup.push(listenerFn);
@@ -15683,7 +15783,7 @@
         else {
             // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
             // ancestors are marked dirty when an event occurs.
-            listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+            listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
         }
         // subscribe to directive outputs
         var outputs = tNode.outputs;
@@ -15708,14 +15808,18 @@
             }
         }
     }
-    function executeListenerWithErrorHandling(lView, listenerFn, e) {
+    function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
         try {
+            profiler(6 /* OutputStart */, context, listenerFn);
             // Only explicitly returning false from a listener should preventDefault
             return listenerFn(e) !== false;
         }
         catch (error) {
             handleError(lView, error);
             return false;
+        }
+        finally {
+            profiler(7 /* OutputEnd */, context, listenerFn);
         }
     }
     /**
@@ -15728,7 +15832,7 @@
      * @param wrapWithPreventDefault Whether or not to prevent default behavior
      * (the procedural renderer does this already, so in those cases, we should skip)
      */
-    function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+    function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault) {
         // Note: we are performing most of the work in the listener function itself
         // to optimize listener registration.
         return function wrapListenerIn_markDirtyAndPreventDefault(e) {
@@ -15746,13 +15850,13 @@
             if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
                 markViewDirty(startView);
             }
-            var result = executeListenerWithErrorHandling(lView, listenerFn, e);
+            var result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
             // A just-invoked listener function might have coalesced listeners so we need to check for
             // their presence and invoke as needed.
             var nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
             while (nextListenerFn) {
                 // We should prevent default if any of the listeners explicitly return false
-                result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+                result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
                 nextListenerFn = nextListenerFn.__ngNextListenerFn__;
             }
             if (wrapWithPreventDefault && result === false) {
@@ -16366,35 +16470,10 @@
                 for (var i = 2; i < values.length; i += 2) {
                     interpolationInBetween.push(values[i]);
                 }
-                storePropertyBindingMetadata.apply(void 0, __spread([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], interpolationInBetween));
+                storePropertyBindingMetadata.apply(void 0, __spreadArray([tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1], __read(interpolationInBetween)));
             }
         }
         return ɵɵpropertyInterpolateV;
-    }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This file contains reuseable "empty" symbols that can be used as default return values
-     * in different parts of the rendering code. Because the same symbols are returned, this
-     * allows for identity checks against these values to be consistently used by the framework
-     * code.
-     */
-    var EMPTY_OBJ$1 = {};
-    var EMPTY_ARRAY$3 = [];
-    // freezing the values prevents any code from accidentally inserting new values in
-    if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
-        // These property accesses can be ignored because ngDevMode will be set to false
-        // when optimizing code and the whole if statement will be dropped.
-        // tslint:disable-next-line:no-toplevel-property-access
-        Object.freeze(EMPTY_OBJ$1);
-        // tslint:disable-next-line:no-toplevel-property-access
-        Object.freeze(EMPTY_ARRAY$3);
     }
 
     /**
@@ -17579,7 +17658,7 @@
      */
     function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
         if (value == null /*|| value === undefined */ || value === '')
-            return EMPTY_ARRAY$3;
+            return EMPTY_ARRAY;
         var styleKeyValueArray = [];
         var unwrappedValue = unwrapSafeValue(value);
         if (Array.isArray(unwrappedValue)) {
@@ -17636,7 +17715,7 @@
     function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
         if (oldKeyValueArray === NO_CHANGE) {
             // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
-            oldKeyValueArray = EMPTY_ARRAY$3;
+            oldKeyValueArray = EMPTY_ARRAY;
         }
         var oldIndex = 0;
         var newIndex = 0;
@@ -17774,7 +17853,7 @@
                 // we have `undefined` (or empty array in case of styling-map instruction) instead. This
                 // allows the resolution to apply the value (which may later be overwritten when the
                 // binding actually executes.)
-                valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY$3 : undefined;
+                valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY : undefined;
             }
             var currentValue = isStylingMap ? keyValueArrayGet(valueAtLViewIndex, prop) :
                 key === prop ? valueAtLViewIndex : undefined;
@@ -21919,7 +21998,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.1.0-next.4+175.sha-02ff4ed');
+    var VERSION = new Version('12.0.0-next.8+133.sha-d5b13ce');
 
     /**
      * @license
@@ -22179,24 +22258,25 @@
                 // Remove the record from the collection since we know it does not match the item.
                 this._remove(record);
             }
-            // Attempt to see if we have seen the item before.
-            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
+            // See if we have evicted the item, which used to be at some anterior position of _itHead list.
+            record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
             if (record !== null) {
-                // We have seen this before, we need to move it forward in the collection.
-                // But first we need to check if identity changed, so we can update in view if necessary
+                // It is an item which we have evicted earlier: reinsert it back into the list.
+                // But first we need to check if identity changed, so we can update in view if necessary.
                 if (!Object.is(record.item, item))
                     this._addIdentityChange(record, item);
-                this._moveAfter(record, previousRecord, index);
+                this._reinsertAfter(record, previousRecord, index);
             }
             else {
-                // Never seen it, check evicted list.
-                record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+                // Attempt to see if the item is at some posterior position of _itHead list.
+                record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
                 if (record !== null) {
-                    // It is an item which we have evicted earlier: reinsert it back into the list.
-                    // But first we need to check if identity changed, so we can update in view if necessary
+                    // We have the item in _itHead at/after `index` position. We need to move it forward in the
+                    // collection.
+                    // But first we need to check if identity changed, so we can update in view if necessary.
                     if (!Object.is(record.item, item))
                         this._addIdentityChange(record, item);
-                    this._reinsertAfter(record, previousRecord, index);
+                    this._moveAfter(record, previousRecord, index);
                 }
                 else {
                     // It is a new item: add it.
@@ -23040,19 +23120,13 @@
                 }
             }
             else if (tNodeType & 16 /* Projection */) {
-                var componentView = lView[DECLARATION_COMPONENT_VIEW];
-                var componentHost = componentView[T_HOST];
-                var slotIdx = tNode.projection;
-                ngDevMode &&
-                    assertDefined(componentHost.projection, 'Components with projection nodes (<ng-content>) must have projection slots defined.');
-                var nodesInSlot = componentHost.projection[slotIdx];
+                var nodesInSlot = getProjectionNodes(lView, tNode);
                 if (Array.isArray(nodesInSlot)) {
-                    result.push.apply(result, __spread(nodesInSlot));
+                    result.push.apply(result, __spreadArray([], __read(nodesInSlot)));
                 }
                 else {
-                    var parentView = getLViewParent(componentView);
-                    ngDevMode &&
-                        assertDefined(parentView, 'Component views should always have a parent view (component\'s host view)');
+                    var parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
+                    ngDevMode && assertParentView(parentView);
                     collectNativeNodes(parentView[TVIEW], parentView, nodesInSlot, result, true);
                 }
             }
@@ -23099,6 +23173,9 @@
         Object.defineProperty(ViewRef.prototype, "context", {
             get: function () {
                 return this._lView[CONTEXT];
+            },
+            set: function (value) {
+                this._lView[CONTEXT] = value;
             },
             enumerable: false,
             configurable: true
@@ -23425,17 +23502,9 @@
      * @nocollapse
      */
     ChangeDetectorRef.__NG_ELEMENT_ID__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY;
-    /**
-     * This marker is need so that the JIT compiler can correctly identify this class as special.
-     *
-     * @internal
-     * @nocollapse
-     */
-    ChangeDetectorRef.__ChangeDetectorRef__ = true;
     /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-    function injectChangeDetectorRef(isPipe) {
-        if (isPipe === void 0) { isPipe = false; }
-        return createViewRef(getCurrentTNode(), getLView(), isPipe);
+    function injectChangeDetectorRef(flags) {
+        return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* ForPipe */) === 16 /* ForPipe */);
     }
     /**
      * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
@@ -23446,10 +23515,7 @@
      * @returns The ChangeDetectorRef to use
      */
     function createViewRef(tNode, lView, isPipe) {
-        // `isComponentView` will be true for Component and Directives (but not for Pipes).
-        // See https://github.com/angular/angular/pull/33072 for proper fix
-        var isComponentView = !isPipe && isComponentHost(tNode);
-        if (isComponentView) {
+        if (isComponentHost(tNode) && !isPipe) {
             // The LView represents the location where the component is declared.
             // Instead we want the LView for the component View and so we need to look it up.
             var componentView = getComponentLViewByIndex(tNode.index, lView); // look down
@@ -24357,7 +24423,6 @@
     function _toStringWithNull(v) {
         return v != null ? v.toString() : '';
     }
-    var EMPTY_ARRAY$4 = [];
     var EMPTY_MAP = {};
 
     var UNDEFINED_VALUE = {};
@@ -24472,7 +24537,7 @@
         return ngModule._def.modules.indexOf(scope) > -1;
     }
     function targetsModule(ngModule, def) {
-        var providedIn = def.providedIn;
+        var providedIn = resolveForwardRef(def.providedIn);
         return providedIn != null &&
             (providedIn === 'any' || providedIn === ngModule._def.scope ||
                 moduleTransitivelyPresent(ngModule, providedIn));
@@ -24519,7 +24584,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
                 }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+                return new (ctor.bind.apply(ctor, __spreadArray([void 0], __read(depValues))))();
         }
     }
     function _callFactory(ngModule, factory, deps) {
@@ -24538,7 +24603,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues[i] = resolveNgModuleDep(ngModule, deps[i]);
                 }
-                return factory.apply(void 0, __spread(depValues));
+                return factory.apply(void 0, __spreadArray([], __read(depValues)));
         }
     }
     function callNgModuleLifecycle(ngModule, lifecycles) {
@@ -24909,6 +24974,9 @@
         Object.defineProperty(ViewRef_.prototype, "context", {
             get: function () {
                 return this._view.context;
+            },
+            set: function (value) {
+                this._view.context = value;
             },
             enumerable: false,
             configurable: true
@@ -25314,7 +25382,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
                 }
-                return new (ctor.bind.apply(ctor, __spread([void 0], depValues)))();
+                return new (ctor.bind.apply(ctor, __spreadArray([void 0], __read(depValues))))();
         }
     }
     function callFactory(view, elDef, allowPrivateServices, factory, deps) {
@@ -25333,7 +25401,7 @@
                 for (var i = 0; i < len; i++) {
                     depValues.push(resolveDep(view, elDef, allowPrivateServices, deps[i]));
                 }
-                return factory.apply(void 0, __spread(depValues));
+                return factory.apply(void 0, __spreadArray([], __read(depValues)));
         }
     }
     // This default value is when checking the hierarchy for a token.
@@ -25799,7 +25867,7 @@
             var clazz = type;
             if (decorators !== null) {
                 if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                    (_a = clazz.decorators).push.apply(_a, __spread(decorators));
+                    (_a = clazz.decorators).push.apply(_a, __spreadArray([], __read(decorators)));
                 }
                 else {
                     clazz.decorators = decorators;
@@ -26532,60 +26600,39 @@
         EventEmitter_.prototype.emit = function (value) {
             _super.prototype.next.call(this, value);
         };
-        EventEmitter_.prototype.subscribe = function (generatorOrNext, error, complete) {
-            var schedulerFn;
-            var errorFn = function (err) { return null; };
-            var completeFn = function () { return null; };
-            if (generatorOrNext && typeof generatorOrNext === 'object') {
-                schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return generatorOrNext.next(value); });
-                } : function (value) {
-                    generatorOrNext.next(value);
-                };
-                if (generatorOrNext.error) {
-                    errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return generatorOrNext.error(err); });
-                    } : function (err) {
-                        generatorOrNext.error(err);
-                    };
+        EventEmitter_.prototype.subscribe = function (observerOrNext, error, complete) {
+            var _a, _b, _c;
+            var nextFn = observerOrNext;
+            var errorFn = error || (function () { return null; });
+            var completeFn = complete;
+            if (observerOrNext && typeof observerOrNext === 'object') {
+                var observer = observerOrNext;
+                nextFn = (_a = observer.next) === null || _a === void 0 ? void 0 : _a.bind(observer);
+                errorFn = (_b = observer.error) === null || _b === void 0 ? void 0 : _b.bind(observer);
+                completeFn = (_c = observer.complete) === null || _c === void 0 ? void 0 : _c.bind(observer);
+            }
+            if (this.__isAsync) {
+                errorFn = _wrapInTimeout(errorFn);
+                if (nextFn) {
+                    nextFn = _wrapInTimeout(nextFn);
                 }
-                if (generatorOrNext.complete) {
-                    completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return generatorOrNext.complete(); });
-                    } : function () {
-                        generatorOrNext.complete();
-                    };
+                if (completeFn) {
+                    completeFn = _wrapInTimeout(completeFn);
                 }
             }
-            else {
-                schedulerFn = this.__isAsync ? function (value) {
-                    setTimeout(function () { return generatorOrNext(value); });
-                } : function (value) {
-                    generatorOrNext(value);
-                };
-                if (error) {
-                    errorFn = this.__isAsync ? function (err) {
-                        setTimeout(function () { return error(err); });
-                    } : function (err) {
-                        error(err);
-                    };
-                }
-                if (complete) {
-                    completeFn = this.__isAsync ? function () {
-                        setTimeout(function () { return complete(); });
-                    } : function () {
-                        complete();
-                    };
-                }
-            }
-            var sink = _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
-            if (generatorOrNext instanceof rxjs.Subscription) {
-                generatorOrNext.add(sink);
+            var sink = _super.prototype.subscribe.call(this, { next: nextFn, error: errorFn, complete: completeFn });
+            if (observerOrNext instanceof rxjs.Subscription) {
+                observerOrNext.add(sink);
             }
             return sink;
         };
         return EventEmitter_;
     }(rxjs.Subject));
+    function _wrapInTimeout(fn) {
+        return function (value) {
+            setTimeout(fn, undefined, value);
+        };
+    }
     /**
      * @publicApi
      */
@@ -26631,8 +26678,7 @@
         /**
          * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
          *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
-         *     the same result) This is set to `false` for backwards compatibility but will be changed to
-         *     true in v12.
+         *     the same result)
          */
         function QueryList(_emitDistinctChangesOnly) {
             if (_emitDistinctChangesOnly === void 0) { _emitDistinctChangesOnly = false; }
@@ -27280,21 +27326,6 @@
     function ɵɵtemplateRefExtractor(tNode, lView) {
         return createTemplateRef(tNode, lView);
     }
-    /**
-     * Returns the appropriate `ChangeDetectorRef` for a pipe.
-     *
-     * @codeGenApi
-     */
-    function ɵɵinjectPipeChangeDetectorRef(flags) {
-        if (flags === void 0) { flags = exports.InjectFlags.Default; }
-        var value = injectChangeDetectorRef(true);
-        if (value == null && !(flags & exports.InjectFlags.Optional)) {
-            throwProviderNotFoundError('ChangeDetectorRef');
-        }
-        else {
-            return value;
-        }
-    }
 
     /**
      * @license
@@ -27329,13 +27360,11 @@
         'ɵɵdefineNgModule': ɵɵdefineNgModule,
         'ɵɵdefinePipe': ɵɵdefinePipe,
         'ɵɵdirectiveInject': ɵɵdirectiveInject,
-        'ɵɵgetFactoryOf': ɵɵgetFactoryOf,
         'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
         'ɵɵinject': ɵɵinject,
         'ɵɵinjectAttribute': ɵɵinjectAttribute,
         'ɵɵinvalidFactory': ɵɵinvalidFactory,
         'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
-        'ɵɵinjectPipeChangeDetectorRef': ɵɵinjectPipeChangeDetectorRef,
         'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
         'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
         'ɵɵProvidersFeature': ɵɵProvidersFeature,
@@ -27490,7 +27519,6 @@
         jitOptions = null;
     }
 
-    var EMPTY_ARRAY$5 = [];
     var moduleQueue = [];
     /**
      * Enqueues moduleDef to be checked later to see if scope can be set on its
@@ -27549,7 +27577,7 @@
         enqueueModuleForDelayedScoping(moduleType, ngModule);
     }
     /**
-     * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+     * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
      *
      * It's possible to compile a module via this API which will allow duplicate declarations in its
      * root.
@@ -27558,7 +27586,7 @@
         if (allowDuplicateDeclarationsInRoot === void 0) { allowDuplicateDeclarationsInRoot = false; }
         ngDevMode && assertDefined(moduleType, 'Required value moduleType');
         ngDevMode && assertDefined(ngModule, 'Required value ngModule');
-        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$5);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
         var ngModuleDef = null;
         Object.defineProperty(moduleType, NG_MOD_DEF, {
             configurable: true,
@@ -27571,12 +27599,12 @@
                     }
                     ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275mod.js", {
                         type: moduleType,
-                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY$5).map(resolveForwardRef),
+                        bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY).map(resolveForwardRef),
                         declarations: declarations.map(resolveForwardRef),
-                        imports: flatten(ngModule.imports || EMPTY_ARRAY$5)
+                        imports: flatten(ngModule.imports || EMPTY_ARRAY)
                             .map(resolveForwardRef)
                             .map(expandModuleWithProviders),
-                        exports: flatten(ngModule.exports || EMPTY_ARRAY$5)
+                        exports: flatten(ngModule.exports || EMPTY_ARRAY)
                             .map(resolveForwardRef)
                             .map(expandModuleWithProviders),
                         schemas: ngModule.schemas ? flatten(ngModule.schemas) : null,
@@ -27593,6 +27621,24 @@
                 return ngModuleDef;
             }
         });
+        var ngFactoryDef = null;
+        Object.defineProperty(moduleType, NG_FACTORY_DEF, {
+            get: function () {
+                if (ngFactoryDef === null) {
+                    var compiler = getCompilerFacade();
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275fac.js", {
+                        name: moduleType.name,
+                        type: moduleType,
+                        deps: reflectDependencies(moduleType),
+                        target: compiler.FactoryTarget.NgModule,
+                        typeArgumentCount: 0,
+                    });
+                }
+                return ngFactoryDef;
+            },
+            // Make the property configurable in dev mode to allow overriding in tests
+            configurable: !!ngDevMode,
+        });
         var ngInjectorDef = null;
         Object.defineProperty(moduleType, NG_INJ_DEF, {
             get: function () {
@@ -27602,11 +27648,10 @@
                     var meta = {
                         name: moduleType.name,
                         type: moduleType,
-                        deps: reflectDependencies(moduleType),
-                        providers: ngModule.providers || EMPTY_ARRAY$5,
+                        providers: ngModule.providers || EMPTY_ARRAY,
                         imports: [
-                            (ngModule.imports || EMPTY_ARRAY$5).map(resolveForwardRef),
-                            (ngModule.exports || EMPTY_ARRAY$5).map(resolveForwardRef),
+                            (ngModule.imports || EMPTY_ARRAY).map(resolveForwardRef),
+                            (ngModule.exports || EMPTY_ARRAY).map(resolveForwardRef),
                         ],
                     };
                     ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, "ng:///" + moduleType.name + "/\u0275inj.js", meta);
@@ -27642,7 +27687,7 @@
         var exports = maybeUnwrapFn(ngModuleDef.exports);
         declarations.forEach(verifyDeclarationsHaveDefinitions);
         declarations.forEach(verifyDirectivesHaveSelector);
-        var combinedDeclarations = __spread(declarations.map(resolveForwardRef), flatten(imports.map(computeCombinedExports)).map(resolveForwardRef));
+        var combinedDeclarations = __spreadArray(__spreadArray([], __read(declarations.map(resolveForwardRef))), __read(flatten(imports.map(computeCombinedExports)).map(resolveForwardRef)));
         exports.forEach(verifyExportsAreDeclaredOrReExported);
         declarations.forEach(function (decl) { return verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot); });
         declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
@@ -27789,7 +27834,7 @@
     function computeCombinedExports(type) {
         type = resolveForwardRef(type);
         var ngModuleDef = getNgModuleDef(type, true);
-        return __spread(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
+        return __spreadArray([], __read(flatten(maybeUnwrapFn(ngModuleDef.exports).map(function (type) {
             var ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
                 verifySemanticsOfNgModuleDef(type, false);
@@ -27798,7 +27843,7 @@
             else {
                 return type;
             }
-        })));
+        }))));
     }
     /**
      * Some declared components may be compiled asynchronously, and thus may not have their
@@ -27806,7 +27851,7 @@
      * the `ngSelectorScope` property of the declared type.
      */
     function setScopeOnDeclaredComponents(moduleType, ngModule) {
-        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY$5);
+        var declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
         var transitiveScopes = transitiveScopesFor(moduleType);
         declarations.forEach(function (declaration) {
             if (declaration.hasOwnProperty(NG_COMP_DEF)) {
@@ -28062,7 +28107,7 @@
                     // `directive` can be null in the case of abstract directives as a base class
                     // that use `@Directive()` with no selector. In that case, pass empty object to the
                     // `directiveMetadata` function instead of null.
-                    var meta = getDirectiveMetadata(type, directive || {});
+                    var meta = getDirectiveMetadata$1(type, directive || {});
                     ngDirectiveDef =
                         getCompilerFacade().compileDirective(angularCoreEnv, meta.sourceMapUrl, meta.metadata);
                 }
@@ -28072,7 +28117,7 @@
             configurable: !!ngDevMode,
         });
     }
-    function getDirectiveMetadata(type, metadata) {
+    function getDirectiveMetadata$1(type, metadata) {
         var name = type && type.name;
         var sourceMapUrl = "ng:///" + name + "/\u0275dir.js";
         var compiler = getCompilerFacade();
@@ -28088,9 +28133,15 @@
         Object.defineProperty(type, NG_FACTORY_DEF, {
             get: function () {
                 if (ngFactoryDef === null) {
-                    var meta = getDirectiveMetadata(type, metadata);
+                    var meta = getDirectiveMetadata$1(type, metadata);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", Object.assign(Object.assign({}, meta.metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Directive }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + type.name + "/\u0275fac.js", {
+                        name: meta.metadata.name,
+                        type: meta.metadata.type,
+                        typeArgumentCount: 0,
+                        deps: reflectDependencies(type),
+                        target: compiler.FactoryTarget.Directive
+                    });
                 }
                 return ngFactoryDef;
             },
@@ -28112,9 +28163,7 @@
         return {
             name: type.name,
             type: type,
-            typeArgumentCount: 0,
             selector: metadata.selector !== undefined ? metadata.selector : null,
-            deps: reflectDependencies(type),
             host: metadata.host || EMPTY_OBJ,
             propMetadata: propMetadata,
             inputs: metadata.inputs || EMPTY_ARRAY,
@@ -28240,7 +28289,13 @@
                 if (ngFactoryDef === null) {
                     var metadata = getPipeMetadata(type, meta);
                     var compiler = getCompilerFacade();
-                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", Object.assign(Object.assign({}, metadata), { injectFn: 'directiveInject', target: compiler.R3FactoryTarget.Pipe }));
+                    ngFactoryDef = compiler.compileFactory(angularCoreEnv, "ng:///" + metadata.name + "/\u0275fac.js", {
+                        name: metadata.name,
+                        type: metadata.type,
+                        typeArgumentCount: 0,
+                        deps: reflectDependencies(type),
+                        target: compiler.FactoryTarget.Pipe
+                    });
                 }
                 return ngFactoryDef;
             },
@@ -28262,9 +28317,7 @@
     function getPipeMetadata(type, meta) {
         return {
             type: type,
-            typeArgumentCount: 0,
             name: type.name,
-            deps: reflectDependencies(type),
             pipeName: meta.name,
             pure: meta.pure !== undefined ? meta.pure : true
         };
@@ -28411,13 +28464,12 @@
     function preR3NgModuleCompile(moduleType, metadata) {
         var imports = (metadata && metadata.imports) || [];
         if (metadata && metadata.exports) {
-            imports = __spread(imports, [metadata.exports]);
+            imports = __spreadArray(__spreadArray([], __read(imports)), [metadata.exports]);
         }
-        moduleType.ɵinj = ɵɵdefineInjector({
-            factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-            providers: metadata && metadata.providers,
-            imports: imports,
-        });
+        var moduleInjectorType = moduleType;
+        moduleInjectorType.ɵfac = convertInjectableProviderToFactory(moduleType, { useClass: moduleType });
+        moduleInjectorType.ɵinj =
+            ɵɵdefineInjector({ providers: metadata && metadata.providers, imports: imports });
     }
     var SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule;
     var SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;
@@ -28443,8 +28495,8 @@
      * one or more initialization functions.
      *
      * The provided functions are injected at application startup and executed during
-     * app initialization. If any of these functions returns a Promise, initialization
-     * does not complete until the Promise is resolved.
+     * app initialization. If any of these functions returns a Promise or an Observable, initialization
+     * does not complete until the Promise is resolved or the Observable is completed.
      *
      * You can, for example, create a factory function that loads language data
      * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
@@ -28452,6 +28504,59 @@
      * and the needed data is available on startup.
      *
      * @see `ApplicationInitStatus`
+     *
+     * @usageNotes
+     *
+     * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
+     * and a function returning a promise.
+     *
+     * ```
+     *  function initializeApp(): Promise<any> {
+     *    return new Promise((resolve, reject) => {
+     *      // Do some asynchronous stuff
+     *      resolve();
+     *    });
+     *  }
+     *
+     *  @NgModule({
+     *   imports: [BrowserModule],
+     *   declarations: [AppComponent],
+     *   bootstrap: [AppComponent],
+     *   providers: [{
+     *     provide: APP_INITIALIZER,
+     *     useFactory: () => initializeApp,
+     *     multi: true
+     *    }]
+     *   })
+     *  export class AppModule {}
+     * ```
+     *
+     * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
+     * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
+     * demo purposes to illustrate how the factory function can work with other providers available
+     * through DI.
+     *
+     * ```
+     *  function initializeApp(httpClient: HttpClient): Observable<any> {
+     *   return httpClient.get("https://someUrl.com/api/user")
+     *     .pipe(
+     *        tap(user => { ... })
+     *     )
+     *  }
+     *
+     *  @NgModule({
+     *    imports: [BrowserModule, HttpClientModule],
+     *    declarations: [AppComponent],
+     *    bootstrap: [AppComponent],
+     *    providers: [{
+     *      provide: APP_INITIALIZER,
+     *      useFactory: initializeApp,
+     *      deps: [HttpClient],
+     *      multi: true
+     *    }]
+     *  })
+     *  export class AppModule {}
+     * ```
      *
      * @publicApi
      */
@@ -28486,11 +28591,21 @@
                 _this.resolve();
             };
             if (this.appInits) {
-                for (var i = 0; i < this.appInits.length; i++) {
-                    var initResult = this.appInits[i]();
+                var _loop_1 = function (i) {
+                    var initResult = this_1.appInits[i]();
                     if (isPromise(initResult)) {
                         asyncInitPromises.push(initResult);
                     }
+                    else if (isObservable(initResult)) {
+                        var observableAsPromise = new Promise(function (resolve, reject) {
+                            initResult.subscribe({ complete: resolve, error: reject });
+                        });
+                        asyncInitPromises.push(observableAsPromise);
+                    }
+                };
+                var this_1 = this;
+                for (var i = 0; i < this.appInits.length; i++) {
+                    _loop_1(i);
                 }
             }
             Promise.all(asyncInitPromises)
@@ -28511,7 +28626,7 @@
         { type: Injectable }
     ];
     ApplicationInitStatus.ctorParameters = function () { return [
-        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
+        { type: undefined, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
     ]; };
 
     /**
@@ -29105,6 +29220,21 @@
     }());
     var EMPTY_PAYLOAD = {};
     function checkStable(zone) {
+        // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
+        // re-entry. The case is:
+        //
+        // @Component({...})
+        // export class AppComponent {
+        // constructor(private ngZone: NgZone) {
+        //   this.ngZone.onStable.subscribe(() => {
+        //     this.ngZone.run(() => console.log('stable'););
+        //   });
+        // }
+        //
+        // The onStable subscriber run another function inside ngZone
+        // which causes `checkStable()` re-entry.
+        // But this fix causes some issues in g3, so this fix will be
+        // launched in another PR.
         if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
             try {
                 zone._nesting++;
@@ -29124,7 +29254,20 @@
         }
     }
     function delayChangeDetectionForEvents(zone) {
-        if (zone.lastRequestAnimationFrameId !== -1) {
+        /**
+         * We also need to check _nesting here
+         * Consider the following case with shouldCoalesceRunChangeDetection = true
+         *
+         * ngZone.run(() => {});
+         * ngZone.run(() => {});
+         *
+         * We want the two `ngZone.run()` only trigger one change detection
+         * when shouldCoalesceRunChangeDetection is true.
+         * And because in this case, change detection run in async way(requestAnimationFrame),
+         * so we also need to check the _nesting here to prevent multiple
+         * change detections.
+         */
+        if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
             return;
         }
         zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, function () {
@@ -29141,7 +29284,9 @@
                 zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', function () {
                     zone.lastRequestAnimationFrameId = -1;
                     updateMicroTaskStatus(zone);
+                    zone.isCheckStableRunning = true;
                     checkStable(zone);
+                    zone.isCheckStableRunning = false;
                 }, undefined, function () { }, function () { });
             }
             zone.fakeTopEventTask.invoke();
@@ -29400,7 +29545,7 @@
         Testability.prototype.whenStable = function (doneCb, timeout, updateCb) {
             if (updateCb && !this.taskTrackingZone) {
                 throw new Error('Task tracking zone is required when passing an update callback to ' +
-                    'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
+                    'whenStable(). Is "zone.js/plugins/task-tracking" loaded?');
             }
             // These arguments are 'Function' above to keep the public API simple.
             this.addCallback(doneCb, timeout, updateCb);
@@ -30023,10 +30168,9 @@
      */
     var ApplicationRef = /** @class */ (function () {
         /** @internal */
-        function ApplicationRef(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+        function ApplicationRef(_zone, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
             var _this = this;
             this._zone = _zone;
-            this._console = _console;
             this._injector = _injector;
             this._exceptionHandler = _exceptionHandler;
             this._componentFactoryResolver = _componentFactoryResolver;
@@ -30143,8 +30287,11 @@
                 }
             });
             this._loadComponent(compRef);
-            if (isDevMode()) {
-                this._console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
+            // Note that we have still left the `isDevMode()` condition in order to avoid
+            // creating a breaking change for projects that still use the View Engine.
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
+                var _console = this._injector.get(Console);
+                _console.log("Angular is running in development mode. Call enableProdMode() to enable production mode.");
             }
             return compRef;
         };
@@ -30253,7 +30400,6 @@
     ];
     ApplicationRef.ctorParameters = function () { return [
         { type: NgZone },
-        { type: Console },
         { type: Injector },
         { type: ErrorHandler },
         { type: ComponentFactoryResolver },
@@ -30275,7 +30421,7 @@
     }
     function _mergeArrays(parts) {
         var result = [];
-        parts.forEach(function (part) { return part && result.push.apply(result, __spread(part)); });
+        parts.forEach(function (part) { return part && result.push.apply(result, __spreadArray([], __read(part))); });
         return result;
     }
 
@@ -30579,7 +30725,7 @@
             var _this = this;
             var siblingIndex = this.childNodes.indexOf(child);
             if (siblingIndex !== -1) {
-                (_a = this.childNodes).splice.apply(_a, __spread([siblingIndex + 1, 0], newChildren));
+                (_a = this.childNodes).splice.apply(_a, __spreadArray([siblingIndex + 1, 0], __read(newChildren)));
                 newChildren.forEach(function (c) {
                     if (c.parent) {
                         c.parent.removeChild(c);
@@ -31300,7 +31446,7 @@
         {
             provide: ApplicationRef,
             useClass: ApplicationRef,
-            deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
+            deps: [NgZone, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
         },
         { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
         {
@@ -32074,7 +32220,7 @@
                 case 128 /* TypePurePipe */:
                     var pipe = values[0];
                     var params = values.slice(1);
-                    value = pipe.transform.apply(pipe, __spread(params));
+                    value = pipe.transform.apply(pipe, __spreadArray([], __read(params)));
                     break;
             }
             data.value = value;
@@ -32965,7 +33111,7 @@
     // 1) Locate the providers of an element and check if one of them was overwritten
     // 2) Change the providers of that element
     //
-    // We only create new datastructures if we need to, to keep perf impact
+    // We only create new data structures if we need to, to keep perf impact
     // reasonable.
     function applyProviderOverridesToView(def) {
         if (providerOverrides.size === 0) {
@@ -33018,7 +33164,7 @@
         }
     }
     // Notes about the algorithm:
-    // We only create new datastructures if we need to, to keep perf impact
+    // We only create new data structures if we need to, to keep perf impact
     // reasonable.
     function applyProviderOverridesToNgModule(def) {
         var _a = calcHasOverrides(def), hasOverrides = _a.hasOverrides, hasDeprecatedOverrides = _a.hasDeprecatedOverrides;
@@ -33045,7 +33191,7 @@
             });
             def.modules.forEach(function (module) {
                 providerOverridesWithScope.forEach(function (override, token) {
-                    if (getInjectableDef(token).providedIn === module) {
+                    if (resolveForwardRef(getInjectableDef(token).providedIn) === module) {
                         hasOverrides = true;
                         hasDeprecatedOverrides = hasDeprecatedOverrides || override.deprecatedBehavior;
                     }
@@ -33072,7 +33218,7 @@
             if (providerOverridesWithScope.size > 0) {
                 var moduleSet_1 = new Set(def.modules);
                 providerOverridesWithScope.forEach(function (override, token) {
-                    if (moduleSet_1.has(getInjectableDef(token).providedIn)) {
+                    if (moduleSet_1.has(resolveForwardRef(getInjectableDef(token).providedIn))) {
                         var provider = {
                             token: token,
                             flags: override.flags | (hasDeprecatedOverrides ? 4096 /* LazyProvider */ : 0 /* None */),
@@ -33182,7 +33328,7 @@
         }
     }
     function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
-        var changed = checkAndUpdateNode.apply(void 0, __spread([view, nodeDef, argStyle], givenValues));
+        var changed = checkAndUpdateNode.apply(void 0, __spreadArray([view, nodeDef, argStyle], __read(givenValues)));
         if (changed) {
             var values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
             if (nodeDef.flags & 16384 /* TypeDirective */) {
@@ -33217,7 +33363,7 @@
         }
     }
     function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
-        checkNoChangesNode.apply(void 0, __spread([view, nodeDef, argStyle], values));
+        checkNoChangesNode.apply(void 0, __spreadArray([view, nodeDef, argStyle], __read(values)));
     }
     function nextDirectiveWithBinding(view, nodeIndex) {
         for (var i = nodeIndex; i < view.def.nodes.length; i++) {
@@ -33362,7 +33508,7 @@
                 var _a;
                 currRenderNodeIndex++;
                 if (currRenderNodeIndex === renderNodeIndex) {
-                    return (_a = console.error).bind.apply(_a, __spread([console], values));
+                    return (_a = console.error).bind.apply(_a, __spreadArray([console], __read(values)));
                 }
                 else {
                     return NOOP;
@@ -33371,7 +33517,7 @@
             logViewDef.factory(nodeLogger);
             if (currRenderNodeIndex < renderNodeIndex) {
                 console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
-                console.error.apply(console, __spread(values));
+                console.error.apply(console, __spreadArray([], __read(values)));
             }
         };
         return DebugContext_;
@@ -33466,9 +33612,11 @@
         };
         DebugRenderer2.prototype.destroyNode = function (node) {
             var debugNode = getDebugNode$1(node);
-            removeDebugNodeFromIndex(debugNode);
-            if (debugNode instanceof DebugNode__PRE_R3__) {
-                debugNode.listeners.length = 0;
+            if (debugNode) {
+                removeDebugNodeFromIndex(debugNode);
+                if (debugNode instanceof DebugNode__PRE_R3__) {
+                    debugNode.listeners.length = 0;
+                }
             }
             if (this.delegate.destroyNode) {
                 this.delegate.destroyNode(node);
@@ -33696,6 +33844,15 @@
         return compiler.compileDirectiveDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
     }
     /**
+     * Evaluates the class metadata declaration.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareClassMetadata(decl) {
+        var _a, _b;
+        setClassMetadata(decl.type, decl.decorators, (_a = decl.ctorParameters) !== null && _a !== void 0 ? _a : null, (_b = decl.propDecorators) !== null && _b !== void 0 ? _b : null);
+    }
+    /**
      * Compiles a partial component declaration object into a full component definition object.
      *
      * @codeGenApi
@@ -33703,6 +33860,51 @@
     function ɵɵngDeclareComponent(decl) {
         var compiler = getCompilerFacade();
         return compiler.compileComponentDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275cmp.js", decl);
+    }
+    /**
+     * Compiles a partial pipe declaration object into a full pipe definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareFactory(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileFactoryDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275fac.js", decl);
+    }
+    /**
+     * Compiles a partial injectable declaration object into a full injectable definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareInjectable(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileInjectableDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275prov.js", decl);
+    }
+    /**
+     * Compiles a partial injector declaration object into a full injector definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareInjector(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileInjectorDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275inj.js", decl);
+    }
+    /**
+     * Compiles a partial NgModule declaration object into a full NgModule definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclareNgModule(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compileNgModuleDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275mod.js", decl);
+    }
+    /**
+     * Compiles a partial pipe declaration object into a full pipe definition object.
+     *
+     * @codeGenApi
+     */
+    function ɵɵngDeclarePipe(decl) {
+        var compiler = getCompilerFacade();
+        return compiler.compilePipeDeclaration(angularCoreEnv, "ng:///" + decl.type.name + "/\u0275pipe.js", decl);
     }
 
     /**
@@ -33873,7 +34075,7 @@
     exports.ɵComponentFactory = ComponentFactory;
     exports.ɵConsole = Console;
     exports.ɵDEFAULT_LOCALE_ID = DEFAULT_LOCALE_ID;
-    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY$4;
+    exports.ɵEMPTY_ARRAY = EMPTY_ARRAY;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
     exports.ɵINJECTOR_IMPL__POST_R3__ = INJECTOR_IMPL__POST_R3__;
     exports.ɵINJECTOR_SCOPE = INJECTOR_SCOPE;
@@ -34086,7 +34288,6 @@
     exports.ɵɵelementStart = ɵɵelementStart;
     exports.ɵɵenableBindings = ɵɵenableBindings;
     exports.ɵɵgetCurrentView = ɵɵgetCurrentView;
-    exports.ɵɵgetFactoryOf = ɵɵgetFactoryOf;
     exports.ɵɵgetInheritedFactory = ɵɵgetInheritedFactory;
     exports.ɵɵhostProperty = ɵɵhostProperty;
     exports.ɵɵi18n = ɵɵi18n;
@@ -34098,7 +34299,6 @@
     exports.ɵɵi18nStart = ɵɵi18nStart;
     exports.ɵɵinject = ɵɵinject;
     exports.ɵɵinjectAttribute = ɵɵinjectAttribute;
-    exports.ɵɵinjectPipeChangeDetectorRef = ɵɵinjectPipeChangeDetectorRef;
     exports.ɵɵinvalidFactory = ɵɵinvalidFactory;
     exports.ɵɵinvalidFactoryDep = ɵɵinvalidFactoryDep;
     exports.ɵɵlistener = ɵɵlistener;
@@ -34107,8 +34307,14 @@
     exports.ɵɵnamespaceMathML = ɵɵnamespaceMathML;
     exports.ɵɵnamespaceSVG = ɵɵnamespaceSVG;
     exports.ɵɵnextContext = ɵɵnextContext;
+    exports.ɵɵngDeclareClassMetadata = ɵɵngDeclareClassMetadata;
     exports.ɵɵngDeclareComponent = ɵɵngDeclareComponent;
     exports.ɵɵngDeclareDirective = ɵɵngDeclareDirective;
+    exports.ɵɵngDeclareFactory = ɵɵngDeclareFactory;
+    exports.ɵɵngDeclareInjectable = ɵɵngDeclareInjectable;
+    exports.ɵɵngDeclareInjector = ɵɵngDeclareInjector;
+    exports.ɵɵngDeclareNgModule = ɵɵngDeclareNgModule;
+    exports.ɵɵngDeclarePipe = ɵɵngDeclarePipe;
     exports.ɵɵpipe = ɵɵpipe;
     exports.ɵɵpipeBind1 = ɵɵpipeBind1;
     exports.ɵɵpipeBind2 = ɵɵpipeBind2;

@@ -1,10 +1,10 @@
 /**
- * @license Angular v11.1.0-next.4+175.sha-02ff4ed
- * (c) 2010-2020 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.8+133.sha-d5b13ce
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible, Injectable, ɵclearOverrides, ɵoverrideComponentView, ɵINJECTOR_SCOPE, Optional, SkipSelf, ɵoverrideProvider, ɵivyEnabled } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -37,7 +37,7 @@ function waitForAsync(fn) {
     if (!_Zone) {
         return function () {
             return Promise.reject('Zone is needed for the waitForAsync() test helper but could not be found. ' +
-                'Please make sure that your environment includes zone.js/dist/zone.js');
+                'Please make sure that your environment includes zone.js');
         };
     }
     const asyncTest = _Zone && _Zone[_Zone.__symbol__('asyncTest')];
@@ -46,7 +46,7 @@ function waitForAsync(fn) {
     }
     return function () {
         return Promise.reject('zone-testing.js is needed for the async() test helper but could not be found. ' +
-            'Please make sure that your environment includes zone.js/dist/zone-testing.js');
+            'Please make sure that your environment includes zone.js/testing');
     };
 }
 /**
@@ -259,7 +259,7 @@ function scheduleMicroTask(fn) {
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
 const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
 const fakeAsyncTestModuleNotLoadedErrorMessage = `zone-testing.js is needed for the fakeAsync() test helper but could not be found.
-        Please make sure that your environment includes zone.js/dist/zone-testing.js`;
+        Please make sure that your environment includes zone.js/testing`;
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -864,19 +864,18 @@ class R3TestBedCompiler {
             providerDef = { provide: token };
         }
         const injectableDef = typeof token !== 'string' ? ɵgetInjectableDef(token) : null;
-        const isRoot = injectableDef !== null && injectableDef.providedIn === 'root';
-        const overridesBucket = isRoot ? this.rootProviderOverrides : this.providerOverrides;
+        const providedIn = injectableDef === null ? null : resolveForwardRef(injectableDef.providedIn);
+        const overridesBucket = providedIn === 'root' ? this.rootProviderOverrides : this.providerOverrides;
         overridesBucket.push(providerDef);
         // Keep overrides grouped by token as well for fast lookups using token
         this.providerOverridesByToken.set(token, providerDef);
-        if (injectableDef !== null && injectableDef.providedIn !== null &&
-            typeof injectableDef.providedIn !== 'string') {
-            const existingOverrides = this.providerOverridesByModule.get(injectableDef.providedIn);
+        if (injectableDef !== null && providedIn !== null && typeof providedIn !== 'string') {
+            const existingOverrides = this.providerOverridesByModule.get(providedIn);
             if (existingOverrides !== undefined) {
                 existingOverrides.push(providerDef);
             }
             else {
-                this.providerOverridesByModule.set(injectableDef.providedIn, [providerDef]);
+                this.providerOverridesByModule.set(providedIn, [providerDef]);
             }
         }
     }
@@ -1020,7 +1019,7 @@ class R3TestBedCompiler {
         if (this.overriddenModules.size > 0) {
             // Module overrides (via `TestBed.overrideModule`) might affect scopes that were previously
             // calculated and stored in `transitiveCompileScopes`. If module overrides are present,
-            // collect all affected modules and reset scopes to force their re-calculatation.
+            // collect all affected modules and reset scopes to force their re-calculation.
             const testingModuleDef = this.testModuleType[ɵNG_MOD_DEF];
             const affectedModules = this.collectModulesAffectedByOverrides(testingModuleDef.imports);
             if (affectedModules.size > 0) {
