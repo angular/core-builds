@@ -1,6 +1,6 @@
 /**
- * @license Angular v9.0.0-rc.1+246.sha-d3cfad7.with-local-changes
- * (c) 2010-2019 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.8+77.sha-917664e
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -24,27 +24,21 @@ import { PlatformRef } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
 
-
+/**
+ * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
+ * investigation.
+ *
+ * A work around is to mark it as `@codeGenApi` for now and investigate later.
+ *
+ * @codeGenApi
+ */
 export declare const __core_private_testing_placeholder__ = "";
 
-
 /**
- * Wraps a test function in an asynchronous test zone. The test will automatically
- * complete when all asynchronous calls within this zone are done. Can be used
- * to wrap an {@link inject} call.
- *
- * Example:
- *
- * ```
- * it('...', async(inject([AClass], (object) => {
- *   object.doSomething.then(() => {
- *     expect(...);
- *   })
- * });
- * ```
- *
+ * @deprecated use `waitForAsync()`, (expected removal in v12)
+ * @see {@link waitForAsync}
  * @publicApi
- */
+ * */
 export declare function async(fn: Function): (done: any) => any;
 
 /**
@@ -115,8 +109,8 @@ export declare class ComponentFixture<T> {
     whenStable(): Promise<any>;
     private _getRenderer;
     /**
-      * Get a promise that resolves when the ui state is stable following animations.
-      */
+     * Get a promise that resolves when the ui state is stable following animations.
+     */
     whenRenderingDone(): Promise<any>;
     /**
      * Trigger component destruction.
@@ -420,9 +414,69 @@ export declare type TestModuleMetadata = {
  *
  * {@example core/testing/ts/fake_async.ts region='basic'}
  *
+ * @param millis, the number of millisecond to advance the virtual timer
+ * @param tickOptions, the options of tick with a flag called
+ * processNewMacroTasksSynchronously, whether to invoke the new macroTasks, by default is
+ * false, means the new macroTasks will be invoked
+ *
+ * For example,
+ *
+ * it ('test with nested setTimeout', fakeAsync(() => {
+ *   let nestedTimeoutInvoked = false;
+ *   function funcWithNestedTimeout() {
+ *     setTimeout(() => {
+ *       nestedTimeoutInvoked = true;
+ *     });
+ *   };
+ *   setTimeout(funcWithNestedTimeout);
+ *   tick();
+ *   expect(nestedTimeoutInvoked).toBe(true);
+ * }));
+ *
+ * in this case, we have a nested timeout (new macroTask), when we tick, both the
+ * funcWithNestedTimeout and the nested timeout both will be invoked.
+ *
+ * it ('test with nested setTimeout', fakeAsync(() => {
+ *   let nestedTimeoutInvoked = false;
+ *   function funcWithNestedTimeout() {
+ *     setTimeout(() => {
+ *       nestedTimeoutInvoked = true;
+ *     });
+ *   };
+ *   setTimeout(funcWithNestedTimeout);
+ *   tick(0, {processNewMacroTasksSynchronously: false});
+ *   expect(nestedTimeoutInvoked).toBe(false);
+ * }));
+ *
+ * if we pass the tickOptions with processNewMacroTasksSynchronously to be false, the nested timeout
+ * will not be invoked.
+ *
+ *
  * @publicApi
  */
-export declare function tick(millis?: number): void;
+export declare function tick(millis?: number, tickOptions?: {
+    processNewMacroTasksSynchronously: boolean;
+}): void;
+
+
+/**
+ * Wraps a test function in an asynchronous test zone. The test will automatically
+ * complete when all asynchronous calls within this zone are done. Can be used
+ * to wrap an {@link inject} call.
+ *
+ * Example:
+ *
+ * ```
+ * it('...', waitForAsync(inject([AClass], (object) => {
+ *   object.doSomething.then(() => {
+ *     expect(...);
+ *   })
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+export declare function waitForAsync(fn: Function): (done: any) => any;
 
 /**
  * @publicApi
@@ -712,8 +766,6 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
         deps?: any[];
     }): void;
     createComponent<T>(type: Type<T>): ComponentFixture<T>;
-    private readonly compiler;
-    private readonly testModuleRef;
     private assertNotInstantiated;
     /**
      * Check whether the module scoping queue should be flushed, and flush it if needed.
@@ -750,7 +802,7 @@ export declare class ɵMetadataOverrider {
  * @publicApi
  */
 export declare class ɵTestingCompiler extends Compiler {
-    readonly injector: Injector;
+    get injector(): Injector;
     overrideModule(module: Type<any>, overrides: MetadataOverride<NgModule>): void;
     overrideDirective(directive: Type<any>, overrides: MetadataOverride<Directive>): void;
     overrideComponent(component: Type<any>, overrides: MetadataOverride<Component>): void;

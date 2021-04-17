@@ -1,25 +1,20 @@
 {
   "name": "@angular/core",
-  "version": "9.0.0-rc.1+246.sha-d3cfad7.with-local-changes",
+  "version": "12.0.0-next.8+77.sha-917664e",
   "description": "Angular - the core framework",
-  "main": "./bundles/core.umd.js",
-  "module": "./fesm5/core.js",
-  "es2015": "./fesm2015/core.js",
-  "esm5": "./esm5/core.js",
-  "esm2015": "./esm2015/core.js",
-  "fesm5": "./fesm5/core.js",
-  "fesm2015": "./fesm2015/core.js",
-  "typings": "./core.d.ts",
   "author": "angular",
   "license": "MIT",
+  "dependencies": {
+    "tslib": "^2.1.0"
+  },
   "peerDependencies": {
     "rxjs": "^6.5.3",
-    "tslib": "^1.10.0",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.11.4"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/angular/angular.git"
+    "url": "https://github.com/angular/angular.git",
+    "directory": "packages/core"
   },
   "ng-update": {
     "migrations": "./schematics/migrations.json",
@@ -35,8 +30,6 @@
       "@angular/platform-browser-dynamic",
       "@angular/forms",
       "@angular/platform-server",
-      "@angular/platform-webworker",
-      "@angular/platform-webworker-dynamic",
       "@angular/upgrade",
       "@angular/router",
       "@angular/language-service",
@@ -47,5 +40,11 @@
   "sideEffects": false,
   "publishConfig": {
     "registry": "https://wombat-dressing-room.appspot.com"
-  }
+  },
+  "main": "./bundles/core.umd.js",
+  "fesm2015": "./fesm2015/core.js",
+  "esm2015": "./esm2015/core.js",
+  "typings": "./core.d.ts",
+  "module": "./fesm2015/core.js",
+  "es2015": "./fesm2015/core.js"
 }

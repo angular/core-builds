@@ -1,18 +1,19 @@
 /**
- * @license Angular v9.0.0-rc.1+246.sha-d3cfad7.with-local-changes
- * (c) 2010-2019 Google LLC. https://angular.io/
+ * @license Angular v12.0.0-next.8+77.sha-917664e
+ * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
+import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
 
 /**
  * @description
  *
  * Represents an abstract class `T`, if applied to a concrete class it would stop being
- * instantiatable.
+ * instantiable.
  *
  * @publicApi
  */
@@ -21,49 +22,12 @@ export declare interface AbstractType<T> extends Function {
 }
 
 /**
- * Below are constants for LContainer indices to help us look up LContainer members
- * without having to remember the specific indices.
- * Uglify will inline these when minifying so there shouldn't be a cost.
- */
-declare const ACTIVE_INDEX = 2;
-
-/**
- * Used to track:
- *  - Inline embedded views (see: `ɵɵembeddedViewStart`)
- *  - Transplanted `LView`s (see: `LView[DECLARATION_COMPONENT_VIEW])`
- */
-declare const enum ActiveIndexFlag {
-    /**
-     * Flag which signifies that the `LContainer` does not have any inline embedded views.
-     */
-    DYNAMIC_EMBEDDED_VIEWS_ONLY = -1,
-    /**
-     * Flag to signify that this `LContainer` may have transplanted views which need to be change
-     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
-     *
-     * This flag once set is never unset for the `LContainer`. This means that when unset we can skip
-     * a lot of work in `refreshDynamicEmbeddedViews`. But when set we still need to verify
-     * that the `MOVED_VIEWS` are transplanted and on-push.
-     */
-    HAS_TRANSPLANTED_VIEWS = 1,
-    /**
-     * Number of bits to shift inline embedded views counter to make space for other flags.
-     */
-    SHIFT = 1,
-    /**
-     * When incrementing the active index for inline embedded views, the amount to increment to leave
-     * space for other flags.
-     */
-    INCREMENT = 2
-}
-
-/**
  * @description
  * A lifecycle hook that is called after the default change detector has
  * completed checking all content of a directive.
  *
  * @see `AfterViewChecked`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -90,7 +54,7 @@ export declare interface AfterContentChecked {
  *
  * @see `OnInit`
  * @see `AfterViewInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -116,7 +80,7 @@ export declare interface AfterContentInit {
  * completed checking a component's view for changes.
  *
  * @see `AfterContentChecked`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -143,7 +107,7 @@ export declare interface AfterViewChecked {
  *
  * @see `OnInit`
  * @see `AfterContentInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -203,47 +167,115 @@ export declare interface AfterViewInit {
 export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 
 /**
- * All callbacks provided via this token will be called for every component that is bootstrapped.
- * Signature of the callback:
+ * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
+ * be called for every component that is bootstrapped.
  *
- * `(componentRef: ComponentRef) => void`.
+ * Each callback must take a `ComponentRef` instance and return nothing.
+ *
+ * `(componentRef: ComponentRef) => void`
  *
  * @publicApi
  */
 export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: ComponentRef<any>) => void)[]>;
 
 /**
- * A DI Token representing a unique string id assigned to the application by Angular and used
+ * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
  *
- * If you need to avoid randomly generated value to be used as an application id, you can provide
- * a custom value via a DI provider <!-- TODO: provider --> configuring the root {@link Injector}
- * using this token.
+ * BY default, the value is randomly generated and assigned to the application by Angular.
+ * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
+ * the root {@link Injector} that uses this token.
+ *
  * @publicApi
  */
 export declare const APP_ID: InjectionToken<string>;
 
 /**
- * A function that will be executed when an application is initialized.
+ * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
+ * one or more initialization functions.
+ *
+ * The provided functions are injected at application startup and executed during
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
+ *
+ * You can, for example, create a factory function that loads language data
+ * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
+ * The function is executed during the application bootstrap process,
+ * and the needed data is available on startup.
+ *
+ * @see `ApplicationInitStatus`
+ *
+ * @usageNotes
+ *
+ * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
+ * and a function returning a promise.
+ *
+ * ```
+ *  function initializeApp(): Promise<any> {
+ *    return new Promise((resolve, reject) => {
+ *      // Do some asynchronous stuff
+ *      resolve();
+ *    });
+ *  }
+ *
+ *  @NgModule({
+ *   imports: [BrowserModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useFactory: () => initializeApp,
+ *     multi: true
+ *    }]
+ *   })
+ *  export class AppModule {}
+ * ```
+ *
+ * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
+ * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
+ * demo purposes to illustrate how the factory function can work with other providers available
+ * through DI.
+ *
+ * ```
+ *  function initializeApp(httpClient: HttpClient): Observable<any> {
+ *   return httpClient.get("https://someUrl.com/api/user")
+ *     .pipe(
+ *        tap(user => { ... })
+ *     )
+ *  }
+ *
+ *  @NgModule({
+ *    imports: [BrowserModule, HttpClientModule],
+ *    declarations: [AppComponent],
+ *    bootstrap: [AppComponent],
+ *    providers: [{
+ *      provide: APP_INITIALIZER,
+ *      useFactory: initializeApp,
+ *      deps: [HttpClient],
+ *      multi: true
+ *    }]
+ *  })
+ *  export class AppModule {}
+ * ```
  *
  * @publicApi
  */
-export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
+export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
 
 /**
- * A class that reflects the state of running {@link APP_INITIALIZER}s.
+ * A class that reflects the state of running {@link APP_INITIALIZER} functions.
  *
  * @publicApi
  */
 export declare class ApplicationInitStatus {
-    private appInits;
+    private readonly appInits;
     private resolve;
     private reject;
     private initialized;
     readonly donePromise: Promise<any>;
     readonly done = false;
-    constructor(appInits: (() => any)[]);
+    constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
 }
 
 /**
@@ -355,16 +387,14 @@ export declare class ApplicationModule {
  */
 export declare class ApplicationRef {
     private _zone;
-    private _console;
     private _injector;
     private _exceptionHandler;
     private _componentFactoryResolver;
     private _initStatus;
-    private _bootstrapListeners;
     private _views;
     private _runningTick;
-    private _enforceNoNewChanges;
     private _stable;
+    private _onMicrotaskEmptySubscription;
     /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
@@ -419,11 +449,10 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
-    private _unloadComponent;
     /**
      * Returns the number of attached views.
      */
-    readonly viewCount: number;
+    get viewCount(): number;
 }
 
 /**
@@ -432,7 +461,7 @@ export declare class ApplicationRef {
 export declare function asNativeElements(debugEls: DebugElement[]): any;
 
 /**
- * Checks that there currently is a platform which contains the given token as a provider.
+ * Checks that there is currently a platform that contains the given token as a provider.
  *
  * @publicApi
  */
@@ -447,7 +476,7 @@ export declare interface Attribute {
     /**
      * The name of the attribute whose value can be injected.
      */
-    attributeName?: string;
+    attributeName: string;
 }
 
 /**
@@ -457,6 +486,7 @@ export declare interface Attribute {
  * @publicApi
  */
 export declare const Attribute: AttributeDecorator;
+
 
 /**
  * Type of the Attribute decorator / constructor function.
@@ -476,11 +506,11 @@ export declare interface AttributeDecorator {
      * <input type="text">
      * ```
      *
-     * The following example uses the decorator to inject the string literal `text`.
+     * The following example uses the decorator to inject the string literal `text` in a directive.
      *
      * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
      *
-     * ### Example as TypeScript Decorator
+     * The following example uses the decorator in a component constructor.
      *
      * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
      *
@@ -529,15 +559,35 @@ declare interface BootstrapOptions {
      * coalesced and the change detection will be triggered multiple times.
      * And if this option be set to true, the change detection will be
      * triggered async by scheduling a animation frame. So in the case above,
-     * the change detection will only be trigged once.
+     * the change detection will only be triggered once.
      */
     ngZoneEventCoalescing?: boolean;
+    /**
+     * Optionally specify if `NgZone#run()` method invocations should be coalesced
+     * into a single change detection.
+     *
+     * Consider the following case.
+     *
+     * for (let i = 0; i < 10; i ++) {
+     *   ngZone.run(() => {
+     *     // do something
+     *   });
+     * }
+     *
+     * This case triggers the change detection multiple times.
+     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
+     * In addition, the change detection executes in requestAnimation.
+     *
+     */
+    ngZoneRunCoalescing?: boolean;
 }
 
 
 /**
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
+ *
+ * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *
  * @publicApi
  */
@@ -556,11 +606,16 @@ export declare enum ChangeDetectionStrategy {
     Default = 1
 }
 
+declare type ChangeDetectionStrategy_2 = number;
+
 /**
- * Base class for Angular Views, provides change detection functionality.
+ * Base class that provides change detection functionality.
  * A change-detection tree collects all views that are to be checked for changes.
  * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be rerendered.
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
  *
  * @usageNotes
  *
@@ -571,7 +626,7 @@ export declare enum ChangeDetectionStrategy {
  *
  * The following example sets the `OnPush` change-detection strategy for a component
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](http://plnkr.co/edit/GC512b?p=preview).
+ * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
  *
  * <code-example path="core/ts/change_detect/change-detection.ts"
  * region="mark-for-check"></code-example>
@@ -704,28 +759,10 @@ export declare interface ClassSansProvider {
 declare const CLEANUP = 7;
 
 /**
- * @deprecated v4.0.0 - Use IterableChangeRecord instead.
- * @publicApi
- */
-export declare interface CollectionChangeRecord<V> extends IterableChangeRecord<V> {
-}
-
-/**
- * Marks that the next string is for comment.
- *
- * See `I18nMutateOpCodes` documentation.
- */
-declare const COMMENT_MARKER: COMMENT_MARKER;
-
-declare interface COMMENT_MARKER {
-    marker: 'comment';
-}
-
-/**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * injectable def (`ɵprov`) onto the injectable type.
  */
-declare function compileInjectable(type: Type<any>, srcMeta?: Injectable): void;
+declare function compileInjectable(type: Type<any>, meta?: Injectable): void;
 
 /**
  * Low-level service for running the angular compiler during runtime
@@ -860,7 +897,6 @@ export declare interface Component extends Directive {
     animations?: any[];
     /**
      * An encapsulation policy for the template and CSS styles. One of:
-     * - `ViewEncapsulation.Native`: Deprecated. Use `ViewEncapsulation.ShadowDom` instead.
      * - `ViewEncapsulation.Emulated`: Use shimmed CSS that
      * emulates the native behavior.
      * - `ViewEncapsulation.None`: Use global CSS without any
@@ -875,7 +911,7 @@ export declare interface Component extends Directive {
      */
     encapsulation?: ViewEncapsulation;
     /**
-     * Overrides the default encapsulation start and end delimiters (`{{` and `}}`)
+     * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
      */
     interpolation?: [string, string];
     /**
@@ -918,7 +954,8 @@ export declare interface ComponentDecorator {
      * An Angular app contains a tree of Angular components.
      *
      * Angular components are a subset of directives, always associated with a template.
-     * Unlike other directives, only one component can be instantiated per an element in a template.
+     * Unlike other directives, only one component can be instantiated for a given element in a
+     * template.
      *
      * A component must belong to an NgModule in order for it to be available
      * to another component or application. To make it a member of an NgModule,
@@ -1027,8 +1064,8 @@ export declare interface ComponentDecorator {
      *
      * ```html
      * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
-     * <!-->compiled to be equivalent to:</>
-     *  <a>Spaces</a> <a>between</a> <a>links.</a>
+     * <!-- compiled to be equivalent to:
+     *  <a>Spaces</a> <a>between</a> <a>links.</a>  -->
      * ```
      *
      * Note that sequences of `&ngsp;` are still collapsed to just one space character when
@@ -1036,8 +1073,8 @@ export declare interface ComponentDecorator {
      *
      * ```html
      * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
-     * <!-->compiled to be equivalent to:</>
-     *  <a>Spaces</a> <a>between</a> <a>links.</a>
+     * <!-- compiled to be equivalent to:
+     *  <a>before</a> <a>after</a> -->
      * ```
      *
      * To preserve sequences of whitespace characters, use the
@@ -1078,26 +1115,26 @@ declare abstract class ComponentFactory<C> {
     /**
      * The component's HTML selector.
      */
-    abstract readonly selector: string;
+    abstract get selector(): string;
     /**
      * The type of component the factory will create.
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Selector for all <ng-content> elements in the component.
      */
-    abstract readonly ngContentSelectors: string[];
+    abstract get ngContentSelectors(): string[];
     /**
      * The inputs of the component.
      */
-    abstract readonly inputs: {
+    abstract get inputs(): {
         propName: string;
         templateName: string;
     }[];
     /**
      * The outputs of the component.
      */
-    abstract readonly outputs: {
+    abstract get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -1127,6 +1164,15 @@ export declare abstract class ComponentFactoryResolver {
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 
+declare class ComponentFactoryResolver_2 extends ComponentFactoryResolver {
+    private ngModule?;
+    /**
+     * @param ngModule The NgModuleRef to which all resolved factories are bound.
+     */
+    constructor(ngModule?: NgModuleRef<any> | undefined);
+    resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
+}
+
 declare type ComponentInstance = {};
 
 /**
@@ -1140,28 +1186,28 @@ export declare abstract class ComponentRef<C> {
     /**
      * The host or anchor [element](guide/glossary#element) for this component instance.
      */
-    abstract readonly location: ElementRef;
+    abstract get location(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this component instance.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
      * This component instance.
      */
-    abstract readonly instance: C;
+    abstract get instance(): C;
     /**
      * The [host view](guide/glossary#view-tree) defined by the template
      * for this component instance.
      */
-    abstract readonly hostView: ViewRef;
+    abstract get hostView(): ViewRef;
     /**
      * The change detector for this component instance.
      */
-    abstract readonly changeDetectorRef: ChangeDetectorRef;
+    abstract get changeDetectorRef(): ChangeDetectorRef;
     /**
      * The type of this component (as created by a `ComponentFactory` class).
      */
-    abstract readonly componentType: Type<any>;
+    abstract get componentType(): Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -1268,7 +1314,7 @@ export declare interface ContentChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - True to read a different token from the queried element.
+     * * **read** - Used to read a different token from the queried element.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
@@ -1282,11 +1328,11 @@ export declare interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ContentChild;
@@ -1333,7 +1379,12 @@ export declare interface ContentChildrenDecorator {
      *
      * * **selector** - The directive type or the name used for querying.
      * * **descendants** - True to include all descendants, otherwise include only direct children.
-     * * **read** - True to read a different token from the queried elements.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     *   removed in future versions of Angular.
+     * * **read** - Used to read a different token from the queried elements.
      *
      * @usageNotes
      *
@@ -1350,12 +1401,14 @@ export declare interface ContentChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
+        emitDistinctChangesOnly?: boolean;
         read?: any;
     }): Query;
 }
@@ -1412,14 +1465,20 @@ declare interface CreateComponentOptions {
 
 /**
  * Creates a platform.
- * Platforms have to be eagerly created via this function.
+ * Platforms must be created on launch using this function.
  *
  * @publicApi
  */
 export declare function createPlatform(injector: Injector): PlatformRef;
 
 /**
- * Creates a factory for a platform
+ * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
+ * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
+ * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
+ * to build up configurations that might be required by different libraries or parts of the
+ * application.
+ * @param name Identifies the new platform factory.
+ * @param providers A set of dependency providers for platforms created with the new factory.
  *
  * @publicApi
  */
@@ -1456,6 +1515,37 @@ export declare function createPlatformFactory(parentPlatformFactory: ((extraProv
  * See more examples in node_selector_matcher_spec.ts
  */
 declare type CssSelector = (string | SelectorFlags)[];
+
+/**
+ * An object literal of this type is used to represent the metadata of a constructor dependency.
+ * The type itself is never referred to from generated code.
+ *
+ * @publicApi
+ */
+declare type CtorDependency = {
+    /**
+     * If an `@Attribute` decorator is used, this represents the injected attribute's name. If the
+     * attribute name is a dynamic expression instead of a string literal, this will be the unknown
+     * type.
+     */
+    attribute?: string | unknown;
+    /**
+     * If `@Optional()` is used, this key is set to true.
+     */
+    optional?: true;
+    /**
+     * If `@Host` is used, this key is set to true.
+     */
+    host?: true;
+    /**
+     * If `@Self` is used, this key is set to true.
+     */
+    self?: true;
+    /**
+     * If `@SkipSelf` is used, this key is set to true.
+     */
+    skipSelf?: true;
+} | null;
 
 /**
  * Defines a schema that allows an NgModule to contain the following:
@@ -1502,8 +1592,8 @@ export declare const DebugElement: {
 
 declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements DebugElement {
     constructor(nativeNode: Element);
-    readonly nativeElement: Element | null;
-    readonly name: string;
+    get nativeElement(): Element | null;
+    get name(): string;
     /**
      *  Gets a map of property names to property values for an element.
      *
@@ -1516,21 +1606,20 @@ declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements De
      *  - input property bindings (e.g. `[myCustomInput]="value"`)
      *  - attribute bindings (e.g. `[attr.role]="menu"`)
      */
-    readonly properties: {
+    get properties(): {
         [key: string]: any;
     };
-    readonly attributes: {
+    get attributes(): {
         [key: string]: string | null;
     };
-    readonly styles: {
+    get styles(): {
         [key: string]: string | null;
     };
-    private _classesProxy;
-    readonly classes: {
+    get classes(): {
         [key: string]: boolean;
     };
-    readonly childNodes: DebugNode[];
-    readonly children: DebugElement[];
+    get childNodes(): DebugNode[];
+    get children(): DebugElement[];
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
@@ -1569,18 +1658,61 @@ export declare const DebugNode: {
     new (...args: any[]): DebugNode;
 };
 
+/**
+ * A logical node which comprise into `LView`s.
+ *
+ */
+declare interface DebugNode_2 {
+    /**
+     * HTML representation of the node.
+     */
+    html: string | null;
+    /**
+     * Associated `TNode`
+     */
+    tNode: TNode;
+    /**
+     * Human readable node type.
+     */
+    type: string;
+    /**
+     * DOM native node.
+     */
+    native: Node;
+    /**
+     * Child nodes
+     */
+    children: DebugNode_2[];
+    /**
+     * A list of Component/Directive types which need to be instantiated an this location.
+     */
+    factories: Type<unknown>[];
+    /**
+     * A list of Component/Directive instances which were instantiated an this location.
+     */
+    instances: unknown[];
+    /**
+     * NodeInjector information.
+     */
+    injector: NodeInjectorDebug;
+    /**
+     * Injector resolution path.
+     */
+    injectorResolutionPath: any;
+}
+
 declare class DebugNode__POST_R3__ implements DebugNode {
     readonly nativeNode: Node;
     constructor(nativeNode: Node);
-    readonly parent: DebugElement | null;
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly listeners: DebugEventListener[];
-    readonly references: {
+    get parent(): DebugElement | null;
+    get injector(): Injector;
+    get componentInstance(): any;
+    get context(): any;
+    get listeners(): DebugEventListener[];
+    get references(): {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
 
 declare const DECLARATION_COMPONENT_VIEW = 16;
@@ -1588,6 +1720,46 @@ declare const DECLARATION_COMPONENT_VIEW = 16;
 declare const DECLARATION_LCONTAINER = 17;
 
 declare const DECLARATION_VIEW = 15;
+
+/**
+ * Provide this token to set the default currency code your application uses for
+ * CurrencyPipe when there is no currency code passed into it. This is only used by
+ * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
+ *
+ * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ *
+ * <div class="alert is-helpful">
+ *
+ * **Deprecation notice:**
+ *
+ * The default currency code is currently always `USD` but this is deprecated from v9.
+ *
+ * **In v10 the default currency code will be taken from the current locale.**
+ *
+ * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
+ * your application `NgModule`:
+ *
+ * ```ts
+ * {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'}
+ * ```
+ *
+ * </div>
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+export declare const DEFAULT_CURRENCY_CODE: InjectionToken<string>;
 
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
@@ -1621,12 +1793,12 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     diff(collection: NgIterable<V> | null | undefined): DefaultIterableDiffer<V> | null;
     onDestroy(): void;
     check(collection: NgIterable<V>): boolean;
-    readonly isDirty: boolean;
+    get isDirty(): boolean;
     private _addToRemovals;
 }
 
 /**
- * @deprecated in v8, delete after v10. This API should be used only be generated code, and that
+ * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
  * code should now use ɵɵdefineInjectable instead.
  * @publicApi
  */
@@ -1653,7 +1825,28 @@ declare interface DepDef {
 }
 
 /**
- * Destroy the existing platform.
+ * Array of destroy hooks that should be executed for a view and their directive indices.
+ *
+ * The array is set up as a series of number/function or number/(number|function)[]:
+ * - Even indices represent the context with which hooks should be called.
+ * - Odd indices are the hook functions themselves. If a value at an odd index is an array,
+ *   it represents the destroy hooks of a `multi` provider where:
+ *     - Even indices represent the index of the provider for which we've registered a destroy hook,
+ *       inside of the `multi` provider array.
+ *     - Odd indices are the destroy hook functions.
+ * For example:
+ * LView: `[0, 1, 2, AService, 4, [BService, CService, DService]]`
+ * destroyHooks: `[3, AService.ngOnDestroy, 5, [0, BService.ngOnDestroy, 2, DService.ngOnDestroy]]`
+ *
+ * In the example above `AService` is a type provider with an `ngOnDestroy`, whereas `BService`,
+ * `CService` and `DService` are part of a `multi` provider where only `BService` and `DService`
+ * have an `ngOnDestroy` hook.
+ */
+declare type DestroyHookData = (HookEntry | HookData)[];
+
+/**
+ * Destroys the current Angular platform and all Angular applications on the page.
+ * Destroys all modules and listeners registered with the platform.
  *
  * @publicApi
  */
@@ -1862,10 +2055,10 @@ export declare interface Directive {
         [key: string]: string;
     };
     /**
-     * If true, this directive/component will be skipped by the AOT compiler and so will always be
-     * compiled using JIT.
-     *
-     * This exists to support future Ivy work and has no effect currently.
+     * When present, this directive/component is ignored by the AOT compiler.
+     * It remains in distributed code, and the JIT compiler attempts to compile it
+     * at run time, in the browser.
+     * To ensure the correct behavior, the app must import `@angular/compiler`.
      */
     jit?: true;
 }
@@ -2004,7 +2197,7 @@ export declare interface DoBootstrap {
  * changes on the same input.
  *
  * @see `OnChanges`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface
@@ -2012,21 +2205,24 @@ export declare interface DoBootstrap {
  *
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
  *
+ * For a more complete example and discussion, see
+ * [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection).
+ *
  * @publicApi
  */
 export declare interface DoCheck {
     /**
-       * A callback method that performs change-detection, invoked
-       * after the default change-detector runs.
-       * See `KeyValueDiffers` and `IterableDiffers` for implementing
-       * custom change checking for collections.
-       *
-       */
+     * A callback method that performs change-detection, invoked
+     * after the default change-detector runs.
+     * See `KeyValueDiffers` and `IterableDiffers` for implementing
+     * custom change checking for collections.
+     *
+     */
     ngDoCheck(): void;
 }
 
 /**
- * Marks that the next string is for element.
+ * Marks that the next string is an element name.
  *
  * See `I18nMutateOpCodes` documentation.
  */
@@ -2074,11 +2270,11 @@ declare interface ElementHandleEventFn {
  *
  * @security Permitting direct access to the DOM can make your application more vulnerable to
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](http://g.co/ng/security).
+ * [Security Guide](https://g.co/ng/security).
  *
  * @publicApi
  */
-export declare class ElementRef<T extends any = any> {
+export declare class ElementRef<T = any> {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported
      * (e.g. when the application runs in a web worker).
@@ -2161,11 +2357,11 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     /**
      * The context for this view, inherited from the anchor element.
      */
-    abstract readonly context: C;
+    abstract context: C;
     /**
      * The root nodes for this embedded view.
      */
-    abstract readonly rootNodes: any[];
+    abstract get rootNodes(): any[];
 }
 
 /**
@@ -2261,15 +2457,15 @@ export declare class ErrorHandler {
  * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
-export declare class EventEmitter<T extends any> extends Subject<T> {
+export declare interface EventEmitter<T> extends Subject<T> {
     /**
      * Creates an instance of this class that can
      * deliver events synchronously or asynchronously.
      *
-     * @param isAsync When true, deliver events asynchronously.
+     * @param [isAsync=false] When true, deliver events asynchronously.
      *
      */
-    constructor(isAsync?: boolean);
+    new (isAsync?: boolean): EventEmitter<T>;
     /**
      * Emits an event containing a given value.
      * @param value The value to emit.
@@ -2277,14 +2473,31 @@ export declare class EventEmitter<T extends any> extends Subject<T> {
     emit(value?: T): void;
     /**
      * Registers handlers for events emitted by this instance.
-     * @param generatorOrNext When supplied, a custom handler for emitted events.
-     * @param error When supplied, a custom handler for an error notification
-     * from this emitter.
-     * @param complete When supplied, a custom handler for a completion
-     * notification from this emitter.
+     * @param next When supplied, a custom handler for emitted events.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
      */
-    subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription;
+    subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+    /**
+     * Registers handlers for events emitted by this instance.
+     * @param observerOrNext When supplied, a custom handler for emitted events, or an observer
+     *     object.
+     * @param error When supplied, a custom handler for an error notification from this emitter.
+     * @param complete When supplied, a custom handler for a completion notification from this
+     *     emitter.
+     */
+    subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
 }
+
+/**
+ * @publicApi
+ */
+export declare const EventEmitter: {
+    new (isAsync?: boolean): EventEmitter<any>;
+    new <T>(isAsync?: boolean): EventEmitter<T>;
+    readonly prototype: EventEmitter<any>;
+};
 
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
@@ -2329,14 +2542,6 @@ export declare interface ExistingSansProvider {
 }
 
 /**
- * Set of instructions used to process host bindings efficiently.
- *
- * See VIEW_DATA.md for more information.
- */
-declare interface ExpandoInstructions extends Array<number | HostBindingsFunction<any> | null> {
-}
-
-/**
  * Definition of what a factory function should look like.
  */
 declare type FactoryFn<T> = {
@@ -2344,7 +2549,7 @@ declare type FactoryFn<T> = {
      * Subclasses without an explicit constructor call through to the factory of their base
      * definition, providing it with their own constructor to instantiate.
      */
-    <U extends T>(t: Type<U>): U;
+    <U extends T>(t?: Type<U>): U;
     /**
      * If no constructor to instantiate is provided, an instance of type T itself is created.
      */
@@ -2470,6 +2675,16 @@ declare type GlobalTargetResolver = (element: any) => {
 };
 
 /**
+ * Flag to signify that this `LContainer` may have transplanted views which need to be change
+ * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
+ *
+ * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
+ * a lot of work in `refreshEmbeddedViews`. But when set we still need to verify
+ * that the `MOVED_VIEWS` are transplanted and on-push.
+ */
+declare const HAS_TRANSPLANTED_VIEWS = 2;
+
+/**
  * Array of hooks that should be executed for a view and their directive indices.
  *
  * For each node of the view, the following data is stored:
@@ -2481,7 +2696,16 @@ declare type GlobalTargetResolver = (element: any) => {
  * Special cases:
  *  - a negative directive index flags an init hook (ngOnInit, ngAfterContentInit, ngAfterViewInit)
  */
-declare type HookData = (number | (() => void))[];
+declare type HookData = HookEntry[];
+
+/**
+ * Information necessary to call a hook. E.g. the callback that
+ * needs to invoked and the index at which to find its context.
+ */
+declare type HookEntry = number | HookFn;
+
+/** Single hook callback function. */
+declare type HookFn = () => void;
 
 declare const HOST = 0;
 
@@ -2558,10 +2782,75 @@ export declare interface HostBindingDecorator {
     new (hostPropertyName?: string): any;
 }
 
-declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U, elementIndex: number) => void;
+/**
+ * Stores a set of OpCodes to process `HostBindingsFunction` associated with a current view.
+ *
+ * In order to invoke `HostBindingsFunction` we need:
+ * 1. 'elementIdx`: Index to the element associated with the `HostBindingsFunction`.
+ * 2. 'directiveIdx`: Index to the directive associated with the `HostBindingsFunction`. (This will
+ *    become the context for the `HostBindingsFunction` invocation.)
+ * 3. `bindingRootIdx`: Location where the bindings for the `HostBindingsFunction` start. Internally
+ *    `HostBindingsFunction` binding indexes start from `0` so we need to add `bindingRootIdx` to
+ *    it.
+ * 4. `HostBindingsFunction`: A host binding function to execute.
+ *
+ * The above information needs to be encoded into the `HostBindingOpCodes` in an efficient manner.
+ *
+ * 1. `elementIdx` is encoded into the `HostBindingOpCodes` as `~elementIdx` (so a negative number);
+ * 2. `directiveIdx`
+ * 3. `bindingRootIdx`
+ * 4. `HostBindingsFunction` is passed in as is.
+ *
+ * The `HostBindingOpCodes` array contains:
+ * - negative number to select the element index.
+ * - followed by 1 or more of:
+ *    - a number to select the directive index
+ *    - a number to select the bindingRoot index
+ *    - and a function to invoke.
+ *
+ * ## Example
+ *
+ * ```
+ * const hostBindingOpCodes = [
+ *   ~30,                               // Select element 30
+ *   40, 45, MyDir.ɵdir.hostBindings    // Invoke host bindings on MyDir on element 30;
+ *                                      // directiveIdx = 40; bindingRootIdx = 45;
+ *   50, 55, OtherDir.ɵdir.hostBindings // Invoke host bindings on OtherDire on element 30
+ *                                      // directiveIdx = 50; bindingRootIdx = 55;
+ * ]
+ * ```
+ *
+ * ## Pseudocode
+ * ```
+ * const hostBindingOpCodes = tView.hostBindingOpCodes;
+ * if (hostBindingOpCodes === null) return;
+ * for (let i = 0; i < hostBindingOpCodes.length; i++) {
+ *   const opCode = hostBindingOpCodes[i] as number;
+ *   if (opCode < 0) {
+ *     // Negative numbers are element indexes.
+ *     setSelectedIndex(~opCode);
+ *   } else {
+ *     // Positive numbers are NumberTuple which store bindingRootIndex and directiveIndex.
+ *     const directiveIdx = opCode;
+ *     const bindingRootIndx = hostBindingOpCodes[++i] as number;
+ *     const hostBindingFn = hostBindingOpCodes[++i] as HostBindingsFunction<any>;
+ *     setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
+ *     const context = lView[directiveIdx];
+ *     hostBindingFn(RenderFlags.Update, context);
+ *   }
+ * }
+ * ```
+ *
+ */
+declare interface HostBindingOpCodes extends Array<number | HostBindingsFunction<any>> {
+    __brand__: 'HostBindingOpCodes';
+    debug?: string[];
+}
+
+declare type HostBindingsFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
- * Type of the Host decorator / constructor function.
+ * Type of the `Host` decorator / constructor function.
  *
  * @publicApi
  */
@@ -2571,15 +2860,15 @@ export declare interface HostDecorator {
      * that tells the DI framework to resolve the view by checking injectors of child
      * elements, and stop when reaching the host element of the current component.
      *
-     * For an extended example, see
-     * ["Dependency Injection Guide"](guide/dependency-injection-in-action#optional).
-     *
      * @usageNotes
      *
-     * The following shows use with the `@Optional` decorator, and allows for a null result.
+     * The following shows use with the `@Optional` decorator, and allows for a `null` result.
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
      * </code-example>
+     *
+     * For an extended example, see ["Dependency Injection
+     * Guide"](guide/dependency-injection-in-action#optional).
      */
     (): any;
     new (): Host;
@@ -2632,6 +2921,29 @@ export declare interface HostListener {
  *   template: '<button counting>Increment</button>',
  * })
  * class App {}
+ *
+ * ```
+ *
+ * The following example registers another DOM event handler that listens for key-press events.
+ * ``` ts
+ * import { HostListener, Component } from "@angular/core";
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `<h1>Hello, you have pressed keys {{counter}} number of times!</h1> Press any key to
+ * increment the counter.
+ *   <button (click)="resetCounter()">Reset Counter</button>`
+ * })
+ * class AppComponent {
+ *   counter = 0;
+ *   @HostListener('window:keydown', ['$event'])
+ *   handleKeyDown(event: KeyboardEvent) {
+ *     this.counter++;
+ *   }
+ *   resetCounter() {
+ *     this.counter = 0;
+ *   }
+ * }
  * ```
  *
  * @Annotation
@@ -2648,86 +2960,73 @@ export declare interface HostListenerDecorator {
     /**
      * Decorator that declares a DOM event to listen for,
      * and provides a handler method to run when that event occurs.
+     *
+     * Angular invokes the supplied handler method when the host element emits the specified event,
+     * and updates the bound element with the result.
+     *
+     * If the handler method returns false, applies `preventDefault` on the bound element.
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
 }
 
 /**
- * Array storing OpCode for dynamically creating `i18n` blocks.
+ * Array storing OpCode for dynamically creating `i18n` translation DOM elements.
  *
- * Example:
- * ```ts
- * <I18nCreateOpCode>[
- *   // For adding text nodes
- *   // ---------------------
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createTextNode('abc');
- *   //   lView[1].insertBefore(node, lView[2]);
- *   'abc', 1 << SHIFT_PARENT | 2 << SHIFT_REF | InsertBefore,
+ * This array creates a sequence of `Text` and `Comment` (as ICU anchor) DOM elements. It consists
+ * of a pair of `number` and `string` pairs which encode the operations for the creation of the
+ * translated block.
  *
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createTextNode('xyz');
- *   //   lView[1].appendChild(node);
- *   'xyz', 1 << SHIFT_PARENT | AppendChild,
+ * The number is shifted and encoded according to `I18nCreateOpCode`
  *
- *   // For adding element nodes
- *   // ---------------------
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createElement('div');
- *   //   lView[1].insertBefore(node, lView[2]);
- *   ELEMENT_MARKER, 'div', 1 << SHIFT_PARENT | 2 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createElement('div');
- *   //   lView[1].appendChild(node);
- *   ELEMENT_MARKER, 'div', 1 << SHIFT_PARENT | AppendChild,
- *
- *   // For adding comment nodes
- *   // ---------------------
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createComment('');
- *   //   lView[1].insertBefore(node, lView[2]);
- *   COMMENT_MARKER, '', 1 << SHIFT_PARENT | 2 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[index++] = document.createComment('');
- *   //   lView[1].appendChild(node);
- *   COMMENT_MARKER, '', 1 << SHIFT_PARENT | AppendChild,
- *
- *   // For moving existing nodes to a different location
- *   // --------------------------------------------------
- *   // Equivalent to:
- *   //   const node = lView[1];
- *   //   lView[2].insertBefore(node, lView[3]);
- *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | 3 << SHIFT_REF | InsertBefore,
- *
- *   // Equivalent to:
- *   //   const node = lView[1];
- *   //   lView[2].appendChild(node);
- *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | AppendChild,
- *
- *   // For removing existing nodes
- *   // --------------------------------------------------
- *   //   const node = lView[1];
- *   //   removeChild(tView.data(1), node, lView);
- *   1 << SHIFT_REF | Remove,
- *
- *   // For writing attributes
- *   // --------------------------------------------------
- *   //   const node = lView[1];
- *   //   node.setAttribute('attr', 'value');
- *   1 << SHIFT_REF | Select, 'attr', 'value'
- *            // NOTE: Select followed by two string (vs select followed by OpCode)
- * ];
+ * Pseudocode:
  * ```
- * NOTE:
- *   - `index` is initial location where the extra nodes should be stored in the EXPANDO section of
- * `LVIewData`.
+ * const i18nCreateOpCodes = [
+ *   10 << I18nCreateOpCode.SHIFT, "Text Node add to DOM",
+ *   11 << I18nCreateOpCode.SHIFT | I18nCreateOpCode.COMMENT, "Comment Node add to DOM",
+ *   12 << I18nCreateOpCode.SHIFT | I18nCreateOpCode.APPEND_LATER, "Text Node added later"
+ * ];
  *
- * See: `applyI18nCreateOpCodes`;
+ * for(var i=0; i<i18nCreateOpCodes.length; i++) {
+ *   const opcode = i18NCreateOpCodes[i++];
+ *   const index = opcode >> I18nCreateOpCode.SHIFT;
+ *   const text = i18NCreateOpCodes[i];
+ *   let node: Text|Comment;
+ *   if (opcode & I18nCreateOpCode.COMMENT === I18nCreateOpCode.COMMENT) {
+ *     node = lView[~index] = document.createComment(text);
+ *   } else {
+ *     node = lView[index] = document.createText(text);
+ *   }
+ *   if (opcode & I18nCreateOpCode.APPEND_EAGERLY !== I18nCreateOpCode.APPEND_EAGERLY) {
+ *     parentNode.appendChild(node);
+ *   }
+ * }
+ * ```
  */
-declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARKER | COMMENT_MARKER | null> {
+declare interface I18nCreateOpCodes extends Array<number | string>, I18nDebug {
+    __brand__: 'I18nCreateOpCodes';
+}
+
+declare interface I18nDebug {
+    /**
+     * Human readable representation of the OpCode arrays.
+     *
+     * NOTE: This property only exists if `ngDevMode` is set to `true` and it is not present in
+     * production. Its presence is purely to help debug issue in development, and should not be relied
+     * on in production application.
+     */
+    debug?: string[];
+}
+
+/**
+ * Stores a list of nodes which need to be removed.
+ *
+ * Numbers are indexes into the `LView`
+ * - index > 0: `removeRNode(lView[0])`
+ * - index < 0: `removeICU(~lView[0])`
+ */
+declare interface I18nRemoveOpCodes extends Array<number> {
+    __brand__: 'I18nRemoveOpCodes';
 }
 
 /**
@@ -2738,6 +3037,10 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * mask bit. (Bit 1 for expression 1, bit 2 for expression 2 etc..., bit 32 for expression 32 and
  * higher.) The OpCodes then compare its own change mask against the expression change mask to
  * determine if the OpCodes should execute.
+ *
+ * NOTE: 32nd bit is special as it says 32nd or higher. This way if we have more than 32 bindings
+ * the code still works, but with lower efficiency. (it is unlikely that a translation would have
+ * more than 32 bindings.)
  *
  * These OpCodes can be used by both the i18n block as well as ICU sub-block.
  *
@@ -2762,8 +3065,8 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  *   // The following OpCodes represent: `<div i18n-title="pre{{exp1}}in{{exp2}}post">`
  *   // If `changeMask & 0b11`
  *   //        has changed then execute update OpCodes.
- *   //        has NOT changed then skip `7` values and start processing next OpCodes.
- *   0b11, 7,
+ *   //        has NOT changed then skip `8` values and start processing next OpCodes.
+ *   0b11, 8,
  *   // Concatenate `newValue = 'pre'+lView[bindIndex-4]+'in'+lView[bindIndex-3]+'post';`.
  *   'pre', -4, 'in', -3, 'post',
  *   // Update attribute: `elementAttribute(1, 'title', sanitizerFn(newValue));`
@@ -2782,8 +3085,8 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  *   // The following OpCodes represent: `<div i18n>{exp4, plural, ... }">`
  *   // If `changeMask & 0b1000`
  *   //        has changed then execute update OpCodes.
- *   //        has NOT changed then skip `4` values and start processing next OpCodes.
- *   0b1000, 4,
+ *   //        has NOT changed then skip `2` values and start processing next OpCodes.
+ *   0b1000, 2,
  *   // Concatenate `newValue = lView[bindIndex -1];`.
  *   -1,
  *   // Switch ICU: `icuSwitchCase(lView[1], 0, newValue);`
@@ -2798,7 +3101,68 @@ declare interface I18nMutateOpCodes extends Array<number | string | ELEMENT_MARK
  * ```
  *
  */
-declare interface I18nUpdateOpCodes extends Array<string | number | SanitizerFn | null> {
+declare interface I18nUpdateOpCodes extends Array<string | number | SanitizerFn | null>, I18nDebug {
+    __brand__: 'I18nUpdateOpCodes';
+}
+
+/**
+ * Marks that the next string is comment text need for ICU.
+ *
+ * See `I18nMutateOpCodes` documentation.
+ */
+declare const ICU_MARKER: ICU_MARKER;
+
+declare interface ICU_MARKER {
+    marker: 'ICU';
+}
+
+/**
+ * Array storing OpCode for dynamically creating `i18n` blocks.
+ *
+ * Example:
+ * ```ts
+ * <I18nCreateOpCode>[
+ *   // For adding text nodes
+ *   // ---------------------
+ *   // Equivalent to:
+ *   //   lView[1].appendChild(lView[0] = document.createTextNode('xyz'));
+ *   'xyz', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For adding element nodes
+ *   // ---------------------
+ *   // Equivalent to:
+ *   //   lView[1].appendChild(lView[0] = document.createElement('div'));
+ *   ELEMENT_MARKER, 'div', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For adding comment nodes
+ *   // ---------------------
+ *   // Equivalent to:
+ *   //   lView[1].appendChild(lView[0] = document.createComment(''));
+ *   ICU_MARKER, '', 0, 1 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For moving existing nodes to a different location
+ *   // --------------------------------------------------
+ *   // Equivalent to:
+ *   //   const node = lView[1];
+ *   //   lView[2].appendChild(node);
+ *   1 << SHIFT_REF | Select, 2 << SHIFT_PARENT | 0 << SHIFT_REF | AppendChild,
+ *
+ *   // For removing existing nodes
+ *   // --------------------------------------------------
+ *   //   const node = lView[1];
+ *   //   removeChild(tView.data(1), node, lView);
+ *   1 << SHIFT_REF | Remove,
+ *
+ *   // For writing attributes
+ *   // --------------------------------------------------
+ *   //   const node = lView[1];
+ *   //   node.setAttribute('attr', 'value');
+ *   1 << SHIFT_REF | Attr, 'attr', 'value'
+ * ];
+ * ```
+ */
+declare interface IcuCreateOpCodes extends Array<number | string | ELEMENT_MARKER | ICU_MARKER | null>, I18nDebug {
+    __brand__: 'I18nCreateOpCodes';
 }
 
 /**
@@ -2875,7 +3239,7 @@ export declare const Inject: InjectDecorator;
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns True if injection is successful, null otherwise.
+ * @returns the injected value if injection is successful, `null` otherwise.
  *
  * @usageNotes
  *
@@ -2895,13 +3259,14 @@ export declare const inject: typeof ɵɵinject;
 export declare interface Injectable {
     /**
      * Determines which injectors will provide the injectable,
-     * by either associating it with an @NgModule or other `InjectorType`,
-     * or by specifying that this injectable should be provided in the:
-     * - 'root' injector, which will be the application-level injector in most apps.
-     * - 'platform' injector, which would be the special singleton platform injector shared by all
+     * by either associating it with an `@NgModule` or other `InjectorType`,
+     * or by specifying that this injectable should be provided in one of the following injectors:
+     * - 'root' : The application-level injector in most apps.
+     * - 'platform' : A special singleton platform injector shared by all
      * applications on the page.
-     * - 'any' injector, which would be the injector which receives the resolution. (Note this only
-     * works on NgModule Injectors and not on Element Injector)
+     * - 'any' : Provides a unique instance in each lazy loaded module while all eagerly loaded
+     * modules share one instance.
+     *
      */
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
 }
@@ -2957,9 +3322,9 @@ export declare interface InjectableDecorator {
 export declare type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 
 /**
- * A `Type` which has an `InjectableDef` static field.
+ * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
  *
- * `InjectableDefType`s contain their own Dependency Injection metadata and are usable in an
+ * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
  * `InjectorDef`-based `StaticInjector.
  *
  * @publicApi
@@ -2968,11 +3333,8 @@ export declare interface InjectableType<T> extends Type<T> {
     /**
      * Opaque type whose structure is highly version dependent. Do not rely on any properties.
      */
-    ɵprov: never;
+    ɵprov: unknown;
 }
-
-/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-declare function injectChangeDetectorRef(isPipe?: boolean): ChangeDetectorRef;
 
 
 /**
@@ -2985,8 +3347,6 @@ export declare interface InjectDecorator {
      * Parameter decorator on a dependency parameter of a class constructor
      * that specifies a custom provider of the dependency.
      *
-     * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
      * @usageNotes
      * The following example shows a class constructor that specifies a
      * custom provider of a dependency using the parameter decorator.
@@ -2996,18 +3356,13 @@ export declare interface InjectDecorator {
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
      * </code-example>
+     *
+     * @see ["Dependency Injection Guide"](guide/dependency-injection)
+     *
      */
     (token: any): any;
     new (token: any): Inject;
 }
-
-/**
- * Creates an ElementRef from the most recent node.
- *
- * @returns The ElementRef instance to use
- */
-declare function injectElementRef(ElementRefToken: typeof ElementRef): ElementRef;
-
 
 /**
  * Injection flags for DI.
@@ -3072,7 +3427,7 @@ export declare enum InjectFlags {
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ɵprov: never | undefined;
+    readonly ɵprov: unknown;
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
@@ -3091,12 +3446,20 @@ export declare class InjectionToken<T> {
 export declare const INJECTOR: InjectionToken<Injector>;
 
 /**
- * Concrete injectors implement this interface.
+ * Concrete injectors implement this interface. Injectors are configured
+ * with [providers](guide/glossary#provider) that associate
+ * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see `StaticProvider`
  *
  * @usageNotes
- * ### Example
+ *
+ *  The following example creates a service injector instance.
+ *
+ * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * ### Usage example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
@@ -3107,16 +3470,16 @@ export declare const INJECTOR: InjectionToken<Injector>;
  * @publicApi
  */
 export declare abstract class Injector {
-    static THROW_IF_NOT_FOUND: Object;
+    static THROW_IF_NOT_FOUND: {};
     static NULL: Injector;
     /**
      * Retrieves an instance from the injector based on the provided token.
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -3124,13 +3487,25 @@ export declare abstract class Injector {
      * @deprecated from v5 use the new signature Injector.create(options)
      */
     static create(providers: StaticProvider[], parent?: Injector): Injector;
+    /**
+     * Creates a new injector instance that provides one or more dependencies,
+     * according to a given type or types of `StaticProvider`.
+     *
+     * @param options An object with the following properties:
+     * * `providers`: An array of providers of the [StaticProvider type](api/core/StaticProvider).
+     * * `parent`: (optional) A parent injector.
+     * * `name`: (optional) A developer-defined identifying name for the new injector.
+     *
+     * @returns The new injector instance.
+     *
+     */
     static create(options: {
         providers: StaticProvider[];
         parent?: Injector;
         name?: string;
     }): Injector;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
 
 declare const INJECTOR_2 = 9;
@@ -3138,19 +3513,20 @@ declare const INJECTOR_2 = 9;
 /**
  * A type which has an `InjectorDef` static field.
  *
- * `InjectorDefTypes` can be used to configure a `StaticInjector`.
+ * `InjectorTypes` can be used to configure a `StaticInjector`.
+ *
+ * This is an opaque type whose structure is highly version dependent. Do not rely on any
+ * properties.
  *
  * @publicApi
  */
 export declare interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
-    ɵinj: never;
+    ɵfac?: unknown;
+    ɵinj: unknown;
 }
 
 /**
- * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
+ * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorType` with an
  * associated array of providers.
  *
  * Objects of this type can be listed in the imports section of an `InjectorDef`.
@@ -3161,24 +3537,6 @@ declare interface InjectorTypeWithProviders<T> {
     ngModule: InjectorType<T>;
     providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
 }
-
-/** Injects a Renderer2 for the current component. */
-declare function injectRenderer2(): Renderer2;
-
-/**
- * Creates a TemplateRef given a node.
- *
- * @returns The TemplateRef instance to use
- */
-declare function injectTemplateRef<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef): TemplateRef<T> | null;
-
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-declare function injectViewContainerRef(ViewContainerRefToken: typeof ViewContainerRef, ElementRefToken: typeof ElementRef): ViewContainerRef;
 
 /**
  * Type of metadata for an `Input` property.
@@ -3203,102 +3561,58 @@ export declare const Input: InputDecorator;
  */
 export declare interface InputDecorator {
     /**
-    * Decorator that marks a class field as an input property and supplies configuration metadata.
-    * The input property is bound to a DOM property in the template. During change detection,
-    * Angular automatically updates the data property with the DOM property's value.
-    *
-    * @usageNotes
-    *
-    * You can supply an optional name to use in templates when the
-    * component is instantiated, that maps to the
-    * name of the bound property. By default, the original
-    * name of the bound property is used for input binding.
-    *
-    * The following example creates a component with two input properties,
-    * one of which is given a special binding name.
-    *
-    * ```typescript
-    * @Component({
-    *   selector: 'bank-account',
-    *   template: `
-    *     Bank Name: {{bankName}}
-    *     Account Id: {{id}}
-    *   `
-    * })
-    * class BankAccount {
-    *   // This property is bound using its original name.
-    *   @Input() bankName: string;
-    *   // this property value is bound to a different property name
-    *   // when this component is instantiated in a template.
-    *   @Input('account-id') id: string;
-    *
-    *   // this property is not bound, and is not automatically updated by Angular
-    *   normalizedBankName: string;
-    * }
-    *
-    * @Component({
-    *   selector: 'app',
-    *   template: `
-    *     <bank-account bankName="RBC" account-id="4747"></bank-account>
-    *   `
-    * })
-    * class App {}
-    * ```
-    *
-    * @see [Input and Output properties](guide/template-syntax#input-and-output-properties)
-    */
+     * Decorator that marks a class field as an input property and supplies configuration metadata.
+     * The input property is bound to a DOM property in the template. During change detection,
+     * Angular automatically updates the data property with the DOM property's value.
+     *
+     * @usageNotes
+     *
+     * You can supply an optional name to use in templates when the
+     * component is instantiated, that maps to the
+     * name of the bound property. By default, the original
+     * name of the bound property is used for input binding.
+     *
+     * The following example creates a component with two input properties,
+     * one of which is given a special binding name.
+     *
+     * ```typescript
+     * @Component({
+     *   selector: 'bank-account',
+     *   template: `
+     *     Bank Name: {{bankName}}
+     *     Account Id: {{id}}
+     *   `
+     * })
+     * class BankAccount {
+     *   // This property is bound using its original name.
+     *   @Input() bankName: string;
+     *   // this property value is bound to a different property name
+     *   // when this component is instantiated in a template.
+     *   @Input('account-id') id: string;
+     *
+     *   // this property is not bound, and is not automatically updated by Angular
+     *   normalizedBankName: string;
+     * }
+     *
+     * @Component({
+     *   selector: 'app',
+     *   template: `
+     *     <bank-account bankName="RBC" account-id="4747"></bank-account>
+     *   `
+     * })
+     * class App {}
+     * ```
+     *
+     * @see [Input and Output properties](guide/inputs-outputs)
+     */
     (bindingPropertyName?: string): any;
     new (bindingPropertyName?: string): any;
 }
 
 /**
- * All implicit instruction state is stored here.
- *
- * It is useful to have a single object where all of the state is stored as a mental model
- * (rather it being spread across many different variables.)
- *
- * PERF NOTE: Turns out that writing to a true global variable is slower than
- * having an intermediate object with properties.
+ * See `TNode.insertBeforeIndex`
  */
-declare interface InstructionState {
-    /**
-     * Current `LFrame`
-     *
-     * `null` if we have not called `enterView`
-     */
-    lFrame: LFrame;
-    /**
-     * Stores whether directives should be matched to elements.
-     *
-     * When template contains `ngNonBindable` then we need to prevent the runtime from matching
-     * directives on children of that element.
-     *
-     * Example:
-     * ```
-     * <my-comp my-directive>
-     *   Should match component / directive.
-     * </my-comp>
-     * <div ngNonBindable>
-     *   <my-comp my-directive>
-     *     Should not match component / directive because we are in ngNonBindable.
-     *   </my-comp>
-     * </div>
-     * ```
-     */
-    bindingsEnabled: boolean;
-    /**
-     * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
-     *
-     * Necessary to support ChangeDetectorRef.checkNoChanges().
-     */
-    checkNoChangesMode: boolean;
-    /**
-     * Function to be called when the element is exited.
-     *
-     * NOTE: The function is here for tree shakable purposes since it is only needed by styling.
-     */
-    elementExitFn: (() => void) | null;
-}
+declare type InsertBeforeIndex = null | number | number[];
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
     _bootstrapComponents: Type<any>[];
@@ -3306,7 +3620,7 @@ declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
 
 declare interface InternalViewRef extends ViewRef {
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ApplicationRef): void;
+    attachToAppRef(appRef: ViewRefTracker): void;
 }
 
 
@@ -3384,8 +3698,10 @@ export declare interface IterableChanges<V> {
     forEachMovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
     /** Iterate over all removed items. */
     forEachRemovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /** Iterate over all items which had their identity (as computed by the `TrackByFunction`)
-     * changed. */
+    /**
+     * Iterate over all items which had their identity (as computed by the `TrackByFunction`)
+     * changed.
+     */
     forEachIdentityChange(fn: (record: IterableChangeRecord<V>) => void): void;
 }
 
@@ -3423,7 +3739,7 @@ export declare interface IterableDifferFactory {
  */
 export declare class IterableDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private
      */
@@ -3452,6 +3768,22 @@ export declare class IterableDiffers {
      */
     static extend(factories: IterableDifferFactory[]): StaticProvider;
     find(iterable: any): IterableDifferFactory;
+}
+
+/**
+ * `KeyValueArray` is an array where even positions contain keys and odd positions contain values.
+ *
+ * `KeyValueArray` provides a very efficient way of iterating over its contents. For small
+ * sets (~10) the cost of binary searching an `KeyValueArray` has about the same performance
+ * characteristics that of a `Map` with significantly better memory footprint.
+ *
+ * If used as a `Map` the keys are stored in alphabetical order so that they can be binary searched
+ * for retrieval.
+ *
+ * See: `keyValueArraySet`, `keyValueArrayGet`, `keyValueArrayIndexOf`, `keyValueArrayDelete`.
+ */
+declare interface KeyValueArray<VALUE> extends Array<VALUE | string> {
+    __brand__: 'array-map';
 }
 
 /**
@@ -3554,7 +3886,7 @@ export declare interface KeyValueDifferFactory {
  */
 export declare class KeyValueDiffers {
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
     /**
      * @deprecated v4.0.0 - Should be private.
      */
@@ -3600,43 +3932,42 @@ declare interface LContainer extends Array<any> {
      * The host could be an LView if this container is on a component node.
      * In that case, the component LView is its HOST.
      */
-    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_bm;
+    readonly [HOST]: RElement | RComment | ɵangular_packages_core_core_ca;
     /**
      * This is a type field which allows us to differentiate `LContainer` from `StylingContext` in an
      * efficient way. The value is always set to `true`
      */
     [TYPE]: true;
     /**
-     * The next active index in the views array to read or write to. This helps us
-     * keep track of where we are in the views array.
-     * In the case the LContainer is created for a ViewContainerRef,
-     * it is set to null to identify this scenario, as indices are "absolute" in that case,
-     * i.e. provided directly by the user of the ViewContainerRef API.
+     * Flag to signify that this `LContainer` may have transplanted views which need to be change
+     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
      *
-     * This is used by `ɵɵembeddedViewStart` to track which `LView` is currently active.
-     * Because `ɵɵembeddedViewStart` is not generated by the compiler this feature is essentially
-     * unused.
-     *
-     * The lowest bit signals that this `LContainer` has transplanted views which need to be change
-     * detected as part of the declaration CD. (See `LView[DECLARATION_COMPONENT_VIEW]`)
+     * This flag, once set, is never unset for the `LContainer`.
      */
-    [ACTIVE_INDEX]: ActiveIndexFlag;
+    [HAS_TRANSPLANTED_VIEWS]: boolean;
     /**
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
      */
-    [PARENT]: ɵangular_packages_core_core_bm;
+    [PARENT]: ɵangular_packages_core_core_ca;
     /**
      * This allows us to jump from a container to a sibling container or component
      * view with the same parent, so we can remove listeners efficiently.
      */
-    [NEXT]: ɵangular_packages_core_core_bm | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_ca | LContainer | null;
+    /**
+     * The number of direct transplanted views which need a refresh or have descendants themselves
+     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
+     * change detection we should still descend to find those children to refresh, even if the parents
+     * are not `Dirty`/`CheckAlways`.
+     */
+    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
     /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since
      * queries collect matches from the embedded view declaration point and _not_ the insertion point.
      */
-    [MOVED_VIEWS]: ɵangular_packages_core_core_bm[] | null;
+    [MOVED_VIEWS]: ɵangular_packages_core_core_ca[] | null;
     /**
      * Pointer to the `TNode` which represents the host of the container.
      */
@@ -3647,100 +3978,33 @@ declare interface LContainer extends Array<any> {
      * Array of `ViewRef`s used by any `ViewContainerRef`s that point to this container.
      *
      * This is lazily initialized by `ViewContainerRef` when the first view is inserted.
+     *
+     * NOTE: This is stored as `any[]` because render3 should really not be aware of `ViewRef` and
+     * doing so creates circular dependency.
      */
-    [VIEW_REFS]: ViewRef[] | null;
+    [VIEW_REFS]: unknown[] | null;
 }
 
 /**
+ * Human readable version of the `LContainer`
  *
+ * `LContainer` is a data structure used internally to keep track of child views. The `LContainer`
+ * is designed for efficiency and so at times it is difficult to read or write tests which assert on
+ * its values. For this reason when `ngDevMode` is true we patch a `LContainer.debug` property which
+ * points to `LContainerDebug` for easier debugging and test writing. It is the intent of
+ * `LContainerDebug` to be used in tests.
  */
-declare interface LFrame {
+declare interface LContainerDebug {
+    readonly native: RComment;
     /**
-     * Parent LFrame.
-     *
-     * This is needed when `leaveView` is called to restore the previous state.
+     * Child `LView`s.
      */
-    parent: LFrame;
-    /**
-     * Child LFrame.
-     *
-     * This is used to cache existing LFrames to relieve the memory pressure.
-     */
-    child: LFrame | null;
-    /**
-     * State of the current view being processed.
-     *
-     * An array of nodes (text, element, container, etc), pipes, their bindings, and
-     * any local variables that need to be stored between invocations.
-     */
-    lView: ɵangular_packages_core_core_bm;
-    /**
-     * Used to set the parent property when nodes are created and track query results.
-     *
-     * This is used in conjection with `isParent`.
-     */
-    previousOrParentTNode: TNode;
-    /**
-     * If `isParent` is:
-     *  - `true`: then `previousOrParentTNode` points to a parent node.
-     *  - `false`: then `previousOrParentTNode` points to previous node (sibling).
-     */
-    isParent: boolean;
-    /**
-     * Index of currently selected element in LView.
-     *
-     * Used by binding instructions. Updated as part of advance instruction.
-     */
-    selectedIndex: number;
-    /**
-     * Current pointer to the binding index.
-     */
-    bindingIndex: number;
-    /**
-     * The last viewData retrieved by nextContext().
-     * Allows building nextContext() and reference() calls.
-     *
-     * e.g. const inner = x().$implicit; const outer = x().$implicit;
-     */
-    contextLView: ɵangular_packages_core_core_bm;
-    /**
-     * Store the element depth count. This is used to identify the root elements of the template
-     * so that we can then attach patch data `LView` to only those elements. We know that those
-     * are the only places where the patch data could change, this way we will save on number
-     * of places where tha patching occurs.
-     */
-    elementDepthCount: number;
-    /**
-     * Current namespace to be used when creating elements
-     */
-    currentNamespace: string | null;
-    /**
-     * Current sanitizer
-     */
-    currentSanitizer: StyleSanitizeFn | null;
-    /**
-     * Used when processing host bindings.
-     */
-    currentDirectiveDef: ɵDirectiveDef<any> | ɵComponentDef<any> | null;
-    /**
-     * Used as the starting directive id value.
-     *
-     * All subsequent directives are incremented from this value onwards.
-     * The reason why this value is `1` instead of `0` is because the `0`
-     * value is reserved for the template.
-     */
-    activeDirectiveId: number;
-    /**
-     * The root index from which pure function instructions should calculate their binding
-     * indices. In component views, this is TView.bindingStartIndex. In a host binding
-     * context, this is the TView.expandoStartIndex + any dirs/hostVars before the given dir.
-     */
-    bindingRootIndex: number;
-    /**
-     * Current index of a View or Content Query which needs to be processed next.
-     * We iterate over the list of Queries and increment current query index at every step.
-     */
-    currentQueryIndex: number;
+    readonly views: LViewDebug[];
+    readonly parent: LViewDebug | null;
+    readonly movedViews: ɵangular_packages_core_core_ca[] | null;
+    readonly host: RElement | RComment | ɵangular_packages_core_core_ca;
+    readonly next: LViewDebug | LContainerDebug | null;
+    readonly hasTransplantedViews: boolean;
 }
 
 /**
@@ -3773,7 +4037,7 @@ export declare const LOCALE_ID: InjectionToken<string>;
  * - `<div #nativeDivEl>` - `nativeDivEl` should point to the native `<div>` element;
  * - `<ng-template #tplRef>` - `tplRef` should point to the `TemplateRef` instance;
  */
-declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_bm) => any;
+declare type LocalRefExtractor = (tNode: TNodeWithLocalRefs, currentView: ɵangular_packages_core_core_ca) => any;
 
 /**
  * lQueries represent a collection of individual LQuery objects tracked in a given view.
@@ -3830,6 +4094,131 @@ declare interface LQuery<T> {
     setDirty(): void;
 }
 
+/**
+ * Human readable version of the `LView`.
+ *
+ * `LView` is a data structure used internally to keep track of views. The `LView` is designed for
+ * efficiency and so at times it is difficult to read or write tests which assert on its values. For
+ * this reason when `ngDevMode` is true we patch a `LView.debug` property which points to
+ * `LViewDebug` for easier debugging and test writing. It is the intent of `LViewDebug` to be used
+ * in tests.
+ */
+declare interface LViewDebug {
+    /**
+     * Flags associated with the `LView` unpacked into a more readable state.
+     *
+     * See `LViewFlags` for the flag meanings.
+     */
+    readonly flags: {
+        initPhaseState: number;
+        creationMode: boolean;
+        firstViewPass: boolean;
+        checkAlways: boolean;
+        dirty: boolean;
+        attached: boolean;
+        destroyed: boolean;
+        isRoot: boolean;
+        indexWithinInitPhase: number;
+    };
+    /**
+     * Associated TView
+     */
+    readonly tView: TView;
+    /**
+     * Parent view (or container)
+     */
+    readonly parent: LViewDebug | LContainerDebug | null;
+    /**
+     * Next sibling to the `LView`.
+     */
+    readonly next: LViewDebug | LContainerDebug | null;
+    /**
+     * The context used for evaluation of the `LView`
+     *
+     * (Usually the component)
+     */
+    readonly context: {} | null;
+    /**
+     * Hierarchical tree of nodes.
+     */
+    readonly nodes: DebugNode_2[];
+    /**
+     * Template structure (no instance data).
+     * (Shows how TNodes are connected)
+     */
+    readonly template: string;
+    /**
+     * HTML representation of the `LView`.
+     *
+     * This is only approximate to actual HTML as child `LView`s are removed.
+     */
+    readonly html: string;
+    /**
+     * The host element to which this `LView` is attached.
+     */
+    readonly hostHTML: string | null;
+    /**
+     * Child `LView`s
+     */
+    readonly childViews: Array<LViewDebug | LContainerDebug>;
+    /**
+     * Sub range of `LView` containing decls (DOM elements).
+     */
+    readonly decls: LViewDebugRange;
+    /**
+     * Sub range of `LView` containing vars (bindings).
+     */
+    readonly vars: LViewDebugRange;
+    /**
+     * Sub range of `LView` containing expando (used by DI).
+     */
+    readonly expando: LViewDebugRange;
+}
+
+/**
+ * `LView` is subdivided to ranges where the actual data is stored. Some of these ranges such as
+ * `decls` and `vars` are known at compile time. Other such as `i18n` and `expando` are runtime only
+ * concepts.
+ */
+declare interface LViewDebugRange {
+    /**
+     * The starting index in `LView` where the range begins. (Inclusive)
+     */
+    start: number;
+    /**
+     * The ending index in `LView` where the range ends. (Exclusive)
+     */
+    end: number;
+    /**
+     * The length of the range
+     */
+    length: number;
+    /**
+     * The merged content of the range. `t` contains data from `TView.data` and `l` contains `LView`
+     * data at an index.
+     */
+    content: LViewDebugRangeContent[];
+}
+
+/**
+ * For convenience the static and instance portions of `TView` and `LView` are merged into a single
+ * object in `LViewRange`.
+ */
+declare interface LViewDebugRangeContent {
+    /**
+     * Index into original `LView` or `TView.data`.
+     */
+    index: number;
+    /**
+     * Value from the `TView.data[index]` location.
+     */
+    t: any;
+    /**
+     * Value from the `LView[index]` location.
+     */
+    l: any;
+}
+
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 declare const enum LViewFlags {
     /** The state of the init phase on the first 2 bits */
@@ -3879,11 +4268,16 @@ declare const enum LViewFlags {
     /** Whether or not this view is the root view */
     IsRoot = 512,
     /**
-     * Index of the current init phase on last 22 bits
+     * Whether this moved LView was needs to be refreshed at the insertion location because the
+     * declaration was dirty.
      */
-    IndexWithinInitPhaseIncrementer = 1024,
-    IndexWithinInitPhaseShift = 10,
-    IndexWithinInitPhaseReset = 1023
+    RefreshTransplantedView = 1024,
+    /**
+     * Index of the current init phase on last 21 bits
+     */
+    IndexWithinInitPhaseIncrementer = 2048,
+    IndexWithinInitPhaseShift = 11,
+    IndexWithinInitPhaseReset = 2047
 }
 
 /**
@@ -3916,7 +4310,7 @@ export declare enum MissingTranslationStrategy {
 }
 
 /**
- * Combination of NgModuleFactory and ComponentFactorys.
+ * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
  */
@@ -3927,22 +4321,19 @@ export declare class ModuleWithComponentFactories<T> {
 }
 
 /**
- * A wrapper around an NgModule that associates it with the providers.
+ * A wrapper around an NgModule that associates it with [providers](guide/glossary#provider
+ * "Definition"). Usage without a generic type is deprecated.
  *
- * @param T the module type. In Ivy applications, this must be explicitly
- * provided.
- *
- * Note that using ModuleWithProviders without a generic type is deprecated.
- * The generic will become required in a future version of Angular.
+ * @see [Deprecations](guide/deprecations#modulewithproviders-type-without-a-generic)
  *
  * @publicApi
  */
-export declare interface ModuleWithProviders<T = any /** TODO(alxhub): remove default when callers pass explicit type param */> {
+export declare interface ModuleWithProviders<T> {
     ngModule: Type<T>;
     providers?: Provider[];
 }
 
-declare const MOVED_VIEWS = 5;
+declare const MOVED_VIEWS = 9;
 
 declare const NATIVE = 7;
 
@@ -4145,10 +4536,10 @@ export declare interface NgModule {
      */
     id?: string;
     /**
-     * If true, this module will be skipped by the AOT compiler and so will always be compiled
-     * using JIT.
-     *
-     * This exists to support future Ivy work and has no effect currently.
+     * When present, this module is ignored by the AOT compiler.
+     * It remains in distributed code, and the JIT compiler attempts to compile it
+     * at run time, in the browser.
+     * To ensure the correct behavior, the app must import `@angular/compiler`.
      */
     jit?: true;
 }
@@ -4188,7 +4579,7 @@ declare interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDe
  * @publicApi
  */
 export declare abstract class NgModuleFactory<T> {
-    abstract readonly moduleType: Type<T>;
+    abstract get moduleType(): Type<T>;
     abstract create(parentInjector: Injector | null): NgModuleRef<T>;
 }
 
@@ -4212,33 +4603,31 @@ declare interface NgModuleProviderDef {
 }
 
 /**
- * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
- *
- * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
- * NgModule Instance.
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
  *
  * @publicApi
  */
 export declare abstract class NgModuleRef<T> {
     /**
-     * The injector that contains all of the providers of the NgModule.
+     * The injector that contains all of the providers of the `NgModule`.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /**
-     * The ComponentFactoryResolver to get hold of the ComponentFactories
+     * The resolver that can retrieve the component factories
      * declared in the `entryComponents` property of the module.
      */
-    abstract readonly componentFactoryResolver: ComponentFactoryResolver;
+    abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
-     * The NgModule instance.
+     * The `NgModule` instance.
      */
-    abstract readonly instance: T;
+    abstract get instance(): T;
     /**
      * Destroys the module instance and all of the data structures associated with it.
      */
     abstract destroy(): void;
     /**
-     * Allows to register a callback that will be called when the module is destroyed.
+     * Registers a callback to be executed when the module is destroyed.
      */
     abstract onDestroy(callback: () => void): void;
 }
@@ -4355,9 +4744,10 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection }: {
+    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection, shouldCoalesceRunChangeDetection }: {
         enableLongStackTrace?: boolean | undefined;
         shouldCoalesceEventChangeDetection?: boolean | undefined;
+        shouldCoalesceRunChangeDetection?: boolean | undefined;
     });
     static isInAngularZone(): boolean;
     static assertInAngularZone(): void;
@@ -4488,6 +4878,29 @@ declare interface NodeDef {
     ngContent: NgContentDef | null;
 }
 
+declare interface NodeInjectorDebug {
+    /**
+     * Instance bloom. Does the current injector have a provider with a given bloom mask.
+     */
+    bloom: string;
+    /**
+     * Cumulative bloom. Do any of the above injectors have a provider with a given bloom mask.
+     */
+    cumulativeBloom: string;
+    /**
+     * A list of providers associated with this injector.
+     */
+    providers: (Type<unknown> | ɵDirectiveDef<unknown> | ɵComponentDef<unknown>)[];
+    /**
+     * A list of providers associated with this injector visible to the view of the component only.
+     */
+    viewProviders: Type<unknown>[];
+    /**
+     * Location of the parent `TNode`.
+     */
+    parentInjectorIndex: number;
+}
+
 /**
  * Function to call console.error at the right source location. This is an indirection
  * via another function as browser will log the location that actually called
@@ -4519,7 +4932,7 @@ declare interface ObjectOrientedRenderer3 {
  *
  * @see `DoCheck`
  * @see `OnInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -4544,7 +4957,7 @@ export declare interface OnChanges {
  * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
  * Use for any custom cleanup that needs to occur when the
  * instance is destroyed.
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface
@@ -4557,7 +4970,7 @@ export declare interface OnChanges {
 export declare interface OnDestroy {
     /**
      * A callback method that performs custom clean-up, invoked immediately
-     * after a directive, pipe, or service instance is destroyed.
+     * before a directive, pipe, or service instance is destroyed.
      */
     ngOnDestroy(): void;
 }
@@ -4569,7 +4982,7 @@ export declare interface OnDestroy {
  * Define an `ngOnInit()` method to handle any additional initialization tasks.
  *
  * @see `AfterContentInit`
- * @see [Lifecycle Hooks](guide/lifecycle-hooks#onchanges) guide
+ * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -4589,6 +5002,8 @@ export declare interface OnInit {
      */
     ngOnInit(): void;
 }
+
+declare type OpaqueValue = unknown;
 
 declare interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
@@ -4619,20 +5034,19 @@ export declare interface OptionalDecorator {
     /**
      * Parameter decorator to be used on constructor parameters,
      * which marks the parameter as being an optional dependency.
-     * The DI framework provides null if the dependency is not found.
+     * The DI framework provides `null` if the dependency is not found.
      *
      * Can be used together with other parameter decorators
      * that modify how dependency injection operates.
      *
-     * Learn more in the ["Dependency Injection Guide"](guide/dependency-injection).
-     *
      * @usageNotes
      *
-     * The following code allows the possibility of a null result:
+     * The following code allows the possibility of a `null` result:
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
      *
+     * @see ["Dependency Injection Guide"](guide/dependency-injection).
      */
     (): any;
     new (): Optional;
@@ -4645,8 +5059,8 @@ export declare interface OptionalDecorator {
  */
 export declare interface Output {
     /**
-    * The name of the DOM property to which the output property is bound.
-    */
+     * The name of the DOM property to which the output property is bound.
+     */
     bindingPropertyName?: string;
 }
 
@@ -4663,21 +5077,21 @@ export declare const Output: OutputDecorator;
  */
 export declare interface OutputDecorator {
     /**
-    * Decorator that marks a class field as an output property and supplies configuration metadata.
-    * The DOM property bound to the output property is automatically updated during change detection.
-    *
-    * @usageNotes
-    *
-    * You can supply an optional name to use in templates when the
-    * component is instantiated, that maps to the
-    * name of the bound property. By default, the original
-    * name of the bound property is used for output binding.
-    *
-    * See `Input` decorator for an example of providing a binding name.
-    *
-    * @see [Input and Output properties](guide/template-syntax#input-and-output-properties)
-    *
-    */
+     * Decorator that marks a class field as an output property and supplies configuration metadata.
+     * The DOM property bound to the output property is automatically updated during change detection.
+     *
+     * @usageNotes
+     *
+     * You can supply an optional name to use in templates when the
+     * component is instantiated, that maps to the
+     * name of the bound property. By default, the original
+     * name of the bound property is used for output binding.
+     *
+     * See `Input` decorator for an example of providing a binding name.
+     *
+     * @see [Input and Output properties](guide/inputs-outputs)
+     *
+     */
     (bindingPropertyName?: string): any;
     new (bindingPropertyName?: string): any;
 }
@@ -4695,7 +5109,8 @@ declare const enum OutputType {
 }
 
 /**
- * A token which indicates the root directory of the application
+ * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
+ * the application
  * @publicApi
  */
 export declare const PACKAGE_ROOT_URL: InjectionToken<string>;
@@ -4784,20 +5199,19 @@ declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
  *
  * @usageNotes
  *
- * In the following example, `RepeatPipe` repeats a given value a given number of times.
+ * In the following example, `TruncatePipe` returns the shortened value with an added ellipses.
  *
- * ```ts
- * import {Pipe, PipeTransform} from '@angular/core';
+ * <code-example path="core/ts/pipes/simple_truncate.ts" header="simple_truncate.ts"></code-example>
  *
- * @Pipe({name: 'repeat'})
- * export class RepeatPipe implements PipeTransform {
- *   transform(value: any, times: number) {
- *     return value.repeat(times);
- *   }
- * }
- * ```
+ * Invoking `{{ 'It was the best of times' | truncate }}` in a template will produce `It was...`.
  *
- * Invoking `{{ 'ok' | repeat:3 }}` in a template produces `okokok`.
+ * In the following example, `TruncatePipe` takes parameters that sets the truncated length and the
+ * string to append with.
+ *
+ * <code-example path="core/ts/pipes/truncate.ts" header="truncate.ts"></code-example>
+ *
+ * Invoking `{{ 'It was the best of times' | truncate:4:'....' }}` in a template will produce `It
+ * was the best....`.
  *
  * @publicApi
  */
@@ -4810,7 +5224,7 @@ export declare interface PipeTransform {
  * consumable for rendering.
  */
 declare interface PipeType<T> extends Type<T> {
-    ɵpipe: never;
+    ɵpipe: unknown;
 }
 
 declare type PipeTypeList = (PipeType<any> | Type<any>)[];
@@ -4818,13 +5232,13 @@ declare type PipeTypeList = (PipeType<any> | Type<any>)[];
 declare type PipeTypesOrFactory = (() => PipeTypeList) | PipeTypeList;
 
 /**
- * A token that indicates an opaque platform id.
+ * A token that indicates an opaque platform ID.
  * @publicApi
  */
 export declare const PLATFORM_ID: InjectionToken<Object>;
 
 /**
- * A function that will be executed when a platform is initialized.
+ * A function that is executed when a platform is initialized.
  * @publicApi
  */
 export declare const PLATFORM_INITIALIZER: InjectionToken<(() => void)[]>;
@@ -4837,12 +5251,11 @@ export declare const PLATFORM_INITIALIZER: InjectionToken<(() => void)[]>;
 export declare const platformCore: (extraProviders?: StaticProvider[] | undefined) => PlatformRef;
 
 /**
- * The Angular platform is the entry point for Angular on a web page. Each page
- * has exactly one platform, and services (such as reflection) which are common
+ * The Angular platform is the entry point for Angular on a web page.
+ * Each page has exactly one platform. Services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
- *
- * A page's platform is initialized implicitly when a platform is created via a platform factory
- * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
+ * A page's platform is initialized implicitly when a platform is created using a platform
+ * factory such as `PlatformBrowser`, or explicitly by calling the `createPlatform()` function.
  *
  * @publicApi
  */
@@ -4852,11 +5265,11 @@ export declare class PlatformRef {
     private _destroyListeners;
     private _destroyed;
     /**
-     * Creates an instance of an `@NgModule` for the given platform
-     * for offline compilation.
+     * Creates an instance of an `@NgModule` for the given platform for offline compilation.
      *
      * @usageNotes
-     * ### Simple Example
+     *
+     * The following example creates the NgModule for a browser platform.
      *
      * ```typescript
      * my_module.ts:
@@ -4893,19 +5306,20 @@ export declare class PlatformRef {
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions) | Array<CompilerOptions & BootstrapOptions>): Promise<NgModuleRef<M>>;
     private _moduleDoBootstrap;
     /**
-     * Register a listener to be called when the platform is disposed.
+     * Registers a listener to be called when the platform is destroyed.
      */
     onDestroy(callback: () => void): void;
     /**
-     * Retrieve the platform {@link Injector}, which is the parent injector for
+     * Retrieves the platform {@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
      */
-    readonly injector: Injector;
+    get injector(): Injector;
     /**
-     * Destroy the Angular platform and all Angular applications on the page.
+     * Destroys the current Angular platform and all Angular applications on the page.
+     * Destroys all modules and listeners registered with the platform.
      */
     destroy(): void;
-    readonly destroyed: boolean;
+    get destroyed(): boolean;
 }
 
 declare interface PlatformReflectionCapabilities {
@@ -4952,8 +5366,10 @@ declare const PREORDER_HOOK_FLAGS = 18;
 
 /** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
-    /** The index of the next pre-order hook to be called in the hooks array, on the first 16
-       bits */
+    /**
+       The index of the next pre-order hook to be called in the hooks array, on the first 16
+       bits
+     */
     IndexOfTheNextPreOrderHookMaskMask = 65535,
     /**
      * The number of init hooks that have already been called, on the last 16 bits
@@ -4982,12 +5398,12 @@ declare interface ProceduralRenderer3 {
      */
     destroyNode?: ((node: RNode) => void) | null;
     appendChild(parent: RElement, newChild: RNode): void;
-    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null): void;
+    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
     removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string, namespace?: string | null): void;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
     removeClass(el: RElement, name: string): void;
@@ -5074,7 +5490,7 @@ declare interface PublicTestability {
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
 }
 
-declare const QUERIES = 5;
+declare const QUERIES = 19;
 
 /**
  * Type of the Query metadata.
@@ -5083,6 +5499,7 @@ declare const QUERIES = 5;
  */
 export declare interface Query {
     descendants: boolean;
+    emitDistinctChangesOnly: boolean;
     first: boolean;
     read: any;
     isViewQuery: boolean;
@@ -5115,6 +5532,34 @@ declare interface QueryDef {
 }
 
 /**
+ * A set of flags to be used with Queries.
+ *
+ * NOTE: Ensure changes here are reflected in `packages/compiler/src/render3/view/compiler.ts`
+ */
+declare const enum QueryFlags {
+    /**
+     * No flags
+     */
+    none = 0,
+    /**
+     * Whether or not the query should descend into children.
+     */
+    descendants = 1,
+    /**
+     * The query can be computed statically and hence can be assigned eagerly.
+     *
+     * NOTE: Backwards compatibility with ViewEngine.
+     */
+    isStatic = 2,
+    /**
+     * If the `QueryList` should fire change event only if actual change to query was computed (vs old
+     * behavior where the change was fired whenever the query was recomputed, even if the recomputed
+     * query resulted in the same list.)
+     */
+    emitDistinctChangesOnly = 4
+}
+
+/**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
  *
@@ -5141,13 +5586,28 @@ declare interface QueryDef {
  * @publicApi
  */
 export declare class QueryList<T> implements Iterable<T> {
+    private _emitDistinctChangesOnly;
     readonly dirty = true;
     private _results;
-    readonly changes: Observable<any>;
+    private _changesDetected;
+    private _changes;
     readonly length: number;
     readonly first: T;
     readonly last: T;
-    constructor();
+    /**
+     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
+     */
+    get changes(): Observable<any>;
+    /**
+     * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
+     *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
+     *     the same result)
+     */
+    constructor(_emitDistinctChangesOnly?: boolean);
+    /**
+     * Returns the QueryList entry at `index`.
+     */
+    get(index: number): T | undefined;
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
@@ -5189,8 +5649,13 @@ export declare class QueryList<T> implements Iterable<T> {
      * occurs.
      *
      * @param resultsTree The query results to store
+     * @param identityAccessor Optional function for extracting stable object identity from a value
+     *    in the array. This function is executed for each element of the query result list while
+     *    comparing current query list with the new one (provided as a first argument of the `reset`
+     *    function) to detect if the lists are different. If the function is not provided, elements
+     *    are compared as is (without any pre-processing).
      */
-    reset(resultsTree: Array<T | any[]>): void;
+    reset(resultsTree: Array<T | any[]>, identityAccessor?: (value: T) => unknown): void;
     /**
      * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
      */
@@ -5200,6 +5665,118 @@ export declare class QueryList<T> implements Iterable<T> {
     /** internal */
     destroy(): void;
     [Symbol.iterator]: () => Iterator<T>;
+}
+
+declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
+    template: string;
+    isInline?: boolean;
+    styles?: string[];
+    components?: R3DeclareUsedDirectiveFacade[];
+    directives?: R3DeclareUsedDirectiveFacade[];
+    pipes?: {
+        [pipeName: string]: OpaqueValue | (() => OpaqueValue);
+    };
+    viewProviders?: OpaqueValue;
+    animations?: OpaqueValue;
+    changeDetection?: ChangeDetectionStrategy_2;
+    encapsulation?: ViewEncapsulation_2;
+    interpolation?: [string, string];
+    preserveWhitespaces?: boolean;
+}
+
+declare interface R3DeclareDependencyMetadataFacade {
+    token: OpaqueValue;
+    attribute?: boolean;
+    host?: boolean;
+    optional?: boolean;
+    self?: boolean;
+    skipSelf?: boolean;
+}
+
+declare interface R3DeclareDirectiveFacade {
+    selector?: string;
+    type: Type_2;
+    inputs?: {
+        [classPropertyName: string]: string | [string, string];
+    };
+    outputs?: {
+        [classPropertyName: string]: string;
+    };
+    host?: {
+        attributes?: {
+            [key: string]: OpaqueValue;
+        };
+        listeners?: {
+            [key: string]: string;
+        };
+        properties?: {
+            [key: string]: string;
+        };
+        classAttribute?: string;
+        styleAttribute?: string;
+    };
+    queries?: R3DeclareQueryMetadataFacade[];
+    viewQueries?: R3DeclareQueryMetadataFacade[];
+    providers?: OpaqueValue;
+    exportAs?: string[];
+    usesInheritance?: boolean;
+    usesOnChanges?: boolean;
+}
+
+declare interface R3DeclareFactoryFacade {
+    type: Type_2;
+    deps: R3DeclareDependencyMetadataFacade[] | null;
+    target: ɵɵFactoryTarget;
+}
+
+declare interface R3DeclareInjectableFacade {
+    type: Type_2;
+    providedIn?: Type_2 | 'root' | 'platform' | 'any' | null;
+    useClass?: OpaqueValue;
+    useFactory?: OpaqueValue;
+    useExisting?: OpaqueValue;
+    useValue?: OpaqueValue;
+    deps?: R3DeclareDependencyMetadataFacade[];
+}
+
+declare interface R3DeclareInjectorFacade {
+    type: Type_2;
+    imports?: OpaqueValue[];
+    providers?: OpaqueValue[];
+}
+
+declare interface R3DeclareNgModuleFacade {
+    type: Type_2;
+    bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
+    declarations?: OpaqueValue[] | (() => OpaqueValue[]);
+    imports?: OpaqueValue[] | (() => OpaqueValue[]);
+    exports?: OpaqueValue[] | (() => OpaqueValue[]);
+    schemas?: OpaqueValue[];
+    id?: OpaqueValue;
+}
+
+declare interface R3DeclarePipeFacade {
+    type: Type_2;
+    name: string;
+    pure?: boolean;
+}
+
+declare interface R3DeclareQueryMetadataFacade {
+    propertyName: string;
+    first?: boolean;
+    predicate: OpaqueValue | string[];
+    descendants?: boolean;
+    read?: OpaqueValue;
+    static?: boolean;
+    emitDistinctChangesOnly?: boolean;
+}
+
+declare interface R3DeclareUsedDirectiveFacade {
+    selector: string;
+    type: OpaqueValue | (() => OpaqueValue);
+    inputs?: string[];
+    outputs?: string[];
+    exportAs?: string[];
 }
 
 declare class R3Injector {
@@ -5227,7 +5804,7 @@ declare class R3Injector {
     /**
      * Flag indicating that this injector was previously destroyed.
      */
-    readonly destroyed: boolean;
+    get destroyed(): boolean;
     private _destroyed;
     constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector, source?: string | null);
     /**
@@ -5237,7 +5814,7 @@ declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
     /**
@@ -5256,9 +5833,6 @@ declare class R3Injector {
     private processProvider;
     private hydrate;
     private injectableDefInScope;
-}
-
-declare interface Range {
 }
 
 declare interface RComment extends RNode {
@@ -5401,7 +5975,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
      * -->
      */
-    abstract readonly parent: Injector | null;
+    abstract get parent(): Injector | null;
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -5543,7 +6117,7 @@ export declare class ReflectiveKey {
     /**
      * @returns the number of keys registered in the system.
      */
-    static readonly numberOfKeys: number;
+    static get numberOfKeys(): number;
 }
 
 /**
@@ -5555,13 +6129,25 @@ declare interface RElement extends RNode {
     classList: RDomTokenList;
     className: string;
     textContent: string | null;
-    setAttribute(name: string, value: string): void;
+    setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
-    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string): void;
+    setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
     setProperty?(name: string, value: any): void;
 }
+
+/**
+ * This is a synthetic lifecycle hook which gets inserted into `TView.preOrderHooks` to simulate
+ * `ngOnChanges`.
+ *
+ * The hook reads the `NgSimpleChangesStore` data from the component instance and if changes are
+ * found it invokes `ngOnChanges` on the component instance.
+ *
+ * @param this Component instance. Because this function gets inserted into `TView.preOrderHooks`,
+ *     it is guaranteed to be called with component instance.
+ */
+declare function rememberChangeHistoryAndInvokeOnChangesHook(this: OnChanges): void;
 
 declare const RENDERER = 11;
 
@@ -5586,7 +6172,7 @@ export declare abstract class Renderer2 {
      * as an object containing key-value pairs.
      * This is useful for renderers that delegate to other renderers.
      */
-    abstract readonly data: {
+    abstract get data(): {
         [key: string]: any;
     };
     /**
@@ -5628,9 +6214,14 @@ export declare abstract class Renderer2 {
      * in the host element DOM.
      * @param parent The parent node.
      * @param newChild The new child nodes.
-     * @param refChild The existing child node that should precede the new node.
+     * @param refChild The existing child node before which `newChild` is inserted.
+     * @param isMove Optional argument which signifies if the current `insertBefore` is a result of a
+     *     move. Animation uses this information to trigger move animations. In the past the Animation
+     *     would always assume that any `insertBefore` is a move. This is not strictly true because
+     *     with runtime i18n it is possible to invoke `insertBefore` as a result of i18n and it should
+     *     not trigger an animation move.
      */
-    abstract insertBefore(parent: any, newChild: any, refChild: any): void;
+    abstract insertBefore(parent: any, newChild: any, refChild: any, isMove?: boolean): void;
     /**
      * Implement this callback to remove a child node from the host element's DOM.
      * @param parent The parent node.
@@ -5902,6 +6493,14 @@ export declare interface ResolvedReflectiveProvider {
  */
 export declare function resolveForwardRef<T>(type: T): T;
 
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 /** Subset of API needed for appending elements and text nodes. */
 declare interface RNode {
     /**
@@ -5997,14 +6596,13 @@ declare const SANITIZER = 12;
 export declare abstract class Sanitizer {
     abstract sanitize(context: SecurityContext, value: {} | string | null): string | null;
     /** @nocollapse */
-    static ɵprov: never;
+    static ɵprov: unknown;
 }
-
 
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string;
+declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
 
 
 /**
@@ -6018,10 +6616,6 @@ declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => 
  */
 export declare interface SchemaMetadata {
     name: string;
-}
-
-declare interface Scope {
-    (...args: any[] /** TODO #9100 */): any;
 }
 
 
@@ -6082,7 +6676,7 @@ export declare interface SelfDecorator {
      * which tells the DI framework to start dependency resolution from the local injector.
      *
      * Resolution works upward through the injector hierarchy, so the children
-     * of this class must configure their own providers or be prepared for a null result.
+     * of this class must configure their own providers or be prepared for a `null` result.
      *
      * @usageNotes
      *
@@ -6092,7 +6686,6 @@ export declare interface SelfDecorator {
      *
      * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
      * </code-example>
-     *
      *
      * @see `SkipSelf`
      * @see `Optional`
@@ -6143,7 +6736,7 @@ export declare interface SimpleChanges {
 }
 
 /**
- * Type of the SkipSelf metadata.
+ * Type of the `SkipSelf` metadata.
  *
  * @publicApi
  */
@@ -6151,7 +6744,7 @@ export declare interface SkipSelf {
 }
 
 /**
- * SkipSelf decorator and metadata.
+ * `SkipSelf` decorator and metadata.
  *
  * @Annotation
  * @publicApi
@@ -6159,7 +6752,7 @@ export declare interface SkipSelf {
 export declare const SkipSelf: SkipSelfDecorator;
 
 /**
- * Type of the SkipSelf decorator / constructor function.
+ * Type of the `SkipSelf` decorator / constructor function.
  *
  * @publicApi
  */
@@ -6178,9 +6771,7 @@ export declare interface SkipSelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
      * </code-example>
      *
-     * Learn more in the
-     * [Dependency Injection guide](guide/dependency-injection-in-action#skip).
-     *
+     * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
      * @see `Self`
      * @see `Optional`
      *
@@ -6239,80 +6830,15 @@ export declare interface StaticClassSansProvider {
 }
 
 /**
- * Describes how the `Injector` should be configured as static (that is, without reflection).
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * Describes how an `Injector` should be configured as static (that is, without reflection).
+ * A static provider provides tokens to an injector for various types of dependencies.
+ *
+ * @see [Injector.create()](/api/core/Injector#create).
+ * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
-
-/**
- * Used to intercept and sanitize style values before they are written to the renderer.
- *
- * This function is designed to be called in two modes. When a value is not provided
- * then the function will return a boolean whether a property will be sanitized later.
- * If a value is provided then the sanitized version of that will be returned.
- */
-declare interface StyleSanitizeFn {
-    (prop: string, value: string | ɵSafeValue | null, mode?: StyleSanitizeMode): any;
-}
-
-/**
- * A series of flags to instruct a style sanitizer to either validate
- * or sanitize a value.
- *
- * Because sanitization is dependent on the style property (i.e. style
- * sanitization for `width` is much different than for `background-image`)
- * the sanitization function (e.g. `StyleSanitizerFn`) needs to check a
- * property value first before it actually sanitizes any values.
- *
- * This enum exist to allow a style sanitization function to either only
- * do validation (check the property to see whether a value will be
- * sanitized or not) or to sanitize the value (or both).
- *
- * @publicApi
- */
-declare const enum StyleSanitizeMode {
-    /** Just check to see if the property is required to be sanitized or not */
-    ValidateProperty = 1,
-    /** Skip checking the property; just sanitize the value */
-    SanitizeOnly = 2,
-    /** Check the property and (if true) then sanitize the value */
-    ValidateAndSanitize = 3
-}
-
-/**
- * Array-based representation of a key/value array.
- *
- * The format of the array is "property", "value", "property2",
- * "value2", etc...
- *
- * The first value in the array is reserved to store the instance
- * of the key/value array that was used to populate the property/
- * value entries that take place in the remainder of the array.
- */
-declare interface StylingMapArray extends Array<{} | string | number | null | undefined> {
-    /**
-     * The last raw value used to generate the entries in the map.
-     */
-    [StylingMapArrayIndex.RawValuePosition]: {} | string | number | null | undefined;
-}
-
-/**
- * An index of position and offset points for any data stored within a `StylingMapArray` instance.
- */
-declare const enum StylingMapArrayIndex {
-    /** Where the values start in the array */
-    ValuesStartPosition = 1,
-    /** The location of the raw key/value map instance used last to populate the array entries */
-    RawValuePosition = 0,
-    /** The size of each property/value entry */
-    TupleSize = 2,
-    /** The offset for the property entry in the tuple */
-    PropOffset = 0,
-    /** The offset for the value entry in the tuple */
-    ValueOffset = 1
-}
 
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
@@ -6362,8 +6888,23 @@ declare type TAttributes = (string | ɵAttributeMarker | CssSelector)[];
  * Constants that are associated with a view. Includes:
  * - Attribute arrays.
  * - Local definition arrays.
+ * - Translated messages (i18n).
  */
 declare type TConstants = (TAttributes | string)[];
+
+/**
+ * Factory function that returns an array of consts. Consts can be represented as a function in
+ * case any additional statements are required to define consts in the list. An example is i18n
+ * where additional i18n calls are generated, which should be executed when consts are requested
+ * for the first time.
+ */
+declare type TConstantsFactory = () => TConstants;
+
+/**
+ * TConstants type that describes how the `consts` field is generated on ComponentDef: it can be
+ * either an array or a factory function that returns that array.
+ */
+declare type TConstantsOrFactory = TConstants | TConstantsFactory;
 
 /** Static data for an LContainer */
 declare interface TContainerNode extends TNode {
@@ -6381,9 +6922,10 @@ declare interface TContainerNode extends TNode {
      * - They are the first node of a component or embedded view
      * - They are dynamically created
      */
-    parent: ɵangular_packages_core_core_bh | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: TView | TView[] | null;
     projection: null;
+    value: null;
 }
 
 /**
@@ -6413,14 +6955,14 @@ declare interface TContainerNode extends TNode {
  *
  * Injector bloom filters are also stored here.
  */
-declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | null | string)[];
+declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
 
 /** Static data for an <ng-container> */
 declare interface TElementContainerNode extends TNode {
     /** Index in the LView[] array. */
     index: number;
-    child: ɵangular_packages_core_core_bh | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
-    parent: ɵangular_packages_core_core_bh | TElementContainerNode | null;
+    child: ɵangular_packages_core_core_bk | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -6455,7 +6997,7 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    abstract readonly elementRef: ElementRef;
+    abstract get elementRef(): ElementRef;
     /**
      * Instantiates an embedded view based on this template,
      * and attaches it to the view container.
@@ -6576,34 +7118,16 @@ declare interface TextDef {
  */
 declare interface TI18n {
     /**
-     * Number of slots to allocate in expando.
-     *
-     * This is the max number of DOM elements which will be created by this i18n + ICU blocks. When
-     * the DOM elements are being created they are stored in the EXPANDO, so that update OpCodes can
-     * write into them.
-     */
-    vars: number;
-    /**
      * A set of OpCodes which will create the Text Nodes and ICU anchors for the translation blocks.
      *
      * NOTE: The ICU anchors are filled in with ICU Update OpCode.
      */
-    create: I18nMutateOpCodes;
+    create: I18nCreateOpCodes;
     /**
      * A set of OpCodes which will be executed on each change detection to determine if any changes to
      * DOM are required.
      */
     update: I18nUpdateOpCodes;
-    /**
-     * A list of ICUs in a translation block (or `null` if block has no ICUs).
-     *
-     * Example:
-     * Given: `<div i18n>You have {count, plural, ...} and {state, switch, ...}</div>`
-     * There would be 2 ICUs in this array.
-     *   1. `{count, plural, ...}`
-     *   2. `{state, switch, ...}`
-     */
-    icus: TIcu[] | null;
 }
 
 declare interface TIcu {
@@ -6612,43 +7136,22 @@ declare interface TIcu {
      */
     type: IcuType;
     /**
-     * Number of slots to allocate in expando for each case.
-     *
-     * This is the max number of DOM elements which will be created by this i18n + ICU blocks. When
-     * the DOM elements are being created they are stored in the EXPANDO, so that update OpCodes can
-     * write into them.
+     * Index in `LView` where the anchor node is stored. `<!-- ICU 0:0 -->`
      */
-    vars: number[];
+    anchorIdx: number;
     /**
-     * An optional array of child/sub ICUs.
+     * Currently selected ICU case pointer.
      *
-     * In case of nested ICUs such as:
-     * ```
-     * {�0�, plural,
-     *   =0 {zero}
-     *   other {�0� {�1�, select,
-     *                     cat {cats}
-     *                     dog {dogs}
-     *                     other {animals}
-     *                   }!
-     *   }
-     * }
-     * ```
-     * When the parent ICU is changing it must clean up child ICUs as well. For this reason it needs
-     * to know which child ICUs to run clean up for as well.
+     * `lView[currentCaseLViewIndex]` stores the currently selected case. This is needed to know how
+     * to clean up the current case when transitioning no the new case.
      *
-     * In the above example this would be:
-     * ```ts
-     * [
-     *   [],   // `=0` has no sub ICUs
-     *   [1],  // `other` has one subICU at `1`st index.
-     * ]
-     * ```
-     *
-     * The reason why it is Array of Arrays is because first array represents the case, and second
-     * represents the child ICUs to clean up. There may be more than one child ICUs per case.
+     * If the value stored is:
+     * `null`: No current case selected.
+     *   `<0`: A flag which means that the ICU just switched and that `icuUpdate` must be executed
+     *         regardless of the `mask`. (After the execution the flag is cleared)
+     *   `>=0` A currently selected case index.
      */
-    childIcus: number[][];
+    currentCaseLViewIndex: number;
     /**
      * A list of case values which the current ICU will try to match.
      *
@@ -6658,11 +7161,11 @@ declare interface TIcu {
     /**
      * A set of OpCodes to apply in order to build up the DOM render tree for the ICU
      */
-    create: I18nMutateOpCodes[];
+    create: IcuCreateOpCodes[];
     /**
      * A set of OpCodes to apply in order to destroy the DOM render tree for the ICU.
      */
-    remove: I18nMutateOpCodes[];
+    remove: I18nRemoveOpCodes[];
     /**
      * A set of OpCodes to apply in order to update the DOM render tree for the ICU bindings.
      */
@@ -6693,14 +7196,67 @@ declare interface TNode {
      */
     index: number;
     /**
+     * Insert before existing DOM node index.
+     *
+     * When DOM nodes are being inserted, normally they are being appended as they are created.
+     * Under i18n case, the translated text nodes are created ahead of time as part of the
+     * `ɵɵi18nStart` instruction which means that this `TNode` can't just be appended and instead
+     * needs to be inserted using `insertBeforeIndex` semantics.
+     *
+     * Additionally sometimes it is necessary to insert new text nodes as a child of this `TNode`. In
+     * such a case the value stores an array of text nodes to insert.
+     *
+     * Example:
+     * ```
+     * <div i18n>
+     *   Hello <span>World</span>!
+     * </div>
+     * ```
+     * In the above example the `ɵɵi18nStart` instruction can create `Hello `, `World` and `!` text
+     * nodes. It can also insert `Hello ` and `!` text node as a child of `<div>`, but it can't
+     * insert `World` because the `<span>` node has not yet been created. In such a case the
+     * `<span>` `TNode` will have an array which will direct the `<span>` to not only insert
+     * itself in front of `!` but also to insert the `World` (created by `ɵɵi18nStart`) into
+     * `<span>` itself.
+     *
+     * Pseudo code:
+     * ```
+     *   if (insertBeforeIndex === null) {
+     *     // append as normal
+     *   } else if (Array.isArray(insertBeforeIndex)) {
+     *     // First insert current `TNode` at correct location
+     *     const currentNode = lView[this.index];
+     *     parentNode.insertBefore(currentNode, lView[this.insertBeforeIndex[0]]);
+     *     // Now append all of the children
+     *     for(let i=1; i<this.insertBeforeIndex; i++) {
+     *       currentNode.appendChild(lView[this.insertBeforeIndex[i]]);
+     *     }
+     *   } else {
+     *     parentNode.insertBefore(lView[this.index], lView[this.insertBeforeIndex])
+     *   }
+     * ```
+     * - null: Append as normal using `parentNode.appendChild`
+     * - `number`: Append using
+     *      `parentNode.insertBefore(lView[this.index], lView[this.insertBeforeIndex])`
+     *
+     * *Initialization*
+     *
+     * Because `ɵɵi18nStart` executes before nodes are created, on `TView.firstCreatePass` it is not
+     * possible for `ɵɵi18nStart` to set the `insertBeforeIndex` value as the corresponding `TNode`
+     * has not yet been created. For this reason the `ɵɵi18nStart` creates a `TNodeType.Placeholder`
+     * `TNode` at that location. See `TNodeType.Placeholder` for more information.
+     */
+    insertBeforeIndex: InsertBeforeIndex;
+    /**
      * The index of the closest injector in this node's LView.
      *
      * If the index === -1, there is no injector on this node or any ancestor node in this view.
      *
-     * If the index !== -1, it is the index of this node's injector OR the index of a parent injector
-     * in the same view. We pass the parent injector index down the node tree of a view so it's
-     * possible to find the parent injector without walking a potentially deep node tree. Injector
-     * indices are not set across view boundaries because there could be multiple component hosts.
+     * If the index !== -1, it is the index of this node's injector OR the index of a parent
+     * injector in the same view. We pass the parent injector index down the node tree of a view so
+     * it's possible to find the parent injector without walking a potentially deep node tree.
+     * Injector indices are not set across view boundaries because there could be multiple component
+     * hosts.
      *
      * If tNode.injectorIndex === tNode.parent.injectorIndex, then the index belongs to a parent
      * injector.
@@ -6708,19 +7264,43 @@ declare interface TNode {
     injectorIndex: number;
     /**
      * Stores starting index of the directives.
+     *
+     * NOTE: The first directive is always component (if present).
      */
     directiveStart: number;
     /**
      * Stores final exclusive index of the directives.
+     *
+     * The area right behind the `directiveStart-directiveEnd` range is used to allocate the
+     * `HostBindingFunction` `vars` (or null if no bindings.) Therefore `directiveEnd` is used to set
+     * `LFrame.bindingRootIndex` before `HostBindingFunction` is executed.
      */
     directiveEnd: number;
     /**
-     * Stores indexes of property bindings. This field is only set in the ngDevMode and holds indexes
-     * of property bindings so TestBed can get bound property metadata for a given node.
+     * Stores the last directive which had a styling instruction.
+     *
+     * Initial value of this is `-1` which means that no `hostBindings` styling instruction has
+     * executed. As `hostBindings` instructions execute they set the value to the index of the
+     * `DirectiveDef` which contained the last `hostBindings` styling instruction.
+     *
+     * Valid values are:
+     * - `-1` No `hostBindings` instruction has executed.
+     * - `directiveStart <= directiveStylingLast < directiveEnd`: Points to the `DirectiveDef` of
+     * the last styling instruction which executed in the `hostBindings`.
+     *
+     * This data is needed so that styling instructions know which static styling data needs to be
+     * collected from the `DirectiveDef.hostAttrs`. A styling instruction needs to collect all data
+     * since last styling instruction.
+     */
+    directiveStylingLast: number;
+    /**
+     * Stores indexes of property bindings. This field is only set in the ngDevMode and holds
+     * indexes of property bindings so TestBed can get bound property metadata for a given node.
      */
     propertyBindings: number[] | null;
     /**
-     * Stores if Node isComponent, isProjected, hasContentQuery, hasClassInput and hasStyleInput etc.
+     * Stores if Node isComponent, isProjected, hasContentQuery, hasClassInput and hasStyleInput
+     * etc.
      */
     flags: TNodeFlags;
     /**
@@ -6730,11 +7310,17 @@ declare interface TNode {
      * - the count of view providers from the component on this node (last 16 bits)
      */
     providerIndexes: TNodeProviderIndexes;
-    /** The tag name associated with this node. */
-    tagName: string | null;
     /**
-     * Attributes associated with an element. We need to store attributes to support various use-cases
-     * (attribute injection, content projection with selectors, directives matching).
+     * The value name associated with this node.
+     * if type:
+     *   `TNodeType.Text`: text value
+     *   `TNodeType.Element`: tag name
+     *   `TNodeType.ICUContainer`: `TIcu`
+     */
+    value: any;
+    /**
+     * Attributes associated with an element. We need to store attributes to support various
+     * use-cases (attribute injection, content projection with selectors, directives matching).
      * Attributes are stored statically because reading them from the DOM would be way too slow for
      * content projection and queries.
      *
@@ -6747,6 +7333,18 @@ declare interface TNode {
      * namespaces, attributes extracted from bindings and outputs).
      */
     attrs: TAttributes | null;
+    /**
+     * Same as `TNode.attrs` but contains merged data across all directive host bindings.
+     *
+     * We need to keep `attrs` as unmerged so that it can be used for attribute selectors.
+     * We merge attrs here so that it can be used in a performant way for initial rendering.
+     *
+     * The `attrs` are merged in first pass in following order:
+     * - Component's `hostAttrs`
+     * - Directives' `hostAttrs`
+     * - Template `TNode.attrs` associated with the current `TNode`.
+     */
+    mergedAttrs: TAttributes | null;
     /**
      * A set of local names under which a given element is exported in a template and
      * visible to queries. An entry in this array can be created for different reasons:
@@ -6804,10 +7402,10 @@ declare interface TNode {
      */
     next: TNode | null;
     /**
-     * The next projected sibling. Since in Angular content projection works on the node-by-node basis
-     * the act of projecting nodes might change nodes relationship at the insertion point (target
-     * view). At the same time we need to keep initial relationship between nodes as expressed in
-     * content view.
+     * The next projected sibling. Since in Angular content projection works on the node-by-node
+     * basis the act of projecting nodes might change nodes relationship at the insertion point
+     * (target view). At the same time we need to keep initial relationship between nodes as
+     * expressed in content view.
      */
     projectionNext: TNode | null;
     /**
@@ -6831,7 +7429,7 @@ declare interface TNode {
      *
      * If this is an inline view node (V), the parent will be its container.
      */
-    parent: ɵangular_packages_core_core_bh | TContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TContainerNode | null;
     /**
      * List of projected TNodes for a given component host element OR index into the said nodes.
      *
@@ -6857,8 +7455,8 @@ declare interface TNode {
      *    - `projection` size is equal to the number of projections `<ng-content>`. The size of
      *      `c1` will be `1` because `<child>` has only one `<ng-content>`.
      * - we store `projection` with the host (`c1`, `c2`) rather than the `<ng-content>` (`cont1`)
-     *   because the same component (`<child>`) can be used in multiple locations (`c1`, `c2`) and as
-     *   a result have different set of nodes to project.
+     *   because the same component (`<child>`) can be used in multiple locations (`c1`, `c2`) and
+     * as a result have different set of nodes to project.
      * - without `projection` it would be difficult to efficiently traverse nodes to be projected.
      *
      * If `typeof projection == 'number'` then `TNode` is a `<ng-content>` element:
@@ -6873,43 +7471,115 @@ declare interface TNode {
      */
     projection: (TNode | RNode[])[] | number | null;
     /**
-     * A collection of all style bindings and/or static style values for an element.
+     * A collection of all `style` static values for an element (including from host).
      *
      * This field will be populated if and when:
      *
-     * - There are one or more initial styles on an element (e.g. `<div style="width:200px">`)
-     * - There are one or more style bindings on an element (e.g. `<div [style.width]="w">`)
-     *
-     * If and when there are only initial styles (no bindings) then an instance of `StylingMapArray`
-     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
-     * are one or more style bindings on an element.
-     *
-     * During element creation this value is likely to be populated with an instance of
-     * `StylingMapArray` and only when the bindings are evaluated (which happens during
-     * update mode) then it will be converted to a `TStylingContext` if any style bindings
-     * are encountered. If and when this happens then the existing `StylingMapArray` value
-     * will be placed into the initial styling slot in the newly created `TStylingContext`.
+     * - There are one or more initial `style`s on an element (e.g. `<div style="width:200px;">`)
+     * - There are one or more initial `style`s on a directive/component host
+     *   (e.g. `@Directive({host: {style: "width:200px;" } }`)
      */
-    styles: StylingMapArray | TStylingContext | null;
+    styles: string | null;
     /**
-     * A collection of all class bindings and/or static class values for an element.
+     * A collection of all `style` static values for an element excluding host sources.
+     *
+     * Populated when there are one or more initial `style`s on an element
+     * (e.g. `<div style="width:200px;">`)
+     * Must be stored separately from `tNode.styles` to facilitate setting directive
+     * inputs that shadow the `style` property. If we used `tNode.styles` as is for shadowed inputs,
+     * we would feed host styles back into directives as "inputs". If we used `tNode.attrs`, we
+     * would have to concatenate the attributes on every template pass. Instead, we process once on
+     * first create pass and store here.
+     */
+    stylesWithoutHost: string | null;
+    /**
+     * A `KeyValueArray` version of residual `styles`.
+     *
+     * When there are styling instructions than each instruction stores the static styling
+     * which is of lower priority than itself. This means that there may be a higher priority
+     * styling than the instruction.
+     *
+     * Imagine:
+     * ```
+     * <div style="color: highest;" my-dir>
+     *
+     * @Directive({
+     *   host: {
+     *     style: 'color: lowest; ',
+     *     '[styles.color]': 'exp' // ɵɵstyleProp('color', ctx.exp);
+     *   }
+     * })
+     * ```
+     *
+     * In the above case:
+     * - `color: lowest` is stored with `ɵɵstyleProp('color', ctx.exp);` instruction
+     * -  `color: highest` is the residual and is stored here.
+     *
+     * - `undefined': not initialized.
+     * - `null`: initialized but `styles` is `null`
+     * - `KeyValueArray`: parsed version of `styles`.
+     */
+    residualStyles: KeyValueArray<any> | undefined | null;
+    /**
+     * A collection of all class static values for an element (including from host).
      *
      * This field will be populated if and when:
      *
      * - There are one or more initial classes on an element (e.g. `<div class="one two three">`)
-     * - There are one or more class bindings on an element (e.g. `<div [class.foo]="f">`)
-     *
-     * If and when there are only initial classes (no bindings) then an instance of `StylingMapArray`
-     * will be used here. Otherwise an instance of `TStylingContext` will be created when there
-     * are one or more class bindings on an element.
-     *
-     * During element creation this value is likely to be populated with an instance of
-     * `StylingMapArray` and only when the bindings are evaluated (which happens during
-     * update mode) then it will be converted to a `TStylingContext` if any class bindings
-     * are encountered. If and when this happens then the existing `StylingMapArray` value
-     * will be placed into the initial styling slot in the newly created `TStylingContext`.
+     * - There are one or more initial classes on an directive/component host
+     *   (e.g. `@Directive({host: {class: "SOME_CLASS" } }`)
      */
-    classes: StylingMapArray | TStylingContext | null;
+    classes: string | null;
+    /**
+     * A collection of all class static values for an element excluding host sources.
+     *
+     * Populated when there are one or more initial classes on an element
+     * (e.g. `<div class="SOME_CLASS">`)
+     * Must be stored separately from `tNode.classes` to facilitate setting directive
+     * inputs that shadow the `class` property. If we used `tNode.classes` as is for shadowed
+     * inputs, we would feed host classes back into directives as "inputs". If we used
+     * `tNode.attrs`, we would have to concatenate the attributes on every template pass. Instead,
+     * we process once on first create pass and store here.
+     */
+    classesWithoutHost: string | null;
+    /**
+     * A `KeyValueArray` version of residual `classes`.
+     *
+     * Same as `TNode.residualStyles` but for classes.
+     *
+     * - `undefined': not initialized.
+     * - `null`: initialized but `classes` is `null`
+     * - `KeyValueArray`: parsed version of `classes`.
+     */
+    residualClasses: KeyValueArray<any> | undefined | null;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the class bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "class" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     */
+    classBindings: TStylingRange;
+    /**
+     * Stores the head/tail index of the class bindings.
+     *
+     * - If no bindings, the head and tail will both be 0.
+     * - If there are template bindings, stores the head/tail of the style bindings in the template.
+     * - If no template bindings but there are host bindings, the head value will point to the last
+     *   host binding for "style" (not the head of the linked list), tail will be 0.
+     *
+     * See: `style_binding_list.ts` for details.
+     *
+     * This is used by `insertTStylingBinding` to know where the next styling binding should be
+     * inserted so that they can be sorted in priority order.
+     */
+    styleBindings: TStylingRange;
 }
 
 /**
@@ -6940,147 +7610,82 @@ declare const enum TNodeFlags {
      * This flags allows us to guard host-binding logic and invoke it only on nodes
      * that actually have directives with host bindings.
      */
-    hasHostBindings = 128,
-    /** Bit #9 - This bit is set if the node has initial styling */
-    hasInitialStyling = 256,
-    /**
-     * Bit #10 - Whether or not there are class-based map bindings present.
-     *
-     * Examples include:
-     * 1. `<div [class]="x">`
-     * 2. `@HostBinding('class') x`
-     */
-    hasClassMapBindings = 512,
-    /**
-     * Bit #11 - Whether or not there are any class-based prop bindings present.
-     *
-     * Examples include:
-     * 1. `<div [class.name]="x">`
-     * 2. `@HostBinding('class.name') x`
-     */
-    hasClassPropBindings = 1024,
-    /**
-     * Bit #12 - whether or not there are any active [class] and [class.name] bindings
-     */
-    hasClassPropAndMapBindings = 1536,
-    /**
-     * Bit #13 - Whether or not the context contains one or more class-based template bindings.
-     *
-     * Examples include:
-     * 1. `<div [class]="x">`
-     * 2. `<div [class.name]="x">`
-     */
-    hasTemplateClassBindings = 2048,
-    /**
-     * Bit #14 - Whether or not the context contains one or more class-based host bindings.
-     *
-     * Examples include:
-     * 1. `@HostBinding('class') x`
-     * 2. `@HostBinding('class.name') x`
-     */
-    hasHostClassBindings = 4096,
-    /**
-     * Bit #15 - Whether or not there are two or more sources for a class property in the context.
-     *
-     * Examples include:
-     * 1. prop + prop: `<div [class.active]="x" dir-that-sets-active-class>`
-     * 2. map + prop: `<div [class]="x" [class.foo]>`
-     * 3. map + map: `<div [class]="x" dir-that-sets-class>`
-     */
-    hasDuplicateClassBindings = 8192,
-    /**
-     * Bit #16 - Whether or not there are style-based map bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style]="x">`
-     * 2. `@HostBinding('style') x`
-     */
-    hasStyleMapBindings = 16384,
-    /**
-     * Bit #17 - Whether or not there are any style-based prop bindings present.
-     *
-     * Examples include:
-     * 1. `<div [style.prop]="x">`
-     * 2. `@HostBinding('style.prop') x`
-     */
-    hasStylePropBindings = 32768,
-    /**
-     * Bit #18 - whether or not there are any active [style] and [style.prop] bindings
-     */
-    hasStylePropAndMapBindings = 49152,
-    /**
-     * Bit #19 - Whether or not the context contains one or more style-based template bindings.
-     *
-     * Examples include:
-     * 1. `<div [style]="x">`
-     * 2. `<div [style.prop]="x">`
-     */
-    hasTemplateStyleBindings = 65536,
-    /**
-     * Bit #20 - Whether or not the context contains one or more style-based host bindings.
-     *
-     * Examples include:
-     * 1. `@HostBinding('style') x`
-     * 2. `@HostBinding('style.prop') x`
-     */
-    hasHostStyleBindings = 131072,
-    /**
-     * Bit #21 - Whether or not there are two or more sources for a style property in the context.
-     *
-     * Examples include:
-     * 1. prop + prop: `<div [style.width]="x" dir-that-sets-width>`
-     * 2. map + prop: `<div [style]="x" [style.prop]>`
-     * 3. map + map: `<div [style]="x" dir-that-sets-style>`
-     */
-    hasDuplicateStyleBindings = 262144
+    hasHostBindings = 128
 }
 
 /**
  * Corresponds to the TNode.providerIndexes property.
  */
 declare const enum TNodeProviderIndexes {
-    /** The index of the first provider on this node is encoded on the least significant bits */
-    ProvidersStartIndexMask = 65535,
-    /** The count of view providers from the component on this node is encoded on the 16 most
-       significant bits */
-    CptViewProvidersCountShift = 16,
-    CptViewProvidersCountShifter = 65536
+    /** The index of the first provider on this node is encoded on the least significant bits. */
+    ProvidersStartIndexMask = 1048575,
+    /**
+     * The count of view providers from the component on this node is
+     * encoded on the 20 most significant bits.
+     */
+    CptViewProvidersCountShift = 20,
+    CptViewProvidersCountShifter = 1048576
 }
 
 /**
  * TNodeType corresponds to the {@link TNode} `type` property.
+ *
+ * NOTE: type IDs are such that we use each bit to denote a type. This is done so that we can easily
+ * check if the `TNode` is of more than one type.
+ *
+ * `if (tNode.type === TNodeType.Text || tNode.type === TNode.Element)`
+ * can be written as:
+ * `if (tNode.type & (TNodeType.Text | TNodeType.Element))`
+ *
+ * However any given `TNode` can only be of one type.
  */
 declare const enum TNodeType {
     /**
+     * The TNode contains information about a DOM element aka {@link RText}.
+     */
+    Text = 1,
+    /**
+     * The TNode contains information about a DOM element aka {@link RElement}.
+     */
+    Element = 2,
+    /**
      * The TNode contains information about an {@link LContainer} for embedded views.
      */
-    Container = 0,
-    /**
-     * The TNode contains information about an `<ng-content>` projection
-     */
-    Projection = 1,
-    /**
-     * The TNode contains information about an {@link LView}
-     */
-    View = 2,
-    /**
-     * The TNode contains information about a DOM element aka {@link RNode}.
-     */
-    Element = 3,
+    Container = 4,
     /**
      * The TNode contains information about an `<ng-container>` element {@link RNode}.
      */
-    ElementContainer = 4,
+    ElementContainer = 8,
+    /**
+     * The TNode contains information about an `<ng-content>` projection
+     */
+    Projection = 16,
     /**
      * The TNode contains information about an ICU comment used in `i18n`.
      */
-    IcuContainer = 5
+    Icu = 32,
+    /**
+     * Special node type representing a placeholder for future `TNode` at this location.
+     *
+     * I18n translation blocks are created before the element nodes which they contain. (I18n blocks
+     * can span over many elements.) Because i18n `TNode`s (representing text) are created first they
+     * often may need to point to element `TNode`s which are not yet created. In such a case we create
+     * a `Placeholder` `TNode`. This allows the i18n to structurally link the `TNode`s together
+     * without knowing any information about the future nodes which will be at that location.
+     *
+     * On `firstCreatePass` When element instruction executes it will try to create a `TNode` at that
+     * location. Seeing a `Placeholder` `TNode` already there tells the system that it should reuse
+     * existing `TNode` (rather than create a new one) and just update the missing information.
+     */
+    Placeholder = 64,
+    AnyRNode = 3,
+    AnyContainer = 12
 }
 
 /**
  * Type representing a set of TNodes that can have local refs (`#foo`) placed on them.
  */
-declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bh | TElementContainerNode;
+declare type TNodeWithLocalRefs = TContainerNode | ɵangular_packages_core_core_bk | TElementContainerNode;
 
 /** Static data for an LProjectionNode  */
 declare interface TProjectionNode extends TNode {
@@ -7091,10 +7696,11 @@ declare interface TProjectionNode extends TNode {
      * or embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bh | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
+    value: null;
 }
 
 /**
@@ -7137,7 +7743,7 @@ declare interface TQueries {
      */
     template(tView: TView, tNode: TNode): void;
     /**
-    * A proxy method that iterates over all the TQueries in a given TView and calls the corresponding
+     * A proxy method that iterates over all the TQueries in a given TView and calls the corresponding
      * `embeddedTView` on each and every TQuery.
      * @param tNode
      */
@@ -7218,10 +7824,9 @@ declare interface TQuery {
  * An object representing query metadata extracted from query annotations.
  */
 declare interface TQueryMetadata {
-    predicate: Type<any> | string[];
-    descendants: boolean;
+    predicate: Type<any> | InjectionToken<unknown> | string[];
     read: any;
-    isStatic: boolean;
+    flags: QueryFlags;
 }
 
 /**
@@ -7285,342 +7890,151 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 
-/**
- * Tsickle has a bug where it creates an infinite loop for a function returning itself.
- * This is a temporary type that will be removed when the issue is resolved.
- * https://github.com/angular/tsickle/issues/1009)
- */
-declare type TsickleIssue1009 = any;
+declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
+
 
 /**
- * --------
+ * @fileoverview
+ * While Angular only uses Trusted Types internally for the time being,
+ * references to Trusted Types could leak into our core.d.ts, which would force
+ * anyone compiling against @angular/core to provide the @types/trusted-types
+ * package in their compilation unit.
  *
- * This file contains the core interfaces for styling in Angular.
+ * Until https://github.com/microsoft/TypeScript/issues/30024 is resolved, we
+ * will keep Angular's public API surface free of references to Trusted Types.
+ * For internal and semi-private APIs that need to reference Trusted Types, the
+ * minimal type definitions for the Trusted Types API provided by this module
+ * should be used instead. They are marked as "declare" to prevent them from
+ * being renamed by compiler optimization.
  *
- * To learn more about the algorithm see `TStylingContext`.
- *
- * --------
+ * Adapted from
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
+ * but restricted to the API surface used within Angular.
  */
-/**
- * A static-level representation of all style or class bindings/values
- * associated with a `TNode`.
- *
- * The `TStylingContext` unites all template styling bindings (i.e.
- * `[class]` and `[style]` bindings) as well as all host-level
- * styling bindings (for components and directives) together into
- * a single manifest
- *
- * The styling context is stored on a `TNode` on and there are
- * two instances of it: one for classes and another for styles.
- *
- * ```typescript
- * tNode.styles = [ ... a context only for styles ... ];
- * tNode.classes = [ ... a context only for classes ... ];
- * ```
- *
- * The styling context is created each time there are one or more
- * styling bindings (style or class bindings) present for an element,
- * but is only created once per `TNode`.
- *
- * `tNode.styles` and `tNode.classes` can be an instance of the following:
- *
- * ```typescript
- * tNode.styles = null; // no static styling or styling bindings active
- * tNode.styles = StylingMapArray; // only static values present (e.g. `<div style="width:200">`)
- * tNode.styles = TStylingContext; // one or more styling bindings present (e.g. `<div
- * [style.width]>`)
- * ```
- *
- * Both `tNode.styles` and `tNode.classes` are instantiated when anything
- * styling-related is active on an element. They are first created from
- * from the any of the element-level instructions (e.g. `element`,
- * `elementStart`, `elementHostAttrs`). When any static style/class
- * values are encountered they are registered on the `tNode.styles`
- * and `tNode.classes` data-structures. By default (when any static
- * values are encountered) the `tNode.styles` or `tNode.classes` values
- * are instances of a `StylingMapArray`. Only when style/class bindings
- * are detected then that styling map is converted into an instance of
- * `TStylingContext`.
- *
- * Due to the fact the the `TStylingContext` is stored on a `TNode`
- * this means that all data within the context is static. Instead of
- * storing actual styling binding values, the lView binding index values
- * are stored within the context. (static nature means it is more compact.)
- *
- * The code below shows a breakdown of two instances of `TStylingContext`
- * (one for `tNode.styles` and another for `tNode.classes`):
- *
- * ```typescript
- * // <div [class.active]="c"  // lView binding index = 20
- * //      [style.width]="x"   // lView binding index = 21
- * //      [style.height]="y"> // lView binding index = 22
- * //  ...
- * // </div>
- * tNode.styles = [
- *   1,         // the total amount of sources present (only `1` b/c there are only template
- * bindings)
- *   [null],    // initial values array (an instance of `StylingMapArray`)
- *
- *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
- *   0b010,     // template guard mask for height
- *   0,         // host bindings guard mask for height
- *   'height',  // the property name
- *   22,        // the binding location for the "y" binding in the lView
- *   null,      // the default value for height
- *
- *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
- *   0b001,     // template guard mask for width
- *   0,         // host bindings guard mask for width
- *   'width',   // the property name
- *   21,        // the binding location for the "x" binding in the lView
- *   null,      // the default value for width
- * ];
- *
- * tNode.classes = [
- *   0,         // the context config value (see `TStylingContextConfig`)
- *   1,         // the total amount of sources present (only `1` b/c there are only template
- * bindings)
- *   [null],    // initial values array (an instance of `StylingMapArray`)
- *
- *   0,         // config entry for the property (see `TStylingContextPropConfigFlags`)
- *   0b001,     // template guard mask for width
- *   0,         // host bindings guard mask for width
- *   'active',  // the property name
- *   20,        // the binding location for the "c" binding in the lView
- *   null,      // the default value for the `active` class
- * ];
- * ```
- *
- * Entry value present in an entry (called a tuple) within the
- * styling context is as follows:
- *
- * ```typescript
- * context = [
- *   //...
- *   configValue,
- *   templateGuardMask,
- *   hostBindingsGuardMask,
- *   propName,
- *   ...bindingIndices...,
- *   defaultValue
- *   //...
- * ];
- * ```
- *
- * Below is a breakdown of each value:
- *
- * - **configValue**:
- *   Property-specific configuration values. The only config setting
- *   that is implemented right now is whether or not to sanitize the
- *   value.
- *
- * - **templateGuardMask**:
- *   A numeric value where each bit represents a binding index
- *   location. Each binding index location is assigned based on
- *   a local counter value that increments each time an instruction
- *   is called:
- *
- * ```
- * <div [style.width]="x"   // binding index = 21 (counter index = 0)
- *      [style.height]="y"> // binding index = 22 (counter index = 1)
- * ```
- *
- *   In the example code above, if the `width` value where to change
- *   then the first bit in the local bit mask value would be flipped
- *   (and the second bit for when `height`).
- *
- *   If and when there are more than 32 binding sources in the context
- *   (more than 32 `[style/class]` bindings) then the bit masking will
- *   overflow and we are left with a situation where a `-1` value will
- *   represent the bit mask. Due to the way that JavaScript handles
- *   negative values, when the bit mask is `-1` then all bits within
- *   that value will be automatically flipped (this is a quick and
- *   efficient way to flip all bits on the mask when a special kind
- *   of caching scenario occurs or when there are more than 32 bindings).
- *
- * - **hostBindingsGuardMask**:
- *   Another instance of a guard mask that is specific to host bindings.
- *   This behaves exactly the same way as does the `templateGuardMask`,
- *   but will not contain any binding information processed in the template.
- *   The reason why there are two instances of guard masks (one for the
- *   template and another for host bindings) is because the template bindings
- *   are processed before host bindings and the state information is not
- *   carried over into the host bindings code. As soon as host bindings are
- *   processed for an element the counter and state-based bit mask values are
- *   set to `0`.
- *
- * ```
- * <div [style.width]="x"   // binding index = 21 (counter index = 0)
- *      [style.height]="y"  // binding index = 22 (counter index = 1)
- *      dir-that-sets-width  // binding index = 30 (counter index = 0)
- *      dir-that-sets-width> // binding index = 31 (counter index = 1)
- * ```
- *
- * - **propName**:
- *   The CSS property name or class name (e.g `width` or `active`).
- *
- * - **bindingIndices...**:
- *   A series of numeric binding values that reflect where in the
- *   lView to find the style/class values associated with the property.
- *   Each value is in order in terms of priority (templates are first,
- *   then directives and then components). When the context is flushed
- *   and the style/class values are applied to the element (this happens
- *   inside of the `stylingApply` instruction) then the flushing code
- *   will keep checking each binding index against the associated lView
- *   to find the first style/class value that is non-null.
- *
- * - **defaultValue**:
- *   This is the default that will always be applied to the element if
- *   and when all other binding sources return a result that is null.
- *   Usually this value is `null` but it can also be a static value that
- *   is intercepted when the tNode is first constructured (e.g.
- *   `<div style="width:200px">` has a default value of `200px` for
- *   the `width` property).
- *
- * Each time a new binding is encountered it is registered into the
- * context. The context then is continually updated until the first
- * styling apply call has been called (which is automatically scheduled
- * to be called once an element exits during change detection). Note that
- * each entry in the context is stored in alphabetical order.
- *
- * Once styling has been flushed for the first time for an element the
- * context will set as locked (this prevents bindings from being added
- * to the context later on).
- *
- * # How Styles/Classes are Rendered
- * Each time a styling instruction (e.g. `[class.name]`, `[style.prop]`,
- * etc...) is executed, the associated `lView` for the view is updated
- * at the current binding location. Also, when this happens, a local
- * counter value is incremented. If the binding value has changed then
- * a local `bitMask` variable is updated with the specific bit based
- * on the counter value.
- *
- * Below is a lightweight example of what happens when a single style
- * property is updated (i.e. `<div [style.prop]="val">`):
- *
- * ```typescript
- * function updateStyleProp(prop: string, value: string) {
- *   const lView = getLView();
- *   const bindingIndex = BINDING_INDEX++;
- *
- *   // update the local counter value
- *   const indexForStyle = stylingState.stylesCount++;
- *   if (lView[bindingIndex] !== value) {
- *     lView[bindingIndex] = value;
- *
- *     // tell the local state that we have updated a style value
- *     // by updating the bit mask
- *     stylingState.bitMaskForStyles |= 1 << indexForStyle;
- *   }
- * }
- * ```
- *
- * Once all the bindings have updated a `bitMask` value will be populated.
- * This `bitMask` value is used in the apply algorithm (which is called
- * context resolution).
- *
- * ## The Apply Algorithm (Context Resolution)
- * As explained above, each time a binding updates its value, the resulting
- * value is stored in the `lView` array. These styling values have yet to
- * be flushed to the element.
- *
- * Once all the styling instructions have been evaluated, then the styling
- * context(s) are flushed to the element. When this happens, the context will
- * be iterated over (property by property) and each binding source will be
- * examined and the first non-null value will be applied to the element.
- *
- * Let's say that we the following template code:
- *
- * ```html
- * <div [style.width]="w1" dir-that-set-width="w2"></div>
- * ```
- *
- * There are two styling bindings in the code above and they both write
- * to the `width` property. When styling is flushed on the element, the
- * algorithm will try and figure out which one of these values to write
- * to the element.
- *
- * In order to figure out which value to apply, the following
- * binding prioritization is adhered to:
- *
- *   1. First template-level styling bindings are applied (if present).
- *      This includes things like `[style.width]` and `[class.active]`.
- *
- *   2. Second are styling-level host bindings present in directives.
- *      (if there are sub/super directives present then the sub directives
- *      are applied first).
- *
- *   3. Third are styling-level host bindings present in components.
- *      (if there are sub/super components present then the sub directives
- *      are applied first).
- *
- * This means that in the code above the styling binding present in the
- * template is applied first and, only if its falsy, then the directive
- * styling binding for width will be applied.
- *
- * ### What about map-based styling bindings?
- * Map-based styling bindings are activated when there are one or more
- * `[style]` and/or `[class]` bindings present on an element. When this
- * code is activated, the apply algorithm will iterate over each map
- * entry and apply each styling value to the element with the same
- * prioritization rules as above.
- *
- * For the algorithm to apply styling values efficiently, the
- * styling map entries must be applied in sync (property by property)
- * with prop-based bindings. (The map-based algorithm is described
- * more inside of the `render3/styling/map_based_bindings.ts` file.)
- *
- * ## Sanitization
- * Sanitization is used to prevent invalid style values from being applied to
- * the element.
- *
- * It is enabled in two cases:
- *
- *   1. The `styleSanitizer(sanitizerFn)` instruction was called (just before any other
- *      styling instructions are run).
- *
- *   2. The component/directive `LView` instance has a sanitizer object attached to it
- *      (this happens when `renderComponent` is executed with a `sanitizer` value or
- *      if the ngModule contains a sanitizer provider attached to it).
- *
- * If and when sanitization is active then all property/value entries will be evaluated
- * through the active sanitizer before they are applied to the element (or the styling
- * debug handler).
- *
- * If a `Sanitizer` object is used (via the `LView[SANITIZER]` value) then that object
- * will be used for every property.
- *
- * If a `StyleSanitizerFn` function is used (via the `styleSanitizer`) then it will be
- * called in two ways:
- *
- *   1. property validation mode: this will be called early to mark whether a property
- *      should be sanitized or not at during the flushing stage.
- *
- *   2. value sanitization mode: this will be called during the flushing stage and will
- *      run the sanitizer function against the value before applying it to the element.
- *
- * If sanitization returns an empty value then that empty value will be applied
- * to the element.
- */
-declare interface TStylingContext extends Array<number | string | number | boolean | null | StylingMapArray | {}> {
-    /** The total amount of sources present in the context */
-    [TStylingContextIndex.TotalSourcesPosition]: number;
-    /** Initial value position for static styles */
-    [TStylingContextIndex.InitialStylingValuePosition]: StylingMapArray;
+declare interface TrustedHTML {
+    __brand__: 'TrustedHTML';
+}
+
+declare interface TrustedScript {
+    __brand__: 'TrustedScript';
+}
+
+declare interface TrustedScriptURL {
+    __brand__: 'TrustedScriptURL';
 }
 
 /**
- * An index of position and offset values used to navigate the `TStylingContext`.
+ * Value stored in the `TData` which is needed to re-concatenate the styling.
+ *
+ * See: `TStylingKeyPrimitive` and `TStylingStatic`
  */
-declare const enum TStylingContextIndex {
-    TotalSourcesPosition = 0,
-    InitialStylingValuePosition = 1,
-    ValuesStartPosition = 2,
-    ConfigOffset = 0,
-    TemplateBitGuardOffset = 1,
-    HostBindingsBitGuardOffset = 2,
-    PropOffset = 3,
-    BindingsStartOffset = 4
+declare type TStylingKey = TStylingKeyPrimitive | TStylingStatic;
+
+/**
+ * The primitive portion (`TStylingStatic` removed) of the value stored in the `TData` which is
+ * needed to re-concatenate the styling.
+ *
+ * - `string`: Stores the property name. Used with `ɵɵstyleProp`/`ɵɵclassProp` instruction.
+ * - `null`: Represents map, so there is no name. Used with `ɵɵstyleMap`/`ɵɵclassMap`.
+ * - `false`: Represents an ignore case. This happens when `ɵɵstyleProp`/`ɵɵclassProp` instruction
+ *   is combined with directive which shadows its input `@Input('class')`. That way the binding
+ *   should not participate in the styling resolution.
+ */
+declare type TStylingKeyPrimitive = string | null | false;
+
+/**
+ * This is a branded number which contains previous and next index.
+ *
+ * When we come across styling instructions we need to store the `TStylingKey` in the correct
+ * order so that we can re-concatenate the styling value in the desired priority.
+ *
+ * The insertion can happen either at the:
+ * - end of template as in the case of coming across additional styling instruction in the template
+ * - in front of the template in the case of coming across additional instruction in the
+ *   `hostBindings`.
+ *
+ * We use `TStylingRange` to store the previous and next index into the `TData` where the template
+ * bindings can be found.
+ *
+ * - bit 0 is used to mark that the previous index has a duplicate for current value.
+ * - bit 1 is used to mark that the next index has a duplicate for the current value.
+ * - bits 2-16 are used to encode the next/tail of the template.
+ * - bits 17-32 are used to encode the previous/head of template.
+ *
+ * NODE: *duplicate* false implies that it is statically known that this binding will not collide
+ * with other bindings and therefore there is no need to check other bindings. For example the
+ * bindings in `<div [style.color]="exp" [style.width]="exp">` will never collide and will have
+ * their bits set accordingly. Previous duplicate means that we may need to check previous if the
+ * current binding is `null`. Next duplicate means that we may need to check next bindings if the
+ * current binding is not `null`.
+ *
+ * NOTE: `0` has special significance and represents `null` as in no additional pointer.
+ */
+declare interface TStylingRange {
+    __brand__: 'TStylingRange';
+}
+
+/**
+ * Store the static values for the styling binding.
+ *
+ * The `TStylingStatic` is just `KeyValueArray` where key `""` (stored at location 0) contains the
+ * `TStylingKey` (stored at location 1). In other words this wraps the `TStylingKey` such that the
+ * `""` contains the wrapped value.
+ *
+ * When instructions are resolving styling they may need to look forward or backwards in the linked
+ * list to resolve the value. For this reason we have to make sure that he linked list also contains
+ * the static values. However the list only has space for one item per styling instruction. For this
+ * reason we store the static values here as part of the `TStylingKey`. This means that the
+ * resolution function when looking for a value needs to first look at the binding value, and than
+ * at `TStylingKey` (if it exists).
+ *
+ * Imagine we have:
+ *
+ * ```
+ * <div class="TEMPLATE" my-dir>
+ *
+ * @Directive({
+ *   host: {
+ *     class: 'DIR',
+ *     '[class.dynamic]': 'exp' // ɵɵclassProp('dynamic', ctx.exp);
+ *   }
+ * })
+ * ```
+ *
+ * In the above case the linked list will contain one item:
+ *
+ * ```
+ *   // assume binding location: 10 for `ɵɵclassProp('dynamic', ctx.exp);`
+ *   tData[10] = <TStylingStatic>[
+ *     '': 'dynamic', // This is the wrapped value of `TStylingKey`
+ *     'DIR': true,   // This is the default static value of directive binding.
+ *   ];
+ *   tData[10 + 1] = 0; // We don't have prev/next.
+ *
+ *   lView[10] = undefined;     // assume `ctx.exp` is `undefined`
+ *   lView[10 + 1] = undefined; // Just normalized `lView[10]`
+ * ```
+ *
+ * So when the function is resolving styling value, it first needs to look into the linked list
+ * (there is none) and than into the static `TStylingStatic` too see if there is a default value for
+ * `dynamic` (there is not). Therefore it is safe to remove it.
+ *
+ * If setting `true` case:
+ * ```
+ *   lView[10] = true;     // assume `ctx.exp` is `true`
+ *   lView[10 + 1] = true; // Just normalized `lView[10]`
+ * ```
+ * So when the function is resolving styling value, it first needs to look into the linked list
+ * (there is none) and than into `TNode.residualClass` (TNode.residualStyle) which contains
+ * ```
+ *   tNode.residualClass = [
+ *     'TEMPLATE': true,
+ *   ];
+ * ```
+ *
+ * This means that it is safe to add class.
+ */
+declare interface TStylingStatic extends KeyValueArray<any> {
 }
 
 /** Static data for a text node */
@@ -7633,7 +8047,7 @@ declare interface TTextNode extends TNode {
      * embedded view (which means their parent is in a different view and must be
      * retrieved using LView.node).
      */
-    parent: ɵangular_packages_core_core_bh | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     projection: null;
 }
@@ -7652,18 +8066,10 @@ declare interface TView {
      */
     type: TViewType;
     /**
-     * ID for inline views to determine whether a view is the same as the previous view
-     * in a certain position. If it's not, we know the new view needs to be inserted
-     * and the one that exists needs to be removed (e.g. if/else statements)
-     *
-     * If this is -1, then this is a component view or a dynamically created view.
-     */
-    readonly id: number;
-    /**
      * This is a blueprint used to generate LView instances for this TView. Copying this
      * blueprint is faster than creating a new LView from scratch.
      */
-    blueprint: ɵangular_packages_core_core_bm;
+    blueprint: ɵangular_packages_core_core_ca;
     /**
      * The template function used to refresh the view of dynamically created views
      * and components. Will be null for inline views.
@@ -7674,24 +8080,22 @@ declare interface TView {
      */
     viewQuery: ViewQueriesFunction<{}> | null;
     /**
-     * Pointer to the host `TNode` (not part of this TView).
-     *
-     * If this is a `TViewNode` for an `LViewNode`, this is an embedded view of a container.
-     * We need this pointer to be able to efficiently find this node when inserting the view
-     * into an anchor.
-     *
-     * If this is a `TElementNode`, this is the view of a root component. It has exactly one
-     * root TNode.
-     *
-     * If this is null, this is the view of a component that is not at root. We do not store
-     * the host TNodes for child component views because they can potentially have several
-     * different host TNodes, depending on where the component is being used. These host
-     * TNodes cannot be shared (due to different indices, etc).
+     * A `TNode` representing the declaration location of this `TView` (not part of this TView).
      */
-    node: TViewNode | ɵangular_packages_core_core_bh | null;
+    declTNode: TNode | null;
     /** Whether or not this template has been processed in creation mode. */
     firstCreatePass: boolean;
-    /** Whether or not the first update for this template has been processed. */
+    /**
+     *  Whether or not this template has been processed in update mode (e.g. change detected)
+     *
+     * `firstUpdatePass` is used by styling to set up `TData` to contain metadata about the styling
+     * instructions. (Mainly to build up a linked list of styling priority order.)
+     *
+     * Typically this function gets cleared after first execution. If exception is thrown then this
+     * flag can remain turned un until there is first successful (no exception) pass. This means that
+     * individual styling instructions keep track of if they have already been added to the linked
+     * list to prevent double adding.
+     */
     firstUpdatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes, PipeDefInternal or TI18n. */
     data: TData;
@@ -7734,11 +8138,11 @@ declare interface TView {
      */
     firstChild: TNode | null;
     /**
-     * Set of instructions used to process host bindings efficiently.
+     * Stores the OpCodes to be replayed during change-detection to process the `HostBindings`
      *
-     * See VIEW_DATA.md for more information.
+     * See `HostBindingOpCodes` for encoding details.
      */
-    expandoInstructions: ExpandoInstructions | null;
+    hostBindingOpCodes: HostBindingOpCodes | null;
     /**
      * Full registry of directives and components that may be found in this view.
      *
@@ -7760,15 +8164,18 @@ declare interface TView {
      * Array of ngOnInit, ngOnChanges and ngDoCheck hooks that should be executed for this view in
      * creation mode.
      *
-     * Even indices: Directive index
-     * Odd indices: Hook function
+     * This array has a flat structure and contains TNode indices, directive indices (where an
+     * instance can be found in `LView`) and hook functions. TNode index is followed by the directive
+     * index and a hook function. If there are multiple hooks for a given TNode, the TNode index is
+     * not repeated and the next lifecycle hook information is stored right after the previous hook
+     * function. This is done so that at runtime the system can efficiently iterate over all of the
+     * functions to invoke without having to make any decisions/lookups.
      */
     preOrderHooks: HookData | null;
     /**
      * Array of ngOnChanges and ngDoCheck hooks that should be executed for this view in update mode.
      *
-     * Even indices: Directive index
-     * Odd indices: Hook function
+     * This array has the same structure as the `preOrderHooks` one.
      */
     preOrderCheckHooks: HookData | null;
     /**
@@ -7809,7 +8216,7 @@ declare interface TView {
      * Even indices: Directive index
      * Odd indices: Hook function
      */
-    destroyHooks: HookData | null;
+    destroyHooks: DestroyHookData | null;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
@@ -7850,8 +8257,7 @@ declare interface TView {
     queries: TQueries | null;
     /**
      * An array of indices pointing to directives with content queries alongside with the
-     * corresponding
-     * query index. Each entry in this array is a tuple of:
+     * corresponding query index. Each entry in this array is a tuple of:
      * - index of the first content query index declared by a given directive;
      * - index of a directive.
      *
@@ -7868,16 +8274,11 @@ declare interface TView {
      * Used for directive matching, attribute bindings, local definitions and more.
      */
     consts: TConstants | null;
-}
-
-/** Static data for a view  */
-declare interface TViewNode extends TNode {
-    /** If -1, it's a dynamically created view. Otherwise, it is the view block ID. */
-    index: number;
-    child: ɵangular_packages_core_core_bh | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
-    parent: TContainerNode | null;
-    tViews: null;
-    projection: null;
+    /**
+     * Indicates that there was an error before we managed to complete the first create pass of the
+     * view. This means that the view is likely corrupted and we should try to recover it.
+     */
+    incompleteFirstPass: boolean;
 }
 
 /**
@@ -7919,7 +8320,7 @@ declare const TYPE = 1;
  *
  * Represents a type that a Component or other object is instances of.
  *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+ * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is represented by
  * the `MyCustomComponent` constructor function.
  *
  * @publicApi
@@ -7929,6 +8330,8 @@ export declare const Type: FunctionConstructor;
 export declare interface Type<T> extends Function {
     new (...args: any[]): T;
 }
+
+declare type Type_2 = Function;
 
 /**
  * An interface implemented by all Angular type decorators, which allows them to be used as
@@ -8062,7 +8465,7 @@ export declare interface ViewChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - True to read a different token from the queried elements.
+     * * **read** - Used to read a different token from the queried elements.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
@@ -8088,11 +8491,11 @@ export declare interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ViewChild;
@@ -8133,7 +8536,12 @@ export declare interface ViewChildrenDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **read** - True to read a different token from the queried elements.
+     * * **read** - Used to read a different token from the queried elements.
+     * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
+     *   if the QueryList result has changed. When `false` the `changes` observable might emit even
+     *   if the QueryList has not changed.
+     *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
+     * removed in future versions of Angular.
      *
      * @usageNotes
      *
@@ -8145,11 +8553,13 @@ export declare interface ViewChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, opts?: {
+    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): any;
-    new (selector: Type<any> | Function | string, opts?: {
+    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
         read?: any;
+        emitDistinctChangesOnly?: boolean;
     }): ViewChildren;
 }
 
@@ -8182,13 +8592,13 @@ export declare abstract class ViewContainerRef {
      *
      * <!-- TODO: rename to anchorElement -->
      */
-    abstract readonly element: ElementRef;
+    abstract get element(): ElementRef;
     /**
      * The [dependency injector](guide/glossary#injector) for this view container.
      */
-    abstract readonly injector: Injector;
+    abstract get injector(): Injector;
     /** @deprecated No replacement */
-    abstract readonly parentInjector: Injector;
+    abstract get parentInjector(): Injector;
     /**
      * Destroys all views in this container.
      */
@@ -8203,7 +8613,7 @@ export declare abstract class ViewContainerRef {
      * Reports how many views are currently attached to this container.
      * @returns The number of views.
      */
-    abstract readonly length: number;
+    abstract get length(): number;
     /**
      * Instantiates an embedded view and inserts it
      * into this container.
@@ -8315,15 +8725,6 @@ export declare enum ViewEncapsulation {
      */
     Emulated = 0,
     /**
-     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using the deprecated [Shadow DOM
-     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
-    Native = 1,
-    /**
      * Don't provide any template or style encapsulation.
      */
     None = 2,
@@ -8331,9 +8732,15 @@ export declare enum ViewEncapsulation {
      * Use Shadow DOM to encapsulate styles.
      *
      * For the DOM this means using modern [Shadow
-     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
      * creating a ShadowRoot for Component's Host Element.
      */
+    ShadowDom = 3
+}
+
+declare enum ViewEncapsulation_2 {
+    Emulated = 0,
+    None = 2,
     ShadowDom = 3
 }
 
@@ -8350,12 +8757,9 @@ declare interface ViewHandleEventFn {
 declare type ViewQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
- * Represents an Angular [view](guide/glossary#view),
- * specifically the [host view](guide/glossary#view-tree) that is defined by a component.
- * Also serves as the base class
- * that adds destroy methods for [embedded views](guide/glossary#view-tree).
+ * Represents an Angular [view](guide/glossary#view "Definition").
  *
- * @see `EmbeddedViewRef`
+ * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *
  * @publicApi
  */
@@ -8368,7 +8772,7 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * Reports whether this view has been destroyed.
      * @returns True after the `destroy()` method has been called, false otherwise.
      */
-    abstract readonly destroyed: boolean;
+    abstract get destroyed(): boolean;
     /**
      * A lifecycle hook that provides additional developer-defined cleanup
      * functionality for views.
@@ -8387,8 +8791,8 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      */
     private _cdRefInjectingView?;
     private _appRef;
-    private _viewContainerRef;
-    readonly rootNodes: any[];
+    private _attachedToViewContainer;
+    get rootNodes(): any[];
     constructor(
     /**
      * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
@@ -8401,16 +8805,17 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      *
      * @internal
      */
-    _lView: ɵangular_packages_core_core_bm, 
+    _lView: ɵangular_packages_core_core_ca, 
     /**
      * This represents the `LView` associated with the point where `ChangeDetectorRef` was
      * requested.
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: ɵangular_packages_core_core_bm | undefined);
-    readonly context: T;
-    readonly destroyed: boolean;
+    _cdRefInjectingView?: ɵangular_packages_core_core_ca | undefined);
+    get context(): T;
+    set context(value: T);
+    get destroyed(): boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
     /**
@@ -8588,9 +8993,19 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      * introduce other changes.
      */
     checkNoChanges(): void;
-    attachToViewContainerRef(vcRef: ViewContainerRef): void;
+    attachToViewContainerRef(): void;
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ApplicationRef): void;
+    attachToAppRef(appRef: ViewRefTracker): void;
+}
+
+/**
+ * Interface for tracking root `ViewRef`s in `ApplicationRef`.
+ *
+ * NOTE: Importing `ApplicationRef` here directly creates circular dependency, which is why we have
+ * a subset of the `ApplicationRef` interface `ViewRefTracker` here.
+ */
+declare interface ViewRefTracker {
+    detachView(viewRef: ViewRef): void;
 }
 
 /**
@@ -8638,6 +9053,7 @@ declare interface ViewUpdateFn {
  * ```
  *
  * @publicApi
+ * @deprecated from v10 stop using. (No replacement, deemed unnecessary.)
  */
 export declare class WrappedValue {
     /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
@@ -8655,97 +9071,10 @@ export declare class WrappedValue {
 }
 
 /**
- * Create trace scope.
- *
- * Scopes must be strictly nested and are analogous to stack frames, but
- * do not have to follow the stack frames. Instead it is recommended that they follow logical
- * nesting. You may want to use
- * [Event
- * Signatures](http://google.github.io/tracing-framework/instrumenting-code.html#custom-events)
- * as they are defined in WTF.
- *
- * Used to mark scope entry. The return value is used to leave the scope.
- *
- *     var myScope = wtfCreateScope('MyClass#myMethod(ascii someVal)');
- *
- *     someMethod() {
- *        var s = myScope('Foo'); // 'Foo' gets stored in tracing UI
- *        // DO SOME WORK HERE
- *        return wtfLeave(s, 123); // Return value 123
- *     }
- *
- * Note, adding try-finally block around the work to ensure that `wtfLeave` gets called can
- * negatively impact the performance of your application. For this reason we recommend that
- * you don't add them to ensure that `wtfLeave` gets called. In production `wtfLeave` is a noop and
- * so try-finally block has no value. When debugging perf issues, skipping `wtfLeave`, do to
- * exception, will produce incorrect trace, but presence of exception signifies logic error which
- * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
- * an exception is expected during normal execution while profiling.
- *
- * @publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- */
-export declare const wtfCreateScope: (signature: string, flags?: any) => WtfScopeFn;
-
-/**
- * Ends a async time range operation.
- * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
- * enabled.
- * @publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- */
-export declare const wtfEndTimeRange: (range: any) => void;
-
-/**
- * Used to mark end of Scope.
- *
- * - `scope` to end.
- * - `returnValue` (optional) to be passed to the WTF.
- *
- * Returns the `returnValue for easy chaining.
- * @publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- */
-export declare const wtfLeave: <T>(scope: any, returnValue?: T) => T;
-
-
-/**
- * A scope function for the Web Tracing Framework (WTF).
- *
- * @publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- */
-export declare interface WtfScopeFn {
-    (arg0?: any, arg1?: any): any;
-}
-
-/**
- * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
- * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
- * enabled.
- *
- *     someMethod() {
- *        var s = wtfStartTimeRange('HTTP:GET', 'some.url');
- *        var future = new Future.delay(5).then((_) {
- *          wtfEndTimeRange(s);
- *        });
- *     }
- * @publicApi
- * @deprecated the Web Tracing Framework is no longer supported in Angular
- */
-export declare const wtfStartTimeRange: (rangeType: string, action: string) => any;
-
-/**
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
-export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): string;
-
-/**
- * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
- * value) and returns a value that is safe to use in a browser environment.
- */
-export declare function ɵ_sanitizeStyle(value: string): string;
+export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string): TrustedHTML | string;
 
 
 export declare function ɵ_sanitizeUrl(url: string): string;
@@ -8769,30 +9098,51 @@ export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [str
 /** Checks whether a function is wrapped by a `forwardRef`. */
 export declare function ɵangular_packages_core_core_a(fn: any): fn is () => any;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
-export declare abstract class ɵangular_packages_core_core_ba {
-    abstract readonly view: ViewData;
-    abstract readonly nodeIndex: number | null;
-    abstract readonly injector: Injector;
-    abstract readonly component: any;
-    abstract readonly providerTokens: any[];
-    abstract readonly references: {
+/**
+ * Schedule work at next available slot.
+ *
+ * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
+ * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
+ * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
+ *
+ * @param ngZone NgZone to use for scheduling.
+ */
+export declare function ɵangular_packages_core_core_ba(ngZone: NgZone): (fn: () => void) => void;
+
+/**
+ * USD currency code that the application uses by default for CurrencyPipe when no
+ * DEFAULT_CURRENCY_CODE is provided.
+ */
+export declare const ɵangular_packages_core_core_bb = "USD";
+
+export declare function ɵangular_packages_core_core_bc(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
+
+export declare abstract class ɵangular_packages_core_core_bd {
+    abstract get view(): ViewData;
+    abstract get nodeIndex(): number | null;
+    abstract get injector(): Injector;
+    abstract get component(): any;
+    abstract get providerTokens(): any[];
+    abstract get references(): {
         [key: string]: any;
     };
-    abstract readonly context: any;
-    abstract readonly componentRenderElement: any;
-    abstract readonly renderNode: any;
+    abstract get context(): any;
+    abstract get componentRenderElement(): any;
+    abstract get renderNode(): any;
     abstract logError(console: Console, ...values: any[]): void;
 }
+
+export declare function ɵangular_packages_core_core_be<T>(definition: ɵDirectiveDef<T>): typeof rememberChangeHistoryAndInvokeOnChangesHook;
 
 /**
  * A change detection scheduler token for {@link RootContext}. This token is the default value used
  * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
  */
-export declare const ɵangular_packages_core_core_bb: InjectionToken<(fn: () => void) => void>;
+export declare const ɵangular_packages_core_core_bf: InjectionToken<(fn: () => void) => void>;
 
 /**
  * Inject static attribute value into directive constructor.
@@ -8825,41 +9175,120 @@ export declare const ɵangular_packages_core_core_bb: InjectionToken<(fn: () => 
  *
  * @publicApi
  */
-export declare function ɵangular_packages_core_core_bc(tNode: TNode, attrNameToInject: string): string | null;
-
-export declare const ɵangular_packages_core_core_bd: InstructionState;
+export declare function ɵangular_packages_core_core_bg(tNode: TNode, attrNameToInject: string): string | null;
 
 /**
- * Return the current LView.
- *
- * The return value can be `null` if the method is called outside of template. This can happen if
- * directive is instantiated by module injector (rather than by node injector.)
+ * Return the current `LView`.
  */
-export declare function ɵangular_packages_core_core_be(): ɵangular_packages_core_core_bm;
+export declare function ɵangular_packages_core_core_bh(): ɵangular_packages_core_core_ca;
 
-export declare function ɵangular_packages_core_core_bf(): TNode;
+export declare function ɵangular_packages_core_core_bi(): number;
 
-export declare function ɵangular_packages_core_core_bg<T = any>(level?: number): T;
+export declare function ɵangular_packages_core_core_bj<T = any>(level: number): T;
 
 /** Static data for an element  */
-export declare interface ɵangular_packages_core_core_bh extends TNode {
+export declare interface ɵangular_packages_core_core_bk extends TNode {
     /** Index in the data[] array */
     index: number;
-    child: ɵangular_packages_core_core_bh | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
+    child: ɵangular_packages_core_core_bk | TTextNode | TElementContainerNode | TContainerNode | TProjectionNode | null;
     /**
      * Element nodes will have parents unless they are the first node of a component or
      * embedded view (which means their parent is in a different view and must be
      * retrieved using viewData[HOST_NODE]).
      */
-    parent: ɵangular_packages_core_core_bh | TElementContainerNode | null;
+    parent: ɵangular_packages_core_core_bk | TElementContainerNode | null;
     tViews: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
-     * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node or
-     * a component without projection, it will be null.
+     * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node
+     * or a component without projection, it will be null.
      */
     projection: (TNode | RNode[])[] | null;
+    /**
+     * Stores TagName
+     */
+    value: string;
 }
+
+/**
+ * If the value of the provided exp has changed, calls the pure function to return
+ * an updated value. Or if the value has not changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn Function that returns an updated value
+ * @param exp Updated expression value
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bl(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v: any) => any, exp: any, thisArg?: any): any;
+
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bm(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any) => any, exp1: any, exp2: any, thisArg?: any): any;
+
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bn(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any) => any, exp1: any, exp2: any, exp3: any, thisArg?: any): any;
+
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn
+ * @param exp1
+ * @param exp2
+ * @param exp3
+ * @param exp4
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ *
+ */
+export declare function ɵangular_packages_core_core_bo(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (v1: any, v2: any, v3: any, v4: any) => any, exp1: any, exp2: any, exp3: any, exp4: any, thisArg?: any): any;
+
+/**
+ * pureFunction instruction that can support any number of bindings.
+ *
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param lView LView in which the function is being executed.
+ * @param bindingRoot Binding root index.
+ * @param slotOffset the offset from binding root to the reserved slot
+ * @param pureFn A pure function that takes binding values and builds an object or array
+ * containing those values.
+ * @param exps An array of binding values
+ * @param thisArg Optional calling context of pureFn
+ * @returns Updated or cached value
+ */
+export declare function ɵangular_packages_core_core_bp(lView: ɵangular_packages_core_core_ca, bindingRoot: number, slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
 /**
  * Detects which sanitizer to use for URL property, based on tag name and prop name.
@@ -8868,14 +9297,101 @@ export declare interface ɵangular_packages_core_core_bh extends TNode {
  * `packages/compiler/src/schema/dom_security_schema.ts`.
  * If tag and prop names don't match Resource URL schema, use URL sanitizer.
  */
-export declare function ɵangular_packages_core_core_bi(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
+export declare function ɵangular_packages_core_core_bq(tag: string, prop: string): typeof ɵɵsanitizeResourceUrl;
 
-export declare function ɵangular_packages_core_core_bj(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
+export declare function ɵangular_packages_core_core_br(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
 
-export declare function ɵangular_packages_core_core_bk(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (target: any, name: string, ...args: any[]) => void): any;
+export declare function ɵangular_packages_core_core_bs(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
 
 
-export declare function ɵangular_packages_core_core_bl<T>(objWithPropertyToExtract: T): string;
+/**
+ * Special flag indicating that a decorator is of type `Inject`. It's used to make `Inject`
+ * decorator tree-shakable (so we don't have to rely on the `instanceof` checks).
+ * Note: this flag is not included into the `InjectFlags` since it's an internal-only API.
+ */
+export declare const enum ɵangular_packages_core_core_bt {
+    Inject = -1
+}
+
+/**
+ * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
+ * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
+ * be turned into a const enum when ViewEngine is removed (see TODO at the `InjectFlags` enum
+ * above). The benefit of inlining is that we can use these flags at the top level without affecting
+ * tree-shaking (see "no-toplevel-property-access" tslint rule for more info).
+ * Keep this enum in sync with `InjectFlags` enum above.
+ */
+export declare const enum ɵangular_packages_core_core_bu {
+    /** Check self and check parent injector if needed */
+    Default = 0,
+    /**
+     * Specifies that an injector should retrieve a dependency from any injector until reaching the
+     * host element of the current component. (Only used with Element Injector)
+     */
+    Host = 1,
+    /** Don't ascend to ancestors of the node requesting injection. */
+    Self = 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf = 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional = 8,
+    /**
+     * This token is being injected into a pipe.
+     *
+     * This flag is intentionally not in the public facing `InjectFlags` because it is only added by
+     * the compiler and is not a developer applicable flag.
+     */
+    ForPipe = 16
+}
+
+
+export declare function ɵangular_packages_core_core_bv<T>(objWithPropertyToExtract: T): string;
+
+export declare class ɵangular_packages_core_core_bw implements Injector {
+    get(token: any, notFoundValue?: any): any;
+}
+
+export declare function ɵangular_packages_core_core_bx(): (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
+
+
+/**
+ * Special markers which can be left on `Type.__NG_ELEMENT_ID__` which are used by the Ivy's
+ * `NodeInjector`. Usually these markers contain factory functions. But in case of this special
+ * marker we can't leave behind a function because it would create tree shaking problem.
+ *
+ * Currently only `Injector` is special.
+ *
+ * NOTE: the numbers here must be negative, because positive numbers are used as IDs for bloom
+ * filter.
+ */
+export declare const enum ɵangular_packages_core_core_by {
+    /**
+     * Marks that the current type is `Injector`
+     */
+    Injector = -1
+}
+
+/**
+ * Retrieve an `RNode` for a given `TNode` and `LView`.
+ *
+ * This function guarantees in dev mode to retrieve a non-null `RNode`.
+ *
+ * @param tNode
+ * @param lView
+ */
+export declare function ɵangular_packages_core_core_bz(tNode: TNode, lView: ɵangular_packages_core_core_ca): RNode;
+
+/**
+ * Attaches a given InjectFlag to a given decorator using monkey-patching.
+ * Since DI decorators can be used in providers `deps` array (when provider is configured using
+ * `useFactory`) without initialization (e.g. `Host`) and as an instance (e.g. `new Host()`), we
+ * attach the flag to make it available both as a static property and as a field on decorator
+ * instance.
+ *
+ * @param decorator Provided DI decorator.
+ * @param flag InjectFlag that should be applied.
+ */
+export declare function ɵangular_packages_core_core_c(decorator: any, flag: ɵangular_packages_core_core_bu | ɵangular_packages_core_core_bt): any;
 
 /**
  * `LView` stores all of the information needed to process the instructions as
@@ -8887,10 +9403,17 @@ export declare function ɵangular_packages_core_core_bl<T>(objWithPropertyToExtr
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-export declare interface ɵangular_packages_core_core_bm extends Array<any> {
+export declare interface ɵangular_packages_core_core_ca extends Array<any> {
     /**
-     * The host node for this LView instance, if this is a component view.
-     * If this is an embedded view, HOST will be null.
+     * Human readable representation of the `LView`.
+     *
+     * NOTE: This property only exists if `ngDevMode` is set to `true` and it is not present in
+     * production. Its presence is purely to help debug issue in development, and should not be relied
+     * on in production application.
+     */
+    debug?: LViewDebug;
+    /**
+     * The node into which this `LView` is inserted.
      */
     [HOST]: RElement | null;
     /**
@@ -8910,7 +9433,7 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      *
      * `LContainer` - The current view is part of a container, and is an embedded view.
      */
-    [PARENT]: ɵangular_packages_core_core_bm | LContainer | null;
+    [PARENT]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      *
      * The next sibling LView or LContainer.
@@ -8920,20 +9443,39 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * views in the same container. We need a way to link component views and views
      * across containers as well.
      */
-    [NEXT]: ɵangular_packages_core_core_bm | LContainer | null;
+    [NEXT]: ɵangular_packages_core_core_ca | LContainer | null;
     /** Queries active for this view - nodes from a view are reported to those queries. */
     [QUERIES]: LQueries | null;
     /**
-     * Pointer to the `TViewNode` or `TElementNode` which represents the root of the view.
+     * Store the `TNode` of the location where the current `LView` is inserted into.
      *
-     * If `TViewNode`, this is an embedded view of a container. We need this to be able to
-     * efficiently find the `LViewNode` when inserting the view into an anchor.
+     * Given:
+     * ```
+     * <div>
+     *   <ng-template><span></span></ng-template>
+     * </div>
+     * ```
      *
-     * If `TElementNode`, this is the LView of a component.
+     * We end up with two `TView`s.
+     * - `parent` `TView` which contains `<div><!-- anchor --></div>`
+     * - `child` `TView` which contains `<span></span>`
      *
-     * If null, this is the root view of an application (root component is in this view).
+     * Typically the `child` is inserted into the declaration location of the `parent`, but it can be
+     * inserted anywhere. Because it can be inserted anywhere it is not possible to store the
+     * insertion information in the `TView` and instead we must store it in the `LView[T_HOST]`.
+     *
+     * So to determine where is our insertion parent we would execute:
+     * ```
+     * const parentLView = lView[PARENT];
+     * const parentTNode = lView[T_HOST];
+     * const insertionParent = parentLView[parentTNode.index];
+     * ```
+     *
+     *
+     * If `null`, this is the root view of an application (root component is in this view) and it has
+     * no parents.
      */
-    [T_HOST]: TViewNode | ɵangular_packages_core_core_bh | null;
+    [T_HOST]: TNode | null;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This context array stores both listener functions wrapped with
@@ -8941,6 +9483,10 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      *
      * These change per LView instance, so they cannot be stored on TView. Instead,
      * TView.cleanup saves an index to the necessary context in this array.
+     *
+     * After `LView` is created it is possible to attach additional instance specific functions at the
+     * end of the `lView[CLENUP]` because we know that no more `T` level cleanup functions will be
+     * addeded here.
      */
     [CLEANUP]: any[] | null;
     /**
@@ -8953,7 +9499,7 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
     [CONTEXT]: {} | RootContext | null;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
-    /** Renderer to be used for this view. */
+    /** Factory to be used for creating Renderer. */
     [RENDERER_FACTORY]: RendererFactory3;
     /** Renderer to be used for this view. */
     [RENDERER]: Renderer3;
@@ -8966,18 +9512,16 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * Necessary to store this so views can traverse through their nested views
      * to remove listeners and call onDestroy callbacks.
      */
-    [CHILD_HEAD]: ɵangular_packages_core_core_bm | LContainer | null;
+    [CHILD_HEAD]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
      * without having to propagate starting from the first child.
      */
-    [CHILD_TAIL]: ɵangular_packages_core_core_bm | LContainer | null;
+    [CHILD_TAIL]: ɵangular_packages_core_core_ca | LContainer | null;
     /**
      * View where this view's template was declared.
-     *
-     * Only applicable for dynamically created views. Will be null for inline/component views.
      *
      * The template for a dynamically created view may be declared in a different view than
      * it is inserted. We already track the "insertion view" (view where the template was
@@ -8998,7 +9542,7 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * template function during change detection, we need the declaration view to get inherited
      * context.
      */
-    [DECLARATION_VIEW]: ɵangular_packages_core_core_bm | null;
+    [DECLARATION_VIEW]: ɵangular_packages_core_core_ca | null;
     /**
      * Points to the declaration component view, used to track transplanted `LView`s.
      *
@@ -9063,12 +9607,12 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      *
      * see also:
      *   - https://hackmd.io/@mhevery/rJUJsvv9H write up of the problem
-     *   - `LContainer[ACTIVE_INDEX]` for flag which marks which `LContainer` has transplanted views.
+     *   - `LContainer[HAS_TRANSPLANTED_VIEWS]` which marks which `LContainer` has transplanted views.
      *   - `LContainer[TRANSPLANT_HEAD]` and `LContainer[TRANSPLANT_TAIL]` storage for transplanted
      *   - `LView[DECLARATION_LCONTAINER]` similar problem for queries
      *   - `LContainer[MOVED_VIEWS]` similar problem for queries
      */
-    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_bm;
+    [DECLARATION_COMPONENT_VIEW]: ɵangular_packages_core_core_ca;
     /**
      * A declaration point of embedded views (ones instantiated based on the content of a
      * <ng-template>), null for other types of views.
@@ -9082,19 +9626,14 @@ export declare interface ɵangular_packages_core_core_bm extends Array<any> {
      * More flags for this view. See PreOrderHookFlags for more info.
      */
     [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
+    /**
+     * The number of direct transplanted views which need a refresh or have descendants themselves
+     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
+     * change detection we should still descend to find those children to refresh, even if the parents
+     * are not `Dirty`/`CheckAlways`.
+     */
+    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
 }
-
-
-/**
- * Convince closure compiler that the wrapped function has no side-effects.
- *
- * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
- * allow us to execute a function but have closure compiler mark the call as no-side-effects.
- * It is important that the return value for the `noSideEffects` function be assigned
- * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
- * compiler.
- */
-export declare function ɵangular_packages_core_core_bn(fn: () => void): string;
 
 /**
  * Returns the `RootContext` instance that is associated with
@@ -9103,11 +9642,32 @@ export declare function ɵangular_packages_core_core_bn(fn: () => void): string;
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
-export declare function ɵangular_packages_core_core_bo(viewOrComponent: ɵangular_packages_core_core_bm | {}): RootContext;
+export declare function ɵangular_packages_core_core_cb(viewOrComponent: ɵangular_packages_core_core_ca | {}): RootContext;
 
-export declare class ɵangular_packages_core_core_c implements Injector {
-    get(token: any, notFoundValue?: any): any;
-}
+
+/**
+ * Handles message string post-processing for internationalization.
+ *
+ * Handles message string post-processing by transforming it from intermediate
+ * format (that might contain some markers that we need to replace) to the final
+ * form, consumable by i18nStart instruction. Post processing steps include:
+ *
+ * 1. Resolve all multi-value cases (like [�*1:1��#2:1�|�#4:1�|�5�])
+ * 2. Replace all ICU vars (like "VAR_PLURAL")
+ * 3. Replace all placeholders used inside ICUs in a form of {PLACEHOLDER}
+ * 4. Replace all ICU references with corresponding values (like �ICU_EXP_ICU_1�)
+ *    in case multiple ICUs have the same placeholder name
+ *
+ * @param message Raw translation string for post processing
+ * @param replacements Set of replacements that should be applied
+ *
+ * @returns Transformed string that can be consumed by i18nStart instruction
+ *
+ * @codeGenApi
+ */
+export declare function ɵangular_packages_core_core_cc(message: string, replacements?: {
+    [key: string]: (string | string[]);
+}): string;
 
 export declare class ɵangular_packages_core_core_d implements ReflectiveInjector {
     private static INJECTOR_KEY;
@@ -9130,7 +9690,7 @@ export declare class ɵangular_packages_core_core_d implements ReflectiveInjecto
     private _getByReflectiveDependency;
     private _getByKey;
     private _getObjByKeyId;
-    readonly displayName: string;
+    get displayName(): string;
     toString(): string;
 }
 
@@ -9153,45 +9713,67 @@ export declare function ɵangular_packages_core_core_f(providers: Provider[]): R
 
 export declare function ɵangular_packages_core_core_g(): string;
 
+/** Injects a Renderer2 for the current component. */
+export declare function ɵangular_packages_core_core_h(): Renderer2;
+
+/**
+ * Creates an ElementRef from the most recent node.
+ *
+ * @returns The ElementRef instance to use
+ */
+export declare function ɵangular_packages_core_core_i(): ElementRef;
+
 /**
  * Creates an ElementRef given a node.
  *
- * @param ElementRefToken The ElementRef type
  * @param tNode The node for which you'd like an ElementRef
- * @param view The view to which the node belongs
+ * @param lView The view to which the node belongs
  * @returns The ElementRef instance to use
  */
-export declare function ɵangular_packages_core_core_h(ElementRefToken: typeof ElementRef, tNode: TNode, view: ɵangular_packages_core_core_bm): ElementRef;
+export declare function ɵangular_packages_core_core_j(tNode: TNode, lView: ɵangular_packages_core_core_ca): ElementRef;
+
+export declare function ɵangular_packages_core_core_k(id: string): NgModuleFactory<any>;
+
+/**
+ * Creates a TemplateRef given a node.
+ *
+ * @returns The TemplateRef instance to use
+ */
+export declare function ɵangular_packages_core_core_l<T>(): TemplateRef<T> | null;
 
 /**
  * Creates a TemplateRef and stores it on the injector.
  *
- * @param TemplateRefToken The TemplateRef type
- * @param ElementRefToken The ElementRef type
  * @param hostTNode The node on which a TemplateRef is requested
- * @param hostView The view to which the node belongs
+ * @param hostLView The `LView` to which the node belongs
  * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
  */
-export declare function ɵangular_packages_core_core_i<T>(TemplateRefToken: typeof TemplateRef, ElementRefToken: typeof ElementRef, hostTNode: TNode, hostView: ɵangular_packages_core_core_bm): TemplateRef<T> | null;
+export declare function ɵangular_packages_core_core_m<T>(hostTNode: TNode, hostLView: ɵangular_packages_core_core_ca): TemplateRef<T> | null;
 
-export declare function ɵangular_packages_core_core_j(id: string): NgModuleFactory<any>;
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+export declare function ɵangular_packages_core_core_n(): ViewContainerRef;
 
-export declare class ɵangular_packages_core_core_k {
+export declare class ɵangular_packages_core_core_o {
     readonly listeners: DebugEventListener[];
     readonly parent: DebugElement | null;
     readonly nativeNode: any;
     private readonly _debugContext;
-    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_ba);
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly references: {
+    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: ɵangular_packages_core_core_bd);
+    get injector(): Injector;
+    get componentInstance(): any;
+    get context(): any;
+    get references(): {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
 
-export declare class ɵangular_packages_core_core_l extends ɵangular_packages_core_core_k implements DebugElement {
+export declare class ɵangular_packages_core_core_p extends ɵangular_packages_core_core_o implements DebugElement {
     readonly name: string;
     readonly properties: {
         [key: string]: any;
@@ -9207,7 +9789,7 @@ export declare class ɵangular_packages_core_core_l extends ɵangular_packages_c
     };
     readonly childNodes: DebugNode[];
     readonly nativeElement: any;
-    constructor(nativeNode: any, parent: any, _debugContext: ɵangular_packages_core_core_ba);
+    constructor(nativeNode: any, parent: any, _debugContext: ɵangular_packages_core_core_bd);
     addChild(child: DebugNode): void;
     removeChild(child: DebugNode): void;
     insertChildrenAfter(child: DebugNode, newChildren: DebugNode[]): void;
@@ -9215,66 +9797,45 @@ export declare class ɵangular_packages_core_core_l extends ɵangular_packages_c
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    readonly children: DebugElement[];
+    get children(): DebugElement[];
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 
-export declare class ɵangular_packages_core_core_m implements IterableDifferFactory {
+export declare function ɵangular_packages_core_core_q(nativeNode: any): DebugNode | null;
+
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+export declare function ɵangular_packages_core_core_r(flags: InjectFlags): ChangeDetectorRef;
+
+export declare class ɵangular_packages_core_core_s implements IterableDifferFactory {
     constructor();
     supports(obj: Object | null | undefined): boolean;
     create<V>(trackByFn?: TrackByFunction<V>): DefaultIterableDiffer<V>;
 }
 
-export declare class ɵangular_packages_core_core_n<K, V> implements KeyValueDifferFactory {
+export declare class ɵangular_packages_core_core_t<K, V> implements KeyValueDifferFactory {
     constructor();
     supports(obj: any): boolean;
     create<K, V>(): KeyValueDiffer<K, V>;
 }
 
-export declare function ɵangular_packages_core_core_o(): IterableDiffers;
+export declare function ɵangular_packages_core_core_u(): IterableDiffers;
 
-export declare function ɵangular_packages_core_core_p(): KeyValueDiffers;
+export declare function ɵangular_packages_core_core_v(): KeyValueDiffers;
 
-export declare function ɵangular_packages_core_core_q(locale?: string): string;
+export declare function ɵangular_packages_core_core_w(): IterableDiffers;
+
+export declare function ɵangular_packages_core_core_x(): KeyValueDiffers;
+
+export declare function ɵangular_packages_core_core_y(locale?: string): string;
 
 /**
  * A built-in [dependency injection token](guide/glossary#di-token)
  * that is used to configure the root injector for bootstrapping.
  */
-export declare const ɵangular_packages_core_core_r: StaticProvider[];
+export declare const ɵangular_packages_core_core_z: StaticProvider[];
 
 /**
- * Schedule work at next available slot.
- *
- * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
- * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
- * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
- *
- * @param ngZone NgZone to use for scheduling.
- */
-export declare function ɵangular_packages_core_core_s(ngZone: NgZone): (fn: () => void) => void;
-
-/**
- * True if WTF is enabled.
- */
-export declare const ɵangular_packages_core_core_t: boolean;
-
-export declare function ɵangular_packages_core_core_u(): boolean;
-
-export declare function ɵangular_packages_core_core_v(signature: string, flags?: any): any;
-
-export declare function ɵangular_packages_core_core_w<T>(scope: Scope): void;
-
-export declare function ɵangular_packages_core_core_w<T>(scope: Scope, returnValue?: T): T;
-
-export declare function ɵangular_packages_core_core_x(rangeType: string, action: string): Range;
-
-export declare function ɵangular_packages_core_core_y(range: Range): void;
-
-export declare function ɵangular_packages_core_core_z(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: [string | number, ɵQueryValueType][] | null, childCount: number, token: any, value: any, deps: ([ɵDepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
-
-/**
- * Providers that will generate a random APP_ID_TOKEN.
+ * Providers that generate a random `APP_ID_TOKEN`.
  * @publicApi
  */
 export declare const ɵAPP_ID_RANDOM_PROVIDER: {
@@ -9294,27 +9855,35 @@ export declare const enum ɵArgumentType {
  */
 export declare const enum ɵAttributeMarker {
     /**
+     * An implicit marker which indicates that the value in the array are of `attributeKey`,
+     * `attributeValue` format.
+     *
+     * NOTE: This is implicit as it is the type when no marker is present in array. We indicate that
+     * it should not be present at runtime by the negative number.
+     */
+    ImplicitAttributes = -1,
+    /**
      * Marker indicates that the following 3 values in the attributes array are:
      * namespaceUri, attributeName, attributeValue
      * in that order.
      */
     NamespaceURI = 0,
     /**
-      * Signals class declaration.
-      *
-      * Each value following `Classes` designates a class name to include on the element.
-      * ## Example:
-      *
-      * Given:
-      * ```
-      * <div class="foo bar baz">...<d/vi>
-      * ```
-      *
-      * the generated code is:
-      * ```
-      * var _c1 = [AttributeMarker.Classes, 'foo', 'bar', 'baz'];
-      * ```
-      */
+     * Signals class declaration.
+     *
+     * Each value following `Classes` designates a class name to include on the element.
+     * ## Example:
+     *
+     * Given:
+     * ```
+     * <div class="foo bar baz">...<d/vi>
+     * ```
+     *
+     * the generated code is:
+     * ```
+     * var _c1 = [AttributeMarker.Classes, 'foo', 'bar', 'baz'];
+     * ```
+     */
     Classes = 1,
     /**
      * Signals style declaration.
@@ -9375,7 +9944,8 @@ export declare const enum ɵAttributeMarker {
      */
     Template = 4,
     /**
-     * Signals that the following attribute is `ngProjectAs` and its value is a parsed `CssSelector`.
+     * Signals that the following attribute is `ngProjectAs` and its value is a parsed
+     * `CssSelector`.
      *
      * For example, given the following HTML:
      *
@@ -9569,7 +10139,7 @@ export declare function ɵcompileDirective(type: Type<any>, directive: Directive
 export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgModule): void;
 
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -9610,7 +10180,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     readonly template: ComponentTemplate<T>;
     /** Constants associated with the component's view. */
-    readonly consts: TConstants | null;
+    readonly consts: TConstantsOrFactory | null;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -9683,7 +10253,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
      */
-    readonly _?: never;
+    readonly _?: unknown;
 }
 
 /**
@@ -9691,7 +10261,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵComponentType<T> extends Type<T> {
-    ɵcmp: never;
+    ɵcmp: unknown;
 }
 
 
@@ -9699,6 +10269,8 @@ export declare class ɵConsole {
     log(message: string): void;
     warn(message: string): void;
 }
+
+export declare function ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__(): AttributeDecorator;
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
@@ -9759,17 +10331,11 @@ export declare const enum ɵDepFlags {
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
+ * This function triggers change detection in a synchronous way on a component.
  *
  * @param component The component which the change detection should be performed on.
  */
-export declare function ɵdetectChanges<T>(component: T): void;
+export declare function ɵdetectChanges(component: {}): void;
 
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;
@@ -9831,9 +10397,47 @@ export declare interface ɵDirectiveDef<T> {
     /**
      * Refreshes host bindings on the associated directive.
      */
-    hostBindings: HostBindingsFunction<T> | null;
+    readonly hostBindings: HostBindingsFunction<T> | null;
+    /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    readonly hostVars: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    readonly hostAttrs: TAttributes | null;
     /** Token representing the directive. Used by DI. */
-    type: Type<T>;
+    readonly type: Type<T>;
     /** Function that resolves providers and publishes them into the DI system. */
     providersResolver: (<U extends T>(def: ɵDirectiveDef<U>, processProvidersFn?: ProcessProvidersFunction) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
@@ -9846,15 +10450,7 @@ export declare interface ɵDirectiveDef<T> {
      * Factory function used to create a new directive instance. Will be null initially.
      * Populated when the factory is first requested by directive instantiation logic.
      */
-    factory: FactoryFn<T> | null;
-    onChanges: (() => void) | null;
-    onInit: (() => void) | null;
-    doCheck: (() => void) | null;
-    afterContentInit: (() => void) | null;
-    afterContentChecked: (() => void) | null;
-    afterViewInit: (() => void) | null;
-    afterViewChecked: (() => void) | null;
-    onDestroy: (() => void) | null;
+    readonly factory: FactoryFn<T> | null;
     /**
      * The features applied to this directive
      */
@@ -9867,8 +10463,8 @@ export declare interface ɵDirectiveDef<T> {
  * consumable for rendering.
  */
 export declare interface ɵDirectiveType<T> extends Type<T> {
-    ɵdir: never;
-    ɵfac: () => T;
+    ɵdir: unknown;
+    ɵfac: unknown;
 }
 
 export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
@@ -9912,26 +10508,45 @@ export declare function ɵgetDebugNode__POST_R3__(nativeNode: Node): DebugNode__
 
 export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
 
-/**
- * Retrieves directives associated with a given DOM host element.
- *
- * @param target A DOM element, component or directive instance.
- *
- * @publicApi
- */
-export declare function ɵgetDirectives(target: {}): Array<{}>;
+export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
 
 /**
- * Retrieve the host element of the component.
+ * Retrieves directive instances associated with a given DOM node. Does not include
+ * component instances.
  *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
+ * @usageNotes
+ * Given the following DOM structure:
+ * ```
+ * <my-app>
+ *   <button my-button></button>
+ *   <my-comp></my-comp>
+ * </my-app>
+ * ```
+ * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
+ * directive that is associated with the DOM node.
  *
- * @param directive Component or Directive for which the host element should be retrieved.
+ * Calling `getDirectives` on `<my-comp>` will return an empty array.
+ *
+ * @param node DOM node for which to get the directives.
+ * @returns Array of directives associated with the node.
  *
  * @publicApi
+ * @globalApi ng
  */
-export declare function ɵgetHostElement<T>(directive: T): Element;
+export declare function ɵgetDirectives(node: Node): {}[];
+
+/**
+ * Retrieves the host element of a component or directive instance.
+ * The host element is the DOM element that matched the selector of the directive.
+ *
+ * @param componentOrDirective Component or directive instance for which the host
+ *     element should be retrieved.
+ * @returns Host element of the target.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+export declare function ɵgetHostElement(componentOrDirective: {}): Element;
 
 /**
  * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -9939,9 +10554,10 @@ export declare function ɵgetHostElement<T>(directive: T): Element;
  *
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
-export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> | null;
+export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null;
 
-/** Returns the matching `LContext` data for a given DOM node, directive or component instance.
+/**
+ * Returns the matching `LContext` data for a given DOM node, directive or component instance.
  *
  * This function will examine the provided DOM element, component, or directive instance\'s
  * monkey-patched property to derive the `LContext` data. Once called then the monkey-patched
@@ -9961,6 +10577,17 @@ export declare function ɵgetInjectableDef<T>(type: any): ɵɵInjectableDef<T> |
  * @param target Component, Directive or DOM Node.
  */
 export declare function ɵgetLContext(target: any): ɵLContext | null;
+
+/**
+ * Retrieves the default currency code for the given locale.
+ *
+ * The default is defined as the first currency which is still in use.
+ *
+ * @param locale The code of the locale whose currency code we want.
+ * @returns The code of the default currency for the given locale.
+ *
+ */
+export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
 
 /**
  * Retrieves the plural function used by ICU expressions to determine the plural case to use
@@ -10011,13 +10638,24 @@ export declare function ɵisListLikeIterable(obj: any): boolean;
 
 /**
  * Determine if the argument is an Observable
+ *
+ * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
+ * types need additional methods, such as `lift()`. But it is adequate for our
+ * needs since within the Angular framework code we only ever need to use the
+ * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
+ * into `Observable` as needed.
  */
-export declare function ɵisObservable(obj: any | Observable<any>): obj is Observable<any>;
+export declare const ɵisObservable: (obj: any | Observable<any>) => obj is Observable<any>;
 
 /**
  * Determine if the argument is shaped like a Promise
  */
-export declare function ɵisPromise(obj: any): obj is Promise<any>;
+export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
+
+/**
+ * Determine if the argument is a Subscribable
+ */
+export declare function ɵisSubscribable(obj: any | Subscribable<any>): obj is Subscribable<any>;
 
 export declare const ɵivyEnabled = false;
 
@@ -10035,7 +10673,7 @@ export declare interface ɵLContext {
     /**
      * The component's parent view data.
      */
-    lView: ɵangular_packages_core_core_bm;
+    lView: ɵangular_packages_core_core_ca;
     /**
      * The index instance of the node.
      */
@@ -10095,15 +10733,14 @@ export declare enum ɵLocaleDataIndex {
     DateTimeFormat = 12,
     NumberSymbols = 13,
     NumberFormats = 14,
-    CurrencySymbol = 15,
-    CurrencyName = 16,
-    Currencies = 17,
-    PluralCase = 18,
-    ExtraData = 19
+    CurrencyCode = 15,
+    CurrencySymbol = 16,
+    CurrencyName = 17,
+    Currencies = 18,
+    Directionality = 19,
+    PluralCase = 20,
+    ExtraData = 21
 }
-
-
-export declare function ɵlooseIdentical(a: any, b: any): boolean;
 
 /**
  * @suppress {globalThis}
@@ -10115,22 +10752,15 @@ export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]
 };
 
 /**
- * Mark the component as dirty (needing change detection).
+ * Marks the component as dirty (needing change detection). Marking a component dirty will
+ * schedule a change detection on it at some point in the future.
  *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent`, a scheduler
- * can be provided.
+ * Marking an already dirty component as dirty won't do anything. Only one outstanding change
+ * detection can be scheduled per component tree.
  *
  * @param component Component to mark as dirty.
- *
- * @publicApi
  */
-export declare function ɵmarkDirty<T>(component: T): void;
+export declare function ɵmarkDirty(component: {}): void;
 
 export declare type ɵMethodFn = (obj: any, args: any[]) => any;
 
@@ -10229,7 +10859,7 @@ export declare interface ɵNgModuleType<T = any> extends Type<T> {
 
 
 export declare interface ɵNO_CHANGE {
-    brand: 'NO_CHANGE';
+    __brand__: 'NO_CHANGE';
 }
 
 /** A special value which designates that a value has not changed. */
@@ -10278,6 +10908,7 @@ export declare const enum ɵNodeFlags {
     StaticQuery = 268435456,
     DynamicQuery = 536870912,
     TypeNgModule = 1073741824,
+    EmitDistinctChangesOnly = -2147483648,
     CatQuery = 201326592,
     Types = 201347067
 }
@@ -10294,11 +10925,23 @@ export declare class ɵNoopNgZone implements NgZone {
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
     readonly onError: EventEmitter<any>;
-    run(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
-    runGuarded(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): any;
-    runOutsideAngular(fn: (...args: any[]) => any): any;
-    runTask(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any, name?: string): any;
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any): T;
+    runGuarded<T>(fn: (...args: any[]) => any, applyThis?: any, applyArgs?: any): T;
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any, name?: string): T;
 }
+
+
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
 
@@ -10426,6 +11069,61 @@ export declare function ɵppd(checkIndex: number, argCount: number): NodeDef;
 export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
 
 /**
+ * Profiler function which the runtime will invoke before and after user code.
+ */
+export declare interface ɵProfiler {
+    (event: ɵProfilerEvent, instance: {} | null, hookOrListener?: (e?: any) => any): void;
+}
+
+
+/**
+ * Profiler events is an enum used by the profiler to distinguish between different calls of user
+ * code invoked throughout the application lifecycle.
+ */
+export declare const enum ɵProfilerEvent {
+    /**
+     * Corresponds to the point in time before the runtime has called the template function of a
+     * component with `RenderFlags.Create`.
+     */
+    TemplateCreateStart = 0,
+    /**
+     * Corresponds to the point in time after the runtime has called the template function of a
+     * component with `RenderFlags.Create`.
+     */
+    TemplateCreateEnd = 1,
+    /**
+     * Corresponds to the point in time before the runtime has called the template function of a
+     * component with `RenderFlags.Update`.
+     */
+    TemplateUpdateStart = 2,
+    /**
+     * Corresponds to the point in time after the runtime has called the template function of a
+     * component with `RenderFlags.Update`.
+     */
+    TemplateUpdateEnd = 3,
+    /**
+     * Corresponds to the point in time before the runtime has called a lifecycle hook of a component
+     * or directive.
+     */
+    LifecycleHookStart = 4,
+    /**
+     * Corresponds to the point in time after the runtime has called a lifecycle hook of a component
+     * or directive.
+     */
+    LifecycleHookEnd = 5,
+    /**
+     * Corresponds to the point in time before the runtime has evaluated an expression associated with
+     * an event or an output.
+     */
+    OutputStart = 6,
+    /**
+     * Corresponds to the point in time after the runtime has evaluated an expression associated with
+     * an event or an output.
+     */
+    OutputEnd = 7
+}
+
+/**
  * Publishes a collection of default debug tools onto`window.ng`.
  *
  * These functions are available globally when Angular is in development
@@ -10511,11 +11209,11 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
     componentType: Type<any>;
     ngContentSelectors: string[];
     isBoundToModule: boolean;
-    readonly inputs: {
+    get inputs(): {
         propName: string;
         templateName: string;
     }[];
-    readonly outputs: {
+    get outputs(): {
         propName: string;
         templateName: string;
     }[];
@@ -10539,13 +11237,12 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     location: ElementRef;
     private _rootLView;
     private _tNode;
-    destroyCbs: (() => void)[] | null;
     instance: T;
     hostView: ViewRef_2<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_bm, _tNode: ɵangular_packages_core_core_bh | TContainerNode | TElementContainerNode);
-    readonly injector: Injector;
+    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: ɵangular_packages_core_core_ca, _tNode: ɵangular_packages_core_core_bk | TContainerNode | TElementContainerNode);
+    get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
@@ -10557,9 +11254,9 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     injector: Injector;
     instance: T;
     destroyCbs: (() => void)[] | null;
+    readonly componentFactoryResolver: ComponentFactoryResolver_2;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    readonly componentFactoryResolver: ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
@@ -10593,6 +11290,8 @@ export declare const enum ɵRenderFlags {
 }
 
 export declare function ɵresetCompiledComponents(): void;
+
+export declare function ɵresetJitOptions(): void;
 
 /**
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
@@ -10684,8 +11383,8 @@ export declare interface ɵSafeValue {
  *
  * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
  *
- * Calls to `setClassMetadata` can be marked as pure, resulting in the metadata assignments being
- * tree-shaken away during production builds.
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
  */
 export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
     [field: string]: any;
@@ -10703,6 +11402,7 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
  */
 export declare function ɵsetDocument(document: Document | undefined): void;
 
+
 /**
  * Sets the locale id that will be used for translations and ICU expressions.
  * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
@@ -10716,12 +11416,12 @@ export declare function ɵsetLocaleId(localeId: string): void;
 export declare type ɵSetterFn = (obj: any, value: any) => void;
 
 /** Store a value in the `data` at a given `index`. */
-export declare function ɵstore<T>(index: number, value: T): void;
+export declare function ɵstore<T>(tView: TView, lView: ɵangular_packages_core_core_ca, index: number, value: T): void;
 
 
 export declare function ɵstringify(token: any): string;
 
-export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof injectChangeDetectorRef;
+export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_r;
 
 export declare const ɵSWITCH_COMPILE_COMPONENT__POST_R3__: typeof ɵcompileComponent;
 
@@ -10733,34 +11433,29 @@ export declare const ɵSWITCH_COMPILE_NGMODULE__POST_R3__: typeof ɵcompileNgMod
 
 export declare const ɵSWITCH_COMPILE_PIPE__POST_R3__: typeof ɵcompilePipe;
 
-export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof injectElementRef;
+export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_i;
 
 
 export declare const ɵSWITCH_IVY_ENABLED__POST_R3__ = true;
 
-export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof injectRenderer2;
+export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_h;
 
-export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof injectTemplateRef;
+export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_l;
 
-export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof injectViewContainerRef;
+export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof ɵangular_packages_core_core_n;
 
 export declare function ɵted(checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef;
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
- * By default this operation is memoized and the result is cached on the module's definition. You
- * can avoid memoization and previously stored results (if available) by providing the second
- * argument with the `true` value (forcing transitive scopes recalculation).
- *
- * This function can be called on modules with components that have not fully compiled yet, but the
- * result should not be used until they have.
+ * This operation is memoized and the result is cached on the module's definition. This function can
+ * be called on modules with components that have not fully compiled yet, but the result should not
+ * be used until they have.
  *
  * @param moduleType module that transitive scope should be calculated for.
- * @param forceRecalc flag that indicates whether previously calculated and memoized values should
- * be ignored and transitive scope to be fully recalculated.
  */
-export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>, forceRecalc?: boolean): ɵNgModuleTransitiveScopes;
+export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>): ɵNgModuleTransitiveScopes;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
@@ -10833,32 +11528,22 @@ export declare function ɵwhenRendered(component: any): Promise<null>;
  *
  * ```ts
  * (rf: RenderFlags, ctx: any) => {
-  *   if (rf & 1) {
-  *     text(0, 'Hello');
-  *     text(1, 'Goodbye')
-  *     element(2, 'div');
-  *   }
-  *   if (rf & 2) {
-  *     advance(2); // Advance twice to the <div>.
-  *     property('title', 'test');
-  *   }
-  *  }
-  * ```
-  * @param delta Number of elements to advance forwards by.
-  *
-  * @codeGenApi
-  */
-export declare function ɵɵadvance(delta: number): void;
-
-
-/**
- * Allocates the necessary amount of slots for host vars.
- *
- * @param count Amount of vars to be allocated
+ *   if (rf & 1) {
+ *     text(0, 'Hello');
+ *     text(1, 'Goodbye')
+ *     element(2, 'div');
+ *   }
+ *   if (rf & 2) {
+ *     advance(2); // Advance twice to the <div>.
+ *     property('title', 'test');
+ *   }
+ *  }
+ * ```
+ * @param delta Number of elements to advance forwards by.
  *
  * @codeGenApi
  */
-export declare function ɵɵallocHostVars(count: number): void;
+export declare function ɵɵadvance(delta: number): void;
 
 /**
  * Updates the value of or removes a bound attribute on an Element.
@@ -10873,7 +11558,7 @@ export declare function ɵɵallocHostVars(count: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattribute(name: string, value: any, sanitizer?: SanitizerFn | null, namespace?: string): typeof ɵɵattribute;
 
 /**
  *
@@ -10899,7 +11584,7 @@ export declare function ɵɵattribute(name: string, value: any, sanitizer?: Sani
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate1(attrName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate1(attrName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate1;
 
 /**
  *
@@ -10927,7 +11612,7 @@ export declare function ɵɵattributeInterpolate1(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate2(attrName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate2(attrName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate2;
 
 /**
  *
@@ -10958,7 +11643,7 @@ export declare function ɵɵattributeInterpolate2(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate3(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate3(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate3;
 
 /**
  *
@@ -10991,7 +11676,7 @@ export declare function ɵɵattributeInterpolate3(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate4(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate4(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate4;
 
 /**
  *
@@ -11026,7 +11711,7 @@ export declare function ɵɵattributeInterpolate4(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate5(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate5(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate5;
 
 /**
  *
@@ -11063,7 +11748,7 @@ export declare function ɵɵattributeInterpolate5(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate6(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate6(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate6;
 
 /**
  *
@@ -11102,7 +11787,7 @@ export declare function ɵɵattributeInterpolate6(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate7(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate7(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate7;
 
 /**
  *
@@ -11143,12 +11828,12 @@ export declare function ɵɵattributeInterpolate7(attrName: string, prefix: stri
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolate8(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolate8(attrName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolate8;
 
 /**
- * Update an interpolated attribute on an element with 8 or more bound values surrounded by text.
+ * Update an interpolated attribute on an element with 9 or more bound values surrounded by text.
  *
- * Used when the number of interpolated values exceeds 7.
+ * Used when the number of interpolated values exceeds 8.
  *
  * ```html
  * <div
@@ -11164,14 +11849,14 @@ export declare function ɵɵattributeInterpolate8(attrName: string, prefix: stri
  * ```
  *
  * @param attrName The name of the attribute to update.
- * @param values The a collection of values and the strings in-between those values, beginning with
+ * @param values The collection of values and the strings in-between those values, beginning with
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵattributeInterpolateV(attrName: string, values: any[], sanitizer?: SanitizerFn, namespace?: string): TsickleIssue1009;
+export declare function ɵɵattributeInterpolateV(attrName: string, values: any[], sanitizer?: SanitizerFn, namespace?: string): typeof ɵɵattributeInterpolateV;
 
 /**
  * Update class bindings using an object literal or class-string on an element.
@@ -11192,8 +11877,8 @@ export declare function ɵɵattributeInterpolateV(attrName: string, values: any[
  * @codeGenApi
  */
 export declare function ɵɵclassMap(classes: {
-    [className: string]: any;
-} | ɵNO_CHANGE | string | null): void;
+    [className: string]: boolean | undefined | null;
+} | string | undefined | null): void;
 
 
 /**
@@ -11443,9 +12128,9 @@ export declare function ɵɵclassMapInterpolate7(prefix: string, v0: any, i0: st
 export declare function ɵɵclassMapInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): void;
 
 /**
- * Update an interpolated class on an element with 8 or more bound values surrounded by text.
+ * Update an interpolated class on an element with 9 or more bound values surrounded by text.
  *
- * Used when the number of interpolated values exceeds 7.
+ * Used when the number of interpolated values exceeds 8.
  *
  * ```html
  * <div
@@ -11460,7 +12145,7 @@ export declare function ɵɵclassMapInterpolate8(prefix: string, v0: any, i0: st
  *  'suffix']);
  * ```
  *.
- * @param values The a collection of values and the strings in-between those values, beginning with
+ * @param values The collection of values and the strings in-between those values, beginning with
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @codeGenApi
@@ -11482,70 +12167,16 @@ export declare function ɵɵclassMapInterpolateV(values: any[]): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵclassProp(className: string, value: boolean | null): TsickleIssue1009;
+export declare function ɵɵclassProp(className: string, value: boolean | undefined | null): typeof ɵɵclassProp;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵComponentDefWithMeta<T, Selector extends String, ExportAs extends string[], InputMap extends {
+export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = ɵComponentDef<T>;
-
-/**
-* Registers a synthetic host listener (e.g. `(@foo.start)`) on a component.
-*
-* This instruction is for compatibility purposes and is designed to ensure that a
-* synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
-* in the component's renderer. Normally all host listeners are evaluated with the
-* parent component's renderer, but, in the case of animation @triggers, they need
-* to be evaluated with the sub component's renderer (because that's where the
-* animation triggers are defined).
-*
-* Do not use this instruction as a replacement for `listener`. This instruction
-* only exists to ensure compatibility with the ViewEngine's host binding behavior.
-*
-* @param eventName Name of the event
-* @param listenerFn The function to be called when event emits
-* @param useCapture Whether or not to use capture in event listener
-* @param eventTargetResolver Function that returns global target information in case this listener
-* should be attached to a global object like window, document or body
- *
- * @codeGenApi
-*/
-export declare function ɵɵcomponentHostSyntheticListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): TsickleIssue1009;
-
-/**
- * Creates an LContainer for inline views, e.g.
- *
- * % if (showing) {
- *   <div></div>
- * % }
- *
- * @param index The index of the container in the data array
- *
- * @codeGenApi
- */
-export declare function ɵɵcontainer(index: number): void;
-
-/**
- * Marks the end of the LContainer.
- *
- * Marking the end of LContainer is the time when to child views get inserted or removed.
- *
- * @codeGenApi
- */
-export declare function ɵɵcontainerRefreshEnd(): void;
-
-/**
- * Sets a container up to receive views.
- *
- * @param index The index of the container in the data array
- *
- * @codeGenApi
- */
-export declare function ɵɵcontainerRefreshStart(index: number): void;
+}, QueryFields extends string[], NgContentSelectors extends string[]> = unknown;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -11553,13 +12184,13 @@ export declare function ɵɵcontainerRefreshStart(index: number): void;
  *
  * @param directiveIndex Current directive index
  * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
+ * @param flags Flags associated with the query
  * @param read What to save in the query
  * @returns QueryList<T>
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -11578,14 +12209,6 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: T
  * @codeGenApi
  */
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
-
-/**
- * The default style sanitizer will handle sanitization for style properties by
- * sanitizing any CSS property that can include a `url` value (usually image-based properties)
- *
- * @publicApi
- */
-export declare const ɵɵdefaultStyleSanitizer: StyleSanitizeFn;
 
 /**
  * Create a component definition object.
@@ -11688,6 +12311,44 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      */
     hostBindings?: HostBindingsFunction<T>;
     /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values, the
+     * `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: TAttributes;
+    /**
      * Function to create instances of content queries associated with a given directive.
      */
     contentQueries?: ContentQueriesFunction<T>;
@@ -11731,7 +12392,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * Constants for the nodes in the component's view.
      * Includes attribute arrays, local definition arrays etc.
      */
-    consts?: TConstants;
+    consts?: TConstantsOrFactory;
     /**
      * An array of `ngContent[selector]` values that were found in the template.
      */
@@ -11791,7 +12452,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas?: SchemaMetadata[] | null;
-}): never;
+}): unknown;
 
 /**
  * Create a directive definition object.
@@ -11815,7 +12476,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      */
     type: Type<T>;
     /** The selectors that will be used to match nodes to this directive. */
-    selectors?: (string | SelectorFlags)[][] | undefined;
+    selectors?: ɵCssSelectorList | undefined;
     /**
      * A map of input names.
      *
@@ -11882,6 +12543,44 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
      */
     hostBindings?: HostBindingsFunction<T> | undefined;
     /**
+     * The number of bindings in this directive `hostBindings` (including pure fn bindings).
+     *
+     * Used to calculate the length of the component's LView array, so we
+     * can pre-fill the array and set the host binding start index.
+     */
+    hostVars?: number | undefined;
+    /**
+     * Assign static attribute values to a host element.
+     *
+     * This property will assign static attribute values as well as class and style
+     * values to a host element. Since attribute values can consist of different types of values,
+     * the `hostAttrs` array must include the values in the following format:
+     *
+     * attrs = [
+     *   // static attributes (like `title`, `name`, `id`...)
+     *   attr1, value1, attr2, value,
+     *
+     *   // a single namespace value (like `x:id`)
+     *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
+     *
+     *   // another single namespace value (like `x:name`)
+     *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
+     *
+     *   // a series of CSS classes that will be applied to the element (no spaces)
+     *   CLASSES_MARKER, class1, class2, class3,
+     *
+     *   // a series of CSS styles (property + value) that will be applied to the element
+     *   STYLES_MARKER, prop1, value1, prop2, value2
+     * ]
+     *
+     * All non-class and non-style attributes must be defined at the start of the list
+     * first before all class and style values are set. When there is a change in value
+     * type (like when classes and styles are introduced) a marker must be used to separate
+     * the entries. The marker values themselves are set via entries found in the
+     * [AttributeMarker] enum.
+     */
+    hostAttrs?: TAttributes | undefined;
+    /**
      * Function to create instances of content queries associated with a given directive.
      */
     contentQueries?: ContentQueriesFunction<T> | undefined;
@@ -11899,8 +12598,8 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
 }) => never;
 
 /**
- * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
- * in which injectors (if any) it will be available.
+ * Construct an injectable definition which defines how a token will be constructed by the DI
+ * system, and in which injectors (if any) it will be available.
  *
  * This should be assigned to a static `ɵprov` field on a type, which will then be an
  * `InjectableType`.
@@ -11913,12 +12612,13 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
  *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
  *
  * @codeGenApi
+ * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
     providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
     factory: () => T;
-}): never;
+}): unknown;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
@@ -11928,9 +12628,6 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -11938,13 +12635,12 @@ export declare function ɵɵdefineInjectable<T>(opts: {
  *   whose providers will also be added to the injector. Locally provided types will override
  *   providers from imports.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵdefineInjector(options: {
-    factory: () => any;
     providers?: any[];
     imports?: any[];
-}): never;
+}): unknown;
 
 /**
  * @codeGenApi
@@ -11967,7 +12663,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
     schemas?: SchemaMetadata[] | null;
     /** Unique ID for the module that is used with `getModuleFactory`. */
     id?: string | null;
-}): never;
+}): unknown;
 
 /**
  * Create a pipe definition object.
@@ -11992,16 +12688,17 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     type: Type<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): never;
+}): unknown;
+
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportAs extends string[], InputMap extends {
+export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = ɵDirectiveDef<T>;
+}, QueryFields extends string[]> = unknown;
 
 /**
  * Returns the value associated to the given token from the injectors.
@@ -12027,9 +12724,9 @@ export declare type ɵɵDirectiveDefWithMeta<T, Selector extends string, ExportA
  *
  * @codeGenApi
  */
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags: InjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -12106,46 +12803,6 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  */
 export declare function ɵɵelementEnd(): void;
 
-/**
- * Assign static attribute values to a host element.
- *
- * This instruction will assign static attribute values as well as class and style
- * values to an element within the host bindings function. Since attribute values
- * can consist of different types of values, the `attrs` array must include the values in
- * the following format:
- *
- * attrs = [
- *   // static attributes (like `title`, `name`, `id`...)
- *   attr1, value1, attr2, value,
- *
- *   // a single namespace value (like `x:id`)
- *   NAMESPACE_MARKER, namespaceUri1, name1, value1,
- *
- *   // another single namespace value (like `x:name`)
- *   NAMESPACE_MARKER, namespaceUri2, name2, value2,
- *
- *   // a series of CSS classes that will be applied to the element (no spaces)
- *   CLASSES_MARKER, class1, class2, class3,
- *
- *   // a series of CSS styles (property + value) that will be applied to the element
- *   STYLES_MARKER, prop1, value1, prop2, value2
- * ]
- *
- * All non-class and non-style attributes must be defined at the start of the list
- * first before all class and style values are set. When there is a change in value
- * type (like when classes and styles are introduced) a marker must be used to separate
- * the entries. The marker values themselves are set via entries found in the
- * [AttributeMarker] enum.
- *
- * NOTE: This instruction is meant to used from `hostBindings` function only.
- *
- * @param directive A directive instance the styling is associated with.
- * @param attrs An array of static values (attributes, classes and styles) with the correct marker
- * values.
- *
- * @codeGenApi
- */
-export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -12162,23 +12819,6 @@ export declare function ɵɵelementHostAttrs(attrs: TAttributes): void;
  * @codeGenApi
  */
 export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
-
-/**
- * Marks the end of an embedded view.
- *
- * @codeGenApi
- */
-export declare function ɵɵembeddedViewEnd(): void;
-
-/**
- * Marks the start of an embedded view.
- *
- * @param viewBlockId The ID of this view
- * @return boolean Whether or not this view is in creation mode
- *
- * @codeGenApi
- */
-export declare function ɵɵembeddedViewStart(viewBlockId: number, decls: number, vars: number): ɵRenderFlags;
 
 /**
  * Enables directive matching on elements.
@@ -12202,9 +12842,17 @@ export declare function ɵɵembeddedViewStart(viewBlockId: number, decls: number
 export declare function ɵɵenableBindings(): void;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵFactoryDef<T> = () => T;
+export declare type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
+
+export declare enum ɵɵFactoryTarget {
+    Directive = 0,
+    Component = 1,
+    Injectable = 2,
+    Pipe = 3,
+    NgModule = 4
+}
 
 /**
  * Returns the current OpaqueViewState instance.
@@ -12216,11 +12864,6 @@ export declare type ɵɵFactoryDef<T> = () => T;
  * @codeGenApi
  */
 export declare function ɵɵgetCurrentView(): OpaqueViewState;
-
-/**
- * @codeGenApi
- */
-export declare function ɵɵgetFactoryOf<T>(type: Type<any>): FactoryFn<T> | null;
 
 /**
  * @codeGenApi
@@ -12241,7 +12884,7 @@ export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type
  *
  * @codeGenApi
  */
-export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵhostProperty;
 
 /**
  *
@@ -12264,12 +12907,12 @@ export declare function ɵɵhostProperty<T>(propName: string, value: T, sanitize
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18n(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18n(index: number, messageIndex: number, subTemplateIndex?: number): void;
 
 /**
  * Updates a translation block or an i18n attribute when the bindings have changed.
@@ -12289,7 +12932,7 @@ export declare function ɵɵi18nApply(index: number): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nAttributes(index: number, values: string[]): void;
+export declare function ɵɵi18nAttributes(index: number, attrsIndex: number): void;
 
 /**
  * Translates a translation block marked by `i18nStart` and `i18nEnd`. It inserts the text/ICU nodes
@@ -12309,7 +12952,7 @@ export declare function ɵɵi18nEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nExp<T>(value: T): TsickleIssue1009;
+export declare function ɵɵi18nExp<T>(value: T): typeof ɵɵi18nExp;
 
 /**
  * Handles message string post-processing for internationalization.
@@ -12350,21 +12993,17 @@ export declare function ɵɵi18nPostprocess(message: string, replacements?: {
  *   and end of DOM element that were embedded in the original translation block. The placeholder
  *   `index` points to the element index in the template instructions set. An optional `block` that
  *   matches the sub-template in which it was declared.
- * - `�!{index}(:{block})�`/`�/!{index}(:{block})�`: *Projection Placeholder*:  Marks the
- *   beginning and end of <ng-content> that was embedded in the original translation block.
- *   The placeholder `index` points to the element index in the template instructions set.
- *   An optional `block` that matches the sub-template in which it was declared.
  * - `�*{index}:{block}�`/`�/*{index}:{block}�`: *Sub-template Placeholder*: Sub-templates must be
  *   split up and translated separately in each angular template function. The `index` points to the
  *   `template` instruction index. A `block` that matches the sub-template in which it was declared.
  *
  * @param index A unique index of the translation in the static block.
- * @param message The translation message.
+ * @param messageIndex An index of the translation message from the `def.consts` array.
  * @param subTemplateIndex Optional sub-template index in the `message`.
  *
  * @codeGenApi
  */
-export declare function ɵɵi18nStart(index: number, message: string, subTemplateIndex?: number): void;
+export declare function ɵɵi18nStart(index: number, messageIndex: number, subTemplateIndex?: number): void;
 
 /**
  * Merges the definition from a super class to a sub class.
@@ -12380,14 +13019,16 @@ export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<
  * Must be used in the context of a factory function such as one defined for an
  * `InjectionToken`. Throws an error if not called from such a context.
  *
- * (Additional documentation moved to `inject`, as it is the public API, and an alias for this instruction)
+ * (Additional documentation moved to `inject`, as it is the public API, and an alias for this
+ * instruction)
  *
  * @see inject
  * @codeGenApi
+ * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -12396,14 +13037,15 @@ export declare function ɵɵinject<T>(token: Type<T> | InjectionToken<T>, flags?
  * requesting injection of other types if necessary.
  *
  * Optionally, a `providedIn` parameter specifies that the given type belongs to a particular
- * `InjectorDef`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
+ * `Injector`, `NgModule`, or a special scope (e.g. `'root'`). A value of `null` indicates
  * that the injectable does not belong to any scope.
  *
- * NOTE: This is a private type and should not be exported
- *
- * @publicApi
+ * @codeGenApi
+ * @publicApi The ViewEngine compiler emits code with this type for injectables. This code is
+ *   deployed to npm, and should be treated as public api.
+
  */
-export declare interface ɵɵInjectableDef<T> {
+export declare interface ɵɵInjectableDeclaration<T> {
     /**
      * Specifies that the given type belongs to a particular injector:
      * - `InjectorType` such as `NgModule`,
@@ -12437,6 +13079,11 @@ export declare interface ɵɵInjectableDef<T> {
 export declare function ɵɵinjectAttribute(attrNameToInject: string): string | null;
 
 /**
+ * @publicApi
+ */
+export declare type ɵɵInjectorDeclaration<T> = unknown;
+
+/**
  * Information about the providers to be included in an `Injector` as well as how the given type
  * which carries the information should be created by the DI system.
  *
@@ -12446,20 +13093,12 @@ export declare function ɵɵinjectAttribute(attrNameToInject: string): string | 
  *
  * NOTE: This is a private type and should not be exported
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
-    factory: () => T;
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
-
-/**
- * Returns the appropriate `ChangeDetectorRef` for a pipe.
- *
- * @codeGenApi
- */
-export declare function ɵɵinjectPipeChangeDetectorRef(flags?: InjectFlags): ChangeDetectorRef | null;
 
 /**
  * Throws an error indicating that a factory function could not be generated by the compiler for a
@@ -12476,6 +13115,20 @@ export declare function ɵɵinjectPipeChangeDetectorRef(flags?: InjectFlags): Ch
 export declare function ɵɵinvalidFactory(): never;
 
 /**
+ * Throws an error indicating that a factory function could not be generated by the compiler for a
+ * particular class.
+ *
+ * This instruction allows the actual error message to be optimized away when ngDevMode is turned
+ * off, saving bytes of generated code while still providing a good experience in dev mode.
+ *
+ * The name of the class is not mentioned here, but will be in the generated factory function name
+ * and thus in the stack trace.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵinvalidFactoryDep(index: number): never;
+
+/**
  * Adds an event listener to the current node.
  *
  * If an output exists on one of the node's directives, it also subscribes to the output
@@ -12489,7 +13142,7 @@ export declare function ɵɵinvalidFactory(): never;
  *
  * @codeGenApi
  */
-export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): TsickleIssue1009;
+export declare function ɵɵlistener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵlistener;
 
 /**
  * Loads a QueryList corresponding to the current view or content query.
@@ -12535,9 +13188,72 @@ export declare function ɵɵnamespaceSVG(): void;
 export declare function ɵɵnextContext<T = any>(level?: number): T;
 
 /**
+ * Evaluates the class metadata declaration.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareClassMetadata(decl: {
+    type: Type<any>;
+    decorators: any[];
+    ctorParameters?: () => any[];
+    propDecorators?: {
+        [field: string]: any;
+    };
+}): void;
+
+/**
+ * Compiles a partial component declaration object into a full component definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareComponent(decl: R3DeclareComponentFacade): unknown;
+
+/**
+ * Compiles a partial directive declaration object into a full directive definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareDirective(decl: R3DeclareDirectiveFacade): unknown;
+
+/**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareFactory(decl: R3DeclareFactoryFacade): unknown;
+
+/**
+ * Compiles a partial injectable declaration object into a full injectable definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjectable(decl: R3DeclareInjectableFacade): unknown;
+
+/**
+ * Compiles a partial injector declaration object into a full injector definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareInjector(decl: R3DeclareInjectorFacade): unknown;
+
+/**
+ * Compiles a partial NgModule declaration object into a full NgModule definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareNgModule(decl: R3DeclareNgModuleFacade): unknown;
+
+/**
+ * Compiles a partial pipe declaration object into a full pipe definition object.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclarePipe(decl: R3DeclarePipeFacade): unknown;
+
+/**
  * @publicApi
  */
-export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> = ɵNgModuleDef<T>;
+export declare type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> = unknown;
 
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
@@ -12555,7 +13271,7 @@ export declare type ɵɵNgModuleDefWithMeta<T, Declarations, Imports, Exports> =
  * static ɵcmp = defineComponent({
  *   ...
  *   inputs: {name: 'publicName'},
- *   features: [NgOnChangesFeature()]
+ *   features: [NgOnChangesFeature]
  * });
  * ```
  *
@@ -12652,9 +13368,9 @@ export declare function ɵɵpipeBind4(index: number, slotOffset: number, v1: any
 export declare function ɵɵpipeBindV(index: number, slotOffset: number, values: [any, ...any[]]): any;
 
 /**
- * @codeGenApi
+ * @publicApi
  */
-export declare type ɵɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
+export declare type ɵɵPipeDeclaration<T, Name extends string> = unknown;
 
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
@@ -12666,7 +13382,7 @@ export declare type ɵɵPipeDefWithMeta<T, Name extends string> = ɵPipeDef<T>;
  *        - 1 based index of the selector from the {@link projectionDef}
  *
  * @codeGenApi
-*/
+ */
 export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
 
 /**
@@ -12714,7 +13430,7 @@ export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): vo
  *
  * @codeGenApi
  */
-export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵproperty;
 
 /**
  *
@@ -12745,7 +13461,7 @@ export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate;
 
 /**
  *
@@ -12775,7 +13491,7 @@ export declare function ɵɵpropertyInterpolate(propName: string, v0: any, sanit
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate1(propName: string, prefix: string, v0: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate1;
 
 /**
  *
@@ -12807,7 +13523,7 @@ export declare function ɵɵpropertyInterpolate1(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate2(propName: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate2;
 
 /**
  *
@@ -12842,7 +13558,7 @@ export declare function ɵɵpropertyInterpolate2(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate3(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate3;
 
 /**
  *
@@ -12879,7 +13595,7 @@ export declare function ɵɵpropertyInterpolate3(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate4(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate4;
 
 /**
  *
@@ -12918,7 +13634,7 @@ export declare function ɵɵpropertyInterpolate4(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate5(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate5;
 
 /**
  *
@@ -12959,7 +13675,7 @@ export declare function ɵɵpropertyInterpolate5(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate6(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate6;
 
 /**
  *
@@ -13002,7 +13718,7 @@ export declare function ɵɵpropertyInterpolate6(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate7(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate7;
 
 /**
  *
@@ -13047,12 +13763,12 @@ export declare function ɵɵpropertyInterpolate7(propName: string, prefix: strin
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolate8(propName: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolate8;
 
 /**
- * Update an interpolated property on an element with 8 or more bound values surrounded by text.
+ * Update an interpolated property on an element with 9 or more bound values surrounded by text.
  *
- * Used when the number of interpolated values exceeds 7.
+ * Used when the number of interpolated values exceeds 8.
  *
  * ```html
  * <div
@@ -13072,14 +13788,14 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
  *
  * @param propName The name of the property to update.
- * @param values The a collection of values and the strings inbetween those values, beginning with a
+ * @param values The collection of values and the strings inbetween those values, beginning with a
  * string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param sanitizer An optional sanitizer function
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): TsickleIssue1009;
+export declare function ɵɵpropertyInterpolateV(propName: string, values: any[], sanitizer?: SanitizerFn): typeof ɵɵpropertyInterpolateV;
 
 /**
  * This feature resolves the providers of a directive (or component),
@@ -13104,7 +13820,7 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  *        ɵɵtextInterpolate(ctx.greeter.greet());
  *      }
  *    },
- *    features: [ProvidersFeature([GreeterDE])]
+ *    features: [ɵɵProvidersFeature([GreeterDE])]
  *  });
  * }
  * ```
@@ -13114,7 +13830,6 @@ export declare function ɵɵpropertyInterpolateV(propName: string, values: any[]
  * @codeGenApi
  */
 export declare function ɵɵProvidersFeature<T>(providers: Provider[], viewProviders?: Provider[]): (definition: ɵDirectiveDef<T>) => void;
-
 
 /**
  * Bindings for pure functions are stored after regular bindings.
@@ -13356,7 +14071,7 @@ export declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
 }): {
     name: string;
-    target: Window | null;
+    target: (Window & typeof globalThis) | null;
 };
 
 /**
@@ -13367,10 +14082,11 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * walking the declaration view tree in listeners to get vars from parent views.
  *
  * @param viewToRestore The OpaqueViewState instance to restore.
+ * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
  */
-export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
+export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
@@ -13385,9 +14101,9 @@ export declare function ɵɵrestoreView(viewToRestore: OpaqueViewState): void;
  * @returns `html` string which is safe to display to user, because all of the dangerous javascript
  * and urls have been removed.
  *
- * @publicApi
+ * @codeGenApi
  */
-export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
+export declare function ɵɵsanitizeHtml(unsafeHtml: any): TrustedHTML | string;
 
 /**
  * A `url` sanitizer which only lets trusted `url`s through.
@@ -13398,9 +14114,9 @@ export declare function ɵɵsanitizeHtml(unsafeHtml: any): string;
  * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * only trusted `url`s have been allowed to pass.
  *
- * @publicApi
+ * @codeGenApi
  */
-export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
+export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): TrustedScriptURL | string;
 
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -13412,24 +14128,20 @@ export declare function ɵɵsanitizeResourceUrl(unsafeResourceUrl: any): string;
  * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
  * because only trusted `scripts` have been allowed to pass.
  *
- * @publicApi
+ * @codeGenApi
  */
-export declare function ɵɵsanitizeScript(unsafeScript: any): string;
+export declare function ɵɵsanitizeScript(unsafeScript: any): TrustedScript | string;
 
 /**
  * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
  * dangerous content.
  *
- * This method parses the `style` and locates potentially dangerous content (such as urls and
- * javascript) and removes it.
- *
  * It is possible to mark a string as trusted by calling {@link bypassSanitizationTrustStyle}.
  *
  * @param unsafeStyle untrusted `style`, typically from the user.
- * @returns `style` string which is safe to bind to the `style` properties, because all of the
- * dangerous javascript and urls have been removed.
+ * @returns `style` string which is safe to bind to the `style` properties.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeStyle(unsafeStyle: any): string;
 
@@ -13447,7 +14159,7 @@ export declare function ɵɵsanitizeStyle(unsafeStyle: any): string;
  * @returns `url` string which is safe to bind to the `src` properties such as `<img src>`, because
  * all of the dangerous javascript has been removed.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
 
@@ -13464,18 +14176,17 @@ export declare function ɵɵsanitizeUrl(unsafeUrl: any): string;
  * @param prop name of the property that contains the value.
  * @returns `url` string which is safe to bind.
  *
- * @publicApi
+ * @codeGenApi
  */
 export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string, prop: string): any;
 
 /**
- * Selects an element for later binding instructions.
- * @deprecated No longer being generated, but still used in unit tests.
- * @codeGenApi
- */
-export declare function ɵɵselect(index: number): void;
-
-/**
+ * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+ * definition, when generating a direct reference in the component file would otherwise create an
+ * import cycle.
+ *
+ * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+ *
  * @codeGenApi
  */
 export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
@@ -13500,32 +14211,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
      * module.
      */
     exports?: Type<any>[] | (() => Type<any>[]);
-}): void;
-
-/**
- * Registers a QueryList, associated with a static content query, for later refresh
- * (part of a view refresh).
- *
- * @param directiveIndex Current directive index
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- * @returns QueryList<T>
- *
- * @codeGenApi
- */
-export declare function ɵɵstaticContentQuery<T>(directiveIndex: number, predicate: Type<any> | string[], descend: boolean, read?: any): void;
-
-/**
- * Creates new QueryList for a static view query.
- *
- * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
- * @param read What to save in the query
- *
- * @codeGenApi
- */
-export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
+}): unknown;
 
 /**
  * Update style bindings using an object literal on an element.
@@ -13548,7 +14234,286 @@ export declare function ɵɵstaticViewQuery<T>(predicate: Type<any> | string[], 
  */
 export declare function ɵɵstyleMap(styles: {
     [styleName: string]: any;
-} | ɵNO_CHANGE | null): void;
+} | string | undefined | null): void;
+
+
+/**
+ *
+ * Update an interpolated style on an element with single bound value surrounded by text.
+ *
+ * Used when the value passed to a property has 1 interpolated value in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate1('key: ', v0, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate1(prefix: string, v0: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 2 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 2 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate2('key: ', v0, '; key1: ', v1, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 3 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 3 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key2: {{v1}}; key2: {{v2}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate3(
+ *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 4 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 4 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate4(
+ *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 5 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 5 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate5(
+ *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 6 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 6 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}};
+ *             key5: {{v5}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate6(
+ *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *    'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 7 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 7 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+ *             key6: {{v6}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate7(
+ *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *    '; key6: ', v6, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): void;
+
+/**
+ *
+ * Update an interpolated style on an element with 8 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 8 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+ *             key6: {{v6}}; key7: {{v7}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate8(
+ *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *    '; key6: ', v6, '; key7: ', v7, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param i6 Static value used for concatenation only.
+ * @param v7 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): void;
+
+/**
+ * Update an interpolated style on an element with 9 or more bound values surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 8.
+ *
+ * ```html
+ * <div
+ *  class="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+ *         key6: {{v6}}; key7: {{v7}}; key8: {{v8}}; key9: {{v9}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolateV(
+ *    ['key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *     '; key6: ', v6, '; key7: ', v7, '; key8: ', v8, '; key9: ', v9, 'suffix']);
+ * ```
+ *.
+ * @param values The collection of values and the strings in-between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '; key2: ', value1, '; key2: ', value2, ..., value99, 'suffix']`)
+ * @codeGenApi
+ */
+export declare function ɵɵstyleMapInterpolateV(values: any[]): void;
 
 /**
  * Update a style binding on an element with the provided value.
@@ -13563,15 +14528,14 @@ export declare function ɵɵstyleMap(styles: {
  * @param prop A valid CSS property.
  * @param value New value to write (`null` or an empty string to remove).
  * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
- *        Note that when a suffix is provided then the underlying sanitizer will
- *        be ignored.
  *
  * Note that this will apply the provided style value to the host element if this function is called
  * within a host binding function.
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | null, suffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstyleProp(prop: string, value: string | number | ɵSafeValue | undefined | null, suffix?: string | null): typeof ɵɵstyleProp;
+
 
 /**
  *
@@ -13599,7 +14563,7 @@ export declare function ɵɵstyleProp(prop: string, value: string | number | ɵS
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, v0: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate1;
 
 /**
  *
@@ -13629,7 +14593,7 @@ export declare function ɵɵstylePropInterpolate1(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, v0: any, i0: string, v1: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate2;
 
 /**
  *
@@ -13661,7 +14625,7 @@ export declare function ɵɵstylePropInterpolate2(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate3;
 
 /**
  *
@@ -13695,7 +14659,7 @@ export declare function ɵɵstylePropInterpolate3(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate4;
 
 /**
  *
@@ -13731,7 +14695,7 @@ export declare function ɵɵstylePropInterpolate4(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate5;
 
 /**
  *
@@ -13769,7 +14733,7 @@ export declare function ɵɵstylePropInterpolate5(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate6;
 
 /**
  *
@@ -13810,7 +14774,7 @@ export declare function ɵɵstylePropInterpolate6(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate7;
 
 /**
  *
@@ -13853,13 +14817,13 @@ export declare function ɵɵstylePropInterpolate7(prop: string, prefix: string, 
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string, valueSuffix?: string | null): typeof ɵɵstylePropInterpolate8;
 
 /**
- * Update an interpolated style property on an element with 8 or more bound values surrounded by
+ * Update an interpolated style property on an element with 9 or more bound values surrounded by
  * text.
  *
- * Used when the number of interpolated values exceeds 7.
+ * Used when the number of interpolated values exceeds 8.
  *
  * ```html
  * <div
@@ -13878,41 +14842,60 @@ export declare function ɵɵstylePropInterpolate8(prop: string, prefix: string, 
  * @param styleIndex Index of style to update. This index value refers to the
  *        index of the style in the style bindings array that was passed into
  *        `styling`..
- * @param values The a collection of values and the strings in-between those values, beginning with
+ * @param values The collection of values and the strings in-between those values, beginning with
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): TsickleIssue1009;
+export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], valueSuffix?: string | null): typeof ɵɵstylePropInterpolateV;
 
 /**
- * --------
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
  *
- * This file contains the core logic for how styling instructions are processed in Angular.
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+ * in the component's renderer. Normally all host listeners are evaluated with the
+ * parent component's renderer, but, in the case of animation @triggers, they need
+ * to be evaluated with the sub component's renderer (because that's where the
+ * animation triggers are defined).
  *
- * To learn more about the algorithm see `TStylingContext`.
+ * Do not use this instruction as a replacement for `listener`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
  *
- * --------
- */
-/**
- * Sets the current style sanitizer function which will then be used
- * within all follow-up prop and map-based style binding instructions
- * for the given element.
- *
- * Note that once styling has been applied to the element (i.e. once
- * `advance(n)` is executed or the hostBindings/template function exits)
- * then the active `sanitizerFn` will be set to `null`. This means that
- * once styling is applied to another element then a another call to
- * `styleSanitizer` will need to be made.
- *
- * @param sanitizerFn The sanitization function that will be used to
- *       process style prop/value entries.
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
  *
  * @codeGenApi
  */
-export declare function ɵɵstyleSanitizer(sanitizer: StyleSanitizeFn | null): void;
+export declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵsyntheticHostListener;
+
+/**
+ * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
+ * the component's renderer. Normally all host bindings are evaluated with the parent
+ * component's renderer, but, in the case of animation @triggers, they need to be
+ * evaluated with the sub component's renderer (because that's where the animation
+ * triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `elementProperty`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param index The index of the element to update in the data array
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵsyntheticHostProperty<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): typeof ɵɵsyntheticHostProperty;
 
 /**
  * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
@@ -13941,7 +14924,7 @@ export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplat
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplateRefExtractor(tNode: TNode, currentView: ɵangular_packages_core_core_bm): TemplateRef<unknown> | null;
+export declare function ɵɵtemplateRefExtractor(tNode: TNode, lView: ɵangular_packages_core_core_ca): TemplateRef<any> | null;
 
 /**
  * Create static text node
@@ -13973,7 +14956,7 @@ export declare function ɵɵtext(index: number, value?: string): void;
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
+export declare function ɵɵtextInterpolate(v0: any): typeof ɵɵtextInterpolate;
 
 /**
  *
@@ -13994,7 +14977,7 @@ export declare function ɵɵtextInterpolate(v0: any): TsickleIssue1009;
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: string): typeof ɵɵtextInterpolate1;
 
 /**
  *
@@ -14015,7 +14998,7 @@ export declare function ɵɵtextInterpolate1(prefix: string, v0: any, suffix: st
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string, v1: any, suffix: string): typeof ɵɵtextInterpolate2;
 
 /**
  *
@@ -14037,7 +15020,7 @@ export declare function ɵɵtextInterpolate2(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): typeof ɵɵtextInterpolate3;
 
 /**
  *
@@ -14059,7 +15042,7 @@ export declare function ɵɵtextInterpolate3(prefix: string, v0: any, i0: string
  * @see ɵɵtextInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): typeof ɵɵtextInterpolate4;
 
 /**
  *
@@ -14081,7 +15064,7 @@ export declare function ɵɵtextInterpolate4(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): typeof ɵɵtextInterpolate5;
 
 /**
  *
@@ -14105,7 +15088,7 @@ export declare function ɵɵtextInterpolate5(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): typeof ɵɵtextInterpolate6;
 
 /**
  *
@@ -14127,7 +15110,7 @@ export declare function ɵɵtextInterpolate6(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): typeof ɵɵtextInterpolate7;
 
 /**
  *
@@ -14149,7 +15132,7 @@ export declare function ɵɵtextInterpolate7(prefix: string, v0: any, i0: string
  * @see textInterpolateV
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): TsickleIssue1009;
+export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): typeof ɵɵtextInterpolate8;
 
 /**
  * Update text content with 9 or more bound values other surrounded by text.
@@ -14168,47 +15151,54 @@ export declare function ɵɵtextInterpolate8(prefix: string, v0: any, i0: string
  *  'suffix']);
  * ```
  *.
- * @param values The a collection of values and the strings in between those values, beginning with
+ * @param values The collection of values and the strings in between those values, beginning with
  * a string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  *
  * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-export declare function ɵɵtextInterpolateV(values: any[]): TsickleIssue1009;
+export declare function ɵɵtextInterpolateV(values: any[]): typeof ɵɵtextInterpolateV;
 
 /**
- * Updates a synthetic host binding (e.g. `[@foo]`) on a component.
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedHTML. Interpolation is explicitly not allowed.
  *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host binding (e.g. `@HostBinding('@foo')`) properly gets rendered in
- * the component's renderer. Normally all host bindings are evaluated with the parent
- * component's renderer, but, in the case of animation @triggers, they need to be
- * evaluated with the sub component's renderer (because that's where the animation
- * triggers are defined).
+ * @param html constant template literal containing trusted HTML.
+ * @returns TrustedHTML wrapping `html`.
  *
- * Do not use this instruction as a replacement for `elementProperty`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param index The index of the element to update in the data array
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedHTML.
  *
  * @codeGenApi
  */
-export declare function ɵɵupdateSyntheticHostBinding<T>(propName: string, value: T | ɵNO_CHANGE, sanitizer?: SanitizerFn | null): TsickleIssue1009;
+export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): TrustedHTML | string;
+
+/**
+ * A template tag function for promoting the associated constant literal to a
+ * TrustedScriptURL. Interpolation is explicitly not allowed.
+ *
+ * @param url constant template literal containing a trusted script URL.
+ * @returns TrustedScriptURL wrapping `url`.
+ *
+ * @security This is a security-sensitive function and should only be used to
+ * convert constant values of attributes and properties found in
+ * application-provided Angular templates to TrustedScriptURL.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
  *
  * @param predicate The type for which the query will search
- * @param descend Whether or not to descend into children
+ * @param flags Flags associated with the query
  * @param read What to save in the query
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | string[], descend: boolean, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 export { }
