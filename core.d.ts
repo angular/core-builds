@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.10+31.sha-3631934
+ * @license Angular v11.2.10+35.sha-a76f07b
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1325,7 +1325,8 @@ export declare interface ContentChildrenDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **descendants** - True to include all descendants, otherwise include only direct children.
+     * * **descendants** - If `true` include all descendants of the element. If `false` then only
+     * query direct children of the element.
      * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
      *   if the QueryList result has changed. The default value will change from `false` to `true` in
      *   v12. When `false` the `changes` observable might emit even if the QueryList has not changed.
