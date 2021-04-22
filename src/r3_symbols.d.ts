@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-rc.0+10.sha-6221227
+ * @license Angular v12.0.0-rc.0+16.sha-5895ddb
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -535,9 +535,9 @@ declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use ProviderToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -687,6 +687,15 @@ declare interface NgModuleTransitiveScopes {
     };
     schemas: SchemaMetadata[] | null;
 }
+
+/**
+ * @description
+ *
+ * Token that can be used to retrieve an instance from an injector or through a query.
+ *
+ * @publicApi
+ */
+declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToken<T>;
 
 
 /**
@@ -956,9 +965,9 @@ export declare type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDepen
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: ProviderToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
