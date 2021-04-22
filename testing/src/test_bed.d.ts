@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AbstractType, Component, Directive, InjectFlags, InjectionToken, NgModule, Pipe, PlatformRef, Type } from '@angular/core';
+import { Component, Directive, InjectFlags, NgModule, Pipe, PlatformRef, ProviderToken, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 import { TestBedStatic, TestModuleMetadata } from './test_bed_common';
@@ -38,10 +38,10 @@ export interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
@@ -138,10 +138,10 @@ export declare class TestBedViewEngine implements TestBed {
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    static inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    static get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
      * @deprecated from v9.0.0 use TestBed.inject
      * @suppress {duplicate}
@@ -195,10 +195,10 @@ export declare class TestBedViewEngine implements TestBed {
     private _initIfNeeded;
     private _createCompilerAndModule;
     private _assertNotInstantiated;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;

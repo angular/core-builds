@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken } from '../../di/injection_token';
 import { Injector } from '../../di/injector';
+import { ProviderToken } from '../../di/provider_token';
 import { Type } from '../../interface/type';
 import { SchemaMetadata } from '../../metadata/schema';
 import { Sanitizer } from '../../sanitization/sanitizer';
@@ -800,7 +800,7 @@ export declare type DestroyHookData = (HookEntry | HookData)[];
  *
  * Injector bloom filters are also stored here.
  */
-export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
+export declare type TData = (TNode | PipeDef<any> | DirectiveDef<any> | ComponentDef<any> | number | TStylingRange | TStylingKey | ProviderToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
 export declare const unusedValueExportToPlacateAjd = 1;
 /**
  * Human readable version of the `LView`.

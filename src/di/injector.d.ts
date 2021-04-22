@@ -5,10 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AbstractType, Type } from '../interface/type';
-import { InjectionToken } from './injection_token';
 import { InjectFlags } from './interface/injector';
 import { StaticProvider } from './interface/provider';
+import { ProviderToken } from './provider_token';
 export declare function INJECTOR_IMPL__PRE_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): StaticInjector;
 export declare function INJECTOR_IMPL__POST_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): Injector;
 export declare const INJECTOR_IMPL: typeof INJECTOR_IMPL__PRE_R3__;
@@ -44,9 +43,9 @@ export declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use ProviderToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -80,7 +79,7 @@ export declare class StaticInjector implements Injector {
     readonly scope: string | null;
     private _records;
     constructor(providers: StaticProvider[], parent?: Injector, source?: string | null);
-    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     get(token: any, notFoundValue?: any): any;
     toString(): string;
 }

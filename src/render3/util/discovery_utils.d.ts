@@ -8,7 +8,6 @@
 import { ChangeDetectionStrategy } from '../../change_detection/constants';
 import { Injector } from '../../di/injector';
 import { ViewEncapsulation } from '../../metadata/view';
-import { LContext } from '../interfaces/context';
 import { DebugNode, LView } from '../interfaces/view';
 /**
  * Retrieves the component instance associated with a given DOM element.
@@ -157,12 +156,6 @@ export interface ComponentDebugMetadata extends DirectiveDebugMetadata {
  */
 export declare function getDirectiveMetadata(directiveOrComponentInstance: any): ComponentDebugMetadata | DirectiveDebugMetadata | null;
 /**
- * Returns LContext associated with a target passed as an argument.
- * Throws if a given target doesn't have associated LContext.
- */
-export declare function loadLContext(target: {}): LContext;
-export declare function loadLContext(target: {}, throwOnNotFound: false): LContext | null;
-/**
  * Retrieve map of local references.
  *
  * The references are retrieved as a map of local reference name to element or directive instance.
@@ -196,7 +189,6 @@ export declare function getHostElement(componentOrDirective: {}): Element;
  * @param component The component to return the content text for.
  */
 export declare function getRenderedText(component: any): string;
-export declare function loadLContextFromNode(node: Node): LContext;
 /**
  * Event listener configuration returned from `getListeners`.
  * @publicApi

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+204.sha-64567d3
+ * @license Angular v12.0.0-next.8+206.sha-de4fafb
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12383,7 +12383,7 @@
      */
     function getComponent(element) {
         assertDomElement(element);
-        var context = loadLContext(element, false);
+        var context = getLContext(element);
         if (context === null)
             return null;
         if (context.component === undefined) {
@@ -12405,7 +12405,7 @@
      */
     function getContext(element) {
         assertDomElement(element);
-        var context = loadLContext(element, false);
+        var context = getLContext(element);
         return context === null ? null : context.lView[CONTEXT];
     }
     /**
@@ -12424,7 +12424,7 @@
      * @globalApi ng
      */
     function getOwningComponent(elementOrDir) {
-        var context = loadLContext(elementOrDir, false);
+        var context = getLContext(elementOrDir);
         if (context === null)
             return null;
         var lView = context.lView;
@@ -12460,7 +12460,7 @@
      * @globalApi ng
      */
     function getInjector(elementOrDir) {
-        var context = loadLContext(elementOrDir, false);
+        var context = getLContext(elementOrDir);
         if (context === null)
             return Injector.NULL;
         var tNode = context.lView[TVIEW].data[context.nodeIndex];
@@ -12472,7 +12472,7 @@
      * @param element Element for which the injection tokens should be retrieved.
      */
     function getInjectionTokens(element) {
-        var context = loadLContext(element, false);
+        var context = getLContext(element);
         if (context === null)
             return [];
         var lView = context.lView;
@@ -12522,7 +12522,7 @@
         if (node instanceof Text) {
             return [];
         }
-        var context = loadLContext(node, false);
+        var context = getLContext(node);
         if (context === null) {
             return [];
         }
@@ -12573,15 +12573,6 @@
         }
         return null;
     }
-    function loadLContext(target, throwOnNotFound) {
-        if (throwOnNotFound === void 0) { throwOnNotFound = true; }
-        var context = getLContext(target);
-        if (!context && throwOnNotFound) {
-            throw new Error(ngDevMode ? "Unable to find context associated with " + stringifyForError(target) :
-                'Invalid ng target');
-        }
-        return context;
-    }
     /**
      * Retrieve map of local references.
      *
@@ -12591,7 +12582,7 @@
      *    the local references.
      */
     function getLocalRefs(target) {
-        var context = loadLContext(target, false);
+        var context = getLContext(target);
         if (context === null)
             return {};
         if (context.localRefs === undefined) {
@@ -12627,11 +12618,6 @@
         var hostElement = getHostElement(component);
         return hostElement.textContent || '';
     }
-    function loadLContextFromNode(node) {
-        if (!(node instanceof Node))
-            throw new Error('Expecting instance of DOM Element');
-        return loadLContext(node);
-    }
     /**
      * Retrieves a list of event listeners associated with a DOM element. The list does include host
      * listeners, but it does not include event listeners defined outside of the Angular context
@@ -12663,7 +12649,7 @@
      */
     function getListeners(element) {
         assertDomElement(element);
-        var lContext = loadLContext(element, false);
+        var lContext = getLContext(element);
         if (lContext === null)
             return [];
         var lView = lContext.lView;
@@ -12713,8 +12699,13 @@
      * @param element DOM element which is owned by an existing component's view.
      */
     function getDebugNode(element) {
-        var debugNode = null;
-        var lContext = loadLContextFromNode(element);
+        if (ngDevMode && !(element instanceof Node)) {
+            throw new Error('Expecting instance of DOM Element');
+        }
+        var lContext = getLContext(element);
+        if (lContext === null) {
+            return null;
+        }
         var lView = lContext.lView;
         var nodeIndex = lContext.nodeIndex;
         if (nodeIndex !== -1) {
@@ -12724,9 +12715,9 @@
             var tNode = isLView(valueInLView) ? valueInLView[T_HOST] : getTNode(lView[TVIEW], nodeIndex);
             ngDevMode &&
                 assertEqual(tNode.index, nodeIndex, 'Expecting that TNode at index is same as index');
-            debugNode = buildDebugNode(tNode, lView);
+            return buildDebugNode(tNode, lView);
         }
-        return debugNode;
+        return null;
     }
     /**
      * Retrieve the component `LView` from component/element.
@@ -12737,7 +12728,7 @@
      * @param target DOM element or component instance for which to retrieve the LView.
      */
     function getComponentLView(target) {
-        var lContext = loadLContext(target);
+        var lContext = getLContext(target);
         var nodeIndx = lContext.nodeIndex;
         var lView = lContext.lView;
         var componentLView = lView[nodeIndx];
@@ -21969,7 +21960,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+204.sha-64567d3');
+    var VERSION = new Version('12.0.0-next.8+206.sha-de4fafb');
 
     /**
      * @license
@@ -30856,14 +30847,14 @@
         });
         Object.defineProperty(DebugElement__POST_R3__.prototype, "name", {
             get: function () {
-                try {
-                    var context = loadLContext(this.nativeNode);
+                var context = getLContext(this.nativeNode);
+                if (context !== null) {
                     var lView = context.lView;
                     var tData = lView[TVIEW].data;
                     var tNode = tData[context.nodeIndex];
                     return tNode.value;
                 }
-                catch (e) {
+                else {
                     return this.nativeNode.nodeName;
                 }
             },
@@ -30884,8 +30875,8 @@
              *  - attribute bindings (e.g. `[attr.role]="menu"`)
              */
             get: function () {
-                var context = loadLContext(this.nativeNode, false);
-                if (context == null) {
+                var context = getLContext(this.nativeNode);
+                if (context === null) {
                     return {};
                 }
                 var lView = context.lView;
@@ -30909,8 +30900,8 @@
                 if (!element) {
                     return attributes;
                 }
-                var context = loadLContext(element, false);
-                if (context == null) {
+                var context = getLContext(element);
+                if (context === null) {
                     return {};
                 }
                 var lView = context.lView;
@@ -31081,7 +31072,7 @@
             value === null;
     }
     function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
-        var context = loadLContext(parentElement.nativeNode, false);
+        var context = getLContext(parentElement.nativeNode);
         if (context !== null) {
             var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
             _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);

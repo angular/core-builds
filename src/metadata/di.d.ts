@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectionToken } from '../di/injection_token';
-import { Type } from '../interface/type';
+import { ProviderToken } from '../di/provider_token';
 /**
  * A DI token that you can use to create a virtual [provider](guide/glossary#provider)
  * that will populate the `entryComponents` field of components and NgModules
@@ -157,12 +157,12 @@ export interface ContentChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         emitDistinctChangesOnly?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         emitDistinctChangesOnly?: boolean;
         read?: any;
@@ -219,11 +219,11 @@ export interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ContentChild;
@@ -280,11 +280,11 @@ export interface ViewChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         emitDistinctChangesOnly?: boolean;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         emitDistinctChangesOnly?: boolean;
     }): ViewChildren;
@@ -347,11 +347,11 @@ export interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ViewChild;

@@ -5,10 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken } from '../di/injection_token';
 import { Injector } from '../di/injector';
 import { InjectFlags } from '../di/interface/injector';
-import { AbstractType, Type } from '../interface/type';
+import { ProviderToken } from '../di/provider_token';
+import { Type } from '../interface/type';
 import { RelativeInjectorLocation } from './interfaces/injector';
 import { TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode } from './interfaces/node';
 import { LView, TData, TView } from './interfaces/view';
@@ -21,7 +21,7 @@ export declare function setIncludeViewProviders(v: boolean): boolean;
  * @param tView The TView for the injector's bloom filters
  * @param type The directive token to register
  */
-export declare function bloomAdd(injectorIndex: number, tView: TView, type: Type<any> | InjectionToken<any> | string): void;
+export declare function bloomAdd(injectorIndex: number, tView: TView, type: ProviderToken<any> | string): void;
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
@@ -46,7 +46,7 @@ export declare function getParentInjectorLocation(tNode: TNode, lView: LView): R
  * @param di The node injector in which a directive will be added
  * @param token The type or the injection token to be made public
  */
-export declare function diPublicInInjector(injectorIndex: number, tView: TView, token: InjectionToken<any> | Type<any>): void;
+export declare function diPublicInInjector(injectorIndex: number, tView: TView, token: ProviderToken<any>): void;
 /**
  * Inject static attribute value into directive constructor.
  *
@@ -95,7 +95,7 @@ export declare function injectAttributeImpl(tNode: TNode, attrNameToInject: stri
  * @param notFoundValue The value to return when the injection flags is `InjectFlags.Optional`
  * @returns the value from the injector, `null` when not found, or `notFoundValue` if provided
  */
-export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | null, lView: LView, token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
+export declare function getOrCreateInjectable<T>(tNode: TDirectiveHostNode | null, lView: LView, token: ProviderToken<T>, flags?: InjectFlags, notFoundValue?: any): T | null;
 export declare function createNodeInjector(): Injector;
 /**
  * Searches for the given token among the node's directives and providers.
@@ -107,7 +107,7 @@ export declare function createNodeInjector(): Injector;
  * @param isHostSpecialCase Whether the host special case applies.
  * @returns Index of a found directive or provider, or null when none found.
  */
-export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: Type<T> | AbstractType<T> | InjectionToken<T> | string, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
+export declare function locateDirectiveOrProvider<T>(tNode: TNode, tView: TView, token: ProviderToken<T> | string, canAccessViewProviders: boolean, isHostSpecialCase: boolean | number): number | null;
 /**
  * Retrieve or instantiate the injectable from the `LView` at particular `index`.
  *
@@ -128,7 +128,7 @@ export declare function getNodeInjectable(lView: LView, tView: TView, index: num
  * @returns the matching bit to check in the bloom filter or `null` if the token is not known.
  *   When the returned value is negative then it represents special values such as `Injector`.
  */
-export declare function bloomHashBitOrFactory(token: Type<any> | AbstractType<any> | InjectionToken<any> | string): number | Function | undefined;
+export declare function bloomHashBitOrFactory(token: ProviderToken<any> | string): number | Function | undefined;
 export declare function bloomHasToken(bloomHash: number, injectorIndex: number, injectorView: LView | TData): boolean;
 export declare class NodeInjector implements Injector {
     private _tNode;

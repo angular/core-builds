@@ -5,8 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken } from '../di/injection_token';
-import { Type } from '../interface/type';
+import { ProviderToken } from '../di/provider_token';
 import { QueryList } from '../linker/query_list';
 import { QueryFlags } from './interfaces/query';
 /**
@@ -28,7 +27,7 @@ export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
  * refresh).
@@ -41,7 +40,7 @@ export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<u
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 /**
  * Loads a QueryList corresponding to the current view or content query.
  *

@@ -6,12 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import '../util/ng_dev_mode';
-import { AbstractType, Type } from '../interface/type';
-import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
 import { InjectorType } from './interface/defs';
 import { InjectFlags } from './interface/injector';
 import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, StaticProvider, TypeProvider, ValueProvider } from './interface/provider';
+import { ProviderToken } from './provider_token';
 /**
  * Internal type for a single provider in a deep provider array.
  */
@@ -63,7 +62,7 @@ export declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
-    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
     /**
