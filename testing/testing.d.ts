@@ -1,10 +1,9 @@
 /**
- * @license Angular v12.0.0-next.8+204.sha-64567d3
+ * @license Angular v12.0.0-next.8+206.sha-de4fafb
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { AbstractType } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { Compiler } from '@angular/core';
 import { CompilerOptions } from '@angular/core';
@@ -21,6 +20,7 @@ import { NgModule } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { Pipe } from '@angular/core';
 import { PlatformRef } from '@angular/core';
+import { ProviderToken } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
 
@@ -269,10 +269,10 @@ export declare interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
@@ -374,10 +374,10 @@ export declare interface TestBedStatic {
         useValue?: any;
         deps?: any[];
     }): TestBedStatic;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
@@ -556,10 +556,10 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    static inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    static get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /**
      * @deprecated from v9.0.0 use TestBed.inject
      * @suppress {duplicate}
@@ -613,10 +613,10 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
     private _initIfNeeded;
     private _createCompilerAndModule;
     private _assertNotInstantiated;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
@@ -704,10 +704,10 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
     static overrideProvider(token: any, provider: {
         useValue: any;
     }): TestBedStatic;
-    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    static inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    static inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    static inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    static get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    static get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
@@ -745,10 +745,10 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: Type<T> | InjectionToken<T> | AbstractType<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
+    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
