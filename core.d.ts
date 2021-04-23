@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+139.sha-aa35a1a
+ * @license Angular v12.0.0-next.8+213.sha-45ffab5
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1328,11 +1328,11 @@ export declare interface ContentChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ContentChild;
@@ -1378,7 +1378,8 @@ export declare interface ContentChildrenDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
-     * * **descendants** - True to include all descendants, otherwise include only direct children.
+     * * **descendants** - If `true` include all descendants of the element. If `false` then only
+     * query direct children of the element.
      * * **emitDistinctChangesOnly** - The ` QueryList#changes` observable will emit new values only
      *   if the QueryList result has changed. When `false` the `changes` observable might emit even
      *   if the QueryList has not changed.
@@ -1401,12 +1402,12 @@ export declare interface ContentChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         emitDistinctChangesOnly?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
         emitDistinctChangesOnly?: boolean;
         read?: any;
@@ -3477,9 +3478,9 @@ export declare abstract class Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
-    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
-     * @deprecated from v4.0.0 use Type<T>, AbstractType<T> or InjectionToken<T>
+     * @deprecated from v4.0.0 use ProviderToken<T>
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
@@ -5479,6 +5480,15 @@ declare interface ProviderOverride {
 }
 
 /**
+ * @description
+ *
+ * Token that can be used to retrieve an instance from an injector or through a query.
+ *
+ * @publicApi
+ */
+export declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToken<T>;
+
+/**
  * Testability API.
  * `declare` keyword causes tsickle to generate externs, so these methods are
  * not renamed by Closure Compiler.
@@ -5814,7 +5824,7 @@ declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
-    get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
     /**
@@ -6955,7 +6965,7 @@ declare interface TContainerNode extends TNode {
  *
  * Injector bloom filters are also stored here.
  */
-declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | Type<any> | InjectionToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
+declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | ProviderToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string)[];
 
 /** Static data for an <ng-container> */
 declare interface TElementContainerNode extends TNode {
@@ -7824,7 +7834,7 @@ declare interface TQuery {
  * An object representing query metadata extracted from query annotations.
  */
 declare interface TQueryMetadata {
-    predicate: Type<any> | InjectionToken<unknown> | string[];
+    predicate: ProviderToken<unknown> | string[];
     read: any;
     flags: QueryFlags;
 }
@@ -8491,11 +8501,11 @@ export declare interface ViewChildDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         static?: boolean;
     }): ViewChild;
@@ -8553,11 +8563,11 @@ export declare interface ViewChildrenDecorator {
      *
      * @Annotation
      */
-    (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         emitDistinctChangesOnly?: boolean;
     }): any;
-    new (selector: Type<any> | InjectionToken<unknown> | Function | string, opts?: {
+    new (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
         emitDistinctChangesOnly?: boolean;
     }): ViewChildren;
@@ -9098,9 +9108,9 @@ export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [str
 /** Checks whether a function is wrapped by a `forwardRef`. */
 export declare function ɵangular_packages_core_core_a(fn: any): fn is () => any;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
+export declare function ɵangular_packages_core_core_b<T>(token: ProviderToken<T>): T;
 
-export declare function ɵangular_packages_core_core_b<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵangular_packages_core_core_b<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Schedule work at next available slot.
@@ -9351,7 +9361,7 @@ export declare class ɵangular_packages_core_core_bw implements Injector {
     get(token: any, notFoundValue?: any): any;
 }
 
-export declare function ɵangular_packages_core_core_bx(): (<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
+export declare function ɵangular_packages_core_core_bx(): (<T>(token: ProviderToken<T>, flags?: InjectFlags | undefined) => T | null) | undefined;
 
 
 /**
@@ -12190,7 +12200,7 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -12724,9 +12734,9 @@ export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportA
  *
  * @codeGenApi
  */
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
+export declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>): T;
 
-export declare function ɵɵdirectiveInject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags: InjectFlags): T;
+export declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>, flags: InjectFlags): T;
 
 /**
  * Disables directive matching on element.
@@ -13026,9 +13036,9 @@ export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>): T;
+export declare function ɵɵinject<T>(token: ProviderToken<T>): T;
 
-export declare function ɵɵinject<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
+export declare function ɵɵinject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -15199,6 +15209,6 @@ export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray):
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: Type<any> | InjectionToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 export { }

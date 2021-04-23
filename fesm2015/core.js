@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+139.sha-aa35a1a
+ * @license Angular v12.0.0-next.8+213.sha-45ffab5
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11883,7 +11883,7 @@ function staticError(text, obj) {
  */
 function getComponent(element) {
     assertDomElement(element);
-    const context = loadLContext(element, false);
+    const context = getLContext(element);
     if (context === null)
         return null;
     if (context.component === undefined) {
@@ -11905,7 +11905,7 @@ function getComponent(element) {
  */
 function getContext(element) {
     assertDomElement(element);
-    const context = loadLContext(element, false);
+    const context = getLContext(element);
     return context === null ? null : context.lView[CONTEXT];
 }
 /**
@@ -11924,7 +11924,7 @@ function getContext(element) {
  * @globalApi ng
  */
 function getOwningComponent(elementOrDir) {
-    const context = loadLContext(elementOrDir, false);
+    const context = getLContext(elementOrDir);
     if (context === null)
         return null;
     let lView = context.lView;
@@ -11960,7 +11960,7 @@ function getRootComponents(elementOrDir) {
  * @globalApi ng
  */
 function getInjector(elementOrDir) {
-    const context = loadLContext(elementOrDir, false);
+    const context = getLContext(elementOrDir);
     if (context === null)
         return Injector.NULL;
     const tNode = context.lView[TVIEW].data[context.nodeIndex];
@@ -11972,7 +11972,7 @@ function getInjector(elementOrDir) {
  * @param element Element for which the injection tokens should be retrieved.
  */
 function getInjectionTokens(element) {
-    const context = loadLContext(element, false);
+    const context = getLContext(element);
     if (context === null)
         return [];
     const lView = context.lView;
@@ -12022,7 +12022,7 @@ function getDirectives(node) {
     if (node instanceof Text) {
         return [];
     }
-    const context = loadLContext(node, false);
+    const context = getLContext(node);
     if (context === null) {
         return [];
     }
@@ -12073,14 +12073,6 @@ function getDirectiveMetadata(directiveOrComponentInstance) {
     }
     return null;
 }
-function loadLContext(target, throwOnNotFound = true) {
-    const context = getLContext(target);
-    if (!context && throwOnNotFound) {
-        throw new Error(ngDevMode ? `Unable to find context associated with ${stringifyForError(target)}` :
-            'Invalid ng target');
-    }
-    return context;
-}
 /**
  * Retrieve map of local references.
  *
@@ -12090,7 +12082,7 @@ function loadLContext(target, throwOnNotFound = true) {
  *    the local references.
  */
 function getLocalRefs(target) {
-    const context = loadLContext(target, false);
+    const context = getLContext(target);
     if (context === null)
         return {};
     if (context.localRefs === undefined) {
@@ -12126,11 +12118,6 @@ function getRenderedText(component) {
     const hostElement = getHostElement(component);
     return hostElement.textContent || '';
 }
-function loadLContextFromNode(node) {
-    if (!(node instanceof Node))
-        throw new Error('Expecting instance of DOM Element');
-    return loadLContext(node);
-}
 /**
  * Retrieves a list of event listeners associated with a DOM element. The list does include host
  * listeners, but it does not include event listeners defined outside of the Angular context
@@ -12162,7 +12149,7 @@ function loadLContextFromNode(node) {
  */
 function getListeners(element) {
     assertDomElement(element);
-    const lContext = loadLContext(element, false);
+    const lContext = getLContext(element);
     if (lContext === null)
         return [];
     const lView = lContext.lView;
@@ -12212,8 +12199,13 @@ function isDirectiveDefHack(obj) {
  * @param element DOM element which is owned by an existing component's view.
  */
 function getDebugNode(element) {
-    let debugNode = null;
-    const lContext = loadLContextFromNode(element);
+    if (ngDevMode && !(element instanceof Node)) {
+        throw new Error('Expecting instance of DOM Element');
+    }
+    const lContext = getLContext(element);
+    if (lContext === null) {
+        return null;
+    }
     const lView = lContext.lView;
     const nodeIndex = lContext.nodeIndex;
     if (nodeIndex !== -1) {
@@ -12223,9 +12215,9 @@ function getDebugNode(element) {
         const tNode = isLView(valueInLView) ? valueInLView[T_HOST] : getTNode(lView[TVIEW], nodeIndex);
         ngDevMode &&
             assertEqual(tNode.index, nodeIndex, 'Expecting that TNode at index is same as index');
-        debugNode = buildDebugNode(tNode, lView);
+        return buildDebugNode(tNode, lView);
     }
-    return debugNode;
+    return null;
 }
 /**
  * Retrieve the component `LView` from component/element.
@@ -12236,7 +12228,7 @@ function getDebugNode(element) {
  * @param target DOM element or component instance for which to retrieve the LView.
  */
 function getComponentLView(target) {
-    const lContext = loadLContext(target);
+    const lContext = getLContext(target);
     const nodeIndx = lContext.nodeIndex;
     const lView = lContext.lView;
     const componentLView = lView[nodeIndx];
@@ -21424,7 +21416,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.8+139.sha-aa35a1a');
+const VERSION = new Version('12.0.0-next.8+213.sha-45ffab5');
 
 /**
  * @license
@@ -30070,14 +30062,14 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         return this.nativeNode.nodeType == Node.ELEMENT_NODE ? this.nativeNode : null;
     }
     get name() {
-        try {
-            const context = loadLContext(this.nativeNode);
+        const context = getLContext(this.nativeNode);
+        if (context !== null) {
             const lView = context.lView;
             const tData = lView[TVIEW].data;
             const tNode = tData[context.nodeIndex];
             return tNode.value;
         }
-        catch (e) {
+        else {
             return this.nativeNode.nodeName;
         }
     }
@@ -30094,8 +30086,8 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
      *  - attribute bindings (e.g. `[attr.role]="menu"`)
      */
     get properties() {
-        const context = loadLContext(this.nativeNode, false);
-        if (context == null) {
+        const context = getLContext(this.nativeNode);
+        if (context === null) {
             return {};
         }
         const lView = context.lView;
@@ -30115,8 +30107,8 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         if (!element) {
             return attributes;
         }
-        const context = loadLContext(element, false);
-        if (context == null) {
+        const context = getLContext(element);
+        if (context === null) {
             return {};
         }
         const lView = context.lView;
@@ -30267,7 +30259,7 @@ function isPrimitiveValue(value) {
         value === null;
 }
 function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
-    const context = loadLContext(parentElement.nativeNode, false);
+    const context = getLContext(parentElement.nativeNode);
     if (context !== null) {
         const parentTNode = context.lView[TVIEW].data[context.nodeIndex];
         _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
