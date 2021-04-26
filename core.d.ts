@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.11+15.sha-21f1466
+ * @license Angular v11.2.11+18.sha-aa578f5
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6734,7 +6734,7 @@ export declare interface StaticClassSansProvider {
  * Describes how an `Injector` should be configured as static (that is, without reflection).
  * A static provider provides tokens to an injector for various types of dependencies.
  *
- * @see [Injector.create()](/api/core/Injector#create).
+ * @see `Injector.create()`.
  * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
