@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+223.sha-6d9e340
+ * @license Angular v12.0.0-next.8+224.sha-18b33e7
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1482,6 +1482,7 @@
     var DECLARATION_LCONTAINER = 17;
     var PREORDER_HOOK_FLAGS = 18;
     var QUERIES = 19;
+    var ID = 20;
     /**
      * Size of LView's header. Necessary to adjust for it when setting slots.
      *
@@ -1489,7 +1490,7 @@
      * instruction index into `LView` index. All other indexes should be in the `LView` index space and
      * there should be no need to refer to `HEADER_OFFSET` anywhere else.
      */
-    var HEADER_OFFSET = 20;
+    var HEADER_OFFSET = 21;
     /**
      * Converts `TViewType` into human readable text.
      * Make sure this matches with `TViewType`
@@ -6452,6 +6453,80 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    // Keeps track of the currently-active LViews.
+    var TRACKED_LVIEWS = new Map();
+    // Used for generating unique IDs for LViews.
+    var uniqueIdCounter = 0;
+    /** Starts tracking an LView and returns a unique ID that can be used for future lookups. */
+    function registerLView(lView) {
+        var id = uniqueIdCounter++;
+        TRACKED_LVIEWS.set(id, lView);
+        return id;
+    }
+    /** Gets an LView by its unique ID. */
+    function getLViewById(id) {
+        ngDevMode && assertNumber(id, 'ID used for LView lookup must be a number');
+        return TRACKED_LVIEWS.get(id) || null;
+    }
+    /** Stops tracking an LView. */
+    function unregisterLView(lView) {
+        ngDevMode && assertNumber(lView[ID], 'Cannot stop tracking an LView that does not have an ID');
+        TRACKED_LVIEWS.delete(lView[ID]);
+    }
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * The internal view context which is specific to a given DOM element, directive or
+     * component instance. Each value in here (besides the LView and element node details)
+     * can be present, null or undefined. If undefined then it implies the value has not been
+     * looked up yet, otherwise, if null, then a lookup was executed and nothing was found.
+     *
+     * Each value will get filled when the respective value is examined within the getContext
+     * function. The component, element and each directive instance will share the same instance
+     * of the context.
+     */
+    var LContext = /** @class */ (function () {
+        function LContext(
+        /**
+         * ID of the component's parent view data.
+         */
+        lViewId, 
+        /**
+         * The index instance of the node.
+         */
+        nodeIndex, 
+        /**
+         * The instance of the DOM node that is attached to the lNode.
+         */
+        native) {
+            this.lViewId = lViewId;
+            this.nodeIndex = nodeIndex;
+            this.native = native;
+        }
+        Object.defineProperty(LContext.prototype, "lView", {
+            /** Component's parent view data. */
+            get: function () {
+                return getLViewById(this.lViewId);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        return LContext;
+    }());
+
+    /**
+     * @license
+     * Copyright Google LLC All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Returns the matching `LContext` data for a given DOM node, directive or component instance.
      *
@@ -6477,7 +6552,7 @@
         if (mpValue) {
             // only when it's an array is it considered an LView instance
             // ... otherwise it's an already constructed LContext instance
-            if (Array.isArray(mpValue)) {
+            if (isLView(mpValue)) {
                 var lView = mpValue;
                 var nodeIndex = void 0;
                 var component = undefined;
@@ -6536,13 +6611,7 @@
             while (parent = parent.parentNode) {
                 var parentContext = readPatchedData(parent);
                 if (parentContext) {
-                    var lView = void 0;
-                    if (Array.isArray(parentContext)) {
-                        lView = parentContext;
-                    }
-                    else {
-                        lView = parentContext.lView;
-                    }
+                    var lView = Array.isArray(parentContext) ? parentContext : parentContext.lView;
                     // the edge of the app was also reached here through another means
                     // (maybe because the DOM was changed manually).
                     if (!lView) {
@@ -6565,14 +6634,7 @@
      * Creates an empty instance of a `LContext` context
      */
     function createLContext(lView, nodeIndex, native) {
-        return {
-            lView: lView,
-            nodeIndex: nodeIndex,
-            native: native,
-            component: undefined,
-            directives: undefined,
-            localRefs: undefined,
-        };
+        return new LContext(lView[ID], nodeIndex, native);
     }
     /**
      * Takes a component instance and returns the view for that component.
@@ -6581,21 +6643,24 @@
      * @returns The component's view
      */
     function getComponentViewByInstance(componentInstance) {
-        var lView = readPatchedData(componentInstance);
-        var view;
-        if (Array.isArray(lView)) {
-            var nodeIndex = findViaComponent(lView, componentInstance);
-            view = getComponentLViewByIndex(nodeIndex, lView);
-            var context = createLContext(lView, nodeIndex, view[HOST]);
+        var patchedData = readPatchedData(componentInstance);
+        var lView;
+        if (isLView(patchedData)) {
+            var contextLView = patchedData;
+            var nodeIndex = findViaComponent(contextLView, componentInstance);
+            lView = getComponentLViewByIndex(nodeIndex, contextLView);
+            var context = createLContext(contextLView, nodeIndex, lView[HOST]);
             context.component = componentInstance;
             attachPatchData(componentInstance, context);
             attachPatchData(context.native, context);
         }
         else {
-            var context = lView;
-            view = getComponentLViewByIndex(context.nodeIndex, context.lView);
+            var context = patchedData;
+            var contextLView = context.lView;
+            ngDevMode && assertLView(contextLView);
+            lView = getComponentLViewByIndex(context.nodeIndex, contextLView);
         }
-        return view;
+        return lView;
     }
     /**
      * This property will be monkey-patched on elements, components and directives.
@@ -6607,7 +6672,10 @@
      */
     function attachPatchData(target, data) {
         ngDevMode && assertDefined(target, 'Target expected');
-        target[MONKEY_PATCH_KEY_NAME] = data;
+        // Only attach the ID of the view in order to avoid memory leaks (see #41047). We only do this
+        // for `LView`, because we have control over when an `LView` is created and destroyed, whereas
+        // we can't know when to remove an `LContext`.
+        target[MONKEY_PATCH_KEY_NAME] = isLView(data) ? data[ID] : data;
     }
     /**
      * Returns the monkey-patch value data present on the target (which could be
@@ -6615,12 +6683,13 @@
      */
     function readPatchedData(target) {
         ngDevMode && assertDefined(target, 'Target expected');
-        return target[MONKEY_PATCH_KEY_NAME] || null;
+        var data = target[MONKEY_PATCH_KEY_NAME];
+        return (typeof data === 'number') ? getLViewById(data) : data || null;
     }
     function readPatchedLView(target) {
         var value = readPatchedData(target);
         if (value) {
-            return Array.isArray(value) ? value : value.lView;
+            return isLView(value) ? value : value.lView;
         }
         return null;
     }
@@ -7581,6 +7650,7 @@
                 applyView(tView, lView, renderer, 3 /* Destroy */, null, null);
             }
             destroyViewTree(lView);
+            unregisterLView(lView);
         }
     }
     /**
@@ -9442,6 +9512,13 @@
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(LViewDebug.prototype, "id", {
+            get: function () {
+                return this._raw_lView[ID];
+            },
+            enumerable: false,
+            configurable: true
+        });
         Object.defineProperty(LViewDebug.prototype, "decls", {
             get: function () {
                 return toLViewRange(this.tView, this._raw_lView, HEADER_OFFSET, this.tView.bindingStartIndex);
@@ -9732,6 +9809,7 @@
         lView[SANITIZER] = sanitizer || parentLView && parentLView[SANITIZER] || null;
         lView[INJECTOR] = injector || parentLView && parentLView[INJECTOR] || null;
         lView[T_HOST] = tHostNode;
+        lView[ID] = registerLView(lView);
         ngDevMode &&
             assertEqual(tView.type == 2 /* Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
         lView[DECLARATION_COMPONENT_VIEW] =
@@ -11257,8 +11335,11 @@
         for (var i = 0; i < rootContext.components.length; i++) {
             var rootComponent = rootContext.components[i];
             var lView = readPatchedLView(rootComponent);
-            var tView = lView[TVIEW];
-            renderComponentOrTemplate(tView, lView, tView.template, rootComponent);
+            // We might not have an `LView` if the component was destroyed.
+            if (lView !== null) {
+                var tView = lView[TVIEW];
+                renderComponentOrTemplate(tView, lView, tView.template, rootComponent);
+            }
         }
     }
     function detectChangesInternal(tView, lView, context) {
@@ -12382,12 +12463,16 @@
      * @globalApi ng
      */
     function getComponent(element) {
-        assertDomElement(element);
+        ngDevMode && assertDomElement(element);
         var context = getLContext(element);
         if (context === null)
             return null;
         if (context.component === undefined) {
-            context.component = getComponentAtNodeIndex(context.nodeIndex, context.lView);
+            var lView = context.lView;
+            if (lView === null) {
+                return null;
+            }
+            context.component = getComponentAtNodeIndex(context.nodeIndex, lView);
         }
         return context.component;
     }
@@ -12406,7 +12491,8 @@
     function getContext(element) {
         assertDomElement(element);
         var context = getLContext(element);
-        return context === null ? null : context.lView[CONTEXT];
+        var lView = context ? context.lView : null;
+        return lView === null ? null : lView[CONTEXT];
     }
     /**
      * Retrieves the component instance whose view contains the DOM element.
@@ -12425,11 +12511,10 @@
      */
     function getOwningComponent(elementOrDir) {
         var context = getLContext(elementOrDir);
-        if (context === null)
+        var lView = context ? context.lView : null;
+        if (lView === null)
             return null;
-        var lView = context.lView;
         var parent;
-        ngDevMode && assertLView(lView);
         while (lView[TVIEW].type === 2 /* Embedded */ && (parent = getLViewParent(lView))) {
             lView = parent;
         }
@@ -12447,7 +12532,8 @@
      * @globalApi ng
      */
     function getRootComponents(elementOrDir) {
-        return __spreadArray([], __read(getRootContext(elementOrDir).components));
+        var lView = readPatchedLView(elementOrDir);
+        return lView !== null ? __spreadArray([], __read(getRootContext(lView).components)) : [];
     }
     /**
      * Retrieves an `Injector` associated with an element, component or directive instance.
@@ -12461,10 +12547,11 @@
      */
     function getInjector(elementOrDir) {
         var context = getLContext(elementOrDir);
-        if (context === null)
+        var lView = context ? context.lView : null;
+        if (lView === null)
             return Injector.NULL;
-        var tNode = context.lView[TVIEW].data[context.nodeIndex];
-        return new NodeInjector(tNode, context.lView);
+        var tNode = lView[TVIEW].data[context.nodeIndex];
+        return new NodeInjector(tNode, lView);
     }
     /**
      * Retrieve a set of injection tokens at a given DOM node.
@@ -12473,9 +12560,9 @@
      */
     function getInjectionTokens(element) {
         var context = getLContext(element);
-        if (context === null)
+        var lView = context ? context.lView : null;
+        if (lView === null)
             return [];
-        var lView = context.lView;
         var tView = lView[TVIEW];
         var tNode = tView.data[context.nodeIndex];
         var providerTokens = [];
@@ -12523,10 +12610,10 @@
             return [];
         }
         var context = getLContext(node);
-        if (context === null) {
+        var lView = context ? context.lView : null;
+        if (lView === null) {
             return [];
         }
-        var lView = context.lView;
         var tView = lView[TVIEW];
         var nodeIndex = context.nodeIndex;
         if (!(tView === null || tView === void 0 ? void 0 : tView.data[nodeIndex])) {
@@ -12586,7 +12673,11 @@
         if (context === null)
             return {};
         if (context.localRefs === undefined) {
-            context.localRefs = discoverLocalRefs(context.lView, context.nodeIndex);
+            var lView = context.lView;
+            if (lView === null) {
+                return {};
+            }
+            context.localRefs = discoverLocalRefs(lView, context.nodeIndex);
         }
         return context.localRefs || {};
     }
@@ -12648,11 +12739,11 @@
      * @globalApi ng
      */
     function getListeners(element) {
-        assertDomElement(element);
+        ngDevMode && assertDomElement(element);
         var lContext = getLContext(element);
-        if (lContext === null)
+        var lView = lContext === null ? null : lContext.lView;
+        if (lView === null)
             return [];
-        var lView = lContext.lView;
         var tView = lView[TVIEW];
         var lCleanup = lView[CLEANUP];
         var tCleanup = tView.cleanup;
@@ -12703,10 +12794,10 @@
             throw new Error('Expecting instance of DOM Element');
         }
         var lContext = getLContext(element);
-        if (lContext === null) {
+        var lView = lContext ? lContext.lView : null;
+        if (lView === null) {
             return null;
         }
-        var lView = lContext.lView;
         var nodeIndex = lContext.nodeIndex;
         if (nodeIndex !== -1) {
             var valueInLView = lView[nodeIndex];
@@ -12731,6 +12822,7 @@
         var lContext = getLContext(target);
         var nodeIndx = lContext.nodeIndex;
         var lView = lContext.lView;
+        ngDevMode && assertLView(lView);
         var componentLView = lView[nodeIndx];
         ngDevMode && assertLView(componentLView);
         return componentLView;
@@ -21960,7 +22052,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+223.sha-6d9e340');
+    var VERSION = new Version('12.0.0-next.8+224.sha-18b33e7');
 
     /**
      * @license
@@ -30848,8 +30940,8 @@
         Object.defineProperty(DebugElement__POST_R3__.prototype, "name", {
             get: function () {
                 var context = getLContext(this.nativeNode);
-                if (context !== null) {
-                    var lView = context.lView;
+                var lView = context ? context.lView : null;
+                if (lView !== null) {
                     var tData = lView[TVIEW].data;
                     var tNode = tData[context.nodeIndex];
                     return tNode.value;
@@ -30876,10 +30968,10 @@
              */
             get: function () {
                 var context = getLContext(this.nativeNode);
-                if (context === null) {
+                var lView = context ? context.lView : null;
+                if (lView === null) {
                     return {};
                 }
-                var lView = context.lView;
                 var tData = lView[TVIEW].data;
                 var tNode = tData[context.nodeIndex];
                 var properties = {};
@@ -30901,10 +30993,10 @@
                     return attributes;
                 }
                 var context = getLContext(element);
-                if (context === null) {
+                var lView = context ? context.lView : null;
+                if (lView === null) {
                     return {};
                 }
-                var lView = context.lView;
                 var tNodeAttrs = lView[TVIEW].data[context.nodeIndex].attrs;
                 var lowercaseTNodeAttrs = [];
                 // For debug nodes we take the element's attribute directly from the DOM since it allows us
@@ -31073,9 +31165,10 @@
     }
     function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
         var context = getLContext(parentElement.nativeNode);
-        if (context !== null) {
-            var parentTNode = context.lView[TVIEW].data[context.nodeIndex];
-            _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
+        var lView = context ? context.lView : null;
+        if (lView !== null) {
+            var parentTNode = lView[TVIEW].data[context.nodeIndex];
+            _queryNodeChildrenR3(parentTNode, lView, predicate, matches, elementsOnly, parentElement.nativeNode);
         }
         else {
             // If the context is null, then `parentElement` was either created with Renderer2 or native DOM
@@ -34046,6 +34139,7 @@
     exports.ɵEMPTY_MAP = EMPTY_MAP;
     exports.ɵINJECTOR_IMPL__POST_R3__ = INJECTOR_IMPL__POST_R3__;
     exports.ɵINJECTOR_SCOPE = INJECTOR_SCOPE;
+    exports.ɵLContext = LContext;
     exports.ɵLifecycleHooksFeature = LifecycleHooksFeature;
     exports.ɵNG_COMP_DEF = NG_COMP_DEF;
     exports.ɵNG_DIR_DEF = NG_DIR_DEF;

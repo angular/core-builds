@@ -39,6 +39,7 @@ export declare const DECLARATION_COMPONENT_VIEW = 16;
 export declare const DECLARATION_LCONTAINER = 17;
 export declare const PREORDER_HOOK_FLAGS = 18;
 export declare const QUERIES = 19;
+export declare const ID = 20;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -46,7 +47,7 @@ export declare const QUERIES = 19;
  * instruction index into `LView` index. All other indexes should be in the `LView` index space and
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
-export declare const HEADER_OFFSET = 20;
+export declare const HEADER_OFFSET = 21;
 export interface OpaqueViewState {
     '__brand__': 'Brand for OpaqueViewState that nothing will match';
 }
@@ -290,6 +291,8 @@ export interface LView extends Array<any> {
      * are not `Dirty`/`CheckAlways`.
      */
     [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
+    /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
+    [ID]: number;
 }
 /** Flags associated with an LView (saved in LView[FLAGS]) */
 export declare const enum LViewFlags {
