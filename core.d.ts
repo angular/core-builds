@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+213.sha-45ffab5
+ * @license Angular v12.0.0-next.8+272.sha-083ceec
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3174,6 +3174,8 @@ declare const enum IcuType {
     plural = 1
 }
 
+declare const ID = 20;
+
 /**
  * This array contains information about input properties that
  * need to be set once from attribute data. It's ordered by
@@ -5397,13 +5399,13 @@ declare interface ProceduralRenderer3 {
      * in which case the view engine won't call it.
      * This is used as a performance optimization for production mode.
      */
-    destroyNode?: ((node: RNode) => void) | null;
-    appendChild(parent: RElement, newChild: RNode): void;
-    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
-    removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
+    destroyNode?: ((node: ɵangular_packages_core_core_cd) => void) | null;
+    appendChild(parent: RElement, newChild: ɵangular_packages_core_core_cd): void;
+    insertBefore(parent: ɵangular_packages_core_core_cd, newChild: ɵangular_packages_core_core_cd, refChild: ɵangular_packages_core_core_cd | null, isMove?: boolean): void;
+    removeChild(parent: RElement, oldChild: ɵangular_packages_core_core_cd, isHostElement?: boolean): void;
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
-    parentNode(node: RNode): RElement | null;
-    nextSibling(node: RNode): RNode | null;
+    parentNode(node: ɵangular_packages_core_core_cd): RElement | null;
+    nextSibling(node: ɵangular_packages_core_core_cd): ɵangular_packages_core_core_cd | null;
     setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
     removeAttribute(el: RElement, name: string, namespace?: string | null): void;
     addClass(el: RElement, name: string): void;
@@ -5412,7 +5414,7 @@ declare interface ProceduralRenderer3 {
     removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
     setProperty(el: RElement, name: string, value: any): void;
     setValue(node: RText | RComment, value: string): void;
-    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
+    listen(target: GlobalTargetName | ɵangular_packages_core_core_cd, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 
 /**
@@ -5845,7 +5847,7 @@ declare class R3Injector {
     private injectableDefInScope;
 }
 
-declare interface RComment extends RNode {
+declare interface RComment extends ɵangular_packages_core_core_cd {
     textContent: string | null;
 }
 
@@ -6134,7 +6136,7 @@ export declare class ReflectiveKey {
  * Subset of API needed for writing attributes, properties, and setting up
  * listeners on Element.
  */
-declare interface RElement extends RNode {
+declare interface RElement extends ɵangular_packages_core_core_cd {
     style: RCssStyleDeclaration;
     classList: RDomTokenList;
     className: string;
@@ -6504,47 +6506,6 @@ export declare interface ResolvedReflectiveProvider {
 export declare function resolveForwardRef<T>(type: T): T;
 
 /**
- * The goal here is to make sure that the browser DOM API is the Renderer.
- * We do this by defining a subset of DOM API to be the renderer and then
- * use that at runtime for rendering.
- *
- * At runtime we can then use the DOM api directly, in server or web-worker
- * it will be easy to implement such API.
- */
-/** Subset of API needed for appending elements and text nodes. */
-declare interface RNode {
-    /**
-     * Returns the parent Element, Document, or DocumentFragment
-     */
-    parentNode: RNode | null;
-    /**
-     * Returns the parent Element if there is one
-     */
-    parentElement: RElement | null;
-    /**
-     * Gets the Node immediately following this one in the parent's childNodes
-     */
-    nextSibling: RNode | null;
-    /**
-     * Removes a child from the current node and returns the removed node
-     * @param oldChild the child node to remove
-     */
-    removeChild(oldChild: RNode): RNode;
-    /**
-     * Insert a child node.
-     *
-     * Used exclusively for adding View root nodes into ViewAnchor location.
-     */
-    insertBefore(newChild: RNode, refChild: RNode | null, isViewRoot: boolean): void;
-    /**
-     * Append a child node.
-     *
-     * Used exclusively for building up DOM which are static (ie not View roots)
-     */
-    appendChild(newChild: RNode): RNode;
-}
-
-/**
  * RootContext contains information which is shared for all components which
  * were bootstrapped with {@link renderComponent}.
  */
@@ -6592,7 +6553,7 @@ declare interface RootData {
     sanitizer: Sanitizer;
 }
 
-declare interface RText extends RNode {
+declare interface RText extends ɵangular_packages_core_core_cd {
     textContent: string | null;
 }
 
@@ -6843,7 +6804,7 @@ export declare interface StaticClassSansProvider {
  * Describes how an `Injector` should be configured as static (that is, without reflection).
  * A static provider provides tokens to an injector for various types of dependencies.
  *
- * @see [Injector.create()](/api/core/Injector#create).
+ * @see `Injector.create()`.
  * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
@@ -7479,7 +7440,7 @@ declare interface TNode {
      * If `projection` is of type `RNode[][]` than we have a collection of native nodes passed as
      * projectable nodes during dynamic component creation.
      */
-    projection: (TNode | RNode[])[] | number | null;
+    projection: (TNode | ɵangular_packages_core_core_cd[])[] | number | null;
     /**
      * A collection of all `style` static values for an element (including from host).
      *
@@ -9213,7 +9174,7 @@ export declare interface ɵangular_packages_core_core_bk extends TNode {
      * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node
      * or a component without projection, it will be null.
      */
-    projection: (TNode | RNode[])[] | null;
+    projection: (TNode | ɵangular_packages_core_core_cd[])[] | null;
     /**
      * Stores TagName
      */
@@ -9389,7 +9350,7 @@ export declare const enum ɵangular_packages_core_core_by {
  * @param tNode
  * @param lView
  */
-export declare function ɵangular_packages_core_core_bz(tNode: TNode, lView: ɵangular_packages_core_core_ca): RNode;
+export declare function ɵangular_packages_core_core_bz(tNode: TNode, lView: ɵangular_packages_core_core_ca): ɵangular_packages_core_core_cd;
 
 /**
  * Attaches a given InjectFlag to a given decorator using monkey-patching.
@@ -9643,6 +9604,8 @@ export declare interface ɵangular_packages_core_core_ca extends Array<any> {
      * are not `Dirty`/`CheckAlways`.
      */
     [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
+    /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
+    [ID]: number;
 }
 
 /**
@@ -9678,6 +9641,47 @@ export declare function ɵangular_packages_core_core_cb(viewOrComponent: ɵangul
 export declare function ɵangular_packages_core_core_cc(message: string, replacements?: {
     [key: string]: (string | string[]);
 }): string;
+
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
+/** Subset of API needed for appending elements and text nodes. */
+export declare interface ɵangular_packages_core_core_cd {
+    /**
+     * Returns the parent Element, Document, or DocumentFragment
+     */
+    parentNode: ɵangular_packages_core_core_cd | null;
+    /**
+     * Returns the parent Element if there is one
+     */
+    parentElement: RElement | null;
+    /**
+     * Gets the Node immediately following this one in the parent's childNodes
+     */
+    nextSibling: ɵangular_packages_core_core_cd | null;
+    /**
+     * Removes a child from the current node and returns the removed node
+     * @param oldChild the child node to remove
+     */
+    removeChild(oldChild: ɵangular_packages_core_core_cd): ɵangular_packages_core_core_cd;
+    /**
+     * Insert a child node.
+     *
+     * Used exclusively for adding View root nodes into ViewAnchor location.
+     */
+    insertBefore(newChild: ɵangular_packages_core_core_cd, refChild: ɵangular_packages_core_core_cd | null, isViewRoot: boolean): void;
+    /**
+     * Append a child node.
+     *
+     * Used exclusively for building up DOM which are static (ie not View roots)
+     */
+    appendChild(newChild: ɵangular_packages_core_core_cd): ɵangular_packages_core_core_cd;
+}
 
 export declare class ɵangular_packages_core_core_d implements ReflectiveInjector {
     private static INJECTOR_KEY;
@@ -10679,11 +10683,11 @@ export declare const ɵivyEnabled = false;
  * function. The component, element and each directive instance will share the same instance
  * of the context.
  */
-export declare interface ɵLContext {
+export declare class ɵLContext {
     /**
-     * The component's parent view data.
+     * ID of the component's parent view data.
      */
-    lView: ɵangular_packages_core_core_ca;
+    private lViewId;
     /**
      * The index instance of the node.
      */
@@ -10691,7 +10695,7 @@ export declare interface ɵLContext {
     /**
      * The instance of the DOM node that is attached to the lNode.
      */
-    native: RNode;
+    native: ɵangular_packages_core_core_cd;
     /**
      * The instance of the Component node.
      */
@@ -10701,12 +10705,27 @@ export declare interface ɵLContext {
      */
     directives: any[] | null | undefined;
     /**
-     * The map of local references (local reference name => element or directive instance) that exist
-     * on this element.
+     * The map of local references (local reference name => element or directive instance) that
+     * exist on this element.
      */
     localRefs: {
         [key: string]: any;
     } | null | undefined;
+    /** Component's parent view data. */
+    get lView(): ɵangular_packages_core_core_ca | null;
+    constructor(
+    /**
+     * ID of the component's parent view data.
+     */
+    lViewId: number, 
+    /**
+     * The index instance of the node.
+     */
+    nodeIndex: number, 
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     */
+    native: ɵangular_packages_core_core_cd);
 }
 
 /**
