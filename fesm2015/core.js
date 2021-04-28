@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.12
+ * @license Angular v11.2.12+1.sha-f555a55
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21419,7 +21419,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.2.12');
+const VERSION = new Version('11.2.12+1.sha-f555a55');
 
 /**
  * @license
@@ -22605,9 +22605,6 @@ class ViewRef {
     }
     /**
      * Marks a view and all of its ancestors dirty.
-     *
-     * It also triggers change detection by calling `scheduleTick` internally, which coalesces
-     * multiple `markForCheck` calls to into one change detection run.
      *
      * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush OnPush} component is
      * checked when it needs to be re-rendered but the two normal triggers haven't marked it
