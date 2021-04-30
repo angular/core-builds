@@ -8,7 +8,6 @@
 import '../../util/ng_dev_mode';
 import '../../util/ng_i18n_closure_mode';
 import { I18nUpdateOpCodes, IcuExpression, TIcu } from '../interfaces/i18n';
-import { SanitizerFn } from '../interfaces/sanitization';
 import { LView, TView } from '../interfaces/view';
 /**
  * Create dynamic nodes from i18n translation block.
@@ -29,16 +28,6 @@ export declare function i18nStartFirstCreatePass(tView: TView, parentTNodeIndex:
  * See `i18nAttributes` above.
  */
 export declare function i18nAttributesFirstPass(tView: TView, index: number, values: string[]): void;
-/**
- * Generate the OpCodes to update the bindings of a string.
- *
- * @param updateOpCodes Place where the update opcodes will be stored.
- * @param str The string containing the bindings.
- * @param destinationNode Index of the destination node which will receive the binding.
- * @param attrName Name of the attribute, if the string belongs to an attribute.
- * @param sanitizeFn Sanitization function used to sanitize the string after update, if necessary.
- */
-export declare function generateBindingUpdateOpCodes(updateOpCodes: I18nUpdateOpCodes, str: string, destinationNode: number, attrName?: string, sanitizeFn?: SanitizerFn | null): number;
 export declare function isRootTemplateMessage(subTemplateIndex: number): subTemplateIndex is -1;
 /**
  * Extracts a part of a message and removes the rest.
