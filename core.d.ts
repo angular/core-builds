@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+295.sha-2dd96e0
+ * @license Angular v12.0.0-next.8+296.sha-6581a1b
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2670,10 +2670,7 @@ export declare interface GetTestability {
 
 declare type GlobalTargetName = 'document' | 'window' | 'body';
 
-declare type GlobalTargetResolver = (element: any) => {
-    name: GlobalTargetName;
-    target: EventTarget;
-};
+declare type GlobalTargetResolver = (element: any) => EventTarget;
 
 /**
  * Flag to signify that this `LContainer` may have transplanted views which need to be change
@@ -14054,10 +14051,7 @@ export declare function ɵɵreference<T>(index: number): T;
  */
 export declare function ɵɵresolveBody(element: RElement & {
     ownerDocument: Document;
-}): {
-    name: string;
-    target: HTMLElement;
-};
+}): HTMLElement;
 
 /**
  *
@@ -14065,10 +14059,7 @@ export declare function ɵɵresolveBody(element: RElement & {
  */
 export declare function ɵɵresolveDocument(element: RElement & {
     ownerDocument: Document;
-}): {
-    name: string;
-    target: Document;
-};
+}): Document;
 
 /**
  *
@@ -14076,10 +14067,7 @@ export declare function ɵɵresolveDocument(element: RElement & {
  */
 export declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
-}): {
-    name: string;
-    target: (Window & typeof globalThis) | null;
-};
+}): (Window & typeof globalThis) | null;
 
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
@@ -14879,7 +14867,7 @@ export declare function ɵɵstylePropInterpolateV(prop: string, values: any[], v
  *
  * @codeGenApi
  */
-export declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean, eventTargetResolver?: GlobalTargetResolver): typeof ɵɵsyntheticHostListener;
+export declare function ɵɵsyntheticHostListener(eventName: string, listenerFn: (e?: any) => any): typeof ɵɵsyntheticHostListener;
 
 /**
  * Updates a synthetic host binding (e.g. `[@foo]`) on a component or directive.
