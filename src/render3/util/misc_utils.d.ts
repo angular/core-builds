@@ -13,30 +13,21 @@ export declare const defaultScheduler: typeof setTimeout | typeof requestAnimati
  */
 export declare function ɵɵresolveWindow(element: RElement & {
     ownerDocument: Document;
-}): {
-    name: string;
-    target: (Window & typeof globalThis) | null;
-};
+}): (Window & typeof globalThis) | null;
 /**
  *
  * @codeGenApi
  */
 export declare function ɵɵresolveDocument(element: RElement & {
     ownerDocument: Document;
-}): {
-    name: string;
-    target: Document;
-};
+}): Document;
 /**
  *
  * @codeGenApi
  */
 export declare function ɵɵresolveBody(element: RElement & {
     ownerDocument: Document;
-}): {
-    name: string;
-    target: HTMLElement;
-};
+}): HTMLElement;
 /**
  * The special delimiter we use to separate property names, prefixes, and suffixes
  * in property binding metadata. See storeBindingMetadata().

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+295.sha-2dd96e0
+ * @license Angular v12.0.0-next.8+296.sha-6581a1b
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7023,21 +7023,21 @@
      * @codeGenApi
      */
     function ɵɵresolveWindow(element) {
-        return { name: 'window', target: element.ownerDocument.defaultView };
+        return element.ownerDocument.defaultView;
     }
     /**
      *
      * @codeGenApi
      */
     function ɵɵresolveDocument(element) {
-        return { name: 'document', target: element.ownerDocument };
+        return element.ownerDocument;
     }
     /**
      *
      * @codeGenApi
      */
     function ɵɵresolveBody(element) {
-        return { name: 'body', target: element.ownerDocument.body };
+        return element.ownerDocument.body;
     }
     /**
      * The special delimiter we use to separate property names, prefixes, and suffixes
@@ -15608,11 +15608,10 @@
      * @codeGenApi
      */
     function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
-        if (useCapture === void 0) { useCapture = false; }
         var lView = getLView();
         var tView = getTView();
         var tNode = getCurrentTNode();
-        listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, useCapture, eventTargetResolver);
+        listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, !!useCapture, eventTargetResolver);
         return ɵɵlistener;
     }
     /**
@@ -15636,14 +15635,13 @@
      *
      * @codeGenApi
      */
-    function ɵɵsyntheticHostListener(eventName, listenerFn, useCapture, eventTargetResolver) {
-        if (useCapture === void 0) { useCapture = false; }
+    function ɵɵsyntheticHostListener(eventName, listenerFn) {
         var tNode = getCurrentTNode();
         var lView = getLView();
         var tView = getTView();
         var currentDef = getCurrentDirectiveDef(tView.data);
         var renderer = loadComponentRenderer(currentDef, tNode, lView);
-        listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver);
+        listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, false);
         return ɵɵsyntheticHostListener;
     }
     /**
@@ -15677,7 +15675,6 @@
         return null;
     }
     function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver) {
-        if (useCapture === void 0) { useCapture = false; }
         var isTNodeDirectiveHost = isDirectiveHost(tNode);
         var firstCreatePass = tView.firstCreatePass;
         var tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
@@ -15691,11 +15688,10 @@
         // add native event listener - applicable to elements only
         if (tNode.type & 3 /* AnyRNode */) {
             var native = getNativeByTNode(tNode, lView);
-            var resolved = eventTargetResolver ? eventTargetResolver(native) : EMPTY_OBJ;
-            var target = resolved.target || native;
+            var target = eventTargetResolver ? eventTargetResolver(native) : native;
             var lCleanupIndex = lCleanup.length;
             var idxOrTargetGetter = eventTargetResolver ?
-                function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])).target; } :
+                function (_lView) { return eventTargetResolver(unwrapRNode(_lView[tNode.index])); } :
                 tNode.index;
             // In order to match current behavior, native DOM event listeners must be added for all
             // events (including outputs).
@@ -15731,11 +15727,8 @@
                     processOutputs = false;
                 }
                 else {
-                    // The first argument of `listen` function in Procedural Renderer is:
-                    // - either a target name (as a string) in case of global target (window, document, body)
-                    // - or element reference (in all other cases)
                     listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
-                    var cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
+                    var cleanupFn = renderer.listen(target, eventName, listenerFn);
                     ngDevMode && ngDevMode.rendererAddEventListener++;
                     lCleanup.push(listenerFn, cleanupFn);
                     tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
@@ -21960,7 +21953,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+295.sha-2dd96e0');
+    var VERSION = new Version('12.0.0-next.8+296.sha-6581a1b');
 
     /**
      * @license
