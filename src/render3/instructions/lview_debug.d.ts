@@ -226,7 +226,6 @@ export declare class LViewDebug implements ILViewDebug {
     get declarationView(): ILViewDebug | null;
     get queries(): LQueries | null;
     get tHost(): ITNode | null;
-    get id(): number;
     get decls(): LViewDebugRange;
     get vars(): LViewDebugRange;
     get expando(): LViewDebugRange;

@@ -17,11 +17,11 @@ import { LView } from './view';
  * function. The component, element and each directive instance will share the same instance
  * of the context.
  */
-export declare class LContext {
+export interface LContext {
     /**
-     * ID of the component's parent view data.
+     * The component's parent view data.
      */
-    private lViewId;
+    lView: LView;
     /**
      * The index instance of the node.
      */
@@ -39,25 +39,10 @@ export declare class LContext {
      */
     directives: any[] | null | undefined;
     /**
-     * The map of local references (local reference name => element or directive instance) that
-     * exist on this element.
+     * The map of local references (local reference name => element or directive instance) that exist
+     * on this element.
      */
     localRefs: {
         [key: string]: any;
     } | null | undefined;
-    /** Component's parent view data. */
-    get lView(): LView | null;
-    constructor(
-    /**
-     * ID of the component's parent view data.
-     */
-    lViewId: number, 
-    /**
-     * The index instance of the node.
-     */
-    nodeIndex: number, 
-    /**
-     * The instance of the DOM node that is attached to the lNode.
-     */
-    native: RNode);
 }
