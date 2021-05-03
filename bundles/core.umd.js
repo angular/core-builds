@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.12+12.sha-7e9ef4d
+ * @license Angular v11.2.12+18.sha-a75a317
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20702,7 +20702,7 @@
         var hasBinding = text.match(BINDING_REGEXP);
         var tNode = createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, createOpCodes, hasBinding ? null : text, false);
         if (hasBinding) {
-            generateBindingUpdateOpCodes(updateOpCodes, text, tNode.index);
+            generateBindingUpdateOpCodes(updateOpCodes, text, tNode.index, null, 0, null);
         }
     }
     /**
@@ -20730,7 +20730,9 @@
                     }
                     // i18n attributes that hit this code path are guaranteed to have bindings, because
                     // the compiler treats static i18n attributes as regular attribute bindings.
-                    generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName);
+                    // Since this may not be the first i18n attribute on this element we need to pass in how
+                    // many previous bindings there have already been.
+                    generateBindingUpdateOpCodes(updateOpCodes, message, previousElementIndex, attrName, countBindings(updateOpCodes), null);
                 }
             }
             tView.data[index] = updateOpCodes;
@@ -20744,9 +20746,10 @@
      * @param destinationNode Index of the destination node which will receive the binding.
      * @param attrName Name of the attribute, if the string belongs to an attribute.
      * @param sanitizeFn Sanitization function used to sanitize the string after update, if necessary.
+     * @param bindingStart The lView index of the next expression that can be bound via an opCode.
+     * @returns The mask value for these bindings
      */
-    function generateBindingUpdateOpCodes(updateOpCodes, str, destinationNode, attrName, sanitizeFn) {
-        if (sanitizeFn === void 0) { sanitizeFn = null; }
+    function generateBindingUpdateOpCodes(updateOpCodes, str, destinationNode, attrName, bindingStart, sanitizeFn) {
         ngDevMode &&
             assertGreaterThanOrEqual(destinationNode, HEADER_OFFSET, 'Index must be in absolute LView offset');
         var maskIndex = updateOpCodes.length; // Location of mask
@@ -20762,7 +20765,7 @@
             var textValue = textParts[j];
             if (j & 1) {
                 // Odd indexes are bindings
-                var bindingIndex = parseInt(textValue, 10);
+                var bindingIndex = bindingStart + parseInt(textValue, 10);
                 updateOpCodes.push(-1 - bindingIndex);
                 mask = mask | toMaskBit(bindingIndex);
             }
@@ -20779,6 +20782,28 @@
         updateOpCodes[maskIndex] = mask;
         updateOpCodes[sizeIndex] = updateOpCodes.length - startIndex;
         return mask;
+    }
+    /**
+     * Count the number of bindings in the given `opCodes`.
+     *
+     * It could be possible to speed this up, by passing the number of bindings found back from
+     * `generateBindingUpdateOpCodes()` to `i18nAttributesFirstPass()` but this would then require more
+     * complexity in the code and/or transient objects to be created.
+     *
+     * Since this function is only called once when the template is instantiated, is trivial in the
+     * first instance (since `opCodes` will be an empty array), and it is not common for elements to
+     * contain multiple i18n bound attributes, it seems like this is a reasonable compromise.
+     */
+    function countBindings(opCodes) {
+        var count = 0;
+        for (var i = 0; i < opCodes.length; i++) {
+            var opCode = opCodes[i];
+            // Bindings are negative numbers.
+            if (typeof opCode === 'number' && opCode < 0) {
+                count++;
+            }
+        }
+        return count;
     }
     /**
      * Convert binding index to mask bit.
@@ -21031,13 +21056,13 @@
                             if (hasBinding_1) {
                                 if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
                                     if (URI_ATTRS[lowerAttrName]) {
-                                        generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, _sanitizeUrl);
+                                        generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, _sanitizeUrl);
                                     }
                                     else if (SRCSET_ATTRS[lowerAttrName]) {
-                                        generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, sanitizeSrcset);
+                                        generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, sanitizeSrcset);
                                     }
                                     else {
-                                        generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name);
+                                        generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, null);
                                     }
                                 }
                                 else {
@@ -21063,7 +21088,8 @@
                     addCreateNodeAndAppend(create, null, hasBinding ? '' : value, parentIdx, newIndex);
                     addRemoveNode(remove, newIndex, depth);
                     if (hasBinding) {
-                        bindingMask = generateBindingUpdateOpCodes(update, value, newIndex) | bindingMask;
+                        bindingMask =
+                            generateBindingUpdateOpCodes(update, value, newIndex, null, 0, null) | bindingMask;
                     }
                     break;
                 case Node.COMMENT_NODE:
@@ -21983,7 +22009,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.12+12.sha-7e9ef4d');
+    var VERSION = new Version('11.2.12+18.sha-a75a317');
 
     /**
      * @license
