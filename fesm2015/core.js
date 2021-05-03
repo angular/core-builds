@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+312.sha-253ed5d
+ * @license Angular v12.0.0-next.8+313.sha-3b58903
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21439,7 +21439,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.8+312.sha-253ed5d');
+const VERSION = new Version('12.0.0-next.8+313.sha-3b58903');
 
 /**
  * @license
@@ -28719,8 +28719,8 @@ class NoopNgZone {
  */
 /**
  * The Testability service provides testing hooks that can be accessed from
- * the browser and by services such as Protractor. Each bootstrapped Angular
- * application on the page will have an instance of Testability.
+ * the browser. Each bootstrapped Angular application on the page will have
+ * an instance of Testability.
  * @publicApi
  */
 class Testability {
