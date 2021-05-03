@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-rc.1+35.sha-d59330b
+ * @license Angular v12.0.0-rc.1+44.sha-b5b09dc
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7017,8 +7017,8 @@ export declare abstract class TemplateRef<C> {
 
 /**
  * The Testability service provides testing hooks that can be accessed from
- * the browser and by services such as Protractor. Each bootstrapped Angular
- * application on the page will have an instance of Testability.
+ * the browser. Each bootstrapped Angular application on the page will have
+ * an instance of Testability.
  * @publicApi
  */
 export declare class Testability implements PublicTestability {
