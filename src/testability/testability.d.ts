@@ -26,8 +26,8 @@ export declare type DoneCallback = (didWork: boolean, tasks?: PendingMacrotask[]
 export declare type UpdateCallback = (tasks: PendingMacrotask[]) => boolean;
 /**
  * The Testability service provides testing hooks that can be accessed from
- * the browser and by services such as Protractor. Each bootstrapped Angular
- * application on the page will have an instance of Testability.
+ * the browser. Each bootstrapped Angular application on the page will have
+ * an instance of Testability.
  * @publicApi
  */
 export declare class Testability implements PublicTestability {
