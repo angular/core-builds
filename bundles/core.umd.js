@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.13+4.sha-c7bef55
+ * @license Angular v11.2.13+6.sha-e090a6d
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22009,7 +22009,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('11.2.13+4.sha-c7bef55');
+    var VERSION = new Version('11.2.13+6.sha-e090a6d');
 
     /**
      * @license
@@ -33982,6 +33982,7 @@
     exports.ɵRender3ComponentFactory = ComponentFactory$1;
     exports.ɵRender3ComponentRef = ComponentRef$1;
     exports.ɵRender3NgModuleRef = NgModuleRef$1;
+    exports.ɵRuntimeError = RuntimeError;
     exports.ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__;
     exports.ɵSWITCH_COMPILE_COMPONENT__POST_R3__ = SWITCH_COMPILE_COMPONENT__POST_R3__;
     exports.ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__ = SWITCH_COMPILE_DIRECTIVE__POST_R3__;
