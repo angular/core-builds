@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-rc.2+8.sha-cbe01a3
+ * @license Angular v12.0.0-rc.2+13.sha-568a69c
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11332,6 +11332,24 @@ export declare function ɵresetJitOptions(): void;
 export declare function ɵresolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
     text(): Promise<string>;
 }>)): Promise<void>;
+
+export declare class ɵRuntimeError extends Error {
+    code: ɵRuntimeErrorCode;
+    constructor(code: ɵRuntimeErrorCode, message: string);
+}
+
+
+export declare const enum ɵRuntimeErrorCode {
+    EXPRESSION_CHANGED_AFTER_CHECKED = "100",
+    CYCLIC_DI_DEPENDENCY = "200",
+    PROVIDER_NOT_FOUND = "201",
+    MULTIPLE_COMPONENTS_MATCH = "300",
+    EXPORT_NOT_FOUND = "301",
+    PIPE_NOT_FOUND = "302",
+    UNKNOWN_BINDING = "303",
+    UNKNOWN_ELEMENT = "304",
+    TEMPLATE_STRUCTURE_ERROR = "305"
+}
 
 /**
  * Marker interface for a value that's safe to use as HTML.
