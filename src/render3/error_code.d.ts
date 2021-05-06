@@ -13,7 +13,8 @@ export declare const enum RuntimeErrorCode {
     EXPORT_NOT_FOUND = "301",
     PIPE_NOT_FOUND = "302",
     UNKNOWN_BINDING = "303",
-    UNKNOWN_ELEMENT = "304"
+    UNKNOWN_ELEMENT = "304",
+    TEMPLATE_STRUCTURE_ERROR = "305"
 }
 export declare class RuntimeError extends Error {
     code: RuntimeErrorCode;
