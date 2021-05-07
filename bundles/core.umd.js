@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+365.sha-3927e25
+ * @license Angular v12.0.0-next.8+367.sha-cb418bd
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7685,11 +7685,25 @@
                     var toCall = destroyHooks[i + 1];
                     if (Array.isArray(toCall)) {
                         for (var j = 0; j < toCall.length; j += 2) {
-                            toCall[j + 1].call(context[toCall[j]]);
+                            var callContext = context[toCall[j]];
+                            var hook = toCall[j + 1];
+                            profiler(4 /* LifecycleHookStart */, callContext, hook);
+                            try {
+                                hook.call(callContext);
+                            }
+                            finally {
+                                profiler(5 /* LifecycleHookEnd */, callContext, hook);
+                            }
                         }
                     }
                     else {
-                        toCall.call(context);
+                        profiler(4 /* LifecycleHookStart */, context, toCall);
+                        try {
+                            toCall.call(context);
+                        }
+                        finally {
+                            profiler(5 /* LifecycleHookEnd */, context, toCall);
+                        }
                     }
                 }
             }
@@ -21979,7 +21993,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+365.sha-3927e25');
+    var VERSION = new Version('12.0.0-next.8+367.sha-cb418bd');
 
     /**
      * @license
