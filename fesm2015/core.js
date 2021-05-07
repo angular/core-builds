@@ -1,5 +1,5 @@
 /**
- * @license Angular v11.2.13+9.sha-9883dab
+ * @license Angular v11.2.13+12.sha-ed20342
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7398,11 +7398,25 @@ function executeOnDestroys(tView, lView) {
                 const toCall = destroyHooks[i + 1];
                 if (Array.isArray(toCall)) {
                     for (let j = 0; j < toCall.length; j += 2) {
-                        toCall[j + 1].call(context[toCall[j]]);
+                        const callContext = context[toCall[j]];
+                        const hook = toCall[j + 1];
+                        profiler(4 /* LifecycleHookStart */, callContext, hook);
+                        try {
+                            hook.call(callContext);
+                        }
+                        finally {
+                            profiler(5 /* LifecycleHookEnd */, callContext, hook);
+                        }
                     }
                 }
                 else {
-                    toCall.call(context);
+                    profiler(4 /* LifecycleHookStart */, context, toCall);
+                    try {
+                        toCall.call(context);
+                    }
+                    finally {
+                        profiler(5 /* LifecycleHookEnd */, context, toCall);
+                    }
                 }
             }
         }
@@ -21446,7 +21460,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.2.13+9.sha-9883dab');
+const VERSION = new Version('11.2.13+12.sha-ed20342');
 
 /**
  * @license
