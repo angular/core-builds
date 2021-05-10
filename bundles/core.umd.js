@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+373.sha-cd252b9
+ * @license Angular v12.0.0-next.8+380.sha-d59f2b0
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21984,16 +21984,17 @@
     var Version = /** @class */ (function () {
         function Version(full) {
             this.full = full;
-            this.major = full.split('.')[0];
-            this.minor = full.split('.')[1];
-            this.patch = full.split('.').slice(2).join('.');
+            var _a = __read(full.split('.')), major = _a[0], minor = _a[1], rest = _a.slice(2);
+            this.major = major;
+            this.minor = minor;
+            this.patch = rest.join('.');
         }
         return Version;
     }());
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+373.sha-cd252b9');
+    var VERSION = new Version('12.0.0-next.8+380.sha-d59f2b0');
 
     /**
      * @license
