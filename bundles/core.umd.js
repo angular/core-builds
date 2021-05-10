@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+385.sha-089daea
+ * @license Angular v12.0.0-next.8+389.sha-d2296bc
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22023,7 +22023,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-next.8+385.sha-089daea');
+    var VERSION = new Version('12.0.0-next.8+389.sha-d2296bc');
 
     /**
      * @license
@@ -27841,11 +27841,11 @@
      * NgModule the component belongs to. We keep the list of compiled components here so that the
      * TestBed can reset it later.
      */
-    var ownerNgModule = new Map();
-    var verifiedNgModule = new Map();
+    var ownerNgModule = new WeakMap();
+    var verifiedNgModule = new WeakMap();
     function resetCompiledComponents() {
-        ownerNgModule = new Map();
-        verifiedNgModule = new Map();
+        ownerNgModule = new WeakMap();
+        verifiedNgModule = new WeakMap();
         moduleQueue.length = 0;
     }
     /**
