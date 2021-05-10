@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+387.sha-ddf2a6c
+ * @license Angular v12.0.0-next.8+385.sha-089daea
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21425,7 +21425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.8+387.sha-ddf2a6c');
+const VERSION = new Version('12.0.0-next.8+385.sha-089daea');
 
 /**
  * @license
@@ -27090,11 +27090,11 @@ function getAnnotation(type, name) {
  * NgModule the component belongs to. We keep the list of compiled components here so that the
  * TestBed can reset it later.
  */
-let ownerNgModule = new WeakMap();
-let verifiedNgModule = new WeakMap();
+let ownerNgModule = new Map();
+let verifiedNgModule = new Map();
 function resetCompiledComponents() {
-    ownerNgModule = new WeakMap();
-    verifiedNgModule = new WeakMap();
+    ownerNgModule = new Map();
+    verifiedNgModule = new Map();
     moduleQueue.length = 0;
 }
 /**
