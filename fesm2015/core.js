@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+373.sha-cd252b9
+ * @license Angular v12.0.0-next.8+380.sha-d59f2b0
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21445,15 +21445,16 @@ Sanitizer.ɵprov = ɵɵdefineInjectable({
 class Version {
     constructor(full) {
         this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
+        const [major, minor, ...rest] = full.split('.');
+        this.major = major;
+        this.minor = minor;
+        this.patch = rest.join('.');
     }
 }
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.8+373.sha-cd252b9');
+const VERSION = new Version('12.0.0-next.8+380.sha-d59f2b0');
 
 /**
  * @license
