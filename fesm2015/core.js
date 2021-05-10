@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-rc.2+24.sha-7a4d980
+ * @license Angular v12.0.0-rc.2+38.sha-cffba6f
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21445,15 +21445,16 @@ Sanitizer.ɵprov = ɵɵdefineInjectable({
 class Version {
     constructor(full) {
         this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
+        const [major, minor, ...rest] = full.split('.');
+        this.major = major;
+        this.minor = minor;
+        this.patch = rest.join('.');
     }
 }
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-rc.2+24.sha-7a4d980');
+const VERSION = new Version('12.0.0-rc.2+38.sha-cffba6f');
 
 /**
  * @license
@@ -27134,11 +27135,11 @@ function getAnnotation(type, name) {
  * NgModule the component belongs to. We keep the list of compiled components here so that the
  * TestBed can reset it later.
  */
-let ownerNgModule = new Map();
-let verifiedNgModule = new Map();
+let ownerNgModule = new WeakMap();
+let verifiedNgModule = new WeakMap();
 function resetCompiledComponents() {
-    ownerNgModule = new Map();
-    verifiedNgModule = new Map();
+    ownerNgModule = new WeakMap();
+    verifiedNgModule = new WeakMap();
     moduleQueue.length = 0;
 }
 /**

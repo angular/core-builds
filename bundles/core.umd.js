@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-rc.2+24.sha-7a4d980
+ * @license Angular v12.0.0-rc.2+38.sha-cffba6f
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22013,16 +22013,17 @@
     var Version = /** @class */ (function () {
         function Version(full) {
             this.full = full;
-            this.major = full.split('.')[0];
-            this.minor = full.split('.')[1];
-            this.patch = full.split('.').slice(2).join('.');
+            var _a = __read(full.split('.')), major = _a[0], minor = _a[1], rest = _a.slice(2);
+            this.major = major;
+            this.minor = minor;
+            this.patch = rest.join('.');
         }
         return Version;
     }());
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.0-rc.2+24.sha-7a4d980');
+    var VERSION = new Version('12.0.0-rc.2+38.sha-cffba6f');
 
     /**
      * @license
@@ -27840,11 +27841,11 @@
      * NgModule the component belongs to. We keep the list of compiled components here so that the
      * TestBed can reset it later.
      */
-    var ownerNgModule = new Map();
-    var verifiedNgModule = new Map();
+    var ownerNgModule = new WeakMap();
+    var verifiedNgModule = new WeakMap();
     function resetCompiledComponents() {
-        ownerNgModule = new Map();
-        verifiedNgModule = new Map();
+        ownerNgModule = new WeakMap();
+        verifiedNgModule = new WeakMap();
         moduleQueue.length = 0;
     }
     /**
