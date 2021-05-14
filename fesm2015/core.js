@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.0-next.8+410.sha-2e7eb27
+ * @license Angular v12.0.0-next.8+411.sha-4bc5b4d
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15180,8 +15180,11 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     const lCleanup = getOrCreateLViewCleanup(lView);
     ngDevMode && assertTNodeType(tNode, 3 /* AnyRNode */ | 12 /* AnyContainer */);
     let processOutputs = true;
-    // add native event listener - applicable to elements only
-    if (tNode.type & 3 /* AnyRNode */) {
+    // Adding a native event listener is applicable when:
+    // - The corresponding TNode represents a DOM element.
+    // - The event target has a resolver (usually resulting in a global object,
+    //   such as `window` or `document`).
+    if ((tNode.type & 3 /* AnyRNode */) || eventTargetResolver) {
         const native = getNativeByTNode(tNode, lView);
         const target = eventTargetResolver ? eventTargetResolver(native) : native;
         const lCleanupIndex = lCleanup.length;
@@ -21453,7 +21456,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.0.0-next.8+410.sha-2e7eb27');
+const VERSION = new Version('12.0.0-next.8+411.sha-4bc5b4d');
 
 /**
  * @license
