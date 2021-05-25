@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.2+80.sha-6da0c97
+ * @license Angular v12.1.0-next.2+84.sha-b7721aa
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8839,7 +8839,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      *
      * ```typescript
      * @Component({
-     *   selector: 'my-app',
+     *   selector: 'app-root',
      *   template: `Number of ticks: {{numberOfTicks}}`
      *   changeDetection: ChangeDetectionStrategy.OnPush,
      * })
@@ -8955,7 +8955,7 @@ declare class ViewRef_2<T> implements EmbeddedViewRef<T>, InternalViewRef, viewE
      * }
      *
      * @Component({
-     *   selector: 'my-app',
+     *   selector: 'app-root',
      *   providers: [DataProvider],
      *   template: `
      *     Live Update: <input type="checkbox" [(ngModel)]="live">
@@ -10520,12 +10520,14 @@ export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
  *
  * @usageNotes
  * Given the following DOM structure:
- * ```
- * <my-app>
+ *
+ * ```html
+ * <app-root>
  *   <button my-button></button>
  *   <my-comp></my-comp>
- * </my-app>
+ * </app-root>
  * ```
+ *
  * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
  * directive that is associated with the DOM node.
  *

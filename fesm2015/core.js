@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.2+80.sha-6da0c97
+ * @license Angular v12.1.0-next.2+84.sha-b7721aa
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11875,17 +11875,19 @@ function staticError(text, obj) {
  *
  * @usageNotes
  * Given the following DOM structure:
+ *
  * ```html
- * <my-app>
+ * <app-root>
  *   <div>
  *     <child-comp></child-comp>
  *   </div>
- * </my-app>
+ * </app-root>
  * ```
+ *
  * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
  * associated with this DOM element.
  *
- * Calling the function on `<my-app>` will return the `MyApp` instance.
+ * Calling the function on `<app-root>` will return the `MyApp` instance.
  *
  *
  * @param element DOM element from which the component should be retrieved.
@@ -12014,12 +12016,14 @@ function getInjectionTokens(element) {
  *
  * @usageNotes
  * Given the following DOM structure:
- * ```
- * <my-app>
+ *
+ * ```html
+ * <app-root>
  *   <button my-button></button>
  *   <my-comp></my-comp>
- * </my-app>
+ * </app-root>
  * ```
+ *
  * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
  * directive that is associated with the DOM node.
  *
@@ -12139,14 +12143,16 @@ function getRenderedText(component) {
  *
  * @usageNotes
  * Given the following DOM structure:
- * ```
- * <my-app>
- *   <div (click)="doSomething()"></div>
- * </my-app>
  *
+ * ```html
+ * <app-root>
+ *   <div (click)="doSomething()"></div>
+ * </app-root>
  * ```
+ *
  * Calling `getListeners` on `<div>` will return an object that looks as follows:
- * ```
+ *
+ * ```ts
  * {
  *   name: 'click',
  *   element: <div>,
@@ -21456,7 +21462,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.0-next.2+80.sha-6da0c97');
+const VERSION = new Version('12.1.0-next.2+84.sha-b7721aa');
 
 /**
  * @license
@@ -22657,7 +22663,7 @@ class ViewRef {
      *
      * ```typescript
      * @Component({
-     *   selector: 'my-app',
+     *   selector: 'app-root',
      *   template: `Number of ticks: {{numberOfTicks}}`
      *   changeDetection: ChangeDetectionStrategy.OnPush,
      * })
@@ -22777,7 +22783,7 @@ class ViewRef {
      * }
      *
      * @Component({
-     *   selector: 'my-app',
+     *   selector: 'app-root',
      *   providers: [DataProvider],
      *   template: `
      *     Live Update: <input type="checkbox" [(ngModel)]="live">
