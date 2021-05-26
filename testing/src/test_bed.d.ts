@@ -258,11 +258,6 @@ export declare const getTestBed: () => TestBed;
  * })
  * ```
  *
- * Notes:
- * - inject is currently a function because of some Traceur limitation the syntax should
- * eventually
- *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
- *
  * @publicApi
  */
 export declare function inject(tokens: any[], fn: Function): () => any;
