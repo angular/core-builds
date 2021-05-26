@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.3+10.sha-bd51762
+ * @license Angular v12.1.0-next.3+11.sha-a787f78
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -732,40 +732,6 @@
             throw new TypeError("Cannot write private member to an object whose class did not declare it");
         return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
     }
-
-    /**
-     * @license
-     * Copyright Google LLC All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Injectable completer that allows signaling completion of an asynchronous test. Used internally.
-     */
-    var AsyncTestCompleter = /** @class */ (function () {
-        function AsyncTestCompleter() {
-            var _this = this;
-            this._promise = new Promise(function (res, rej) {
-                _this._resolve = res;
-                _this._reject = rej;
-            });
-        }
-        AsyncTestCompleter.prototype.done = function (value) {
-            this._resolve(value);
-        };
-        AsyncTestCompleter.prototype.fail = function (error, stackTrace) {
-            this._reject(error);
-        };
-        Object.defineProperty(AsyncTestCompleter.prototype, "promise", {
-            get: function () {
-                return this._promise;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        return AsyncTestCompleter;
-    }());
 
     /**
      * @license
@@ -2884,34 +2850,14 @@
      * })
      * ```
      *
-     * Notes:
-     * - inject is currently a function because of some Traceur limitation the syntax should
-     * eventually
-     *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
-     *
      * @publicApi
      */
     function inject(tokens, fn) {
         var testBed = getTestBed();
-        if (tokens.indexOf(AsyncTestCompleter) >= 0) {
-            // Not using an arrow function to preserve context passed from call site
-            return function () {
-                var _this = this;
-                // Return an async test method that returns a Promise if AsyncTestCompleter is one of
-                // the injected tokens.
-                return testBed.compileComponents().then(function () {
-                    var completer = testBed.inject(AsyncTestCompleter);
-                    testBed.execute(tokens, fn, _this);
-                    return completer.promise;
-                });
-            };
-        }
-        else {
-            // Not using an arrow function to preserve context passed from call site
-            return function () {
-                return testBed.execute(tokens, fn, this);
-            };
-        }
+        // Not using an arrow function to preserve context passed from call site
+        return function () {
+            return testBed.execute(tokens, fn, this);
+        };
     }
     /**
      * @publicApi
