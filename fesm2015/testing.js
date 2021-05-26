@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.3+10.sha-bd51762
+ * @license Angular v12.1.0-next.3+11.sha-a787f78
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -410,34 +410,6 @@ function flushMicrotasks() {
         return fakeAsyncTestModule.flushMicrotasks();
     }
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Injectable completer that allows signaling completion of an asynchronous test. Used internally.
- */
-class AsyncTestCompleter {
-    constructor() {
-        this._promise = new Promise((res, rej) => {
-            this._resolve = res;
-            this._reject = rej;
-        });
-    }
-    done(value) {
-        this._resolve(value);
-    }
-    fail(error, stackTrace) {
-        this._reject(error);
-    }
-    get promise() {
-        return this._promise;
-    }
 }
 
 /**
@@ -2359,33 +2331,14 @@ function _getTestBedViewEngine() {
  * })
  * ```
  *
- * Notes:
- * - inject is currently a function because of some Traceur limitation the syntax should
- * eventually
- *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
- *
  * @publicApi
  */
 function inject(tokens, fn) {
     const testBed = getTestBed();
-    if (tokens.indexOf(AsyncTestCompleter) >= 0) {
-        // Not using an arrow function to preserve context passed from call site
-        return function () {
-            // Return an async test method that returns a Promise if AsyncTestCompleter is one of
-            // the injected tokens.
-            return testBed.compileComponents().then(() => {
-                const completer = testBed.inject(AsyncTestCompleter);
-                testBed.execute(tokens, fn, this);
-                return completer.promise;
-            });
-        };
-    }
-    else {
-        // Not using an arrow function to preserve context passed from call site
-        return function () {
-            return testBed.execute(tokens, fn, this);
-        };
-    }
+    // Not using an arrow function to preserve context passed from call site
+    return function () {
+        return testBed.execute(tokens, fn, this);
+    };
 }
 /**
  * @publicApi
