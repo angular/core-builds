@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.3+11.sha-a787f78
+ * @license Angular v12.1.0-next.3+13.sha-9193ea2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3256,9 +3256,15 @@ export declare const inject: typeof ɵɵinject;
  */
 export declare interface Injectable {
     /**
-     * Determines which injectors will provide the injectable,
-     * by either associating it with an `@NgModule` or other `InjectorType`,
-     * or by specifying that this injectable should be provided in one of the following injectors:
+     * Determines which injectors will provide the injectable.
+     *
+     * - `Type<any>` - associates the injectable with an `@NgModule` or other `InjectorType`,
+     * - 'null' : Equivalent to `undefined`. The injectable is not provided in any scope automatically
+     * and must be added to a `providers` array of an [@NgModule](api/core/NgModule#providers),
+     * [@Component](api/core/Directive#providers) or [@Directive](api/core/Directive#providers).
+     *
+     * The following options specify that this injectable should be provided in one of the following
+     * injectors:
      * - 'root' : The application-level injector in most apps.
      * - 'platform' : A special singleton platform injector shared by all
      * applications on the page.
