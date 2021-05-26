@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.2+15.sha-12e7968
+ * @license Angular v12.0.2+21.sha-765854e
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2162,8 +2162,8 @@ declare interface DisposableFn {
 
 /**
  * @description
- * Hook for manual bootstrapping of the application instead of using bootstrap array in @NgModule
- * annotation.
+ * Hook for manual bootstrapping of the application instead of using `bootstrap` array in @NgModule
+ * annotation. This hook is invoked only when the `bootstrap` array is empty or not provided.
  *
  * Reference to the current application is provided as a parameter.
  *
