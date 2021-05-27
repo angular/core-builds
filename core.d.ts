@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.2+25.sha-2513a53
+ * @license Angular v12.0.2+39.sha-a86a6b9
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7856,6 +7856,8 @@ declare interface TQueryMetadata {
  * - preserve any DOM-specific UI state (like cursor position, focus, text selection) when the
  *   iterable is modified
  * - enable animation of item addition, removal, and iterable reordering
+ * - preserve the value of the `<select>` element when nested `<option>` elements are dynamically
+ *   populated using `NgForOf` and the bound iterable is updated
  *
  * A common use for custom `trackBy` functions is when the model that `NgForOf` iterates over
  * contains a property with a unique identifier. For example, given a model:
