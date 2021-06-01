@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.3+48.sha-62b5a6c
+ * @license Angular v12.1.0-next.3+52.sha-e0381a8
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1318,6 +1318,13 @@ export declare interface ContentChildDecorator {
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
      *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
      * @usageNotes
      *
      * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
@@ -1386,6 +1393,13 @@ export declare interface ContentChildrenDecorator {
      *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
      *   removed in future versions of Angular.
      * * **read** - Used to read a different token from the queried elements.
+     *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
      *
      * @usageNotes
      *
@@ -8637,6 +8651,13 @@ export declare interface ViewChildDecorator {
      *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChild(TemplateRef)
      * template;`)
      *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
      * @usageNotes
      *
      * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
@@ -8698,6 +8719,13 @@ export declare interface ViewChildrenDecorator {
      *   if the QueryList has not changed.
      *   ** Note: *** This config option is **deprecated**, it will be permanently set to `true` and
      * removed in future versions of Angular.
+     *
+     * The following values are supported by `read`:
+     *   * Any class with the `@Component` or `@Directive` decorator
+     *   * Any provider defined on the injector of the component that is matched by the `selector` of
+     * this query
+     *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
+     *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
      *
      * @usageNotes
      *
