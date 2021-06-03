@@ -138,7 +138,7 @@ export interface TrackByFunction<T> {
      * @param index The index of the item within the iterable.
      * @param item The item in the iterable.
      */
-    (index: number, item: T): any;
+    <U extends T>(index: number, item: U): any;
 }
 /**
  * Provides a factory for {@link IterableDiffer}.
