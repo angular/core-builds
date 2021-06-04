@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.4+41.sha-6929625
+ * @license Angular v12.1.0-next.4+43.sha-71e14a7
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22031,7 +22031,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.1.0-next.4+41.sha-6929625');
+    var VERSION = new Version('12.1.0-next.4+43.sha-71e14a7');
 
     /**
      * @license
@@ -24277,6 +24277,8 @@
                     (renderParent.element.componentRendererType.encapsulation ===
                         exports.ViewEncapsulation.ShadowDom ||
                         // TODO(FW-2290): remove the `encapsulation === 1` fallback logic in v12.
+                        // @ts-ignore TODO: Remove as part of FW-2290. TS complains about us dealing with an enum
+                        // value that is not known (but previously was the value for ViewEncapsulation.Native)
                         renderParent.element.componentRendererType.encapsulation === 1))) {
                 // only children of non components, or children of components with native encapsulation should
                 // be attached.
@@ -26839,6 +26841,7 @@
         };
         return QueryList;
     }());
+    Symbol.iterator;
 
     /**
      * @license
