@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.4+50.sha-b061e5b
+ * @license Angular v12.1.0-next.4+51.sha-cc904b5
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4630,7 +4630,10 @@ export declare interface NgModule {
      * using one of the imperative techniques, such as `ViewContainerRef.createComponent()`.
      *
      * @see [Entry Components](guide/entry-components)
-     * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
+     * @deprecated
+     * Since 9.0.0. With Ivy, this property is no longer necessary.
+     * (You may need to keep these if building a library that will be consumed by a View Engine
+     * application.)
      */
     entryComponents?: Array<Type<any> | any[]>;
     /**
