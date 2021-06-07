@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.4+51.sha-cc904b5
+ * @license Angular v12.1.0-next.4+53.sha-f4c55e4
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6547,6 +6547,10 @@ const CUSTOM_ELEMENTS_SCHEMA = {
 };
 /**
  * Defines a schema that allows any property on any element.
+ *
+ * This schema allows you to ignore the errors related to any unknown elements or properties in a
+ * template. The usage of this schema is generally discouraged because it prevents useful validation
+ * and may hide real errors in your template. Consider using the `CUSTOM_ELEMENTS_SCHEMA` instead.
  *
  * @publicApi
  */
@@ -21462,7 +21466,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.0-next.4+51.sha-cc904b5');
+const VERSION = new Version('12.1.0-next.4+53.sha-f4c55e4');
 
 /**
  * @license
