@@ -29,6 +29,10 @@ export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 /**
  * Defines a schema that allows any property on any element.
  *
+ * This schema allows you to ignore the errors related to any unknown elements or properties in a
+ * template. The usage of this schema is generally discouraged because it prevents useful validation
+ * and may hide real errors in your template. Consider using the `CUSTOM_ELEMENTS_SCHEMA` instead.
+ *
  * @publicApi
  */
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
