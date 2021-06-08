@@ -18,6 +18,9 @@ export declare function getComponent(error: Error): Type<any>;
  * then use the factory's `create()` method to create a component of that type.
  *
  * @see [Dynamic Components](guide/dynamic-component-loader)
+ * @see [Usage Example](guide/dynamic-component-loader#resolving-components)
+ * @see <live-example name="dynamic-component-loader" noDownload></live-example>
+of the code in this cookbook
  * @publicApi
  */
 export declare abstract class ComponentFactoryResolver {

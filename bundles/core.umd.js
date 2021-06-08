@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.4+72.sha-d10c38a
+ * @license Angular v12.1.0-next.4+76.sha-c44ab4f
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21773,6 +21773,9 @@
      * then use the factory's `create()` method to create a component of that type.
      *
      * @see [Dynamic Components](guide/dynamic-component-loader)
+     * @see [Usage Example](guide/dynamic-component-loader#resolving-components)
+     * @see <live-example name="dynamic-component-loader" noDownload></live-example>
+    of the code in this cookbook
      * @publicApi
      */
     var ComponentFactoryResolver = /** @class */ (function () {
@@ -22006,7 +22009,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.1.0-next.4+72.sha-d10c38a');
+    var VERSION = new Version('12.1.0-next.4+76.sha-c44ab4f');
 
     /**
      * @license
