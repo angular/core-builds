@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.4+64.sha-f1d58ef
+ * @license Angular v12.1.0-next.4+70.sha-66f49c2
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19308,7 +19308,8 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    // THIS CODE IS GENERATED - DO NOT MODIFY.
+    // THIS CODE IS GENERATED - DO NOT MODIFY
+    // See angular/tools/gulp-tasks/cldr/extract.js
     var u = undefined;
     function plural(n) {
         var i = Math.floor(Math.abs(n)), v = n.toString().replace(/^[^.]*\.?/, '').length;
@@ -19316,7 +19317,40 @@
             return 1;
         return 5;
     }
-    var localeEn = ["en", [["a", "p"], ["AM", "PM"], u], [["AM", "PM"], u, u], [["S", "M", "T", "W", "T", "F", "S"], ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]], u, [["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]], u, [["B", "A"], ["BC", "AD"], ["Before Christ", "Anno Domini"]], 0, [6, 0], ["M/d/yy", "MMM d, y", "MMMM d, y", "EEEE, MMMM d, y"], ["h:mm a", "h:mm:ss a", "h:mm:ss a z", "h:mm:ss a zzzz"], ["{1}, {0}", u, "{1} 'at' {0}", u], [".", ",", ";", "%", "+", "-", "E", "×", "‰", "∞", "NaN", ":"], ["#,##0.###", "#,##0%", "¤#,##0.00", "#E0"], "USD", "$", "US Dollar", {}, "ltr", plural];
+    var localeEn = [
+        'en',
+        [['a', 'p'], ['AM', 'PM'], u],
+        [['AM', 'PM'], u, u],
+        [
+            ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+        ],
+        u,
+        [
+            ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
+            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            [
+                'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+                'October', 'November', 'December'
+            ]
+        ],
+        u,
+        [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']],
+        0,
+        [6, 0],
+        ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
+        ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'],
+        ['{1}, {0}', u, '{1} \'at\' {0}', u],
+        ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
+        ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'],
+        'USD',
+        '$',
+        'US Dollar',
+        {},
+        'ltr',
+        plural
+    ];
 
     /**
      * @license
@@ -21972,7 +22006,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.1.0-next.4+64.sha-f1d58ef');
+    var VERSION = new Version('12.1.0-next.4+70.sha-66f49c2');
 
     /**
      * @license
