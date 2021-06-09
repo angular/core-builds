@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.0.3+66.sha-dfb072a
+ * @license Angular v12.0.4+2.sha-785da0f
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1236,22 +1236,22 @@
      * @codeGenApi
      */
     function ɵɵdefineNgModule(def) {
-        var res = {
-            type: def.type,
-            bootstrap: def.bootstrap || EMPTY_ARRAY,
-            declarations: def.declarations || EMPTY_ARRAY,
-            imports: def.imports || EMPTY_ARRAY,
-            exports: def.exports || EMPTY_ARRAY,
-            transitiveCompileScopes: null,
-            schemas: def.schemas || null,
-            id: def.id || null,
-        };
-        if (def.id != null) {
-            noSideEffects(function () {
+        return noSideEffects(function () {
+            var res = {
+                type: def.type,
+                bootstrap: def.bootstrap || EMPTY_ARRAY,
+                declarations: def.declarations || EMPTY_ARRAY,
+                imports: def.imports || EMPTY_ARRAY,
+                exports: def.exports || EMPTY_ARRAY,
+                transitiveCompileScopes: null,
+                schemas: def.schemas || null,
+                id: def.id || null,
+            };
+            if (def.id != null) {
                 autoRegisterModuleById[def.id] = def.type;
-            });
-        }
-        return res;
+            }
+            return res;
+        });
     }
     /**
      * Adds the module metadata that is necessary to compute the module's transitive scope to an
@@ -22038,7 +22038,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.0.3+66.sha-dfb072a');
+    var VERSION = new Version('12.0.4+2.sha-785da0f');
 
     /**
      * @license
