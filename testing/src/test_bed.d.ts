@@ -8,7 +8,7 @@
 import { Component, Directive, InjectFlags, NgModule, Pipe, PlatformRef, ProviderToken, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
-import { TestBedStatic, TestModuleMetadata } from './test_bed_common';
+import { TestBedStatic, TestEnvironmentOptions, TestModuleMetadata } from './test_bed_common';
 /**
  * @publicApi
  */
@@ -26,6 +26,7 @@ export interface TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: TestEnvironmentOptions): void;
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
@@ -79,6 +80,16 @@ export interface TestBed {
  */
 export declare class TestBedViewEngine implements TestBed {
     /**
+     * Teardown options that have been configured at the environment level.
+     * Used as a fallback if no instance-level options have been provided.
+     */
+    private static _environmentTeardownOptions;
+    /**
+     * Teardown options that have been configured at the `TestBed` instance level.
+     * These options take precedence over the environemnt-level ones.
+     */
+    private _instanceTeardownOptions;
+    /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
      *
@@ -89,7 +100,7 @@ export declare class TestBedViewEngine implements TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
-    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBedViewEngine;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: TestEnvironmentOptions | (() => any[])): TestBedViewEngine;
     /**
      * Reset the providers for the test injector.
      */
@@ -148,6 +159,8 @@ export declare class TestBedViewEngine implements TestBed {
      */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    static shouldTearDownTestingModule(): boolean;
+    static tearDownTestingModule(): void;
     private _instantiated;
     private _compiler;
     private _moduleRef;
@@ -180,7 +193,7 @@ export declare class TestBedViewEngine implements TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: TestEnvironmentOptions | (() => any[])): void;
     /**
      * Reset the providers for the test injector.
      */
@@ -219,6 +232,10 @@ export declare class TestBedViewEngine implements TestBed {
     private overrideProviderImpl;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    private destroyActiveFixtures;
+    private shouldRethrowTeardownErrors;
+    shouldTearDownTestingModule(): boolean;
+    tearDownTestingModule(): void;
 }
 /**
  * @description

@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.5+51.sha-f8e17c8
+ * @license Angular v12.1.0-next.6+1.sha-873229f
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1470,12 +1470,18 @@ class R3TestCompiler {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Whether test modules should be torn down by default.
+ * Currently disabled for backwards-compatibility reasons.
+ */
+const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = false;
+/**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
  * @publicApi
  */
 class TestComponentRenderer {
     insertRootElement(rootElementId) { }
+    removeAllRootElements() { }
 }
 /**
  * @publicApi
@@ -1527,9 +1533,9 @@ class TestBedRender3 {
      *
      * @publicApi
      */
-    static initTestEnvironment(ngModule, platform, aotSummaries) {
+    static initTestEnvironment(ngModule, platform, summariesOrOptions) {
         const testBed = _getTestBedRender3();
-        testBed.initTestEnvironment(ngModule, platform, aotSummaries);
+        testBed.initTestEnvironment(ngModule, platform, summariesOrOptions);
         return testBed;
     }
     /**
@@ -1608,6 +1614,12 @@ class TestBedRender3 {
         _getTestBedRender3().resetTestingModule();
         return TestBedRender3;
     }
+    static shouldTearDownTestingModule() {
+        return _getTestBedRender3().shouldTearDownTestingModule();
+    }
+    static tearDownTestingModule() {
+        _getTestBedRender3().tearDownTestingModule();
+    }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -1621,10 +1633,14 @@ class TestBedRender3 {
      *
      * @publicApi
      */
-    initTestEnvironment(ngModule, platform, aotSummaries) {
+    initTestEnvironment(ngModule, platform, summariesOrOptions) {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
+        // If `summariesOrOptions` is a function, it means that it's
+        // an AOT summaries factory which Ivy doesn't support.
+        TestBedRender3._environmentTeardownOptions =
+            typeof summariesOrOptions === 'function' ? undefined : summariesOrOptions === null || summariesOrOptions === void 0 ? void 0 : summariesOrOptions.teardown;
         this.platform = platform;
         this.ngModule = ngModule;
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
@@ -1639,6 +1655,7 @@ class TestBedRender3 {
         this._compiler = null;
         this.platform = null;
         this.ngModule = null;
+        TestBedRender3._environmentTeardownOptions = undefined;
     }
     resetTestingModule() {
         this.checkGlobalCompilationFinished();
@@ -1647,8 +1664,23 @@ class TestBedRender3 {
             this.compiler.restoreOriginalState();
         }
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
-        this._testModuleRef = null;
-        this.destroyActiveFixtures();
+        // We have to chain a couple of try/finally blocks, because each step can
+        // throw errors and we don't want it to interrupt the next step and we also
+        // want an error to be thrown at the end.
+        try {
+            this.destroyActiveFixtures();
+        }
+        finally {
+            try {
+                if (this.shouldTearDownTestingModule()) {
+                    this.tearDownTestingModule();
+                }
+            }
+            finally {
+                this._testModuleRef = null;
+                this._instanceTeardownOptions = undefined;
+            }
+        }
     }
     configureCompiler(config) {
         if (config.useJit != null) {
@@ -1660,6 +1692,9 @@ class TestBedRender3 {
     }
     configureTestingModule(moduleDef) {
         this.assertNotInstantiated('R3TestBed.configureTestingModule', 'configure the test module');
+        // Always re-assign the teardown options, even if they're undefined.
+        // This ensures that we don't carry the options between tests.
+        this._instanceTeardownOptions = moduleDef.teardown;
         this.compiler.configureTestingModule(moduleDef);
     }
     compileComponents() {
@@ -1778,11 +1813,13 @@ class TestBedRender3 {
         this._globalCompilationChecked = true;
     }
     destroyActiveFixtures() {
+        let errorCount = 0;
         this._activeFixtures.forEach((fixture) => {
             try {
                 fixture.destroy();
             }
             catch (e) {
+                errorCount++;
                 console.error('Error during cleanup of component', {
                     component: fixture.componentInstance,
                     stacktrace: e,
@@ -1790,6 +1827,52 @@ class TestBedRender3 {
             }
         });
         this._activeFixtures = [];
+        if (errorCount > 0 && this.shouldRethrowTeardownErrors()) {
+            throw Error(`${errorCount} ${(errorCount === 1 ? 'component' : 'components')} ` +
+                `threw errors during cleanup`);
+        }
+    }
+    shouldRethrowTeardownErrors() {
+        var _a, _b;
+        const instanceOptions = this._instanceTeardownOptions;
+        const environmentOptions = TestBedRender3._environmentTeardownOptions;
+        // If the new teardown behavior hasn't been configured, preserve the old behavior.
+        if (!instanceOptions && !environmentOptions) {
+            return false;
+        }
+        // Otherwise use the configured behavior or default to rethrowing.
+        return (_b = (_a = instanceOptions === null || instanceOptions === void 0 ? void 0 : instanceOptions.rethrowErrors) !== null && _a !== void 0 ? _a : environmentOptions === null || environmentOptions === void 0 ? void 0 : environmentOptions.rethrowErrors) !== null && _b !== void 0 ? _b : true;
+    }
+    shouldTearDownTestingModule() {
+        var _a, _b, _c, _d;
+        return (_d = (_b = (_a = this._instanceTeardownOptions) === null || _a === void 0 ? void 0 : _a.destroyAfterEach) !== null && _b !== void 0 ? _b : (_c = TestBedRender3._environmentTeardownOptions) === null || _c === void 0 ? void 0 : _c.destroyAfterEach) !== null && _d !== void 0 ? _d : TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
+    }
+    tearDownTestingModule() {
+        var _a;
+        // If the module ref has already been destroyed, we won't be able to get a test renderer.
+        if (this._testModuleRef === null) {
+            return;
+        }
+        // Resolve the renderer ahead of time, because we want to remove the root elements as the very
+        // last step, but the injector will be destroyed as a part of the module ref destruction.
+        const testRenderer = this.inject(TestComponentRenderer);
+        try {
+            this._testModuleRef.destroy();
+        }
+        catch (e) {
+            if (this.shouldRethrowTeardownErrors()) {
+                throw e;
+            }
+            else {
+                console.error('Error during cleanup of a testing module', {
+                    component: this._testModuleRef.instance,
+                    stacktrace: e,
+                });
+            }
+        }
+        finally {
+            (_a = testRenderer.removeAllRootElements) === null || _a === void 0 ? void 0 : _a.call(testRenderer);
+        }
     }
 }
 let testBed;
@@ -1917,9 +2000,9 @@ class TestBedViewEngine {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
-    static initTestEnvironment(ngModule, platform, aotSummaries) {
+    static initTestEnvironment(ngModule, platform, summariesOrOptions) {
         const testBed = _getTestBedViewEngine();
-        testBed.initTestEnvironment(ngModule, platform, aotSummaries);
+        testBed.initTestEnvironment(ngModule, platform, summariesOrOptions);
         return testBed;
     }
     /**
@@ -2000,6 +2083,12 @@ class TestBedViewEngine {
     static createComponent(component) {
         return _getTestBedViewEngine().createComponent(component);
     }
+    static shouldTearDownTestingModule() {
+        return _getTestBedViewEngine().shouldTearDownTestingModule();
+    }
+    static tearDownTestingModule() {
+        _getTestBedViewEngine().tearDownTestingModule();
+    }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -2011,14 +2100,19 @@ class TestBedViewEngine {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
-    initTestEnvironment(ngModule, platform, aotSummaries) {
+    initTestEnvironment(ngModule, platform, summariesOrOptions) {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
         this.platform = platform;
         this.ngModule = ngModule;
-        if (aotSummaries) {
-            this._testEnvAotSummaries = aotSummaries;
+        if (typeof summariesOrOptions === 'function') {
+            this._testEnvAotSummaries = summariesOrOptions;
+            TestBedViewEngine._environmentTeardownOptions = undefined;
+        }
+        else {
+            this._testEnvAotSummaries = (summariesOrOptions === null || summariesOrOptions === void 0 ? void 0 : summariesOrOptions.aotSummaries) || (() => []);
+            TestBedViewEngine._environmentTeardownOptions = summariesOrOptions === null || summariesOrOptions === void 0 ? void 0 : summariesOrOptions.teardown;
         }
     }
     /**
@@ -2029,6 +2123,7 @@ class TestBedViewEngine {
         this.platform = null;
         this.ngModule = null;
         this._testEnvAotSummaries = () => [];
+        TestBedViewEngine._environmentTeardownOptions = undefined;
     }
     resetTestingModule() {
         ɵclearOverrides();
@@ -2041,26 +2136,30 @@ class TestBedViewEngine {
         this._pipeOverrides = [];
         this._isRoot = true;
         this._rootProviderOverrides = [];
-        this._moduleRef = null;
         this._moduleFactory = null;
         this._compilerOptions = [];
         this._providers = [];
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
-        this._instantiated = false;
-        this._activeFixtures.forEach((fixture) => {
+        // We have to chain a couple of try/finally blocks, because each step can
+        // throw errors and we don't want it to interrupt the next step and we also
+        // want an error to be thrown at the end.
+        try {
+            this.destroyActiveFixtures();
+        }
+        finally {
             try {
-                fixture.destroy();
+                if (this.shouldTearDownTestingModule()) {
+                    this.tearDownTestingModule();
+                }
             }
-            catch (e) {
-                console.error('Error during cleanup of component', {
-                    component: fixture.componentInstance,
-                    stacktrace: e,
-                });
+            finally {
+                this._moduleRef = null;
+                this._instanceTeardownOptions = undefined;
+                this._instantiated = false;
             }
-        });
-        this._activeFixtures = [];
+        }
     }
     configureCompiler(config) {
         this._assertNotInstantiated('TestBed.configureCompiler', 'configure the compiler');
@@ -2083,6 +2182,9 @@ class TestBedViewEngine {
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
         }
+        // Always re-assign the teardown options, even if they're undefined.
+        // This ensures that we don't carry the options between tests.
+        this._instanceTeardownOptions = moduleDef.teardown;
     }
     compileComponents() {
         if (this._moduleFactory || this._instantiated) {
@@ -2290,6 +2392,68 @@ class TestBedViewEngine {
         this._activeFixtures.push(fixture);
         return fixture;
     }
+    destroyActiveFixtures() {
+        let errorCount = 0;
+        this._activeFixtures.forEach((fixture) => {
+            try {
+                fixture.destroy();
+            }
+            catch (e) {
+                errorCount++;
+                console.error('Error during cleanup of component', {
+                    component: fixture.componentInstance,
+                    stacktrace: e,
+                });
+            }
+        });
+        this._activeFixtures = [];
+        if (errorCount > 0 && this.shouldRethrowTeardownErrors()) {
+            throw Error(`${errorCount} ${(errorCount === 1 ? 'component' : 'components')} ` +
+                `threw errors during cleanup`);
+        }
+    }
+    shouldRethrowTeardownErrors() {
+        var _a, _b;
+        const instanceOptions = this._instanceTeardownOptions;
+        const environmentOptions = TestBedViewEngine._environmentTeardownOptions;
+        // If the new teardown behavior hasn't been configured, preserve the old behavior.
+        if (!instanceOptions && !environmentOptions) {
+            return false;
+        }
+        // Otherwise use the configured behavior or default to rethrowing.
+        return (_b = (_a = instanceOptions === null || instanceOptions === void 0 ? void 0 : instanceOptions.rethrowErrors) !== null && _a !== void 0 ? _a : environmentOptions === null || environmentOptions === void 0 ? void 0 : environmentOptions.rethrowErrors) !== null && _b !== void 0 ? _b : true;
+    }
+    shouldTearDownTestingModule() {
+        var _a, _b, _c, _d;
+        return (_d = (_b = (_a = this._instanceTeardownOptions) === null || _a === void 0 ? void 0 : _a.destroyAfterEach) !== null && _b !== void 0 ? _b : (_c = TestBedViewEngine._environmentTeardownOptions) === null || _c === void 0 ? void 0 : _c.destroyAfterEach) !== null && _d !== void 0 ? _d : TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
+    }
+    tearDownTestingModule() {
+        var _a, _b, _c, _d, _e;
+        // If the module ref has already been destroyed, we won't be able to get a test renderer.
+        if (this._moduleRef === null) {
+            return;
+        }
+        // Resolve the renderer ahead of time, because we want to remove the root elements as the very
+        // last step, but the injector will be destroyed as a part of the module ref destruction.
+        const testRenderer = this.inject(TestComponentRenderer);
+        try {
+            this._moduleRef.destroy();
+        }
+        catch (e) {
+            if ((_d = (_b = (_a = this._instanceTeardownOptions) === null || _a === void 0 ? void 0 : _a.rethrowErrors) !== null && _b !== void 0 ? _b : (_c = TestBedViewEngine._environmentTeardownOptions) === null || _c === void 0 ? void 0 : _c.rethrowErrors) !== null && _d !== void 0 ? _d : true) {
+                throw e;
+            }
+            else {
+                console.error('Error during cleanup of a testing module', {
+                    component: this._moduleRef.instance,
+                    stacktrace: e,
+                });
+            }
+        }
+        finally {
+            (_e = testRenderer === null || testRenderer === void 0 ? void 0 : testRenderer.removeAllRootElements) === null || _e === void 0 ? void 0 : _e.call(testRenderer);
+        }
+    }
 }
 /**
  * @description
@@ -2388,10 +2552,22 @@ function withModule(moduleDef, fn) {
 const _global = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
 if (_global.beforeEach) {
-    _global.beforeEach(() => {
-        TestBed.resetTestingModule();
-        resetFakeAsyncZone();
-    });
+    _global.beforeEach(getCleanupHook(false));
+}
+// We provide both a `beforeEach` and `afterEach`, because the updated behavior for
+// tearing down the module is supposed to run after the test so that we can associate
+// teardown errors with the correct test.
+if (_global.afterEach) {
+    _global.afterEach(getCleanupHook(true));
+}
+function getCleanupHook(expectedTeardownValue) {
+    return () => {
+        if (TestBed.shouldTearDownTestingModule() ===
+            expectedTeardownValue) {
+            TestBed.resetTestingModule();
+            resetFakeAsyncZone();
+        }
+    };
 }
 /**
  * This API should be removed. But doing so seems to break `google3` and so it requires a bit of

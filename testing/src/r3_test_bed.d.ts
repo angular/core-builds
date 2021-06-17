@@ -9,7 +9,7 @@ import { Component, Directive, InjectFlags, NgModule, Pipe, PlatformRef, Provide
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 import { TestBed } from './test_bed';
-import { TestBedStatic, TestModuleMetadata } from './test_bed_common';
+import { ModuleTeardownOptions, TestBedStatic, TestEnvironmentOptions, TestModuleMetadata } from './test_bed_common';
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
@@ -21,6 +21,16 @@ import { TestBedStatic, TestModuleMetadata } from './test_bed_common';
  * according to the compiler used.
  */
 export declare class TestBedRender3 implements TestBed {
+    /**
+     * Teardown options that have been configured at the environment level.
+     * Used as a fallback if no instance-level options have been provided.
+     */
+    private static _environmentTeardownOptions;
+    /**
+     * Teardown options that have been configured at the `TestBed` instance level.
+     * These options take precedence over the environemnt-level ones.
+     */
+    private _instanceTeardownOptions;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -34,7 +44,7 @@ export declare class TestBedRender3 implements TestBed {
      *
      * @publicApi
      */
-    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: TestEnvironmentOptions | (() => any[])): TestBed;
     /**
      * Reset the providers for the test injector.
      *
@@ -83,6 +93,8 @@ export declare class TestBedRender3 implements TestBed {
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     static resetTestingModule(): TestBedStatic;
+    static shouldTearDownTestingModule(): boolean;
+    static tearDownTestingModule(): void;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     private _compiler;
@@ -102,7 +114,9 @@ export declare class TestBedRender3 implements TestBed {
      *
      * @publicApi
      */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: {
+        teardown?: ModuleTeardownOptions;
+    } | (() => any[])): void;
     /**
      * Reset the providers for the test injector.
      *
@@ -152,5 +166,8 @@ export declare class TestBedRender3 implements TestBed {
      */
     private checkGlobalCompilationFinished;
     private destroyActiveFixtures;
+    private shouldRethrowTeardownErrors;
+    shouldTearDownTestingModule(): boolean;
+    tearDownTestingModule(): void;
 }
 export declare function _getTestBedRender3(): TestBedRender3;
