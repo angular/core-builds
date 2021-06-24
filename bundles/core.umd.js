@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.5+49.sha-18fe044
+ * @license Angular v12.1.0-next.6+60.sha-d71d521
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -358,10 +358,16 @@
                 r[k] = a[j];
         return r;
     }
-    function __spreadArray(to, from) {
-        for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-            to[j] = from[i];
-        return to;
+    function __spreadArray(to, from, pack) {
+        if (pack || arguments.length === 2)
+            for (var i = 0, l = from.length, ar; i < l; i++) {
+                if (ar || !(i in from)) {
+                    if (!ar)
+                        ar = Array.prototype.slice.call(from, 0, i);
+                    ar[i] = from[i];
+                }
+            }
+        return to.concat(ar || from);
     }
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
@@ -22038,7 +22044,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.1.0-next.5+49.sha-18fe044');
+    var VERSION = new Version('12.1.0-next.6+60.sha-d71d521');
 
     /**
      * @license
@@ -30280,20 +30286,41 @@
                 rxjs.merge(isCurrentlyStable, isStable.pipe(operators.share()));
         }
         /**
-         * Bootstrap a new component at the root level of the application.
+         * Bootstrap a component onto the element identified by its selector or, optionally, to a
+         * specified element.
          *
          * @usageNotes
          * ### Bootstrap process
          *
-         * When bootstrapping a new root component into an application, Angular mounts the
-         * specified application component onto DOM elements identified by the componentType's
-         * selector and kicks off automatic change detection to finish initializing the component.
+         * When bootstrapping a component, Angular mounts it onto a target DOM element
+         * and kicks off automatic change detection. The target DOM element can be
+         * provided using the `rootSelectorOrNode` argument.
          *
-         * Optionally, a component can be mounted onto a DOM element that does not match the
-         * componentType's selector.
+         * If the target DOM element is not provided, Angular tries to find one on a page
+         * using the `selector` of the component that is being bootstrapped
+         * (first matched element is used).
          *
          * ### Example
-         * {@example core/ts/platform/platform.ts region='longform'}
+         *
+         * Generally, we define the component to bootstrap in the `bootstrap` array of `NgModule`,
+         * but it requires us to know the component while writing the application code.
+         *
+         * Imagine a situation where we have to wait for an API call to decide about the component to
+         * bootstrap. We can use the `ngDoBootstrap` hook of the `NgModule` and call this method to
+         * dynamically bootstrap a component.
+         *
+         * {@example core/ts/platform/platform.ts region='componentSelector'}
+         *
+         * Optionally, a component can be mounted onto a DOM element that does not match the
+         * selector of the bootstrapped component.
+         *
+         * In the following example, we are providing a CSS selector to match the target element.
+         *
+         * {@example core/ts/platform/platform.ts region='cssSelector'}
+         *
+         * While in this example, we are providing reference to a DOM node.
+         *
+         * {@example core/ts/platform/platform.ts region='domNode'}
          */
         ApplicationRef.prototype.bootstrap = function (componentOrFactory, rootSelectorOrNode) {
             var _this = this;

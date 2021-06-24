@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0-next.5+49.sha-18fe044
+ * @license Angular v12.1.0-next.6+60.sha-d71d521
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -232,6 +232,17 @@ export declare type MetadataOverride<T> = {
 };
 
 /**
+ * Object used to configure the test module teardown behavior in `TestBed`.
+ * @publicApi
+ */
+export declare interface ModuleTeardownOptions {
+    /** Whether the test module should be destroyed after every test. */
+    destroyAfterEach: boolean;
+    /** Whether errors during test module destruction should be re-thrown. Defaults to `true`. */
+    rethrowErrors?: boolean;
+}
+
+/**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
  *
@@ -256,6 +267,7 @@ export declare interface TestBed {
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: TestEnvironmentOptions): void;
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
@@ -319,6 +331,9 @@ export declare const TestBed: TestBedStatic;
  */
 export declare interface TestBedStatic {
     new (...args: any[]): TestBed;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: {
+        teardown?: ModuleTeardownOptions;
+    }): TestBed;
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
@@ -389,6 +404,15 @@ export declare interface TestBedStatic {
  */
 export declare class TestComponentRenderer {
     insertRootElement(rootElementId: string): void;
+    removeAllRootElements?(): void;
+}
+
+/**
+ * @publicApi
+ */
+export declare interface TestEnvironmentOptions {
+    aotSummaries?: () => any[];
+    teardown?: ModuleTeardownOptions;
 }
 
 /**
@@ -400,6 +424,7 @@ export declare type TestModuleMetadata = {
     imports?: any[];
     schemas?: Array<SchemaMetadata | any[]>;
     aotSummaries?: () => any[];
+    teardown?: ModuleTeardownOptions;
 };
 
 /**
@@ -509,6 +534,16 @@ export declare function withModule(moduleDef: TestModuleMetadata, fn: Function):
  */
 export declare class ɵangular_packages_core_testing_testing_a implements TestBed {
     /**
+     * Teardown options that have been configured at the environment level.
+     * Used as a fallback if no instance-level options have been provided.
+     */
+    private static _environmentTeardownOptions;
+    /**
+     * Teardown options that have been configured at the `TestBed` instance level.
+     * These options take precedence over the environemnt-level ones.
+     */
+    private _instanceTeardownOptions;
+    /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
      *
@@ -519,7 +554,7 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
-    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): ɵangular_packages_core_testing_testing_a;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: TestEnvironmentOptions | (() => any[])): ɵangular_packages_core_testing_testing_a;
     /**
      * Reset the providers for the test injector.
      */
@@ -578,6 +613,8 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
      */
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    static shouldTearDownTestingModule(): boolean;
+    static tearDownTestingModule(): void;
     private _instantiated;
     private _compiler;
     private _moduleRef;
@@ -610,7 +647,7 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
      * Test modules and platforms for individual platforms are available from
      * '@angular/<platform_name>/testing'.
      */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: TestEnvironmentOptions | (() => any[])): void;
     /**
      * Reset the providers for the test injector.
      */
@@ -649,6 +686,10 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
     private overrideProviderImpl;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    private destroyActiveFixtures;
+    private shouldRethrowTeardownErrors;
+    shouldTearDownTestingModule(): boolean;
+    tearDownTestingModule(): void;
 }
 
 /**
@@ -663,6 +704,16 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
  */
 export declare class ɵangular_packages_core_testing_testing_b implements TestBed {
     /**
+     * Teardown options that have been configured at the environment level.
+     * Used as a fallback if no instance-level options have been provided.
+     */
+    private static _environmentTeardownOptions;
+    /**
+     * Teardown options that have been configured at the `TestBed` instance level.
+     * These options take precedence over the environemnt-level ones.
+     */
+    private _instanceTeardownOptions;
+    /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
      *
@@ -675,7 +726,7 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
      *
      * @publicApi
      */
-    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: TestEnvironmentOptions | (() => any[])): TestBed;
     /**
      * Reset the providers for the test injector.
      *
@@ -724,6 +775,8 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     static resetTestingModule(): TestBedStatic;
+    static shouldTearDownTestingModule(): boolean;
+    static tearDownTestingModule(): void;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     private _compiler;
@@ -743,7 +796,9 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
      *
      * @publicApi
      */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, summariesOrOptions?: {
+        teardown?: ModuleTeardownOptions;
+    } | (() => any[])): void;
     /**
      * Reset the providers for the test injector.
      *
@@ -793,6 +848,9 @@ export declare class ɵangular_packages_core_testing_testing_b implements TestBe
      */
     private checkGlobalCompilationFinished;
     private destroyActiveFixtures;
+    private shouldRethrowTeardownErrors;
+    shouldTearDownTestingModule(): boolean;
+    tearDownTestingModule(): void;
 }
 
 export declare function ɵangular_packages_core_testing_testing_c(): ɵangular_packages_core_testing_testing_b;
