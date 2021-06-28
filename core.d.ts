@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0+2.sha-f6b828e
+ * @license Angular v12.1.0+11.sha-a1e036c
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8875,6 +8875,8 @@ export declare abstract class ViewContainerRef {
      * Instantiates an embedded view and inserts it
      * into this container.
      * @param templateRef The HTML template that defines the view.
+     * @param context The data-binding context of the embedded view, as declared
+     * in the `<ng-template>` usage.
      * @param index The 0-based index at which to insert the new view into this container.
      * If not specified, appends the new view as the last entry.
      *
