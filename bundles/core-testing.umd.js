@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.0+29.sha-1445dba
+ * @license Angular v12.2.0-next.1+1.sha-0f23f73
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2450,6 +2450,7 @@
             this._compiler = null;
             this._moduleRef = null;
             this._moduleFactory = null;
+            this._pendingModuleFactory = null;
             this._compilerOptions = [];
             this._moduleOverrides = [];
             this._componentOverrides = [];
@@ -2618,6 +2619,7 @@
             this._isRoot = true;
             this._rootProviderOverrides = [];
             this._moduleFactory = null;
+            this._pendingModuleFactory = null;
             this._compilerOptions = [];
             this._providers = [];
             this._declarations = [];
@@ -2674,9 +2676,15 @@
                 return Promise.resolve(null);
             }
             var moduleType = this._createCompilerAndModule();
-            return this._compiler.compileModuleAndAllComponentsAsync(moduleType)
-                .then(function (moduleAndComponentFactories) {
-                _this._moduleFactory = moduleAndComponentFactories.ngModuleFactory;
+            this._pendingModuleFactory = moduleType;
+            return this._compiler.compileModuleAndAllComponentsAsync(moduleType).then(function (result) {
+                // If the module mismatches by the time the promise resolves, it means that the module has
+                // already been destroyed and a new compilation has started. If that's the case, avoid
+                // overwriting the module factory, because it can cause downstream errors.
+                if (_this._pendingModuleFactory === moduleType) {
+                    _this._moduleFactory = result.ngModuleFactory;
+                    _this._pendingModuleFactory = null;
+                }
             });
         };
         TestBedViewEngine.prototype._initIfNeeded = function () {
