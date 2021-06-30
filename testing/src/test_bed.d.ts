@@ -165,6 +165,7 @@ export declare class TestBedViewEngine implements TestBed {
     private _compiler;
     private _moduleRef;
     private _moduleFactory;
+    private _pendingModuleFactory;
     private _compilerOptions;
     private _moduleOverrides;
     private _componentOverrides;
