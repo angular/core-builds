@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.0+23.sha-12e0cfa
+ * @license Angular v12.1.1+1.sha-41c6877
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -619,6 +619,7 @@ export declare class ɵangular_packages_core_testing_testing_a implements TestBe
     private _compiler;
     private _moduleRef;
     private _moduleFactory;
+    private _pendingModuleFactory;
     private _compilerOptions;
     private _moduleOverrides;
     private _componentOverrides;
