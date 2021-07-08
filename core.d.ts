@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.1+43.sha-e7832a6
+ * @license Angular v12.2.0-next.1+45.sha-1f3747b
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -238,11 +238,11 @@ export declare const APP_ID: InjectionToken<string>;
  * through DI.
  *
  * ```
- *  function initializeApp(httpClient: HttpClient): Observable<any> {
- *   return httpClient.get("https://someUrl.com/api/user")
+ *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
+ *   return () => httpClient.get("https://someUrl.com/api/user")
  *     .pipe(
  *        tap(user => { ... })
- *     )
+ *     );
  *  }
  *
  *  @NgModule({
@@ -251,7 +251,7 @@ export declare const APP_ID: InjectionToken<string>;
  *    bootstrap: [AppComponent],
  *    providers: [{
  *      provide: APP_INITIALIZER,
- *      useFactory: initializeApp,
+ *      useFactory: initializeAppFactory,
  *      deps: [HttpClient],
  *      multi: true
  *    }]
