@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.1+43.sha-e7832a6
+ * @license Angular v12.2.0-next.1+44.sha-89084ff
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22044,7 +22044,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.2.0-next.1+43.sha-e7832a6');
+    var VERSION = new Version('12.2.0-next.1+44.sha-89084ff');
 
     /**
      * @license
@@ -28583,11 +28583,11 @@
      * through DI.
      *
      * ```
-     *  function initializeApp(httpClient: HttpClient): Observable<any> {
-     *   return httpClient.get("https://someUrl.com/api/user")
+     *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
+     *   return () => httpClient.get("https://someUrl.com/api/user")
      *     .pipe(
      *        tap(user => { ... })
-     *     )
+     *     );
      *  }
      *
      *  @NgModule({
@@ -28596,7 +28596,7 @@
      *    bootstrap: [AppComponent],
      *    providers: [{
      *      provide: APP_INITIALIZER,
-     *      useFactory: initializeApp,
+     *      useFactory: initializeAppFactory,
      *      deps: [HttpClient],
      *      multi: true
      *    }]
