@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.1+41.sha-f6bce31
+ * @license Angular v12.1.1+43.sha-a8d5a31
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21469,7 +21469,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.1+41.sha-f6bce31');
+const VERSION = new Version('12.1.1+43.sha-a8d5a31');
 
 /**
  * @license
@@ -27877,11 +27877,11 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
  * through DI.
  *
  * ```
- *  function initializeApp(httpClient: HttpClient): Observable<any> {
- *   return httpClient.get("https://someUrl.com/api/user")
+ *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
+ *   return () => httpClient.get("https://someUrl.com/api/user")
  *     .pipe(
  *        tap(user => { ... })
- *     )
+ *     );
  *  }
  *
  *  @NgModule({
@@ -27890,7 +27890,7 @@ const SWITCH_COMPILE_NGMODULE = SWITCH_COMPILE_NGMODULE__PRE_R3__;
  *    bootstrap: [AppComponent],
  *    providers: [{
  *      provide: APP_INITIALIZER,
- *      useFactory: initializeApp,
+ *      useFactory: initializeAppFactory,
  *      deps: [HttpClient],
  *      multi: true
  *    }]
