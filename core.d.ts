@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.1+61.sha-4e73b88
+ * @license Angular v12.2.0-next.1+62.sha-40da386
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8784,9 +8784,9 @@ export declare interface ViewChildrenDecorator {
      *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
      * with `@ViewChildren('cmp')`)
      *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ViewChildren(SomeService) someService: SomeService`)
-     *   * Any provider defined through a string token (e.g. `@ViewChildren('someToken') someTokenVal:
-     * any`)
+     * `@ViewChildren(SomeService) someService!: SomeService`)
+     *   * Any provider defined through a string token (e.g. `@ViewChildren('someToken')
+     * someTokenVal!: any`)
      *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChildren(TemplateRef)
      * template;`)
      *
