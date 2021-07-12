@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.1+63.sha-4c482bf
+ * @license Angular v12.2.0-next.1+67.sha-e8be045
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6849,11 +6849,7 @@
         };
         /** @internal */
         ErrorHandler.prototype._findContext = function (error) {
-            if (error) {
-                return getDebugContext(error) ? getDebugContext(error) :
-                    this._findContext(getOriginalError(error));
-            }
-            return null;
+            return error ? (getDebugContext(error) || this._findContext(getOriginalError(error))) : null;
         };
         /** @internal */
         ErrorHandler.prototype._findOriginalError = function (error) {
@@ -22015,7 +22011,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.2.0-next.1+63.sha-4c482bf');
+    var VERSION = new Version('12.2.0-next.1+67.sha-e8be045');
 
     /**
      * @license
