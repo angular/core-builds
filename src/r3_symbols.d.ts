@@ -1,9 +1,8 @@
 /**
- * @license Angular v12.1.1+46.sha-1c31828
+ * @license Angular v12.1.1+55.sha-2ed5a2d
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
-
 
 /**
  * @description
@@ -167,7 +166,7 @@ declare abstract class ComponentFactory<C> {
  * @see [Dynamic Components](guide/dynamic-component-loader)
  * @see [Usage Example](guide/dynamic-component-loader#resolving-components)
  * @see <live-example name="dynamic-component-loader" noDownload></live-example>
-of the code in this cookbook
+ of the code in this cookbook
  * @publicApi
  */
 declare abstract class ComponentFactoryResolver {

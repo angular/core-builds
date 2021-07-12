@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.1+46.sha-1c31828
+ * @license Angular v12.1.1+55.sha-2ed5a2d
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1176,7 +1176,7 @@ export { ComponentFactory as ɵComponentFactory }
  * @see [Dynamic Components](guide/dynamic-component-loader)
  * @see [Usage Example](guide/dynamic-component-loader#resolving-components)
  * @see <live-example name="dynamic-component-loader" noDownload></live-example>
-of the code in this cookbook
+ of the code in this cookbook
  * @publicApi
  */
 export declare abstract class ComponentFactoryResolver {
@@ -5547,8 +5547,8 @@ declare const PREORDER_HOOK_FLAGS = 18;
 /** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
     /**
-       The index of the next pre-order hook to be called in the hooks array, on the first 16
-       bits
+     The index of the next pre-order hook to be called in the hooks array, on the first 16
+     bits
      */
     IndexOfTheNextPreOrderHookMaskMask = 65535,
     /**
@@ -8784,9 +8784,9 @@ export declare interface ViewChildrenDecorator {
      *   * A template reference variable as a string (e.g. query `<my-component #cmp></my-component>`
      * with `@ViewChildren('cmp')`)
      *   * Any provider defined in the child component tree of the current component (e.g.
-     * `@ViewChildren(SomeService) someService: SomeService`)
-     *   * Any provider defined through a string token (e.g. `@ViewChildren('someToken') someTokenVal:
-     * any`)
+     * `@ViewChildren(SomeService) someService!: SomeService`)
+     *   * Any provider defined through a string token (e.g. `@ViewChildren('someToken')
+     * someTokenVal!: any`)
      *   * A `TemplateRef` (e.g. query `<ng-template></ng-template>` with `@ViewChildren(TemplateRef)
      * template;`)
      *
