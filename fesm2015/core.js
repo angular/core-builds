@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.1+55.sha-2ed5a2d
+ * @license Angular v12.1.1+60.sha-91a576d
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6511,11 +6511,7 @@ class ErrorHandler {
     }
     /** @internal */
     _findContext(error) {
-        if (error) {
-            return getDebugContext(error) ? getDebugContext(error) :
-                this._findContext(getOriginalError(error));
-        }
-        return null;
+        return error ? (getDebugContext(error) || this._findContext(getOriginalError(error))) : null;
     }
     /** @internal */
     _findOriginalError(error) {
@@ -21469,7 +21465,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.1+55.sha-2ed5a2d');
+const VERSION = new Version('12.1.1+60.sha-91a576d');
 
 /**
  * @license
