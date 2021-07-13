@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.1+102.sha-970d7f7
+ * @license Angular v12.2.0-next.1+103.sha-51156f3
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8067,7 +8067,7 @@ export declare interface TrackByFunction<T> {
      * @param index The index of the item within the iterable.
      * @param item The item in the iterable.
      */
-    <U extends T>(index: number, item: U): any;
+    <U extends T>(index: number, item: T & U): any;
 }
 
 /**
