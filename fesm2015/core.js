@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.2+3.sha-e6f01d7
+ * @license Angular v12.1.2+13.sha-97fa1cf
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4025,15 +4025,38 @@ var ViewEncapsulation$1;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function getCompilerFacade() {
+function getCompilerFacade(request) {
     const globalNg = _global['ng'];
-    if (!globalNg || !globalNg.ɵcompilerFacade) {
-        throw new Error(`Angular JIT compilation failed: '@angular/compiler' not loaded!\n` +
-            `  - JIT compilation is discouraged for production use-cases! Consider AOT mode instead.\n` +
-            `  - Did you bootstrap using '@angular/platform-browser-dynamic' or '@angular/platform-server'?\n` +
-            `  - Alternatively provide the compiler with 'import "@angular/compiler";' before bootstrapping.`);
+    if (globalNg && globalNg.ɵcompilerFacade) {
+        return globalNg.ɵcompilerFacade;
     }
-    return globalNg.ɵcompilerFacade;
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        // Log the type as an error so that a developer can easily navigate to the type from the
+        // console.
+        console.error(`JIT compilation failed for ${request.kind}`, request.type);
+        let message = `The ${request.kind} '${request
+            .type.name}' needs to be compiled using the JIT compiler, but '@angular/compiler' is not available.\n\n`;
+        if (request.usage === 1 /* PartialDeclaration */) {
+            message += `The ${request.kind} is part of a library that has been partially compiled.\n`;
+            message +=
+                `However, the Angular Linker has not processed the library such that JIT compilation is used as fallback.\n`;
+            message += '\n';
+            message +=
+                `Ideally, the library is processed using the Angular Linker to become fully AOT compiled.\n`;
+        }
+        else {
+            message +=
+                `JIT compilation is discouraged for production use-cases! Consider using AOT mode instead.\n`;
+        }
+        message +=
+            `Alternatively, the JIT compiler should be loaded by bootstrapping using '@angular/platform-browser-dynamic' or '@angular/platform-server',\n`;
+        message +=
+            `or manually provide the compiler with 'import "@angular/compiler";' before bootstrapping.`;
+        throw new Error(message);
+    }
+    else {
+        throw new Error('JIT compiler unavailable');
+    }
 }
 
 /**
@@ -13669,7 +13692,8 @@ function compileInjectable(type, meta) {
         Object.defineProperty(type, NG_PROV_DEF, {
             get: () => {
                 if (ngInjectableDef === null) {
-                    ngInjectableDef = getCompilerFacade().compileInjectable(angularCoreDiEnv, `ng:///${type.name}/ɵprov.js`, getInjectableMetadata(type, meta));
+                    const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'injectable', type });
+                    ngInjectableDef = compiler.compileInjectable(angularCoreDiEnv, `ng:///${type.name}/ɵprov.js`, getInjectableMetadata(type, meta));
                 }
                 return ngInjectableDef;
             },
@@ -13680,7 +13704,7 @@ function compileInjectable(type, meta) {
         Object.defineProperty(type, NG_FACTORY_DEF, {
             get: () => {
                 if (ngFactoryDef === null) {
-                    const compiler = getCompilerFacade();
+                    const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'injectable', type });
                     ngFactoryDef = compiler.compileFactory(angularCoreDiEnv, `ng:///${type.name}/ɵfac.js`, {
                         name: type.name,
                         type,
@@ -21465,7 +21489,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.2+3.sha-e6f01d7');
+const VERSION = new Version('12.1.2+13.sha-97fa1cf');
 
 /**
  * @license
@@ -26924,7 +26948,8 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
                     // go into an infinite loop before we've reached the point where we throw all the errors.
                     throw new Error(`'${stringifyForError(moduleType)}' module can't import itself`);
                 }
-                ngModuleDef = getCompilerFacade().compileNgModule(angularCoreEnv, `ng:///${moduleType.name}/ɵmod.js`, {
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'NgModule', type: moduleType });
+                ngModuleDef = compiler.compileNgModule(angularCoreEnv, `ng:///${moduleType.name}/ɵmod.js`, {
                     type: moduleType,
                     bootstrap: flatten(ngModule.bootstrap || EMPTY_ARRAY).map(resolveForwardRef),
                     declarations: declarations.map(resolveForwardRef),
@@ -26952,7 +26977,7 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
     Object.defineProperty(moduleType, NG_FACTORY_DEF, {
         get: () => {
             if (ngFactoryDef === null) {
-                const compiler = getCompilerFacade();
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'NgModule', type: moduleType });
                 ngFactoryDef = compiler.compileFactory(angularCoreEnv, `ng:///${moduleType.name}/ɵfac.js`, {
                     name: moduleType.name,
                     type: moduleType,
@@ -26981,7 +27006,9 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
                         (ngModule.exports || EMPTY_ARRAY).map(resolveForwardRef),
                     ],
                 };
-                ngInjectorDef = getCompilerFacade().compileInjector(angularCoreEnv, `ng:///${moduleType.name}/ɵinj.js`, meta);
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'NgModule', type: moduleType });
+                ngInjectorDef =
+                    compiler.compileInjector(angularCoreEnv, `ng:///${moduleType.name}/ɵinj.js`, meta);
             }
             return ngInjectorDef;
         },
@@ -27347,7 +27374,7 @@ function compileComponent(type, metadata) {
     Object.defineProperty(type, NG_COMP_DEF, {
         get: () => {
             if (ngComponentDef === null) {
-                const compiler = getCompilerFacade();
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'component', type: type });
                 if (componentNeedsResolution(metadata)) {
                     const error = [`Component '${type.name}' is not resolved:`];
                     if (metadata.templateUrl) {
@@ -27438,8 +27465,9 @@ function compileDirective(type, directive) {
                 // that use `@Directive()` with no selector. In that case, pass empty object to the
                 // `directiveMetadata` function instead of null.
                 const meta = getDirectiveMetadata$1(type, directive || {});
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'directive', type });
                 ngDirectiveDef =
-                    getCompilerFacade().compileDirective(angularCoreEnv, meta.sourceMapUrl, meta.metadata);
+                    compiler.compileDirective(angularCoreEnv, meta.sourceMapUrl, meta.metadata);
             }
             return ngDirectiveDef;
         },
@@ -27450,7 +27478,7 @@ function compileDirective(type, directive) {
 function getDirectiveMetadata$1(type, metadata) {
     const name = type && type.name;
     const sourceMapUrl = `ng:///${name}/ɵdir.js`;
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'directive', type });
     const facade = directiveMetadata(type, metadata);
     facade.typeSourceSpan = compiler.createParseSourceSpan('Directive', name, sourceMapUrl);
     if (facade.usesInheritance) {
@@ -27464,7 +27492,7 @@ function addDirectiveFactoryDef(type, metadata) {
         get: () => {
             if (ngFactoryDef === null) {
                 const meta = getDirectiveMetadata$1(type, metadata);
-                const compiler = getCompilerFacade();
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'directive', type });
                 ngFactoryDef = compiler.compileFactory(angularCoreEnv, `ng:///${type.name}/ɵfac.js`, {
                     name: meta.metadata.name,
                     type: meta.metadata.type,
@@ -27615,7 +27643,7 @@ function compilePipe(type, meta) {
         get: () => {
             if (ngFactoryDef === null) {
                 const metadata = getPipeMetadata(type, meta);
-                const compiler = getCompilerFacade();
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'pipe', type: metadata.type });
                 ngFactoryDef = compiler.compileFactory(angularCoreEnv, `ng:///${metadata.name}/ɵfac.js`, {
                     name: metadata.name,
                     type: metadata.type,
@@ -27633,7 +27661,9 @@ function compilePipe(type, meta) {
         get: () => {
             if (ngPipeDef === null) {
                 const metadata = getPipeMetadata(type, meta);
-                ngPipeDef = getCompilerFacade().compilePipe(angularCoreEnv, `ng:///${metadata.name}/ɵpipe.js`, metadata);
+                const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: 'pipe', type: metadata.type });
+                ngPipeDef =
+                    compiler.compilePipe(angularCoreEnv, `ng:///${metadata.name}/ɵpipe.js`, metadata);
             }
             return ngPipeDef;
         },
@@ -29081,7 +29111,11 @@ function compileNgModuleFactory__POST_R3__(injector, options, moduleType) {
     if (compilerProviders.length === 0) {
         return Promise.resolve(moduleFactory);
     }
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({
+        usage: 0 /* Decorator */,
+        kind: 'NgModule',
+        type: moduleType,
+    });
     const compilerInjector = Injector.create({ providers: compilerProviders });
     const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
     // The resource loader can also return a string while the "resolveComponentResources"
@@ -33023,7 +33057,7 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @codeGenApi
  */
 function ɵɵngDeclareDirective(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 1 /* PartialDeclaration */, kind: 'directive', type: decl.type });
     return compiler.compileDirectiveDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵfac.js`, decl);
 }
 /**
@@ -33041,7 +33075,7 @@ function ɵɵngDeclareClassMetadata(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareComponent(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 1 /* PartialDeclaration */, kind: 'component', type: decl.type });
     return compiler.compileComponentDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵcmp.js`, decl);
 }
 /**
@@ -33050,8 +33084,26 @@ function ɵɵngDeclareComponent(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareFactory(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({
+        usage: 1 /* PartialDeclaration */,
+        kind: getFactoryKind(decl.target),
+        type: decl.type
+    });
     return compiler.compileFactoryDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵfac.js`, decl);
+}
+function getFactoryKind(target) {
+    switch (target) {
+        case FactoryTarget.Directive:
+            return 'directive';
+        case FactoryTarget.Component:
+            return 'component';
+        case FactoryTarget.Injectable:
+            return 'injectable';
+        case FactoryTarget.Pipe:
+            return 'pipe';
+        case FactoryTarget.NgModule:
+            return 'NgModule';
+    }
 }
 /**
  * Compiles a partial injectable declaration object into a full injectable definition object.
@@ -33059,7 +33111,7 @@ function ɵɵngDeclareFactory(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareInjectable(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 1 /* PartialDeclaration */, kind: 'injectable', type: decl.type });
     return compiler.compileInjectableDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵprov.js`, decl);
 }
 /**
@@ -33068,7 +33120,7 @@ function ɵɵngDeclareInjectable(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareInjector(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 1 /* PartialDeclaration */, kind: 'NgModule', type: decl.type });
     return compiler.compileInjectorDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵinj.js`, decl);
 }
 /**
@@ -33077,7 +33129,7 @@ function ɵɵngDeclareInjector(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclareNgModule(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 1 /* PartialDeclaration */, kind: 'NgModule', type: decl.type });
     return compiler.compileNgModuleDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵmod.js`, decl);
 }
 /**
@@ -33086,7 +33138,7 @@ function ɵɵngDeclareNgModule(decl) {
  * @codeGenApi
  */
 function ɵɵngDeclarePipe(decl) {
-    const compiler = getCompilerFacade();
+    const compiler = getCompilerFacade({ usage: 1 /* PartialDeclaration */, kind: 'pipe', type: decl.type });
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
 }
 
