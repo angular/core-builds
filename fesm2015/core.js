@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.2+13.sha-97fa1cf
+ * @license Angular v12.1.2+29.sha-e6b7472
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11231,6 +11231,7 @@ class R3Injector {
         this.assertNotDestroyed();
         // Set the injection context.
         const previousInjector = setCurrentInjector(this);
+        const previousInjectImplementation = setInjectImplementation(undefined);
         try {
             // Check for the SkipSelf flag.
             if (!(flags & InjectFlags.SkipSelf)) {
@@ -11283,7 +11284,8 @@ class R3Injector {
             }
         }
         finally {
-            // Lastly, clean up the state by restoring the previous injector.
+            // Lastly, restore the previous injection context.
+            setInjectImplementation(previousInjectImplementation);
             setCurrentInjector(previousInjector);
         }
     }
@@ -21489,7 +21491,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.2+13.sha-97fa1cf');
+const VERSION = new Version('12.1.2+29.sha-e6b7472');
 
 /**
  * @license
