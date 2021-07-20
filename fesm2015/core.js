@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.2+32.sha-96d31d8
+ * @license Angular v12.2.0-next.2+33.sha-4286b08
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21455,7 +21455,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.2.0-next.2+32.sha-96d31d8');
+const VERSION = new Version('12.2.0-next.2+33.sha-4286b08');
 
 /**
  * @license
