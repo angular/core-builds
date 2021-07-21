@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.1.2+34.sha-b0854e2
+ * @license Angular v12.1.3+5.sha-f589b01.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6473,7 +6473,7 @@ function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
 }
 function getErrorLogger(error) {
-    return error[ERROR_LOGGER] || defaultErrorLogger;
+    return error && error[ERROR_LOGGER] || defaultErrorLogger;
 }
 function defaultErrorLogger(console, ...values) {
     console.error(...values);
@@ -6538,11 +6538,11 @@ class ErrorHandler {
     }
     /** @internal */
     _findOriginalError(error) {
-        let e = getOriginalError(error);
+        let e = error && getOriginalError(error);
         while (e && getOriginalError(e)) {
             e = getOriginalError(e);
         }
-        return e;
+        return e || null;
     }
 }
 
@@ -21491,7 +21491,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.1.2+34.sha-b0854e2');
+const VERSION = new Version('12.1.3+5.sha-f589b01.with-local-changes');
 
 /**
  * @license
