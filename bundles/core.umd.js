@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.3+2.sha-992dc93.with-local-changes
+ * @license Angular v12.2.0-next.3+4.sha-eefe168.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6807,7 +6807,7 @@
         return error[ERROR_ORIGINAL_ERROR];
     }
     function getErrorLogger(error) {
-        return error[ERROR_LOGGER] || defaultErrorLogger;
+        return error && error[ERROR_LOGGER] || defaultErrorLogger;
     }
     function defaultErrorLogger(console) {
         var values = [];
@@ -6876,11 +6876,11 @@
         };
         /** @internal */
         ErrorHandler.prototype._findOriginalError = function (error) {
-            var e = getOriginalError(error);
+            var e = error && getOriginalError(error);
             while (e && getOriginalError(e)) {
                 e = getOriginalError(e);
             }
-            return e;
+            return e || null;
         };
         return ErrorHandler;
     }());
@@ -22003,7 +22003,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.2.0-next.3+2.sha-992dc93.with-local-changes');
+    var VERSION = new Version('12.2.0-next.3+4.sha-eefe168.with-local-changes');
 
     /**
      * @license
