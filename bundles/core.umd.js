@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.0-next.2+28.sha-0ce8f6e.with-local-changes
+ * @license Angular v12.2.0-next.2+29.sha-5327926.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9934,6 +9934,7 @@
             // an error, mark the view as corrupted so we can try to recover.
             if (tView.firstCreatePass) {
                 tView.incompleteFirstPass = true;
+                tView.firstCreatePass = false;
             }
             throw error;
         }
@@ -22032,7 +22033,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.2.0-next.2+28.sha-0ce8f6e.with-local-changes');
+    var VERSION = new Version('12.2.0-next.2+29.sha-5327926.with-local-changes');
 
     /**
      * @license
