@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.1+5.sha-398be10.with-local-changes
+ * @license Angular v13.0.0-next.1+6.sha-470371f.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1324,7 +1324,8 @@ export declare const ContentChild: ContentChildDecorator;
  */
 export declare interface ContentChildDecorator {
     /**
-     * Parameter decorator that configures a content query.
+     * @description
+     * Property decorator that configures a content query.
      *
      * Use to get the first element or the directive matching the selector from the content DOM.
      * If the content DOM changes, and a new child matches the selector,
@@ -1406,7 +1407,8 @@ export declare const ContentChildren: ContentChildrenDecorator;
  */
 export declare interface ContentChildrenDecorator {
     /**
-     * Parameter decorator that configures a content query.
+     * @description
+     * Property decorator that configures a content query.
      *
      * Use to get the `QueryList` of elements or directives from the content DOM.
      * Any time a child element is added, removed, or moved, the query list will be
@@ -8761,7 +8763,8 @@ export declare const ViewChildren: ViewChildrenDecorator;
  */
 export declare interface ViewChildrenDecorator {
     /**
-     * Parameter decorator that configures a view query.
+     * @description
+     * Property decorator that configures a view query.
      *
      * Use to get the `QueryList` of elements or directives from the view DOM.
      * Any time a child element is added, removed, or moved, the query list will be updated,
