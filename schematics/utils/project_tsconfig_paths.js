@@ -5,6 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
@@ -18,71 +27,96 @@
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getProjectTsConfigPaths = void 0;
     const core_1 = require("@angular-devkit/core");
-    /** Name of the default Angular CLI workspace configuration files. */
-    const defaultWorkspaceConfigPaths = ['/angular.json', '/.angular.json'];
     /**
      * Gets all tsconfig paths from a CLI project by reading the workspace configuration
      * and looking for common tsconfig locations.
      */
     function getProjectTsConfigPaths(tree) {
-        // Start with some tsconfig paths that are generally used within CLI projects. Note
-        // that we are not interested in IDE-specific tsconfig files (e.g. /tsconfig.json)
-        const buildPaths = new Set(['src/tsconfig.app.json']);
-        const testPaths = new Set(['src/tsconfig.spec.json']);
-        // Add any tsconfig directly referenced in a build or test task of the angular.json workspace.
-        const workspace = getWorkspaceConfigGracefully(tree);
-        if (workspace) {
-            const projects = Object.keys(workspace.projects).map(name => workspace.projects[name]);
-            for (const project of projects) {
-                const buildPath = getTargetTsconfigPath(project, 'build');
-                const testPath = getTargetTsconfigPath(project, 'test');
-                if (buildPath) {
-                    buildPaths.add(buildPath);
-                }
-                if (testPath) {
-                    testPaths.add(testPath);
+        return __awaiter(this, void 0, void 0, function* () {
+            // Start with some tsconfig paths that are generally used within CLI projects. Note
+            // that we are not interested in IDE-specific tsconfig files (e.g. /tsconfig.json)
+            const buildPaths = new Set();
+            const testPaths = new Set();
+            const workspace = yield getWorkspace(tree);
+            for (const [, project] of workspace.projects) {
+                for (const [name, target] of project.targets) {
+                    if (name !== 'build' && name !== 'test') {
+                        continue;
+                    }
+                    for (const [, options] of allTargetOptions(target)) {
+                        const tsConfig = options.tsConfig;
+                        // Filter out tsconfig files that don't exist in the CLI project.
+                        if (typeof tsConfig !== 'string' || !tree.exists(tsConfig)) {
+                            continue;
+                        }
+                        if (name === 'build') {
+                            buildPaths.add(core_1.normalize(tsConfig));
+                        }
+                        else {
+                            testPaths.add(core_1.normalize(tsConfig));
+                        }
+                    }
                 }
             }
-        }
-        // Filter out tsconfig files that don't exist in the CLI project.
-        return {
-            buildPaths: Array.from(buildPaths).filter(p => tree.exists(p)),
-            testPaths: Array.from(testPaths).filter(p => tree.exists(p)),
-        };
+            return {
+                buildPaths: [...buildPaths],
+                testPaths: [...testPaths],
+            };
+        });
     }
     exports.getProjectTsConfigPaths = getProjectTsConfigPaths;
-    /** Gets the tsconfig path from the given target within the specified project. */
-    function getTargetTsconfigPath(project, targetName) {
-        if (project.targets && project.targets[targetName] && project.targets[targetName].options &&
-            project.targets[targetName].options.tsConfig) {
-            return core_1.normalize(project.targets[targetName].options.tsConfig);
+    /** Get options for all configurations for the passed builder target. */
+    function* allTargetOptions(target) {
+        if (target.options) {
+            yield [undefined, target.options];
         }
-        if (project.architect && project.architect[targetName] && project.architect[targetName].options &&
-            project.architect[targetName].options.tsConfig) {
-            return core_1.normalize(project.architect[targetName].options.tsConfig);
+        if (!target.configurations) {
+            return;
         }
-        return null;
+        for (const [name, options] of Object.entries(target.configurations)) {
+            if (options) {
+                yield [name, options];
+            }
+        }
     }
-    /**
-     * Resolve the workspace configuration of the specified tree gracefully. We cannot use the utility
-     * functions from the default Angular schematics because those might not be present in older
-     * versions of the CLI. Also it's important to resolve the workspace gracefully because
-     * the CLI project could be still using `.angular-cli.json` instead of thew new config.
-     */
-    function getWorkspaceConfigGracefully(tree) {
-        const path = defaultWorkspaceConfigPaths.find(filePath => tree.exists(filePath));
-        const configBuffer = tree.read(path);
-        if (!path || !configBuffer) {
-            return null;
-        }
-        try {
-            // Parse the workspace file as JSON5 which is also supported for CLI
-            // workspace configurations.
-            return core_1.parseJson(configBuffer.toString(), core_1.JsonParseMode.Json5);
-        }
-        catch (e) {
-            return null;
-        }
+    function createHost(tree) {
+        return {
+            readFile(path) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const data = tree.read(path);
+                    if (!data) {
+                        throw new Error('File not found.');
+                    }
+                    return core_1.virtualFs.fileBufferToString(data);
+                });
+            },
+            writeFile(path, data) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    return tree.overwrite(path, data);
+                });
+            },
+            isDirectory(path) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    // Approximate a directory check.
+                    // We don't need to consider empty directories and hence this is a good enough approach.
+                    // This is also per documentation, see:
+                    // https://angular.io/guide/schematics-for-libraries#get-the-project-configuration
+                    return !tree.exists(path) && tree.getDir(path).subfiles.length > 0;
+                });
+            },
+            isFile(path) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    return tree.exists(path);
+                });
+            },
+        };
+    }
+    function getWorkspace(tree) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const host = createHost(tree);
+            const { workspace } = yield core_1.workspaces.readWorkspace('/', host);
+            return workspace;
+        });
     }
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvamVjdF90c2NvbmZpZ19wYXRocy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc2NoZW1hdGljcy91dGlscy9wcm9qZWN0X3RzY29uZmlnX3BhdGhzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRzs7Ozs7Ozs7Ozs7OztJQUVILCtDQUF5RTtJQUl6RSxxRUFBcUU7SUFDckUsTUFBTSwyQkFBMkIsR0FBRyxDQUFDLGVBQWUsRUFBRSxnQkFBZ0IsQ0FBQyxDQUFDO0lBRXhFOzs7T0FHRztJQUNILFNBQWdCLHVCQUF1QixDQUFDLElBQVU7UUFDaEQsbUZBQW1GO1FBQ25GLGtGQUFrRjtRQUNsRixNQUFNLFVBQVUsR0FBRyxJQUFJLEdBQUcsQ0FBUyxDQUFDLHVCQUF1QixDQUFDLENBQUMsQ0FBQztRQUM5RCxNQUFNLFNBQVMsR0FBRyxJQUFJLEdBQUcsQ0FBUyxDQUFDLHdCQUF3QixDQUFDLENBQUMsQ0FBQztRQUU5RCw4RkFBOEY7UUFDOUYsTUFBTSxTQUFTLEdBQUcsNEJBQTRCLENBQUMsSUFBSSxDQUFDLENBQUM7UUFFckQsSUFBSSxTQUFTLEVBQUU7WUFDYixNQUFNLFFBQVEsR0FBRyxNQUFNLENBQUMsSUFBSSxDQUFDLFNBQVMsQ0FBQyxRQUFRLENBQUMsQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxTQUFTLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUM7WUFDdkYsS0FBSyxNQUFNLE9BQU8sSUFBSSxRQUFRLEVBQUU7Z0JBQzlCLE1BQU0sU0FBUyxHQUFHLHFCQUFxQixDQUFDLE9BQU8sRUFBRSxPQUFPLENBQUMsQ0FBQztnQkFDMUQsTUFBTSxRQUFRLEdBQUcscUJBQXFCLENBQUMsT0FBTyxFQUFFLE1BQU0sQ0FBQyxDQUFDO2dCQUV4RCxJQUFJLFNBQVMsRUFBRTtvQkFDYixVQUFVLENBQUMsR0FBRyxDQUFDLFNBQVMsQ0FBQyxDQUFDO2lCQUMzQjtnQkFFRCxJQUFJLFFBQVEsRUFBRTtvQkFDWixTQUFTLENBQUMsR0FBRyxDQUFDLFFBQVEsQ0FBQyxDQUFDO2lCQUN6QjthQUNGO1NBQ0Y7UUFFRCxpRUFBaUU7UUFDakUsT0FBTztZQUNMLFVBQVUsRUFBRSxLQUFLLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxDQUFDLE1BQU0sQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxDQUFDLENBQUM7WUFDOUQsU0FBUyxFQUFFLEtBQUssQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUMsTUFBTSxDQUFDLENBQUMsQ0FBQyxFQUFFLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQztTQUM3RCxDQUFDO0lBQ0osQ0FBQztJQTlCRCwwREE4QkM7SUFFRCxpRkFBaUY7SUFDakYsU0FBUyxxQkFBcUIsQ0FBQyxPQUF5QixFQUFFLFVBQWtCO1FBQzFFLElBQUksT0FBTyxDQUFDLE9BQU8sSUFBSSxPQUFPLENBQUMsT0FBTyxDQUFDLFVBQVUsQ0FBQyxJQUFJLE9BQU8sQ0FBQyxPQUFPLENBQUMsVUFBVSxDQUFDLENBQUMsT0FBTztZQUNyRixPQUFPLENBQUMsT0FBTyxDQUFDLFVBQVUsQ0FBQyxDQUFDLE9BQU8sQ0FBQyxRQUFRLEVBQUU7WUFDaEQsT0FBTyxnQkFBUyxDQUFDLE9BQU8sQ0FBQyxPQUFPLENBQUMsVUFBVSxDQUFDLENBQUMsT0FBTyxDQUFDLFFBQVEsQ0FBQyxDQUFDO1NBQ2hFO1FBRUQsSUFBSSxPQUFPLENBQUMsU0FBUyxJQUFJLE9BQU8sQ0FBQyxTQUFTLENBQUMsVUFBVSxDQUFDLElBQUksT0FBTyxDQUFDLFNBQVMsQ0FBQyxVQUFVLENBQUMsQ0FBQyxPQUFPO1lBQzNGLE9BQU8sQ0FBQyxTQUFTLENBQUMsVUFBVSxDQUFDLENBQUMsT0FBTyxDQUFDLFFBQVEsRUFBRTtZQUNsRCxPQUFPLGdCQUFTLENBQUMsT0FBTyxDQUFDLFNBQVMsQ0FBQyxVQUFVLENBQUMsQ0FBQyxPQUFPLENBQUMsUUFBUSxDQUFDLENBQUM7U0FDbEU7UUFDRCxPQUFPLElBQUksQ0FBQztJQUNkLENBQUM7SUFFRDs7Ozs7T0FLRztJQUNILFNBQVMsNEJBQTRCLENBQUMsSUFBVTtRQUM5QyxNQUFNLElBQUksR0FBRywyQkFBMkIsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLEVBQUUsQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUM7UUFDakYsTUFBTSxZQUFZLEdBQUcsSUFBSSxDQUFDLElBQUksQ0FBQyxJQUFLLENBQUMsQ0FBQztRQUV0QyxJQUFJLENBQUMsSUFBSSxJQUFJLENBQUMsWUFBWSxFQUFFO1lBQzFCLE9BQU8sSUFBSSxDQUFDO1NBQ2I7UUFFRCxJQUFJO1lBQ0Ysb0VBQW9FO1lBQ3BFLDRCQUE0QjtZQUM1QixPQUFPLGdCQUFTLENBQUMsWUFBWSxDQUFDLFFBQVEsRUFBRSxFQUFFLG9CQUFhLENBQUMsS0FBSyxDQUFDLENBQUM7U0FDaEU7UUFBQyxPQUFPLENBQUMsRUFBRTtZQUNWLE9BQU8sSUFBSSxDQUFDO1NBQ2I7SUFDSCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBMTEMgQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7SnNvblBhcnNlTW9kZSwgbm9ybWFsaXplLCBwYXJzZUpzb259IGZyb20gJ0Bhbmd1bGFyLWRldmtpdC9jb3JlJztcbmltcG9ydCB7VHJlZX0gZnJvbSAnQGFuZ3VsYXItZGV2a2l0L3NjaGVtYXRpY3MnO1xuaW1wb3J0IHtXb3Jrc3BhY2VQcm9qZWN0fSBmcm9tICdAc2NoZW1hdGljcy9hbmd1bGFyL3V0aWxpdHkvd29ya3NwYWNlLW1vZGVscyc7XG5cbi8qKiBOYW1lIG9mIHRoZSBkZWZhdWx0IEFuZ3VsYXIgQ0xJIHdvcmtzcGFjZSBjb25maWd1cmF0aW9uIGZpbGVzLiAqL1xuY29uc3QgZGVmYXVsdFdvcmtzcGFjZUNvbmZpZ1BhdGhzID0gWycvYW5ndWxhci5qc29uJywgJy8uYW5ndWxhci5qc29uJ107XG5cbi8qKlxuICogR2V0cyBhbGwgdHNjb25maWcgcGF0aHMgZnJvbSBhIENMSSBwcm9qZWN0IGJ5IHJlYWRpbmcgdGhlIHdvcmtzcGFjZSBjb25maWd1cmF0aW9uXG4gKiBhbmQgbG9va2luZyBmb3IgY29tbW9uIHRzY29uZmlnIGxvY2F0aW9ucy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldFByb2plY3RUc0NvbmZpZ1BhdGhzKHRyZWU6IFRyZWUpOiB7YnVpbGRQYXRoczogc3RyaW5nW10sIHRlc3RQYXRoczogc3RyaW5nW119IHtcbiAgLy8gU3RhcnQgd2l0aCBzb21lIHRzY29uZmlnIHBhdGhzIHRoYXQgYXJlIGdlbmVyYWxseSB1c2VkIHdpdGhpbiBDTEkgcHJvamVjdHMuIE5vdGVcbiAgLy8gdGhhdCB3ZSBhcmUgbm90IGludGVyZXN0ZWQgaW4gSURFLXNwZWNpZmljIHRzY29uZmlnIGZpbGVzIChlLmcuIC90c2NvbmZpZy5qc29uKVxuICBjb25zdCBidWlsZFBhdGhzID0gbmV3IFNldDxzdHJpbmc+KFsnc3JjL3RzY29uZmlnLmFwcC5qc29uJ10pO1xuICBjb25zdCB0ZXN0UGF0aHMgPSBuZXcgU2V0PHN0cmluZz4oWydzcmMvdHNjb25maWcuc3BlYy5qc29uJ10pO1xuXG4gIC8vIEFkZCBhbnkgdHNjb25maWcgZGlyZWN0bHkgcmVmZXJlbmNlZCBpbiBhIGJ1aWxkIG9yIHRlc3QgdGFzayBvZiB0aGUgYW5ndWxhci5qc29uIHdvcmtzcGFjZS5cbiAgY29uc3Qgd29ya3NwYWNlID0gZ2V0V29ya3NwYWNlQ29uZmlnR3JhY2VmdWxseSh0cmVlKTtcblxuICBpZiAod29ya3NwYWNlKSB7XG4gICAgY29uc3QgcHJvamVjdHMgPSBPYmplY3Qua2V5cyh3b3Jrc3BhY2UucHJvamVjdHMpLm1hcChuYW1lID0+IHdvcmtzcGFjZS5wcm9qZWN0c1tuYW1lXSk7XG4gICAgZm9yIChjb25zdCBwcm9qZWN0IG9mIHByb2plY3RzKSB7XG4gICAgICBjb25zdCBidWlsZFBhdGggPSBnZXRUYXJnZXRUc2NvbmZpZ1BhdGgocHJvamVjdCwgJ2J1aWxkJyk7XG4gICAgICBjb25zdCB0ZXN0UGF0aCA9IGdldFRhcmdldFRzY29uZmlnUGF0aChwcm9qZWN0LCAndGVzdCcpO1xuXG4gICAgICBpZiAoYnVpbGRQYXRoKSB7XG4gICAgICAgIGJ1aWxkUGF0aHMuYWRkKGJ1aWxkUGF0aCk7XG4gICAgICB9XG5cbiAgICAgIGlmICh0ZXN0UGF0aCkge1xuICAgICAgICB0ZXN0UGF0aHMuYWRkKHRlc3RQYXRoKTtcbiAgICAgIH1cbiAgICB9XG4gIH1cblxuICAvLyBGaWx0ZXIgb3V0IHRzY29uZmlnIGZpbGVzIHRoYXQgZG9uJ3QgZXhpc3QgaW4gdGhlIENMSSBwcm9qZWN0LlxuICByZXR1cm4ge1xuICAgIGJ1aWxkUGF0aHM6IEFycmF5LmZyb20oYnVpbGRQYXRocykuZmlsdGVyKHAgPT4gdHJlZS5leGlzdHMocCkpLFxuICAgIHRlc3RQYXRoczogQXJyYXkuZnJvbSh0ZXN0UGF0aHMpLmZpbHRlcihwID0+IHRyZWUuZXhpc3RzKHApKSxcbiAgfTtcbn1cblxuLyoqIEdldHMgdGhlIHRzY29uZmlnIHBhdGggZnJvbSB0aGUgZ2l2ZW4gdGFyZ2V0IHdpdGhpbiB0aGUgc3BlY2lmaWVkIHByb2plY3QuICovXG5mdW5jdGlvbiBnZXRUYXJnZXRUc2NvbmZpZ1BhdGgocHJvamVjdDogV29ya3NwYWNlUHJvamVjdCwgdGFyZ2V0TmFtZTogc3RyaW5nKTogc3RyaW5nfG51bGwge1xuICBpZiAocHJvamVjdC50YXJnZXRzICYmIHByb2plY3QudGFyZ2V0c1t0YXJnZXROYW1lXSAmJiBwcm9qZWN0LnRhcmdldHNbdGFyZ2V0TmFtZV0ub3B0aW9ucyAmJlxuICAgICAgcHJvamVjdC50YXJnZXRzW3RhcmdldE5hbWVdLm9wdGlvbnMudHNDb25maWcpIHtcbiAgICByZXR1cm4gbm9ybWFsaXplKHByb2plY3QudGFyZ2V0c1t0YXJnZXROYW1lXS5vcHRpb25zLnRzQ29uZmlnKTtcbiAgfVxuXG4gIGlmIChwcm9qZWN0LmFyY2hpdGVjdCAmJiBwcm9qZWN0LmFyY2hpdGVjdFt0YXJnZXROYW1lXSAmJiBwcm9qZWN0LmFyY2hpdGVjdFt0YXJnZXROYW1lXS5vcHRpb25zICYmXG4gICAgICBwcm9qZWN0LmFyY2hpdGVjdFt0YXJnZXROYW1lXS5vcHRpb25zLnRzQ29uZmlnKSB7XG4gICAgcmV0dXJuIG5vcm1hbGl6ZShwcm9qZWN0LmFyY2hpdGVjdFt0YXJnZXROYW1lXS5vcHRpb25zLnRzQ29uZmlnKTtcbiAgfVxuICByZXR1cm4gbnVsbDtcbn1cblxuLyoqXG4gKiBSZXNvbHZlIHRoZSB3b3Jrc3BhY2UgY29uZmlndXJhdGlvbiBvZiB0aGUgc3BlY2lmaWVkIHRyZWUgZ3JhY2VmdWxseS4gV2UgY2Fubm90IHVzZSB0aGUgdXRpbGl0eVxuICogZnVuY3Rpb25zIGZyb20gdGhlIGRlZmF1bHQgQW5ndWxhciBzY2hlbWF0aWNzIGJlY2F1c2UgdGhvc2UgbWlnaHQgbm90IGJlIHByZXNlbnQgaW4gb2xkZXJcbiAqIHZlcnNpb25zIG9mIHRoZSBDTEkuIEFsc28gaXQncyBpbXBvcnRhbnQgdG8gcmVzb2x2ZSB0aGUgd29ya3NwYWNlIGdyYWNlZnVsbHkgYmVjYXVzZVxuICogdGhlIENMSSBwcm9qZWN0IGNvdWxkIGJlIHN0aWxsIHVzaW5nIGAuYW5ndWxhci1jbGkuanNvbmAgaW5zdGVhZCBvZiB0aGV3IG5ldyBjb25maWcuXG4gKi9cbmZ1bmN0aW9uIGdldFdvcmtzcGFjZUNvbmZpZ0dyYWNlZnVsbHkodHJlZTogVHJlZSk6IGFueSB7XG4gIGNvbnN0IHBhdGggPSBkZWZhdWx0V29ya3NwYWNlQ29uZmlnUGF0aHMuZmluZChmaWxlUGF0aCA9PiB0cmVlLmV4aXN0cyhmaWxlUGF0aCkpO1xuICBjb25zdCBjb25maWdCdWZmZXIgPSB0cmVlLnJlYWQocGF0aCEpO1xuXG4gIGlmICghcGF0aCB8fCAhY29uZmlnQnVmZmVyKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICB0cnkge1xuICAgIC8vIFBhcnNlIHRoZSB3b3Jrc3BhY2UgZmlsZSBhcyBKU09ONSB3aGljaCBpcyBhbHNvIHN1cHBvcnRlZCBmb3IgQ0xJXG4gICAgLy8gd29ya3NwYWNlIGNvbmZpZ3VyYXRpb25zLlxuICAgIHJldHVybiBwYXJzZUpzb24oY29uZmlnQnVmZmVyLnRvU3RyaW5nKCksIEpzb25QYXJzZU1vZGUuSnNvbjUpO1xuICB9IGNhdGNoIChlKSB7XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cbn1cbiJdfQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvamVjdF90c2NvbmZpZ19wYXRocy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc2NoZW1hdGljcy91dGlscy9wcm9qZWN0X3RzY29uZmlnX3BhdGhzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztJQUVILCtDQUE0RTtJQUc1RTs7O09BR0c7SUFDSCxTQUFzQix1QkFBdUIsQ0FBQyxJQUFVOztZQUV0RCxtRkFBbUY7WUFDbkYsa0ZBQWtGO1lBQ2xGLE1BQU0sVUFBVSxHQUFHLElBQUksR0FBRyxFQUFVLENBQUM7WUFDckMsTUFBTSxTQUFTLEdBQUcsSUFBSSxHQUFHLEVBQVUsQ0FBQztZQUVwQyxNQUFNLFNBQVMsR0FBRyxNQUFNLFlBQVksQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUMzQyxLQUFLLE1BQU0sQ0FBQyxFQUFFLE9BQU8sQ0FBQyxJQUFJLFNBQVMsQ0FBQyxRQUFRLEVBQUU7Z0JBQzVDLEtBQUssTUFBTSxDQUFDLElBQUksRUFBRSxNQUFNLENBQUMsSUFBSSxPQUFPLENBQUMsT0FBTyxFQUFFO29CQUM1QyxJQUFJLElBQUksS0FBSyxPQUFPLElBQUksSUFBSSxLQUFLLE1BQU0sRUFBRTt3QkFDdkMsU0FBUztxQkFDVjtvQkFFRCxLQUFLLE1BQU0sQ0FBQyxFQUFFLE9BQU8sQ0FBQyxJQUFJLGdCQUFnQixDQUFDLE1BQU0sQ0FBQyxFQUFFO3dCQUNsRCxNQUFNLFFBQVEsR0FBRyxPQUFPLENBQUMsUUFBUSxDQUFDO3dCQUNsQyxpRUFBaUU7d0JBQ2pFLElBQUksT0FBTyxRQUFRLEtBQUssUUFBUSxJQUFJLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxRQUFRLENBQUMsRUFBRTs0QkFDMUQsU0FBUzt5QkFDVjt3QkFFRCxJQUFJLElBQUksS0FBSyxPQUFPLEVBQUU7NEJBQ3BCLFVBQVUsQ0FBQyxHQUFHLENBQUMsZ0JBQVMsQ0FBQyxRQUFRLENBQUMsQ0FBQyxDQUFDO3lCQUNyQzs2QkFBTTs0QkFDTCxTQUFTLENBQUMsR0FBRyxDQUFDLGdCQUFTLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQzt5QkFDcEM7cUJBQ0Y7aUJBQ0Y7YUFDRjtZQUVELE9BQU87Z0JBQ0wsVUFBVSxFQUFFLENBQUMsR0FBRyxVQUFVLENBQUM7Z0JBQzNCLFNBQVMsRUFBRSxDQUFDLEdBQUcsU0FBUyxDQUFDO2FBQzFCLENBQUM7UUFDSixDQUFDO0tBQUE7SUFsQ0QsMERBa0NDO0lBRUQsd0VBQXdFO0lBQ3hFLFFBQVEsQ0FBQyxDQUNMLGdCQUFnQixDQUFDLE1BQW1DO1FBRXRELElBQUksTUFBTSxDQUFDLE9BQU8sRUFBRTtZQUNsQixNQUFNLENBQUMsU0FBUyxFQUFFLE1BQU0sQ0FBQyxPQUFPLENBQUMsQ0FBQztTQUNuQztRQUVELElBQUksQ0FBQyxNQUFNLENBQUMsY0FBYyxFQUFFO1lBQzFCLE9BQU87U0FDUjtRQUVELEtBQUssTUFBTSxDQUFDLElBQUksRUFBRSxPQUFPLENBQUMsSUFBSSxNQUFNLENBQUMsT0FBTyxDQUFDLE1BQU0sQ0FBQyxjQUFjLENBQUMsRUFBRTtZQUNuRSxJQUFJLE9BQU8sRUFBRTtnQkFDWCxNQUFNLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQyxDQUFDO2FBQ3ZCO1NBQ0Y7SUFDSCxDQUFDO0lBRUQsU0FBUyxVQUFVLENBQUMsSUFBVTtRQUM1QixPQUFPO1lBQ0MsUUFBUSxDQUFDLElBQVk7O29CQUN6QixNQUFNLElBQUksR0FBRyxJQUFJLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDO29CQUM3QixJQUFJLENBQUMsSUFBSSxFQUFFO3dCQUNULE1BQU0sSUFBSSxLQUFLLENBQUMsaUJBQWlCLENBQUMsQ0FBQztxQkFDcEM7b0JBRUQsT0FBTyxnQkFBUyxDQUFDLGtCQUFrQixDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUM1QyxDQUFDO2FBQUE7WUFDSyxTQUFTLENBQUMsSUFBWSxFQUFFLElBQVk7O29CQUN4QyxPQUFPLElBQUksQ0FBQyxTQUFTLENBQUMsSUFBSSxFQUFFLElBQUksQ0FBQyxDQUFDO2dCQUNwQyxDQUFDO2FBQUE7WUFDSyxXQUFXLENBQUMsSUFBWTs7b0JBQzVCLGlDQUFpQztvQkFDakMsd0ZBQXdGO29CQUN4Rix1Q0FBdUM7b0JBQ3ZDLGtGQUFrRjtvQkFDbEYsT0FBTyxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLElBQUksSUFBSSxDQUFDLE1BQU0sQ0FBQyxJQUFJLENBQUMsQ0FBQyxRQUFRLENBQUMsTUFBTSxHQUFHLENBQUMsQ0FBQztnQkFDckUsQ0FBQzthQUFBO1lBQ0ssTUFBTSxDQUFDLElBQVk7O29CQUN2QixPQUFPLElBQUksQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUM7Z0JBQzNCLENBQUM7YUFBQTtTQUNGLENBQUM7SUFDSixDQUFDO0lBRUQsU0FBZSxZQUFZLENBQUMsSUFBVTs7WUFDcEMsTUFBTSxJQUFJLEdBQUcsVUFBVSxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQzlCLE1BQU0sRUFBQyxTQUFTLEVBQUMsR0FBRyxNQUFNLGlCQUFVLENBQUMsYUFBYSxDQUFDLEdBQUcsRUFBRSxJQUFJLENBQUMsQ0FBQztZQUU5RCxPQUFPLFNBQVMsQ0FBQztRQUNuQixDQUFDO0tBQUEiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIExMQyBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuaW1wb3J0IHtqc29uLCBub3JtYWxpemUsIHZpcnR1YWxGcywgd29ya3NwYWNlc30gZnJvbSAnQGFuZ3VsYXItZGV2a2l0L2NvcmUnO1xuaW1wb3J0IHtUcmVlfSBmcm9tICdAYW5ndWxhci1kZXZraXQvc2NoZW1hdGljcyc7XG5cbi8qKlxuICogR2V0cyBhbGwgdHNjb25maWcgcGF0aHMgZnJvbSBhIENMSSBwcm9qZWN0IGJ5IHJlYWRpbmcgdGhlIHdvcmtzcGFjZSBjb25maWd1cmF0aW9uXG4gKiBhbmQgbG9va2luZyBmb3IgY29tbW9uIHRzY29uZmlnIGxvY2F0aW9ucy5cbiAqL1xuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGdldFByb2plY3RUc0NvbmZpZ1BhdGhzKHRyZWU6IFRyZWUpOlxuICAgIFByb21pc2U8e2J1aWxkUGF0aHM6IHN0cmluZ1tdOyB0ZXN0UGF0aHM6IHN0cmluZ1tdO30+IHtcbiAgLy8gU3RhcnQgd2l0aCBzb21lIHRzY29uZmlnIHBhdGhzIHRoYXQgYXJlIGdlbmVyYWxseSB1c2VkIHdpdGhpbiBDTEkgcHJvamVjdHMuIE5vdGVcbiAgLy8gdGhhdCB3ZSBhcmUgbm90IGludGVyZXN0ZWQgaW4gSURFLXNwZWNpZmljIHRzY29uZmlnIGZpbGVzIChlLmcuIC90c2NvbmZpZy5qc29uKVxuICBjb25zdCBidWlsZFBhdGhzID0gbmV3IFNldDxzdHJpbmc+KCk7XG4gIGNvbnN0IHRlc3RQYXRocyA9IG5ldyBTZXQ8c3RyaW5nPigpO1xuXG4gIGNvbnN0IHdvcmtzcGFjZSA9IGF3YWl0IGdldFdvcmtzcGFjZSh0cmVlKTtcbiAgZm9yIChjb25zdCBbLCBwcm9qZWN0XSBvZiB3b3Jrc3BhY2UucHJvamVjdHMpIHtcbiAgICBmb3IgKGNvbnN0IFtuYW1lLCB0YXJnZXRdIG9mIHByb2plY3QudGFyZ2V0cykge1xuICAgICAgaWYgKG5hbWUgIT09ICdidWlsZCcgJiYgbmFtZSAhPT0gJ3Rlc3QnKSB7XG4gICAgICAgIGNvbnRpbnVlO1xuICAgICAgfVxuXG4gICAgICBmb3IgKGNvbnN0IFssIG9wdGlvbnNdIG9mIGFsbFRhcmdldE9wdGlvbnModGFyZ2V0KSkge1xuICAgICAgICBjb25zdCB0c0NvbmZpZyA9IG9wdGlvbnMudHNDb25maWc7XG4gICAgICAgIC8vIEZpbHRlciBvdXQgdHNjb25maWcgZmlsZXMgdGhhdCBkb24ndCBleGlzdCBpbiB0aGUgQ0xJIHByb2plY3QuXG4gICAgICAgIGlmICh0eXBlb2YgdHNDb25maWcgIT09ICdzdHJpbmcnIHx8ICF0cmVlLmV4aXN0cyh0c0NvbmZpZykpIHtcbiAgICAgICAgICBjb250aW51ZTtcbiAgICAgICAgfVxuXG4gICAgICAgIGlmIChuYW1lID09PSAnYnVpbGQnKSB7XG4gICAgICAgICAgYnVpbGRQYXRocy5hZGQobm9ybWFsaXplKHRzQ29uZmlnKSk7XG4gICAgICAgIH0gZWxzZSB7XG4gICAgICAgICAgdGVzdFBhdGhzLmFkZChub3JtYWxpemUodHNDb25maWcpKTtcbiAgICAgICAgfVxuICAgICAgfVxuICAgIH1cbiAgfVxuXG4gIHJldHVybiB7XG4gICAgYnVpbGRQYXRoczogWy4uLmJ1aWxkUGF0aHNdLFxuICAgIHRlc3RQYXRoczogWy4uLnRlc3RQYXRoc10sXG4gIH07XG59XG5cbi8qKiBHZXQgb3B0aW9ucyBmb3IgYWxsIGNvbmZpZ3VyYXRpb25zIGZvciB0aGUgcGFzc2VkIGJ1aWxkZXIgdGFyZ2V0LiAqL1xuZnVuY3Rpb24qXG4gICAgYWxsVGFyZ2V0T3B0aW9ucyh0YXJnZXQ6IHdvcmtzcGFjZXMuVGFyZ2V0RGVmaW5pdGlvbik6XG4gICAgICAgIEl0ZXJhYmxlPFtzdHJpbmcgfCB1bmRlZmluZWQsIFJlY29yZDxzdHJpbmcsIGpzb24uSnNvblZhbHVlfHVuZGVmaW5lZD5dPiB7XG4gIGlmICh0YXJnZXQub3B0aW9ucykge1xuICAgIHlpZWxkIFt1bmRlZmluZWQsIHRhcmdldC5vcHRpb25zXTtcbiAgfVxuXG4gIGlmICghdGFyZ2V0LmNvbmZpZ3VyYXRpb25zKSB7XG4gICAgcmV0dXJuO1xuICB9XG5cbiAgZm9yIChjb25zdCBbbmFtZSwgb3B0aW9uc10gb2YgT2JqZWN0LmVudHJpZXModGFyZ2V0LmNvbmZpZ3VyYXRpb25zKSkge1xuICAgIGlmIChvcHRpb25zKSB7XG4gICAgICB5aWVsZCBbbmFtZSwgb3B0aW9uc107XG4gICAgfVxuICB9XG59XG5cbmZ1bmN0aW9uIGNyZWF0ZUhvc3QodHJlZTogVHJlZSk6IHdvcmtzcGFjZXMuV29ya3NwYWNlSG9zdCB7XG4gIHJldHVybiB7XG4gICAgYXN5bmMgcmVhZEZpbGUocGF0aDogc3RyaW5nKTogUHJvbWlzZTxzdHJpbmc+IHtcbiAgICAgIGNvbnN0IGRhdGEgPSB0cmVlLnJlYWQocGF0aCk7XG4gICAgICBpZiAoIWRhdGEpIHtcbiAgICAgICAgdGhyb3cgbmV3IEVycm9yKCdGaWxlIG5vdCBmb3VuZC4nKTtcbiAgICAgIH1cblxuICAgICAgcmV0dXJuIHZpcnR1YWxGcy5maWxlQnVmZmVyVG9TdHJpbmcoZGF0YSk7XG4gICAgfSxcbiAgICBhc3luYyB3cml0ZUZpbGUocGF0aDogc3RyaW5nLCBkYXRhOiBzdHJpbmcpOiBQcm9taXNlPHZvaWQ+IHtcbiAgICAgIHJldHVybiB0cmVlLm92ZXJ3cml0ZShwYXRoLCBkYXRhKTtcbiAgICB9LFxuICAgIGFzeW5jIGlzRGlyZWN0b3J5KHBhdGg6IHN0cmluZyk6IFByb21pc2U8Ym9vbGVhbj4ge1xuICAgICAgLy8gQXBwcm94aW1hdGUgYSBkaXJlY3RvcnkgY2hlY2suXG4gICAgICAvLyBXZSBkb24ndCBuZWVkIHRvIGNvbnNpZGVyIGVtcHR5IGRpcmVjdG9yaWVzIGFuZCBoZW5jZSB0aGlzIGlzIGEgZ29vZCBlbm91Z2ggYXBwcm9hY2guXG4gICAgICAvLyBUaGlzIGlzIGFsc28gcGVyIGRvY3VtZW50YXRpb24sIHNlZTpcbiAgICAgIC8vIGh0dHBzOi8vYW5ndWxhci5pby9ndWlkZS9zY2hlbWF0aWNzLWZvci1saWJyYXJpZXMjZ2V0LXRoZS1wcm9qZWN0LWNvbmZpZ3VyYXRpb25cbiAgICAgIHJldHVybiAhdHJlZS5leGlzdHMocGF0aCkgJiYgdHJlZS5nZXREaXIocGF0aCkuc3ViZmlsZXMubGVuZ3RoID4gMDtcbiAgICB9LFxuICAgIGFzeW5jIGlzRmlsZShwYXRoOiBzdHJpbmcpOiBQcm9taXNlPGJvb2xlYW4+IHtcbiAgICAgIHJldHVybiB0cmVlLmV4aXN0cyhwYXRoKTtcbiAgICB9LFxuICB9O1xufVxuXG5hc3luYyBmdW5jdGlvbiBnZXRXb3Jrc3BhY2UodHJlZTogVHJlZSk6IFByb21pc2U8d29ya3NwYWNlcy5Xb3Jrc3BhY2VEZWZpbml0aW9uPiB7XG4gIGNvbnN0IGhvc3QgPSBjcmVhdGVIb3N0KHRyZWUpO1xuICBjb25zdCB7d29ya3NwYWNlfSA9IGF3YWl0IHdvcmtzcGFjZXMucmVhZFdvcmtzcGFjZSgnLycsIGhvc3QpO1xuXG4gIHJldHVybiB3b3Jrc3BhY2U7XG59XG4iXX0=
