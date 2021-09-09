@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.5+6.sha-4c307ad.with-local-changes
+ * @license Angular v13.0.0-next.5+8.sha-6c84c5f.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12143,7 +12143,7 @@
         return Injector;
     }());
     Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
-    Injector.NULL = new NullInjector();
+    Injector.NULL = ( /* @__PURE__ */new NullInjector());
     /** @nocollapse */
     Injector.ɵprov = ɵɵdefineInjectable({
         token: Injector,
@@ -15238,7 +15238,7 @@
         };
         return ReflectiveInjector_;
     }());
-    ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
+    ReflectiveInjector_.INJECTOR_KEY = ( /* @__PURE__ */ReflectiveKey.get(Injector));
     function _mapProviders(injector, fn) {
         var res = [];
         for (var i = 0; i < injector._providers.length; ++i) {
@@ -21800,7 +21800,7 @@
         }
         return ComponentFactoryResolver;
     }());
-    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+    ComponentFactoryResolver.NULL = ( /* @__PURE__ */new _NullComponentFactoryResolver());
     var CodegenComponentFactoryResolver = /** @class */ (function () {
         function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
             this._parent = _parent;
@@ -22033,7 +22033,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('13.0.0-next.5+6.sha-4c307ad.with-local-changes');
+    var VERSION = new Version('13.0.0-next.5+8.sha-6c84c5f.with-local-changes');
 
     /**
      * @license
