@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.4+20.sha-e726a63.with-local-changes
+ * @license Angular v12.2.5+4.sha-2658219.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11623,7 +11623,7 @@ class Injector {
     }
 }
 Injector.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
-Injector.NULL = new NullInjector();
+Injector.NULL = ( /* @__PURE__ */new NullInjector());
 /** @nocollapse */
 Injector.ɵprov = ɵɵdefineInjectable({
     token: Injector,
@@ -14692,7 +14692,7 @@ class ReflectiveInjector_ {
         return this.displayName;
     }
 }
-ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
+ReflectiveInjector_.INJECTOR_KEY = ( /* @__PURE__ */ReflectiveKey.get(Injector));
 function _mapProviders(injector, fn) {
     const res = [];
     for (let i = 0; i < injector._providers.length; ++i) {
@@ -21244,7 +21244,7 @@ of the code in this cookbook
  */
 class ComponentFactoryResolver {
 }
-ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+ComponentFactoryResolver.NULL = ( /* @__PURE__ */new _NullComponentFactoryResolver());
 class CodegenComponentFactoryResolver {
     constructor(factories, _parent, _ngModule) {
         this._parent = _parent;
@@ -21458,7 +21458,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.2.4+20.sha-e726a63.with-local-changes');
+const VERSION = new Version('12.2.5+4.sha-2658219.with-local-changes');
 
 /**
  * @license
