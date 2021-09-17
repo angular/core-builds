@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.6+28.sha-05e1adb.with-local-changes
+ * @license Angular v12.2.6+30.sha-ed235bd.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22033,7 +22033,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.2.6+28.sha-05e1adb.with-local-changes');
+    var VERSION = new Version('12.2.6+30.sha-ed235bd.with-local-changes');
 
     /**
      * @license
