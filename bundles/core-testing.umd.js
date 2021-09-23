@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.7+10.sha-cc427d1.with-local-changes
+ * @license Angular v13.0.0-next.7+11.sha-ea61ec2.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1160,18 +1160,18 @@
             // Enqueue any compilation tasks for the directly declared component.
             if (moduleDef.declarations !== undefined) {
                 this.queueTypeArray(moduleDef.declarations, TestingModuleOverride.DECLARATION);
-                (_a = this.declarations).push.apply(_a, __spreadArray([], __read(moduleDef.declarations)));
+                (_a = this.declarations).push.apply(_a, __spreadArray([], __read(moduleDef.declarations), false));
             }
             // Enqueue any compilation tasks for imported modules.
             if (moduleDef.imports !== undefined) {
                 this.queueTypesFromModulesArray(moduleDef.imports);
-                (_b = this.imports).push.apply(_b, __spreadArray([], __read(moduleDef.imports)));
+                (_b = this.imports).push.apply(_b, __spreadArray([], __read(moduleDef.imports), false));
             }
             if (moduleDef.providers !== undefined) {
-                (_c = this.providers).push.apply(_c, __spreadArray([], __read(moduleDef.providers)));
+                (_c = this.providers).push.apply(_c, __spreadArray([], __read(moduleDef.providers), false));
             }
             if (moduleDef.schemas !== undefined) {
-                (_d = this.schemas).push.apply(_d, __spreadArray([], __read(moduleDef.schemas)));
+                (_d = this.schemas).push.apply(_d, __spreadArray([], __read(moduleDef.schemas), false));
             }
         };
         R3TestBedCompiler.prototype.overrideModule = function (ngModule, override) {
@@ -1445,7 +1445,7 @@
             this.moduleProvidersOverridden.add(moduleType);
             var injectorDef = moduleType[core.ɵNG_INJ_DEF];
             if (this.providerOverridesByToken.size > 0) {
-                var providers = __spreadArray(__spreadArray([], __read(injectorDef.providers)), __read((this.providerOverridesByModule.get(moduleType) || [])));
+                var providers = __spreadArray(__spreadArray([], __read(injectorDef.providers), false), __read((this.providerOverridesByModule.get(moduleType) || [])), false);
                 if (this.hasProviderOverrides(providers)) {
                     this.maybeStoreNgDef(core.ɵNG_INJ_DEF, moduleType);
                     this.storeFieldOfDefOnType(moduleType, core.ɵNG_INJ_DEF, 'providers');
@@ -1730,13 +1730,13 @@
                 return RootScopeModule;
             }());
             core.ɵcompileNgModuleDefs(RootScopeModule, {
-                providers: __spreadArray([], __read(this.rootProviderOverrides)),
+                providers: __spreadArray([], __read(this.rootProviderOverrides), false),
             });
             var ngZone = new core.NgZone({ enableLongStackTrace: true });
             var providers = __spreadArray(__spreadArray([
                 { provide: core.NgZone, useValue: ngZone },
                 { provide: core.Compiler, useFactory: function () { return new R3TestCompiler(_this); } }
-            ], __read(this.providers)), __read(this.providerOverrides));
+            ], __read(this.providers), false), __read(this.providerOverrides), false);
             var imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
             // clang-format off
             core.ɵcompileNgModuleDefs(this.testModuleType, {
@@ -1761,7 +1761,7 @@
                     }
                 });
                 if (this.compilerProviders !== null) {
-                    providers.push.apply(providers, __spreadArray([], __read(this.compilerProviders)));
+                    providers.push.apply(providers, __spreadArray([], __read(this.compilerProviders), false));
                 }
                 // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
                 var CompilerModule = /** @class */ (function () {
@@ -1799,7 +1799,7 @@
                 return [];
             var flattenedProviders = flatten(providers);
             var overrides = this.getProviderOverrides(flattenedProviders);
-            var overriddenProviders = __spreadArray(__spreadArray([], __read(flattenedProviders)), __read(overrides));
+            var overriddenProviders = __spreadArray(__spreadArray([], __read(flattenedProviders), false), __read(overrides), false);
             var final = [];
             var seenOverriddenProviders = new Set();
             // We iterate through the list of providers in reverse order to make sure provider overrides
@@ -1857,7 +1857,7 @@
         var out = [];
         values.forEach(function (value) {
             if (Array.isArray(value)) {
-                out.push.apply(out, __spreadArray([], __read(flatten(value, mapFn))));
+                out.push.apply(out, __spreadArray([], __read(flatten(value, mapFn)), false));
             }
             else {
                 out.push(mapFn ? mapFn(value) : value);
@@ -2655,16 +2655,16 @@
             var _f, _g, _h, _j;
             this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
             if (moduleDef.providers) {
-                (_f = this._providers).push.apply(_f, __spreadArray([], __read(moduleDef.providers)));
+                (_f = this._providers).push.apply(_f, __spreadArray([], __read(moduleDef.providers), false));
             }
             if (moduleDef.declarations) {
-                (_g = this._declarations).push.apply(_g, __spreadArray([], __read(moduleDef.declarations)));
+                (_g = this._declarations).push.apply(_g, __spreadArray([], __read(moduleDef.declarations), false));
             }
             if (moduleDef.imports) {
-                (_h = this._imports).push.apply(_h, __spreadArray([], __read(moduleDef.imports)));
+                (_h = this._imports).push.apply(_h, __spreadArray([], __read(moduleDef.imports), false));
             }
             if (moduleDef.schemas) {
-                (_j = this._schemas).push.apply(_j, __spreadArray([], __read(moduleDef.schemas)));
+                (_j = this._schemas).push.apply(_j, __spreadArray([], __read(moduleDef.schemas), false));
             }
             if (moduleDef.aotSummaries) {
                 this._aotSummaries.push(moduleDef.aotSummaries);
@@ -2743,7 +2743,7 @@
             var e_2, _f;
             var _this = this;
             var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-            var declarations = __spreadArray(__spreadArray([], __read(this._declarations)), __read(this._templateOverrides.map(function (entry) { return entry.templateOf; })));
+            var declarations = __spreadArray(__spreadArray([], __read(this._declarations), false), __read(this._templateOverrides.map(function (entry) { return entry.templateOf; })), false);
             var rootScopeImports = [];
             var rootProviderOverrides = this._rootProviderOverrides;
             if (this._isRoot) {
@@ -2754,7 +2754,7 @@
                 }());
                 RootScopeModule.decorators = [
                     { type: core.NgModule, args: [{
-                                providers: __spreadArray([], __read(rootProviderOverrides)),
+                                providers: __spreadArray([], __read(rootProviderOverrides), false),
                                 jit: true,
                             },] }
                 ];
@@ -2774,7 +2774,7 @@
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
             this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
             try {
-                for (var _g = __values(__spreadArray([this._testEnvAotSummaries], __read(this._aotSummaries))), _h = _g.next(); !_h.done; _h = _g.next()) {
+                for (var _g = __values(__spreadArray([this._testEnvAotSummaries], __read(this._aotSummaries), false)), _h = _g.next(); !_h.done; _h = _g.next()) {
                     var summary = _h.value;
                     this._compiler.loadAotSummaries(summary);
                 }
