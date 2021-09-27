@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.8+7.sha-f055a88.with-local-changes
+ * @license Angular v13.0.0-next.8+9.sha-66fb311.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -332,9 +332,7 @@ export declare const TestBed: TestBedStatic;
  */
 export declare interface TestBedStatic {
     new (...args: any[]): TestBed;
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: {
-        teardown?: ModuleTeardownOptions;
-    }): TestBed;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: TestEnvironmentOptions): TestBed;
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
