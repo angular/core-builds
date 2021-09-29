@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/create_ngc_program" />
-import type { AotCompiler } from '@angular/compiler';
+import { AotCompiler } from '@angular/compiler';
 import { CompilerHost } from '@angular/compiler-cli';
 import * as ts from 'typescript';
 /** Creates an NGC program that can be used to read and parse metadata for files. */

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/decorator_rewrite/import_rewrite_visitor" />
-import type { AotCompilerHost } from '@angular/compiler';
+import { AotCompilerHost } from '@angular/compiler';
 import * as ts from 'typescript';
 import { ImportManager } from '../../../utils/import_manager';
 /**
