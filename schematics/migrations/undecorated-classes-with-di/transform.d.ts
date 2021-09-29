@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/transform" />
-import type { AotCompiler } from '@angular/compiler';
+import { AotCompiler } from '@angular/compiler';
 import { PartialEvaluator } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
 import * as ts from 'typescript';
 import { UpdateRecorder } from './update_recorder';
@@ -19,7 +19,6 @@ export declare class UndecoratedClassesTransform {
     private compiler;
     private evaluator;
     private getUpdateRecorder;
-    private compilerModule;
     private printer;
     private importManager;
     private decoratorRewriter;
@@ -35,7 +34,7 @@ export declare class UndecoratedClassesTransform {
      * an explicit constructor.
      */
     private missingExplicitConstructorClasses;
-    constructor(typeChecker: ts.TypeChecker, compiler: AotCompiler, evaluator: PartialEvaluator, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, compilerModule: typeof import('@angular/compiler'));
+    constructor(typeChecker: ts.TypeChecker, compiler: AotCompiler, evaluator: PartialEvaluator, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
     /**
      * Migrates decorated directives which can potentially inherit a constructor
      * from an undecorated base class. All base classes until the first one

@@ -18,8 +18,7 @@ import { TimingResult, TimingStrategy } from '../timing-strategy';
 export declare class QueryUsageStrategy implements TimingStrategy {
     private classMetadata;
     private typeChecker;
-    private compilerModule;
-    constructor(classMetadata: ClassMetadataMap, typeChecker: ts.TypeChecker, compilerModule: typeof import('@angular/compiler'));
+    constructor(classMetadata: ClassMetadataMap, typeChecker: ts.TypeChecker);
     setup(): void;
     /**
      * Analyzes the usage of the given query and determines the query timing based
