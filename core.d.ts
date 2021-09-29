@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.8+30.sha-ab3de40.with-local-changes
+ * @license Angular v13.0.0-next.8+31.sha-7dccbdd.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9270,17 +9270,44 @@ export declare abstract class ViewContainerRef {
     /**
      * Instantiates a single component and inserts its host view into this container.
      *
-     * @param componentFactory The factory to use.
+     * @param componentType Component Type to use.
+     * @param options An object that contains extra parameters:
+     *  * index: the index at which to insert the new component's host view into this container.
+     *           If not specified, appends the new view as the last entry.
+     *  * injector: the injector to use as the parent for the new component.
+     *  * ngModuleRef: an NgModuleRef of the component's NgModule, you should almost always provide
+     *                 this to ensure that all expected providers are available for the component
+     *                 instantiation.
+     *  * projectableNodes: list of DOM nodes that should be projected through
+     *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
+     *
+     * @returns The new `ComponentRef` which contains the component instance and the host view.
+     */
+    abstract createComponent<C>(componentType: Type<C>, options?: {
+        index?: number;
+        injector?: Injector;
+        ngModuleRef?: NgModuleRef<unknown>;
+        projectableNodes?: Node[][];
+    }): ComponentRef<C>;
+    /**
+     * Instantiates a single component and inserts its host view into this container.
+     *
+     * @param componentFactory Component factory to use.
      * @param index The index at which to insert the new component's host view into this container.
      * If not specified, appends the new view as the last entry.
      * @param injector The injector to use as the parent for the new component.
-     * @param projectableNodes
-     * @param ngModule
+     * @param projectableNodes List of DOM nodes that should be projected through
+     *     [`<ng-content>`](api/core/ng-content) of the new component instance.
+     * @param ngModuleRef An instance of the NgModuleRef that represent an NgModule.
+     * This information is used to retrieve corresponding NgModule injector.
      *
-     * @returns The new component instance, containing the host view.
+     * @returns The new `ComponentRef` which contains the component instance and the host view.
      *
+     * @deprecated Angular no longer requires component factories to dynamically create components.
+     *     Use different signature of the `createComponent` method, which allows passing
+     *     Component class directly.
      */
-    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], ngModule?: NgModuleRef<any>): ComponentRef<C>;
+    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], ngModuleRef?: NgModuleRef<any>): ComponentRef<C>;
     /**
      * Inserts a view into this container.
      * @param viewRef The view to insert.
@@ -10846,6 +10873,7 @@ export declare class ɵNoopNgZone implements NgZone {
  * compiler.
  */
 export declare function ɵnoSideEffects<T>(fn: () => T): T;
+
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
 
