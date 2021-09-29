@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.8+31.sha-7dccbdd.with-local-changes
+ * @license Angular v13.0.0-next.8+34.sha-94c6dee.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -22005,7 +22005,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('13.0.0-next.8+31.sha-7dccbdd.with-local-changes');
+    var VERSION = new Version('13.0.0-next.8+34.sha-94c6dee.with-local-changes');
 
     /**
      * @license
@@ -27619,18 +27619,6 @@
      * found in the LICENSE file at https://angular.io/license
      */
 
-    /**
-     * Used to load ng module factories.
-     *
-     * @publicApi
-     * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
-     * part of its implementation. See `LoadChildren` for more details.
-     */
-    var NgModuleFactoryLoader = /** @class */ (function () {
-        function NgModuleFactoryLoader() {
-        }
-        return NgModuleFactoryLoader;
-    }());
     function getModuleFactory__PRE_R3__(id) {
         var factory = getRegisteredNgModuleType(id);
         if (!factory)
@@ -27652,82 +27640,6 @@
     var getModuleFactory = getModuleFactory__POST_R3__;
     function noModuleError(id) {
         return new Error("No module with ID " + id + " loaded");
-    }
-
-    var _SEPARATOR = '#';
-    var FACTORY_CLASS_SUFFIX = 'NgFactory';
-    /**
-     * Configuration for SystemJsNgModuleLoader.
-     * token.
-     *
-     * @publicApi
-     * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoaderConfig`
-     * is part of its implementation. See `LoadChildren` for more details.
-     */
-    var SystemJsNgModuleLoaderConfig = /** @class */ (function () {
-        function SystemJsNgModuleLoaderConfig() {
-        }
-        return SystemJsNgModuleLoaderConfig;
-    }());
-    var DEFAULT_CONFIG = {
-        factoryPathPrefix: '',
-        factoryPathSuffix: '.ngfactory',
-    };
-    /**
-     * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
-     * @publicApi
-     * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
-     * part of its implementation. See `LoadChildren` for more details.
-     */
-    var SystemJsNgModuleLoader = /** @class */ (function () {
-        function SystemJsNgModuleLoader(_compiler, config) {
-            this._compiler = _compiler;
-            this._config = config || DEFAULT_CONFIG;
-        }
-        SystemJsNgModuleLoader.prototype.load = function (path) {
-            var legacyOfflineMode = !ivyEnabled && this._compiler instanceof Compiler;
-            return legacyOfflineMode ? this.loadFactory(path) : this.loadAndCompile(path);
-        };
-        SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
-            var _this = this;
-            var _a = __read(path.split(_SEPARATOR), 2), module = _a[0], exportName = _a[1];
-            if (exportName === undefined) {
-                exportName = 'default';
-            }
-            return System.import(module)
-                .then(function (module) { return module[exportName]; })
-                .then(function (type) { return checkNotEmpty(type, module, exportName); })
-                .then(function (type) { return _this._compiler.compileModuleAsync(type); });
-        };
-        SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
-            var _a = __read(path.split(_SEPARATOR), 2), module = _a[0], exportName = _a[1];
-            var factoryClassSuffix = FACTORY_CLASS_SUFFIX;
-            if (exportName === undefined) {
-                exportName = 'default';
-                factoryClassSuffix = '';
-            }
-            return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
-                .then(function (module) { return module[exportName + factoryClassSuffix]; })
-                .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
-        };
-        return SystemJsNgModuleLoader;
-    }());
-    SystemJsNgModuleLoader.ɵfac = function SystemJsNgModuleLoader_Factory(t) { return new (t || SystemJsNgModuleLoader)(ɵɵinject(Compiler), ɵɵinject(SystemJsNgModuleLoaderConfig, 8)); };
-    SystemJsNgModuleLoader.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: SystemJsNgModuleLoader, factory: SystemJsNgModuleLoader.ɵfac });
-    (function () {
-        (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SystemJsNgModuleLoader, [{
-                type: Injectable
-            }], function () {
-            return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{
-                            type: Optional
-                        }] }];
-        }, null);
-    })();
-    function checkNotEmpty(value, modulePath, exportName) {
-        if (!value) {
-            throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
-        }
-        return value;
     }
 
     var SWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__ = injectChangeDetectorRef;
@@ -34124,7 +34036,6 @@
     exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
     exports.NgModule = NgModule;
     exports.NgModuleFactory = NgModuleFactory;
-    exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
     exports.NgModuleRef = NgModuleRef;
     exports.NgProbeToken = NgProbeToken;
     exports.NgZone = NgZone;
@@ -34146,8 +34057,6 @@
     exports.Self = Self;
     exports.SimpleChange = SimpleChange;
     exports.SkipSelf = SkipSelf;
-    exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
-    exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
     exports.TRANSLATIONS = TRANSLATIONS;
     exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
     exports.TemplateRef = TemplateRef;
