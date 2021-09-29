@@ -14,10 +14,11 @@ export declare class QueryTemplateStrategy implements TimingStrategy {
     private projectPath;
     private classMetadata;
     private host;
+    private compilerModule;
     private compiler;
     private metadataResolver;
     private analyzedQueries;
-    constructor(projectPath: string, classMetadata: ClassMetadataMap, host: ts.CompilerHost);
+    constructor(projectPath: string, classMetadata: ClassMetadataMap, host: ts.CompilerHost, compilerModule: typeof import('@angular/compiler'));
     /**
      * Sets up the template strategy by creating the AngularCompilerProgram. Returns false if
      * the AOT compiler program could not be created due to failure diagnostics.
@@ -35,4 +36,6 @@ export declare class QueryTemplateStrategy implements TimingStrategy {
     private _parseTemplate;
     private _createDiagnosticsError;
     private _getViewQueryUniqueKey;
+    /** Figures out which queries are static and which ones are dynamic. */
+    private findStaticQueryIds;
 }

@@ -6,14 +6,15 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/router-link-empty-expression/angular/html_routerlink_empty_expr_visitor" />
-import { BoundAttribute, Element, NullVisitor, Template } from '@angular/compiler/src/render3/r3_ast';
+import type { TmplAstBoundAttribute, TmplAstElement, TmplAstTemplate } from '@angular/compiler';
+import { TemplateAstVisitor } from '../../../utils/template_ast_visitor';
 /**
  * HTML AST visitor that traverses the Render3 HTML AST in order to find all
  * undefined routerLink asssignment ([routerLink]="").
  */
-export declare class RouterLinkEmptyExprVisitor extends NullVisitor {
-    readonly emptyRouterLinkExpressions: BoundAttribute[];
-    visitElement(element: Element): void;
-    visitTemplate(t: Template): void;
-    visitBoundAttribute(node: BoundAttribute): void;
+export declare class RouterLinkEmptyExprVisitor extends TemplateAstVisitor {
+    readonly emptyRouterLinkExpressions: TmplAstBoundAttribute[];
+    visitElement(element: TmplAstElement): void;
+    visitTemplate(t: TmplAstTemplate): void;
+    visitBoundAttribute(node: TmplAstBoundAttribute): void;
 }
