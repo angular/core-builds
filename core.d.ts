@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.8+31.sha-7dccbdd.with-local-changes
+ * @license Angular v13.0.0-next.8+34.sha-94c6dee.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4802,17 +4802,6 @@ export declare abstract class NgModuleFactory<T> {
     abstract create(parentInjector: Injector | null): NgModuleRef<T>;
 }
 
-/**
- * Used to load ng module factories.
- *
- * @publicApi
- * @deprecated the `string` form of `loadChildren` is deprecated, and `NgModuleFactoryLoader` is
- * part of its implementation. See `LoadChildren` for more details.
- */
-export declare abstract class NgModuleFactoryLoader {
-    abstract load(path: string): Promise<NgModuleFactory<any>>;
-}
-
 declare interface NgModuleProviderDef {
     flags: ɵNodeFlags;
     index: number;
@@ -7074,40 +7063,6 @@ export declare interface StaticClassSansProvider {
  * @publicApi
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
-
-/**
- * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
- * @publicApi
- * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoader` is
- * part of its implementation. See `LoadChildren` for more details.
- */
-export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
-    private _compiler;
-    private _config;
-    constructor(_compiler: Compiler, config?: SystemJsNgModuleLoaderConfig);
-    load(path: string): Promise<NgModuleFactory<any>>;
-    private loadAndCompile;
-    private loadFactory;
-}
-
-/**
- * Configuration for SystemJsNgModuleLoader.
- * token.
- *
- * @publicApi
- * @deprecated the `string` form of `loadChildren` is deprecated, and `SystemJsNgModuleLoaderConfig`
- * is part of its implementation. See `LoadChildren` for more details.
- */
-export declare abstract class SystemJsNgModuleLoaderConfig {
-    /**
-     * Prefix to add when computing the name of the factory module for a given module name.
-     */
-    factoryPathPrefix: string;
-    /**
-     * Suffix to add when computing the name of the factory module for a given module name.
-     */
-    factoryPathSuffix: string;
-}
 
 declare const T_HOST = 6;
 
