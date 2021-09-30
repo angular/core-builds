@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.7+9.sha-2306a32.with-local-changes
+ * @license Angular v12.2.7+32.sha-cadef4c.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1895,7 +1895,7 @@ declare const DECLARATION_VIEW = 15;
  * CurrencyPipe when there is no currency code passed into it. This is only used by
  * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
  *
- * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ * See the [i18n guide](guide/i18n-common-locale-id) for more information.
  *
  * <div class="alert is-helpful">
  *
@@ -4187,7 +4187,7 @@ declare interface LContainerDebug {
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
  *
- * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ * See the [i18n guide](guide/i18n-common-locale-id) for more information.
  *
  * @usageNotes
  * ### Example
@@ -4462,7 +4462,7 @@ declare const enum LViewFlags {
  * - Warning (default): show a warning in the console and/or shell.
  * - Ignore: do nothing.
  *
- * See the [i18n guide](guide/i18n#missing-translation) for more information.
+ * See the [i18n guide](guide/i18n-common-merge#report-missing-translations) for more information.
  *
  * @usageNotes
  * ### Example
@@ -8076,7 +8076,7 @@ export declare interface TrackByFunction<T> {
  * Use this token at bootstrap to provide the content of your translation file (`xtb`,
  * `xlf` or `xlf2`) when you want to translate your application in another language.
  *
- * See the [i18n guide](guide/i18n#merge) for more information.
+ * See the [i18n guide](guide/i18n-common-merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -8102,7 +8102,7 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
  *
- * See the [i18n guide](guide/i18n#merge) for more information.
+ * See the [i18n guide](guide/i18n-common-merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -10748,7 +10748,7 @@ export declare const enum ɵExtraLocaleDataIndex {
  *
  * @param locale The locale code.
  * @returns The locale data.
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
  */
 export declare function ɵfindLocaleData(locale: string): any;
 
@@ -10856,7 +10856,7 @@ export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
  * @see `NgPlural`
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
  */
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
@@ -11446,7 +11446,8 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
 
 /**
  * Register locale data to be used internally by Angular. See the
- * ["I18n guide"](guide/i18n#i18n-pipes) to know how to import additional locale data.
+ * ["I18n guide"](guide/i18n-common-format-data-locale) to know how to import additional locale
+ * data.
  *
  * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
  */

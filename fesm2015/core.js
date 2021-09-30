@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.7+9.sha-2306a32.with-local-changes
+ * @license Angular v12.2.7+32.sha-cadef4c.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18832,7 +18832,8 @@ var localeEn = ["en", [["a", "p"], ["AM", "PM"], u], [["AM", "PM"], u, u], [["S"
 let LOCALE_DATA = {};
 /**
  * Register locale data to be used internally by Angular. See the
- * ["I18n guide"](guide/i18n#i18n-pipes) to know how to import additional locale data.
+ * ["I18n guide"](guide/i18n-common-format-data-locale) to know how to import additional locale
+ * data.
  *
  * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
  */
@@ -18852,7 +18853,7 @@ function registerLocaleData(data, localeId, extraData) {
  *
  * @param locale The locale code.
  * @returns The locale data.
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
  */
 function findLocaleData(locale) {
     const normalizedLocale = normalizeLocale(locale);
@@ -18890,7 +18891,7 @@ function getLocaleCurrencyCode(locale) {
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
  * @see `NgPlural`
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
  */
 function getLocalePluralCase(locale) {
     const data = findLocaleData(locale);
@@ -21458,7 +21459,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('12.2.7+9.sha-2306a32.with-local-changes');
+const VERSION = new Version('12.2.7+32.sha-cadef4c.with-local-changes');
 
 /**
  * @license
@@ -28053,7 +28054,7 @@ Console.decorators = [
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
  *
- * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ * See the [i18n guide](guide/i18n-common-locale-id) for more information.
  *
  * @usageNotes
  * ### Example
@@ -28076,7 +28077,7 @@ const LOCALE_ID$1 = new InjectionToken('LocaleId');
  * CurrencyPipe when there is no currency code passed into it. This is only used by
  * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
  *
- * See the [i18n guide](guide/i18n#setting-up-locale) for more information.
+ * See the [i18n guide](guide/i18n-common-locale-id) for more information.
  *
  * <div class="alert is-helpful">
  *
@@ -28114,7 +28115,7 @@ const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode');
  * Use this token at bootstrap to provide the content of your translation file (`xtb`,
  * `xlf` or `xlf2`) when you want to translate your application in another language.
  *
- * See the [i18n guide](guide/i18n#merge) for more information.
+ * See the [i18n guide](guide/i18n-common-merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -28139,7 +28140,7 @@ const TRANSLATIONS = new InjectionToken('Translations');
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
  *
- * See the [i18n guide](guide/i18n#merge) for more information.
+ * See the [i18n guide](guide/i18n-common-merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -28164,7 +28165,7 @@ const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
  * - Warning (default): show a warning in the console and/or shell.
  * - Ignore: do nothing.
  *
- * See the [i18n guide](guide/i18n#missing-translation) for more information.
+ * See the [i18n guide](guide/i18n-common-merge#report-missing-translations) for more information.
  *
  * @usageNotes
  * ### Example
