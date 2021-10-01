@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.9+6.sha-74ca3c5.with-local-changes
+ * @license Angular v13.0.0-next.9+10.sha-9eba260.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6256,7 +6256,7 @@ declare interface R3DeclareDirectiveFacade {
 
 declare interface R3DeclareFactoryFacade {
     type: Type_2;
-    deps: R3DeclareDependencyMetadataFacade[] | null;
+    deps: R3DeclareDependencyMetadataFacade[] | 'invalid' | null;
     target: ɵɵFactoryTarget;
 }
 
@@ -9655,42 +9655,6 @@ declare interface ViewUpdateFn {
 }
 
 /**
- * Indicates that the result of a {@link Pipe} transformation has changed even though the
- * reference has not changed.
- *
- * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
- * is stored.
- *
- * Example:
- *
- * ```
- * if (this._latestValue === this._latestReturnedValue) {
- *    return this._latestReturnedValue;
- *  } else {
- *    this._latestReturnedValue = this._latestValue;
- *    return WrappedValue.wrap(this._latestValue); // this will force update
- *  }
- * ```
- *
- * @publicApi
- * @deprecated from v10 stop using. (No replacement, deemed unnecessary.)
- */
-export declare class WrappedValue {
-    /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
-    wrapped: any;
-    constructor(value: any);
-    /** Creates a wrapped value. */
-    static wrap(value: any): WrappedValue;
-    /**
-     * Returns the underlying value of a wrapped value.
-     * Returns the given `value` when it is not wrapped.
-     **/
-    static unwrap(value: any): any;
-    /** Returns true if `value` is a wrapped value. */
-    static isWrapped(value: any): value is WrappedValue;
-}
-
-/**
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
@@ -11365,8 +11329,6 @@ export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>): ɵNgModul
  * Helper function to remove all the locale data from `LOCALE_DATA`.
  */
 export declare function ɵunregisterLocaleData(): void;
-
-export declare function ɵunv(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
 
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 

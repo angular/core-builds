@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.9+6.sha-74ca3c5.with-local-changes
+ * @license Angular v13.0.0-next.9+10.sha-9eba260.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13379,48 +13379,6 @@
             }
         }
     }
-    /**
-     * Indicates that the result of a {@link Pipe} transformation has changed even though the
-     * reference has not changed.
-     *
-     * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
-     * is stored.
-     *
-     * Example:
-     *
-     * ```
-     * if (this._latestValue === this._latestReturnedValue) {
-     *    return this._latestReturnedValue;
-     *  } else {
-     *    this._latestReturnedValue = this._latestValue;
-     *    return WrappedValue.wrap(this._latestValue); // this will force update
-     *  }
-     * ```
-     *
-     * @publicApi
-     * @deprecated from v10 stop using. (No replacement, deemed unnecessary.)
-     */
-    var WrappedValue = /** @class */ (function () {
-        function WrappedValue(value) {
-            this.wrapped = value;
-        }
-        /** Creates a wrapped value. */
-        WrappedValue.wrap = function (value) {
-            return new WrappedValue(value);
-        };
-        /**
-         * Returns the underlying value of a wrapped value.
-         * Returns the given `value` when it is not wrapped.
-         **/
-        WrappedValue.unwrap = function (value) {
-            return WrappedValue.isWrapped(value) ? value.wrapped : value;
-        };
-        /** Returns true if `value` is a wrapped value. */
-        WrappedValue.isWrapped = function (value) {
-            return value instanceof WrappedValue;
-        };
-        return WrappedValue;
-    }());
     function isListLikeIterable(obj) {
         if (!isJsObject(obj))
             return false;
@@ -22005,7 +21963,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('13.0.0-next.9+6.sha-74ca3c5.with-local-changes');
+    var VERSION = new Version('13.0.0-next.9+10.sha-9eba260.with-local-changes');
 
     /**
      * @license
@@ -23243,9 +23201,9 @@
         var adjustedIndex = index + HEADER_OFFSET;
         var lView = getLView();
         var pipeInstance = load(lView, adjustedIndex);
-        return unwrapValue(lView, isPure(lView, adjustedIndex) ?
+        return isPure(lView, adjustedIndex) ?
             pureFunction1Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, pipeInstance) :
-            pipeInstance.transform(v1));
+            pipeInstance.transform(v1);
     }
     /**
      * Invokes a pipe with 2 arguments.
@@ -23264,9 +23222,9 @@
         var adjustedIndex = index + HEADER_OFFSET;
         var lView = getLView();
         var pipeInstance = load(lView, adjustedIndex);
-        return unwrapValue(lView, isPure(lView, adjustedIndex) ?
+        return isPure(lView, adjustedIndex) ?
             pureFunction2Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
-            pipeInstance.transform(v1, v2));
+            pipeInstance.transform(v1, v2);
     }
     /**
      * Invokes a pipe with 3 arguments.
@@ -23286,8 +23244,9 @@
         var adjustedIndex = index + HEADER_OFFSET;
         var lView = getLView();
         var pipeInstance = load(lView, adjustedIndex);
-        return unwrapValue(lView, isPure(lView, adjustedIndex) ? pureFunction3Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
-            pipeInstance.transform(v1, v2, v3));
+        return isPure(lView, adjustedIndex) ?
+            pureFunction3Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
+            pipeInstance.transform(v1, v2, v3);
     }
     /**
      * Invokes a pipe with 4 arguments.
@@ -23308,8 +23267,8 @@
         var adjustedIndex = index + HEADER_OFFSET;
         var lView = getLView();
         var pipeInstance = load(lView, adjustedIndex);
-        return unwrapValue(lView, isPure(lView, adjustedIndex) ? pureFunction4Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
-            pipeInstance.transform(v1, v2, v3, v4));
+        return isPure(lView, adjustedIndex) ? pureFunction4Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+            pipeInstance.transform(v1, v2, v3, v4);
     }
     /**
      * Invokes a pipe with variable number of arguments.
@@ -23327,29 +23286,12 @@
         var adjustedIndex = index + HEADER_OFFSET;
         var lView = getLView();
         var pipeInstance = load(lView, adjustedIndex);
-        return unwrapValue(lView, isPure(lView, adjustedIndex) ?
+        return isPure(lView, adjustedIndex) ?
             pureFunctionVInternal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, values, pipeInstance) :
-            pipeInstance.transform.apply(pipeInstance, values));
+            pipeInstance.transform.apply(pipeInstance, values);
     }
     function isPure(lView, index) {
         return lView[TVIEW].data[index].pure;
-    }
-    /**
-     * Unwrap the output of a pipe transformation.
-     * In order to trick change detection into considering that the new value is always different from
-     * the old one, the old value is overwritten by NO_CHANGE.
-     *
-     * @param newValue the pipe transformation output.
-     */
-    function unwrapValue(lView, newValue) {
-        if (WrappedValue.isWrapped(newValue)) {
-            newValue = WrappedValue.unwrap(newValue);
-            // The NO_CHANGE value needs to be written at the index where the impacted binding value is
-            // stored
-            var bindingToInvalidateIdx = getBindingIndex();
-            lView[bindingToInvalidateIdx] = NO_CHANGE;
-        }
-        return newValue;
     }
 
     var EventEmitter_ = /** @class */ (function (_super) {
@@ -29952,15 +29894,6 @@
         }
         return key;
     }
-    function unwrapValue$1(view, nodeIdx, bindingIdx, value) {
-        if (WrappedValue.isWrapped(value)) {
-            value = WrappedValue.unwrap(value);
-            var globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
-            var oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
-            view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
-        }
-        return value;
-    }
     var UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
     var EMPTY_RENDERER_TYPE_ID = '$$empty';
     // Attention: this function is called as top level function.
@@ -31686,7 +31619,7 @@
         providerData.instance[propName] = value;
         if (def.flags & 524288 /* OnChanges */) {
             changes = changes || {};
-            var oldValue = WrappedValue.unwrap(view.oldValues[def.bindingIndex + bindingIdx]);
+            var oldValue = view.oldValues[def.bindingIndex + bindingIdx];
             var binding_1 = def.bindings[bindingIdx];
             changes[binding_1.nonMinifiedName] =
                 new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
@@ -34069,7 +34002,6 @@
     exports.ViewChildren = ViewChildren;
     exports.ViewContainerRef = ViewContainerRef;
     exports.ViewRef = ViewRef$1;
-    exports.WrappedValue = WrappedValue;
     exports.asNativeElements = asNativeElements;
     exports.assertPlatform = assertPlatform;
     exports.createPlatform = createPlatform;
@@ -34214,7 +34146,6 @@
     exports.ɵted = textDef;
     exports.ɵtransitiveScopesFor = transitiveScopesFor;
     exports.ɵunregisterLocaleData = unregisterAllLocaleData;
-    exports.ɵunv = unwrapValue$1;
     exports.ɵunwrapSafeValue = unwrapSafeValue;
     exports.ɵvid = viewDef;
     exports.ɵwhenRendered = whenRendered;
