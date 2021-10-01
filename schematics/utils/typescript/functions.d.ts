@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/typescript/functions" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Checks whether a given node is a function like declaration. */
 export declare function isFunctionLikeDeclaration(node: ts.Node): node is ts.FunctionLikeDeclaration;
 /**

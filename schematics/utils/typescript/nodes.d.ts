@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/typescript/nodes" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Checks whether the given TypeScript node has the specified modifier set. */
 export declare function hasModifier(node: ts.Node, modifierKind: ts.SyntaxKind): boolean;
 /** Find the closest parent node of a particular kind. */

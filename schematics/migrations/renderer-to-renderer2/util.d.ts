@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/renderer-to-renderer2/util" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /**
  * Finds typed nodes (e.g. function parameters or class properties) that are referencing the old
  * `Renderer`, as well as calls to the `Renderer` methods.

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/relative-link-resolution/update_recorder" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /**
  * Update recorder interface that is used to transform source files in a non-colliding
  * way. Also this indirection makes it possible to re-use logic for both TSLint rules

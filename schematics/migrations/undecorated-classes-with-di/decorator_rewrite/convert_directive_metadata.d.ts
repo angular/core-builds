@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/decorator_rewrite/convert_directive_metadata" />
 import type { StaticSymbol } from '@angular/compiler';
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Error that will be thrown if an unexpected value needs to be converted. */
 export declare class UnexpectedMetadataValueError extends Error {
 }

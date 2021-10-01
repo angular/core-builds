@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/missing-injectable/definition_collector" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { NgDecorator } from '../../utils/ng_decorators';
 export interface ResolvedNgModule {
     name: string;

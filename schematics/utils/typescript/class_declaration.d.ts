@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/typescript/class_declaration" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Determines the base type identifiers of a specified class declaration. */
 export declare function getBaseTypeIdentifiers(node: ts.ClassDeclaration): ts.Identifier[] | null;
 /** Gets the first found parent class declaration of a given node. */

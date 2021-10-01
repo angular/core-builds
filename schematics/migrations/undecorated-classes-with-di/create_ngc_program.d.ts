@@ -8,7 +8,7 @@
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/create_ngc_program" />
 import type { AotCompiler } from '@angular/compiler';
 import { CompilerHost } from '@angular/compiler-cli';
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Creates an NGC program that can be used to read and parse metadata for files. */
 export declare function createNgcProgram(createHost: (options: ts.CompilerOptions) => CompilerHost, tsconfigPath: string): {
     host: CompilerHost;

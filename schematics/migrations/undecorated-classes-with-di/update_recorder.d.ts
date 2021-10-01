@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/update_recorder" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { ImportManagerUpdateRecorder } from '../../utils/import_manager';
 /**
  * Update recorder interface that is used to transform source files in a non-colliding

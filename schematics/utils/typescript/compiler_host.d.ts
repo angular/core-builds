@@ -7,7 +7,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Tree } from '@angular-devkit/schematics';
-import * as ts from 'typescript';
+import ts from 'typescript';
 export declare type FakeReadFileFn = (fileName: string) => string | undefined;
 /**
  * Creates a TypeScript program instance for a TypeScript project within

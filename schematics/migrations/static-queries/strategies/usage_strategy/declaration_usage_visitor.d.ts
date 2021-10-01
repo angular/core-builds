@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/strategies/usage_strategy/declaration_usage_visitor" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 export declare type FunctionContext = Map<ts.Node, ts.Node>;
 export declare enum ResolvedUsage {
     SYNCHRONOUS = 0,

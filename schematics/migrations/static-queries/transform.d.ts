@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/transform" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { NgQueryDefinition, QueryTiming } from './angular/query-definition';
 export declare type TransformedQueryResult = null | {
     /** Transformed call expression. */

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/ng_component_template" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 export interface ResolvedTemplate {
     /** Class declaration that contains this template. */
     container: ts.ClassDeclaration;

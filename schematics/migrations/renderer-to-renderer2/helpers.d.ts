@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/renderer-to-renderer2/helpers" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Names of the helper functions that are supported for this migration. */
 export declare const enum HelperFunction {
     any = "AnyDuringRendererMigration",

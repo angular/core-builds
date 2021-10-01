@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/activated-route-snapshot-fragment/util" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /**
  * Finds all the accesses of `ActivatedRouteSnapshot.fragment`
  * that need to be migrated within a particular file.

@@ -7,8 +7,8 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/transform" />
 import type { AotCompiler } from '@angular/compiler';
-import { PartialEvaluator } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
-import * as ts from 'typescript';
+import { PartialEvaluator } from '@angular/compiler-cli/private/migrations';
+import ts from 'typescript';
 import { UpdateRecorder } from './update_recorder';
 export interface TransformFailure {
     node: ts.Node;

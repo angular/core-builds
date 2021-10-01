@@ -6,8 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/ng_declaration_collector" />
-import { PartialEvaluator } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
-import * as ts from 'typescript';
+import { PartialEvaluator } from '@angular/compiler-cli/private/migrations';
+import ts from 'typescript';
 import { NgDecorator } from '../../utils/ng_decorators';
 /**
  * Visitor that walks through specified TypeScript nodes and collects all defined

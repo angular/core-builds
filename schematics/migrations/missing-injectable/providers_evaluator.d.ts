@@ -6,9 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/missing-injectable/providers_evaluator" />
-import { ResolvedValue } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
-import { StaticInterpreter } from '@angular/compiler-cli/src/ngtsc/partial_evaluator/src/interpreter';
-import * as ts from 'typescript';
+import { ResolvedValue, StaticInterpreter } from '@angular/compiler-cli/private/migrations';
+import ts from 'typescript';
 export interface ProviderLiteral {
     node: ts.ObjectLiteralExpression;
     resolvedValue: ResolvedValue;

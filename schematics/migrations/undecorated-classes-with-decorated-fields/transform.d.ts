@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-decorated-fields/transform" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { UpdateRecorder } from './update_recorder';
 interface AnalysisFailure {
     node: ts.Node;

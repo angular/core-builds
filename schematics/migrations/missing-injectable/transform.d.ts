@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/missing-injectable/transform" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { ResolvedDirective, ResolvedNgModule } from './definition_collector';
 import { UpdateRecorder } from './update_recorder';
 export interface AnalysisFailure {

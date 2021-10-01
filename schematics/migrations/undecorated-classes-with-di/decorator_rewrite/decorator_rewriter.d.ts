@@ -7,8 +7,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import type { AotCompiler } from '@angular/compiler';
-import { PartialEvaluator } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
-import * as ts from 'typescript';
+import { PartialEvaluator } from '@angular/compiler-cli/private/migrations';
+import ts from 'typescript';
 import { ImportManager } from '../../../utils/import_manager';
 import { NgDecorator } from '../../../utils/ng_decorators';
 /**

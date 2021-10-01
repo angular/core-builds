@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/angular/ng_query_visitor" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { ResolvedTemplate } from '../../../utils/ng_component_template';
 import { NgQueryDefinition } from './query-definition';
 /** Resolved metadata of a given class. */

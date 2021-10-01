@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/module-with-providers/util" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Add a generic type to a type reference. */
 export declare function createModuleWithProvidersType(type: string, node?: ts.TypeReferenceNode): ts.TypeReferenceNode;
 /** Determine whether a node is a ModuleWithProviders type reference node without a generic type */

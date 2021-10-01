@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/import_manager" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /** Update recorder for managing imports. */
 export interface ImportManagerUpdateRecorder {
     addNewImport(start: number, importText: string): void;

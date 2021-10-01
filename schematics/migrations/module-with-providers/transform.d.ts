@@ -7,8 +7,8 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/module-with-providers/transform" />
 import { UpdateRecorder } from '@angular-devkit/schematics';
-import { ResolvedValueMap } from '@angular/compiler-cli/src/ngtsc/partial_evaluator';
-import * as ts from 'typescript';
+import { ResolvedValueMap } from '@angular/compiler-cli/private/migrations';
+import ts from 'typescript';
 import { ResolvedNgModule } from './collector';
 export interface AnalysisFailure {
     node: ts.Node;

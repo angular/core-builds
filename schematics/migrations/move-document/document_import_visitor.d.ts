@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/move-document/document_import_visitor" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 export declare const COMMON_IMPORT = "@angular/common";
 export declare const PLATFORM_BROWSER_IMPORT = "@angular/platform-browser";
 export declare const DOCUMENT_TOKEN_NAME = "DOCUMENT";

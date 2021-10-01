@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/strategies/usage_strategy/super_class_context" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { ClassMetadataMap } from '../../angular/ng_query_visitor';
 import { FunctionContext } from './declaration_usage_visitor';
 /**

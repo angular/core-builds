@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/dynamic-queries/util" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 /**
  * Identifies the nodes that should be migrated by the dynamic
  * queries schematic. Splits the nodes into the following categories:

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/typescript/imports" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 export declare type Import = {
     name: string;
     importModule: string;

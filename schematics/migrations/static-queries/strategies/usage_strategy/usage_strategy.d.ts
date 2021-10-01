@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/static-queries/strategies/usage_strategy/usage_strategy" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { ClassMetadataMap } from '../../angular/ng_query_visitor';
 import { NgQueryDefinition } from '../../angular/query-definition';
 import { TimingResult, TimingStrategy } from '../timing-strategy';

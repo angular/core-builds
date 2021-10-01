@@ -6,6 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/router-preserve-query-params/util" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 export declare function migrateLiteral(methodName: string, node: ts.ObjectLiteralExpression): ts.ObjectLiteralExpression;
 export declare function findLiteralsToMigrate(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): Map<string, Set<ts.ObjectLiteralExpression>>;

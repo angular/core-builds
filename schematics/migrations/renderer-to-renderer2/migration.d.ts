@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/renderer-to-renderer2/migration" />
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { HelperFunction } from './helpers';
 /**
  * Migrates a function call expression from `Renderer` to `Renderer2`.
