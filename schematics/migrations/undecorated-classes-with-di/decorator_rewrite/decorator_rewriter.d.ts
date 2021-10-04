@@ -7,7 +7,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import type { AotCompiler } from '@angular/compiler';
-import { PartialEvaluator } from '@angular/compiler-cli/private/migrations';
 import ts from 'typescript';
 import { ImportManager } from '../../../utils/import_manager';
 import { NgDecorator } from '../../../utils/ng_decorators';
@@ -20,14 +19,13 @@ import { NgDecorator } from '../../../utils/ng_decorators';
 export declare class DecoratorRewriter {
     private importManager;
     private typeChecker;
-    private evaluator;
     private compiler;
     previousSourceFile: ts.SourceFile | null;
     newSourceFile: ts.SourceFile | null;
     newProperties: ts.ObjectLiteralElementLike[];
     nonCopyableProperties: ts.ObjectLiteralElementLike[];
     private importRewriterFactory;
-    constructor(importManager: ImportManager, typeChecker: ts.TypeChecker, evaluator: PartialEvaluator, compiler: AotCompiler);
+    constructor(importManager: ImportManager, typeChecker: ts.TypeChecker, compiler: AotCompiler);
     rewrite(ngDecorator: NgDecorator, newSourceFile: ts.SourceFile): ts.Decorator;
     /** Creates a new decorator with the given expression. */
     private _createDecorator;

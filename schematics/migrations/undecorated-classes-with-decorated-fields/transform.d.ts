@@ -15,11 +15,12 @@ interface AnalysisFailure {
 export declare class UndecoratedClassesWithDecoratedFieldsTransform {
     private typeChecker;
     private getUpdateRecorder;
+    private compilerCliMigrationsModule;
     private printer;
     private importManager;
     private reflectionHost;
     private partialEvaluator;
-    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
+    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, compilerCliMigrationsModule: typeof import('@angular/compiler-cli/private/migrations'));
     /**
      * Migrates the specified source files. The transform adds the abstract `@Directive`
      * decorator to undecorated classes that use Angular features. Class members which

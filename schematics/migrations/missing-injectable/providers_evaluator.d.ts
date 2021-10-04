@@ -6,30 +6,21 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/missing-injectable/providers_evaluator" />
-import { ResolvedValue, StaticInterpreter } from '@angular/compiler-cli/private/migrations';
 import ts from 'typescript';
+import type { ResolvedValue, TypeScriptReflectionHost } from '@angular/compiler-cli/private/migrations';
 export interface ProviderLiteral {
     node: ts.ObjectLiteralExpression;
     resolvedValue: ResolvedValue;
 }
 /**
- * Providers evaluator that extends the ngtsc static interpreter. This is necessary because
- * the static interpreter by default only exposes the resolved value, but we are also interested
- * in the TypeScript nodes that declare providers. It would be possible to manually traverse the
- * AST to collect these nodes, but that would mean that we need to re-implement the static
- * interpreter in order to handle all possible scenarios. (e.g. spread operator, function calls,
- * callee scope). This can be avoided by simply extending the static interpreter and intercepting
- * the "visitObjectLiteralExpression" method.
+ * A factory function to create an evaluator for providers. This is required to be a
+ * factory function because the underlying class extends a class that is only available
+ * from within a dynamically imported module (`@angular/compiler-cli/private/migrations`)
+ * and is therefore not available at module evaluation time.
  */
-export declare class ProvidersEvaluator extends StaticInterpreter {
-    private _providerLiterals;
-    visitObjectLiteralExpression(node: ts.ObjectLiteralExpression, context: any): ResolvedValue;
-    /**
-     * Evaluates the given expression and returns its statically resolved value
-     * and a list of object literals which define Angular providers.
-     */
-    evaluate(expr: ts.Expression): {
+export declare function createProvidersEvaluator(compilerCliMigrationsModule: typeof import('@angular/compiler-cli/private/migrations'), host: TypeScriptReflectionHost, checker: ts.TypeChecker): {
+    evaluate: (expr: ts.Expression) => {
         resolvedValue: ResolvedValue;
         literals: ProviderLiteral[];
     };
-}
+};

@@ -22,3 +22,11 @@ import { URL } from 'url';
  * @returns A Promise that resolves to the dynamically imported module.
  */
 export declare function loadEsmModule<T>(modulePath: string | URL): Promise<T>;
+/**
+ * Attempt to load the new `@angular/compiler-cli/private/migrations` entry. If not yet present
+ * the previous deep imports are used to constructor an equivalent object.
+ *
+ * @returns A Promise that resolves to the dynamically imported compiler-cli private migrations
+ * entry or an equivalent object if not available.
+ */
+export declare function loadCompilerCliMigrationsModule(): Promise<typeof import('@angular/compiler-cli/private/migrations')>;

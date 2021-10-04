@@ -7,7 +7,6 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/transform" />
 import type { AotCompiler } from '@angular/compiler';
-import { PartialEvaluator } from '@angular/compiler-cli/private/migrations';
 import ts from 'typescript';
 import { UpdateRecorder } from './update_recorder';
 export interface TransformFailure {
@@ -17,9 +16,9 @@ export interface TransformFailure {
 export declare class UndecoratedClassesTransform {
     private typeChecker;
     private compiler;
-    private evaluator;
     private getUpdateRecorder;
     private compilerModule;
+    private coreModule;
     private printer;
     private importManager;
     private decoratorRewriter;
@@ -35,7 +34,7 @@ export declare class UndecoratedClassesTransform {
      * an explicit constructor.
      */
     private missingExplicitConstructorClasses;
-    constructor(typeChecker: ts.TypeChecker, compiler: AotCompiler, evaluator: PartialEvaluator, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, compilerModule: typeof import('@angular/compiler'));
+    constructor(typeChecker: ts.TypeChecker, compiler: AotCompiler, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, compilerModule: typeof import('@angular/compiler'), coreModule: typeof import('@angular/core'));
     /**
      * Migrates decorated directives which can potentially inherit a constructor
      * from an undecorated base class. All base classes until the first one

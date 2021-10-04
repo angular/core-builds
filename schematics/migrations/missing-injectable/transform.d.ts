@@ -16,6 +16,7 @@ export interface AnalysisFailure {
 export declare class MissingInjectableTransform {
     private typeChecker;
     private getUpdateRecorder;
+    private compilerCliMigrationsModule;
     private printer;
     private importManager;
     private providersEvaluator;
@@ -23,7 +24,7 @@ export declare class MissingInjectableTransform {
     private visitedProviderClasses;
     /** Set of provider object literals which were already checked or migrated. */
     private visitedProviderLiterals;
-    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
+    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, compilerCliMigrationsModule: typeof import('@angular/compiler-cli/private/migrations'));
     recordChanges(): void;
     /**
      * Migrates all specified NgModule's by walking through referenced providers

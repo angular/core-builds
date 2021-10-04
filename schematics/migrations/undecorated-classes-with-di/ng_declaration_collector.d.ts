@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/undecorated-classes-with-di/ng_declaration_collector" />
-import { PartialEvaluator } from '@angular/compiler-cli/private/migrations';
 import ts from 'typescript';
 import { NgDecorator } from '../../utils/ng_decorators';
 /**
@@ -16,14 +15,15 @@ import { NgDecorator } from '../../utils/ng_decorators';
  */
 export declare class NgDeclarationCollector {
     typeChecker: ts.TypeChecker;
-    private evaluator;
+    private compilerCliMigrationsModule;
     /** List of resolved directives which are decorated. */
     decoratedDirectives: ts.ClassDeclaration[];
     /** List of resolved providers which are decorated. */
     decoratedProviders: ts.ClassDeclaration[];
     /** Set of resolved Angular declarations which are not decorated. */
     undecoratedDeclarations: Set<ts.ClassDeclaration>;
-    constructor(typeChecker: ts.TypeChecker, evaluator: PartialEvaluator);
+    private evaluator;
+    constructor(typeChecker: ts.TypeChecker, compilerCliMigrationsModule: typeof import('@angular/compiler-cli/private/migrations'));
     visitNode(node: ts.Node): void;
     private _visitClassDeclaration;
     private _visitNgModuleDecorator;

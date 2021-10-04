@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/module-with-providers/transform" />
 import { UpdateRecorder } from '@angular-devkit/schematics';
-import { ResolvedValueMap } from '@angular/compiler-cli/private/migrations';
+import type { ResolvedValueMap } from '@angular/compiler-cli/private/migrations';
 import ts from 'typescript';
 import { ResolvedNgModule } from './collector';
 export interface AnalysisFailure {
@@ -17,9 +17,10 @@ export interface AnalysisFailure {
 export declare class ModuleWithProvidersTransform {
     private typeChecker;
     private getUpdateRecorder;
+    private compilerCliMigrationsModule;
     private printer;
     private partialEvaluator;
-    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder);
+    constructor(typeChecker: ts.TypeChecker, getUpdateRecorder: (sf: ts.SourceFile) => UpdateRecorder, compilerCliMigrationsModule: typeof import('@angular/compiler-cli/private/migrations'));
     /** Migrates a given NgModule by walking through the referenced providers and static methods. */
     migrateModule(module: ResolvedNgModule): AnalysisFailure[];
     /** Migrates a ModuleWithProviders type definition that has no explicit generic type */
