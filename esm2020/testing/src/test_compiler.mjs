@@ -54,9 +54,9 @@ export class TestingCompiler extends Compiler {
         throw unimplemented();
     }
 }
-TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.0-next.11+3.sha-bdc6ff4.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
-TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.0-next.11+3.sha-bdc6ff4.with-local-changes", ngImport: i0, type: TestingCompiler });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.0-next.11+3.sha-bdc6ff4.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
+TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.0-next.11+6.sha-318cf91.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
+TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.0-next.11+6.sha-318cf91.with-local-changes", ngImport: i0, type: TestingCompiler });
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.0-next.11+6.sha-318cf91.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
             type: Injectable
         }] });
 /**

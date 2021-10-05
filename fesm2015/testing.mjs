@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.11+3.sha-bdc6ff4.with-local-changes
+ * @license Angular v13.0.0-next.11+6.sha-318cf91.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1832,10 +1832,10 @@ class TestBedRender3 {
         const environmentOptions = TestBedRender3._environmentTeardownOptions;
         // If the new teardown behavior hasn't been configured, preserve the old behavior.
         if (!instanceOptions && !environmentOptions) {
-            return false;
+            return TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
         }
         // Otherwise use the configured behavior or default to rethrowing.
-        return (_b = (_a = instanceOptions === null || instanceOptions === void 0 ? void 0 : instanceOptions.rethrowErrors) !== null && _a !== void 0 ? _a : environmentOptions === null || environmentOptions === void 0 ? void 0 : environmentOptions.rethrowErrors) !== null && _b !== void 0 ? _b : true;
+        return (_b = (_a = instanceOptions === null || instanceOptions === void 0 ? void 0 : instanceOptions.rethrowErrors) !== null && _a !== void 0 ? _a : environmentOptions === null || environmentOptions === void 0 ? void 0 : environmentOptions.rethrowErrors) !== null && _b !== void 0 ? _b : this.shouldTearDownTestingModule();
     }
     shouldTearDownTestingModule() {
         var _a, _b, _c, _d;
@@ -1928,9 +1928,9 @@ class TestingCompiler extends Compiler {
         throw unimplemented();
     }
 }
-TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.0-next.11+3.sha-bdc6ff4.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
-TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.0-next.11+3.sha-bdc6ff4.with-local-changes", ngImport: i0, type: TestingCompiler });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.0-next.11+3.sha-bdc6ff4.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
+TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.0-next.11+6.sha-318cf91.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
+TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.0-next.11+6.sha-318cf91.with-local-changes", ngImport: i0, type: TestingCompiler });
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.0-next.11+6.sha-318cf91.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
             type: Injectable
         }] });
 /**
@@ -2424,10 +2424,10 @@ class TestBedViewEngine {
         const environmentOptions = TestBedViewEngine._environmentTeardownOptions;
         // If the new teardown behavior hasn't been configured, preserve the old behavior.
         if (!instanceOptions && !environmentOptions) {
-            return false;
+            return TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
         }
         // Otherwise use the configured behavior or default to rethrowing.
-        return (_b = (_a = instanceOptions === null || instanceOptions === void 0 ? void 0 : instanceOptions.rethrowErrors) !== null && _a !== void 0 ? _a : environmentOptions === null || environmentOptions === void 0 ? void 0 : environmentOptions.rethrowErrors) !== null && _b !== void 0 ? _b : true;
+        return (_b = (_a = instanceOptions === null || instanceOptions === void 0 ? void 0 : instanceOptions.rethrowErrors) !== null && _a !== void 0 ? _a : environmentOptions === null || environmentOptions === void 0 ? void 0 : environmentOptions.rethrowErrors) !== null && _b !== void 0 ? _b : this.shouldTearDownTestingModule();
     }
     shouldTearDownTestingModule() {
         var _a, _b, _c, _d;
