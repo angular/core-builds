@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.10+11.sha-6d1c2f7.with-local-changes
+ * @license Angular v13.0.0-next.10+22.sha-81c7eb8.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1582,6 +1582,15 @@ declare interface CreateComponentOptions {
 }
 
 /**
+ * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
+ * @param ngModule NgModule class.
+ * @param parentInjector Optional injector instance to use as a parent for the module injector. If
+ *     not provided, `NullInjector` will be used instead.
+ * @publicApi
+ */
+export declare const createNgModuleRef: <T>(ngModule: Type<T>, parentInjector?: Injector) => NgModuleRef<T>;
+
+/**
  * Creates a platform.
  * Platforms must be created on launch using this function.
  *
@@ -2866,12 +2875,21 @@ export declare interface ForwardRefFn {
 export declare const getDebugNode: (nativeNode: any) => DebugNode | null;
 
 /**
- * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
- * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
- * cannot be found.
+ * Returns the NgModuleFactory with the given id (specified using [@NgModule.id
+ * field](api/core/NgModule#id)), if it exists and has been loaded. Factories for NgModules that do
+ * not specify an `id` cannot be retrieved. Throws if an NgModule cannot be found.
  * @publicApi
+ * @deprecated Use `getNgModuleById` instead.
  */
 export declare const getModuleFactory: (id: string) => NgModuleFactory<any>;
+
+/**
+ * Returns the NgModule class with the given id (specified using [@NgModule.id
+ * field](api/core/NgModule#id)), if it exists and has been loaded. Classes for NgModules that do
+ * not specify an `id` cannot be retrieved. Throws if an NgModule cannot be found.
+ * @publicApi
+ */
+export declare const getNgModuleById: <T>(id: string) => Type<T>;
 
 /**
  * Returns the current platform.
@@ -5054,9 +5072,8 @@ export declare interface NgModule {
      */
     schemas?: Array<SchemaMetadata | any[]>;
     /**
-     * A name or path that uniquely identifies this NgModule in `getModuleFactory`.
-     * If left `undefined`, the NgModule is not registered with
-     * `getModuleFactory`.
+     * A name or path that uniquely identifies this NgModule in `getNgModuleById`.
+     * If left `undefined`, the NgModule is not registered with `getNgModuleById`.
      */
     id?: string;
     /**
@@ -10448,6 +10465,8 @@ export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
 export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
+
+export declare function ɵgetNgModuleById__POST_R3__(id: string): ɵNgModuleType;
 
 export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | null;
 

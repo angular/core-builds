@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.10+11.sha-6d1c2f7.with-local-changes
+ * @license Angular v13.0.0-next.10+22.sha-81c7eb8.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1466,11 +1466,8 @@ class R3TestCompiler {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Whether test modules should be torn down by default.
- * Currently disabled for backwards-compatibility reasons.
- */
-const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = false;
+/** Whether test modules should be torn down by default. */
+const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -1931,9 +1928,9 @@ class TestingCompiler extends Compiler {
         throw unimplemented();
     }
 }
-TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.0-next.10+11.sha-6d1c2f7.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
-TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.0-next.10+11.sha-6d1c2f7.with-local-changes", ngImport: i0, type: TestingCompiler });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.0-next.10+11.sha-6d1c2f7.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
+TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.0-next.10+22.sha-81c7eb8.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
+TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.0-next.10+22.sha-81c7eb8.with-local-changes", ngImport: i0, type: TestingCompiler });
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.0-next.10+22.sha-81c7eb8.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
             type: Injectable
         }] });
 /**
@@ -2236,8 +2233,12 @@ class TestBedViewEngine {
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
-        this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
-        this._instantiated = true;
+        try {
+            this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
+        }
+        finally {
+            this._instantiated = true;
+        }
     }
     _createCompilerAndModule() {
         const providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
