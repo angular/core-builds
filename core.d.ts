@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.11+16.sha-7acf3be.with-local-changes
+ * @license Angular v13.0.0-next.12+1.sha-e3d6e97.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -845,6 +845,11 @@ declare function compileInjectable(type: Type<any>, meta?: Injectable): void;
  * of components.
  *
  * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
  */
 export declare class Compiler {
     /**
@@ -891,6 +896,11 @@ export declare const COMPILER_OPTIONS: InjectionToken<CompilerOptions[]>;
  * A factory for creating a Compiler
  *
  * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
  */
 export declare abstract class CompilerFactory {
     abstract createCompiler(options?: CompilerOptions[]): Compiler;
@@ -4852,6 +4862,11 @@ export declare enum MissingTranslationStrategy {
  * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
  */
 export declare class ModuleWithComponentFactories<T> {
     ngModuleFactory: NgModuleFactory<T>;
@@ -5118,6 +5133,14 @@ declare interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDe
 
 /**
  * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
+ * for additional context. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
+ * using factory-based ones.
  */
 export declare abstract class NgModuleFactory<T> {
     abstract get moduleType(): Type<T>;

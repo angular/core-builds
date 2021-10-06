@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.11+16.sha-7acf3be.with-local-changes
+ * @license Angular v13.0.0-next.12+1.sha-e3d6e97.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21382,7 +21382,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.0.0-next.11+16.sha-7acf3be.with-local-changes');
+const VERSION = new Version('13.0.0-next.12+1.sha-e3d6e97.with-local-changes');
 
 /**
  * @license
@@ -22009,6 +22009,14 @@ class NgModuleRef$1 {
 }
 /**
  * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
+ * for additional context. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
+ * using factory-based ones.
  */
 class NgModuleFactory$1 {
 }
@@ -25335,6 +25343,11 @@ const ivyEnabled = SWITCH_IVY_ENABLED__POST_R3__;
  * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
  */
 class ModuleWithComponentFactories {
     constructor(ngModuleFactory, componentFactories) {
@@ -25383,6 +25396,11 @@ const Compiler_compileModuleAndAllComponentsAsync = Compiler_compileModuleAndAll
  * of components.
  *
  * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
  */
 class Compiler {
     constructor() {
@@ -25436,6 +25454,11 @@ const COMPILER_OPTIONS = new InjectionToken('compilerOptions');
  * A factory for creating a Compiler
  *
  * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
  */
 class CompilerFactory {
 }
