@@ -18,7 +18,18 @@ export interface InitTestEnvironmentAnalysis {
 export declare function findInitTestEnvironmentCalls(typeChecker: ts.TypeChecker, allSourceFiles: ts.SourceFile[]): InitTestEnvironmentAnalysis;
 /** Finds the `configureTestingModule` and `withModule` calls that need to be migrated. */
 export declare function findTestModuleMetadataNodes(typeChecker: ts.TypeChecker, sourceFile: ts.SourceFile): ts.ObjectLiteralExpression[];
-/** Migrates a call to `TestBed.initTestEnvironment`. */
-export declare function migrateInitTestEnvironment(node: ts.CallExpression): ts.CallExpression;
+/**
+ * Gets data that can be used to migrate a call to `TestBed.initTestEnvironment`.
+ * The returned `span` is used to mark the text that should be replaced while the `text`
+ * is the code that should be inserted instead.
+ */
+export declare function getInitTestEnvironmentLiteralReplacement(node: ts.CallExpression, printer: ts.Printer): {
+    span: {
+        start: number;
+        end: number;
+        length: number;
+    };
+    text: string;
+};
 /** Migrates an object literal that is passed into `configureTestingModule` or `withModule`. */
 export declare function migrateTestModuleMetadataLiteral(node: ts.ObjectLiteralExpression): ts.ObjectLiteralExpression;
