@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.7+49.sha-d6679e2.with-local-changes
+ * @license Angular v12.2.9+13.sha-fced3e8.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5916,7 +5916,7 @@ declare interface R3DeclareDirectiveFacade {
 
 declare interface R3DeclareFactoryFacade {
     type: Type_2;
-    deps: R3DeclareDependencyMetadataFacade[] | null;
+    deps: R3DeclareDependencyMetadataFacade[] | 'invalid' | null;
     target: ɵɵFactoryTarget;
 }
 
