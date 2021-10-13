@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.9+13.sha-fced3e8.with-local-changes
+ * @license Angular v12.2.9+17.sha-c7c285c.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3568,11 +3568,11 @@ export declare enum InjectFlags {
  * parameterized type.
  *
  * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
- * the `Injector`. This provides additional level of type safety.
+ * the `Injector`. This provides an additional level of type safety.
  *
  * ```
  * interface MyInterface {...}
- * var myInterface = injector.get(new InjectionToken<MyInterface>('SomeToken'));
+ * const myInterface = injector.get(new InjectionToken<MyInterface>('SomeToken'));
  * // myInterface is inferred to be MyInterface.
  * ```
  *
@@ -3580,14 +3580,15 @@ export declare enum InjectFlags {
  * (possibly by creating) a default value of the parameterized type `T`. This sets up the
  * `InjectionToken` using this factory as a provider as if it was defined explicitly in the
  * application's root injector. If the factory function, which takes zero arguments, needs to inject
- * dependencies, it can do so using the `inject` function. See below for an example.
+ * dependencies, it can do so using the `inject` function.
+ * As you can see in the Tree-shakable InjectionToken example below.
  *
  * Additionally, if a `factory` is specified you can also specify the `providedIn` option, which
  * overrides the above behavior and marks the token as belonging to a particular `@NgModule`. As
  * mentioned above, `'root'` is the default value for `providedIn`.
  *
  * @usageNotes
- * ### Basic Example
+ * ### Basic Examples
  *
  * ### Plain InjectionToken
  *
@@ -3603,6 +3604,12 @@ export declare enum InjectFlags {
 export declare class InjectionToken<T> {
     protected _desc: string;
     readonly ɵprov: unknown;
+    /**
+     * @param _desc   Description for the token,
+     *                used only for debugging purposes,
+     *                it should but does not need to be unique
+     * @param options Options for the token's usage, as described above
+     */
     constructor(_desc: string, options?: {
         providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
         factory: () => T;
