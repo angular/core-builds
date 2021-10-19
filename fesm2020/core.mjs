@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-rc.0+27.sha-b489ae5.with-local-changes
+ * @license Angular v13.0.0-rc.0+39.sha-812a33d.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12326,8 +12326,7 @@ function applyChanges(component) {
  *
  * To see this in action run the following command:
  *
- *   bazel run --config=ivy
- *   //packages/core/test/bundling/todo:devserver
+ *   bazel run //packages/core/test/bundling/todo:devserver
  *
  *  Then load `localhost:5432` and start using the console tools.
  */
@@ -21404,7 +21403,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.0.0-rc.0+27.sha-b489ae5.with-local-changes');
+const VERSION = new Version('13.0.0-rc.0+39.sha-812a33d.with-local-changes');
 
 /**
  * @license
