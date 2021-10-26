@@ -1,5 +1,5 @@
 /**
- * @license Angular v12.2.11+10.sha-5f32863.with-local-changes
+ * @license Angular v12.2.11+12.sha-bf59401.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -457,10 +457,15 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    // Base URL for the error details page.
-    // Keep this value in sync with a similar const in
-    // `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
+    /**
+     * Base URL for the error details page.
+     *
+     * Keep the files below in full sync:
+     *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
+     *  - packages/core/src/render3/error_details_base_url.ts
+     */
     var ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+
     var RuntimeError = /** @class */ (function (_super) {
         __extends(RuntimeError, _super);
         function RuntimeError(code, message) {
@@ -22041,7 +22046,7 @@
     /**
      * @publicApi
      */
-    var VERSION = new Version('12.2.11+10.sha-5f32863.with-local-changes');
+    var VERSION = new Version('12.2.11+12.sha-bf59401.with-local-changes');
 
     /**
      * @license
