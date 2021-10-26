@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-rc.1+21.sha-59e56e7.with-local-changes
+ * @license Angular v13.0.0-rc.1+23.sha-fa7693f.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -136,10 +136,22 @@ function isForwardRef(fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Base URL for the error details page.
-// Keep this value in sync with a similar const in
-// `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
+/**
+ * Base URL for the error details page.
+ *
+ * Keep the files below in full sync:
+ *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
+ *  - packages/core/src/render3/error_details_base_url.ts
+ */
 const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 class RuntimeError extends Error {
     constructor(code, message) {
         super(formatRuntimeError(code, message));
@@ -21388,7 +21400,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.0.0-rc.1+21.sha-59e56e7.with-local-changes');
+const VERSION = new Version('13.0.0-rc.1+23.sha-fa7693f.with-local-changes');
 
 /**
  * @license
