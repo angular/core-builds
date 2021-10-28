@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.14+135.sha-a84983e.with-local-changes
+ * @license Angular v13.0.0-next.14+139.sha-65cb2c5.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -834,7 +834,6 @@ const NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
 const NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
 const NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
 const NG_MOD_DEF = getClosureSafeProperty({ ɵmod: getClosureSafeProperty });
-const NG_LOC_ID_DEF = getClosureSafeProperty({ ɵloc: getClosureSafeProperty });
 const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
 /**
  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
@@ -1131,9 +1130,6 @@ function getNgModuleDef(type, throwNotFound) {
         throw new Error(`Type ${stringify(type)} does not have 'ɵmod' property.`);
     }
     return ngModuleDef;
-}
-function getNgLocaleIdDef(type) {
-    return type[NG_LOC_ID_DEF] || null;
 }
 
 /**
@@ -3629,8 +3625,8 @@ class NodeInjector {
         this._tNode = _tNode;
         this._lView = _lView;
     }
-    get(token, notFoundValue) {
-        return getOrCreateInjectable(this._tNode, this._lView, token, undefined, notFoundValue);
+    get(token, notFoundValue, flags) {
+        return getOrCreateInjectable(this._tNode, this._lView, token, flags, notFoundValue);
     }
 }
 /**
@@ -21400,7 +21396,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.0.0-next.14+135.sha-a84983e.with-local-changes');
+const VERSION = new Version('13.0.0-next.14+139.sha-65cb2c5.with-local-changes');
 
 /**
  * @license
@@ -22134,8 +22130,6 @@ class NgModuleRef extends NgModuleRef$1 {
         const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode &&
             assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
-        const ngLocaleIdDef = getNgLocaleIdDef(ngModuleType);
-        ngLocaleIdDef && setLocaleId(ngLocaleIdDef);
         this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
         this._r3Injector = createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
             { provide: NgModuleRef$1, useValue: this }, {
@@ -28885,11 +28879,7 @@ function _keyValueDiffersFactory() {
     return defaultKeyValueDiffers;
 }
 function _localeFactory(locale) {
-    locale = locale || getGlobalLocale();
-    if (ivyEnabled) {
-        setLocaleId(locale);
-    }
-    return locale;
+    return locale || getGlobalLocale();
 }
 /**
  * Work out the locale from the potential global properties.
