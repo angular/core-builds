@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0-next.14+163.sha-8d8cdc1.with-local-changes
+ * @license Angular v13.0.0-next.14+164.sha-967283e.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1235,10 +1235,10 @@ export { ComponentFactory as ɵComponentFactory }
  * Use to obtain the factory for a given component type,
  * then use the factory's `create()` method to create a component of that type.
  *
- * @see [Dynamic Components](guide/dynamic-component-loader)
- * @see [Usage Example](guide/dynamic-component-loader#resolving-components)
- * @see <live-example name="dynamic-component-loader" noDownload></live-example>
- of the code in this cookbook
+ * Note: since v13, dynamic component creation via
+ * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
+ * does **not** require resolving component factory: component class can be used directly.
+ *
  * @publicApi
  */
 export declare abstract class ComponentFactoryResolver {
@@ -5174,8 +5174,11 @@ export declare abstract class NgModuleRef<T> {
      */
     abstract get injector(): Injector;
     /**
-     * The resolver that can retrieve the component factories
-     * declared in the `entryComponents` property of the module.
+     * The resolver that can retrieve component factories in a context of this module.
+     *
+     * Note: since v13, dynamic component creation via
+     * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
+     * does **not** require resolving component factory: component class can be used directly.
      */
     abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
