@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/utils/ng_component_template" />
+import { Tree } from '@angular-devkit/schematics';
 import ts from 'typescript';
 export interface ResolvedTemplate {
     /** Class declaration that contains this template. */
@@ -34,8 +35,10 @@ export interface ResolvedTemplate {
  */
 export declare class NgComponentTemplateVisitor {
     typeChecker: ts.TypeChecker;
+    private _basePath;
+    private _tree;
     resolvedTemplates: ResolvedTemplate[];
-    constructor(typeChecker: ts.TypeChecker);
+    constructor(typeChecker: ts.TypeChecker, _basePath: string, _tree: Tree);
     visitNode(node: ts.Node): void;
     private visitClassDeclaration;
 }
