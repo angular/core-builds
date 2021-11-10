@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.0+54.sha-5eac434.with-local-changes
+ * @license Angular v13.0.0+68.sha-30a27ad.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6634,44 +6634,6 @@ function escapeCommentText(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
- */
-/**
- * Creates an `Array` construction with a given name. This is useful when
- * looking for memory consumption to see what time of array it is.
- *
- *
- * @param name Name to give to the constructor
- * @returns A subclass of `Array` if possible. This can only be done in
- *          environments which support `class` construct.
- */
-function createNamedArrayType(name) {
-    // This should never be called in prod mode, so let's verify that is the case.
-    if (ngDevMode) {
-        try {
-            // If this function were compromised the following could lead to arbitrary
-            // script execution. We bless it with Trusted Types anyway since this
-            // function is stripped out of production binaries.
-            return (newTrustedFunctionForDev('Array', `return class ${name} extends Array{}`))(Array);
-        }
-        catch (e) {
-            // If it does not work just give up and fall back to regular Array.
-            return Array;
-        }
-    }
-    else {
-        throw new Error('Looks like we are in \'prod mode\', but we are creating a named Array type, which is wrong! Check your code');
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
     name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
@@ -8462,6 +8424,44 @@ function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
+ */
+/**
+ * Creates an `Array` construction with a given name. This is useful when
+ * looking for memory consumption to see what time of array it is.
+ *
+ *
+ * @param name Name to give to the constructor
+ * @returns A subclass of `Array` if possible. This can only be done in
+ *          environments which support `class` construct.
+ */
+function createNamedArrayType(name) {
+    // This should never be called in prod mode, so let's verify that is the case.
+    if (ngDevMode) {
+        try {
+            // If this function were compromised the following could lead to arbitrary
+            // script execution. We bless it with Trusted Types anyway since this
+            // function is stripped out of production binaries.
+            return (newTrustedFunctionForDev('Array', `return class ${name} extends Array{}`))(Array);
+        }
+        catch (e) {
+            // If it does not work just give up and fall back to regular Array.
+            return Array;
+        }
+    }
+    else {
+        throw new Error('Looks like we are in \'prod mode\', but we are creating a named Array type, which is wrong! Check your code');
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function toTStylingRange(prev, next) {
     ngDevMode && assertNumberInRange(prev, 0, 32767 /* UNSIGNED_MASK */);
     ngDevMode && assertNumberInRange(next, 0, 32767 /* UNSIGNED_MASK */);
@@ -8558,7 +8558,6 @@ function attachDebugGetter(obj, debugGetter) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const NG_DEV_MODE = ((typeof ngDevMode === 'undefined' || !!ngDevMode) && initNgDevMode());
 /*
  * This file contains conditionally attached classes which provide human readable (debug) level
  * information for `LView`, `LContainer` and other internal data structures. These data structures
@@ -8590,6 +8589,8 @@ const NG_DEV_MODE = ((typeof ngDevMode === 'undefined' || !!ngDevMode) && initNg
 let LVIEW_COMPONENT_CACHE;
 let LVIEW_EMBEDDED_CACHE;
 let LVIEW_ROOT;
+let LVIEW_COMPONENT;
+let LVIEW_EMBEDDED;
 /**
  * This function clones a blueprint and creates LView.
  *
@@ -8600,13 +8601,24 @@ function cloneToLViewFromTViewBlueprint(tView) {
     const lView = getLViewToClone(debugTView.type, tView.template && tView.template.name);
     return lView.concat(tView.blueprint);
 }
+class LRootView extends Array {
+}
+class LComponentView extends Array {
+}
+class LEmbeddedView extends Array {
+}
 function getLViewToClone(type, name) {
     switch (type) {
         case 0 /* Root */:
             if (LVIEW_ROOT === undefined)
-                LVIEW_ROOT = new (createNamedArrayType('LRootView'))();
+                LVIEW_ROOT = new LRootView();
             return LVIEW_ROOT;
         case 1 /* Component */:
+            if (!ngDevMode || !ngDevMode.namedConstructors) {
+                if (LVIEW_COMPONENT === undefined)
+                    LVIEW_COMPONENT = new LComponentView();
+                return LVIEW_COMPONENT;
+            }
             if (LVIEW_COMPONENT_CACHE === undefined)
                 LVIEW_COMPONENT_CACHE = new Map();
             let componentArray = LVIEW_COMPONENT_CACHE.get(name);
@@ -8616,6 +8628,11 @@ function getLViewToClone(type, name) {
             }
             return componentArray;
         case 2 /* Embedded */:
+            if (!ngDevMode || !ngDevMode.namedConstructors) {
+                if (LVIEW_EMBEDDED === undefined)
+                    LVIEW_EMBEDDED = new LEmbeddedView();
+                return LVIEW_EMBEDDED;
+            }
             if (LVIEW_EMBEDDED_CACHE === undefined)
                 LVIEW_EMBEDDED_CACHE = new Map();
             let embeddedArray = LVIEW_EMBEDDED_CACHE.get(name);
@@ -8886,7 +8903,8 @@ function processTNodeChildren(tNode, buf) {
         tNode = tNode.next;
     }
 }
-const TViewData = NG_DEV_MODE && createNamedArrayType('TViewData') || null;
+class TViewData extends Array {
+}
 let TVIEWDATA_EMPTY; // can't initialize here or it will not be tree shaken, because
 // `LView` constructor could have side-effects.
 /**
@@ -8899,14 +8917,20 @@ function cloneToTViewData(list) {
         TVIEWDATA_EMPTY = new TViewData();
     return TVIEWDATA_EMPTY.concat(list);
 }
-const LViewBlueprint = NG_DEV_MODE && createNamedArrayType('LViewBlueprint') || null;
-const MatchesArray = NG_DEV_MODE && createNamedArrayType('MatchesArray') || null;
-const TViewComponents = NG_DEV_MODE && createNamedArrayType('TViewComponents') || null;
-const TNodeLocalNames = NG_DEV_MODE && createNamedArrayType('TNodeLocalNames') || null;
-const TNodeInitialInputs = NG_DEV_MODE && createNamedArrayType('TNodeInitialInputs') || null;
-const TNodeInitialData = NG_DEV_MODE && createNamedArrayType('TNodeInitialData') || null;
-const LCleanup = NG_DEV_MODE && createNamedArrayType('LCleanup') || null;
-const TCleanup = NG_DEV_MODE && createNamedArrayType('TCleanup') || null;
+class LViewBlueprint extends Array {
+}
+class MatchesArray extends Array {
+}
+class TViewComponents extends Array {
+}
+class TNodeLocalNames extends Array {
+}
+class TNodeInitialInputs extends Array {
+}
+class LCleanup extends Array {
+}
+class TCleanup extends Array {
+}
 function attachLViewDebug(lView) {
     attachDebugObject(lView, new LViewDebug(lView));
 }
@@ -10544,8 +10568,8 @@ function generateInitialInputs(inputs, attrs) {
 //// ViewContainer & View
 //////////////////////////
 // Not sure why I need to do `any` here but TS complains later.
-const LContainerArray = ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) &&
-    createNamedArrayType('LContainer');
+const LContainerArray = class LContainer extends Array {
+};
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -21396,7 +21420,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.0.0+54.sha-5eac434.with-local-changes');
+const VERSION = new Version('13.0.0+68.sha-30a27ad.with-local-changes');
 
 /**
  * @license
