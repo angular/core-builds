@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.0-next.0+76.sha-4809bbd.with-local-changes
+ * @license Angular v13.1.0-next.0+81.sha-f817e30.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -683,6 +683,8 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  */
 var ViewEncapsulation$1;
 (function (ViewEncapsulation) {
+    // TODO: consider making `ViewEncapsulation` a `const enum` instead. See
+    // https://github.com/angular/angular/issues/44119 for additional information.
     /**
      * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
      * Element and pre-processing the style rules provided via {@link Component#styles styles} or
@@ -898,8 +900,6 @@ function ɵɵdefineComponent(componentDefinition) {
             viewQuery: componentDefinition.viewQuery || null,
             features: componentDefinition.features || null,
             data: componentDefinition.data || {},
-            // TODO(misko): convert ViewEncapsulation into const enum so that it can be used
-            // directly in the next line. Also `None` should be 0 not 2.
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation$1.Emulated,
             id: 'c',
             styles: componentDefinition.styles || EMPTY_ARRAY,
@@ -21420,7 +21420,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.0-next.0+76.sha-4809bbd.with-local-changes');
+const VERSION = new Version('13.1.0-next.0+81.sha-f817e30.with-local-changes');
 
 /**
  * @license
