@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.0-next.2+16.sha-7e121e4.with-local-changes
+ * @license Angular v13.1.0-next.2+21.sha-48ca7dc.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21420,7 +21420,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.0-next.2+16.sha-7e121e4.with-local-changes');
+const VERSION = new Version('13.1.0-next.2+21.sha-48ca7dc.with-local-changes');
 
 /**
  * @license
@@ -26191,55 +26191,6 @@ let _testabilityGetter = new _NoopGetTestability();
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
- *
- * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
- * please see [BAZEL.md](./docs/BAZEL.md).
- */
-let _devMode = true;
-let _runModeLocked = false;
-/**
- * Returns whether Angular is in development mode. After called once,
- * the value is locked and won't change any more.
- *
- * By default, this is true, unless a user calls `enableProdMode` before calling this.
- *
- * @publicApi
- */
-function isDevMode() {
-    _runModeLocked = true;
-    return _devMode;
-}
-/**
- * Disable Angular's development mode, which turns off assertions and other
- * checks within the framework.
- *
- * One important assertion this disables verifies that a change detection pass
- * does not result in additional changes to any bindings (also known as
- * unidirectional data flow).
- *
- * @publicApi
- */
-function enableProdMode() {
-    if (_runModeLocked) {
-        throw new Error('Cannot enable prod mode after platform setup.');
-    }
-    // The below check is there so when ngDevMode is set via terser
-    // `global['ngDevMode'] = false;` is also dropped.
-    if (typeof ngDevMode === undefined || !!ngDevMode) {
-        _global['ngDevMode'] = false;
-    }
-    _devMode = false;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _platform;
 let compileNgModuleFactory = compileNgModuleFactory__POST_R3__;
 function compileNgModuleFactory__PRE_R3__(injector, options, moduleType) {
@@ -26563,7 +26514,7 @@ function getNgZone(ngZoneOption, extra) {
     }
     else {
         ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) || new NgZone({
-            enableLongStackTrace: isDevMode(),
+            enableLongStackTrace: typeof ngDevMode === 'undefined' ? false : !!ngDevMode,
             shouldCoalesceEventChangeDetection: !!(extra === null || extra === void 0 ? void 0 : extra.ngZoneEventCoalescing),
             shouldCoalesceRunChangeDetection: !!(extra === null || extra === void 0 ? void 0 : extra.ngZoneRunCoalescing)
         });
@@ -26830,9 +26781,7 @@ class ApplicationRef {
             }
         });
         this._loadComponent(compRef);
-        // Note that we have still left the `isDevMode()` condition in order to avoid
-        // creating a breaking change for projects that still use the View Engine.
-        if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
+        if (typeof ngDevMode === 'undefined' || ngDevMode) {
             const _console = this._injector.get(Console);
             _console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
         }
@@ -26857,9 +26806,7 @@ class ApplicationRef {
             for (let view of this._views) {
                 view.detectChanges();
             }
-            // Note that we have still left the `isDevMode()` condition in order to avoid
-            // creating a breaking change for projects that still use the View Engine.
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) && isDevMode()) {
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
                 for (let view of this._views) {
                     view.checkNoChanges();
                 }
@@ -26936,6 +26883,55 @@ function _mergeArrays(parts) {
     const result = [];
     parts.forEach((part) => part && result.push(...part));
     return result;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+ *
+ * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
+ * please see [BAZEL.md](./docs/BAZEL.md).
+ */
+let _devMode = true;
+let _runModeLocked = false;
+/**
+ * Returns whether Angular is in development mode. After called once,
+ * the value is locked and won't change any more.
+ *
+ * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ *
+ * @publicApi
+ */
+function isDevMode() {
+    _runModeLocked = true;
+    return _devMode;
+}
+/**
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
+ *
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
+ *
+ * @publicApi
+ */
+function enableProdMode() {
+    if (_runModeLocked) {
+        throw new Error('Cannot enable prod mode after platform setup.');
+    }
+    // The below check is there so when ngDevMode is set via terser
+    // `global['ngDevMode'] = false;` is also dropped.
+    if (typeof ngDevMode === undefined || !!ngDevMode) {
+        _global['ngDevMode'] = false;
+    }
+    _devMode = false;
 }
 
 /**
