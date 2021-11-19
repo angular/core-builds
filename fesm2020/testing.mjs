@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.2+11.sha-427822e.with-local-changes
+ * @license Angular v13.0.2+19.sha-6e351ed.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -606,8 +606,20 @@ function setMetadata(metadata, set) {
     }
 }
 function _propHashKey(propName, propValue, references) {
+    let nextObjectId = 0;
+    const objectIds = new Map();
     const replacer = (key, value) => {
-        if (typeof value === 'function') {
+        if (value !== null && typeof value === 'object') {
+            if (objectIds.has(value)) {
+                return objectIds.get(value);
+            }
+            // Record an id for this object such that any later references use the object's id instead
+            // of the object itself, in order to break cyclic pointers in objects.
+            objectIds.set(value, `ɵobj#${nextObjectId++}`);
+            // The first time an object is seen the object itself is serialized.
+            return value;
+        }
+        else if (typeof value === 'function') {
             value = _serializeReference(value, references);
         }
         return value;
@@ -1927,9 +1939,9 @@ class TestingCompiler extends Compiler {
         throw unimplemented();
     }
 }
-TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.2+11.sha-427822e.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
-TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.2+11.sha-427822e.with-local-changes", ngImport: i0, type: TestingCompiler });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.2+11.sha-427822e.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
+TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.2+19.sha-6e351ed.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
+TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.2+19.sha-6e351ed.with-local-changes", ngImport: i0, type: TestingCompiler });
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.2+19.sha-6e351ed.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
             type: Injectable
         }] });
 /**
