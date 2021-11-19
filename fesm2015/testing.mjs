@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.2+19.sha-6e351ed.with-local-changes
+ * @license Angular v13.0.2+21.sha-3289aae.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1940,9 +1940,9 @@ class TestingCompiler extends Compiler {
         throw unimplemented();
     }
 }
-TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.2+19.sha-6e351ed.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
-TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.2+19.sha-6e351ed.with-local-changes", ngImport: i0, type: TestingCompiler });
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.2+19.sha-6e351ed.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
+TestingCompiler.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "13.0.2+21.sha-3289aae.with-local-changes", ngImport: i0, type: TestingCompiler, deps: null, target: i0.ɵɵFactoryTarget.Injectable });
+TestingCompiler.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "13.0.2+21.sha-3289aae.with-local-changes", ngImport: i0, type: TestingCompiler });
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "13.0.2+21.sha-3289aae.with-local-changes", ngImport: i0, type: TestingCompiler, decorators: [{
             type: Injectable
         }] });
 /**
