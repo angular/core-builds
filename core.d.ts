@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.2+32.sha-d265d0d.with-local-changes
+ * @license Angular v13.0.2+35.sha-84ef01d.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -590,15 +590,6 @@ export declare interface AttributeDecorator {
     new (name: string): Attribute;
 }
 
-declare interface BindingDef {
-    flags: ɵBindingFlags;
-    ns: string | null;
-    name: string | null;
-    nonMinifiedName: string | null;
-    securityContext: SecurityContext | null;
-    suffix: string | null;
-}
-
 /**
  * Provides additional options to the bootstraping process.
  *
@@ -830,12 +821,6 @@ export declare interface ClassSansProvider {
 declare const CLEANUP = 7;
 
 /**
- * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
- * injectable def (`ɵprov`) onto the injectable type.
- */
-declare function compileInjectable(type: Type<any>, meta?: Injectable): void;
-
-/**
  * Low-level service for running the angular compiler during runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
@@ -856,19 +841,19 @@ export declare class Compiler {
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents` have to be inlined.
      */
-    compileModuleSync: <T>(moduleType: Type<T>) => NgModuleFactory<T>;
+    compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T>;
     /**
      * Compiles the given NgModule and all of its components
      */
-    compileModuleAsync: <T>(moduleType: Type<T>) => Promise<NgModuleFactory<T>>;
+    compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>>;
     /**
      * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
      */
-    compileModuleAndAllComponentsSync: <T>(moduleType: Type<T>) => ModuleWithComponentFactories<T>;
+    compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T>;
     /**
      * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
      */
-    compileModuleAndAllComponentsAsync: <T>(moduleType: Type<T>) => Promise<ModuleWithComponentFactories<T>>;
+    compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
     /**
      * Clears all caches.
      */
@@ -1598,7 +1583,7 @@ declare interface CreateComponentOptions {
  *     not provided, `NullInjector` will be used instead.
  * @publicApi
  */
-export declare const createNgModuleRef: <T>(ngModule: Type<T>, parentInjector?: Injector) => NgModuleRef<T>;
+export declare function createNgModuleRef<T>(ngModule: Type<T>, parentInjector?: Injector): NgModuleRef<T>;
 
 /**
  * Creates a platform.
@@ -1798,42 +1783,6 @@ export declare const DebugElement: {
     new (...args: any[]): DebugElement;
 };
 
-declare class DebugElement__POST_R3__ extends DebugNode__POST_R3__ implements DebugElement {
-    constructor(nativeNode: Element);
-    get nativeElement(): Element | null;
-    get name(): string;
-    /**
-     *  Gets a map of property names to property values for an element.
-     *
-     *  This map includes:
-     *  - Regular property bindings (e.g. `[id]="id"`)
-     *  - Host property bindings (e.g. `host: { '[id]': "id" }`)
-     *  - Interpolated property bindings (e.g. `id="{{ value }}")
-     *
-     *  It does not include:
-     *  - input property bindings (e.g. `[myCustomInput]="value"`)
-     *  - attribute bindings (e.g. `[attr.role]="menu"`)
-     */
-    get properties(): {
-        [key: string]: any;
-    };
-    get attributes(): {
-        [key: string]: string | null;
-    };
-    get styles(): {
-        [key: string]: string | null;
-    };
-    get classes(): {
-        [key: string]: boolean;
-    };
-    get childNodes(): DebugNode[];
-    get children(): DebugElement[];
-    query(predicate: Predicate<DebugElement>): DebugElement;
-    queryAll(predicate: Predicate<DebugElement>): DebugElement[];
-    queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    triggerEventHandler(eventName: string, eventObj: any): void;
-}
-
 /**
  * @publicApi
  */
@@ -1941,20 +1890,6 @@ declare interface DebugNode_2 {
     injectorResolutionPath: any;
 }
 
-declare class DebugNode__POST_R3__ implements DebugNode {
-    readonly nativeNode: Node;
-    constructor(nativeNode: Node);
-    get parent(): DebugElement | null;
-    get injector(): Injector;
-    get componentInstance(): any;
-    get context(): any;
-    get listeners(): DebugEventListener[];
-    get references(): {
-        [key: string]: any;
-    };
-    get providerTokens(): any[];
-}
-
 declare const DECLARATION_COMPONENT_VIEW = 16;
 
 declare const DECLARATION_LCONTAINER = 17;
@@ -2043,26 +1978,6 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
  * @publicApi
  */
 export declare const defineInjectable: typeof ɵɵdefineInjectable;
-
-declare interface Definition<DF extends DefinitionFactory<any>> {
-    factory: DF | null;
-}
-
-/**
- * Factory for ViewDefinitions/NgModuleDefinitions.
- * We use a function so we can reexeute it in case an error happens and use the given logger
- * function to log the error from the definition of the node, which is shown in all browser
- * logs.
- */
-declare interface DefinitionFactory<D extends Definition<any>> {
-    (logger: NodeLogger): D;
-}
-
-declare interface DepDef {
-    flags: ɵDepFlags;
-    token: any;
-    tokenKey: string;
-}
 
 /**
  * Array of destroy hooks that should be executed for a view and their directive indices.
@@ -2395,10 +2310,6 @@ declare type DirectiveTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | 
 
 declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
 
-declare interface DisposableFn {
-    (): void;
-}
-
 /**
  * @description
  * Hook for manual bootstrapping of the application instead of using `bootstrap` array in @NgModule
@@ -2473,36 +2384,6 @@ declare const ELEMENT_MARKER: ELEMENT_MARKER;
 
 declare interface ELEMENT_MARKER {
     marker: 'element';
-}
-
-declare interface ElementDef {
-    name: string | null;
-    ns: string | null;
-    /** ns, name, value */
-    attrs: [string, string, string][] | null;
-    template: ɵViewDefinition | null;
-    componentProvider: NodeDef | null;
-    componentRendererType: RendererType2 | null;
-    componentView: ViewDefinitionFactory | null;
-    /**
-     * visible public providers for DI in the view,
-     * as see from this element. This does not include private providers.
-     */
-    publicProviders: {
-        [tokenKey: string]: NodeDef;
-    } | null;
-    /**
-     * same as visiblePublicProviders, but also includes private providers
-     * that are located on this element.
-     */
-    allProviders: {
-        [tokenKey: string]: NodeDef;
-    } | null;
-    handleEvent: ElementHandleEventFn | null;
-}
-
-declare interface ElementHandleEventFn {
-    (view: ViewData, eventName: string, event: any): boolean;
 }
 
 /**
@@ -2882,7 +2763,9 @@ export declare interface ForwardRefFn {
 /**
  * @publicApi
  */
-export declare const getDebugNode: (nativeNode: any) => DebugNode | null;
+declare const getDebugNode: (nativeNode: any) => DebugNode | null;
+export { getDebugNode }
+export { getDebugNode as ɵgetDebugNode }
 
 /**
  * Returns the NgModuleFactory with the given id (specified using [@NgModule.id
@@ -2891,7 +2774,7 @@ export declare const getDebugNode: (nativeNode: any) => DebugNode | null;
  * @publicApi
  * @deprecated Use `getNgModuleById` instead.
  */
-export declare const getModuleFactory: (id: string) => NgModuleFactory<any>;
+export declare function getModuleFactory(id: string): NgModuleFactory<any>;
 
 /**
  * Returns the NgModule class with the given id (specified using [@NgModule.id
@@ -2899,7 +2782,7 @@ export declare const getModuleFactory: (id: string) => NgModuleFactory<any>;
  * not specify an `id` cannot be retrieved. Throws if an NgModule cannot be found.
  * @publicApi
  */
-export declare const getNgModuleById: <T>(id: string) => Type<T>;
+export declare function getNgModuleById<T>(id: string): Type<T>;
 
 /**
  * Returns the current platform.
@@ -3609,9 +3492,6 @@ export declare interface InjectableType<T> extends Type<T> {
     ɵprov: unknown;
 }
 
-/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-declare function injectChangeDetectorRef(flags: InjectFlags): ChangeDetectorRef;
-
 
 /**
  * Type of the Inject decorator / constructor function.
@@ -3639,13 +3519,6 @@ export declare interface InjectDecorator {
     (token: any): any;
     new (token: any): Inject;
 }
-
-/**
- * Creates an ElementRef from the most recent node.
- *
- * @returns The ElementRef instance to use
- */
-declare function injectElementRef(): ElementRef;
 
 /**
  * Injection flags for DI.
@@ -3827,24 +3700,6 @@ declare interface InjectorTypeWithProviders<T> {
     ngModule: InjectorType<T>;
     providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
 }
-
-/** Injects a Renderer2 for the current component. */
-declare function injectRenderer2(): Renderer2;
-
-/**
- * Creates a TemplateRef given a node.
- *
- * @returns The TemplateRef instance to use
- */
-declare function injectTemplateRef<T>(): TemplateRef<T> | null;
-
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-declare function injectViewContainerRef(): ViewContainerRef;
 
 /**
  * Type of metadata for an `Input` property.
@@ -4900,16 +4755,6 @@ declare const NATIVE = 7;
 
 declare const NEXT = 4;
 
-declare interface NgContentDef {
-    /**
-     * this index is checked against NodeDef.ngContentIndex to find the nodes
-     * that are matched by this ng-content.
-     * Note that a NodeDef with an ng-content can be reprojected, i.e.
-     * have a ngContentIndex on its own.
-     */
-    index: number;
-}
-
 /**
  * A type describing supported iterable types.
  *
@@ -5126,18 +4971,6 @@ export declare interface NgModuleDecorator {
     new (obj?: NgModule): NgModule;
 }
 
-declare interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory> {
-    providers: NgModuleProviderDef[];
-    providersByKey: {
-        [tokenKey: string]: NgModuleProviderDef;
-    };
-    modules: any[];
-    scope: 'root' | 'platform' | null;
-}
-
-declare interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {
-}
-
 /**
  * @publicApi
  *
@@ -5152,14 +4985,6 @@ declare interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDe
 export declare abstract class NgModuleFactory<T> {
     abstract get moduleType(): Type<T>;
     abstract create(parentInjector: Injector | null): NgModuleRef<T>;
-}
-
-declare interface NgModuleProviderDef {
-    flags: ɵNodeFlags;
-    index: number;
-    token: any;
-    value: any;
-    deps: DepDef[];
 }
 
 /**
@@ -5373,78 +5198,6 @@ export declare class NgZone {
  */
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 
-declare interface NodeCheckFn {
-    (view: ViewData, nodeIndex: number, argStyle: ɵArgumentType.Dynamic, values: any[]): any;
-    (view: ViewData, nodeIndex: number, argStyle: ɵArgumentType.Inline, v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): any;
-}
-
-/**
- * Node instance data.
- *
- * We have a separate type per NodeType to save memory
- * (TextData | ElementData | ProviderData | PureExpressionData | QueryList<any>)
- *
- * To keep our code monomorphic,
- * we prohibit using `NodeData` directly but enforce the use of accessors (`asElementData`, ...).
- * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
- * purposes.
- */
-declare class NodeData {
-    private __brand;
-}
-
-/**
- * A node definition in the view.
- *
- * Note: We use one type for all nodes so that loops that loop over all nodes
- * of a ViewDefinition stay monomorphic!
- */
-declare interface NodeDef {
-    flags: ɵNodeFlags;
-    nodeIndex: number;
-    checkIndex: number;
-    parent: NodeDef | null;
-    renderParent: NodeDef | null;
-    /** this is checked against NgContentDef.index to find matched nodes */
-    ngContentIndex: number | null;
-    /** number of transitive children */
-    childCount: number;
-    /** aggregated NodeFlags for all transitive children (does not include self) **/
-    childFlags: ɵNodeFlags;
-    /** aggregated NodeFlags for all direct children (does not include self) **/
-    directChildFlags: ɵNodeFlags;
-    bindingIndex: number;
-    bindings: BindingDef[];
-    bindingFlags: ɵBindingFlags;
-    outputIndex: number;
-    outputs: OutputDef[];
-    /**
-     * references that the user placed on the element
-     */
-    references: {
-        [refId: string]: ɵQueryValueType;
-    };
-    /**
-     * ids and value types of all queries that are matched by this node.
-     */
-    matchedQueries: {
-        [queryId: number]: ɵQueryValueType;
-    };
-    /** Binary or of all matched query ids of this node. */
-    matchedQueryIds: number;
-    /**
-     * Binary or of all query ids that are matched by one of the children.
-     * This includes query ids from templates as well.
-     * Used as a bloom filter.
-     */
-    childMatchedQueries: number;
-    element: ElementDef | null;
-    provider: ProviderDef | null;
-    text: TextDef | null;
-    query: QueryDef | null;
-    ngContent: NgContentDef | null;
-}
-
 declare interface NodeInjectorDebug {
     /**
      * Instance bloom. Does the current injector have a provider with a given bloom mask.
@@ -5466,15 +5219,6 @@ declare interface NodeInjectorDebug {
      * Location of the parent `TNode`.
      */
     parentInjectorIndex: number;
-}
-
-/**
- * Function to call console.error at the right source location. This is an indirection
- * via another function as browser will log the location that actually called
- * `console.error`.
- */
-declare interface NodeLogger {
-    (): () => void;
 }
 
 /**
@@ -5661,18 +5405,6 @@ export declare interface OutputDecorator {
      */
     (bindingPropertyName?: string): any;
     new (bindingPropertyName?: string): any;
-}
-
-declare interface OutputDef {
-    type: OutputType;
-    target: 'window' | 'document' | 'body' | 'component' | null;
-    eventName: string;
-    propName: string | null;
-}
-
-declare const enum OutputType {
-    ElementOutput = 0,
-    DirectiveOutput = 1
 }
 
 /**
@@ -6036,20 +5768,6 @@ declare type PropertyAliasValue = (number | string)[];
  */
 export declare type Provider = TypeProvider | ValueProvider | ClassProvider | ConstructorProvider | ExistingProvider | FactoryProvider | any[];
 
-declare interface ProviderDef {
-    token: any;
-    value: any;
-    deps: DepDef[];
-}
-
-declare interface ProviderOverride {
-    token: any;
-    flags: ɵNodeFlags;
-    value: any;
-    deps: ([ɵDepFlags, any] | any)[];
-    deprecatedBehavior: boolean;
-}
-
 /**
  * @description
  *
@@ -6099,17 +5817,6 @@ export declare interface Query {
  * @publicApi
  */
 export declare abstract class Query {
-}
-
-declare interface QueryBindingDef {
-    propName: string;
-    bindingType: ɵQueryBindingType;
-}
-
-declare interface QueryDef {
-    id: number;
-    filterId: number;
-    bindings: QueryBindingDef[];
 }
 
 /**
@@ -6475,6 +6182,8 @@ declare class ReflectiveDependency {
  *
  * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
  * resolve all of the object's dependencies automatically.
+ *
+ * TODO: delete in v14.
  *
  * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  * @publicApi
@@ -7152,17 +6861,6 @@ declare const enum RootContextFlags {
     FlushPlayers = 2
 }
 
-declare interface RootData {
-    injector: Injector;
-    ngModule: NgModuleRef<any>;
-    projectableNodes: any[][];
-    selectorOrNode: any;
-    renderer: Renderer2;
-    rendererFactory: RendererFactory2;
-    errorHandler: ErrorHandler;
-    sanitizer: Sanitizer;
-}
-
 declare interface RText extends RNode {
     textContent: string | null;
 }
@@ -7568,7 +7266,7 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    abstract get elementRef(): ElementRef;
+    abstract readonly elementRef: ElementRef;
     /**
      * Instantiates an embedded view based on this template,
      * and attaches it to the view container.
@@ -7682,10 +7380,6 @@ export declare class TestabilityRegistry {
     findTestabilityInTree(elem: Node, findInAncestors?: boolean): Testability | null;
     static ɵfac: i0.ɵɵFactoryDeclaration<TestabilityRegistry, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<TestabilityRegistry>;
-}
-
-declare interface TextDef {
-    prefix: string;
 }
 
 /**
@@ -9349,31 +9043,6 @@ export declare abstract class ViewContainerRef {
     abstract detach(index?: number): ViewRef | null;
 }
 
-/**
- * View instance data.
- * Attention: Adding fields to this is performance sensitive!
- */
-declare interface ViewData {
-    def: ɵViewDefinition;
-    root: RootData;
-    renderer: Renderer2;
-    parentNodeDef: NodeDef | null;
-    parent: ViewData | null;
-    viewContainerParent: ViewData | null;
-    component: any;
-    context: any;
-    nodes: {
-        [key: number]: NodeData;
-    };
-    state: ViewState;
-    oldValues: any[];
-    disposables: DisposableFn[] | null;
-    initIndex: number;
-}
-
-declare interface ViewDefinitionFactory extends DefinitionFactory<ɵViewDefinition> {
-}
-
 
 /**
  * Defines template and style encapsulation options available for Component's {@link Component}.
@@ -9420,10 +9089,6 @@ declare enum ViewEncapsulation_2 {
 declare interface viewEngine_ChangeDetectorRef_interface extends ChangeDetectorRef {
 }
 
-declare interface ViewHandleEventFn {
-    (view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
-}
-
 /**
  * Definition of what a view queries function should look like.
  */
@@ -9466,32 +9131,6 @@ declare interface ViewRefTracker {
 }
 
 /**
- * Bitmask of states
- */
-declare const enum ViewState {
-    BeforeFirstCheck = 1,
-    FirstCheck = 2,
-    Attached = 4,
-    ChecksEnabled = 8,
-    IsProjectedView = 16,
-    CheckProjectedView = 32,
-    CheckProjectedViews = 64,
-    Destroyed = 128,
-    InitState_Mask = 1792,
-    InitState_BeforeInit = 0,
-    InitState_CallingOnInit = 256,
-    InitState_CallingAfterContentInit = 512,
-    InitState_CallingAfterViewInit = 768,
-    InitState_AfterInit = 1024,
-    CatDetectChanges = 12,
-    CatInit = 13
-}
-
-declare interface ViewUpdateFn {
-    (check: NodeCheckFn, view: ViewData): void;
-}
-
-/**
  * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
  * the DOM in a browser environment.
  */
@@ -9514,8 +9153,6 @@ export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBy
 
 export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType): boolean;
 
-export declare function ɵand(flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn, templateFactory?: ViewDefinitionFactory): NodeDef;
-
 /**
  * Providers that generate a random `APP_ID_TOKEN`.
  * @publicApi
@@ -9525,11 +9162,6 @@ export declare const ɵAPP_ID_RANDOM_PROVIDER: {
     useFactory: typeof _appIdRandomProviderFactory;
     deps: any[];
 };
-
-export declare const enum ɵArgumentType {
-    Inline = 0,
-    Dynamic = 1
-}
 
 /**
  * A set of marker values to be used in the attributes arrays. These markers indicate that some
@@ -9659,17 +9291,6 @@ export declare const enum ɵAttributeMarker {
     I18n = 6
 }
 
-export declare const enum ɵBindingFlags {
-    TypeElementAttribute = 1,
-    TypeElementClass = 2,
-    TypeElementStyle = 4,
-    TypeProperty = 8,
-    SyntheticProperty = 16,
-    SyntheticHostProperty = 32,
-    CatSyntheticProperty = 48,
-    Types = 15
-}
-
 /**
  * Mark `html` string as trusted.
  *
@@ -9734,12 +9355,6 @@ export declare const enum ɵBypassType {
     Style = "Style"
 }
 
-export declare function ɵccf(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
-    [propName: string]: string;
-} | null, outputs: {
-    [propName: string]: string;
-}, ngContentSelectors: string[]): ComponentFactory<any>;
-
 /**
  * Defines the possible states of the default change detector.
  * @see `ChangeDetectorRef`
@@ -9777,21 +9392,7 @@ export declare enum ɵChangeDetectorStatus {
     Destroyed = 5
 }
 
-export declare function ɵclearOverrides(): void;
-
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
-
-export declare function ɵcmf(ngModuleType: Type<any>, bootstrapComponents: Type<any>[], defFactory: NgModuleDefinitionFactory): NgModuleFactory<any>;
-
-export declare class ɵCodegenComponentFactoryResolver implements ComponentFactoryResolver {
-    private _parent;
-    private _ngModule;
-    private _factories;
-    constructor(factories: ComponentFactory<any>[], _parent: ComponentFactoryResolver, _ngModule: NgModuleRef<any>);
-    resolveComponentFactory<T>(component: {
-        new (...args: any[]): T;
-    }): ComponentFactory<T>;
-}
 
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
@@ -9828,17 +9429,9 @@ export declare function ɵcompileNgModule(moduleType: Type<any>, ngModule?: NgMo
  */
 export declare function ɵcompileNgModuleDefs(moduleType: ɵNgModuleType, ngModule: NgModule, allowDuplicateDeclarationsInRoot?: boolean): void;
 
-export declare function ɵcompileNgModuleFactory__POST_R3__<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
+export declare function ɵcompileNgModuleFactory<M>(injector: Injector, options: CompilerOptions, moduleType: Type<M>): Promise<NgModuleFactory<M>>;
 
 export declare function ɵcompilePipe(type: Type<any>, meta: Pipe): void;
-
-export declare const ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__: <T>(moduleType: Type<T>) => Promise<ModuleWithComponentFactories<T>>;
-
-export declare const ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__: <T>(moduleType: Type<T>) => ModuleWithComponentFactories<T>;
-
-export declare const ɵCompiler_compileModuleAsync__POST_R3__: <T>(moduleType: Type<T>) => Promise<NgModuleFactory<T>>;
-
-export declare const ɵCompiler_compileModuleSync__POST_R3__: <T>(moduleType: Type<T>) => NgModuleFactory<T>;
 
 /**
  * Runtime link information for Components.
@@ -9953,22 +9546,12 @@ export declare class ɵConsole {
     static ɵprov: i0.ɵɵInjectableDeclaration<ɵConsole>;
 }
 
-export declare function ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__(): AttributeDecorator;
-
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
  * @publicApi
  */
 export declare function ɵcreateInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null, name?: string): Injector;
-
-export declare function ɵcrt(values: {
-    styles: (string | any[])[];
-    encapsulation: ViewEncapsulation;
-    data: {
-        [kind: string]: any[];
-    };
-}): RendererType2;
 
 /**
  * A list of CssSelectors.
@@ -9999,17 +9582,6 @@ export declare const ɵdefaultIterableDiffers: IterableDiffers;
 
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
 
-/**
- * Bitmask for DI flags
- */
-export declare const enum ɵDepFlags {
-    None = 0,
-    SkipSelf = 1,
-    Optional = 2,
-    Self = 4,
-    Value = 8
-}
-
 
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
@@ -10022,12 +9594,6 @@ export declare function ɵdetectChanges(component: {}): void;
 
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;
-
-export declare function ɵdid(checkIndex: number, flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], childCount: number, ctor: any, deps: ([ɵDepFlags, any] | any)[], props?: null | {
-    [name: string]: [number, string];
-}, outputs?: null | {
-    [name: string]: string;
-}): NodeDef;
 
 /**
  * Runtime link information for Directives.
@@ -10150,14 +9716,6 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
     ɵfac: unknown;
 }
 
-export declare function ɵeld(checkIndex: number, flags: ɵNodeFlags, matchedQueriesDsl: null | [string | number, ɵQueryValueType][], ngContentIndex: null | number, childCount: number, namespaceAndName: string | null, fixedAttrs?: null | [string, string][], bindings?: null | [ɵBindingFlags, string, string | SecurityContext | null][], outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn, componentView?: null | ViewDefinitionFactory, componentRendererType?: RendererType2 | null): NodeDef;
-
-export declare const ɵEMPTY_ARRAY: any[];
-
-export declare const ɵEMPTY_MAP: {
-    [key: string]: any;
-};
-
 /**
  * Index of each type of locale data from the extra locale data array
  */
@@ -10182,14 +9740,6 @@ export declare function ɵfindLocaleData(locale: string): any;
  * its declarations.
  */
 export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
-
-export declare function ɵgetComponentViewDefinitionFactory(componentFactory: ComponentFactory<any>): ViewDefinitionFactory;
-
-export declare function ɵgetDebugNode__POST_R3__(nativeNode: Element): DebugElement__POST_R3__;
-
-export declare function ɵgetDebugNode__POST_R3__(nativeNode: Node): DebugNode__POST_R3__;
-
-export declare function ɵgetDebugNode__POST_R3__(nativeNode: null): null;
 
 export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
 
@@ -10284,10 +9834,6 @@ export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
  */
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
-export declare function ɵgetModuleFactory__POST_R3__(id: string): NgModuleFactory<any>;
-
-export declare function ɵgetNgModuleById__POST_R3__(id: string): ɵNgModuleType;
-
 export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | null;
 
 export declare type ɵGetterFn = (obj: any) => any;
@@ -10295,9 +9841,8 @@ export declare type ɵGetterFn = (obj: any) => any;
 
 export declare const ɵglobal: any;
 
-export declare function ɵinitServicesIfNeeded(): void;
-
-export declare function ɵINJECTOR_IMPL__POST_R3__(providers: StaticProvider[], parent: Injector | undefined, name: string): Injector;
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDetectorRef;
 
 /**
  * An internal token whose presence in an injector indicates that the injector should treat itself
@@ -10306,11 +9851,7 @@ export declare function ɵINJECTOR_IMPL__POST_R3__(providers: StaticProvider[], 
  */
 export declare const ɵINJECTOR_SCOPE: InjectionToken<"root" | "platform" | null>;
 
-export declare function ɵinlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
-
-export declare function ɵinterpolate(valueCount: number, constAndInterp: string[]): string;
-
-export declare function ɵisBoundToModule__POST_R3__<C>(cf: ComponentFactory<C>): boolean;
+export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 
 /**
  * Reports whether a given strategy is currently the default for change detection.
@@ -10344,7 +9885,7 @@ export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
  */
 export declare function ɵisSubscribable(obj: any | Subscribable<any>): obj is Subscribable<any>;
 
-export declare const ɵivyEnabled = false;
+export declare const ɵivyEnabled = true;
 
 /**
  * The internal view context which is specific to a given DOM element, directive or
@@ -10451,12 +9992,6 @@ export declare function ɵmarkDirty(component: {}): void;
 
 export declare type ɵMethodFn = (obj: any, args: any[]) => any;
 
-export declare function ɵmod(providers: NgModuleProviderDef[]): NgModuleDefinition;
-
-export declare function ɵmpd(flags: ɵNodeFlags, token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NgModuleProviderDef;
-
-export declare function ɵncd(ngContentIndex: null | number, index: number): NodeDef;
-
 
 export declare const ɵNG_COMP_DEF: string;
 
@@ -10553,54 +10088,6 @@ export declare interface ɵNO_CHANGE {
 export declare const ɵNO_CHANGE: ɵNO_CHANGE;
 
 /**
- * Bitmask for NodeDef.flags.
- * Naming convention:
- * - `Type...`: flags that are mutually exclusive
- * - `Cat...`: union of multiple `Type...` (short for category).
- */
-export declare const enum ɵNodeFlags {
-    None = 0,
-    TypeElement = 1,
-    TypeText = 2,
-    ProjectedTemplate = 4,
-    CatRenderNode = 3,
-    TypeNgContent = 8,
-    TypePipe = 16,
-    TypePureArray = 32,
-    TypePureObject = 64,
-    TypePurePipe = 128,
-    CatPureExpression = 224,
-    TypeValueProvider = 256,
-    TypeClassProvider = 512,
-    TypeFactoryProvider = 1024,
-    TypeUseExistingProvider = 2048,
-    LazyProvider = 4096,
-    PrivateProvider = 8192,
-    TypeDirective = 16384,
-    Component = 32768,
-    CatProviderNoDirective = 3840,
-    CatProvider = 20224,
-    OnInit = 65536,
-    OnDestroy = 131072,
-    DoCheck = 262144,
-    OnChanges = 524288,
-    AfterContentInit = 1048576,
-    AfterContentChecked = 2097152,
-    AfterViewInit = 4194304,
-    AfterViewChecked = 8388608,
-    EmbeddedViews = 16777216,
-    ComponentView = 33554432,
-    TypeContentQuery = 67108864,
-    TypeViewQuery = 134217728,
-    StaticQuery = 268435456,
-    DynamicQuery = 536870912,
-    TypeNgModule = 1073741824,
-    EmitDistinctChangesOnly = -2147483648,
-    CatQuery = 201326592,
-    Types = 201347067
-}
-
-/**
  * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
  * to framework to perform rendering.
  */
@@ -10633,21 +10120,11 @@ export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
 
-export declare function ɵnov(view: ViewData, index: number): any;
-
-export declare function ɵoverrideComponentView(comp: Type<any>, componentFactory: ComponentFactory<any>): void;
-
-export declare function ɵoverrideProvider(override: ProviderOverride): void;
-
-export declare function ɵpad(checkIndex: number, argCount: number): NodeDef;
-
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
  * a given module.
  */
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
-
-export declare function ɵpid(flags: ɵNodeFlags, ctor: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
 
 /**
  * Runtime link information for Pipes.
@@ -10748,14 +10225,6 @@ export declare const enum ɵPlayState {
     Destroyed = 200
 }
 
-export declare function ɵpod(checkIndex: number, propToIndex: {
-    [p: string]: number;
-}): NodeDef;
-
-export declare function ɵppd(checkIndex: number, argCount: number): NodeDef;
-
-export declare function ɵprd(flags: ɵNodeFlags, matchedQueries: null | [string | number, ɵQueryValueType][], token: any, value: any, deps: ([ɵDepFlags, any] | any)[]): NodeDef;
-
 /**
  * Profiler function which the runtime will invoke before and after user code.
  */
@@ -10825,23 +10294,6 @@ export declare function ɵpublishDefaultGlobalUtils(): void;
  */
 export declare function ɵpublishGlobalUtil(name: string, fn: Function): void;
 
-export declare function ɵqud(flags: ɵNodeFlags, id: number, bindings: {
-    [propName: string]: ɵQueryBindingType;
-}): NodeDef;
-
-export declare const enum ɵQueryBindingType {
-    First = 0,
-    All = 1
-}
-
-export declare const enum ɵQueryValueType {
-    ElementRef = 0,
-    RenderElement = 1,
-    TemplateRef = 2,
-    ViewContainerRef = 3,
-    Provider = 4
-}
-
 export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
     constructor(reflect?: any);
@@ -10879,12 +10331,6 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
  * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
  */
 export declare function ɵregisterLocaleData(data: any, localeId?: string | any, extraData?: any): void;
-
-/**
- * Registers a loaded module. Should only be called from generated NgModuleFactory code.
- * @publicApi
- */
-export declare function ɵregisterModuleFactory(id: string, factory: NgModuleFactory<any>): void;
 
 export declare function ɵregisterNgModuleType(ngModuleType: ɵNgModuleType): void;
 
@@ -11128,31 +10574,6 @@ export declare function ɵstore<T>(tView: TView, lView: LView, index: number, va
 
 export declare function ɵstringify(token: any): string;
 
-export declare const ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__: typeof injectChangeDetectorRef;
-
-export declare const ɵSWITCH_COMPILE_COMPONENT__POST_R3__: typeof ɵcompileComponent;
-
-export declare const ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__: typeof ɵcompileDirective;
-
-export declare const ɵSWITCH_COMPILE_INJECTABLE__POST_R3__: typeof compileInjectable;
-
-export declare const ɵSWITCH_COMPILE_NGMODULE__POST_R3__: typeof ɵcompileNgModule;
-
-export declare const ɵSWITCH_COMPILE_PIPE__POST_R3__: typeof ɵcompilePipe;
-
-export declare const ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__: typeof injectElementRef;
-
-
-export declare const ɵSWITCH_IVY_ENABLED__POST_R3__ = true;
-
-export declare const ɵSWITCH_RENDERER2_FACTORY__POST_R3__: typeof injectRenderer2;
-
-export declare const ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__: typeof injectTemplateRef;
-
-export declare const ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__: typeof injectViewContainerRef;
-
-export declare function ɵted(checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef;
-
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
@@ -11172,40 +10593,6 @@ export declare function ɵunregisterLocaleData(): void;
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 
 export declare function ɵunwrapSafeValue<T>(value: T): T;
-
-export declare function ɵvid(flags: ɵViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn, updateRenderer?: null | ViewUpdateFn): ɵViewDefinition;
-
-export declare interface ɵViewDefinition extends Definition<ViewDefinitionFactory> {
-    flags: ɵViewFlags;
-    updateDirectives: ViewUpdateFn;
-    updateRenderer: ViewUpdateFn;
-    handleEvent: ViewHandleEventFn;
-    /**
-     * Order: Depth first.
-     * Especially providers are before elements / anchors.
-     */
-    nodes: NodeDef[];
-    /** aggregated NodeFlags for all nodes **/
-    nodeFlags: ɵNodeFlags;
-    rootNodeFlags: ɵNodeFlags;
-    lastRenderRootNode: NodeDef | null;
-    bindingCount: number;
-    outputCount: number;
-    /**
-     * Binary or of all query ids that are matched by one of the nodes.
-     * This includes query ids from templates as well.
-     * Used as a bloom filter.
-     */
-    nodeMatchedQueries: number;
-}
-
-/**
- * Bitmask for ViewDefinition.flags.
- */
-export declare const enum ɵViewFlags {
-    None = 0,
-    OnPush = 2
-}
 
 export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef, viewEngine_ChangeDetectorRef_interface {
     /**
