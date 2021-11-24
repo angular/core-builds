@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.0-next.2+44.sha-6ae3858.with-local-changes
+ * @license Angular v13.1.0-next.2+50.sha-b06e398.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21047,7 +21047,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.0-next.2+44.sha-6ae3858.with-local-changes');
+const VERSION = new Version('13.1.0-next.2+50.sha-b06e398.with-local-changes');
 
 /**
  * @license
@@ -22214,6 +22214,8 @@ function ɵɵpipe(index, pipeName) {
     let pipeDef;
     const adjustedIndex = index + HEADER_OFFSET;
     if (tView.firstCreatePass) {
+        // The `getPipeDef` throws if a pipe with a given name is not found
+        // (so we use non-null assertion below).
         pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
         tView.data[adjustedIndex] = pipeDef;
         if (pipeDef.onDestroy) {
@@ -22257,7 +22259,13 @@ function getPipeDef(name, registry) {
             }
         }
     }
-    throw new RuntimeError("302" /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found!`);
+    if (ngDevMode) {
+        const lView = getLView();
+        const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+        const context = declarationLView[CONTEXT];
+        const component = context ? ` in the '${context.constructor.name}' component` : '';
+        throw new RuntimeError("302" /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found${component}!`);
+    }
 }
 /**
  * Invokes a pipe with 1 arguments.
