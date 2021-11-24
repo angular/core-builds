@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.0-next.2+43.sha-2bf131a.with-local-changes
+ * @license Angular v13.1.0-next.2+44.sha-6ae3858.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -964,18 +964,19 @@ export declare interface Component extends Directive {
      */
     animations?: any[];
     /**
-     * An encapsulation policy for the template and CSS styles. One of:
-     * - `ViewEncapsulation.Emulated`: Use shimmed CSS that
-     * emulates the native behavior.
-     * - `ViewEncapsulation.None`: Use global CSS without any
-     * encapsulation.
-     * - `ViewEncapsulation.ShadowDom`: Use Shadow DOM v1 to encapsulate styles.
+     * An encapsulation policy for the component's styling.
+     * Possible values:
+     * - `ViewEncapsulation.Emulated`: Apply modified component styles in order to emulate
+     *                                 a native Shadow DOM CSS encapsulation behavior.
+     * - `ViewEncapsulation.None`: Apply component styles globally without any sort of encapsulation.
+     * - `ViewEncapsulation.ShadowDom`: Use the browser's native Shadow DOM API to encapsulate styles.
      *
-     * If not supplied, the value is taken from `CompilerOptions`. The default compiler option is
-     * `ViewEncapsulation.Emulated`.
+     * If not supplied, the value is taken from the `CompilerOptions`
+     * which defaults to `ViewEncapsulation.Emulated`.
      *
-     * If the policy is set to `ViewEncapsulation.Emulated` and the component has no `styles`
-     * or `styleUrls` specified, the policy is automatically switched to `ViewEncapsulation.None`.
+     * If the policy is `ViewEncapsulation.Emulated` and the component has no
+     * {@link Component#styles styles} nor {@link Component#styleUrls styleUrls},
+     * the policy is automatically switched to `ViewEncapsulation.None`.
      */
     encapsulation?: ViewEncapsulation;
     /**
@@ -9045,7 +9046,8 @@ export declare abstract class ViewContainerRef {
 
 
 /**
- * Defines template and style encapsulation options available for Component's {@link Component}.
+ * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
+ * `encapsulation` option.
  *
  * See {@link Component#encapsulation encapsulation}.
  *
@@ -9058,24 +9060,23 @@ export declare abstract class ViewContainerRef {
  */
 export declare enum ViewEncapsulation {
     /**
-     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-     * selectors.
+     * Emulates a native Shadow DOM encapsulation behavior by adding a specific attribute to the
+     * component's host element and applying the same attribute to all the CSS selectors provided
+     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls}.
      *
      * This is the default option.
      */
     Emulated = 0,
     /**
-     * Don't provide any template or style encapsulation.
+     * Doesn't provide any sort of CSS style encapsulation, meaning that all the styles provided
+     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls} are applicable
+     * to any HTML element of the application regardless of their host Component.
      */
     None = 2,
     /**
-     * Use Shadow DOM to encapsulate styles.
-     *
-     * For the DOM this means using modern [Shadow
-     * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
-     * creating a ShadowRoot for Component's Host Element.
+     * Uses the browser's native Shadow DOM API to encapsulate CSS styles, meaning that it creates
+     * a ShadowRoot for the component's host element which is then used to encapsulate
+     * all the Component's styling.
      */
     ShadowDom = 3
 }
