@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.0.2+38.sha-b9362f0.with-local-changes
+ * @license Angular v13.0.2+47.sha-5119be4.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -670,7 +670,8 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Defines template and style encapsulation options available for Component's {@link Component}.
+ * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
+ * `encapsulation` option.
  *
  * See {@link Component#encapsulation encapsulation}.
  *
@@ -686,25 +687,24 @@ var ViewEncapsulation$1;
     // TODO: consider making `ViewEncapsulation` a `const enum` instead. See
     // https://github.com/angular/angular/issues/44119 for additional information.
     /**
-     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
-     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
-     * selectors.
+     * Emulates a native Shadow DOM encapsulation behavior by adding a specific attribute to the
+     * component's host element and applying the same attribute to all the CSS selectors provided
+     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls}.
      *
      * This is the default option.
      */
     ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
     // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     /**
-     * Don't provide any template or style encapsulation.
+     * Doesn't provide any sort of CSS style encapsulation, meaning that all the styles provided
+     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls} are applicable
+     * to any HTML element of the application regardless of their host Component.
      */
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     /**
-     * Use Shadow DOM to encapsulate styles.
-     *
-     * For the DOM this means using modern [Shadow
-     * DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) and
-     * creating a ShadowRoot for Component's Host Element.
+     * Uses the browser's native Shadow DOM API to encapsulate CSS styles, meaning that it creates
+     * a ShadowRoot for the component's host element which is then used to encapsulate
+     * all the Component's styling.
      */
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
 })(ViewEncapsulation$1 || (ViewEncapsulation$1 = {}));
@@ -21061,7 +21061,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.0.2+38.sha-b9362f0.with-local-changes');
+const VERSION = new Version('13.0.2+47.sha-5119be4.with-local-changes');
 
 /**
  * @license
@@ -22228,6 +22228,8 @@ function ɵɵpipe(index, pipeName) {
     let pipeDef;
     const adjustedIndex = index + HEADER_OFFSET;
     if (tView.firstCreatePass) {
+        // The `getPipeDef` throws if a pipe with a given name is not found
+        // (so we use non-null assertion below).
         pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
         tView.data[adjustedIndex] = pipeDef;
         if (pipeDef.onDestroy) {
@@ -22271,7 +22273,13 @@ function getPipeDef(name, registry) {
             }
         }
     }
-    throw new RuntimeError("302" /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found!`);
+    if (ngDevMode) {
+        const lView = getLView();
+        const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+        const context = declarationLView[CONTEXT];
+        const component = context ? ` in the '${context.constructor.name}' component` : '';
+        throw new RuntimeError("302" /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found${component}!`);
+    }
 }
 /**
  * Invokes a pipe with 1 arguments.
