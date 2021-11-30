@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.0-next.2+80.sha-f058109.with-local-changes
+ * @license Angular v13.1.0-next.2+82.sha-96dfc7a.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10473,6 +10473,7 @@ export declare class ɵRuntimeError extends Error {
 
 export declare const enum ɵRuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = "100",
+    RECURSIVE_APPLICATION_REF_TICK = "101",
     CYCLIC_DI_DEPENDENCY = "200",
     PROVIDER_NOT_FOUND = "201",
     MULTIPLE_COMPONENTS_MATCH = "300",
@@ -10480,7 +10481,13 @@ export declare const enum ɵRuntimeErrorCode {
     PIPE_NOT_FOUND = "302",
     UNKNOWN_BINDING = "303",
     UNKNOWN_ELEMENT = "304",
-    TEMPLATE_STRUCTURE_ERROR = "305"
+    TEMPLATE_STRUCTURE_ERROR = "305",
+    MULTIPLE_PLATFORMS = "400",
+    PLATFORM_NOT_FOUND = "401",
+    ERROR_HANDLER_NOT_FOUND = "402",
+    BOOTSTRAP_COMPONENTS_NOT_FOUND = "403",
+    ALREADY_DESTROYED_PLATFORM = "404",
+    ASYNC_INITIALIZERS_STILL_RUNNING = "405"
 }
 
 /**
