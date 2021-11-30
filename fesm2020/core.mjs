@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.0-next.2+67.sha-3aafa76.with-local-changes
+ * @license Angular v13.1.0-next.2+74.sha-0fcf18d.with-local-changes
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20697,8 +20697,11 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
  */
 function registerDestroyHooksIfSupported(tView, provider, contextIndex, indexInFactory) {
     const providerIsTypeProvider = isTypeProvider(provider);
-    if (providerIsTypeProvider || isClassProvider(provider)) {
-        const prototype = (provider.useClass || provider).prototype;
+    const providerIsClassProvider = isClassProvider(provider);
+    if (providerIsTypeProvider || providerIsClassProvider) {
+        // Resolve forward references as `useClass` can hold a forward reference.
+        const classToken = providerIsClassProvider ? resolveForwardRef(provider.useClass) : provider;
+        const prototype = classToken.prototype;
         const ngOnDestroy = prototype.ngOnDestroy;
         if (ngOnDestroy) {
             const hooks = tView.destroyHooks || (tView.destroyHooks = []);
@@ -21061,7 +21064,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.0-next.2+67.sha-3aafa76.with-local-changes');
+const VERSION = new Version('13.1.0-next.2+74.sha-0fcf18d.with-local-changes');
 
 /**
  * @license
