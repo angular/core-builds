@@ -55,8 +55,3 @@ export declare class ImportManager {
      */
     private _getEndPositionOfNode;
 }
-/**
- * Backwards-compatible version of `ts.createImportSpecifier`
- * to handle a breaking change between 4.4 and 4.5.
- */
-export declare function createImportSpecifier(propertyName: string | ts.Identifier | undefined, name: string | ts.Identifier, isTypeOnly?: boolean): ts.ImportSpecifier;
