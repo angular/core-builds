@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-next.1+27.sha-5ae1030.with-local-changes
+ * @license Angular v13.2.0-next.1+29.sha-a864d1c.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -958,7 +958,7 @@ export declare interface Component extends Directive {
     styles?: string[];
     /**
      * One or more animation `trigger()` calls, containing
-     * `state()` and `transition()` definitions.
+     * [`state()`](api/animations/state) and `transition()` definitions.
      * See the [Animations guide](/guide/animations) and animations API documentation.
      *
      */
