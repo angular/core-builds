@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-next.1+83.sha-c57e22a.with-local-changes
+ * @license Angular v13.2.0-next.1+80.sha-de93b6e.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -19727,7 +19727,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
     };
 }
 /**
- * Allocate space in i18n Range add create OpCode instruction to create a text or comment node.
+ * Allocate space in i18n Range add create OpCode instruction to crete a text or comment node.
  *
  * @param tView Current `TView` needed to allocate space in i18n range.
  * @param rootTNode Root `TNode` of the i18n block. This node determines if the new TNode will be
@@ -21028,7 +21028,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.0-next.1+83.sha-c57e22a.with-local-changes');
+const VERSION = new Version('13.2.0-next.1+80.sha-de93b6e.with-local-changes');
 
 /**
  * @license
@@ -21766,7 +21766,7 @@ class NgModuleRef extends NgModuleRef$1 {
             }
         ], stringify(ngModuleType));
         // We need to resolve the injector types separately from the injector creation, because
-        // the module might be trying to use this ref in its constructor for DI which will cause a
+        // the module might be trying to use this ref in its contructor for DI which will cause a
         // circular error that will eventually error out, because the injector isn't created yet.
         this._r3Injector._resolveInjectorDefTypes();
         this.instance = this.get(ngModuleType);
