@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.1+70.sha-57d5f95.with-local-changes
+ * @license Angular v13.1.1+73.sha-d252cff.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -141,7 +141,7 @@ function isForwardRef(fn) {
  *
  * Keep the files below in full sync:
  *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
- *  - packages/core/src/render3/error_details_base_url.ts
+ *  - packages/core/src/error_details_base_url.ts
  */
 const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
 
@@ -158,30 +158,15 @@ class RuntimeError extends Error {
         this.code = code;
     }
 }
-// Contains a set of error messages that have details guides at angular.io.
-// Full list of available error guides can be found at https://angular.io/errors
-/* tslint:disable:no-toplevel-property-access */
-const RUNTIME_ERRORS_WITH_GUIDES = new Set([
-    "100" /* EXPRESSION_CHANGED_AFTER_CHECKED */,
-    "200" /* CYCLIC_DI_DEPENDENCY */,
-    "201" /* PROVIDER_NOT_FOUND */,
-    "300" /* MULTIPLE_COMPONENTS_MATCH */,
-    "301" /* EXPORT_NOT_FOUND */,
-    "302" /* PIPE_NOT_FOUND */,
-]);
-/* tslint:enable:no-toplevel-property-access */
 /** Called to format a runtime error */
 function formatRuntimeError(code, message) {
-    const fullCode = code ? `NG0${code}: ` : '';
-    let errorMessage = `${fullCode}${message}`;
-    // Some runtime errors are still thrown without `ngDevMode` (for example
-    // `throwProviderNotFoundError`), so we add `ngDevMode` check here to avoid pulling
-    // `RUNTIME_ERRORS_WITH_GUIDES` symbol into prod bundles.
-    // TODO: revisit all instances where `RuntimeError` is thrown and see if `ngDevMode` can be added
-    // there instead to tree-shake more devmode-only code (and eventually remove `ngDevMode` check
-    // from this code).
-    if (ngDevMode && RUNTIME_ERRORS_WITH_GUIDES.has(code)) {
-        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/NG0${code}`;
+    const codeAsNumber = code;
+    // Error code might be a negative number, which is a special marker that instructs the logic to
+    // generate a link to the error details page on angular.io.
+    const fullCode = `NG0${Math.abs(codeAsNumber)}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
+    if (ngDevMode && codeAsNumber < 0) {
+        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
     }
     return errorMessage;
 }
@@ -222,10 +207,17 @@ function stringifyForError(value) {
     return renderStringify(value);
 }
 
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token, path) {
     const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
-    throw new RuntimeError("200" /* CYCLIC_DI_DEPENDENCY */, `Circular dependency in DI detected for ${token}${depPath}`);
+    throw new RuntimeError(-200 /* CYCLIC_DI_DEPENDENCY */, `Circular dependency in DI detected for ${token}${depPath}`);
 }
 function throwMixedMultiProviderError() {
     throw new Error(`Cannot mix multi providers and regular providers`);
@@ -242,7 +234,7 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
 /** Throws an error when a token is not found in DI. */
 function throwProviderNotFoundError(token, injectorName) {
     const injectorDetails = injectorName ? ` in ${injectorName}` : '';
-    throw new RuntimeError("201" /* PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
+    throw new RuntimeError(-201 /* PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -6439,7 +6431,6 @@ function discoverLocalRefs(lView, nodeIndex) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const ERROR_TYPE = 'ngType';
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 const ERROR_LOGGER = 'ngErrorLogger';
 function wrappedError(message, originalError) {
@@ -6447,17 +6438,6 @@ function wrappedError(message, originalError) {
     const error = Error(msg);
     error[ERROR_ORIGINAL_ERROR] = originalError;
     return error;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function getType(error) {
-    return error[ERROR_TYPE];
 }
 function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
@@ -6703,7 +6683,7 @@ function maybeUnwrapFn(value) {
  */
 /** Called when there are multiple component selectors that match a given node */
 function throwMultipleComponentError(tNode) {
-    throw new RuntimeError("300" /* MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}`);
+    throw new RuntimeError(-300 /* MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}`);
 }
 /** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
 function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
@@ -6714,9 +6694,7 @@ function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) 
             ` It seems like the view has been created after its parent and its children have been dirty checked.` +
                 ` Has it been created in a change detection hook?`;
     }
-    // TODO: include debug context, see `viewDebugError` function in
-    // `packages/core/src/view/errors.ts` for reference.
-    throw new RuntimeError("100" /* EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
+    throw new RuntimeError(-100 /* EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
 }
 function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
     const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
@@ -10126,7 +10104,7 @@ function matchingSchemas(tView, tagName) {
  */
 function logUnknownPropertyError(propName, tNode) {
     let message = `Can't bind to '${propName}' since it isn't a known property of '${tNode.value}'.`;
-    console.error(formatRuntimeError("303" /* UNKNOWN_BINDING */, message));
+    console.error(formatRuntimeError(303 /* UNKNOWN_BINDING */, message));
 }
 /**
  * Instantiate a root component.
@@ -10379,7 +10357,7 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
         for (let i = 0; i < localRefs.length; i += 2) {
             const index = exportsMap[localRefs[i + 1]];
             if (index == null)
-                throw new RuntimeError("301" /* EXPORT_NOT_FOUND */, `Export of name '${localRefs[i + 1]}' not found!`);
+                throw new RuntimeError(-301 /* EXPORT_NOT_FOUND */, `Export of name '${localRefs[i + 1]}' not found!`);
             localNames.push(localRefs[i], index);
         }
     }
@@ -14604,7 +14582,7 @@ function logUnknownElementError(tView, element, tNode, hasDirectives) {
                 message +=
                     `2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.`;
             }
-            console.error(formatRuntimeError("304" /* UNKNOWN_ELEMENT */, message));
+            console.error(formatRuntimeError(304 /* UNKNOWN_ELEMENT */, message));
         }
     }
 }
@@ -21050,7 +21028,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.1+70.sha-57d5f95.with-local-changes');
+const VERSION = new Version('13.1.1+73.sha-d252cff.with-local-changes');
 
 /**
  * @license
@@ -22267,7 +22245,7 @@ function getPipeDef(name, registry) {
         const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
         const context = declarationLView[CONTEXT];
         const component = context ? ` in the '${context.constructor.name}' component` : '';
-        throw new RuntimeError("302" /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found${component}!`);
+        throw new RuntimeError(-302 /* PIPE_NOT_FOUND */, `The pipe '${name}' could not be found${component}!`);
     }
 }
 /**
@@ -25860,7 +25838,7 @@ function createPlatform(injector) {
         const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
             'There can be only one platform. Destroy the previous one to create a new one.' :
             '';
-        throw new RuntimeError("400" /* MULTIPLE_PLATFORMS */, errorMessage);
+        throw new RuntimeError(400 /* MULTIPLE_PLATFORMS */, errorMessage);
     }
     publishDefaultGlobalUtils();
     _platform = injector.get(PlatformRef);
@@ -25909,11 +25887,11 @@ function assertPlatform(requiredToken) {
     const platform = getPlatform();
     if (!platform) {
         const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ? 'No platform exists!' : '';
-        throw new RuntimeError("401" /* PLATFORM_NOT_FOUND */, errorMessage);
+        throw new RuntimeError(401 /* PLATFORM_NOT_FOUND */, errorMessage);
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
         !platform.injector.get(requiredToken, null)) {
-        throw new RuntimeError("400" /* MULTIPLE_PLATFORMS */, 'A platform with a different configuration has been created. Please destroy it first.');
+        throw new RuntimeError(400 /* MULTIPLE_PLATFORMS */, 'A platform with a different configuration has been created. Please destroy it first.');
     }
     return platform;
 }
@@ -26000,7 +25978,7 @@ class PlatformRef {
                 const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
                     'No ErrorHandler. Is platform module (BrowserModule) included?' :
                     '';
-                throw new RuntimeError("402" /* ERROR_HANDLER_NOT_FOUND */, errorMessage);
+                throw new RuntimeError(402 /* ERROR_HANDLER_NOT_FOUND */, errorMessage);
             }
             ngZone.runOutsideAngular(() => {
                 const subscription = ngZone.onError.subscribe({
@@ -26061,7 +26039,7 @@ class PlatformRef {
                     `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
                     `Please define one of these.` :
                 '';
-            throw new RuntimeError("403" /* BOOTSTRAP_COMPONENTS_NOT_FOUND */, errorMessage);
+            throw new RuntimeError(403 /* BOOTSTRAP_COMPONENTS_NOT_FOUND */, errorMessage);
         }
         this._modules.push(moduleRef);
     }
@@ -26087,7 +26065,7 @@ class PlatformRef {
             const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
                 'The platform has already been destroyed!' :
                 '';
-            throw new RuntimeError("404" /* ALREADY_DESTROYED_PLATFORM */, errorMessage);
+            throw new RuntimeError(404 /* ALREADY_DESTROYED_PLATFORM */, errorMessage);
         }
         this._modules.slice().forEach(module => module.destroy());
         this._destroyListeners.forEach(listener => listener());
@@ -26353,7 +26331,7 @@ class ApplicationRef {
                 'Cannot bootstrap as there are still asynchronous initializers running. ' +
                     'Bootstrap components in the `ngDoBootstrap` method of the root module.' :
                 '';
-            throw new RuntimeError("405" /* ASYNC_INITIALIZERS_STILL_RUNNING */, errorMessage);
+            throw new RuntimeError(405 /* ASYNC_INITIALIZERS_STILL_RUNNING */, errorMessage);
         }
         let componentFactory;
         if (componentOrFactory instanceof ComponentFactory$1) {
@@ -26403,7 +26381,7 @@ class ApplicationRef {
             const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
                 'ApplicationRef.tick is called recursively' :
                 '';
-            throw new RuntimeError("101" /* RECURSIVE_APPLICATION_REF_TICK */, errorMessage);
+            throw new RuntimeError(101 /* RECURSIVE_APPLICATION_REF_TICK */, errorMessage);
         }
         try {
             this._runningTick = true;

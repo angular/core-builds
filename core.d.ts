@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.1+70.sha-57d5f95.with-local-changes
+ * @license Angular v13.1.1+73.sha-d252cff.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6866,6 +6866,36 @@ declare interface RText extends RNode {
     textContent: string | null;
 }
 
+
+/**
+ * The list of error codes used in runtime code of the `core` package.
+ * Reserved error code range: 100-999.
+ *
+ * Note: the minus sign denotes the fact that a particular code has a detailed guide on
+ * angular.io. This extra annotation is needed to avoid introducing a separate set to store
+ * error codes which have guides, which might leak into runtime code.
+ *
+ * Full list of available error guides can be found at https://angular.io/errors.
+ */
+declare const enum RuntimeErrorCode {
+    EXPRESSION_CHANGED_AFTER_CHECKED = -100,
+    RECURSIVE_APPLICATION_REF_TICK = 101,
+    CYCLIC_DI_DEPENDENCY = -200,
+    PROVIDER_NOT_FOUND = -201,
+    MULTIPLE_COMPONENTS_MATCH = -300,
+    EXPORT_NOT_FOUND = -301,
+    PIPE_NOT_FOUND = -302,
+    UNKNOWN_BINDING = 303,
+    UNKNOWN_ELEMENT = 304,
+    TEMPLATE_STRUCTURE_ERROR = 305,
+    MULTIPLE_PLATFORMS = 400,
+    PLATFORM_NOT_FOUND = 401,
+    ERROR_HANDLER_NOT_FOUND = 402,
+    BOOTSTRAP_COMPONENTS_NOT_FOUND = 403,
+    ALREADY_DESTROYED_PLATFORM = 404,
+    ASYNC_INITIALIZERS_STILL_RUNNING = 405
+}
+
 declare const SANITIZER = 12;
 
 /**
@@ -10465,29 +10495,9 @@ export declare function ɵresolveComponentResources(resourceResolver: (url: stri
     text(): Promise<string>;
 }>)): Promise<void>;
 
-export declare class ɵRuntimeError extends Error {
-    code: ɵRuntimeErrorCode;
-    constructor(code: ɵRuntimeErrorCode, message: string);
-}
-
-
-export declare const enum ɵRuntimeErrorCode {
-    EXPRESSION_CHANGED_AFTER_CHECKED = "100",
-    RECURSIVE_APPLICATION_REF_TICK = "101",
-    CYCLIC_DI_DEPENDENCY = "200",
-    PROVIDER_NOT_FOUND = "201",
-    MULTIPLE_COMPONENTS_MATCH = "300",
-    EXPORT_NOT_FOUND = "301",
-    PIPE_NOT_FOUND = "302",
-    UNKNOWN_BINDING = "303",
-    UNKNOWN_ELEMENT = "304",
-    TEMPLATE_STRUCTURE_ERROR = "305",
-    MULTIPLE_PLATFORMS = "400",
-    PLATFORM_NOT_FOUND = "401",
-    ERROR_HANDLER_NOT_FOUND = "402",
-    BOOTSTRAP_COMPONENTS_NOT_FOUND = "403",
-    ALREADY_DESTROYED_PLATFORM = "404",
-    ASYNC_INITIALIZERS_STILL_RUNNING = "405"
+export declare class ɵRuntimeError<T = RuntimeErrorCode> extends Error {
+    code: T;
+    constructor(code: T, message: string);
 }
 
 /**
