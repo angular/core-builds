@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-next.1+87.sha-5a4ddfd.with-local-changes
+ * @license Angular v13.2.0-next.1+89.sha-c82e541.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21028,7 +21028,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.0-next.1+87.sha-5a4ddfd.with-local-changes');
+const VERSION = new Version('13.2.0-next.1+89.sha-c82e541.with-local-changes');
 
 /**
  * @license
@@ -24494,7 +24494,7 @@ const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ ho
  *   @HostListener('click', ['$event.target'])
  *   onClick(btn) {
  *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
- *  }
+ *   }
  * }
  *
  * @Component({

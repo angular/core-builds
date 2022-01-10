@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-next.1+87.sha-5a4ddfd.with-local-changes
+ * @license Angular v13.2.0-next.1+89.sha-c82e541.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3046,7 +3046,7 @@ export declare interface HostListener {
  *   @HostListener('click', ['$event.target'])
  *   onClick(btn) {
  *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
- *  }
+ *   }
  * }
  *
  * @Component({
