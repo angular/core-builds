@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.2+20.sha-929788d.with-local-changes
+ * @license Angular v13.1.2+21.sha-3797d10.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4729,7 +4729,10 @@ function setCurrentInjector(injector) {
 }
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
-        throw new Error(`inject() must be called from an injection context`);
+        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+            `inject() must be called from an injection context` :
+            '';
+        throw new RuntimeError(203 /* MISSING_INJECTION_CONTEXT */, errorMessage);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -4793,7 +4796,10 @@ function injectArgs(types) {
         const arg = resolveForwardRef(types[i]);
         if (Array.isArray(arg)) {
             if (arg.length === 0) {
-                throw new Error('Arguments array must have arguments.');
+                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+                    'Arguments array must have arguments.' :
+                    '';
+                throw new RuntimeError(900 /* INVALID_DIFFER_INPUT */, errorMessage);
             }
             let type = undefined;
             let flags = InjectFlags.Default;
@@ -5990,7 +5996,10 @@ function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
     if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* ResourceUrl */)) {
         return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
     }
-    throw new Error('unsafe value used in a resource URL context (see https://g.co/ng/security#xss)');
+    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+        'unsafe value used in a resource URL context (see https://g.co/ng/security#xss)' :
+        '';
+    throw new RuntimeError(904 /* UNSAFE_VALUE_IN_RESOURCE_URL */, errorMessage);
 }
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -6012,7 +6021,10 @@ function ɵɵsanitizeScript(unsafeScript) {
     if (allowSanitizationBypassAndThrow(unsafeScript, "Script" /* Script */)) {
         return trustedScriptFromStringBypass(unwrapSafeValue(unsafeScript));
     }
-    throw new Error('unsafe value used in a script context');
+    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+        'unsafe value used in a script context' :
+        '';
+    throw new RuntimeError(905 /* UNSAFE_VALUE_IN_SCRIPT */, errorMessage);
 }
 /**
  * A template tag function for promoting the associated constant literal to a
@@ -6100,18 +6112,18 @@ function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl, tag, prop) {
 }
 function validateAgainstEventProperties(name) {
     if (name.toLowerCase().startsWith('on')) {
-        const msg = `Binding to event property '${name}' is disallowed for security reasons, ` +
+        const errorMessage = `Binding to event property '${name}' is disallowed for security reasons, ` +
             `please use (${name.slice(2)})=...` +
             `\nIf '${name}' is a directive input, make sure the directive is imported by the` +
             ` current module.`;
-        throw new Error(msg);
+        throw new RuntimeError(306 /* INVALID_EVENT_BINDING */, errorMessage);
     }
 }
 function validateAgainstEventAttributes(name) {
     if (name.toLowerCase().startsWith('on')) {
-        const msg = `Binding to event attribute '${name}' is disallowed for security reasons, ` +
+        const errorMessage = `Binding to event attribute '${name}' is disallowed for security reasons, ` +
             `please use (${name.slice(2)})=...`;
-        throw new Error(msg);
+        throw new RuntimeError(306 /* INVALID_EVENT_BINDING */, errorMessage);
     }
 }
 function getSanitizer() {
@@ -11283,7 +11295,10 @@ class R3Injector {
     }
     assertNotDestroyed() {
         if (this._destroyed) {
-            throw new Error('Injector has already been destroyed.');
+            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+                'Injector has already been destroyed.' :
+                '';
+            throw new RuntimeError(205 /* INJECTOR_ALREADY_DESTROYED */, errorMessage);
         }
     }
     /**
@@ -11447,21 +11462,28 @@ function injectableDefOrInjectorDefFactory(token) {
     // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
     // If it's missing that, it's an error.
     if (token instanceof InjectionToken) {
-        throw new Error(`Token ${stringify(token)} is missing a ɵprov definition.`);
+        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+            `Token ${stringify(token)} is missing a ɵprov definition.` :
+            '';
+        throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, errorMessage);
     }
     // Undecorated types can sometimes be created if they have no constructor arguments.
     if (token instanceof Function) {
         return getUndecoratedInjectableFactory(token);
     }
     // There was no way to resolve a factory for this token.
-    throw new Error('unreachable');
+    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ? 'unreachable' : '';
+    throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, errorMessage);
 }
 function getUndecoratedInjectableFactory(token) {
     // If the token has parameters then it has dependencies that we cannot resolve implicitly.
     const paramLength = token.length;
     if (paramLength > 0) {
         const args = newArray(paramLength, '?');
-        throw new Error(`Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
+        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+            `Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).` :
+            '';
+        throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, errorMessage);
     }
     // The constructor function appears to have no parameters.
     // This might be because it inherits from a super-class. In which case, use an injectable
@@ -12320,7 +12342,10 @@ function ɵɵInheritDefinitionFeature(definition) {
         }
         else {
             if (superType.ɵcmp) {
-                throw new Error('Directives cannot inherit Components');
+                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+                    'Directives cannot inherit Components' :
+                    '';
+                throw new RuntimeError(903 /* INVALID_INHERITANCE */, errorMessage);
             }
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ɵdir;
@@ -19101,7 +19126,9 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                     setElementAttribute(renderer, getNativeByIndex(elementNodeIndex, lView), null, null, attrName, attrValue, null);
                     break;
                 default:
-                    throw new Error(`Unable to determine the type of mutate operation for "${opCode}"`);
+                    if (ngDevMode) {
+                        throw new RuntimeError(700 /* INVALID_I18N_STRUCTURE */, `Unable to determine the type of mutate operation for "${opCode}"`);
+                    }
             }
         }
         else {
@@ -21028,7 +21055,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.2+20.sha-929788d.with-local-changes');
+const VERSION = new Version('13.1.2+21.sha-3797d10.with-local-changes');
 
 /**
  * @license
@@ -21364,7 +21391,8 @@ class ViewRef$1 {
     }
     attachToViewContainerRef() {
         if (this._appRef) {
-            throw new Error('This view is already attached directly to the ApplicationRef!');
+            const errorMessage = ngDevMode ? 'This view is already attached directly to the ApplicationRef!' : '';
+            throw new RuntimeError(902 /* VIEW_ALREADY_ATTACHED */, errorMessage);
         }
         this._attachedToViewContainer = true;
     }
@@ -21374,7 +21402,8 @@ class ViewRef$1 {
     }
     attachToAppRef(appRef) {
         if (this._attachedToViewContainer) {
-            throw new Error('This view is already attached to a ViewContainer!');
+            const errorMessage = ngDevMode ? 'This view is already attached to a ViewContainer!' : '';
+            throw new RuntimeError(902 /* VIEW_ALREADY_ATTACHED */, errorMessage);
         }
         this._appRef = appRef;
     }
@@ -27372,7 +27401,10 @@ class DefaultIterableDiffer {
         if (collection == null)
             collection = [];
         if (!isListLikeIterable(collection)) {
-            throw new Error(`Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
+            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed` :
+                '';
+            throw new RuntimeError(900 /* INVALID_DIFFER_INPUT */, errorMessage);
         }
         if (this.check(collection)) {
             return this;
@@ -27973,7 +28005,10 @@ class DefaultKeyValueDiffer {
             map = new Map();
         }
         else if (!(map instanceof Map || isJsObject(map))) {
-            throw new Error(`Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
+            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed` :
+                '';
+            throw new RuntimeError(900 /* INVALID_DIFFER_INPUT */, errorMessage);
         }
         return this.check(map) ? this : null;
     }
@@ -28220,7 +28255,10 @@ class IterableDiffers {
             return factory;
         }
         else {
-            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'` :
+                '';
+            throw new RuntimeError(901 /* NO_SUPPORTING_DIFFER_FACTORY */, errorMessage);
         }
     }
 }
@@ -28294,7 +28332,10 @@ class KeyValueDiffers {
         if (factory) {
             return factory;
         }
-        throw new Error(`Cannot find a differ supporting object '${kv}'`);
+        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+            `Cannot find a differ supporting object '${kv}'` :
+            '';
+        throw new RuntimeError(901 /* NO_SUPPORTING_DIFFER_FACTORY */, errorMessage);
     }
 }
 /** @nocollapse */
