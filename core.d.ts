@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-next.2+29.sha-2b01e17.with-local-changes
+ * @license Angular v13.2.0-next.2+32.sha-4e95a31.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -892,14 +892,23 @@ export declare abstract class CompilerFactory {
 }
 
 /**
- * Options for creating a compiler
+ * Options for creating a compiler.
+ *
+ * Note: the `useJit` and `missingTranslation` config options are not used in Ivy, passing them has
+ * no effect. Those config options are deprecated since v13.
  *
  * @publicApi
  */
 export declare type CompilerOptions = {
+    /**
+     * @deprecated not used at all in Ivy, providing this config option has no effect.
+     */
     useJit?: boolean;
     defaultEncapsulation?: ViewEncapsulation;
     providers?: StaticProvider[];
+    /**
+     * @deprecated not used at all in Ivy, providing this config option has no effect.
+     */
     missingTranslation?: MissingTranslationStrategy;
     preserveWhitespaces?: boolean;
 };
@@ -1179,6 +1188,9 @@ declare interface ComponentDefFeature {
  * @see [Dynamic Components](guide/dynamic-component-loader)
  *
  * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
  */
 declare abstract class ComponentFactory<C> {
     /**
@@ -1226,6 +1238,9 @@ export { ComponentFactory as ɵComponentFactory }
  * does **not** require resolving component factory: component class can be used directly.
  *
  * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
  */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
@@ -5005,6 +5020,9 @@ export declare abstract class NgModuleRef<T> {
      * Note: since v13, dynamic component creation via
      * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
      * does **not** require resolving component factory: component class can be used directly.
+     *
+     * @deprecated Angular no longer requires Component factories. Please use other APIs where
+     *     Component class can be used directly.
      */
     abstract get componentFactoryResolver(): ComponentFactoryResolver;
     /**
