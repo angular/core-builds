@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.1.3+7.sha-ef5486f.with-local-changes
+ * @license Angular v13.1.3+9.sha-45503b4.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4478,7 +4478,7 @@ const ES2015_INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{
  * Regular expression that detects ES2015 classes which extend from other classes
  * and inherit a constructor.
  */
-const ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{\s*super\(\.\.\.arguments\)/;
+const ES2015_INHERITED_CLASS_WITH_DELEGATE_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[^{]+{[\s\S]*constructor\s*\(\)\s*{[^}]*super\(\.\.\.arguments\)/;
 /**
  * Determine whether a stringified type is a class which delegates its constructor
  * to its parent.
@@ -21077,7 +21077,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.1.3+7.sha-ef5486f.with-local-changes');
+const VERSION = new Version('13.1.3+9.sha-45503b4.with-local-changes');
 
 /**
  * @license
