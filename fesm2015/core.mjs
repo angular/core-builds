@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-next.2+43.sha-fb9163a.with-local-changes
+ * @license Angular v13.2.0-next.2+41.sha-9d4af65.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1552,15 +1552,8 @@ const profiler = function (event, instance, hookOrListener) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const SVG_NAMESPACE = 'svg';
-const SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg';
-const MATH_ML_NAMESPACE = 'math';
-const MATH_ML_NAMESPACE_URI = 'http://www.w3.org/1998/MathML/';
-function getNamespaceUri(namespace) {
-    const name = namespace.toLowerCase();
-    return name === SVG_NAMESPACE ? SVG_NAMESPACE_URI :
-        (name === MATH_ML_NAMESPACE ? MATH_ML_NAMESPACE_URI : null);
-}
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+const MATH_ML_NAMESPACE = 'http://www.w3.org/1998/MathML/';
 
 /**
  * @license
@@ -6980,9 +6973,8 @@ function createElementNode(renderer, name, namespace) {
         return renderer.createElement(name, namespace);
     }
     else {
-        const namespaceUri = namespace !== null ? getNamespaceUri(namespace) : null;
-        return namespaceUri === null ? renderer.createElement(name) :
-            renderer.createElementNS(namespaceUri, name);
+        return namespace === null ? renderer.createElement(name) :
+            renderer.createElementNS(namespace, name);
     }
 }
 /**
@@ -21069,7 +21061,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.0-next.2+43.sha-fb9163a.with-local-changes');
+const VERSION = new Version('13.2.0-next.2+41.sha-9d4af65.with-local-changes');
 
 /**
  * @license
