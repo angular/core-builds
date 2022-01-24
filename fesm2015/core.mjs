@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-rc.1+7.sha-94bfcdd.with-local-changes
+ * @license Angular v13.2.0-rc.1+9.sha-a4aa9b3.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21069,7 +21069,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.0-rc.1+7.sha-94bfcdd.with-local-changes');
+const VERSION = new Version('13.2.0-rc.1+9.sha-a4aa9b3.with-local-changes');
 
 /**
  * @license
@@ -21096,37 +21096,6 @@ const VERSION = new Version('13.2.0-rc.1+7.sha-94bfcdd.with-local-changes');
 // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Injector that looks up a value using a specific injector, before falling back to the module
- * injector. Used primarily when creating components or embedded views dynamically.
- */
-class ChainedInjector {
-    constructor(injector, parentInjector) {
-        this.injector = injector;
-        this.parentInjector = parentInjector;
-    }
-    get(token, notFoundValue, flags) {
-        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
-        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
-            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
-            // Return the value from the root element injector when
-            // - it provides it
-            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            // - the module injector should not be checked
-            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            return value;
-        }
-        return this.parentInjector.get(token, notFoundValue, flags);
-    }
-}
 
 /**
  * @license
@@ -21513,6 +21482,23 @@ const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
     providedIn: 'root',
     factory: () => defaultScheduler,
 });
+function createChainedInjector(rootViewInjector, moduleInjector) {
+    return {
+        get: (token, notFoundValue, flags) => {
+            const value = rootViewInjector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
+            if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+                notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+                // Return the value from the root element injector when
+                // - it provides it
+                //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+                // - the module injector should not be checked
+                //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+                return value;
+            }
+            return moduleInjector.get(token, notFoundValue, flags);
+        }
+    };
+}
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
@@ -21539,7 +21525,7 @@ class ComponentFactory extends ComponentFactory$1 {
     }
     create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
         ngModule = ngModule || this.ngModule;
-        const rootViewInjector = ngModule ? new ChainedInjector(injector, ngModule.injector) : injector;
+        const rootViewInjector = ngModule ? createChainedInjector(injector, ngModule.injector) : injector;
         const rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
         const sanitizer = rootViewInjector.get(Sanitizer, null);
         const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
@@ -22675,9 +22661,9 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
         this._declarationTContainer = _declarationTContainer;
         this.elementRef = elementRef;
     }
-    createEmbeddedView(context, injector) {
+    createEmbeddedView(context) {
         const embeddedTView = this._declarationTContainer.tViews;
-        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* CheckAlways */, null, embeddedTView.declTNode, null, null, null, createEmbeddedViewInjector(injector, this._declarationLView[INJECTOR$1]));
+        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* CheckAlways */, null, embeddedTView.declTNode, null, null, null, null);
         const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
         ngDevMode && assertLContainer(declarationLContainer);
         embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
@@ -22689,14 +22675,6 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
         return new ViewRef$1(embeddedLView);
     }
 };
-function createEmbeddedViewInjector(embeddedViewInjector, declarationViewInjector) {
-    if (!embeddedViewInjector) {
-        return null;
-    }
-    return declarationViewInjector ?
-        new ChainedInjector(embeddedViewInjector, declarationViewInjector) :
-        embeddedViewInjector;
-}
 /**
  * Creates a TemplateRef given a node.
  *
@@ -22801,17 +22779,8 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
     get length() {
         return this._lContainer.length - CONTAINER_HEADER_OFFSET;
     }
-    createEmbeddedView(templateRef, context, indexOrOptions) {
-        let index;
-        let injector;
-        if (typeof indexOrOptions === 'number') {
-            index = indexOrOptions;
-        }
-        else if (indexOrOptions != null) {
-            index = indexOrOptions.index;
-            injector = indexOrOptions.injector;
-        }
-        const viewRef = templateRef.createEmbeddedView(context || {}, injector);
+    createEmbeddedView(templateRef, context, index) {
+        const viewRef = templateRef.createEmbeddedView(context || {});
         this.insert(viewRef, index);
         return viewRef;
     }
