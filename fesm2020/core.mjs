@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0-rc.0+10.sha-fce521e.with-local-changes
+ * @license Angular v13.2.0-rc.1+7.sha-94bfcdd.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21083,7 +21083,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.0-rc.0+10.sha-fce521e.with-local-changes');
+const VERSION = new Version('13.2.0-rc.1+7.sha-94bfcdd.with-local-changes');
 
 /**
  * @license
@@ -25354,7 +25354,8 @@ class NgZone {
         forkInnerZoneWithAngularBehavior(self);
     }
     static isInAngularZone() {
-        return Zone.current.get('isAngularZone') === true;
+        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
+        return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
     }
     static assertInAngularZone() {
         if (!NgZone.isInAngularZone()) {
