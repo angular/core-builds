@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.0+1063.sha-6642e3c.with-local-changes
+ * @license Angular v14.0.0-next.0+1064.sha-39c614c.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1697,6 +1697,11 @@ class TestBedRender3 {
     }
     configureTestingModule(moduleDef) {
         this.assertNotInstantiated('R3TestBed.configureTestingModule', 'configure the test module');
+        // Trigger module scoping queue flush before executing other TestBed operations in a test.
+        // This is needed for the first test invocation to ensure that globally declared modules have
+        // their components scoped properly. See the `checkGlobalCompilationFinished` function
+        // description for additional info.
+        this.checkGlobalCompilationFinished();
         // Always re-assign the teardown options, even if they're undefined.
         // This ensures that we don't carry the options between tests.
         this._instanceTeardownOptions = moduleDef.teardown;
