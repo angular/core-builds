@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.0+25.sha-b51d111.with-local-changes
+ * @license Angular v13.2.0+28.sha-07185f4.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3072,19 +3072,20 @@ export declare interface HostListener {
  *
  * ```
  *
- * The following example registers another DOM event handler that listens for key-press events.
+ * The following example registers another DOM event handler that listens for `Enter` key-press
+ * events on the global `window`.
  * ``` ts
  * import { HostListener, Component } from "@angular/core";
  *
  * @Component({
  *   selector: 'app',
- *   template: `<h1>Hello, you have pressed keys {{counter}} number of times!</h1> Press any key to
- * increment the counter.
+ *   template: `<h1>Hello, you have pressed enter {{counter}} number of times!</h1> Press enter key
+ * to increment the counter.
  *   <button (click)="resetCounter()">Reset Counter</button>`
  * })
  * class AppComponent {
  *   counter = 0;
- *   @HostListener('window:keydown', ['$event'])
+ *   @HostListener('window:keydown.enter', ['$event'])
  *   handleKeyDown(event: KeyboardEvent) {
  *     this.counter++;
  *   }
@@ -3093,6 +3094,14 @@ export declare interface HostListener {
  *   }
  * }
  * ```
+ * The list of valid key names for `keydown` and `keyup` events
+ * can be found here:
+ * https://www.w3.org/TR/DOM-Level-3-Events-key/#named-key-attribute-values
+ *
+ * Note that keys can also be combined, e.g. `@HostListener('keydown.shift.a')`.
+ *
+ * The global target names that can be used to prefix an event name are
+ * `document:`, `window:` and `body:`.
  *
  * @Annotation
  * @publicApi
