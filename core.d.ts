@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.0+1070.sha-db05ae1.with-local-changes
+ * @license Angular v14.0.0-next.0+1071.sha-ed1732c.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10534,9 +10534,24 @@ export declare function ɵresolveComponentResources(resourceResolver: (url: stri
     text(): Promise<string>;
 }>)): Promise<void>;
 
-export declare class ɵRuntimeError<T = RuntimeErrorCode> extends Error {
+/**
+ * Class that represents a runtime error.
+ * Formats and outputs the error message in a consistent way.
+ *
+ * Example:
+ * ```
+ *  throw new RuntimeError(
+ *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
+ *    ngDevMode && 'Injector has already been destroyed.');
+ * ```
+ *
+ * Note: the `message` argument contains a descriptive error message as a string in development
+ * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
+ */
+export declare class ɵRuntimeError<T extends number = RuntimeErrorCode> extends Error {
     code: T;
-    constructor(code: T, message: string);
+    constructor(code: T, message: null | false | string);
 }
 
 /**

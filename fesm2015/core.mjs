@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.0+1070.sha-db05ae1.with-local-changes
+ * @license Angular v14.0.0-next.0+1071.sha-ed1732c.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -152,20 +152,37 @@ const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Class that represents a runtime error.
+ * Formats and outputs the error message in a consistent way.
+ *
+ * Example:
+ * ```
+ *  throw new RuntimeError(
+ *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
+ *    ngDevMode && 'Injector has already been destroyed.');
+ * ```
+ *
+ * Note: the `message` argument contains a descriptive error message as a string in development
+ * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
+ */
 class RuntimeError extends Error {
     constructor(code, message) {
         super(formatRuntimeError(code, message));
         this.code = code;
     }
 }
-/** Called to format a runtime error */
+/**
+ * Called to format a runtime error.
+ * See additional info on the `message` argument type in the `RuntimeError` class description.
+ */
 function formatRuntimeError(code, message) {
-    const codeAsNumber = code;
     // Error code might be a negative number, which is a special marker that instructs the logic to
     // generate a link to the error details page on angular.io.
-    const fullCode = `NG0${Math.abs(codeAsNumber)}`;
+    const fullCode = `NG0${Math.abs(code)}`;
     let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
-    if (ngDevMode && codeAsNumber < 0) {
+    if (ngDevMode && code < 0) {
         errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
     }
     return errorMessage;
@@ -10377,7 +10394,7 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
         for (let i = 0; i < localRefs.length; i += 2) {
             const index = exportsMap[localRefs[i + 1]];
             if (index == null)
-                throw new RuntimeError(-301 /* EXPORT_NOT_FOUND */, `Export of name '${localRefs[i + 1]}' not found!`);
+                throw new RuntimeError(-301 /* EXPORT_NOT_FOUND */, ngDevMode && `Export of name '${localRefs[i + 1]}' not found!`);
             localNames.push(localRefs[i], index);
         }
     }
@@ -11303,10 +11320,7 @@ class R3Injector {
     }
     assertNotDestroyed() {
         if (this._destroyed) {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                'Injector has already been destroyed.' :
-                '';
-            throw new RuntimeError(205 /* INJECTOR_ALREADY_DESTROYED */, errorMessage);
+            throw new RuntimeError(205 /* INJECTOR_ALREADY_DESTROYED */, ngDevMode && 'Injector has already been destroyed.');
         }
     }
     /**
@@ -11470,28 +11484,21 @@ function injectableDefOrInjectorDefFactory(token) {
     // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
     // If it's missing that, it's an error.
     if (token instanceof InjectionToken) {
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `Token ${stringify(token)} is missing a ɵprov definition.` :
-            '';
-        throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, errorMessage);
+        throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, ngDevMode && `Token ${stringify(token)} is missing a ɵprov definition.`);
     }
     // Undecorated types can sometimes be created if they have no constructor arguments.
     if (token instanceof Function) {
         return getUndecoratedInjectableFactory(token);
     }
     // There was no way to resolve a factory for this token.
-    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ? 'unreachable' : '';
-    throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, errorMessage);
+    throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, ngDevMode && 'unreachable');
 }
 function getUndecoratedInjectableFactory(token) {
     // If the token has parameters then it has dependencies that we cannot resolve implicitly.
     const paramLength = token.length;
     if (paramLength > 0) {
         const args = newArray(paramLength, '?');
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).` :
-            '';
-        throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, errorMessage);
+        throw new RuntimeError(204 /* INVALID_INJECTION_TOKEN */, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
     }
     // The constructor function appears to have no parameters.
     // This might be because it inherits from a super-class. In which case, use an injectable
@@ -21069,7 +21076,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.0+1070.sha-db05ae1.with-local-changes');
+const VERSION = new Version('14.0.0-next.0+1071.sha-ed1732c.with-local-changes');
 
 /**
  * @license
