@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.1+9.sha-1aae414.with-local-changes
+ * @license Angular v14.0.0-next.1+12.sha-0072eb4.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21090,7 +21090,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.1+9.sha-1aae414.with-local-changes');
+const VERSION = new Version('14.0.0-next.1+12.sha-0072eb4.with-local-changes');
 
 /**
  * @license
@@ -24362,7 +24362,10 @@ function directiveMetadata(type, metadata) {
         usesInheritance: !extendsDirectlyFromObject(type),
         exportAs: extractExportAs(metadata.exportAs),
         providers: metadata.providers || null,
-        viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery)
+        viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
+        // TODO(alxhub): pass through the standalone flag from the directive metadata once standalone
+        // functionality is fully rolled out.
+        isStandalone: false,
     };
 }
 /**
@@ -24506,7 +24509,10 @@ function getPipeMetadata(type, meta) {
         type: type,
         name: type.name,
         pipeName: meta.name,
-        pure: meta.pure !== undefined ? meta.pure : true
+        pure: meta.pure !== undefined ? meta.pure : true,
+        // TODO(alxhub): pass through the standalone flag from the pipe metadata once standalone
+        // functionality is fully rolled out.
+        isStandalone: false,
     };
 }
 
