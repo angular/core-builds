@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.1+33.sha-38c03a2.with-local-changes
+ * @license Angular v14.0.0-next.1+34.sha-9917152.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21090,7 +21090,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.1+33.sha-38c03a2.with-local-changes');
+const VERSION = new Version('14.0.0-next.1+34.sha-9917152.with-local-changes');
 
 /**
  * @license
@@ -26836,8 +26836,6 @@ var ng_module_factory_loader_impl = {};
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// TODO(alxhub): recombine the interfaces and implementations here and move the docs back onto the
-// original classes.
 /**
  * @publicApi
  */
@@ -26853,43 +26851,88 @@ class DebugEventListener {
 function asNativeElements(debugEls) {
     return debugEls.map((el) => el.nativeElement);
 }
-class DebugNode__POST_R3__ {
+/**
+ * @publicApi
+ */
+class DebugNode {
     constructor(nativeNode) {
         this.nativeNode = nativeNode;
     }
+    /**
+     * The `DebugElement` parent. Will be `null` if this is the root element.
+     */
     get parent() {
         const parent = this.nativeNode.parentNode;
-        return parent ? new DebugElement__POST_R3__(parent) : null;
+        return parent ? new DebugElement(parent) : null;
     }
+    /**
+     * The host dependency injector. For example, the root element's component instance injector.
+     */
     get injector() {
         return getInjector(this.nativeNode);
     }
+    /**
+     * The element's own component instance, if it has one.
+     */
     get componentInstance() {
         const nativeElement = this.nativeNode;
         return nativeElement &&
             (getComponent$1(nativeElement) || getOwningComponent(nativeElement));
     }
+    /**
+     * An object that provides parent context for this element. Often an ancestor component instance
+     * that governs this element.
+     *
+     * When an element is repeated within *ngFor, the context is an `NgForOf` whose `$implicit`
+     * property is the value of the row instance value. For example, the `hero` in `*ngFor="let hero
+     * of heroes"`.
+     */
     get context() {
         return getComponent$1(this.nativeNode) || getContext(this.nativeNode);
     }
+    /**
+     * The callbacks attached to the component's @Output properties and/or the element's event
+     * properties.
+     */
     get listeners() {
         return getListeners(this.nativeNode).filter(listener => listener.type === 'dom');
     }
+    /**
+     * Dictionary of objects associated with template local variables (e.g. #foo), keyed by the local
+     * variable name.
+     */
     get references() {
         return getLocalRefs(this.nativeNode);
     }
+    /**
+     * This component's injector lookup tokens. Includes the component itself plus the tokens that the
+     * component lists in its providers metadata.
+     */
     get providerTokens() {
         return getInjectionTokens(this.nativeNode);
     }
 }
-class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
+/**
+ * @publicApi
+ *
+ * @see [Component testing scenarios](guide/testing-components-scenarios)
+ * @see [Basics of testing components](guide/testing-components-basics)
+ * @see [Testing utility APIs](guide/testing-utility-apis)
+ */
+class DebugElement extends DebugNode {
     constructor(nativeNode) {
         ngDevMode && assertDomNode(nativeNode);
         super(nativeNode);
     }
+    /**
+     * The underlying DOM element at the root of the component.
+     */
     get nativeElement() {
         return this.nativeNode.nodeType == Node.ELEMENT_NODE ? this.nativeNode : null;
     }
+    /**
+     * The element tag name, if it is an element.
+     */
     get name() {
         const context = getLContext(this.nativeNode);
         if (context !== null) {
@@ -26930,6 +26973,9 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         collectPropertyBindings(properties, tNode, lView, tData);
         return properties;
     }
+    /**
+     *  A map of attribute names to attribute values for an element.
+     */
     get attributes() {
         const attributes = {};
         const element = this.nativeElement;
@@ -26978,12 +27024,29 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         }
         return attributes;
     }
+    /**
+     * The inline styles of the DOM element.
+     *
+     * Will be `null` if there is no `style` property on the underlying DOM element.
+     *
+     * @see [ElementCSSInlineStyle](https://developer.mozilla.org/en-US/docs/Web/API/ElementCSSInlineStyle/style)
+     */
     get styles() {
         if (this.nativeElement && this.nativeElement.style) {
             return this.nativeElement.style;
         }
         return {};
     }
+    /**
+     * A map containing the class names on the element as keys.
+     *
+     * This map is derived from the `className` property of the DOM element.
+     *
+     * Note: The values of this object will always be `true`. The class key will not appear in the KV
+     * object if it does not exist on the element.
+     *
+     * @see [Element.className](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)
+     */
     get classes() {
         const result = {};
         const element = this.nativeElement;
@@ -26993,15 +27056,23 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         classes.forEach((value) => result[value] = true);
         return result;
     }
+    /**
+     * The `childNodes` of the DOM element as a `DebugNode` array.
+     *
+     * @see [Node.childNodes](https://developer.mozilla.org/en-US/docs/Web/API/Node/childNodes)
+     */
     get childNodes() {
         const childNodes = this.nativeNode.childNodes;
         const children = [];
         for (let i = 0; i < childNodes.length; i++) {
             const element = childNodes[i];
-            children.push(getDebugNode__POST_R3__(element));
+            children.push(getDebugNode(element));
         }
         return children;
     }
+    /**
+     * The immediate `DebugElement` children. Walk the tree by descending through `children`.
+     */
     get children() {
         const nativeElement = this.nativeElement;
         if (!nativeElement)
@@ -27010,24 +27081,45 @@ class DebugElement__POST_R3__ extends DebugNode__POST_R3__ {
         const children = [];
         for (let i = 0; i < childNodes.length; i++) {
             const element = childNodes[i];
-            children.push(getDebugNode__POST_R3__(element));
+            children.push(getDebugNode(element));
         }
         return children;
     }
+    /**
+     * @returns the first `DebugElement` that matches the predicate at any depth in the subtree.
+     */
     query(predicate) {
         const results = this.queryAll(predicate);
         return results[0] || null;
     }
+    /**
+     * @returns All `DebugElement` matches for the predicate at any depth in the subtree.
+     */
     queryAll(predicate) {
         const matches = [];
-        _queryAllR3(this, predicate, matches, true);
+        _queryAll(this, predicate, matches, true);
         return matches;
     }
+    /**
+     * @returns All `DebugNode` matches for the predicate at any depth in the subtree.
+     */
     queryAllNodes(predicate) {
         const matches = [];
-        _queryAllR3(this, predicate, matches, false);
+        _queryAll(this, predicate, matches, false);
         return matches;
     }
+    /**
+     * Triggers the event by its name if there is a corresponding listener in the element's
+     * `listeners` collection.
+     *
+     * If the event lacks a listener or there's some other problem, consider
+     * calling `nativeElement.dispatchEvent(eventObject)`.
+     *
+     * @param eventName The name of the event to trigger
+     * @param eventObj The _event object_ expected by the handler
+     *
+     * @see [Testing components scenarios](guide/testing-components-scenarios#trigger-event-handler)
+     */
     triggerEventHandler(eventName, eventObj) {
         const node = this.nativeNode;
         const invokedListeners = [];
@@ -27086,11 +27178,11 @@ function isPrimitiveValue(value) {
     return typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' ||
         value === null;
 }
-function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
+function _queryAll(parentElement, predicate, matches, elementsOnly) {
     const context = getLContext(parentElement.nativeNode);
     if (context !== null) {
         const parentTNode = context.lView[TVIEW].data[context.nodeIndex];
-        _queryNodeChildrenR3(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
+        _queryNodeChildren(parentTNode, context.lView, predicate, matches, elementsOnly, parentElement.nativeNode);
     }
     else {
         // If the context is null, then `parentElement` was either created with Renderer2 or native DOM
@@ -27108,26 +27200,26 @@ function _queryAllR3(parentElement, predicate, matches, elementsOnly) {
  * @param elementsOnly whether only elements should be searched
  * @param rootNativeNode the root native node on which predicate should not be matched
  */
-function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, rootNativeNode) {
+function _queryNodeChildren(tNode, lView, predicate, matches, elementsOnly, rootNativeNode) {
     ngDevMode && assertTNodeForLView(tNode, lView);
     const nativeNode = getNativeByTNodeOrNull(tNode, lView);
     // For each type of TNode, specific logic is executed.
     if (tNode.type & (3 /* AnyRNode */ | 8 /* ElementContainer */)) {
         // Case 1: the TNode is an element
         // The native node has to be checked.
-        _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
+        _addQueryMatch(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
         if (isComponentHost(tNode)) {
             // If the element is the host of a component, then all nodes in its view have to be processed.
             // Note: the component's content (tNode.child) will be processed from the insertion points.
             const componentView = getComponentLViewByIndex(tNode.index, lView);
             if (componentView && componentView[TVIEW].firstChild) {
-                _queryNodeChildrenR3(componentView[TVIEW].firstChild, componentView, predicate, matches, elementsOnly, rootNativeNode);
+                _queryNodeChildren(componentView[TVIEW].firstChild, componentView, predicate, matches, elementsOnly, rootNativeNode);
             }
         }
         else {
             if (tNode.child) {
                 // Otherwise, its children have to be processed.
-                _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
+                _queryNodeChildren(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
             }
             // We also have to query the DOM directly in order to catch elements inserted through
             // Renderer2. Note that this is __not__ optimal, because we're walking similar trees multiple
@@ -27143,16 +27235,16 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // processed.
         const nodeOrContainer = lView[tNode.index];
         if (isLContainer(nodeOrContainer)) {
-            _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly, rootNativeNode);
+            _queryNodeChildrenInContainer(nodeOrContainer, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
     else if (tNode.type & 4 /* Container */) {
         // Case 2: the TNode is a container
         // The native node has to be checked.
         const lContainer = lView[tNode.index];
-        _addQueryMatchR3(lContainer[NATIVE], predicate, matches, elementsOnly, rootNativeNode);
+        _addQueryMatch(lContainer[NATIVE], predicate, matches, elementsOnly, rootNativeNode);
         // Each view inside the container has to be processed.
-        _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode);
+        _queryNodeChildrenInContainer(lContainer, predicate, matches, elementsOnly, rootNativeNode);
     }
     else if (tNode.type & 16 /* Projection */) {
         // Case 3: the TNode is a projection insertion point (i.e. a <ng-content>).
@@ -27162,18 +27254,18 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         const head = componentHost.projection[tNode.projection];
         if (Array.isArray(head)) {
             for (let nativeNode of head) {
-                _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
+                _addQueryMatch(nativeNode, predicate, matches, elementsOnly, rootNativeNode);
             }
         }
         else if (head) {
             const nextLView = componentView[PARENT];
             const nextTNode = nextLView[TVIEW].data[head.index];
-            _queryNodeChildrenR3(nextTNode, nextLView, predicate, matches, elementsOnly, rootNativeNode);
+            _queryNodeChildren(nextTNode, nextLView, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
     else if (tNode.child) {
         // Case 4: the TNode is a view.
-        _queryNodeChildrenR3(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
+        _queryNodeChildren(tNode.child, lView, predicate, matches, elementsOnly, rootNativeNode);
     }
     // We don't want to go to the next sibling of the root node.
     if (rootNativeNode !== nativeNode) {
@@ -27181,7 +27273,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // link, depending on whether the current node has been projected.
         const nextTNode = (tNode.flags & 4 /* isProjected */) ? tNode.projectionNext : tNode.next;
         if (nextTNode) {
-            _queryNodeChildrenR3(nextTNode, lView, predicate, matches, elementsOnly, rootNativeNode);
+            _queryNodeChildren(nextTNode, lView, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
 }
@@ -27194,12 +27286,12 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
  * @param elementsOnly whether only elements should be searched
  * @param rootNativeNode the root native node on which predicate should not be matched
  */
-function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode) {
+function _queryNodeChildrenInContainer(lContainer, predicate, matches, elementsOnly, rootNativeNode) {
     for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         const childView = lContainer[i];
         const firstChild = childView[TVIEW].firstChild;
         if (firstChild) {
-            _queryNodeChildrenR3(firstChild, childView, predicate, matches, elementsOnly, rootNativeNode);
+            _queryNodeChildren(firstChild, childView, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
 }
@@ -27212,7 +27304,7 @@ function _queryNodeChildrenInContainerR3(lContainer, predicate, matches, element
  * @param elementsOnly whether only elements should be searched
  * @param rootNativeNode the root native node on which predicate should not be matched
  */
-function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNativeNode) {
+function _addQueryMatch(nativeNode, predicate, matches, elementsOnly, rootNativeNode) {
     if (rootNativeNode !== nativeNode) {
         const debugNode = getDebugNode(nativeNode);
         if (!debugNode) {
@@ -27221,7 +27313,7 @@ function _addQueryMatchR3(nativeNode, predicate, matches, elementsOnly, rootNati
         // Type of the "predicate and "matches" array are set based on the value of
         // the "elementsOnly" parameter. TypeScript is not able to properly infer these
         // types with generics, so we manually cast the parameters accordingly.
-        if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode) &&
+        if (elementsOnly && (debugNode instanceof DebugElement) && predicate(debugNode) &&
             matches.indexOf(debugNode) === -1) {
             matches.push(debugNode);
         }
@@ -27246,7 +27338,7 @@ function _queryNativeNodeDescendants(parentNode, predicate, matches, elementsOnl
         const node = nodes[i];
         const debugNode = getDebugNode(node);
         if (debugNode) {
-            if (elementsOnly && debugNode instanceof DebugElement__POST_R3__ && predicate(debugNode) &&
+            if (elementsOnly && (debugNode instanceof DebugElement) && predicate(debugNode) &&
                 matches.indexOf(debugNode) === -1) {
                 matches.push(debugNode);
             }
@@ -27287,25 +27379,24 @@ function collectPropertyBindings(properties, tNode, lView, tData) {
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 const _nativeNodeToDebugNode = new Map();
 const NG_DEBUG_PROPERTY = '__ng_debug__';
-function getDebugNode__POST_R3__(nativeNode) {
+/**
+ * @publicApi
+ */
+function getDebugNode(nativeNode) {
     if (nativeNode instanceof Node) {
         if (!(nativeNode.hasOwnProperty(NG_DEBUG_PROPERTY))) {
             nativeNode[NG_DEBUG_PROPERTY] = nativeNode.nodeType == Node.ELEMENT_NODE ?
-                new DebugElement__POST_R3__(nativeNode) :
-                new DebugNode__POST_R3__(nativeNode);
+                new DebugElement(nativeNode) :
+                new DebugNode(nativeNode);
         }
         return nativeNode[NG_DEBUG_PROPERTY];
     }
     return null;
 }
-/**
- * @publicApi
- */
-const getDebugNode = getDebugNode__POST_R3__;
-function getDebugNodeR2__POST_R3__(_nativeNode) {
+// TODO: cleanup all references to this function and remove it.
+function getDebugNodeR2(_nativeNode) {
     return null;
 }
-const getDebugNodeR2 = getDebugNodeR2__POST_R3__;
 function getAllDebugNodes() {
     return Array.from(_nativeNodeToDebugNode.values());
 }
@@ -27315,14 +27406,6 @@ function indexDebugNode(node) {
 function removeDebugNodeFromIndex(node) {
     _nativeNodeToDebugNode.delete(node.nativeNode);
 }
-/**
- * @publicApi
- */
-const DebugNode = DebugNode__POST_R3__;
-/**
- * @publicApi
- */
-const DebugElement = DebugElement__POST_R3__;
 
 /**
  * @license

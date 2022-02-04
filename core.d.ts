@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.1+33.sha-38c03a2.with-local-changes
+ * @license Angular v14.0.0-next.1+34.sha-9917152.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1702,13 +1702,18 @@ export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
  * @see [Basics of testing components](guide/testing-components-basics)
  * @see [Testing utility APIs](guide/testing-utility-apis)
  */
-export declare interface DebugElement extends DebugNode {
+export declare class DebugElement extends DebugNode {
+    constructor(nativeNode: Element);
+    /**
+     * The underlying DOM element at the root of the component.
+     */
+    get nativeElement(): any;
     /**
      * The element tag name, if it is an element.
      */
-    readonly name: string;
+    get name(): string;
     /**
-     *  A map of property names to property values for an element.
+     *  Gets a map of property names to property values for an element.
      *
      *  This map includes:
      *  - Regular property bindings (e.g. `[id]="id"`)
@@ -1719,13 +1724,23 @@ export declare interface DebugElement extends DebugNode {
      *  - input property bindings (e.g. `[myCustomInput]="value"`)
      *  - attribute bindings (e.g. `[attr.role]="menu"`)
      */
-    readonly properties: {
+    get properties(): {
         [key: string]: any;
     };
     /**
      *  A map of attribute names to attribute values for an element.
      */
-    readonly attributes: {
+    get attributes(): {
+        [key: string]: string | null;
+    };
+    /**
+     * The inline styles of the DOM element.
+     *
+     * Will be `null` if there is no `style` property on the underlying DOM element.
+     *
+     * @see [ElementCSSInlineStyle](https://developer.mozilla.org/en-US/docs/Web/API/ElementCSSInlineStyle/style)
+     */
+    get styles(): {
         [key: string]: string | null;
     };
     /**
@@ -1738,33 +1753,19 @@ export declare interface DebugElement extends DebugNode {
      *
      * @see [Element.className](https://developer.mozilla.org/en-US/docs/Web/API/Element/className)
      */
-    readonly classes: {
+    get classes(): {
         [key: string]: boolean;
-    };
-    /**
-     * The inline styles of the DOM element.
-     *
-     * Will be `null` if there is no `style` property on the underlying DOM element.
-     *
-     * @see [ElementCSSInlineStyle](https://developer.mozilla.org/en-US/docs/Web/API/ElementCSSInlineStyle/style)
-     */
-    readonly styles: {
-        [key: string]: string | null;
     };
     /**
      * The `childNodes` of the DOM element as a `DebugNode` array.
      *
      * @see [Node.childNodes](https://developer.mozilla.org/en-US/docs/Web/API/Node/childNodes)
      */
-    readonly childNodes: DebugNode[];
-    /**
-     * The underlying DOM element at the root of the component.
-     */
-    readonly nativeElement: any;
+    get childNodes(): DebugNode[];
     /**
      * The immediate `DebugElement` children. Walk the tree by descending through `children`.
      */
-    readonly children: DebugElement[];
+    get children(): DebugElement[];
     /**
      * @returns the first `DebugElement` that matches the predicate at any depth in the subtree.
      */
@@ -1795,13 +1796,6 @@ export declare interface DebugElement extends DebugNode {
 /**
  * @publicApi
  */
-export declare const DebugElement: {
-    new (...args: any[]): DebugElement;
-};
-
-/**
- * @publicApi
- */
 export declare class DebugEventListener {
     name: string;
     callback: Function;
@@ -1811,28 +1805,24 @@ export declare class DebugEventListener {
 /**
  * @publicApi
  */
-export declare interface DebugNode {
-    /**
-     * The callbacks attached to the component's @Output properties and/or the element's event
-     * properties.
-     */
-    readonly listeners: DebugEventListener[];
-    /**
-     * The `DebugElement` parent. Will be `null` if this is the root element.
-     */
-    readonly parent: DebugElement | null;
+export declare class DebugNode {
     /**
      * The underlying DOM node.
      */
     readonly nativeNode: any;
+    constructor(nativeNode: Node);
+    /**
+     * The `DebugElement` parent. Will be `null` if this is the root element.
+     */
+    get parent(): DebugElement | null;
     /**
      * The host dependency injector. For example, the root element's component instance injector.
      */
-    readonly injector: Injector;
+    get injector(): Injector;
     /**
      * The element's own component instance, if it has one.
      */
-    readonly componentInstance: any;
+    get componentInstance(): any;
     /**
      * An object that provides parent context for this element. Often an ancestor component instance
      * that governs this element.
@@ -1841,27 +1831,25 @@ export declare interface DebugNode {
      * property is the value of the row instance value. For example, the `hero` in `*ngFor="let hero
      * of heroes"`.
      */
-    readonly context: any;
+    get context(): any;
+    /**
+     * The callbacks attached to the component's @Output properties and/or the element's event
+     * properties.
+     */
+    get listeners(): DebugEventListener[];
     /**
      * Dictionary of objects associated with template local variables (e.g. #foo), keyed by the local
      * variable name.
      */
-    readonly references: {
+    get references(): {
         [key: string]: any;
     };
     /**
      * This component's injector lookup tokens. Includes the component itself plus the tokens that the
      * component lists in its providers metadata.
      */
-    readonly providerTokens: any[];
+    get providerTokens(): any[];
 }
-
-/**
- * @publicApi
- */
-export declare const DebugNode: {
-    new (...args: any[]): DebugNode;
-};
 
 /**
  * A logical node which comprise into `LView`s.
@@ -2779,7 +2767,7 @@ export declare interface ForwardRefFn {
 /**
  * @publicApi
  */
-declare const getDebugNode: (nativeNode: any) => DebugNode | null;
+declare function getDebugNode(nativeNode: any): DebugNode | null;
 export { getDebugNode }
 export { getDebugNode as ɵgetDebugNode }
 
@@ -9812,7 +9800,7 @@ export declare function ɵfindLocaleData(locale: string): any;
  */
 export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
 
-export declare const ɵgetDebugNodeR2: (nativeNode: any) => DebugNode | null;
+export declare function ɵgetDebugNodeR2(_nativeNode: any): DebugNode | null;
 
 /**
  * Retrieves directive instances associated with a given DOM node. Does not include
