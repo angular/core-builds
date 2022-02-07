@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.1+45.sha-d4da832.with-local-changes
+ * @license Angular v14.0.0-next.1+46.sha-64acbc4.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21076,7 +21076,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.1+45.sha-d4da832.with-local-changes');
+const VERSION = new Version('14.0.0-next.1+46.sha-64acbc4.with-local-changes');
 
 /**
  * @license
@@ -25998,26 +25998,7 @@ class PlatformRef {
         this._destroyed = false;
     }
     /**
-     * Creates an instance of an `@NgModule` for the given platform for offline compilation.
-     *
-     * @usageNotes
-     *
-     * The following example creates the NgModule for a browser platform.
-     *
-     * ```typescript
-     * my_module.ts:
-     *
-     * @NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * main.ts:
-     * import {MyModuleNgFactory} from './my_module.ngfactory';
-     * import {platformBrowser} from '@angular/platform-browser';
-     *
-     * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
-     * ```
+     * Creates an instance of an `@NgModule` for the given platform.
      *
      * @deprecated Passing NgModule factories as the `PlatformRef.bootstrapModuleFactory` function
      *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
@@ -26071,7 +26052,7 @@ class PlatformRef {
         });
     }
     /**
-     * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
+     * Creates an instance of an `@NgModule` for a given platform.
      *
      * @usageNotes
      * ### Simple Example
