@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.2+5.sha-635683a.with-local-changes
+ * @license Angular v14.0.0-next.2+7.sha-1b91e10.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12107,10 +12107,11 @@ export declare function ɵɵdisableBindings(): void;
  * @param name Name of the DOM Node
  * @param attrsIndex Index of the element's attributes in the `consts` array.
  * @param localRefsIndex Index of the element's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
+export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵelement;
 
 /**
  * Creates an empty logical container using {@link elementContainerStart}
@@ -12119,17 +12120,19 @@ export declare function ɵɵelement(index: number, name: string, attrsIndex?: nu
  * @param index Index of the element in the LView array
  * @param attrsIndex Index of the container attributes in the `consts` array.
  * @param localRefsIndex Index of the container's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainer(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
+export declare function ɵɵelementContainer(index: number, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵelementContainer;
 
 /**
  * Mark the end of the <ng-container>.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerEnd(): void;
+export declare function ɵɵelementContainerEnd(): typeof ɵɵelementContainerEnd;
 
 /**
  * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
@@ -12138,6 +12141,7 @@ export declare function ɵɵelementContainerEnd(): void;
  * @param index Index of the element in the LView array
  * @param attrsIndex Index of the container attributes in the `consts` array.
  * @param localRefsIndex Index of the container's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
@@ -12145,14 +12149,15 @@ export declare function ɵɵelementContainerEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementContainerStart(index: number, attrsIndex?: number | null, localRefsIndex?: number): void;
+export declare function ɵɵelementContainerStart(index: number, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵelementContainerStart;
 
 /**
  * Mark the end of the element.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
-export declare function ɵɵelementEnd(): void;
+export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
 
 
 /**
@@ -12162,6 +12167,7 @@ export declare function ɵɵelementEnd(): void;
  * @param name Name of the DOM Node
  * @param attrsIndex Index of the element's attributes in the `consts` array.
  * @param localRefsIndex Index of the element's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
@@ -12169,7 +12175,7 @@ export declare function ɵɵelementEnd(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): void;
+export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵelementStart;
 
 /**
  * Enables directive matching on elements.
