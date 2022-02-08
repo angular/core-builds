@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.1+30.sha-7a47add.with-local-changes
+ * @license Angular v13.2.2+5.sha-835b326.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14492,6 +14492,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
  * @param name Name of the DOM Node
  * @param attrsIndex Index of the element's attributes in the `consts` array.
  * @param localRefsIndex Index of the element's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
@@ -14543,9 +14544,11 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     if (localRefsIndex !== null) {
         saveResolvedLocalsInData(lView, tNode);
     }
+    return ɵɵelementStart;
 }
 /**
  * Mark the end of the element.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
@@ -14576,6 +14579,7 @@ function ɵɵelementEnd() {
     if (tNode.stylesWithoutHost != null && hasStyleInput(tNode)) {
         setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.stylesWithoutHost, false);
     }
+    return ɵɵelementEnd;
 }
 /**
  * Creates an empty element using {@link elementStart} and {@link elementEnd}
@@ -14584,12 +14588,14 @@ function ɵɵelementEnd() {
  * @param name Name of the DOM Node
  * @param attrsIndex Index of the element's attributes in the `consts` array.
  * @param localRefsIndex Index of the element's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
 function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
     ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
     ɵɵelementEnd();
+    return ɵɵelement;
 }
 function logUnknownElementError(tView, element, tNode, hasDirectives) {
     const schemas = tView.schemas;
@@ -14658,6 +14664,7 @@ function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, l
  * @param index Index of the element in the LView array
  * @param attrsIndex Index of the container attributes in the `consts` array.
  * @param localRefsIndex Index of the container's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
  * the DOM (as a comment node can't have attributes). Attributes are here only for directive
@@ -14688,9 +14695,11 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
     if (localRefsIndex != null) {
         saveResolvedLocalsInData(lView, tNode);
     }
+    return ɵɵelementContainerStart;
 }
 /**
  * Mark the end of the <ng-container>.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
@@ -14712,6 +14721,7 @@ function ɵɵelementContainerEnd() {
             tView.queries.elementEnd(currentTNode);
         }
     }
+    return ɵɵelementContainerEnd;
 }
 /**
  * Creates an empty logical container using {@link elementContainerStart}
@@ -14720,12 +14730,14 @@ function ɵɵelementContainerEnd() {
  * @param index Index of the element in the LView array
  * @param attrsIndex Index of the container attributes in the `consts` array.
  * @param localRefsIndex Index of the container's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
  *
  * @codeGenApi
  */
 function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
     ɵɵelementContainerStart(index, attrsIndex, localRefsIndex);
     ɵɵelementContainerEnd();
+    return ɵɵelementContainer;
 }
 
 /**
@@ -21076,7 +21088,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.1+30.sha-7a47add.with-local-changes');
+const VERSION = new Version('13.2.2+5.sha-835b326.with-local-changes');
 
 /**
  * @license
@@ -22828,11 +22840,29 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
             componentFactoryOrType :
             new ComponentFactory(getComponentDef(componentFactoryOrType));
         const contextInjector = injector || this.parentInjector;
-        if (!ngModuleRef && componentFactory.ngModule == null && contextInjector) {
-            // DO NOT REFACTOR. The code here used to have a `value || undefined` expression
-            // which seems to cause internal google apps to fail. This is documented in the
-            // following internal bug issue: go/b/142967802
-            const result = contextInjector.get(NgModuleRef$1, null);
+        // If an `NgModuleRef` is not provided explicitly, try retrieving it from the DI tree.
+        if (!ngModuleRef && componentFactory.ngModule == null) {
+            // For the `ComponentFactory` case, entering this logic is very unlikely, since we expect that
+            // an instance of a `ComponentFactory`, resolved via `ComponentFactoryResolver` would have an
+            // `ngModule` field. This is possible in some test scenarios and potentially in some JIT-based
+            // use-cases. For the `ComponentFactory` case we preserve backwards-compatibility and try
+            // using a provided injector first, then fall back to the parent injector of this
+            // `ViewContainerRef` instance.
+            //
+            // For the factory-less case, it's critical to establish a connection with the module
+            // injector tree (by retrieving an instance of an `NgModuleRef` and accessing its injector),
+            // so that a component can use DI tokens provided in MgModules. For this reason, we can not
+            // rely on the provided injector, since it might be detached from the DI tree (for example, if
+            // it was created via `Injector.create` without specifying a parent injector, or if an
+            // injector is retrieved from an `NgModuleRef` created via `createNgModuleRef` using an
+            // NgModule outside of a module tree). Instead, we always use `ViewContainerRef`'s parent
+            // injector, which is normally connected to the DI tree, which includes module injector
+            // subtree.
+            const _injector = isComponentFactory ? contextInjector : this.parentInjector;
+            // DO NOT REFACTOR. The code here used to have a `injector.get(NgModuleRef, null) ||
+            // undefined` expression which seems to cause internal google apps to fail. This is documented
+            // in the following internal bug issue: go/b/142967802
+            const result = _injector.get(NgModuleRef$1, null);
             if (result) {
                 ngModuleRef = result;
             }
