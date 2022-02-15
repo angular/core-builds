@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.2+29.sha-bedb257.with-local-changes
+ * @license Angular v14.0.0-next.2+34.sha-787eaa7.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -165,6 +165,13 @@ export declare interface AfterViewInit {
  * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
  */
 export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
+
+/**
+ * A [DI token](guide/glossary#di-token "DI token definition") that indicates which animations
+ * module has been loaded.
+ * @publicApi
+ */
+export declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "BrowserAnimations">;
 
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
