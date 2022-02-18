@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.2+49.sha-4333662.with-local-changes
+ * @license Angular v14.0.0-next.3+1.sha-071c8af.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3343,6 +3343,8 @@ declare const enum IcuType {
     plural = 1
 }
 
+declare const ID = 20;
+
 /**
  * This array contains information about input properties that
  * need to be set once from attribute data. It's ordered by
@@ -4523,6 +4525,8 @@ declare interface LView extends Array<any> {
      * are not `Dirty`/`CheckAlways`.
      */
     [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
+    /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
+    [ID]: number;
 }
 
 /**
@@ -9948,11 +9952,11 @@ export declare const ɵivyEnabled = true;
  * function. The component, element and each directive instance will share the same instance
  * of the context.
  */
-export declare interface ɵLContext {
+export declare class ɵLContext {
     /**
-     * The component's parent view data.
+     * ID of the component's parent view data.
      */
-    lView: LView;
+    private lViewId;
     /**
      * The index instance of the node.
      */
@@ -9970,12 +9974,27 @@ export declare interface ɵLContext {
      */
     directives: any[] | null | undefined;
     /**
-     * The map of local references (local reference name => element or directive instance) that exist
-     * on this element.
+     * The map of local references (local reference name => element or directive instance) that
+     * exist on this element.
      */
     localRefs: {
         [key: string]: any;
     } | null | undefined;
+    /** Component's parent view data. */
+    get lView(): LView | null;
+    constructor(
+    /**
+     * ID of the component's parent view data.
+     */
+    lViewId: number, 
+    /**
+     * The index instance of the node.
+     */
+    nodeIndex: number, 
+    /**
+     * The instance of the DOM node that is attached to the lNode.
+     */
+    native: RNode);
 }
 
 /**
