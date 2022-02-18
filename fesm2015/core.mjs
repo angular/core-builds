@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.2+32.sha-54d09a6.with-local-changes
+ * @license Angular v13.2.3+9.sha-4d2ef0f.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21088,7 +21088,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.2+32.sha-54d09a6.with-local-changes');
+const VERSION = new Version('13.2.3+9.sha-4d2ef0f.with-local-changes');
 
 /**
  * @license
@@ -28520,12 +28520,6 @@ const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDER
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function _iterableDiffersFactory() {
-    return defaultIterableDiffers;
-}
-function _keyValueDiffersFactory() {
-    return defaultKeyValueDiffers;
-}
 function _localeFactory(locale) {
     return locale || getGlobalLocale();
 }
@@ -28574,8 +28568,6 @@ const APPLICATION_MODULE_PROVIDERS = [
     },
     { provide: Compiler, useClass: Compiler, deps: [] },
     APP_ID_RANDOM_PROVIDER,
-    { provide: IterableDiffers, useFactory: _iterableDiffersFactory, deps: [] },
-    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory, deps: [] },
     {
         provide: LOCALE_ID,
         useFactory: _localeFactory,
