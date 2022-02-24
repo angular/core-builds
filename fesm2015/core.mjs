@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.4+2.sha-bad5096.with-local-changes
+ * @license Angular v14.0.0-next.4+3.sha-8eb8288.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21172,7 +21172,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.4+2.sha-bad5096.with-local-changes');
+const VERSION = new Version('14.0.0-next.4+3.sha-8eb8288.with-local-changes');
 
 /**
  * @license
