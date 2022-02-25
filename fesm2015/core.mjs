@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.4+16.sha-0920104.with-local-changes
+ * @license Angular v14.0.0-next.4+17.sha-88f1168.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6167,11 +6167,14 @@ function getSanitizer() {
 const TRACKED_LVIEWS = new Map();
 // Used for generating unique IDs for LViews.
 let uniqueIdCounter = 0;
-/** Starts tracking an LView and returns a unique ID that can be used for future lookups. */
+/** Gets a unique ID that can be assigned to an LView. */
+function getUniqueLViewId() {
+    return uniqueIdCounter++;
+}
+/** Starts tracking an LView. */
 function registerLView(lView) {
-    const id = uniqueIdCounter++;
-    TRACKED_LVIEWS.set(id, lView);
-    return id;
+    ngDevMode && assertNumber(lView[ID], 'LView must have an ID in order to be registered');
+    TRACKED_LVIEWS.set(lView[ID], lView);
 }
 /** Gets an LView by its unique ID. */
 function getLViewById(id) {
@@ -6380,7 +6383,13 @@ function attachPatchData(target, data) {
     // Only attach the ID of the view in order to avoid memory leaks (see #41047). We only do this
     // for `LView`, because we have control over when an `LView` is created and destroyed, whereas
     // we can't know when to remove an `LContext`.
-    target[MONKEY_PATCH_KEY_NAME] = isLView(data) ? data[ID] : data;
+    if (isLView(data)) {
+        target[MONKEY_PATCH_KEY_NAME] = data[ID];
+        registerLView(data);
+    }
+    else {
+        target[MONKEY_PATCH_KEY_NAME] = data;
+    }
 }
 /**
  * Returns the monkey-patch value data present on the target (which could be
@@ -9370,7 +9379,7 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     lView[SANITIZER] = sanitizer || parentLView && parentLView[SANITIZER] || null;
     lView[INJECTOR$1] = injector || parentLView && parentLView[INJECTOR$1] || null;
     lView[T_HOST] = tHostNode;
-    lView[ID] = registerLView(lView);
+    lView[ID] = getUniqueLViewId();
     ngDevMode &&
         assertEqual(tView.type == 2 /* Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
     lView[DECLARATION_COMPONENT_VIEW] =
@@ -10379,7 +10388,6 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
 function invokeDirectivesHostBindings(tView, lView, tNode) {
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
-    const firstCreatePass = tView.firstCreatePass;
     const elementIndex = tNode.index;
     const currentDirectiveIndex = getCurrentDirectiveIndex();
     try {
@@ -21172,7 +21180,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.4+16.sha-0920104.with-local-changes');
+const VERSION = new Version('14.0.0-next.4+17.sha-88f1168.with-local-changes');
 
 /**
  * @license
