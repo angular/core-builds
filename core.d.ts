@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.4+18.sha-8907fbb.with-local-changes
+ * @license Angular v13.2.4+21.sha-71ff12c.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -283,12 +283,9 @@ export declare class ApplicationInitStatus {
 }
 
 /**
- * Configures the root injector for an app with
- * providers of `@angular/core` dependencies that `ApplicationRef` needs
- * to bootstrap components.
- *
  * Re-exported by `BrowserModule`, which is included automatically in the root
- * `AppModule` when you create a new app with the CLI `new` command.
+ * `AppModule` when you create a new app with the CLI `new` command. Eagerly injects
+ * `ApplicationRef` to instantiate it.
  *
  * @publicApi
  */

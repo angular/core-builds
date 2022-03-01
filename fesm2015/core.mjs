@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.4+18.sha-8907fbb.with-local-changes
+ * @license Angular v13.2.4+21.sha-71ff12c.with-local-changes
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21088,7 +21088,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.4+18.sha-8907fbb.with-local-changes');
+const VERSION = new Version('13.2.4+21.sha-71ff12c.with-local-changes');
 
 /**
  * @license
@@ -21493,14 +21493,6 @@ function getNamespace(elementName) {
     const name = elementName.toLowerCase();
     return name === 'svg' ? SVG_NAMESPACE : (name === 'math' ? MATH_ML_NAMESPACE : null);
 }
-/**
- * A change detection scheduler token for {@link RootContext}. This token is the default value used
- * for the default `RootContext` found in the {@link ROOT_CONTEXT} token.
- */
-const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', {
-    providedIn: 'root',
-    factory: () => defaultScheduler,
-});
 function createChainedInjector(rootViewInjector, moduleInjector) {
     return {
         get: (token, notFoundValue, flags) => {
@@ -24804,10 +24796,11 @@ class ApplicationInitStatus {
     }
 }
 ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
-ApplicationInitStatus.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac });
+ApplicationInitStatus.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' });
 (function () {
     (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
-            type: Injectable
+            type: Injectable,
+            args: [{ providedIn: 'root' }]
         }], function () {
         return [{ type: undefined, decorators: [{
                         type: Inject,
@@ -24836,7 +24829,10 @@ ApplicationInitStatus.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Appli
  *
  * @publicApi
  */
-const APP_ID = new InjectionToken('AppId');
+const APP_ID = new InjectionToken('AppId', {
+    providedIn: 'root',
+    factory: _appIdRandomProviderFactory,
+});
 function _appIdRandomProviderFactory() {
     return `${_randomChar()}${_randomChar()}${_randomChar()}`;
 }
@@ -24914,6 +24910,33 @@ Console.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: C
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Work out the locale from the potential global properties.
+ *
+ * * Closure Compiler: use `goog.getLocale()`.
+ * * Ivy enabled: use `$localize.locale`
+ */
+function getGlobalLocale() {
+    if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
+        typeof goog !== 'undefined' && goog.getLocale() !== 'en') {
+        // * The default `goog.getLocale()` value is `en`, while Angular used `en-US`.
+        // * In order to preserve backwards compatibility, we use Angular default value over
+        //   Closure Compiler's one.
+        return goog.getLocale();
+    }
+    else {
+        // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
+        // COMPILE-TIME INLINER.
+        //
+        // * During compile time inlining of translations the expression will be replaced
+        //   with a string literal that is the current locale. Other forms of this expression are not
+        //   guaranteed to be replaced.
+        //
+        // * During runtime translation evaluation, the developer is required to set `$localize.locale`
+        //   if required, or just to provide their own `LOCALE_ID` provider.
+        return (typeof $localize !== 'undefined' && $localize.locale) || DEFAULT_LOCALE_ID;
+    }
+}
+/**
  * Provide this token to set the locale of your application.
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
@@ -24935,7 +24958,10 @@ Console.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: C
  *
  * @publicApi
  */
-const LOCALE_ID = new InjectionToken('LocaleId');
+const LOCALE_ID = new InjectionToken('LocaleId', {
+    providedIn: 'root',
+    factory: () => inject(LOCALE_ID, InjectFlags.Optional | InjectFlags.SkipSelf) || getGlobalLocale(),
+});
 /**
  * Provide this token to set the default currency code your application uses for
  * CurrencyPipe when there is no currency code passed into it. This is only used by
@@ -24974,7 +25000,10 @@ const LOCALE_ID = new InjectionToken('LocaleId');
  *
  * @publicApi
  */
-const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode');
+const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode', {
+    providedIn: 'root',
+    factory: () => USD_CURRENCY_CODE,
+});
 /**
  * Use this token at bootstrap to provide the content of your translation file (`xtb`,
  * `xlf` or `xlf2`) when you want to translate your application in another language.
@@ -25141,10 +25170,11 @@ class Compiler {
     }
 }
 Compiler.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); };
-Compiler.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac });
+Compiler.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' });
 (function () {
     (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
-            type: Injectable
+            type: Injectable,
+            args: [{ providedIn: 'root' }]
         }], null, null);
 })();
 /**
@@ -26512,10 +26542,11 @@ class ApplicationRef {
     }
 }
 ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver$1), ɵɵinject(ApplicationInitStatus)); };
-ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac });
+ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 (function () {
     (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
-            type: Injectable
+            type: Injectable,
+            args: [{ providedIn: 'root' }]
         }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver$1 }, { type: ApplicationInitStatus }]; }, null);
 })();
 function remove(list, el) {
@@ -28514,94 +28545,9 @@ const _CORE_PLATFORM_PROVIDERS = [
 const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function _localeFactory(locale) {
-    return locale || getGlobalLocale();
-}
-/**
- * Work out the locale from the potential global properties.
- *
- * * Closure Compiler: use `goog.getLocale()`.
- * * Ivy enabled: use `$localize.locale`
- */
-function getGlobalLocale() {
-    if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
-        typeof goog !== 'undefined' && goog.getLocale() !== 'en') {
-        // * The default `goog.getLocale()` value is `en`, while Angular used `en-US`.
-        // * In order to preserve backwards compatibility, we use Angular default value over
-        //   Closure Compiler's one.
-        return goog.getLocale();
-    }
-    else {
-        // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
-        // COMPILE-TIME INLINER.
-        //
-        // * During compile time inlining of translations the expression will be replaced
-        //   with a string literal that is the current locale. Other forms of this expression are not
-        //   guaranteed to be replaced.
-        //
-        // * During runtime translation evaluation, the developer is required to set `$localize.locale`
-        //   if required, or just to provide their own `LOCALE_ID` provider.
-        return (typeof $localize !== 'undefined' && $localize.locale) || DEFAULT_LOCALE_ID;
-    }
-}
-/**
- * A built-in [dependency injection token](guide/glossary#di-token)
- * that is used to configure the root injector for bootstrapping.
- */
-const APPLICATION_MODULE_PROVIDERS = [
-    {
-        provide: ApplicationRef,
-        useClass: ApplicationRef,
-        deps: [NgZone, Injector, ErrorHandler, ComponentFactoryResolver$1, ApplicationInitStatus]
-    },
-    { provide: SCHEDULER, deps: [NgZone], useFactory: zoneSchedulerFactory },
-    {
-        provide: ApplicationInitStatus,
-        useClass: ApplicationInitStatus,
-        deps: [[new Optional(), APP_INITIALIZER]]
-    },
-    { provide: Compiler, useClass: Compiler, deps: [] },
-    APP_ID_RANDOM_PROVIDER,
-    {
-        provide: LOCALE_ID,
-        useFactory: _localeFactory,
-        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-    },
-    { provide: DEFAULT_CURRENCY_CODE, useValue: USD_CURRENCY_CODE },
-];
-/**
- * Schedule work at next available slot.
- *
- * In Ivy this is just `requestAnimationFrame`. For compatibility reasons when bootstrapped
- * using `platformRef.bootstrap` we need to use `NgZone.onStable` as the scheduling mechanism.
- * This overrides the scheduling mechanism in Ivy to `NgZone.onStable`.
- *
- * @param ngZone NgZone to use for scheduling.
- */
-function zoneSchedulerFactory(ngZone) {
-    let queue = [];
-    ngZone.onStable.subscribe(() => {
-        while (queue.length) {
-            queue.pop()();
-        }
-    });
-    return function (fn) {
-        queue.push(fn);
-    };
-}
-/**
- * Configures the root injector for an app with
- * providers of `@angular/core` dependencies that `ApplicationRef` needs
- * to bootstrap components.
- *
  * Re-exported by `BrowserModule`, which is included automatically in the root
- * `AppModule` when you create a new app with the CLI `new` command.
+ * `AppModule` when you create a new app with the CLI `new` command. Eagerly injects
+ * `ApplicationRef` to instantiate it.
  *
  * @publicApi
  */
@@ -28611,11 +28557,10 @@ class ApplicationModule {
 }
 ApplicationModule.ɵfac = function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); };
 ApplicationModule.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule });
-ApplicationModule.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({ providers: APPLICATION_MODULE_PROVIDERS });
+ApplicationModule.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({});
 (function () {
     (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationModule, [{
-            type: NgModule,
-            args: [{ providers: APPLICATION_MODULE_PROVIDERS }]
+            type: NgModule
         }], function () { return [{ type: ApplicationRef }]; }, null);
 })();
 
