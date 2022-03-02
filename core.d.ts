@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.4+42.sha-05d50b8
+ * @license Angular v14.0.0-next.4+43.sha-69018c9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2432,6 +2432,8 @@ export declare class ElementRef<T = any> {
     constructor(nativeElement: T);
 }
 
+declare const EMBEDDED_VIEW_INJECTOR = 21;
+
 /**
  * Represents an Angular [view](guide/glossary#view) in a view container.
  * An [embedded view](guide/glossary#view-tree) can be referenced from a component
@@ -4524,6 +4526,11 @@ declare interface LView extends Array<any> {
     [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
     /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
     [ID]: number;
+    /**
+     * Optional injector assigned to embedded views that takes
+     * precedence over the element and module injectors.
+     */
+    readonly [EMBEDDED_VIEW_INJECTOR]: Injector | null;
 }
 
 /**
@@ -4704,12 +4711,14 @@ declare const enum LViewFlags {
      * declaration was dirty.
      */
     RefreshTransplantedView = 1024,
+    /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
+    HasEmbeddedViewInjector = 2048,
     /**
      * Index of the current init phase on last 21 bits
      */
-    IndexWithinInitPhaseIncrementer = 2048,
-    IndexWithinInitPhaseShift = 11,
-    IndexWithinInitPhaseReset = 2047
+    IndexWithinInitPhaseIncrementer = 4096,
+    IndexWithinInitPhaseShift = 12,
+    IndexWithinInitPhaseReset = 4095
 }
 
 /**
@@ -7320,9 +7329,10 @@ export declare abstract class TemplateRef<C> {
      * and attaches it to the view container.
      * @param context The data-binding context of the embedded view, as declared
      * in the `<ng-template>` usage.
+     * @param injector Injector to be used within the embedded view.
      * @returns The new embedded view object.
      */
-    abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
+    abstract createEmbeddedView(context: C, injector?: Injector): EmbeddedViewRef<C>;
 }
 
 /**
@@ -9000,6 +9010,23 @@ export declare abstract class ViewContainerRef {
      * @returns The number of views.
      */
     abstract get length(): number;
+    /**
+     * Instantiates an embedded view and inserts it
+     * into this container.
+     * @param templateRef The HTML template that defines the view.
+     * @param context The data-binding context of the embedded view, as declared
+     * in the `<ng-template>` usage.
+     * @param options Extra configuration for the created view. Includes:
+     *  * index: The 0-based index at which to insert the new view into this container.
+     *           If not specified, appends the new view as the last entry.
+     *  * injector: Injector to be used within the embedded view.
+     *
+     * @returns The `ViewRef` instance for the newly created view.
+     */
+    abstract createEmbeddedView<C>(templateRef: TemplateRef<C>, context?: C, options?: {
+        index?: number;
+        injector?: Injector;
+    }): EmbeddedViewRef<C>;
     /**
      * Instantiates an embedded view and inserts it
      * into this container.
