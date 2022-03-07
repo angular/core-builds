@@ -6,9 +6,5 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /// <amd-module name="@angular/core/schematics/migrations/typed-forms" />
-import { Rule, UpdateRecorder } from '@angular-devkit/schematics';
-import ts from 'typescript';
-import { MigratableNode } from './util';
+import { Rule } from '@angular-devkit/schematics';
 export default function (): Rule;
-export declare function migrateNode(update: UpdateRecorder, node: MigratableNode, importd: ts.ImportSpecifier | null): void;
-export declare function insertAnyImport(update: UpdateRecorder, importd: ts.ImportSpecifier): void;
