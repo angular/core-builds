@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.5+15.sha-43bbaf8
+ * @license Angular v13.2.5+16.sha-8390e12
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -374,7 +374,8 @@ function tick(millis = 0, tickOptions = {
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }
 /**
- * Simulates the asynchronous passage of time for the timers in the `fakeAsync` zone by
+ * Flushes any pending microtasks and simulates the asynchronous passage of time for the timers in
+ * the `fakeAsync` zone by
  * draining the macrotask queue until it is empty.
  *
  * @param maxTurns The maximum number of times the scheduler attempts to clear its queue before
