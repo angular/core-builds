@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.5+20.sha-0b31c8e
+ * @license Angular v14.0.0-next.5+22.sha-9fa6f5a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7600,7 +7600,8 @@ function nativeInsertBefore(renderer, parent, child, beforeNode, isMove) {
         renderer.insertBefore(parent, child, beforeNode, isMove);
     }
     else {
-        parent.insertBefore(child, beforeNode, isMove);
+        const targetParent = isTemplateNode(parent) ? parent.content : parent;
+        targetParent.insertBefore(child, beforeNode, isMove);
     }
 }
 function nativeAppendChild(renderer, parent, child) {
@@ -7610,7 +7611,8 @@ function nativeAppendChild(renderer, parent, child) {
         renderer.appendChild(parent, child);
     }
     else {
-        parent.appendChild(child);
+        const targetParent = isTemplateNode(parent) ? parent.content : parent;
+        targetParent.appendChild(child);
     }
 }
 function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove) {
@@ -7629,6 +7631,10 @@ function nativeRemoveChild(renderer, parent, child, isHostElement) {
     else {
         parent.removeChild(child);
     }
+}
+/** Checks if an element is a `<template>` node. */
+function isTemplateNode(node) {
+    return node.tagName === 'TEMPLATE' && node.content !== undefined;
 }
 /**
  * Returns a native parent of a given native node.
@@ -21266,7 +21272,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.5+20.sha-0b31c8e');
+const VERSION = new Version('14.0.0-next.5+22.sha-9fa6f5a');
 
 /**
  * @license
