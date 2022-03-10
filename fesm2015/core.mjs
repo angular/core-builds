@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.2.6+2.sha-6336b8e
+ * @license Angular v13.2.6+3.sha-895c541
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21088,7 +21088,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.2.6+2.sha-6336b8e');
+const VERSION = new Version('13.2.6+3.sha-895c541');
 
 /**
  * @license
