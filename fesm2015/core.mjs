@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.6+7.sha-8848d2d
+ * @license Angular v14.0.0-next.6+8.sha-5f7c4f6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21272,7 +21272,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.6+7.sha-8848d2d');
+const VERSION = new Version('14.0.0-next.6+8.sha-5f7c4f6');
 
 /**
  * @license
@@ -25126,16 +25126,16 @@ Console.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: C
 /**
  * Work out the locale from the potential global properties.
  *
- * * Closure Compiler: use `goog.getLocale()`.
+ * * Closure Compiler: use `goog.LOCALE`.
  * * Ivy enabled: use `$localize.locale`
  */
 function getGlobalLocale() {
     if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
-        typeof goog !== 'undefined' && goog.getLocale() !== 'en') {
-        // * The default `goog.getLocale()` value is `en`, while Angular used `en-US`.
+        typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
+        // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
         // * In order to preserve backwards compatibility, we use Angular default value over
         //   Closure Compiler's one.
-        return goog.getLocale();
+        return goog.LOCALE;
     }
     else {
         // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
