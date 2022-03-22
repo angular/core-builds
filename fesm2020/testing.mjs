@@ -1,10 +1,10 @@
 /**
- * @license Angular v14.0.0-next.7+13.sha-9d8ff5d
+ * @license Angular v14.0.0-next.7+18.sha-8155428
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -1648,6 +1648,11 @@ class TestBedRender3 {
         this.platform = platform;
         this.ngModule = ngModule;
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
+        // TestBed does not have an API which can reliably detect the start of a test, and thus could be
+        // used to track the state of the NgModule registry and reset it correctly. Instead, when we
+        // know we're in a testing scenario, we disable the check for duplicate NgModule registration
+        // completely.
+        ɵsetAllowDuplicateNgModuleIdsForTest(true);
     }
     /**
      * Reset the providers for the test injector.
@@ -1660,6 +1665,7 @@ class TestBedRender3 {
         this.platform = null;
         this.ngModule = null;
         TestBedRender3._environmentTeardownOptions = undefined;
+        ɵsetAllowDuplicateNgModuleIdsForTest(false);
     }
     resetTestingModule() {
         this.checkGlobalCompilationFinished();

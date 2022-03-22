@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.7+13.sha-9d8ff5d
+ * @license Angular v14.0.0-next.7+18.sha-8155428
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,8 +10427,6 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
  */
 export declare function ɵregisterLocaleData(data: any, localeId?: string | any, extraData?: any): void;
 
-export declare function ɵregisterNgModuleType(ngModuleType: ɵNgModuleType): void;
-
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
@@ -10626,6 +10624,15 @@ export declare interface ɵSafeUrl extends ɵSafeValue {
  */
 export declare interface ɵSafeValue {
 }
+
+/**
+ * Control whether the NgModule registration system enforces that each NgModule type registered has
+ * a unique id.
+ *
+ * This is useful for testing as the NgModule registry cannot be properly reset between tests with
+ * Angular's current API.
+ */
+export declare function ɵsetAllowDuplicateNgModuleIdsForTest(allowDuplicates: boolean): void;
 
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
@@ -13448,6 +13455,18 @@ export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
  * @codeGenApi
  */
 export declare function ɵɵreference<T>(index: number): T;
+
+/**
+ * Adds the given NgModule type to Angular's NgModule registry.
+ *
+ * This is generated as a side-effect of NgModule compilation. Note that the `id` is passed in
+ * explicitly and not read from the NgModule definition. This is for two reasons: it avoids a
+ * megamorphic read, and in JIT there's a chicken-and-egg problem where the NgModule may not be
+ * fully resolved when it's registered.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵregisterNgModuleType(ngModuleType: ɵNgModuleType, id: string): void;
 
 /**
  *
