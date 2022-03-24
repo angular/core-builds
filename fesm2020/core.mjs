@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.7+34.sha-0f9b3c6
+ * @license Angular v14.0.0-next.7+35.sha-4ddcf81
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4965,7 +4965,7 @@ function catchInjectorError(e, token, injectorErrorName, source) {
     throw e;
 }
 function formatError(text, obj, injectorErrorName, source = null) {
-    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
+    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.slice(2) : text;
     let context = stringify(obj);
     if (Array.isArray(obj)) {
         context = obj.map(stringify).join(' -> ');
@@ -8851,7 +8851,7 @@ function nameSuffix(text) {
     if (text == null)
         return '';
     const index = text.lastIndexOf('_Template');
-    return '_' + (index === -1 ? text : text.substr(0, index));
+    return '_' + (index === -1 ? text : text.slice(0, index));
 }
 /**
  * This class is a debug version of Object literal so that we can have constructor name show up
@@ -16466,7 +16466,7 @@ function consumeQuotedText(text, quoteCharCode, startIndex, endIndex) {
 function malformedStyleError(text, expecting, index) {
     ngDevMode && assertEqual(typeof text === 'string', true, 'String expected here');
     throw throwError(`Malformed style at location ${index} in string '` + text.substring(0, index) + '[>>' +
-        text.substring(index, index + 1) + '<<]' + text.substr(index + 1) +
+        text.substring(index, index + 1) + '<<]' + text.slice(index + 1) +
         `'. Expecting '${expecting}'.`);
 }
 
@@ -20151,7 +20151,7 @@ function removeInnerTemplateTranslation(message) {
     }
     ngDevMode &&
         assertEqual(inTemplate, false, `Tag mismatch: unable to find the end of the sub-template in the translation "${message}"`);
-    res += message.substr(index);
+    res += message.slice(index);
     return res;
 }
 /**
@@ -20243,7 +20243,7 @@ function parseICUBlock(pattern) {
         else {
             icuType = 1 /* plural */;
         }
-        mainBinding = parseInt(binding.substr(1), 10);
+        mainBinding = parseInt(binding.slice(1), 10);
         return '';
     });
     const parts = i18nParseTextIntoPartsAndICU(pattern);
@@ -21248,7 +21248,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.7+34.sha-0f9b3c6');
+const VERSION = new Version('14.0.0-next.7+35.sha-4ddcf81');
 
 /**
  * @license
