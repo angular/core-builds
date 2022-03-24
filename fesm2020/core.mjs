@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.7+30.sha-8198bb9
+ * @license Angular v14.0.0-next.7+31.sha-71ee417
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4595,9 +4595,6 @@ class ReflectionCapabilities {
     constructor(reflect) {
         this._reflect = reflect || _global['Reflect'];
     }
-    isReflectionEnabled() {
-        return true;
-    }
     factory(t) {
         return (...args) => new t(...args);
     }
@@ -4768,38 +4765,6 @@ class ReflectionCapabilities {
     }
     hasLifecycleHook(type, lcProperty) {
         return type instanceof Type && lcProperty in type.prototype;
-    }
-    guards(type) {
-        return {};
-    }
-    getter(name) {
-        return new Function('o', 'return o.' + name + ';');
-    }
-    setter(name) {
-        return new Function('o', 'v', 'return o.' + name + ' = v;');
-    }
-    method(name) {
-        const functionBody = `if (!o.${name}) throw new Error('"${name}" is undefined');
-        return o.${name}.apply(o, args);`;
-        return new Function('o', 'args', functionBody);
-    }
-    // There is not a concept of import uri in Js, but this is useful in developing Dart applications.
-    importUri(type) {
-        // StaticSymbol
-        if (typeof type === 'object' && type['filePath']) {
-            return type['filePath'];
-        }
-        // Runtime type
-        return `./${stringify(type)}`;
-    }
-    resourceUri(type) {
-        return `./${stringify(type)}`;
-    }
-    resolveIdentifier(name, moduleUrl, members, runtime) {
-        return runtime;
-    }
-    resolveEnum(enumIdentifier, name) {
-        return enumIdentifier[name];
     }
 }
 function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
@@ -14045,75 +14010,6 @@ const _globalKeyRegistry = new KeyRegistry();
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Provides access to reflection data about symbols. Used internally by Angular
- * to power dependency injection and compilation.
- */
-class Reflector {
-    constructor(reflectionCapabilities) {
-        this.reflectionCapabilities = reflectionCapabilities;
-    }
-    updateCapabilities(caps) {
-        this.reflectionCapabilities = caps;
-    }
-    factory(type) {
-        return this.reflectionCapabilities.factory(type);
-    }
-    parameters(typeOrFunc) {
-        return this.reflectionCapabilities.parameters(typeOrFunc);
-    }
-    annotations(typeOrFunc) {
-        return this.reflectionCapabilities.annotations(typeOrFunc);
-    }
-    propMetadata(typeOrFunc) {
-        return this.reflectionCapabilities.propMetadata(typeOrFunc);
-    }
-    hasLifecycleHook(type, lcProperty) {
-        return this.reflectionCapabilities.hasLifecycleHook(type, lcProperty);
-    }
-    getter(name) {
-        return this.reflectionCapabilities.getter(name);
-    }
-    setter(name) {
-        return this.reflectionCapabilities.setter(name);
-    }
-    method(name) {
-        return this.reflectionCapabilities.method(name);
-    }
-    importUri(type) {
-        return this.reflectionCapabilities.importUri(type);
-    }
-    resourceUri(type) {
-        return this.reflectionCapabilities.resourceUri(type);
-    }
-    resolveIdentifier(name, moduleUrl, members, runtime) {
-        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, members, runtime);
-    }
-    resolveEnum(identifier, name) {
-        return this.reflectionCapabilities.resolveEnum(identifier, name);
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * The {@link Reflector} used internally in Angular to access metadata
- * about symbols.
- */
-const reflector = new Reflector(new ReflectionCapabilities());
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
@@ -14162,7 +14058,7 @@ function resolveReflectiveFactory(provider) {
     let resolvedDeps;
     if (provider.useClass) {
         const useClass = resolveForwardRef(provider.useClass);
-        factoryFn = reflector.factory(useClass);
+        factoryFn = getReflect().factory(useClass);
         resolvedDeps = _dependenciesFor(useClass);
     }
     else if (provider.useExisting) {
@@ -14258,7 +14154,7 @@ function constructDependencies(typeOrFunc, dependencies) {
     }
 }
 function _dependenciesFor(typeOrFunc) {
-    const params = reflector.parameters(typeOrFunc);
+    const params = getReflect().parameters(typeOrFunc);
     if (!params)
         return [];
     if (params.some(p => p == null)) {
@@ -21340,7 +21236,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.7+30.sha-8198bb9');
+const VERSION = new Version('14.0.0-next.7+31.sha-71ee417');
 
 /**
  * @license

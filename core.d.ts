@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.7+30.sha-8198bb9
+ * @license Angular v14.0.0-next.7+31.sha-71ee417
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5641,12 +5641,8 @@ export declare class PlatformRef {
 }
 
 declare interface PlatformReflectionCapabilities {
-    isReflectionEnabled(): boolean;
     factory(type: Type<any>): Function;
     hasLifecycleHook(type: any, lcProperty: string): boolean;
-    guards(type: any): {
-        [key: string]: any;
-    };
     /**
      * Return a list of annotations/types for constructor parameters
      */
@@ -5661,13 +5657,6 @@ declare interface PlatformReflectionCapabilities {
     propMetadata(typeOrFunc: Type<any>): {
         [key: string]: any[];
     };
-    getter(name: string): ɵGetterFn;
-    setter(name: string): ɵSetterFn;
-    method(name: string): ɵMethodFn;
-    importUri(type: Type<any>): string;
-    resourceUri(type: Type<any>): string;
-    resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
-    resolveEnum(enumIdentifier: any, name: string): any;
 }
 
 /**
@@ -9916,8 +9905,6 @@ export declare function ɵgetLocalePluralCase(locale: string): (value: number) =
 
 export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | null;
 
-export declare type ɵGetterFn = (obj: any) => any;
-
 
 export declare const ɵglobal: any;
 
@@ -10084,8 +10071,6 @@ export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]
  * @param component Component to mark as dirty.
  */
 export declare function ɵmarkDirty(component: {}): void;
-
-export declare type ɵMethodFn = (obj: any, args: any[]) => any;
 
 
 export declare const ɵNG_COMP_DEF: string;
@@ -10392,7 +10377,6 @@ export declare function ɵpublishGlobalUtil(name: string, fn: Function): void;
 export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
     constructor(reflect?: any);
-    isReflectionEnabled(): boolean;
     factory<T>(t: Type<T>): (args: any[]) => T;
     private _ownParameters;
     parameters(type: Type<any>): any[][];
@@ -10406,16 +10390,6 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
         [key: string]: any[];
     };
     hasLifecycleHook(type: any, lcProperty: string): boolean;
-    guards(type: any): {
-        [key: string]: any;
-    };
-    getter(name: string): ɵGetterFn;
-    setter(name: string): ɵSetterFn;
-    method(name: string): ɵMethodFn;
-    importUri(type: any): string;
-    resourceUri(type: any): string;
-    resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
-    resolveEnum(enumIdentifier: any, name: string): any;
 }
 
 /**
@@ -10668,9 +10642,6 @@ export declare function ɵsetDocument(document: Document | undefined): void;
  * @param localeId
  */
 export declare function ɵsetLocaleId(localeId: string): void;
-
-
-export declare type ɵSetterFn = (obj: any, value: any) => void;
 
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
