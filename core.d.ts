@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.7+31.sha-71ee417
+ * @license Angular v14.0.0-next.7+32.sha-be161be
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13438,6 +13438,14 @@ export declare function ɵɵreference<T>(index: number): T;
  * @codeGenApi
  */
 export declare function ɵɵregisterNgModuleType(ngModuleType: ɵNgModuleType, id: string): void;
+
+/**
+ * Clears the view set in `ɵɵrestoreView` from memory. Returns the passed in
+ * value so that it can be used as a return value of an instruction.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵresetView<T>(value?: T): T | undefined;
 
 /**
  *
