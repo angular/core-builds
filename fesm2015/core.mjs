@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.9+4.sha-96c7cc9
+ * @license Angular v14.0.0-next.9+5.sha-d36fa11
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1923,6 +1923,7 @@ function getLView() {
 function getTView() {
     return instructionState.lFrame.tView;
 }
+// TODO(crisbeto): revert the @noinline once Closure issue is resolved.
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
@@ -1934,6 +1935,7 @@ function getTView() {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
+ * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 function ɵɵrestoreView(viewToRestore) {
     instructionState.lFrame.contextLView = viewToRestore;
@@ -21234,7 +21236,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.9+4.sha-96c7cc9');
+const VERSION = new Version('14.0.0-next.9+5.sha-d36fa11');
 
 /**
  * @license

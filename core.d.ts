@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.9+4.sha-96c7cc9
+ * @license Angular v14.0.0-next.9+5.sha-d36fa11
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13482,6 +13482,7 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
+ * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
