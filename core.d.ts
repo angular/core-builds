@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.9+22.sha-6e1fce5
+ * @license Angular v14.0.0-next.9+28.sha-2142ffd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9765,6 +9765,10 @@ export declare interface ɵDirectiveDef<T> {
      */
     readonly exportAs: string[] | null;
     /**
+     * Whether this directive (or component) is standalone.
+     */
+    readonly standalone: boolean;
+    /**
      * Factory function used to create a new directive instance. Will be null initially.
      * Populated when the factory is first requested by directive instantiation logic.
      */
@@ -10239,6 +10243,10 @@ export declare interface ɵPipeDef<T> {
      * state of the pipe.
      */
     readonly pure: boolean;
+    /**
+     * Whether this pipe is standalone.
+     */
+    readonly standalone: boolean;
     onDestroy: (() => void) | null;
 }
 
@@ -11832,6 +11840,10 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas?: SchemaMetadata[] | null;
+    /**
+     * Whether this directive/component is standalone.
+     */
+    standalone?: boolean;
 }): unknown;
 
 /**
@@ -12068,6 +12080,10 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
     type: Type<T>;
     /** Whether the pipe is pure. */
     pure?: boolean;
+    /**
+     * Whether the pipe is standalone.
+     */
+    standalone?: boolean;
 }): unknown;
 
 

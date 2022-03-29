@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.9+22.sha-6e1fce5
+ * @license Angular v14.0.0-next.9+28.sha-2142ffd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -905,6 +905,7 @@ function ɵɵdefineComponent(componentDefinition) {
             onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
             directiveDefs: null,
             pipeDefs: null,
+            standalone: componentDefinition.standalone === true,
             selectors: componentDefinition.selectors || EMPTY_ARRAY,
             viewQuery: componentDefinition.viewQuery || null,
             features: componentDefinition.features || null,
@@ -1116,6 +1117,7 @@ function ɵɵdefinePipe(pipeDef) {
         name: pipeDef.name,
         factory: null,
         pure: pipeDef.pure !== false,
+        standalone: pipeDef.standalone === true,
         onDestroy: pipeDef.type.prototype.ngOnDestroy || null
     };
 }
@@ -21236,7 +21238,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.9+22.sha-6e1fce5');
+const VERSION = new Version('14.0.0-next.9+28.sha-2142ffd');
 
 /**
  * @license
