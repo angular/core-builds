@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.1+2.sha-a3d9c82
+ * @license Angular v13.3.1+5.sha-9fcc1b7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10052,7 +10052,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
     else if (tNode.type & 12 /* AnyContainer */) {
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
-        if (ngDevMode && !matchingSchemas(tView, tNode.value)) {
+        if (ngDevMode && !matchingSchemas(tView.schemas, tNode.value)) {
             logUnknownPropertyError(propName, tNode);
         }
     }
@@ -10114,15 +10114,20 @@ function validateProperty(tView, element, propName, tNode) {
         return true;
     // The property is considered valid if the element matches the schema, it exists on the element
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    if (matchingSchemas(tView, tNode.value) || propName in element || isAnimationProp(propName)) {
+    if (matchingSchemas(tView.schemas, tNode.value) || propName in element ||
+        isAnimationProp(propName)) {
         return true;
     }
     // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
     // need to account for both here, while being careful for `typeof null` also returning 'object'.
     return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
-function matchingSchemas(tView, tagName) {
-    const schemas = tView.schemas;
+/**
+ * Returns true if the tag name is allowed by specified schemas.
+ * @param schemas Array of schemas
+ * @param tagName Name of the tag
+ */
+function matchingSchemas(schemas, tagName) {
     if (schemas !== null) {
         for (let i = 0; i < schemas.length; i++) {
             const schema = schemas[i];
@@ -14473,7 +14478,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const attrs = getConstant(tViewConsts, attrsIndex);
     const tNode = getOrCreateTNode(tView, index, 2 /* Element */, name, attrs);
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && logUnknownElementError(tView, native, tNode, hasDirectives);
+    ngDevMode && validateElementIsKnown(native, tNode.value, tView.schemas, hasDirectives);
     if (tNode.attrs !== null) {
         computeStaticStyling(tNode, tNode.attrs, false);
     }
@@ -14597,18 +14602,33 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
     ɵɵelementEnd();
     return ɵɵelement;
 }
-function logUnknownElementError(tView, element, tNode, hasDirectives) {
-    const schemas = tView.schemas;
+/**
+ * Validates that the element is known at runtime and produces
+ * an error if it's not the case.
+ * This check is relevant for JIT-compiled components (for AOT-compiled
+ * ones this check happens at build time).
+ *
+ * The element is considered known if either:
+ * - it's a known HTML element
+ * - it's a known custom element
+ * - the element matches any directive
+ * - the element is allowed by one of the schemas
+ *
+ * @param element Element to validate
+ * @param tagName Name of the tag to check
+ * @param schemas Array of schemas
+ * @param hasDirectives Boolean indicating that the element matches any directive
+ */
+function validateElementIsKnown(element, tagName, schemas, hasDirectives) {
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
     // defined as an array (as an empty array in case `schemas` field is not defined) and we should
     // execute the check below.
     if (schemas === null)
         return;
-    const tagName = tNode.value;
     // If the element matches any directive, it's considered as valid.
     if (!hasDirectives && tagName !== null) {
-        // The element is unknown if it's an instance of HTMLUnknownElement or it isn't registered
+        // The element is unknown if it's an instance of HTMLUnknownElement, or it isn't registered
         // as a custom element. Note that unknown elements with a dash in their name won't be instances
         // of HTMLUnknownElement in browsers that support web components.
         const isUnknown = 
@@ -14618,7 +14638,7 @@ function logUnknownElementError(tView, element, tNode, hasDirectives) {
             element instanceof HTMLUnknownElement) ||
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
-        if (isUnknown && !matchingSchemas(tView, tagName)) {
+        if (isUnknown && !matchingSchemas(schemas, tagName)) {
             let message = `'${tagName}' is not a known element:\n`;
             message += `1. If '${tagName}' is an Angular component, then verify that it is part of this module.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
@@ -21088,7 +21108,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.3.1+2.sha-a3d9c82');
+const VERSION = new Version('13.3.1+5.sha-9fcc1b7');
 
 /**
  * @license
