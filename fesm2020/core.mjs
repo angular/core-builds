@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.11+6.sha-2a81e44
+ * @license Angular v14.0.0-next.11+7.sha-60b5a3d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10252,9 +10252,9 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
-            if (!validateProperty(tView, element, propName, tNode)) {
+            if (!validateProperty(element, tNode.value, propName, tView.schemas)) {
                 // Return here since we only log warnings for unknown properties.
-                logUnknownPropertyError(propName, tNode);
+                logUnknownPropertyError(propName, tNode.value);
                 return;
             }
             ngDevMode.rendererSetProperty++;
@@ -10274,7 +10274,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
         if (ngDevMode && !matchingSchemas(tView.schemas, tNode.value)) {
-            logUnknownPropertyError(propName, tNode);
+            logUnknownPropertyError(propName, tNode.value);
         }
     }
 }
@@ -10326,21 +10326,36 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
         }
     }
 }
-function validateProperty(tView, element, propName, tNode) {
+/**
+ * Validates that the property of the element is known at runtime and returns
+ * false if it's not the case.
+ * This check is relevant for JIT-compiled components (for AOT-compiled
+ * ones this check happens at build time).
+ *
+ * The property is considered known if either:
+ * - it's a known property of the element
+ * - the element is allowed by one of the schemas
+ * - the property is used for animations
+ *
+ * @param element Element to validate
+ * @param tagName Name of the tag to check
+ * @param propName Name of the property to check
+ * @param schemas Array of schemas
+ */
+function validateProperty(element, tagName, propName, schemas) {
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
     // defined as an array (as an empty array in case `schemas` field is not defined) and we should
     // execute the check below.
-    if (tView.schemas === null)
+    if (schemas === null)
         return true;
-    // The property is considered valid if the element matches the schema, it exists on the element
+    // The property is considered valid if the element matches the schema, it exists on the element,
     // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    if (matchingSchemas(tView.schemas, tNode.value) || propName in element ||
-        isAnimationProp(propName)) {
+    if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
         return true;
     }
     // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
-    // need to account for both here, while being careful for `typeof null` also returning 'object'.
+    // need to account for both here, while being careful with `typeof null` also returning 'object'.
     return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
 /**
@@ -10363,10 +10378,10 @@ function matchingSchemas(schemas, tagName) {
 /**
  * Logs an error that a property is not supported on an element.
  * @param propName Name of the invalid property.
- * @param tNode Node on which we encountered the property.
+ * @param tagName Name of the node on which we encountered the property.
  */
-function logUnknownPropertyError(propName, tNode) {
-    let message = `Can't bind to '${propName}' since it isn't a known property of '${tNode.value}'.`;
+function logUnknownPropertyError(propName, tagName) {
+    const message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'.`;
     console.error(formatRuntimeError(303 /* UNKNOWN_BINDING */, message));
 }
 /**
@@ -21272,7 +21287,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.11+6.sha-2a81e44');
+const VERSION = new Version('14.0.0-next.11+7.sha-60b5a3d');
 
 /**
  * @license
