@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.12+10.sha-f38c344
+ * @license Angular v14.0.0-next.12+11.sha-89ed8d8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -400,7 +400,6 @@ export declare class ApplicationRef {
     private _zone;
     private _injector;
     private _exceptionHandler;
-    private _componentFactoryResolver;
     private _initStatus;
     private _views;
     private _runningTick;

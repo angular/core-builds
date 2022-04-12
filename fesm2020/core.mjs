@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.12+10.sha-f38c344
+ * @license Angular v14.0.0-next.12+11.sha-89ed8d8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21298,7 +21298,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.12+10.sha-f38c344');
+const VERSION = new Version('14.0.0-next.12+11.sha-89ed8d8');
 
 /**
  * @license
@@ -26505,11 +26505,10 @@ function optionsReducer(dst, objs) {
  */
 class ApplicationRef {
     /** @internal */
-    constructor(_zone, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+    constructor(_zone, _injector, _exceptionHandler, _initStatus) {
         this._zone = _zone;
         this._injector = _injector;
         this._exceptionHandler = _exceptionHandler;
-        this._componentFactoryResolver = _componentFactoryResolver;
         this._initStatus = _initStatus;
         /** @internal */
         this._bootstrapListeners = [];
@@ -26625,8 +26624,8 @@ class ApplicationRef {
             componentFactory = componentOrFactory;
         }
         else {
-            componentFactory =
-                this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+            const resolver = this._injector.get(ComponentFactoryResolver$1);
+            componentFactory = resolver.resolveComponentFactory(componentOrFactory);
         }
         this.componentTypes.push(componentFactory.componentType);
         // Create a factory associated with the current module if it's not bound to some other
@@ -26727,12 +26726,12 @@ class ApplicationRef {
         return this._views.length;
     }
 }
-ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver$1), ɵɵinject(ApplicationInitStatus)); };
+ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ApplicationInitStatus)); };
 ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver$1 }, { type: ApplicationInitStatus }]; }, null); })();
+    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ApplicationInitStatus }]; }, null); })();
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
