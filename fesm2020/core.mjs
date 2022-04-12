@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.12+6.sha-820077d
+ * @license Angular v14.0.0-next.12+9.sha-3c1695e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12857,22 +12857,8 @@ function getSymbolIterator() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function devModeEqual(a, b) {
-    const isListLikeIterableA = isListLikeIterable(a);
-    const isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return Object.is(a, b);
-        }
-    }
+function isIterable(obj) {
+    return obj !== null && typeof obj === 'object' && obj[getSymbolIterator()] !== undefined;
 }
 function isListLikeIterable(obj) {
     if (!isJsObject(obj))
@@ -12911,6 +12897,31 @@ function iterateListLike(obj, fn) {
 }
 function isJsObject(o) {
     return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function devModeEqual(a, b) {
+    const isListLikeIterableA = isListLikeIterable(a);
+    const isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return Object.is(a, b);
+        }
+    }
 }
 
 /**
@@ -21287,7 +21298,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.12+6.sha-820077d');
+const VERSION = new Version('14.0.0-next.12+9.sha-3c1695e');
 
 /**
  * @license
