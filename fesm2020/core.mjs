@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.2+15.sha-c49d232
+ * @license Angular v13.3.2+19.sha-fc145d0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21137,7 +21137,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.3.2+15.sha-c49d232');
+const VERSION = new Version('13.3.2+19.sha-fc145d0');
 
 /**
  * @license
@@ -24922,7 +24922,10 @@ const PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
  * A token that indicates an opaque platform ID.
  * @publicApi
  */
-const PLATFORM_ID = new InjectionToken('Platform ID');
+const PLATFORM_ID = new InjectionToken('Platform ID', {
+    providedIn: 'platform',
+    factory: () => 'unknown', // set a default platform name, when none set explicitly
+});
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
  * be called for every component that is bootstrapped.
@@ -24960,9 +24963,10 @@ class Console {
     }
 }
 Console.ɵfac = function Console_Factory(t) { return new (t || Console)(); };
-Console.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac });
+Console.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: 'platform' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
-        type: Injectable
+        type: Injectable,
+        args: [{ providedIn: 'platform' }]
     }], null, null); })();
 
 /**
@@ -25920,9 +25924,10 @@ class TestabilityRegistry {
     }
 }
 TestabilityRegistry.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); };
-TestabilityRegistry.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac });
+TestabilityRegistry.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: 'platform' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TestabilityRegistry, [{
-        type: Injectable
+        type: Injectable,
+        args: [{ providedIn: 'platform' }]
     }], function () { return []; }, null); })();
 class _NoopGetTestability {
     addToWindow(registry) { }
@@ -26234,9 +26239,10 @@ class PlatformRef {
     }
 }
 PlatformRef.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); };
-PlatformRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac });
+PlatformRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
-        type: Injectable
+        type: Injectable,
+        args: [{ providedIn: 'platform' }]
     }], function () { return [{ type: Injector }]; }, null); })();
 function getNgZone(ngZoneOption, extra) {
     let ngZone;
@@ -26374,11 +26380,10 @@ function optionsReducer(dst, objs) {
  */
 class ApplicationRef {
     /** @internal */
-    constructor(_zone, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
+    constructor(_zone, _injector, _exceptionHandler, _initStatus) {
         this._zone = _zone;
         this._injector = _injector;
         this._exceptionHandler = _exceptionHandler;
-        this._componentFactoryResolver = _componentFactoryResolver;
         this._initStatus = _initStatus;
         /** @internal */
         this._bootstrapListeners = [];
@@ -26494,8 +26499,8 @@ class ApplicationRef {
             componentFactory = componentOrFactory;
         }
         else {
-            componentFactory =
-                this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+            const resolver = this._injector.get(ComponentFactoryResolver$1);
+            componentFactory = resolver.resolveComponentFactory(componentOrFactory);
         }
         this.componentTypes.push(componentFactory.componentType);
         // Create a factory associated with the current module if it's not bound to some other
@@ -26596,12 +26601,12 @@ class ApplicationRef {
         return this._views.length;
     }
 }
-ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ComponentFactoryResolver$1), ɵɵinject(ApplicationInitStatus)); };
+ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ApplicationInitStatus)); };
 ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver$1 }, { type: ApplicationInitStatus }]; }, null); })();
+    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ApplicationInitStatus }]; }, null); })();
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
@@ -28583,19 +28588,12 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const _CORE_PLATFORM_PROVIDERS = [
-    // Set a default platform name for platforms that don't set it explicitly.
-    { provide: PLATFORM_ID, useValue: 'unknown' },
-    { provide: PlatformRef, deps: [Injector] },
-    { provide: TestabilityRegistry, deps: [] },
-    { provide: Console, deps: [] },
-];
 /**
  * This platform has to be included in any other platform
  *
  * @publicApi
  */
-const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+const platformCore = createPlatformFactory(null, 'core', []);
 
 /**
  * @license
