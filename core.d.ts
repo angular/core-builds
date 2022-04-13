@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.12+21.sha-fbbed3d
+ * @license Angular v14.0.0-next.13+1.sha-e250db4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9203,6 +9203,10 @@ export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string
 
 export declare function ɵ_sanitizeUrl(url: string): string;
 
+/**
+ * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
+ * one bootstrapped platform is allowed by default). This token helps to support SSR scenarios.
+ */
 export declare const ɵALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 
 export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.Html): value is ɵSafeHtml;
