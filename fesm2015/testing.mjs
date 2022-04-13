@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.12+11.sha-89ed8d8
+ * @license Angular v14.0.0-next.12+16.sha-a6ab3f7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1539,9 +1539,9 @@ class TestBedRender3 {
      *
      * @publicApi
      */
-    static initTestEnvironment(ngModule, platform, summariesOrOptions) {
+    static initTestEnvironment(ngModule, platform, options) {
         const testBed = _getTestBedRender3();
-        testBed.initTestEnvironment(ngModule, platform, summariesOrOptions);
+        testBed.initTestEnvironment(ngModule, platform, options);
         return testBed;
     }
     /**
@@ -1639,14 +1639,11 @@ class TestBedRender3 {
      *
      * @publicApi
      */
-    initTestEnvironment(ngModule, platform, summariesOrOptions) {
+    initTestEnvironment(ngModule, platform, options) {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
-        // If `summariesOrOptions` is a function, it means that it's
-        // an AOT summaries factory which Ivy doesn't support.
-        TestBedRender3._environmentTeardownOptions =
-            typeof summariesOrOptions === 'function' ? undefined : summariesOrOptions === null || summariesOrOptions === void 0 ? void 0 : summariesOrOptions.teardown;
+        TestBedRender3._environmentTeardownOptions = options === null || options === void 0 ? void 0 : options.teardown;
         this.platform = platform;
         this.ngModule = ngModule;
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);

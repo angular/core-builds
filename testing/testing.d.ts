@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.12+11.sha-89ed8d8
+ * @license Angular v14.0.0-next.12+16.sha-a6ab3f7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -266,21 +266,6 @@ export declare interface TestBed {
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: TestEnvironmentOptions): void;
     /**
-     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-     * angular module. These are common to every test in the suite.
-     *
-     * This may only be called once, to set up the common providers for the current test
-     * suite on the current platform. If you absolutely need to change the providers,
-     * first use `resetTestEnvironment`.
-     *
-     * Test modules and platforms for individual platforms are available from
-     * '@angular/<platform_name>/testing'.
-     *
-     * @deprecated This API that allows providing AOT summaries is deprecated, since summary files are
-     *     unused in Ivy.
-     */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
-    /**
      * Reset the providers for the test injector.
      */
     resetTestEnvironment(): void;
@@ -354,21 +339,6 @@ export declare interface TestBedStatic {
      * '@angular/<platform_name>/testing'.
      */
     initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: TestEnvironmentOptions): TestBed;
-    /**
-     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-     * angular module. These are common to every test in the suite.
-     *
-     * This may only be called once, to set up the common providers for the current test
-     * suite on the current platform. If you absolutely need to change the providers,
-     * first use `resetTestEnvironment`.
-     *
-     * Test modules and platforms for individual platforms are available from
-     * '@angular/<platform_name>/testing'.
-     *
-     * @deprecated This API that allows providing AOT summaries is deprecated, since summary files are
-     *     unused in Ivy.
-     */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
      */
@@ -446,13 +416,6 @@ export declare class TestComponentRenderer {
  */
 export declare interface TestEnvironmentOptions {
     /**
-     * Provides a way to specify AOT summaries to use in TestBed.
-     * This parameter is unused and deprecated in Ivy.
-     *
-     * @deprecated With Ivy, AOT summary files are unused.
-     */
-    aotSummaries?: () => any[];
-    /**
      * Configures the test module teardown behavior in `TestBed`.
      */
     teardown?: ModuleTeardownOptions;
@@ -466,10 +429,6 @@ export declare type TestModuleMetadata = {
     declarations?: any[];
     imports?: any[];
     schemas?: Array<SchemaMetadata | any[]>;
-    /**
-     * @deprecated With Ivy, AOT summary files are unused.
-     */
-    aotSummaries?: () => any[];
     teardown?: ModuleTeardownOptions;
 };
 
