@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.2+25.sha-cbfe628
+ * @license Angular v13.3.3+1.sha-ec115a3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21137,7 +21137,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.3.2+25.sha-cbfe628');
+const VERSION = new Version('13.3.3+1.sha-ec115a3');
 
 /**
  * @license
@@ -25951,7 +25951,19 @@ let _testabilityGetter = new _NoopGetTestability();
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let _platform;
+let _platformInjector = null;
+/**
+ * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
+ * one bootstrapped platform is allowed by default). This token helps to support SSR scenarios.
+ */
+const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
+/**
+ * Internal token that allows to register extra callbacks that should be invoked during the
+ * `PlatformRef.destroy` operation. This token is needed to avoid a direct reference to the
+ * `PlatformRef` class (i.e. register the callback via `PlatformRef.onDestroy`), thus making the
+ * entire class tree-shakeable.
+ */
+const PLATFORM_ON_DESTROY = new InjectionToken('PlatformOnDestroy');
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
     const moduleFactory = new NgModuleFactory(moduleType);
@@ -25996,7 +26008,6 @@ function publishDefaultGlobalUtils() {
 function isBoundToModule(cf) {
     return cf.isBoundToModule;
 }
-const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
 /**
  * A token for third-party components that can register themselves with NgProbe.
  *
@@ -26015,19 +26026,19 @@ class NgProbeToken {
  * @publicApi
  */
 function createPlatform(injector) {
-    if (_platform && !_platform.destroyed &&
-        !_platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+    if (_platformInjector && !_platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
         const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
             'There can be only one platform. Destroy the previous one to create a new one.' :
             '';
         throw new RuntimeError(400 /* MULTIPLE_PLATFORMS */, errorMessage);
     }
     publishDefaultGlobalUtils();
-    _platform = injector.get(PlatformRef);
+    _platformInjector = injector;
+    const platform = injector.get(PlatformRef);
     const inits = injector.get(PLATFORM_INITIALIZER, null);
     if (inits)
-        inits.forEach((init) => init());
-    return _platform;
+        inits.forEach(initFn => initFn());
+    return platform;
 }
 /**
  * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
@@ -26046,15 +26057,16 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
     return (extraProviders = []) => {
         let platform = getPlatform();
         if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+            const platformProviders = [
+                ...providers,
+                ...extraProviders,
+                { provide: marker, useValue: true }
+            ];
             if (parentPlatformFactory) {
-                parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+                parentPlatformFactory(platformProviders);
             }
             else {
-                const injectedProviders = providers.concat(extraProviders).concat({ provide: marker, useValue: true }, {
-                    provide: INJECTOR_SCOPE,
-                    useValue: 'platform'
-                });
-                createPlatform(Injector.create({ providers: injectedProviders, name: desc }));
+                createPlatform(createPlatformInjector(platformProviders, desc));
             }
         }
         return assertPlatform(marker);
@@ -26078,15 +26090,27 @@ function assertPlatform(requiredToken) {
     return platform;
 }
 /**
+ * Helper function to create an instance of a platform injector (that maintains the 'platform'
+ * scope).
+ */
+function createPlatformInjector(providers = [], name) {
+    return Injector.create({
+        name,
+        providers: [
+            { provide: INJECTOR_SCOPE, useValue: 'platform' },
+            { provide: PLATFORM_ON_DESTROY, useValue: () => _platformInjector = null },
+            ...providers
+        ],
+    });
+}
+/**
  * Destroys the current Angular platform and all Angular applications on the page.
  * Destroys all modules and listeners registered with the platform.
  *
  * @publicApi
  */
 function destroyPlatform() {
-    if (_platform && !_platform.destroyed) {
-        _platform.destroy();
-    }
+    getPlatform()?.destroy();
 }
 /**
  * Returns the current platform.
@@ -26094,7 +26118,7 @@ function destroyPlatform() {
  * @publicApi
  */
 function getPlatform() {
-    return _platform && !_platform.destroyed ? _platform : null;
+    return _platformInjector?.get(PlatformRef) ?? null;
 }
 /**
  * The Angular platform is the entry point for Angular on a web page.
@@ -26232,6 +26256,8 @@ class PlatformRef {
         }
         this._modules.slice().forEach(module => module.destroy());
         this._destroyListeners.forEach(listener => listener());
+        const destroyListener = this._injector.get(PLATFORM_ON_DESTROY, null);
+        destroyListener?.();
         this._destroyed = true;
     }
     get destroyed() {
