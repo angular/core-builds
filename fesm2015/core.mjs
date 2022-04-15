@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.3+4.sha-acbd2e9
+ * @license Angular v13.3.3+7.sha-d68333e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6718,8 +6718,10 @@ function maybeUnwrapFn(value) {
  * found in the LICENSE file at https://angular.io/license
  */
 /** Called when there are multiple component selectors that match a given node */
-function throwMultipleComponentError(tNode) {
-    throw new RuntimeError(-300 /* MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}`);
+function throwMultipleComponentError(tNode, first, second) {
+    throw new RuntimeError(-300 /* MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}: ` +
+        `${stringifyForError(first)} and ` +
+        `${stringifyForError(second)}`);
 }
 /** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
 function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
@@ -10378,8 +10380,11 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                     if (ngDevMode) {
                         assertTNodeType(tNode, 2 /* Element */, `"${tNode.value}" tags cannot be used as component hosts. ` +
                             `Please use a different tag to activate the ${stringify(def.type)} component.`);
-                        if (tNode.flags & 2 /* isComponentHost */)
-                            throwMultipleComponentError(tNode);
+                        if (tNode.flags & 2 /* isComponentHost */) {
+                            // If another component has been matched previously, it's the first element in the
+                            // `matches` array, see how we store components/directives in `matches` below.
+                            throwMultipleComponentError(tNode, matches[0].type, def.type);
+                        }
                     }
                     markAsComponentHost(tView, tNode);
                     // The component is always stored first with directives after.
@@ -21123,7 +21128,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.3.3+4.sha-acbd2e9');
+const VERSION = new Version('13.3.3+7.sha-d68333e');
 
 /**
  * @license
