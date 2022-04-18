@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+30.sha-aa966fd
+ * @license Angular v14.0.0-next.13+34.sha-ea8256f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -405,6 +405,12 @@ export declare class ApplicationRef {
     private _runningTick;
     private _stable;
     private _onMicrotaskEmptySubscription;
+    private _destroyed;
+    private _destroyListeners;
+    /**
+     * Indicates whether this instance was destroyed.
+     */
+    get destroyed(): boolean;
     /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
@@ -521,10 +527,12 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
+    destroy(): void;
     /**
      * Returns the number of attached views.
      */
     get viewCount(): number;
+    private warnIfDestroyed;
     static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationRef, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationRef>;
 }
@@ -5670,6 +5678,9 @@ export declare class PlatformRef {
      * Destroys all modules and listeners registered with the platform.
      */
     destroy(): void;
+    /**
+     * Indicates whether this instance was destroyed.
+     */
     get destroyed(): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<PlatformRef, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<PlatformRef>;
@@ -6921,8 +6932,9 @@ declare const enum RuntimeErrorCode {
     PLATFORM_NOT_FOUND = 401,
     ERROR_HANDLER_NOT_FOUND = 402,
     BOOTSTRAP_COMPONENTS_NOT_FOUND = 403,
-    ALREADY_DESTROYED_PLATFORM = 404,
+    PLATFORM_ALREADY_DESTROYED = 404,
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
+    APPLICATION_REF_ALREADY_DESTROYED = 406,
     INVALID_I18N_STRUCTURE = 700,
     INVALID_DIFFER_INPUT = 900,
     NO_SUPPORTING_DIFFER_FACTORY = 901,

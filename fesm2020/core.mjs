@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+30.sha-aa966fd
+ * @license Angular v14.0.0-next.13+34.sha-ea8256f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21400,7 +21400,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.13+30.sha-aa966fd');
+const VERSION = new Version('14.0.0-next.13+34.sha-ea8256f');
 
 /**
  * @license
@@ -26226,6 +26226,7 @@ const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
  * entire class tree-shakeable.
  */
 const PLATFORM_ON_DESTROY = new InjectionToken('PlatformOnDestroy');
+const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
     const moduleFactory = new NgModuleFactory(moduleType);
@@ -26514,7 +26515,7 @@ class PlatformRef {
             const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
                 'The platform has already been destroyed!' :
                 '';
-            throw new RuntimeError(404 /* ALREADY_DESTROYED_PLATFORM */, errorMessage);
+            throw new RuntimeError(404 /* PLATFORM_ALREADY_DESTROYED */, errorMessage);
         }
         this._modules.slice().forEach(module => module.destroy());
         this._destroyListeners.forEach(listener => listener());
@@ -26522,6 +26523,9 @@ class PlatformRef {
         destroyListener?.();
         this._destroyed = true;
     }
+    /**
+     * Indicates whether this instance was destroyed.
+     */
     get destroyed() {
         return this._destroyed;
     }
@@ -26678,6 +26682,8 @@ class ApplicationRef {
         this._views = [];
         this._runningTick = false;
         this._stable = true;
+        this._destroyed = false;
+        this._destroyListeners = [];
         /**
          * Get a list of component types registered to this application.
          * This list is populated even before the component is created.
@@ -26738,6 +26744,12 @@ class ApplicationRef {
             merge$1(isCurrentlyStable, isStable.pipe(share()));
     }
     /**
+     * Indicates whether this instance was destroyed.
+     */
+    get destroyed() {
+        return this._destroyed;
+    }
+    /**
      * Bootstrap a component onto the element identified by its selector or, optionally, to a
      * specified element.
      *
@@ -26775,6 +26787,7 @@ class ApplicationRef {
      * {@example core/ts/platform/platform.ts region='domNode'}
      */
     bootstrap(componentOrFactory, rootSelectorOrNode) {
+        NG_DEV_MODE && this.warnIfDestroyed();
         if (!this._initStatus.done) {
             const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
                 'Cannot bootstrap as there are still asynchronous initializers running. ' +
@@ -26826,6 +26839,7 @@ class ApplicationRef {
      * detection pass during which all change detection must complete.
      */
     tick() {
+        NG_DEV_MODE && this.warnIfDestroyed();
         if (this._runningTick) {
             const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
                 'ApplicationRef.tick is called recursively' :
@@ -26857,6 +26871,7 @@ class ApplicationRef {
      * This will throw if the view is already attached to a ViewContainer.
      */
     attachView(viewRef) {
+        NG_DEV_MODE && this.warnIfDestroyed();
         const view = viewRef;
         this._views.push(view);
         view.attachToAppRef(this);
@@ -26865,6 +26880,7 @@ class ApplicationRef {
      * Detaches a view from dirty checking again.
      */
     detachView(viewRef) {
+        NG_DEV_MODE && this.warnIfDestroyed();
         const view = viewRef;
         remove(this._views, view);
         view.detachFromAppRef();
@@ -26879,14 +26895,59 @@ class ApplicationRef {
     }
     /** @internal */
     ngOnDestroy() {
-        this._views.slice().forEach((view) => view.destroy());
-        this._onMicrotaskEmptySubscription.unsubscribe();
+        if (this._destroyed)
+            return;
+        try {
+            // Call all the lifecycle hooks.
+            this._destroyListeners.forEach(listener => listener());
+            // Destroy all registered views.
+            this._views.slice().forEach((view) => view.destroy());
+            this._onMicrotaskEmptySubscription.unsubscribe();
+        }
+        finally {
+            // Indicate that this instance is destroyed.
+            this._destroyed = true;
+            // Release all references.
+            this._views = [];
+            this._bootstrapListeners = [];
+            this._destroyListeners = [];
+        }
+    }
+    /**
+     * Registers a listener to be called when an instance is destroyed.
+     *
+     * @param callback A callback function to add as a listener.
+     * @returns A function which unregisters a listener.
+     *
+     * @internal
+     */
+    onDestroy(callback) {
+        NG_DEV_MODE && this.warnIfDestroyed();
+        this._destroyListeners.push(callback);
+        return () => remove(this._destroyListeners, callback);
+    }
+    destroy() {
+        if (this._destroyed) {
+            throw new RuntimeError(406 /* APPLICATION_REF_ALREADY_DESTROYED */, NG_DEV_MODE && 'This instance of the `ApplicationRef` has already been destroyed.');
+        }
+        const injector = this._injector;
+        // Check that this injector instance supports destroy operation.
+        if (injector.destroy && !injector.destroyed) {
+            // Destroying an underlying injector will trigger the `ngOnDestroy` lifecycle
+            // hook, which invokes the remaining cleanup actions.
+            injector.destroy();
+        }
     }
     /**
      * Returns the number of attached views.
      */
     get viewCount() {
         return this._views.length;
+    }
+    warnIfDestroyed() {
+        if (NG_DEV_MODE && this._destroyed) {
+            console.warn(formatRuntimeError(406 /* APPLICATION_REF_ALREADY_DESTROYED */, 'This instance of the `ApplicationRef` has already been destroyed.'));
+        }
     }
 }
 ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ApplicationInitStatus)); };
