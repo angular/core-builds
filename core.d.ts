@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+23.sha-1fe255c
+ * @license Angular v14.0.0-next.13+27.sha-3578e94
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1225,7 +1225,7 @@ declare abstract class ComponentFactory<C> {
     /**
      * Creates a new component.
      */
-    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, ngModule?: NgModuleRef<any>): ComponentRef<C>;
+    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, environmentInjector?: EnvironmentInjector | NgModuleRef<any>): ComponentRef<C>;
 }
 export { ComponentFactory }
 export { ComponentFactory as ɵComponentFactory }
@@ -1594,6 +1594,13 @@ declare interface CreateComponentOptions {
      */
     scheduler?: (work: () => void) => void;
 }
+
+/**
+ * Create a new environment injector.
+ *
+ * @publicApi
+ */
+export declare function createEnvironmentInjector(providers: Provider[], parent?: EnvironmentInjector | null, debugName?: string | null): EnvironmentInjector;
 
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
@@ -2508,6 +2515,25 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
  * @publicApi
  */
 export declare function enableProdMode(): void;
+
+/**
+ * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
+ * component tree.
+ */
+export declare abstract class EnvironmentInjector implements Injector {
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    /**
+     * @deprecated from v4.0.0 use ProviderToken<T>
+     * @suppress {duplicate}
+     */
+    abstract get(token: any, notFoundValue?: any): any;
+    abstract destroy(): void;
+}
 
 
 /**
@@ -3692,6 +3718,16 @@ export declare abstract class Injector {
 }
 
 declare const INJECTOR_2 = 9;
+
+/**
+ * A multi-provider token for initialization functions that will run upon construction of a
+ * non-view injector.
+ *
+ * @publicApi
+ */
+export declare const INJECTOR_INITIALIZER: InjectionToken<() => void>;
+
+declare type InjectorScope = 'root' | 'platform' | 'environment';
 
 /**
  * A type which has an `InjectorDef` static field.
@@ -5026,7 +5062,7 @@ export declare abstract class NgModuleRef<T> {
     /**
      * The injector that contains all of the providers of the `NgModule`.
      */
-    abstract get injector(): Injector;
+    abstract get injector(): EnvironmentInjector;
     /**
      * The resolver that can retrieve component factories in a context of this module.
      *
@@ -6070,8 +6106,10 @@ declare interface R3DeclareUsedDirectiveFacade {
     exportAs?: string[];
 }
 
-declare class R3Injector {
+declare class R3Injector extends EnvironmentInjector {
     readonly parent: Injector;
+    readonly source: string | null;
+    readonly scopes: Set<InjectorScope>;
     /**
      * Map of tokens to records which contain the instances of those tokens.
      * - `null` value implies that we don't have the record. Used by tree-shakable injectors
@@ -6079,25 +6117,17 @@ declare class R3Injector {
      */
     private records;
     /**
-     * The transitive set of `InjectorType`s which define this injector.
-     */
-    private injectorDefTypes;
-    /**
      * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
      */
-    private onDestroy;
-    /**
-     * Flag indicating this injector provides the APP_ROOT_SCOPE token, and thus counts as the
-     * root scope.
-     */
-    private readonly scope;
-    readonly source: string | null;
+    private _ngOnDestroyHooks;
+    private _onDestroyHooks;
     /**
      * Flag indicating that this injector was previously destroyed.
      */
     get destroyed(): boolean;
     private _destroyed;
-    constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector, source?: string | null);
+    private injectorDefTypes;
+    constructor(providers: Provider[], parent: Injector, source: string | null, scopes: Set<InjectorScope>);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
@@ -6105,19 +6135,10 @@ declare class R3Injector {
      * hook was found.
      */
     destroy(): void;
+    onDestroy(callback: () => void): void;
     get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
-    /**
-     * Add an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive providers
-     * to this injector.
-     *
-     * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
-     * the function will return "true" to indicate that the providers of the type definition need
-     * to be processed. This allows us to process providers of injector types after all imports of
-     * an injector definition are processed. (following View Engine semantics: see FW-1349)
-     */
-    private processInjectorType;
     /**
      * Process a `SingleProvider` and add it.
      */
@@ -9039,6 +9060,10 @@ export declare abstract class ViewContainerRef {
      *  * ngModuleRef: an NgModuleRef of the component's NgModule, you should almost always provide
      *                 this to ensure that all expected providers are available for the component
      *                 instantiation.
+     *  * environmentInjector: an EnvironmentInjector which will provide the component's environment.
+     *                 you should almost always provide this to ensure that all expected providers
+     *                 are available for the component instantiation. This option is intended to
+     *                 replace the `ngModuleRef` parameter.
      *  * projectableNodes: list of DOM nodes that should be projected through
      *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
      *
@@ -9048,6 +9073,7 @@ export declare abstract class ViewContainerRef {
         index?: number;
         injector?: Injector;
         ngModuleRef?: NgModuleRef<unknown>;
+        environmentInjector?: EnvironmentInjector | NgModuleRef<unknown>;
         projectableNodes?: Node[][];
     }): ComponentRef<C>;
     /**
@@ -9068,7 +9094,7 @@ export declare abstract class ViewContainerRef {
      *     Use different signature of the `createComponent` method, which allows passing
      *     Component class directly.
      */
-    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], ngModuleRef?: NgModuleRef<any>): ComponentRef<C>;
+    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], environmentInjector?: EnvironmentInjector | NgModuleRef<any>): ComponentRef<C>;
     /**
      * Inserts a view into this container.
      * @param viewRef The view to insert.
@@ -9923,7 +9949,7 @@ export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDet
  * as a root scoped injector when processing requests for unknown tokens which may indicate
  * they are provided in the root scope.
  */
-export declare const ɵINJECTOR_SCOPE: InjectionToken<"root" | "platform" | null>;
+export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 
@@ -10435,7 +10461,7 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
      * @param ngModule The NgModuleRef to which the factory is bound.
      */
     constructor(componentDef: ɵComponentDef<any>, ngModule?: NgModuleRef<any> | undefined);
-    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, ngModule?: NgModuleRef<any> | undefined): ComponentRef<T>;
+    create(injector: Injector, projectableNodes?: any[][] | undefined, rootSelectorOrNode?: any, environmentInjector?: NgModuleRef<any> | EnvironmentInjector | undefined): ComponentRef<T>;
 }
 
 /**
@@ -10460,11 +10486,11 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     onDestroy(callback: () => void): void;
 }
 
-export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T> {
+export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T>, EnvironmentInjector {
     _parent: Injector | null;
     _bootstrapComponents: Type<any>[];
     _r3Injector: R3Injector;
-    injector: Injector;
+    injector: EnvironmentInjector;
     instance: T;
     destroyCbs: (() => void)[] | null;
     readonly componentFactoryResolver: ComponentFactoryResolver_2;
@@ -12011,7 +12037,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
-    providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'env' | null;
     factory: () => T;
 }): unknown;
 
@@ -12459,7 +12485,7 @@ export declare interface ɵɵInjectableDeclaration<T> {
      * - `null`, does not belong to any injector. Must be explicitly listed in the injector
      *   `providers`.
      */
-    providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | null;
+    providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | 'environment' | null;
     /**
      * The token to which this definition belongs.
      *

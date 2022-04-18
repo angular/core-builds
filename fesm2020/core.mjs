@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+23.sha-1fe255c
+ * @license Angular v14.0.0-next.13+27.sha-3578e94
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4014,6 +4014,12 @@ class InjectionToken {
                 factory: options.factory,
             });
         }
+    }
+    /**
+     * @internal
+     */
+    get multi() {
+        return this;
     }
     toString() {
         return `InjectionToken ${this._desc}`;
@@ -11407,6 +11413,14 @@ const NOT_YET = {};
  */
 const CIRCULAR = {};
 /**
+ * A multi-provider token for initialization functions that will run upon construction of a
+ * non-view injector.
+ *
+ * @publicApi
+ */
+const INJECTOR_INITIALIZER = new InjectionToken('INJECTOR_INITIALIZER');
+const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
+/**
  * A lazily initialized NullInjector.
  */
 let NULL_INJECTOR$1 = undefined;
@@ -11423,7 +11437,7 @@ function getNullInjector() {
  */
 function createInjector(defType, parent = null, additionalProviders = null, name) {
     const injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
-    injector._resolveInjectorDefTypes();
+    injector.resolveInjectorInitializers();
     return injector;
 }
 /**
@@ -11431,12 +11445,150 @@ function createInjector(defType, parent = null, additionalProviders = null, name
  * where resolving the injector types immediately can lead to an infinite loop. The injector types
  * should be resolved at a later point by calling `_resolveInjectorDefTypes`.
  */
-function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name) {
-    return new R3Injector(defType, additionalProviders, parent || getNullInjector(), name);
+function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name, scopes = new Set()) {
+    const providers = [
+        ...flatten(additionalProviders || EMPTY_ARRAY),
+        ...importProvidersFrom(defType),
+    ];
+    name = name || (typeof defType === 'object' ? undefined : stringify(defType));
+    return new R3Injector(providers, parent || getNullInjector(), name || null, scopes);
 }
-class R3Injector {
-    constructor(def, additionalProviders, parent, source = null) {
+/**
+ * The logic visits an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive
+ * providers and invokes specified callbacks when:
+ * - an injector type is visited (typically an NgModule)
+ * - a provider is visited
+ *
+ * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
+ * the function will return "true" to indicate that the providers of the type definition need
+ * to be processed. This allows us to process providers of injector types after all imports of
+ * an injector definition are processed. (following View Engine semantics: see FW-1349)
+ */
+function walkProviderTree(container, providersOut, parents, dedup) {
+    container = resolveForwardRef(container);
+    if (!container)
+        return false;
+    // Either the defOrWrappedDef is an InjectorType (with injector def) or an
+    // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
+    // read, so care is taken to only do the read once.
+    // First attempt to read the injector def (`ɵinj`).
+    let def = getInjectorDef(container);
+    // If that's not present, then attempt to read ngModule from the InjectorDefTypeWithProviders.
+    const ngModule = (def == null) && container.ngModule || undefined;
+    // Determine the InjectorType. In the case where `defOrWrappedDef` is an `InjectorType`,
+    // then this is easy. In the case of an InjectorDefTypeWithProviders, then the definition type
+    // is the `ngModule`.
+    const defType = (ngModule === undefined) ? container : ngModule;
+    // Check for circular dependencies.
+    if (ngDevMode && parents.indexOf(defType) !== -1) {
+        const defName = stringify(defType);
+        const path = parents.map(stringify);
+        throwCyclicDependencyError(defName, path);
+    }
+    // Check for multiple imports of the same module
+    const isDuplicate = dedup.has(defType);
+    // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
+    // `InjectorDef` is on its `ngModule`.
+    if (ngModule !== undefined) {
+        def = getInjectorDef(ngModule);
+    }
+    // If no definition was found, it might be from exports. Remove it.
+    if (def == null) {
+        return false;
+    }
+    // Add providers in the same way that @NgModule resolution did:
+    // First, include providers from any imports.
+    if (def.imports != null && !isDuplicate) {
+        // Before processing defType's imports, add it to the set of parents. This way, if it ends
+        // up deeply importing itself, this can be detected.
+        ngDevMode && parents.push(defType);
+        // Add it to the set of dedups. This way we can detect multiple imports of the same module
+        dedup.add(defType);
+        let importTypesWithProviders;
+        try {
+            deepForEach(def.imports, imported => {
+                if (walkProviderTree(imported, providersOut, parents, dedup)) {
+                    if (importTypesWithProviders === undefined)
+                        importTypesWithProviders = [];
+                    // If the processed import is an injector type with providers, we store it in the
+                    // list of import types with providers, so that we can process those afterwards.
+                    importTypesWithProviders.push(imported);
+                }
+            });
+        }
+        finally {
+            // Remove it from the parents set when finished.
+            ngDevMode && parents.pop();
+        }
+        // Imports which are declared with providers (TypeWithProviders) need to be processed
+        // after all imported modules are processed. This is similar to how View Engine
+        // processes/merges module imports in the metadata resolver. See: FW-1349.
+        if (importTypesWithProviders !== undefined) {
+            for (let i = 0; i < importTypesWithProviders.length; i++) {
+                const { ngModule, providers } = importTypesWithProviders[i];
+                deepForEach(providers, provider => {
+                    validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
+                    providersOut.push(provider);
+                });
+            }
+        }
+    }
+    // Track the InjectorType and add a provider for it.
+    // It's important that this is done after the def's imports.
+    const factory = getFactoryDef(defType) || (() => new defType());
+    // Provider to create `defType` using its factory.
+    providersOut.push({
+        provide: defType,
+        useFactory: factory,
+        deps: EMPTY_ARRAY,
+    });
+    providersOut.push({
+        provide: INJECTOR_DEF_TYPES,
+        useValue: defType,
+        multi: true,
+    });
+    // Provider to eagerly instantiate `defType` via `INJECTOR_INITIALIZER`.
+    providersOut.push({
+        provide: INJECTOR_INITIALIZER,
+        useValue: () => inject(defType),
+        multi: true,
+    });
+    // Next, include providers listed on the definition itself.
+    const defProviders = def.providers;
+    if (defProviders != null && !isDuplicate) {
+        const injectorType = container;
+        deepForEach(defProviders, provider => {
+            // TODO: fix cast
+            validateProvider(provider, defProviders, injectorType);
+            providersOut.push(provider);
+        });
+    }
+    return (ngModule !== undefined &&
+        container.providers !== undefined);
+}
+/**
+ * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
+ * component tree.
+ */
+class EnvironmentInjector {
+}
+/**
+ * Collects providers from all NgModules, including transitively imported ones.
+ *
+ * @returns The list of collected providers from the specified list of NgModules.
+ * @publicApi
+ */
+function importProvidersFrom(...injectorTypes) {
+    const providers = [];
+    deepForEach(injectorTypes, injectorDef => walkProviderTree(injectorDef, providers, [], new Set()));
+    return providers;
+}
+class R3Injector extends EnvironmentInjector {
+    constructor(providers, parent, source, scopes) {
+        super();
         this.parent = parent;
+        this.source = source;
+        this.scopes = scopes;
         /**
          * Map of tokens to records which contain the instances of those tokens.
          * - `null` value implies that we don't have the record. Used by tree-shakable injectors
@@ -11444,29 +11596,29 @@ class R3Injector {
          */
         this.records = new Map();
         /**
-         * The transitive set of `InjectorType`s which define this injector.
-         */
-        this.injectorDefTypes = new Set();
-        /**
          * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
          */
-        this.onDestroy = new Set();
+        this._ngOnDestroyHooks = new Set();
+        this._onDestroyHooks = [];
         this._destroyed = false;
-        const dedupStack = [];
-        // Start off by creating Records for every provider declared in every InjectorType
-        // included transitively in additional providers then do the same for `def`. This order is
-        // important because `def` may include providers that override ones in additionalProviders.
-        additionalProviders &&
-            deepForEach(additionalProviders, provider => this.processProvider(provider, def, additionalProviders));
-        deepForEach([def], injectorDef => this.processInjectorType(injectorDef, [], dedupStack));
+        // Start off by creating Records for every provider.
+        for (const provider of providers) {
+            this.processProvider(provider);
+        }
         // Make sure the INJECTOR token provides this injector.
         this.records.set(INJECTOR, makeRecord(undefined, this));
+        // And `EnvironmentInjector` if the current injector is supposed to be env-scoped.
+        if (scopes.has('environment')) {
+            this.records.set(EnvironmentInjector, makeRecord(undefined, this));
+        }
         // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
         // any injectable scoped to APP_ROOT_SCOPE.
         const record = this.records.get(INJECTOR_SCOPE);
-        this.scope = record != null ? record.value : null;
-        // Source name, used for debugging
-        this.source = source || (typeof def === 'object' ? null : stringify(def));
+        if (record != null && typeof record.value === 'string') {
+            this.scopes.add(record.value);
+        }
+        this.injectorDefTypes =
+            new Set(this.get(INJECTOR_DEF_TYPES.multi, EMPTY_ARRAY, InjectFlags.Self));
     }
     /**
      * Flag indicating that this injector was previously destroyed.
@@ -11486,14 +11638,23 @@ class R3Injector {
         this._destroyed = true;
         try {
             // Call all the lifecycle hooks.
-            this.onDestroy.forEach(service => service.ngOnDestroy());
+            for (const service of this._ngOnDestroyHooks) {
+                service.ngOnDestroy();
+            }
+            for (const hook of this._onDestroyHooks) {
+                hook();
+            }
         }
         finally {
             // Release all references.
             this.records.clear();
-            this.onDestroy.clear();
+            this._ngOnDestroyHooks.clear();
             this.injectorDefTypes.clear();
+            this._onDestroyHooks.length = 0;
         }
+    }
+    onDestroy(callback) {
+        this._onDestroyHooks.push(callback);
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this.assertNotDestroyed();
@@ -11558,12 +11719,26 @@ class R3Injector {
         }
     }
     /** @internal */
-    _resolveInjectorDefTypes() {
-        this.injectorDefTypes.forEach(defType => this.get(defType));
+    resolveInjectorInitializers() {
+        const previousInjector = setCurrentInjector(this);
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            const initializers = this.get(INJECTOR_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
+            for (const initializer of initializers) {
+                initializer();
+            }
+        }
+        finally {
+            setCurrentInjector(previousInjector);
+            setInjectImplementation(previousInjectImplementation);
+        }
     }
     toString() {
-        const tokens = [], records = this.records;
-        records.forEach((v, token) => tokens.push(stringify(token)));
+        const tokens = [];
+        const records = this.records;
+        for (const token of records.keys()) {
+            tokens.push(stringify(token));
+        }
         return `R3Injector[${tokens.join(', ')}]`;
     }
     assertNotDestroyed() {
@@ -11572,104 +11747,15 @@ class R3Injector {
         }
     }
     /**
-     * Add an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive providers
-     * to this injector.
-     *
-     * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
-     * the function will return "true" to indicate that the providers of the type definition need
-     * to be processed. This allows us to process providers of injector types after all imports of
-     * an injector definition are processed. (following View Engine semantics: see FW-1349)
-     */
-    processInjectorType(defOrWrappedDef, parents, dedupStack) {
-        defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
-        if (!defOrWrappedDef)
-            return false;
-        // Either the defOrWrappedDef is an InjectorType (with injector def) or an
-        // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
-        // read, so care is taken to only do the read once.
-        // First attempt to read the injector def (`ɵinj`).
-        let def = getInjectorDef(defOrWrappedDef);
-        // If that's not present, then attempt to read ngModule from the InjectorDefTypeWithProviders.
-        const ngModule = (def == null) && defOrWrappedDef.ngModule || undefined;
-        // Determine the InjectorType. In the case where `defOrWrappedDef` is an `InjectorType`,
-        // then this is easy. In the case of an InjectorDefTypeWithProviders, then the definition type
-        // is the `ngModule`.
-        const defType = (ngModule === undefined) ? defOrWrappedDef : ngModule;
-        // Check for circular dependencies.
-        if (ngDevMode && parents.indexOf(defType) !== -1) {
-            const defName = stringify(defType);
-            const path = parents.map(stringify);
-            throwCyclicDependencyError(defName, path);
-        }
-        // Check for multiple imports of the same module
-        const isDuplicate = dedupStack.indexOf(defType) !== -1;
-        // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
-        // `InjectorDef` is on its `ngModule`.
-        if (ngModule !== undefined) {
-            def = getInjectorDef(ngModule);
-        }
-        // If no definition was found, it might be from exports. Remove it.
-        if (def == null) {
-            return false;
-        }
-        // Add providers in the same way that @NgModule resolution did:
-        // First, include providers from any imports.
-        if (def.imports != null && !isDuplicate) {
-            // Before processing defType's imports, add it to the set of parents. This way, if it ends
-            // up deeply importing itself, this can be detected.
-            ngDevMode && parents.push(defType);
-            // Add it to the set of dedups. This way we can detect multiple imports of the same module
-            dedupStack.push(defType);
-            let importTypesWithProviders;
-            try {
-                deepForEach(def.imports, imported => {
-                    if (this.processInjectorType(imported, parents, dedupStack)) {
-                        if (importTypesWithProviders === undefined)
-                            importTypesWithProviders = [];
-                        // If the processed import is an injector type with providers, we store it in the
-                        // list of import types with providers, so that we can process those afterwards.
-                        importTypesWithProviders.push(imported);
-                    }
-                });
-            }
-            finally {
-                // Remove it from the parents set when finished.
-                ngDevMode && parents.pop();
-            }
-            // Imports which are declared with providers (TypeWithProviders) need to be processed
-            // after all imported modules are processed. This is similar to how View Engine
-            // processes/merges module imports in the metadata resolver. See: FW-1349.
-            if (importTypesWithProviders !== undefined) {
-                for (let i = 0; i < importTypesWithProviders.length; i++) {
-                    const { ngModule, providers } = importTypesWithProviders[i];
-                    deepForEach(providers, provider => this.processProvider(provider, ngModule, providers || EMPTY_ARRAY));
-                }
-            }
-        }
-        // Track the InjectorType and add a provider for it. It's important that this is done after the
-        // def's imports.
-        this.injectorDefTypes.add(defType);
-        const factory = getFactoryDef(defType) || (() => new defType());
-        this.records.set(defType, makeRecord(factory, NOT_YET));
-        // Next, include providers listed on the definition itself.
-        const defProviders = def.providers;
-        if (defProviders != null && !isDuplicate) {
-            const injectorType = defOrWrappedDef;
-            deepForEach(defProviders, provider => this.processProvider(provider, injectorType, defProviders));
-        }
-        return (ngModule !== undefined &&
-            defOrWrappedDef.providers !== undefined);
-    }
-    /**
      * Process a `SingleProvider` and add it.
      */
-    processProvider(provider, ngModuleType, providers) {
+    processProvider(provider) {
         // Determine the token from the provider. Either it's its own token, or has a {provide: ...}
         // property.
         provider = resolveForwardRef(provider);
         let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
         // Construct a `Record` for the provider.
-        const record = providerToRecord(provider, ngModuleType, providers);
+        const record = providerToRecord(provider);
         if (!isTypeProvider(provider) && provider.multi === true) {
             // If the provider indicates that it's a multi-provider, process it specially.
             // First check whether it's been defined already.
@@ -11705,7 +11791,7 @@ class R3Injector {
             record.value = record.factory();
         }
         if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
-            this.onDestroy.add(record.value);
+            this._ngOnDestroyHooks.add(record.value);
         }
         return record.value;
     }
@@ -11715,7 +11801,7 @@ class R3Injector {
         }
         const providedIn = resolveForwardRef(def.providedIn);
         if (typeof providedIn === 'string') {
-            return providedIn === 'any' || (providedIn === this.scope);
+            return providedIn === 'any' || (this.scopes.has(providedIn));
         }
         else {
             return this.injectorDefTypes.has(providedIn);
@@ -11761,12 +11847,12 @@ function getUndecoratedInjectableFactory(token) {
         return () => new token();
     }
 }
-function providerToRecord(provider, ngModuleType, providers) {
+function providerToRecord(provider) {
     if (isValueProvider(provider)) {
         return makeRecord(undefined, provider.useValue);
     }
     else {
-        const factory = providerToFactory(provider, ngModuleType, providers);
+        const factory = providerToFactory(provider);
         return makeRecord(factory, NOT_YET);
     }
 }
@@ -11839,6 +11925,17 @@ function hasOnDestroy(value) {
 function couldBeInjectableType(value) {
     return (typeof value === 'function') ||
         (typeof value === 'object' && value instanceof InjectionToken);
+}
+function validateProvider(provider, providers, containerType) {
+    if (isTypeProvider(provider) || isValueProvider(provider) || isFactoryProvider(provider) ||
+        isExistingProvider(provider)) {
+        return;
+    }
+    // Here we expect the provider to be a `useClass` provider (by elimination).
+    const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
+    if (ngDevMode && !classRef) {
+        throwInvalidProviderError(containerType, providers, provider);
+    }
 }
 
 /**
@@ -21303,7 +21400,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.13+23.sha-1fe255c');
+const VERSION = new Version('14.0.0-next.13+27.sha-3578e94');
 
 /**
  * @license
@@ -21755,9 +21852,12 @@ class ComponentFactory extends ComponentFactory$1 {
     get outputs() {
         return toRefArray(this.componentDef.outputs);
     }
-    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
-        ngModule = ngModule || this.ngModule;
-        const rootViewInjector = ngModule ? new ChainedInjector(injector, ngModule.injector) : injector;
+    create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
+        environmentInjector = environmentInjector || this.ngModule;
+        let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
+            environmentInjector :
+            environmentInjector?.injector;
+        const rootViewInjector = realEnvironmentInjector ? new ChainedInjector(injector, realEnvironmentInjector) : injector;
         const rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
         const sanitizer = rootViewInjector.get(Sanitizer, null);
         const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
@@ -21983,11 +22083,11 @@ class NgModuleRef extends NgModuleRef$1 {
                 provide: ComponentFactoryResolver$1,
                 useValue: this.componentFactoryResolver
             }
-        ], stringify(ngModuleType));
+        ], stringify(ngModuleType), new Set(['environment']));
         // We need to resolve the injector types separately from the injector creation, because
         // the module might be trying to use this ref in its constructor for DI which will cause a
         // circular error that will eventually error out, because the injector isn't created yet.
-        this._r3Injector._resolveInjectorDefTypes();
+        this._r3Injector.resolveInjectorInitializers();
         this.instance = this.get(ngModuleType);
     }
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = InjectFlags.Default) {
@@ -22016,6 +22116,35 @@ class NgModuleFactory extends NgModuleFactory$1 {
     create(parentInjector) {
         return new NgModuleRef(this.moduleType, parentInjector);
     }
+}
+class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
+    constructor(providers, parent, source) {
+        super();
+        this.componentFactoryResolver = new ComponentFactoryResolver(this);
+        this.instance = null;
+        const injector = new R3Injector([
+            ...providers,
+            { provide: NgModuleRef$1, useValue: this },
+            { provide: ComponentFactoryResolver$1, useValue: this.componentFactoryResolver },
+        ], parent || getNullInjector(), source, new Set(['environment']));
+        this.injector = injector;
+        injector.resolveInjectorInitializers();
+    }
+    destroy() {
+        this.injector.destroy();
+    }
+    onDestroy(callback) {
+        this.injector.onDestroy(callback);
+    }
+}
+/**
+ * Create a new environment injector.
+ *
+ * @publicApi
+ */
+function createEnvironmentInjector(providers, parent = null, debugName = null) {
+    const adapter = new EnvironmentNgModuleRefAdapter(providers, parent, debugName);
+    return adapter.injector;
 }
 
 /**
@@ -22941,7 +23070,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         this.insert(viewRef, index);
         return viewRef;
     }
-    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, ngModuleRef) {
+    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
         const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
         let index;
         // This function supports 2 signatures and we need to handle options correctly for both:
@@ -22969,17 +23098,20 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
                     'is incompatible. Please use an object as the second argument instead.');
             }
             const options = (indexOrOptions || {});
+            if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
+                throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
+            }
             index = options.index;
             injector = options.injector;
             projectableNodes = options.projectableNodes;
-            ngModuleRef = options.ngModuleRef;
+            environmentInjector = options.environmentInjector || options.ngModuleRef;
         }
         const componentFactory = isComponentFactory ?
             componentFactoryOrType :
             new ComponentFactory(getComponentDef(componentFactoryOrType));
         const contextInjector = injector || this.parentInjector;
         // If an `NgModuleRef` is not provided explicitly, try retrieving it from the DI tree.
-        if (!ngModuleRef && componentFactory.ngModule == null) {
+        if (!environmentInjector && componentFactory.ngModule == null) {
             // For the `ComponentFactory` case, entering this logic is very unlikely, since we expect that
             // an instance of a `ComponentFactory`, resolved via `ComponentFactoryResolver` would have an
             // `ngModule` field. This is possible in some test scenarios and potentially in some JIT-based
@@ -23000,12 +23132,12 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
             // DO NOT REFACTOR. The code here used to have a `injector.get(NgModuleRef, null) ||
             // undefined` expression which seems to cause internal google apps to fail. This is documented
             // in the following internal bug issue: go/b/142967802
-            const result = _injector.get(NgModuleRef$1, null);
+            const result = _injector.get(EnvironmentInjector, null);
             if (result) {
-                ngModuleRef = result;
+                environmentInjector = result;
             }
         }
-        const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
+        const componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, environmentInjector);
         this.insert(componentRef.hostView, index);
         return componentRef;
     }
@@ -28946,5 +29078,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderComponent as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, INJECTOR_INITIALIZER, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createEnvironmentInjector, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderComponent as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map
