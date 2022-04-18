@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.3+7.sha-d68333e
+ * @license Angular v13.3.3+9.sha-989ba8f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12397,7 +12397,7 @@ function ɵɵInheritDefinitionFeature(definition) {
         else {
             if (superType.ɵcmp) {
                 const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                    'Directives cannot inherit Components' :
+                    `Directives cannot inherit Components. Directive ${stringifyForError(definition.type)} is attempting to extend component ${stringifyForError(superType)}` :
                     '';
                 throw new RuntimeError(903 /* INVALID_INHERITANCE */, errorMessage);
             }
@@ -21142,7 +21142,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('13.3.3+7.sha-d68333e');
+const VERSION = new Version('13.3.3+9.sha-989ba8f');
 
 /**
  * @license
