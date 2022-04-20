@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+44.sha-989e840
+ * @license Angular v14.0.0-next.13+54.sha-b8d3389
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2001,6 +2001,8 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
  */
 export declare const defineInjectable: typeof ɵɵdefineInjectable;
 
+declare type DependencyTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | PipeType<any> | Type<any>)[];
+
 /**
  * Array of destroy hooks that should be executed for a view and their directive indices.
  *
@@ -2327,10 +2329,6 @@ declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
 declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
 
 declare type DirectiveInstance = {};
-
-declare type DirectiveTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | Type<any>)[];
-
-declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
 
 /**
  * @description
@@ -5602,10 +5600,6 @@ declare interface PipeType<T> extends Type<T> {
     ɵpipe: unknown;
 }
 
-declare type PipeTypeList = (PipeType<any> | Type<any>)[];
-
-declare type PipeTypesOrFactory = (() => PipeTypeList) | PipeTypeList;
-
 /**
  * A token that indicates an opaque platform ID.
  * @publicApi
@@ -6008,8 +6002,9 @@ declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     template: string;
     isInline?: boolean;
     styles?: string[];
-    components?: R3DeclareUsedDirectiveFacade[];
-    directives?: R3DeclareUsedDirectiveFacade[];
+    dependencies?: R3DeclareTemplateDependencyFacade[];
+    components?: R3DeclareDirectiveDependencyFacade[];
+    directives?: R3DeclareDirectiveDependencyFacade[];
     pipes?: {
         [pipeName: string]: OpaqueValue | (() => OpaqueValue);
     };
@@ -6028,6 +6023,15 @@ declare interface R3DeclareDependencyMetadataFacade {
     optional?: boolean;
     self?: boolean;
     skipSelf?: boolean;
+}
+
+declare interface R3DeclareDirectiveDependencyFacade {
+    kind?: 'directive' | 'component';
+    selector: string;
+    type: OpaqueValue | (() => OpaqueValue);
+    inputs?: string[];
+    outputs?: string[];
+    exportAs?: string[];
 }
 
 declare interface R3DeclareDirectiveFacade {
@@ -6083,6 +6087,11 @@ declare interface R3DeclareInjectorFacade {
     providers?: OpaqueValue[];
 }
 
+declare interface R3DeclareNgModuleDependencyFacade {
+    kind: 'ngmodule';
+    type: OpaqueValue | (() => OpaqueValue);
+}
+
 declare interface R3DeclareNgModuleFacade {
     type: Type_2;
     bootstrap?: OpaqueValue[] | (() => OpaqueValue[]);
@@ -6093,10 +6102,17 @@ declare interface R3DeclareNgModuleFacade {
     id?: OpaqueValue;
 }
 
+declare interface R3DeclarePipeDependencyFacade {
+    kind?: 'pipe';
+    name: string;
+    type: OpaqueValue | (() => OpaqueValue);
+}
+
 declare interface R3DeclarePipeFacade {
     type: Type_2;
     name: string;
     pure?: boolean;
+    isStandalone?: boolean;
 }
 
 declare interface R3DeclareQueryMetadataFacade {
@@ -6109,13 +6125,9 @@ declare interface R3DeclareQueryMetadataFacade {
     emitDistinctChangesOnly?: boolean;
 }
 
-declare interface R3DeclareUsedDirectiveFacade {
-    selector: string;
-    type: OpaqueValue | (() => OpaqueValue);
-    inputs?: string[];
-    outputs?: string[];
-    exportAs?: string[];
-}
+declare type R3DeclareTemplateDependencyFacade = {
+    kind: string;
+} & (R3DeclareDirectiveDependencyFacade | R3DeclarePipeDependencyFacade | R3DeclareNgModuleDependencyFacade);
 
 declare class R3Injector extends EnvironmentInjector {
     readonly parent: Injector;
@@ -8740,6 +8752,8 @@ export declare interface TypeDecorator {
     <T extends Type<any>>(type: T): T;
     (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
 }
+
+declare type TypeOrFactory<T> = T | (() => T);
 
 /**
  * Configures the `Injector` to return an instance of `Type` when `Type' is used as the token.
@@ -11605,7 +11619,7 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[]> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false> = unknown;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -11864,19 +11878,12 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: {
      */
     changeDetection?: ChangeDetectionStrategy;
     /**
-     * Registry of directives and components that may be found in this component's view.
+     * Registry of directives, components, and pipes that may be found in this component's view.
      *
-     * The property is either an array of `DirectiveDef`s or a function which returns the array of
-     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     * This property is either an array of types or a function that returns the array of types. This
+     * function may be necessary to support forward declarations.
      */
-    directives?: DirectiveTypesOrFactory | null;
-    /**
-     * Registry of pipes that may be found in this component's view.
-     *
-     * The property is either an array of `PipeDefs`s or a function which returns the array of
-     * `PipeDefs`s. The function is necessary to be able to support forward declarations.
-     */
-    pipes?: PipeTypesOrFactory | null;
+    dependencies?: TypeOrFactory<DependencyTypeList>;
     /**
      * The set of schemas that declare elements to be allowed in the component's template.
      */
@@ -12135,7 +12142,7 @@ export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportA
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[]> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false> = unknown;
 
 /**
  * Returns the value associated to the given token from the injectors.
@@ -12813,7 +12820,7 @@ export declare function ɵɵpipeBindV(index: number, slotOffset: number, values:
 /**
  * @publicApi
  */
-export declare type ɵɵPipeDeclaration<T, Name extends string> = unknown;
+export declare type ɵɵPipeDeclaration<T, Name extends string, IsStandalone extends boolean = false> = unknown;
 
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
@@ -13667,6 +13674,13 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
      */
     exports?: Type<any>[] | (() => Type<any>[]);
 }): unknown;
+
+/**
+ * TODO: Implements standalone stuff!
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵStandaloneFeature(definition: ɵDirectiveDef<unknown>): void;
 
 /**
  * Update style bindings using an object literal on an element.
