@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+9.sha-3dee3d1
+ * @license Angular v14.0.0-next.14+16.sha-612d6e0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -725,15 +725,15 @@ var ViewEncapsulation$1;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const __globalThis = typeof globalThis !== 'undefined' && globalThis;
-const __window = typeof window !== 'undefined' && window;
-const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-const __global = typeof global !== 'undefined' && global;
 // Always use __globalThis if available, which is the spec-defined global variable across all
 // environments, then fallback to __global first, because in Node tests both __global and
-// __window may be defined and _global should be __global in that case.
-const _global = __globalThis || __global || __window || __self;
+// __window may be defined and _global should be __global in that case. Note: Typeof/Instanceof
+// checks are considered side-effects in Terser. We explicitly mark this as side-effect free:
+// https://github.com/terser/terser/issues/250.
+const _global = ( /* @__PURE__ */(() => (typeof globalThis !== 'undefined' && globalThis) ||
+    (typeof global !== 'undefined' && global) || (typeof window !== 'undefined' && window) ||
+    (typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self))());
 
 /**
  * @license
@@ -21481,7 +21481,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.14+9.sha-3dee3d1');
+const VERSION = new Version('14.0.0-next.14+16.sha-612d6e0');
 
 /**
  * @license
