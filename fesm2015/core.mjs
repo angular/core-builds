@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+62.sha-1d2f5c1
+ * @license Angular v14.0.0-next.14+7.sha-9e4c4bc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -906,6 +906,8 @@ function ɵɵdefineComponent(componentDefinition) {
             directiveDefs: null,
             pipeDefs: null,
             standalone: componentDefinition.standalone === true,
+            dependencies: componentDefinition.standalone === true && componentDefinition.dependencies || null,
+            getStandaloneInjector: null,
             selectors: componentDefinition.selectors || EMPTY_ARRAY,
             viewQuery: componentDefinition.viewQuery || null,
             features: componentDefinition.features || null,
@@ -4807,7 +4809,6 @@ const NG_TOKEN_PATH = 'ngTokenPath';
 const NEW_LINE = /\n/gm;
 const NO_NEW_LINE = 'ɵ';
 const SOURCE = '__source';
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
 /**
  * Current injector value used by `inject`.
  * - `undefined`: it is an error to call `inject`
@@ -11333,6 +11334,221 @@ function tick(component) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A multi-provider token for initialization functions that will run upon construction of a
+ * non-view injector.
+ *
+ * @publicApi
+ */
+const INJECTOR_INITIALIZER = new InjectionToken('INJECTOR_INITIALIZER');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Collects providers from all NgModules and standalone components, including transitively imported
+ * ones.
+ *
+ * @returns The list of collected providers from the specified list of types.
+ * @publicApi
+ */
+function importProvidersFrom(...types) {
+    const providers = [];
+    deepForEach(types, type => walkProviderTree(type, providers, [], new Set()));
+    return providers;
+}
+/**
+ * The logic visits an `InjectorType`, an `InjectorTypeWithProviders`, or a standalone
+ * `ComponentType`, and all of its transitive providers and collects providers.
+ *
+ * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
+ * the function will return "true" to indicate that the providers of the type definition need
+ * to be processed. This allows us to process providers of injector types after all imports of
+ * an injector definition are processed. (following View Engine semantics: see FW-1349)
+ */
+function walkProviderTree(container, providersOut, parents, dedup) {
+    container = resolveForwardRef(container);
+    if (!container)
+        return false;
+    // The actual type which had the definition. Usually `container`, but may be an unwrapped type
+    // from `InjectorTypeWithProviders`.
+    let defType = null;
+    let injDef = getInjectorDef(container);
+    const cmpDef = !injDef && getComponentDef(container);
+    if (!injDef && !cmpDef) {
+        // `container` is not an injector type or a component type. It might be:
+        //  * An `InjectorTypeWithProviders` that wraps an injector type.
+        //  * A standalone directive or pipe that got pulled in from a standalone component's
+        //    dependencies.
+        // Try to unwrap it as an `InjectorTypeWithProviders` first.
+        const ngModule = container.ngModule;
+        injDef = getInjectorDef(ngModule);
+        if (injDef) {
+            defType = ngModule;
+        }
+        else {
+            // Not a component or injector type, so ignore it.
+            return false;
+        }
+    }
+    else if (cmpDef && !cmpDef.standalone) {
+        return false;
+    }
+    else {
+        defType = container;
+    }
+    // Check for circular dependencies.
+    if (ngDevMode && parents.indexOf(defType) !== -1) {
+        const defName = stringify(defType);
+        const path = parents.map(stringify);
+        throwCyclicDependencyError(defName, path);
+    }
+    // Check for multiple imports of the same module
+    const isDuplicate = dedup.has(defType);
+    if (cmpDef) {
+        if (isDuplicate) {
+            // This component definition has already been processed.
+            return false;
+        }
+        dedup.add(defType);
+        if (cmpDef.dependencies) {
+            const deps = typeof cmpDef.dependencies === 'function' ? cmpDef.dependencies() : cmpDef.dependencies;
+            for (const dep of deps) {
+                walkProviderTree(dep, providersOut, parents, dedup);
+            }
+        }
+    }
+    else if (injDef) {
+        // First, include providers from any imports.
+        if (injDef.imports != null && !isDuplicate) {
+            // Before processing defType's imports, add it to the set of parents. This way, if it ends
+            // up deeply importing itself, this can be detected.
+            ngDevMode && parents.push(defType);
+            // Add it to the set of dedups. This way we can detect multiple imports of the same module
+            dedup.add(defType);
+            let importTypesWithProviders;
+            try {
+                deepForEach(injDef.imports, imported => {
+                    if (walkProviderTree(imported, providersOut, parents, dedup)) {
+                        if (importTypesWithProviders === undefined)
+                            importTypesWithProviders = [];
+                        // If the processed import is an injector type with providers, we store it in the
+                        // list of import types with providers, so that we can process those afterwards.
+                        importTypesWithProviders.push(imported);
+                    }
+                });
+            }
+            finally {
+                // Remove it from the parents set when finished.
+                ngDevMode && parents.pop();
+            }
+            // Imports which are declared with providers (TypeWithProviders) need to be processed
+            // after all imported modules are processed. This is similar to how View Engine
+            // processes/merges module imports in the metadata resolver. See: FW-1349.
+            if (importTypesWithProviders !== undefined) {
+                for (let i = 0; i < importTypesWithProviders.length; i++) {
+                    const { ngModule, providers } = importTypesWithProviders[i];
+                    deepForEach(providers, provider => {
+                        validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
+                        providersOut.push(provider);
+                    });
+                }
+            }
+        }
+        // Track the InjectorType and add a provider for it.
+        // It's important that this is done after the def's imports.
+        const factory = getFactoryDef(defType) || (() => new defType());
+        // Provider to create `defType` using its factory.
+        providersOut.push({
+            provide: defType,
+            useFactory: factory,
+            deps: EMPTY_ARRAY,
+        });
+        providersOut.push({
+            provide: INJECTOR_DEF_TYPES,
+            useValue: defType,
+            multi: true,
+        });
+        // Provider to eagerly instantiate `defType` via `INJECTOR_INITIALIZER`.
+        providersOut.push({
+            provide: INJECTOR_INITIALIZER,
+            useValue: () => ɵɵinject(defType),
+            multi: true,
+        });
+        // Next, include providers listed on the definition itself.
+        const defProviders = injDef.providers;
+        if (defProviders != null && !isDuplicate) {
+            const injectorType = container;
+            deepForEach(defProviders, provider => {
+                // TODO: fix cast
+                validateProvider(provider, defProviders, injectorType);
+                providersOut.push(provider);
+            });
+        }
+    }
+    else {
+        // Should not happen, but just in case.
+        return false;
+    }
+    return (defType !== container &&
+        container.providers !== undefined);
+}
+function validateProvider(provider, providers, containerType) {
+    if (isTypeProvider(provider) || isValueProvider(provider) || isFactoryProvider(provider) ||
+        isExistingProvider(provider)) {
+        return;
+    }
+    // Here we expect the provider to be a `useClass` provider (by elimination).
+    const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
+    if (ngDevMode && !classRef) {
+        throwInvalidProviderError(containerType, providers, provider);
+    }
+}
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+function isValueProvider(value) {
+    return value !== null && typeof value == 'object' && USE_VALUE$1 in value;
+}
+function isExistingProvider(value) {
+    return !!(value && value.useExisting);
+}
+function isFactoryProvider(value) {
+    return !!(value && value.useFactory);
+}
+function isTypeProvider(value) {
+    return typeof value === 'function';
+}
+function isClassProvider(value) {
+    return !!value.useClass;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
  *
@@ -11398,14 +11614,6 @@ const NOT_YET = {};
  */
 const CIRCULAR = {};
 /**
- * A multi-provider token for initialization functions that will run upon construction of a
- * non-view injector.
- *
- * @publicApi
- */
-const INJECTOR_INITIALIZER = new InjectionToken('INJECTOR_INITIALIZER');
-const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
-/**
  * A lazily initialized NullInjector.
  */
 let NULL_INJECTOR$1 = undefined;
@@ -11416,157 +11624,10 @@ function getNullInjector() {
     return NULL_INJECTOR$1;
 }
 /**
- * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
- *
- * @publicApi
- */
-function createInjector(defType, parent = null, additionalProviders = null, name) {
-    const injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
-    injector.resolveInjectorInitializers();
-    return injector;
-}
-/**
- * Creates a new injector without eagerly resolving its injector types. Can be used in places
- * where resolving the injector types immediately can lead to an infinite loop. The injector types
- * should be resolved at a later point by calling `_resolveInjectorDefTypes`.
- */
-function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name, scopes = new Set()) {
-    const providers = [
-        ...flatten(additionalProviders || EMPTY_ARRAY),
-        ...importProvidersFrom(defType),
-    ];
-    name = name || (typeof defType === 'object' ? undefined : stringify(defType));
-    return new R3Injector(providers, parent || getNullInjector(), name || null, scopes);
-}
-/**
- * The logic visits an `InjectorType` or `InjectorTypeWithProviders` and all of its transitive
- * providers and invokes specified callbacks when:
- * - an injector type is visited (typically an NgModule)
- * - a provider is visited
- *
- * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
- * the function will return "true" to indicate that the providers of the type definition need
- * to be processed. This allows us to process providers of injector types after all imports of
- * an injector definition are processed. (following View Engine semantics: see FW-1349)
- */
-function walkProviderTree(container, providersOut, parents, dedup) {
-    container = resolveForwardRef(container);
-    if (!container)
-        return false;
-    // Either the defOrWrappedDef is an InjectorType (with injector def) or an
-    // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
-    // read, so care is taken to only do the read once.
-    // First attempt to read the injector def (`ɵinj`).
-    let def = getInjectorDef(container);
-    // If that's not present, then attempt to read ngModule from the InjectorDefTypeWithProviders.
-    const ngModule = (def == null) && container.ngModule || undefined;
-    // Determine the InjectorType. In the case where `defOrWrappedDef` is an `InjectorType`,
-    // then this is easy. In the case of an InjectorDefTypeWithProviders, then the definition type
-    // is the `ngModule`.
-    const defType = (ngModule === undefined) ? container : ngModule;
-    // Check for circular dependencies.
-    if (ngDevMode && parents.indexOf(defType) !== -1) {
-        const defName = stringify(defType);
-        const path = parents.map(stringify);
-        throwCyclicDependencyError(defName, path);
-    }
-    // Check for multiple imports of the same module
-    const isDuplicate = dedup.has(defType);
-    // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
-    // `InjectorDef` is on its `ngModule`.
-    if (ngModule !== undefined) {
-        def = getInjectorDef(ngModule);
-    }
-    // If no definition was found, it might be from exports. Remove it.
-    if (def == null) {
-        return false;
-    }
-    // Add providers in the same way that @NgModule resolution did:
-    // First, include providers from any imports.
-    if (def.imports != null && !isDuplicate) {
-        // Before processing defType's imports, add it to the set of parents. This way, if it ends
-        // up deeply importing itself, this can be detected.
-        ngDevMode && parents.push(defType);
-        // Add it to the set of dedups. This way we can detect multiple imports of the same module
-        dedup.add(defType);
-        let importTypesWithProviders;
-        try {
-            deepForEach(def.imports, imported => {
-                if (walkProviderTree(imported, providersOut, parents, dedup)) {
-                    if (importTypesWithProviders === undefined)
-                        importTypesWithProviders = [];
-                    // If the processed import is an injector type with providers, we store it in the
-                    // list of import types with providers, so that we can process those afterwards.
-                    importTypesWithProviders.push(imported);
-                }
-            });
-        }
-        finally {
-            // Remove it from the parents set when finished.
-            ngDevMode && parents.pop();
-        }
-        // Imports which are declared with providers (TypeWithProviders) need to be processed
-        // after all imported modules are processed. This is similar to how View Engine
-        // processes/merges module imports in the metadata resolver. See: FW-1349.
-        if (importTypesWithProviders !== undefined) {
-            for (let i = 0; i < importTypesWithProviders.length; i++) {
-                const { ngModule, providers } = importTypesWithProviders[i];
-                deepForEach(providers, provider => {
-                    validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
-                    providersOut.push(provider);
-                });
-            }
-        }
-    }
-    // Track the InjectorType and add a provider for it.
-    // It's important that this is done after the def's imports.
-    const factory = getFactoryDef(defType) || (() => new defType());
-    // Provider to create `defType` using its factory.
-    providersOut.push({
-        provide: defType,
-        useFactory: factory,
-        deps: EMPTY_ARRAY,
-    });
-    providersOut.push({
-        provide: INJECTOR_DEF_TYPES,
-        useValue: defType,
-        multi: true,
-    });
-    // Provider to eagerly instantiate `defType` via `INJECTOR_INITIALIZER`.
-    providersOut.push({
-        provide: INJECTOR_INITIALIZER,
-        useValue: () => inject(defType),
-        multi: true,
-    });
-    // Next, include providers listed on the definition itself.
-    const defProviders = def.providers;
-    if (defProviders != null && !isDuplicate) {
-        const injectorType = container;
-        deepForEach(defProviders, provider => {
-            // TODO: fix cast
-            validateProvider(provider, defProviders, injectorType);
-            providersOut.push(provider);
-        });
-    }
-    return (ngModule !== undefined &&
-        container.providers !== undefined);
-}
-/**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
  */
 class EnvironmentInjector {
-}
-/**
- * Collects providers from all NgModules, including transitively imported ones.
- *
- * @returns The list of collected providers from the specified list of NgModules.
- * @publicApi
- */
-function importProvidersFrom(...injectorTypes) {
-    const providers = [];
-    deepForEach(injectorTypes, injectorDef => walkProviderTree(injectorDef, providers, [], new Set()));
-    return providers;
 }
 class R3Injector extends EnvironmentInjector {
     constructor(providers, parent, source, scopes) {
@@ -11885,21 +11946,6 @@ function makeRecord(factory, value, multi = false) {
         multi: multi ? [] : undefined,
     };
 }
-function isValueProvider(value) {
-    return value !== null && typeof value == 'object' && USE_VALUE$1 in value;
-}
-function isExistingProvider(value) {
-    return !!(value && value.useExisting);
-}
-function isFactoryProvider(value) {
-    return !!(value && value.useFactory);
-}
-function isTypeProvider(value) {
-    return typeof value === 'function';
-}
-function isClassProvider(value) {
-    return !!value.useClass;
-}
 function hasDeps(value) {
     return !!value.deps;
 }
@@ -11911,16 +11957,36 @@ function couldBeInjectableType(value) {
     return (typeof value === 'function') ||
         (typeof value === 'object' && value instanceof InjectionToken);
 }
-function validateProvider(provider, providers, containerType) {
-    if (isTypeProvider(provider) || isValueProvider(provider) || isFactoryProvider(provider) ||
-        isExistingProvider(provider)) {
-        return;
-    }
-    // Here we expect the provider to be a `useClass` provider (by elimination).
-    const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
-    if (ngDevMode && !classRef) {
-        throwInvalidProviderError(containerType, providers, provider);
-    }
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
+ *
+ * @publicApi
+ */
+function createInjector(defType, parent = null, additionalProviders = null, name) {
+    const injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
+    injector.resolveInjectorInitializers();
+    return injector;
+}
+/**
+ * Creates a new injector without eagerly resolving its injector types. Can be used in places
+ * where resolving the injector types immediately can lead to an infinite loop. The injector types
+ * should be resolved at a later point by calling `_resolveInjectorDefTypes`.
+ */
+function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name, scopes = new Set()) {
+    const providers = [
+        ...flatten(additionalProviders || EMPTY_ARRAY),
+        ...importProvidersFrom(defType),
+    ];
+    name = name || (typeof defType === 'object' ? undefined : stringify(defType));
+    return new R3Injector(providers, parent || getNullInjector(), name || null, scopes);
 }
 
 /**
@@ -21157,44 +21223,6 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
 }
 
 /**
- * TODO: Implements standalone stuff!
- *
- * @codeGenApi
- */
-function ɵɵStandaloneFeature(definition) { }
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Represents a component created by a `ComponentFactory`.
- * Provides access to the component instance and related objects,
- * and provides the means of destroying the instance.
- *
- * @publicApi
- */
-class ComponentRef$1 {
-}
-/**
- * Base class for a factory that can create a component dynamically.
- * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
- * Use the resulting `ComponentFactory.create()` method to create a component of that type.
- *
- * @see [Dynamic Components](guide/dynamic-component-loader)
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
- */
-class ComponentFactory$1 {
-}
-
-/**
  * @license
  * Copyright Google LLC All Rights Reserved.
  *
@@ -21233,6 +21261,66 @@ class _NullComponentFactoryResolver {
 class ComponentFactoryResolver$1 {
 }
 ComponentFactoryResolver$1.NULL = ( /* @__PURE__ */new _NullComponentFactoryResolver());
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
+ *
+ * @publicApi
+ */
+class NgModuleRef$1 {
+}
+/**
+ * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
+ * for additional context. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
+ * using factory-based ones.
+ */
+class NgModuleFactory$1 {
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Represents a component created by a `ComponentFactory`.
+ * Provides access to the component instance and related objects,
+ * and provides the means of destroying the instance.
+ *
+ * @publicApi
+ */
+class ComponentRef$1 {
+}
+/**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
+ *
+ * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
+ */
+class ComponentFactory$1 {
+}
 
 /**
  * @license
@@ -21393,7 +21481,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.13+62.sha-1d2f5c1');
+const VERSION = new Version('14.0.0-next.14+7.sha-9e4c4bc');
 
 /**
  * @license
@@ -21850,6 +21938,10 @@ class ComponentFactory extends ComponentFactory$1 {
         let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
             environmentInjector :
             environmentInjector === null || environmentInjector === void 0 ? void 0 : environmentInjector.injector;
+        if (realEnvironmentInjector && this.componentDef.getStandaloneInjector !== null) {
+            realEnvironmentInjector = this.componentDef.getStandaloneInjector(realEnvironmentInjector) ||
+                realEnvironmentInjector;
+        }
         const rootViewInjector = realEnvironmentInjector ? new ChainedInjector(injector, realEnvironmentInjector) : injector;
         const rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
         const sanitizer = rootViewInjector.get(Sanitizer, null);
@@ -21966,83 +22058,6 @@ class ComponentRef extends ComponentRef$1 {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
- * being tree-shaken away during production builds.
- */
-function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-    return noSideEffects(() => {
-        const clazz = type;
-        if (decorators !== null) {
-            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                clazz.decorators.push(...decorators);
-            }
-            else {
-                clazz.decorators = decorators;
-            }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which
-            // use tsickle-style annotations and reflect over them in the same way, this could
-            // cause issues, but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have
-            // different decorator types. Decorators on individual fields are not merged, as it's
-            // also incredibly unlikely that a field will be decorated both with an Angular
-            // decorator and a non-Angular decorator that's also been downleveled.
-            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
-                clazz.propDecorators = Object.assign(Object.assign({}, clazz.propDecorators), propDecorators);
-            }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
-    });
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
- * Provides access to the `NgModule` instance and related objects.
- *
- * @publicApi
- */
-class NgModuleRef$1 {
-}
-/**
- * @publicApi
- *
- * @deprecated
- * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
- * for additional context. Angular provides APIs that accept NgModule classes directly (such as
- * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
- * using factory-based ones.
- */
-class NgModuleFactory$1 {
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
  * @param ngModule NgModule class.
  * @param parentInjector Optional injector instance to use as a parent for the module injector. If
@@ -22138,6 +22153,121 @@ class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
 function createEnvironmentInjector(providers, parent = null, debugName = null) {
     const adapter = new EnvironmentNgModuleRefAdapter(providers, parent, debugName);
     return adapter.injector;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A service used by the framework to create instances of standalone injectors. Those injectors are
+ * created on demand in case of dynamic component instantiation and contain ambient providers
+ * collected from the imports graph rooted at a given standalone component.
+ */
+class StandaloneService {
+    constructor(_injector) {
+        this._injector = _injector;
+        this.cachedInjectors = new Map();
+    }
+    setInjector(componentDef, injector) {
+        this.cachedInjectors.set(componentDef, injector);
+    }
+    getOrCreateStandaloneInjector(componentDef) {
+        if (!componentDef.standalone) {
+            return null;
+        }
+        if (!this.cachedInjectors.has(componentDef)) {
+            const providers = importProvidersFrom(componentDef.type);
+            const standaloneInjector = providers.length > 0 ?
+                createEnvironmentInjector(providers, this._injector, `Standalone[${componentDef.type.name}]`) :
+                null;
+            this.cachedInjectors.set(componentDef, standaloneInjector);
+        }
+        return this.cachedInjectors.get(componentDef);
+    }
+    ngOnDestroy() {
+        try {
+            for (const injector of this.cachedInjectors.values()) {
+                if (injector !== null && injector !== this._injector) {
+                    injector.destroy();
+                }
+            }
+        }
+        finally {
+            this.cachedInjectors.clear();
+        }
+    }
+}
+StandaloneService.ɵprov = ɵɵdefineInjectable({
+    token: StandaloneService,
+    providedIn: 'environment',
+    factory: () => new StandaloneService(ɵɵinject(EnvironmentInjector)),
+});
+/**
+ * A feature that acts as a setup code for the {@see StandaloneService}.
+ *
+ * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
+ * function (an entry points to a standalone injector creation) on a component definition object. We
+ * go through the features infrastructure to make sure that the standalone injector creation logic
+ * is tree-shakable and not included in applications that don't use standalone components.
+ *
+ * @codeGenApi
+ */
+function ɵɵStandaloneFeature(definition) {
+    definition.getStandaloneInjector = (parentInjector) => {
+        return parentInjector.get(StandaloneService).getOrCreateStandaloneInjector(definition);
+    };
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
+ */
+function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+    return noSideEffects(() => {
+        const clazz = type;
+        if (decorators !== null) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+                clazz.decorators.push(...decorators);
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which
+            // use tsickle-style annotations and reflect over them in the same way, this could
+            // cause issues, but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have
+            // different decorator types. Decorators on individual fields are not merged, as it's
+            // also incredibly unlikely that a field will be decorated both with an Angular
+            // decorator and a non-Angular decorator that's also been downleveled.
+            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
+                clazz.propDecorators = Object.assign(Object.assign({}, clazz.propDecorators), propDecorators);
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    });
 }
 
 /**
@@ -24132,8 +24262,15 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
         configurable: !!ngDevMode,
     });
 }
+function isStandalone(type) {
+    const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
+    return def !== null ? def.standalone : false;
+}
 function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
     if (verifiedNgModule.get(moduleType))
+        return;
+    // skip verifications of standalone components, direcrtives and pipes
+    if (isStandalone(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
     moduleType = resolveForwardRef(moduleType);
@@ -24150,9 +24287,9 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     const errors = [];
     const declarations = maybeUnwrapFn(ngModuleDef.declarations);
     const imports = maybeUnwrapFn(ngModuleDef.imports);
-    flatten(imports).map(unwrapModuleWithProvidersImports).forEach(mod => {
-        verifySemanticsOfNgModuleImport(mod, moduleType);
-        verifySemanticsOfNgModuleDef(mod, false, moduleType);
+    flatten(imports).map(unwrapModuleWithProvidersImports).forEach(modOrStandaloneCmpt => {
+        verifySemanticsOfNgModuleImport(modOrStandaloneCmpt, moduleType);
+        verifySemanticsOfNgModuleDef(modOrStandaloneCmpt, false, moduleType);
     });
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
@@ -24249,10 +24386,12 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     }
     function verifySemanticsOfNgModuleImport(type, importingModule) {
         type = resolveForwardRef(type);
-        if (getComponentDef(type) || getDirectiveDef(type)) {
+        const directiveDef = getComponentDef(type) || getDirectiveDef(type);
+        if (directiveDef !== null && !directiveDef.standalone) {
             throw new Error(`Unexpected directive '${type.name}' imported by the module '${importingModule.name}'. Please add an @NgModule annotation.`);
         }
-        if (getPipeDef$1(type)) {
+        const pipeDef = getPipeDef$1(type);
+        if (pipeDef !== null && !pipeDef.standalone) {
             throw new Error(`Unexpected pipe '${type.name}' imported by the module '${importingModule.name}'. Please add an @NgModule annotation.`);
         }
     }
@@ -24306,7 +24445,11 @@ function resetCompiledComponents() {
  */
 function computeCombinedExports(type) {
     type = resolveForwardRef(type);
-    const ngModuleDef = getNgModuleDef(type, true);
+    const ngModuleDef = getNgModuleDef(type);
+    // a standalone component, directive or pipe
+    if (ngModuleDef === null) {
+        return [type];
+    }
     return [...flatten(maybeUnwrapFn(ngModuleDef.exports).map((type) => {
             const ngModuleDef = getNgModuleDef(type);
             if (ngModuleDef) {
@@ -24356,6 +24499,47 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
     componentDef.tView = null;
 }
 /**
+ * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
+ * (eaither a NgModule or a standalone component / directive / pipe).
+ */
+function transitiveScopesFor(type) {
+    if (isNgModule(type)) {
+        return transitiveScopesForNgModule(type);
+    }
+    else if (isStandalone(type)) {
+        const directiveDef = getComponentDef(type) || getDirectiveDef(type);
+        if (directiveDef !== null) {
+            return {
+                schemas: null,
+                compilation: {
+                    directives: new Set(),
+                    pipes: new Set(),
+                },
+                exported: {
+                    directives: new Set([type]),
+                    pipes: new Set(),
+                },
+            };
+        }
+        const pipeDef = getPipeDef$1(type);
+        if (pipeDef !== null) {
+            return {
+                schemas: null,
+                compilation: {
+                    directives: new Set(),
+                    pipes: new Set(),
+                },
+                exported: {
+                    directives: new Set(),
+                    pipes: new Set([type]),
+                },
+            };
+        }
+    }
+    // TODO: change the error message to be more user-facing and take standalone into account
+    throw new Error(`${type.name} does not have a module def (ɵmod property)`);
+}
+/**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
  * This operation is memoized and the result is cached on the module's definition. This function can
@@ -24364,11 +24548,8 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
  *
  * @param moduleType module that transitive scope should be calculated for.
  */
-function transitiveScopesFor(moduleType) {
-    if (!isNgModule(moduleType)) {
-        throw new Error(`${moduleType.name} does not have a module def (ɵmod property)`);
-    }
-    const def = getNgModuleDef(moduleType);
+function transitiveScopesForNgModule(moduleType) {
+    const def = getNgModuleDef(moduleType, true);
     if (def.transitiveCompileScopes !== null) {
         return def.transitiveCompileScopes;
     }
@@ -24384,13 +24565,9 @@ function transitiveScopesFor(moduleType) {
         },
     };
     maybeUnwrapFn(def.imports).forEach((imported) => {
-        const importedType = imported;
-        if (!isNgModule(importedType)) {
-            throw new Error(`Importing ${importedType.name} which does not have a ɵmod property`);
-        }
         // When this module imports another, the imported module's exported directives and pipes are
         // added to the compilation scope of this module.
-        const importedScope = transitiveScopesFor(importedType);
+        const importedScope = transitiveScopesFor(imported);
         importedScope.exported.directives.forEach(entry => scopes.compilation.directives.add(entry));
         importedScope.exported.pipes.forEach(entry => scopes.compilation.pipes.add(entry));
     });
@@ -24525,8 +24702,26 @@ function compileComponent(type, metadata) {
                         encapsulation = ViewEncapsulation$1.Emulated;
                     }
                 }
+                let declarations;
+                if (metadata.standalone) {
+                    // Standalone components always have themselves in scope.
+                    declarations = [{
+                            kind: R3TemplateDependencyKind.Directive,
+                            type,
+                        }];
+                    // And might have other dependencies in scope, depending on `imports`.
+                    if (metadata.imports) {
+                        declarations.push(...getStandaloneDependencies(flatten(metadata.imports)));
+                    }
+                }
+                else {
+                    // NgModule-based components are processed first with empty `declarations`, since when the
+                    // component is evaluated the NgModule has not yet been executed. The real scope for the
+                    // component will be patched on after the NgModule is fully evaluated.
+                    declarations = [];
+                }
                 const templateUrl = metadata.templateUrl || `ng:///${type.name}/template.html`;
-                const meta = Object.assign(Object.assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, declarations: [], changeDetection: metadata.changeDetection, encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign(Object.assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, declarations, changeDetection: metadata.changeDetection, encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null, isStandalone: !!metadata.standalone });
                 compilationDepth++;
                 try {
                     if (meta.usesInheritance) {
@@ -24560,6 +24755,49 @@ function compileComponent(type, metadata) {
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
+}
+function getStandaloneDependencies(imports) {
+    const dependencies = [];
+    for (const rawDep of imports) {
+        const dep = resolveForwardRef(rawDep);
+        if (!dep) {
+            // TODO: real error
+            throw new Error(`ForwardRef issue?`);
+        }
+        const ngModuleDef = getNgModuleDef(dep);
+        if (ngModuleDef) {
+            dependencies.push({
+                kind: R3TemplateDependencyKind.NgModule,
+                type: dep,
+            });
+            const scopes = transitiveScopesFor(ngModuleDef.type);
+            for (const dir of scopes.exported.directives) {
+                dependencies.push({
+                    kind: R3TemplateDependencyKind.Directive,
+                    type: dir,
+                });
+            }
+            for (const dir of scopes.exported.pipes) {
+                dependencies.push({
+                    kind: R3TemplateDependencyKind.Pipe,
+                    type: dir,
+                });
+            }
+        }
+        const dirDef = getComponentDef(dep) || getDirectiveDef(dep);
+        const anyDef = dirDef || getPipeDef$1(dep);
+        if (anyDef) {
+            if (!anyDef.standalone) {
+                // TODO: real error
+                throw new Error(`What are you doing? You imported a non-standalone thing!`);
+            }
+            dependencies.push({
+                kind: dirDef ? R3TemplateDependencyKind.Directive : R3TemplateDependencyKind.Pipe,
+                type: dep,
+            });
+        }
+    }
+    return dependencies;
 }
 function hasSelectorScope(component) {
     return component.ngSelectorScope !== undefined;
@@ -24649,9 +24887,7 @@ function directiveMetadata(type, metadata) {
         exportAs: extractExportAs(metadata.exportAs),
         providers: metadata.providers || null,
         viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
-        // TODO(alxhub): pass through the standalone flag from the directive metadata once standalone
-        // functionality is fully rolled out.
-        isStandalone: false,
+        isStandalone: !!metadata.standalone,
     };
 }
 /**
@@ -24796,9 +25032,7 @@ function getPipeMetadata(type, meta) {
         name: type.name,
         pipeName: meta.name,
         pure: meta.pure !== undefined ? meta.pure : true,
-        // TODO(alxhub): pass through the standalone flag from the pipe metadata once standalone
-        // functionality is fully rolled out.
-        isStandalone: false,
+        isStandalone: !!meta.standalone,
     };
 }
 
@@ -29127,5 +29361,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, INJECTOR_INITIALIZER, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createEnvironmentInjector, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderComponent as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, INJECTOR_INITIALIZER, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createEnvironmentInjector, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderComponent as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map

@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.13+62.sha-1d2f5c1
+ * @license Angular v14.0.0-next.14+7.sha-9e4c4bc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1018,6 +1018,8 @@ export declare interface Component extends Directive {
      * overridden in compiler options.
      */
     preserveWhitespaces?: boolean;
+    standalone?: boolean;
+    imports?: (Type<any> | any[])[];
 }
 
 /**
@@ -2240,6 +2242,7 @@ export declare interface Directive {
      * To ensure the correct behavior, the app must import `@angular/compiler`.
      */
     jit?: true;
+    standalone?: boolean;
 }
 
 /**
@@ -3374,6 +3377,15 @@ declare const enum IcuType {
 }
 
 declare const ID = 20;
+
+/**
+ * Collects providers from all NgModules and standalone components, including transitively imported
+ * ones.
+ *
+ * @returns The list of collected providers from the specified list of types.
+ * @publicApi
+ */
+export declare function importProvidersFrom(...types: Array<Type<unknown>>): Provider[];
 
 /**
  * This array contains information about input properties that
@@ -5513,6 +5525,7 @@ export declare interface Pipe {
      * even if the arguments have not changed.
      */
     pure?: boolean;
+    standalone?: boolean;
 }
 
 /**
@@ -9640,6 +9653,10 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     pipeDefs: PipeDefListOrFactory | null;
     /**
+     * Unfiltered list of all dependencies of a component, or `null` if none.
+     */
+    dependencies: TypeOrFactory<DependencyTypeList> | null;
+    /**
      * The set of schemas that declare elements to be allowed in the component's template.
      */
     schemas: SchemaMetadata[] | null;
@@ -9648,6 +9665,10 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      * the first run of component.
      */
     tView: TView | null;
+    /**
+     * A function added by the {@see ɵɵStandaloneFeature} and used by the framework to create standalone injectors.
+     */
+    getStandaloneInjector: ((parentInjector: EnvironmentInjector) => EnvironmentInjector | null) | null;
     /**
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
@@ -10713,15 +10734,10 @@ export declare function ɵstore<T>(tView: TView, lView: LView, index: number, va
 export declare function ɵstringify(token: any): string;
 
 /**
- * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
- *
- * This operation is memoized and the result is cached on the module's definition. This function can
- * be called on modules with components that have not fully compiled yet, but the result should not
- * be used until they have.
- *
- * @param moduleType module that transitive scope should be calculated for.
+ * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
+ * (eaither a NgModule or a standalone component / directive / pipe).
  */
-export declare function ɵtransitiveScopesFor<T>(moduleType: Type<T>): ɵNgModuleTransitiveScopes;
+export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
@@ -12056,7 +12072,7 @@ export declare const ɵɵdefineDirective: <T>(directiveDefinition: {
  */
 export declare function ɵɵdefineInjectable<T>(opts: {
     token: unknown;
-    providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'env' | null;
+    providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
     factory: () => T;
 }): unknown;
 
@@ -13676,11 +13692,16 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
 }): unknown;
 
 /**
- * TODO: Implements standalone stuff!
+ * A feature that acts as a setup code for the {@see StandaloneService}.
+ *
+ * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
+ * function (an entry points to a standalone injector creation) on a component definition object. We
+ * go through the features infrastructure to make sure that the standalone injector creation logic
+ * is tree-shakable and not included in applications that don't use standalone components.
  *
  * @codeGenApi
  */
-export declare function ɵɵStandaloneFeature(definition: ɵDirectiveDef<unknown>): void;
+export declare function ɵɵStandaloneFeature(definition: ɵComponentDef<unknown>): void;
 
 /**
  * Update style bindings using an object literal on an element.
