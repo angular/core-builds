@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+18.sha-3e46a42
+ * @license Angular v14.0.0-next.14+19.sha-4962a4a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10043,6 +10043,8 @@ export declare const ɵisObservable: (obj: any | Observable<any>) => obj is Obse
  * Determine if the argument is shaped like a Promise
  */
 export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
+
+export declare function ɵisStandalone<T>(type: Type<T>): boolean;
 
 /**
  * Determine if the argument is a Subscribable
