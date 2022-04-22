@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+16.sha-612d6e0
+ * @license Angular v14.0.0-next.14+18.sha-3e46a42
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -604,8 +604,6 @@ export declare interface AttributeDecorator {
 
 /**
  * Provides additional options to the bootstraping process.
- *
- *
  */
 declare interface BootstrapOptions {
     /**
@@ -6967,7 +6965,9 @@ declare const enum RuntimeErrorCode {
     VIEW_ALREADY_ATTACHED = 902,
     INVALID_INHERITANCE = 903,
     UNSAFE_VALUE_IN_RESOURCE_URL = 904,
-    UNSAFE_VALUE_IN_SCRIPT = 905
+    UNSAFE_VALUE_IN_SCRIPT = 905,
+    MISSING_GENERATED_DEF = 906,
+    TYPE_IS_NOT_STANDALONE = 907
 }
 
 declare const SANITIZER = 12;
@@ -9424,6 +9424,22 @@ export declare const enum ɵAttributeMarker {
      */
     I18n = 6
 }
+
+/**
+ * Internal bootstrap application API that implements the core bootstrap logic.
+ *
+ * Platforms (such as `platform-browser`) may require different set of application and platform
+ * providers for an application to function correctly. As a result, platforms may use this function
+ * internally and supply the necessary providers during the bootstrap, while exposing
+ * platform-specific APIs as a part of their public API.
+ *
+ * @returns A promise that returns an `ApplicationRef` instance once resolved.
+ */
+export declare function ɵbootstrapApplication(config: {
+    rootComponent: Type<unknown>;
+    appProviders?: Provider[];
+    platformProviders?: Provider[];
+}): Promise<ApplicationRef>;
 
 /**
  * Mark `html` string as trusted.
