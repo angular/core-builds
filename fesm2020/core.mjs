@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+27.sha-4e0784c
+ * @license Angular v14.0.0-next.14+28.sha-284329e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21509,7 +21509,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.14+27.sha-4e0784c');
+const VERSION = new Version('14.0.0-next.14+28.sha-284329e');
 
 /**
  * @license
@@ -24729,24 +24729,6 @@ function compileComponent(type, metadata) {
                         encapsulation = ViewEncapsulation$1.Emulated;
                     }
                 }
-                let declarations;
-                if (metadata.standalone) {
-                    // Standalone components always have themselves in scope.
-                    declarations = [{
-                            kind: R3TemplateDependencyKind.Directive,
-                            type,
-                        }];
-                    // And might have other dependencies in scope, depending on `imports`.
-                    if (metadata.imports) {
-                        declarations.push(...getStandaloneDependencies(flatten(metadata.imports)));
-                    }
-                }
-                else {
-                    // NgModule-based components are processed first with empty `declarations`, since when the
-                    // component is evaluated the NgModule has not yet been executed. The real scope for the
-                    // component will be patched on after the NgModule is fully evaluated.
-                    declarations = [];
-                }
                 const templateUrl = metadata.templateUrl || `ng:///${type.name}/template.html`;
                 const meta = {
                     ...directiveMetadata(type, metadata),
@@ -24755,7 +24737,12 @@ function compileComponent(type, metadata) {
                     preserveWhitespaces,
                     styles: metadata.styles || EMPTY_ARRAY,
                     animations: metadata.animations,
-                    declarations,
+                    // JIT components are always compiled against an empty set of `declarations`. Instead, the
+                    // `directiveDefs` and `pipeDefs` are updated at a later point:
+                    //  * for NgModule-based components, they're set when the NgModule which declares the
+                    //    component resolves in the module scoping queue
+                    //  * for standalone components, they're set just below, after `compileComponent`.
+                    declarations: [],
                     changeDetection: metadata.changeDetection,
                     encapsulation,
                     interpolation: metadata.interpolation,
@@ -24767,7 +24754,18 @@ function compileComponent(type, metadata) {
                     if (meta.usesInheritance) {
                         addDirectiveDefToUndecoratedParents(type);
                     }
-                    ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
+                    ngComponentDef =
+                        compiler.compileComponent(angularCoreEnv, templateUrl, meta);
+                    if (metadata.standalone) {
+                        // Patch the component definition for standalone components with `directiveDefs` and
+                        // `pipeDefs` functions which lazily compute the directives/pipes available in the
+                        // standalone component. Also set `dependencies` to the lazily resolved list of imports.
+                        const imports = flatten(metadata.imports || EMPTY_ARRAY);
+                        const { directiveDefs, pipeDefs } = getStandaloneDefFunctions(type, imports);
+                        ngComponentDef.directiveDefs = directiveDefs;
+                        ngComponentDef.pipeDefs = pipeDefs;
+                        ngComponentDef.dependencies = () => imports.map(resolveForwardRef);
+                    }
                 }
                 finally {
                     // Ensure that the compilation depth is decremented even when the compilation failed.
@@ -24796,48 +24794,64 @@ function compileComponent(type, metadata) {
         configurable: !!ngDevMode,
     });
 }
-function getStandaloneDependencies(imports) {
-    const dependencies = [];
-    for (const rawDep of imports) {
-        const dep = resolveForwardRef(rawDep);
-        if (!dep) {
-            // TODO: real error
-            throw new Error(`ForwardRef issue?`);
-        }
-        const ngModuleDef = getNgModuleDef(dep);
-        if (ngModuleDef) {
-            dependencies.push({
-                kind: R3TemplateDependencyKind.NgModule,
-                type: dep,
-            });
-            const scopes = transitiveScopesFor(ngModuleDef.type);
-            for (const dir of scopes.exported.directives) {
-                dependencies.push({
-                    kind: R3TemplateDependencyKind.Directive,
-                    type: dir,
-                });
+/**
+ * Build memoized `directiveDefs` and `pipeDefs` functions for the component definition of a
+ * standalone component, which process `imports` and filter out directives and pipes. The use of
+ * memoized functions here allows for the delayed resolution of any `forwardRef`s present in the
+ * component's `imports`.
+ */
+function getStandaloneDefFunctions(type, imports) {
+    let cachedDirectiveDefs = null;
+    let cachedPipeDefs = null;
+    const directiveDefs = () => {
+        if (cachedDirectiveDefs === null) {
+            // Standalone components are always able to self-reference, so include the component's own
+            // definition in its `directiveDefs`.
+            cachedDirectiveDefs = [getComponentDef(type)];
+            for (const rawDep of imports) {
+                const dep = resolveForwardRef(rawDep);
+                if (!!getNgModuleDef(dep)) {
+                    const scope = transitiveScopesFor(dep);
+                    for (const dir of scope.exported.directives) {
+                        const def = getComponentDef(dir) || getDirectiveDef(dir);
+                        if (def) {
+                            cachedDirectiveDefs.push(def);
+                        }
+                    }
+                }
+                else {
+                    const def = getComponentDef(dep) || getDirectiveDef(dep);
+                    if (def) {
+                        cachedDirectiveDefs.push(def);
+                    }
+                }
             }
-            for (const dir of scopes.exported.pipes) {
-                dependencies.push({
-                    kind: R3TemplateDependencyKind.Pipe,
-                    type: dir,
-                });
+        }
+        return cachedDirectiveDefs;
+    };
+    const pipeDefs = () => {
+        if (cachedPipeDefs === null) {
+            cachedPipeDefs = [];
+            for (const rawDep of imports) {
+                const dep = resolveForwardRef(rawDep);
+                if (!!getNgModuleDef(dep)) {
+                    const scope = transitiveScopesFor(dep);
+                    cachedPipeDefs.push(...Array.from(scope.exported.pipes).map(pipe => getPipeDef$1(pipe)));
+                }
+                else {
+                    const def = getPipeDef$1(dep);
+                    if (def) {
+                        cachedPipeDefs.push(def);
+                    }
+                }
             }
         }
-        const dirDef = getComponentDef(dep) || getDirectiveDef(dep);
-        const anyDef = dirDef || getPipeDef$1(dep);
-        if (anyDef) {
-            if (!anyDef.standalone) {
-                // TODO: real error
-                throw new Error(`What are you doing? You imported a non-standalone thing!`);
-            }
-            dependencies.push({
-                kind: dirDef ? R3TemplateDependencyKind.Directive : R3TemplateDependencyKind.Pipe,
-                type: dep,
-            });
-        }
-    }
-    return dependencies;
+        return cachedPipeDefs;
+    };
+    return {
+        directiveDefs,
+        pipeDefs,
+    };
 }
 function hasSelectorScope(component) {
     return component.ngSelectorScope !== undefined;
