@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+30.sha-f1cc4a6
+ * @license Angular v14.0.0-next.14+32.sha-2b5c2d6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21509,7 +21509,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.14+30.sha-f1cc4a6');
+const VERSION = new Version('14.0.0-next.14+32.sha-2b5c2d6');
 
 /**
  * @license
@@ -22200,9 +22200,6 @@ class StandaloneService {
         this._injector = _injector;
         this.cachedInjectors = new Map();
     }
-    setInjector(componentDef, injector) {
-        this.cachedInjectors.set(componentDef, injector);
-    }
     getOrCreateStandaloneInjector(componentDef) {
         if (!componentDef.standalone) {
             return null;
@@ -22219,7 +22216,7 @@ class StandaloneService {
     ngOnDestroy() {
         try {
             for (const injector of this.cachedInjectors.values()) {
-                if (injector !== null && injector !== this._injector) {
+                if (injector !== null) {
                     injector.destroy();
                 }
             }
@@ -26614,17 +26611,9 @@ function bootstrapApplication(config) {
         // bootstrap level as well as providers passed to the bootstrap call by a user.
         const allAppProviders = [
             { provide: NgZone, useValue: ngZone },
-            ...(appProviders || []),
-            // Collect providers from the root standalone component
-            // and all of its dependencies (NgModule, other standalone Components)
-            // and make those providers available in the DI tree.
-            ...importProvidersFrom(rootComponent),
+            ...(appProviders || []), //
         ];
         const appInjector = createEnvironmentInjector(allAppProviders, platformInjector, 'Environment Injector');
-        // Instruct `StandaloneService` to use the `appInjector` as an injector for this
-        // root component, so that there is no extra injector instance created.
-        const componentDef = getComponentDef(rootComponent);
-        appInjector.get(StandaloneService).setInjector(componentDef, appInjector);
         const exceptionHandler = appInjector.get(ErrorHandler, null);
         if (NG_DEV_MODE && !exceptionHandler) {
             throw new RuntimeError(402 /* ERROR_HANDLER_NOT_FOUND */, 'No `ErrorHandler` found in the Dependency Injection tree.');
