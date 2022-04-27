@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+32.sha-2b5c2d6
+ * @license Angular v14.0.0-next.14+37.sha-882f595
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3384,7 +3384,14 @@ declare const ID = 20;
  * @returns The list of collected providers from the specified list of types.
  * @publicApi
  */
-export declare function importProvidersFrom(...types: Array<Type<unknown>>): Provider[];
+export declare function importProvidersFrom(...sources: ImportProvidersSource[]): Provider[];
+
+/**
+ * A source of providers for the `importProvidersFrom` function.
+ *
+ * @publicApi
+ */
+export declare type ImportProvidersSource = Type<unknown> | ModuleWithProviders<unknown> | Array<ImportProvidersSource>;
 
 /**
  * This array contains information about input properties that

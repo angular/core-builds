@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+32.sha-2b5c2d6
+ * @license Angular v14.0.0-next.14+37.sha-882f595
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11387,10 +11387,36 @@ const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
  * @returns The list of collected providers from the specified list of types.
  * @publicApi
  */
-function importProvidersFrom(...types) {
-    const providers = [];
-    deepForEach(types, type => walkProviderTree(type, providers, [], new Set()));
-    return providers;
+function importProvidersFrom(...sources) {
+    const providersOut = [];
+    const dedup = new Set(); // already seen types
+    let injectorTypesWithProviders;
+    deepForEach(sources, source => {
+        // Narrow `source` to access the internal type analogue for `ModuleWithProviders`.
+        const internalSource = source;
+        if (walkProviderTree(internalSource, providersOut, [], dedup)) {
+            injectorTypesWithProviders || (injectorTypesWithProviders = []);
+            injectorTypesWithProviders.push(internalSource);
+        }
+    });
+    // Collect all providers from `ModuleWithProviders` types.
+    if (injectorTypesWithProviders !== undefined) {
+        processInjectorTypesWithProviders(injectorTypesWithProviders, providersOut);
+    }
+    return providersOut;
+}
+/**
+ * Collects all providers from the list of `ModuleWithProviders` and appends them to the provided
+ * array.
+ */
+function processInjectorTypesWithProviders(typesWithProviders, providersOut) {
+    for (let i = 0; i < typesWithProviders.length; i++) {
+        const { ngModule, providers } = typesWithProviders[i];
+        deepForEach(providers, provider => {
+            ngDevMode && validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
+            providersOut.push(provider);
+        });
+    }
 }
 /**
  * The logic visits an `InjectorType`, an `InjectorTypeWithProviders`, or a standalone
@@ -11465,8 +11491,7 @@ function walkProviderTree(container, providersOut, parents, dedup) {
             try {
                 deepForEach(injDef.imports, imported => {
                     if (walkProviderTree(imported, providersOut, parents, dedup)) {
-                        if (importTypesWithProviders === undefined)
-                            importTypesWithProviders = [];
+                        importTypesWithProviders || (importTypesWithProviders = []);
                         // If the processed import is an injector type with providers, we store it in the
                         // list of import types with providers, so that we can process those afterwards.
                         importTypesWithProviders.push(imported);
@@ -11481,42 +11506,31 @@ function walkProviderTree(container, providersOut, parents, dedup) {
             // after all imported modules are processed. This is similar to how View Engine
             // processes/merges module imports in the metadata resolver. See: FW-1349.
             if (importTypesWithProviders !== undefined) {
-                for (let i = 0; i < importTypesWithProviders.length; i++) {
-                    const { ngModule, providers } = importTypesWithProviders[i];
-                    deepForEach(providers, provider => {
-                        validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
-                        providersOut.push(provider);
-                    });
-                }
+                processInjectorTypesWithProviders(importTypesWithProviders, providersOut);
             }
         }
-        // Track the InjectorType and add a provider for it.
-        // It's important that this is done after the def's imports.
-        const factory = getFactoryDef(defType) || (() => new defType());
-        // Provider to create `defType` using its factory.
-        providersOut.push({
-            provide: defType,
-            useFactory: factory,
-            deps: EMPTY_ARRAY,
-        });
-        providersOut.push({
-            provide: INJECTOR_DEF_TYPES,
-            useValue: defType,
-            multi: true,
-        });
-        // Provider to eagerly instantiate `defType` via `INJECTOR_INITIALIZER`.
-        providersOut.push({
-            provide: INJECTOR_INITIALIZER,
-            useValue: () => ɵɵinject(defType),
-            multi: true,
-        });
+        if (!isDuplicate) {
+            // Track the InjectorType and add a provider for it.
+            // It's important that this is done after the def's imports.
+            const factory = getFactoryDef(defType) || (() => new defType());
+            // Append extra providers to make more info available for consumers (to retrieve an injector
+            // type), as well as internally (to calculate an injection scope correctly and eagerly
+            // instantiate a `defType` when an injector is created).
+            providersOut.push(
+            // Provider to create `defType` using its factory.
+            { provide: defType, useFactory: factory, deps: EMPTY_ARRAY }, 
+            // Make this `defType` available to an internal logic that calculates injector scope.
+            { provide: INJECTOR_DEF_TYPES, useValue: defType, multi: true }, 
+            // Provider to eagerly instantiate `defType` via `INJECTOR_INITIALIZER`.
+            { provide: INJECTOR_INITIALIZER, useValue: () => ɵɵinject(defType), multi: true } //
+            );
+        }
         // Next, include providers listed on the definition itself.
         const defProviders = injDef.providers;
         if (defProviders != null && !isDuplicate) {
             const injectorType = container;
             deepForEach(defProviders, provider => {
-                // TODO: fix cast
-                validateProvider(provider, defProviders, injectorType);
+                ngDevMode && validateProvider(provider, defProviders, injectorType);
                 providersOut.push(provider);
             });
         }
@@ -11535,7 +11549,7 @@ function validateProvider(provider, providers, containerType) {
     }
     // Here we expect the provider to be a `useClass` provider (by elimination).
     const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
-    if (ngDevMode && !classRef) {
+    if (!classRef) {
         throwInvalidProviderError(containerType, providers, provider);
     }
 }
@@ -21495,7 +21509,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.14+32.sha-2b5c2d6');
+const VERSION = new Version('14.0.0-next.14+37.sha-882f595');
 
 /**
  * @license
