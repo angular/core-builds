@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.14+41.sha-2eb39c0
+ * @license Angular v14.0.0-next.14+42.sha-3d45484
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21509,7 +21509,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.14+41.sha-2eb39c0');
+const VERSION = new Version('14.0.0-next.14+42.sha-3d45484');
 
 /**
  * @license
@@ -24772,6 +24772,17 @@ function compileComponent(type, metadata) {
                 if (hasSelectorScope(type)) {
                     const scopes = transitiveScopesFor(type.ngSelectorScope);
                     patchComponentDefWithScope(ngComponentDef, scopes);
+                }
+                if (metadata.schemas) {
+                    if (metadata.standalone) {
+                        ngComponentDef.schemas = metadata.schemas;
+                    }
+                    else {
+                        throw new Error(`The 'schemas' was specified for the ${stringifyForError(type)} but is only valid on a component that is standalone.`);
+                    }
+                }
+                else if (metadata.standalone) {
+                    ngComponentDef.schemas = [];
                 }
             }
             return ngComponentDef;
