@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+1.sha-f3eb7d9
+ * @license Angular v14.0.0-next.15+4.sha-2f5fd41
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21523,7 +21523,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.15+1.sha-f3eb7d9');
+const VERSION = new Version('14.0.0-next.15+4.sha-2f5fd41');
 
 /**
  * @license
@@ -24153,6 +24153,20 @@ function patchModuleCompilation() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function isModuleWithProviders(value) {
+    return value.ngModule !== undefined;
+}
+function isNgModule(value) {
+    return !!getNgModuleDef(value);
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const moduleQueue = [];
 /**
  * Enqueues moduleDef to be checked later to see if scope can be set on its
@@ -24308,7 +24322,7 @@ function isStandalone(type) {
 function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
     if (verifiedNgModule.get(moduleType))
         return;
-    // skip verifications of standalone components, direcrtives and pipes
+    // skip verifications of standalone components, directives and pipes
     if (isStandalone(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
@@ -24333,6 +24347,7 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     const exports = maybeUnwrapFn(ngModuleDef.exports);
     declarations.forEach(verifyDeclarationsHaveDefinitions);
     declarations.forEach(verifyDirectivesHaveSelector);
+    declarations.forEach((declarationType) => verifyNotStandalone(declarationType, moduleType));
     const combinedDeclarations = [
         ...declarations.map(resolveForwardRef),
         ...flatten(imports.map(computeCombinedExports)).map(resolveForwardRef),
@@ -24369,6 +24384,13 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
         const def = getDirectiveDef(type);
         if (!getComponentDef(type) && def && def.selectors.length == 0) {
             errors.push(`Directive ${stringifyForError(type)} has no selector, please add it!`);
+        }
+    }
+    function verifyNotStandalone(type, moduleType) {
+        type = resolveForwardRef(type);
+        const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
+        if (def?.standalone) {
+            errors.push(`Unexpected "${stringifyForError(type)}" declaration in "${stringifyForError(moduleType)}" NgModule. "${stringifyForError(type)}" is marked as standalone and can't be declared in any NgModule - did you intend to import it?`);
         }
     }
     function verifyExportsAreDeclaredOrReExported(type) {
@@ -24655,12 +24677,6 @@ function expandModuleWithProviders(value) {
     }
     return value;
 }
-function isModuleWithProviders(value) {
-    return value.ngModule !== undefined;
-}
-function isNgModule(value) {
-    return !!getNgModuleDef(value);
-}
 
 /**
  * @license
@@ -24817,6 +24833,41 @@ function compileComponent(type, metadata) {
         configurable: !!ngDevMode,
     });
 }
+function getDependencyTypeForError(type) {
+    if (getComponentDef(type))
+        return 'component';
+    if (getDirectiveDef(type))
+        return 'directive';
+    if (getPipeDef$1(type))
+        return 'pipe';
+    return 'type';
+}
+function verifyStandaloneImport(depType, importingType) {
+    if (isForwardRef(depType)) {
+        depType = resolveForwardRef(depType);
+        if (!depType) {
+            throw new Error(`Expected forwardRef function, imported from "${stringifyForError(importingType)}", to return a standalone entity or NgModule but got "${stringifyForError(depType) || depType}".`);
+        }
+    }
+    if (getNgModuleDef(depType) == null) {
+        const def = getComponentDef(depType) || getDirectiveDef(depType) || getPipeDef$1(depType);
+        if (def != null) {
+            // if a component, directive or pipe is imported make sure that it is standalone
+            if (!def.standalone) {
+                throw new Error(`The "${stringifyForError(depType)}" ${getDependencyTypeForError(depType)}, imported from "${stringifyForError(importingType)}", is not standalone. Did you forget to add the standalone: true flag?`);
+            }
+        }
+        else {
+            // it can be either a module with provider or an unknown (not annotated) type
+            if (isModuleWithProviders(depType)) {
+                throw new Error(`A module with providers was imported from "${stringifyForError(importingType)}". Modules with providers are not supported in standalone components imports.`);
+            }
+            else {
+                throw new Error(`The "${stringifyForError(depType)}" type, imported from "${stringifyForError(importingType)}", must be a standalone component / directive / pipe or an NgModule. Did you forget to add the required @Component / @Directive / @Pipe or @NgModule annotation?`);
+            }
+        }
+    }
+}
 /**
  * Build memoized `directiveDefs` and `pipeDefs` functions for the component definition of a
  * standalone component, which process `imports` and filter out directives and pipes. The use of
@@ -24832,6 +24883,7 @@ function getStandaloneDefFunctions(type, imports) {
             // definition in its `directiveDefs`.
             cachedDirectiveDefs = [getComponentDef(type)];
             for (const rawDep of imports) {
+                ngDevMode && verifyStandaloneImport(rawDep, type);
                 const dep = resolveForwardRef(rawDep);
                 if (!!getNgModuleDef(dep)) {
                     const scope = transitiveScopesFor(dep);
