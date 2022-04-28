@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+6.sha-2941793
+ * @license Angular v14.0.0-next.15+sha-b596a50
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -831,16 +831,27 @@ class R3TestBedCompiler {
         this.queueTypesFromModulesArray([ngModule]);
     }
     overrideComponent(component, override) {
+        this.verifyNoStandaloneFlagOverrides(component, override);
         this.resolvers.component.addOverride(component, override);
         this.pendingComponents.add(component);
     }
     overrideDirective(directive, override) {
+        this.verifyNoStandaloneFlagOverrides(directive, override);
         this.resolvers.directive.addOverride(directive, override);
         this.pendingDirectives.add(directive);
     }
     overridePipe(pipe, override) {
+        this.verifyNoStandaloneFlagOverrides(pipe, override);
         this.resolvers.pipe.addOverride(pipe, override);
         this.pendingPipes.add(pipe);
+    }
+    verifyNoStandaloneFlagOverrides(type, override) {
+        var _a, _b, _c;
+        if (((_a = override.add) === null || _a === void 0 ? void 0 : _a.hasOwnProperty('standalone')) || ((_b = override.set) === null || _b === void 0 ? void 0 : _b.hasOwnProperty('standalone')) ||
+            ((_c = override.remove) === null || _c === void 0 ? void 0 : _c.hasOwnProperty('standalone'))) {
+            throw new Error(`An override for the ${type.name} class has the \`standalone\` flag. ` +
+                `Changing the \`standalone\` flag via TestBed overrides is not supported.`);
+        }
     }
     overrideProvider(token, provider) {
         let providerDef;
