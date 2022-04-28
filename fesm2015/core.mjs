@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+4.sha-2f5fd41
+ * @license Angular v14.0.0-next.15+7.sha-4e413d9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11676,9 +11676,9 @@ class R3Injector extends EnvironmentInjector {
         this._onDestroyHooks = [];
         this._destroyed = false;
         // Start off by creating Records for every provider.
-        for (const provider of providers) {
+        deepForEach(providers, provider => {
             this.processProvider(provider);
-        }
+        });
         // Make sure the INJECTOR token provides this injector.
         this.records.set(INJECTOR, makeRecord(undefined, this));
         // And `EnvironmentInjector` if the current injector is supposed to be env-scoped.
@@ -21509,7 +21509,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.15+4.sha-2f5fd41');
+const VERSION = new Version('14.0.0-next.15+7.sha-4e413d9');
 
 /**
  * @license
