@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-fcc548a
+ * @license Angular v14.0.0-next.15+sha-e1454ae
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4354,7 +4354,7 @@ declare interface LQuery<T> {
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
-declare interface LView extends Array<any> {
+declare interface LView<T = unknown> extends Array<any> {
     /**
      * Human readable representation of the `LView`.
      *
@@ -4447,7 +4447,7 @@ declare interface LView extends Array<any> {
      * - For non-root components, the context is the component instance,
      * - For inline views, the context is null.
      */
-    [CONTEXT]: {} | RootContext | null;
+    [CONTEXT]: T;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
     /** Factory to be used for creating Renderer. */
@@ -4602,7 +4602,7 @@ declare interface LView extends Array<any> {
  * `LViewDebug` for easier debugging and test writing. It is the intent of `LViewDebug` to be used
  * in tests.
  */
-declare interface LViewDebug {
+declare interface LViewDebug<T = unknown> {
     /**
      * Flags associated with the `LView` unpacked into a more readable state.
      *
@@ -4636,7 +4636,7 @@ declare interface LViewDebug {
      *
      * (Usually the component)
      */
-    readonly context: {} | null;
+    readonly context: T;
     /**
      * Hierarchical tree of nodes.
      */
@@ -6890,43 +6890,6 @@ declare interface RNode {
      * Used exclusively for building up DOM which are static (ie not View roots)
      */
     appendChild(newChild: RNode): RNode;
-}
-
-/**
- * RootContext contains information which is shared for all components which
- * were bootstrapped with {@link renderComponent}.
- */
-declare interface RootContext {
-    /**
-     * A function used for scheduling change detection in the future. Usually
-     * this is `requestAnimationFrame`.
-     */
-    scheduler: (workFn: () => void) => void;
-    /**
-     * A promise which is resolved when all components are considered clean (not dirty).
-     *
-     * This promise is overwritten every time a first call to {@link markDirty} is invoked.
-     */
-    clean: Promise<null>;
-    /**
-     * RootComponents - The components that were instantiated by the call to
-     * {@link renderComponent}.
-     */
-    components: {}[];
-    /**
-     * The player flushing handler to kick off all animations
-     */
-    playerHandler: ɵPlayerHandler | null;
-    /**
-     * What render-related operations to run once a scheduler has been set
-     */
-    flags: RootContextFlags;
-}
-
-declare const enum RootContextFlags {
-    Empty = 0,
-    DetectChanges = 1,
-    FlushPlayers = 2
 }
 
 declare interface RText extends RNode {
@@ -10805,7 +10768,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: LView | undefined);
+    _cdRefInjectingView?: LView<unknown> | undefined);
     get context(): T;
     set context(value: T);
     get destroyed(): boolean;
