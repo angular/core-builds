@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-e1454ae
+ * @license Angular v14.0.0-next.15+sha-dff5586
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21509,7 +21509,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.15+sha-e1454ae');
+const VERSION = new Version('14.0.0-next.15+sha-dff5586');
 
 /**
  * @license
@@ -27149,6 +27149,10 @@ class ApplicationRef {
      */
     get destroyed() {
         return this._destroyed;
+    }
+    /** @internal */
+    get injector() {
+        return this._injector;
     }
     /**
      * Bootstrap a component onto the element identified by its selector or, optionally, to a
