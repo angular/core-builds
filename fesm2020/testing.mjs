@@ -1,10 +1,10 @@
 /**
- * @license Angular v14.0.0-next.15+sha-9c2f219
+ * @license Angular v14.0.0-next.15+sha-6a3ca0e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵgetUnknownElementStrictMode, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -1488,8 +1488,6 @@ class R3TestCompiler {
  */
 /** Whether test modules should be torn down by default. */
 const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
-/** Whether unknown elements in templates should throw by default. */
-const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -1654,7 +1652,6 @@ class TestBedRender3 {
             throw new Error('Cannot set base providers because it has already been called');
         }
         TestBedRender3._environmentTeardownOptions = options?.teardown;
-        TestBedRender3._environmentErrorOnUnknownElementsOption = options?.errorOnUnknownElements;
         this.platform = platform;
         this.ngModule = ngModule;
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
@@ -1684,8 +1681,6 @@ class TestBedRender3 {
             this.compiler.restoreOriginalState();
         }
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
-        // Restore the previous value of the "error on unknown elements" option
-        ɵsetUnknownElementStrictMode(this._previousErrorOnUnknownElementsOption ?? THROW_ON_UNKNOWN_ELEMENTS_DEFAULT);
         // We have to chain a couple of try/finally blocks, because each step can
         // throw errors and we don't want it to interrupt the next step and we also
         // want an error to be thrown at the end.
@@ -1701,7 +1696,6 @@ class TestBedRender3 {
             finally {
                 this._testModuleRef = null;
                 this._instanceTeardownOptions = undefined;
-                this._instanceErrorOnUnknownElementsOption = undefined;
             }
         }
     }
@@ -1720,14 +1714,9 @@ class TestBedRender3 {
         // their components scoped properly. See the `checkGlobalCompilationFinished` function
         // description for additional info.
         this.checkGlobalCompilationFinished();
-        // Always re-assign the options, even if they're undefined.
-        // This ensures that we don't carry them between tests.
+        // Always re-assign the teardown options, even if they're undefined.
+        // This ensures that we don't carry the options between tests.
         this._instanceTeardownOptions = moduleDef.teardown;
-        this._instanceErrorOnUnknownElementsOption = moduleDef.errorOnUnknownElements;
-        // Store the current value of the strict mode option,
-        // so we can restore it later
-        this._previousErrorOnUnknownElementsOption = ɵgetUnknownElementStrictMode();
-        ɵsetUnknownElementStrictMode(this.shouldThrowErrorOnUnknownElements());
         this.compiler.configureTestingModule(moduleDef);
     }
     compileComponents() {
@@ -1875,12 +1864,6 @@ class TestBedRender3 {
         // Otherwise use the configured behavior or default to rethrowing.
         return instanceOptions?.rethrowErrors ?? environmentOptions?.rethrowErrors ??
             this.shouldTearDownTestingModule();
-    }
-    shouldThrowErrorOnUnknownElements() {
-        // Check if a configuration has been provided to throw when an unknown element is found
-        return this._instanceErrorOnUnknownElementsOption ??
-            TestBedRender3._environmentErrorOnUnknownElementsOption ??
-            THROW_ON_UNKNOWN_ELEMENTS_DEFAULT;
     }
     shouldTearDownTestingModule() {
         return this._instanceTeardownOptions?.destroyAfterEach ??
