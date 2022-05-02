@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-ad5ffff
+ * @license Angular v14.0.0-next.15+sha-3ebf9e7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2531,14 +2531,6 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
 export declare function enableProdMode(): void;
 
 /**
- * A multi-provider token for initialization functions that will run upon construction of an
- * environment injector.
- *
- * @publicApi
- */
-export declare const ENVIRONMENT_INITIALIZER: InjectionToken<() => void>;
-
-/**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
  */
@@ -3756,6 +3748,14 @@ export declare abstract class Injector {
 }
 
 declare const INJECTOR_2 = 9;
+
+/**
+ * A multi-provider token for initialization functions that will run upon construction of a
+ * non-view injector.
+ *
+ * @publicApi
+ */
+export declare const INJECTOR_INITIALIZER: InjectionToken<() => void>;
 
 declare type InjectorScope = 'root' | 'platform' | 'environment';
 
