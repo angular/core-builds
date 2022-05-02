@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-22c71be
+ * @license Angular v14.0.0-next.15+sha-38f2906
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21543,7 +21543,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.15+sha-22c71be');
+const VERSION = new Version('14.0.0-next.15+sha-38f2906');
 
 /**
  * @license
@@ -27376,6 +27376,11 @@ class ApplicationRef {
         this._destroyListeners.push(callback);
         return () => remove(this._destroyListeners, callback);
     }
+    /**
+     * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
+     * will destroy the associated environnement injectors as well as all the bootstrapped components
+     * with their views.
+     */
     destroy() {
         if (this._destroyed) {
             throw new RuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, NG_DEV_MODE && 'This instance of the `ApplicationRef` has already been destroyed.');

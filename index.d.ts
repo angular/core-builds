@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-22c71be
+ * @license Angular v14.0.0-next.15+sha-38f2906
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -528,6 +528,11 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
+    /**
+     * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
+     * will destroy the associated environnement injectors as well as all the bootstrapped components
+     * with their views.
+     */
     destroy(): void;
     /**
      * Returns the number of attached views.
