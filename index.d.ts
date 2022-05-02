@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-6a3ca0e
+ * @license Angular v14.0.0-next.15+sha-e702caf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9973,6 +9973,11 @@ export declare function ɵgetLocalePluralCase(locale: string): (value: number) =
 
 export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | null;
 
+/**
+ * Gets the current value of the strict mode.
+ */
+export declare function ɵgetUnknownElementStrictMode(): boolean;
+
 
 export declare const ɵglobal: any;
 
@@ -10716,6 +10721,14 @@ export declare function ɵsetDocument(document: Document | undefined): void;
  * @param localeId
  */
 export declare function ɵsetLocaleId(localeId: string): void;
+
+
+/**
+ * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
+ * instead of just logging the error.
+ * (for AOT-compiled ones this check happens at build time).
+ */
+export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): void;
 
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
@@ -12257,7 +12270,6 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  * @codeGenApi
  */
 export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
-
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-6a3ca0e
+ * @license Angular v14.0.0-next.15+sha-e702caf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -420,6 +420,13 @@ export declare interface TestEnvironmentOptions {
      * Configures the test module teardown behavior in `TestBed`.
      */
     teardown?: ModuleTeardownOptions;
+    /**
+     * Whether errors should be thrown on unknown elements.
+     * Defaults to `false`, where the error is simply logged.
+     * If sets to `true`, the error is thrown.
+     * @see https://angular.io/errors/NG8001 for the description of the error and how to fix it
+     */
+    errorOnUnknownElements?: boolean;
 }
 
 /**
@@ -431,6 +438,13 @@ export declare type TestModuleMetadata = {
     imports?: any[];
     schemas?: Array<SchemaMetadata | any[]>;
     teardown?: ModuleTeardownOptions;
+    /**
+     * Whether NG0304 runtime errors should be thrown on unknown elements.
+     * Defaults to `false`, where the error is simply logged.
+     * If sets to `true`, the error is thrown.
+     * @see https://angular.io/errors/NG8001 for the description of the problem and how to fix it
+     */
+    errorOnUnknownElements?: boolean;
 };
 
 /**
