@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-a521571
+ * @license Angular v14.0.0-next.15+sha-d322052
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -240,13 +240,16 @@ function throwMixedMultiProviderError() {
     throw new Error(`Cannot mix multi providers and regular providers`);
 }
 function throwInvalidProviderError(ngModuleType, providers, provider) {
-    let ngModuleDetail = '';
     if (ngModuleType && providers) {
         const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
-        ngModuleDetail =
-            ` - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`;
+        throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}' - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`);
     }
-    throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}'` + ngModuleDetail);
+    else if (provider.ɵproviders) {
+        throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, `Invalid providers from 'importProvidersFrom' present in a non-environment injector. 'importProvidersFrom' can't be used for component providers.`);
+    }
+    else {
+        throw new Error('Invalid provider');
+    }
 }
 /** Throws an error when a token is not found in DI. */
 function throwProviderNotFoundError(token, injectorName) {
@@ -11399,7 +11402,11 @@ const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
  * Collects providers from all NgModules and standalone components, including transitively imported
  * ones.
  *
- * @returns The list of collected providers from the specified list of types.
+ * Providers extracted via `importProvidersFrom` are only usable in an application injector or
+ * another environment injector (such as a route injector). They should not be used in component
+ * providers.
+ *
+ * @returns The collected providers from the specified list of types.
  * @publicApi
  */
 function importProvidersFrom(...sources) {
@@ -11418,7 +11425,7 @@ function importProvidersFrom(...sources) {
     if (injectorTypesWithProviders !== undefined) {
         processInjectorTypesWithProviders(injectorTypesWithProviders, providersOut);
     }
-    return providersOut;
+    return { ɵproviders: providersOut };
 }
 /**
  * Collects all providers from the list of `ModuleWithProviders` and appends them to the provided
@@ -11691,9 +11698,7 @@ class R3Injector extends EnvironmentInjector {
         this._onDestroyHooks = [];
         this._destroyed = false;
         // Start off by creating Records for every provider.
-        deepForEach(providers, provider => {
-            this.processProvider(provider);
-        });
+        forEachSingleProvider(providers, provider => this.processProvider(provider));
         // Make sure the INJECTOR token provides this injector.
         this.records.set(INJECTOR, makeRecord(undefined, this));
         // And `EnvironmentInjector` if the current injector is supposed to be env-scoped.
@@ -11952,6 +11957,9 @@ function providerToRecord(provider) {
  */
 function providerToFactory(provider, ngModuleType, providers) {
     let factory = undefined;
+    if (ngDevMode && isImportedNgModuleProviders(provider)) {
+        throwInvalidProviderError(undefined, providers, provider);
+    }
     if (isTypeProvider(provider)) {
         const unwrappedProvider = resolveForwardRef(provider);
         return getFactoryDef(unwrappedProvider) || injectableDefOrInjectorDefFactory(unwrappedProvider);
@@ -12000,6 +12008,22 @@ function couldBeInjectableType(value) {
     return (typeof value === 'function') ||
         (typeof value === 'object' && value instanceof InjectionToken);
 }
+function isImportedNgModuleProviders(provider) {
+    return !!provider.ɵproviders;
+}
+function forEachSingleProvider(providers, fn) {
+    for (const provider of providers) {
+        if (Array.isArray(provider)) {
+            forEachSingleProvider(provider, fn);
+        }
+        else if (isImportedNgModuleProviders(provider)) {
+            forEachSingleProvider(provider.ɵproviders, fn);
+        }
+        else {
+            fn(provider);
+        }
+    }
+}
 
 /**
  * @license
@@ -12025,8 +12049,8 @@ function createInjector(defType, parent = null, additionalProviders = null, name
  */
 function createInjectorWithoutInjectorInstances(defType, parent = null, additionalProviders = null, name, scopes = new Set()) {
     const providers = [
-        ...flatten(additionalProviders || EMPTY_ARRAY),
-        ...importProvidersFrom(defType),
+        additionalProviders || EMPTY_ARRAY,
+        importProvidersFrom(defType),
     ];
     name = name || (typeof defType === 'object' ? undefined : stringify(defType));
     return new R3Injector(providers, parent || getNullInjector(), name || null, scopes);
@@ -21543,7 +21567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.15+sha-a521571');
+const VERSION = new Version('14.0.0-next.15+sha-d322052');
 
 /**
  * @license
@@ -22240,8 +22264,8 @@ class StandaloneService {
         }
         if (!this.cachedInjectors.has(componentDef)) {
             const providers = importProvidersFrom(componentDef.type);
-            const standaloneInjector = providers.length > 0 ?
-                createEnvironmentInjector(providers, this._injector, `Standalone[${componentDef.type.name}]`) :
+            const standaloneInjector = providers.ɵproviders.length > 0 ?
+                createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`) :
                 null;
             this.cachedInjectors.set(componentDef, standaloneInjector);
         }

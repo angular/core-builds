@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-a521571
+ * @license Angular v14.0.0-next.15+sha-d322052
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1635,7 +1635,7 @@ declare interface CreateComponentOptions {
  *
  * @publicApi
  */
-export declare function createEnvironmentInjector(providers: Provider[], parent?: EnvironmentInjector | null, debugName?: string | null): EnvironmentInjector;
+export declare function createEnvironmentInjector(providers: Array<Provider | ImportedNgModuleProviders>, parent?: EnvironmentInjector | null, debugName?: string | null): EnvironmentInjector;
 
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
@@ -3417,13 +3417,34 @@ declare const enum IcuType {
 declare const ID = 20;
 
 /**
+ * Providers that were imported from NgModules via the `importProvidersFrom` function.
+ *
+ * These providers are meant for use in an application injector (or other environment injectors) and
+ * should not be used in component injectors.
+ *
+ * This type cannot be directly implemented. It's returned from the `importProvidersFrom` function
+ * and serves to prevent the extracted NgModule providers from being used in the wrong contexts.
+ *
+ * @see `importProvidersFrom`
+ *
+ * @publicApi
+ */
+export declare interface ImportedNgModuleProviders {
+    ɵproviders: Provider[];
+}
+
+/**
  * Collects providers from all NgModules and standalone components, including transitively imported
  * ones.
  *
- * @returns The list of collected providers from the specified list of types.
+ * Providers extracted via `importProvidersFrom` are only usable in an application injector or
+ * another environment injector (such as a route injector). They should not be used in component
+ * providers.
+ *
+ * @returns The collected providers from the specified list of types.
  * @publicApi
  */
-export declare function importProvidersFrom(...sources: ImportProvidersSource[]): Provider[];
+export declare function importProvidersFrom(...sources: ImportProvidersSource[]): ImportedNgModuleProviders;
 
 /**
  * A source of providers for the `importProvidersFrom` function.
@@ -6204,7 +6225,7 @@ declare class R3Injector extends EnvironmentInjector {
     get destroyed(): boolean;
     private _destroyed;
     private injectorDefTypes;
-    constructor(providers: Provider[], parent: Injector, source: string | null, scopes: Set<InjectorScope>);
+    constructor(providers: Array<Provider | ImportedNgModuleProviders>, parent: Injector, source: string | null, scopes: Set<InjectorScope>);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
@@ -6950,6 +6971,7 @@ declare const enum RuntimeErrorCode {
     MISSING_INJECTION_CONTEXT = 203,
     INVALID_INJECTION_TOKEN = 204,
     INJECTOR_ALREADY_DESTROYED = 205,
+    PROVIDER_IN_WRONG_CONTEXT = 207,
     MULTIPLE_COMPONENTS_MATCH = -300,
     EXPORT_NOT_FOUND = -301,
     PIPE_NOT_FOUND = -302,
@@ -9442,7 +9464,7 @@ export declare const enum ɵAttributeMarker {
  */
 export declare function ɵbootstrapApplication(config: {
     rootComponent: Type<unknown>;
-    appProviders?: Provider[];
+    appProviders?: Array<Provider | ImportedNgModuleProviders>;
     platformProviders?: Provider[];
 }): Promise<ApplicationRef>;
 
