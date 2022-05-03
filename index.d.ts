@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-7005da9
+ * @license Angular v14.0.0-next.15+sha-fa755b2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10035,6 +10035,11 @@ export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | 
  */
 export declare function ɵgetUnknownElementStrictMode(): boolean;
 
+/**
+ * Gets the current value of the strict mode.
+ */
+export declare function ɵgetUnknownPropertyStrictMode(): boolean;
+
 
 export declare const ɵglobal: any;
 
@@ -10786,6 +10791,13 @@ export declare function ɵsetLocaleId(localeId: string): void;
  * (for AOT-compiled ones this check happens at build time).
  */
 export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): void;
+
+/**
+ * Sets a strict mode for JIT-compiled components to throw an error on unknown properties,
+ * instead of just logging the error.
+ * (for AOT-compiled ones this check happens at build time).
+ */
+export declare function ɵsetUnknownPropertyStrictMode(shouldThrow: boolean): void;
 
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
