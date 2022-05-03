@@ -1,10 +1,10 @@
 /**
- * @license Angular v14.0.0-next.15+sha-410d81f
+ * @license Angular v14.0.0-next.15+sha-a667592
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵgetUnknownElementStrictMode, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -1521,6 +1521,8 @@ class R3TestCompiler {
 const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
 /** Whether unknown elements in templates should throw by default. */
 const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
+/** Whether unknown properties in templates should throw by default. */
+const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -1686,6 +1688,7 @@ class TestBedRender3 {
         }
         TestBedRender3._environmentTeardownOptions = options?.teardown;
         TestBedRender3._environmentErrorOnUnknownElementsOption = options?.errorOnUnknownElements;
+        TestBedRender3._environmentErrorOnUnknownPropertiesOption = options?.errorOnUnknownProperties;
         this.platform = platform;
         this.ngModule = ngModule;
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
@@ -1717,6 +1720,8 @@ class TestBedRender3 {
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
         // Restore the previous value of the "error on unknown elements" option
         ɵsetUnknownElementStrictMode(this._previousErrorOnUnknownElementsOption ?? THROW_ON_UNKNOWN_ELEMENTS_DEFAULT);
+        // Restore the previous value of the "error on unknown properties" option
+        ɵsetUnknownPropertyStrictMode(this._previousErrorOnUnknownPropertiesOption ?? THROW_ON_UNKNOWN_PROPERTIES_DEFAULT);
         // We have to chain a couple of try/finally blocks, because each step can
         // throw errors and we don't want it to interrupt the next step and we also
         // want an error to be thrown at the end.
@@ -1733,6 +1738,7 @@ class TestBedRender3 {
                 this._testModuleRef = null;
                 this._instanceTeardownOptions = undefined;
                 this._instanceErrorOnUnknownElementsOption = undefined;
+                this._instanceErrorOnUnknownPropertiesOption = undefined;
             }
         }
     }
@@ -1755,10 +1761,13 @@ class TestBedRender3 {
         // This ensures that we don't carry them between tests.
         this._instanceTeardownOptions = moduleDef.teardown;
         this._instanceErrorOnUnknownElementsOption = moduleDef.errorOnUnknownElements;
+        this._instanceErrorOnUnknownPropertiesOption = moduleDef.errorOnUnknownProperties;
         // Store the current value of the strict mode option,
         // so we can restore it later
         this._previousErrorOnUnknownElementsOption = ɵgetUnknownElementStrictMode();
         ɵsetUnknownElementStrictMode(this.shouldThrowErrorOnUnknownElements());
+        this._previousErrorOnUnknownPropertiesOption = ɵgetUnknownPropertyStrictMode();
+        ɵsetUnknownPropertyStrictMode(this.shouldThrowErrorOnUnknownProperties());
         this.compiler.configureTestingModule(moduleDef);
     }
     compileComponents() {
@@ -1912,6 +1921,12 @@ class TestBedRender3 {
         return this._instanceErrorOnUnknownElementsOption ??
             TestBedRender3._environmentErrorOnUnknownElementsOption ??
             THROW_ON_UNKNOWN_ELEMENTS_DEFAULT;
+    }
+    shouldThrowErrorOnUnknownProperties() {
+        // Check if a configuration has been provided to throw when an unknown property is found
+        return this._instanceErrorOnUnknownPropertiesOption ??
+            TestBedRender3._environmentErrorOnUnknownPropertiesOption ??
+            THROW_ON_UNKNOWN_PROPERTIES_DEFAULT;
     }
     shouldTearDownTestingModule() {
         return this._instanceTeardownOptions?.destroyAfterEach ??

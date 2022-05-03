@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-410d81f
+ * @license Angular v14.0.0-next.15+sha-a667592
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -421,12 +421,19 @@ export declare interface TestEnvironmentOptions {
      */
     teardown?: ModuleTeardownOptions;
     /**
-     * Whether errors should be thrown on unknown elements.
+     * Whether errors should be thrown when unknown elements are present in component's template.
      * Defaults to `false`, where the error is simply logged.
-     * If sets to `true`, the error is thrown.
+     * If set to `true`, the error is thrown.
      * @see https://angular.io/errors/NG8001 for the description of the error and how to fix it
      */
     errorOnUnknownElements?: boolean;
+    /**
+     * Whether errors should be thrown when unknown properties are present in component's template.
+     * Defaults to `false`, where the error is simply logged.
+     * If set to `true`, the error is thrown.
+     * @see https://angular.io/errors/NG8002 for the description of the error and how to fix it
+     */
+    errorOnUnknownProperties?: boolean;
 }
 
 /**
@@ -439,12 +446,19 @@ export declare type TestModuleMetadata = {
     schemas?: Array<SchemaMetadata | any[]>;
     teardown?: ModuleTeardownOptions;
     /**
-     * Whether NG0304 runtime errors should be thrown on unknown elements.
-     * Defaults to `false`, where the error is simply logged.
-     * If sets to `true`, the error is thrown.
+     * Whether NG0304 runtime errors should be thrown when unknown elements are present in component's
+     * template. Defaults to `false`, where the error is simply logged. If set to `true`, the error is
+     * thrown.
      * @see https://angular.io/errors/NG8001 for the description of the problem and how to fix it
      */
     errorOnUnknownElements?: boolean;
+    /**
+     * Whether errors should be thrown when unknown properties are present in component's template.
+     * Defaults to `false`, where the error is simply logged.
+     * If set to `true`, the error is thrown.
+     * @see https://angular.io/errors/NG8002 for the description of the error and how to fix it
+     */
+    errorOnUnknownProperties?: boolean;
 };
 
 /**
