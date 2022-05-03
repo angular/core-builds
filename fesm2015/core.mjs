@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-8ba4ddc
+ * @license Angular v14.0.0-next.15+sha-410d81f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11395,10 +11395,19 @@ const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
  * @publicApi
  */
 function importProvidersFrom(...sources) {
+    return { ɵproviders: internalImportProvidersFrom(true, sources) };
+}
+function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
     const providersOut = [];
     const dedup = new Set(); // already seen types
     let injectorTypesWithProviders;
     deepForEach(sources, source => {
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && checkForStandaloneCmp) {
+            const cmpDef = getComponentDef(source);
+            if (cmpDef === null || cmpDef === void 0 ? void 0 : cmpDef.standalone) {
+                throw new RuntimeError(800 /* RuntimeErrorCode.IMPORT_PROVIDERS_FROM_STANDALONE */, `Importing providers supports NgModule or ModuleWithProviders but got a standalone component "${stringifyForError(source)}"`);
+            }
+        }
         // Narrow `source` to access the internal type analogue for `ModuleWithProviders`.
         const internalSource = source;
         if (walkProviderTree(internalSource, providersOut, [], dedup)) {
@@ -11410,7 +11419,7 @@ function importProvidersFrom(...sources) {
     if (injectorTypesWithProviders !== undefined) {
         processInjectorTypesWithProviders(injectorTypesWithProviders, providersOut);
     }
-    return { ɵproviders: providersOut };
+    return providersOut;
 }
 /**
  * Collects all providers from the list of `ModuleWithProviders` and appends them to the provided
@@ -21553,7 +21562,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-next.15+sha-8ba4ddc');
+const VERSION = new Version('14.0.0-next.15+sha-410d81f');
 
 /**
  * @license
@@ -22249,8 +22258,8 @@ class StandaloneService {
             return null;
         }
         if (!this.cachedInjectors.has(componentDef)) {
-            const providers = importProvidersFrom(componentDef.type);
-            const standaloneInjector = providers.ɵproviders.length > 0 ?
+            const providers = internalImportProvidersFrom(false, componentDef.type);
+            const standaloneInjector = providers.length > 0 ?
                 createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`) :
                 null;
             this.cachedInjectors.set(componentDef, standaloneInjector);
