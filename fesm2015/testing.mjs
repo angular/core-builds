@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.15+sha-bb8d709
+ * @license Angular v14.0.0-next.15+sha-401dec4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1071,12 +1071,29 @@ class R3TestBedCompiler {
         this.seenDirectives.clear();
     }
     applyProviderOverridesToModule(moduleType) {
+        var _a;
         if (this.moduleProvidersOverridden.has(moduleType)) {
             return;
         }
         this.moduleProvidersOverridden.add(moduleType);
+        // NOTE: the line below triggers JIT compilation of the module injector,
+        // which also invokes verification of the NgModule semantics, which produces
+        // detailed error messages. The fact that the code relies on this line being
+        // present here is suspicious and should be refactored in a way that the line
+        // below can be moved (for ex. after an early exit check below).
         const injectorDef = moduleType[ɵNG_INJ_DEF];
-        if (this.providerOverridesByToken.size > 0) {
+        // No provider overrides, exit early.
+        if (this.providerOverridesByToken.size === 0)
+            return;
+        if (isStandaloneComponent(moduleType)) {
+            // Visit all component dependencies and override providers there.
+            const def = getComponentDef(moduleType);
+            const dependencies = maybeUnwrapFn((_a = def.dependencies) !== null && _a !== void 0 ? _a : []);
+            for (const dependency of dependencies) {
+                this.applyProviderOverridesToModule(dependency);
+            }
+        }
+        else {
             const providers = [
                 ...injectorDef.providers,
                 ...(this.providerOverridesByModule.get(moduleType) || [])
@@ -1151,8 +1168,11 @@ class R3TestBedCompiler {
             // real module, which was imported. This pattern is understood to mean that the component
             // should use its original scope, but that the testing module should also contain the
             // component in its scope.
-            if (!this.componentToModuleScope.has(type) ||
-                this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION) {
+            //
+            // Note: standalone components have no associated NgModule, so the `moduleType` can be `null`.
+            if (moduleType !== null &&
+                (!this.componentToModuleScope.has(type) ||
+                    this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION)) {
                 this.componentToModuleScope.set(type, moduleType);
             }
             return;
@@ -1177,6 +1197,7 @@ class R3TestBedCompiler {
         // encountered. In some test setups, this caching resulted in 10X runtime improvement.
         const processedNgModuleDefs = new Set();
         const queueTypesFromModulesArrayRecur = (arr) => {
+            var _a;
             for (const value of arr) {
                 if (Array.isArray(value)) {
                     queueTypesFromModulesArrayRecur(value);
@@ -1195,6 +1216,11 @@ class R3TestBedCompiler {
                 }
                 else if (isModuleWithProviders(value)) {
                     queueTypesFromModulesArrayRecur([value.ngModule]);
+                }
+                else if (isStandaloneComponent(value)) {
+                    this.queueType(value, null);
+                    const def = getComponentDef(value);
+                    queueTypesFromModulesArrayRecur(maybeUnwrapFn((_a = def.dependencies) !== null && _a !== void 0 ? _a : []));
                 }
             }
         };
@@ -1412,6 +1438,14 @@ function initResolvers() {
         directive: new DirectiveResolver(),
         pipe: new PipeResolver()
     };
+}
+function isStandaloneComponent(value) {
+    const def = getComponentDef(value);
+    return !!(def === null || def === void 0 ? void 0 : def.standalone);
+}
+function getComponentDef(value) {
+    var _a;
+    return (_a = value.ɵcmp) !== null && _a !== void 0 ? _a : null;
 }
 function hasNgModuleDef(value) {
     return value.hasOwnProperty('ɵmod');
@@ -1787,7 +1821,7 @@ class TestBedRender3 {
         testComponentRenderer.insertRootElement(rootElId);
         const componentDef = type.ɵcmp;
         if (!componentDef) {
-            throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ɵcmp' field`);
+            throw new Error(`It looks like '${ɵstringify(type)}' has not been compiled.`);
         }
         // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
