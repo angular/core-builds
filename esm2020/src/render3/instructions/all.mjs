@@ -1,0 +1,53 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/*
+ * This file re-exports all symbols contained in this directory.
+ *
+ * Why is this file not `index.ts`?
+ *
+ * There seems to be an inconsistent path resolution of an `index.ts` file
+ * when only the parent directory is referenced. This could be due to the
+ * node module resolution configuration differing from rollup and/or typescript.
+ *
+ * With commit
+ * https://github.com/angular/angular/commit/d5e3f2c64bd13ce83e7c70788b7fc514ca4a9918
+ * the `instructions.ts` file was moved to `instructions/instructions.ts` and an
+ * `index.ts` file was used to re-export everything. Having had file names that were
+ * importing from `instructions' directly (not the from the sub file or the `index.ts`
+ * file) caused strange CI issues. `index.ts` had to be renamed to `all.ts` for this
+ * to work.
+ *
+ * Jira Issue = FW-1184
+ */
+export * from './attribute';
+export * from './attribute_interpolation';
+export * from './change_detection';
+export * from './template';
+export * from './storage';
+export * from './di';
+export * from './di_attr';
+export * from './element';
+export * from './element_container';
+export * from './get_current_view';
+export * from './listener';
+export * from './namespace';
+export * from './next_context';
+export * from './projection';
+export * from './property';
+export * from './property_interpolation';
+export * from './advance';
+export * from './styling';
+export * from './text';
+export * from './text_interpolation';
+export * from './class_map_interpolation';
+export * from './style_map_interpolation';
+export * from './style_prop_interpolation';
+export * from './host_property';
+export * from './i18n';
+export { ɵgetUnknownPropertyStrictMode, ɵsetUnknownPropertyStrictMode } from './shared';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYWxsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vLi4vLi4vcGFja2FnZXMvY29yZS9zcmMvcmVuZGVyMy9pbnN0cnVjdGlvbnMvYWxsLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVIOzs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FrQkc7QUFDSCxjQUFjLGFBQWEsQ0FBQztBQUM1QixjQUFjLDJCQUEyQixDQUFDO0FBQzFDLGNBQWMsb0JBQW9CLENBQUM7QUFDbkMsY0FBYyxZQUFZLENBQUM7QUFDM0IsY0FBYyxXQUFXLENBQUM7QUFDMUIsY0FBYyxNQUFNLENBQUM7QUFDckIsY0FBYyxXQUFXLENBQUM7QUFDMUIsY0FBYyxXQUFXLENBQUM7QUFDMUIsY0FBYyxxQkFBcUIsQ0FBQztBQUNwQyxjQUFjLG9CQUFvQixDQUFDO0FBQ25DLGNBQWMsWUFBWSxDQUFDO0FBQzNCLGNBQWMsYUFBYSxDQUFDO0FBQzVCLGNBQWMsZ0JBQWdCLENBQUM7QUFDL0IsY0FBYyxjQUFjLENBQUM7QUFDN0IsY0FBYyxZQUFZLENBQUM7QUFDM0IsY0FBYywwQkFBMEIsQ0FBQztBQUN6QyxjQUFjLFdBQVcsQ0FBQztBQUMxQixjQUFjLFdBQVcsQ0FBQztBQUMxQixjQUFjLFFBQVEsQ0FBQztBQUN2QixjQUFjLHNCQUFzQixDQUFDO0FBQ3JDLGNBQWMsMkJBQTJCLENBQUM7QUFDMUMsY0FBYywyQkFBMkIsQ0FBQztBQUMxQyxjQUFjLDRCQUE0QixDQUFDO0FBQzNDLGNBQWMsaUJBQWlCLENBQUM7QUFDaEMsY0FBYyxRQUFRLENBQUM7QUFDdkIsT0FBTyxFQUFDLDZCQUE2QixFQUFFLDZCQUE2QixFQUFDLE1BQU0sVUFBVSxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBMTEMgQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbi8qXG4gKiBUaGlzIGZpbGUgcmUtZXhwb3J0cyBhbGwgc3ltYm9scyBjb250YWluZWQgaW4gdGhpcyBkaXJlY3RvcnkuXG4gKlxuICogV2h5IGlzIHRoaXMgZmlsZSBub3QgYGluZGV4LnRzYD9cbiAqXG4gKiBUaGVyZSBzZWVtcyB0byBiZSBhbiBpbmNvbnNpc3RlbnQgcGF0aCByZXNvbHV0aW9uIG9mIGFuIGBpbmRleC50c2AgZmlsZVxuICogd2hlbiBvbmx5IHRoZSBwYXJlbnQgZGlyZWN0b3J5IGlzIHJlZmVyZW5jZWQuIFRoaXMgY291bGQgYmUgZHVlIHRvIHRoZVxuICogbm9kZSBtb2R1bGUgcmVzb2x1dGlvbiBjb25maWd1cmF0aW9uIGRpZmZlcmluZyBmcm9tIHJvbGx1cCBhbmQvb3IgdHlwZXNjcmlwdC5cbiAqXG4gKiBXaXRoIGNvbW1pdFxuICogaHR0cHM6Ly9naXRodWIuY29tL2FuZ3VsYXIvYW5ndWxhci9jb21taXQvZDVlM2YyYzY0YmQxM2NlODNlN2M3MDc4OGI3ZmM1MTRjYTRhOTkxOFxuICogdGhlIGBpbnN0cnVjdGlvbnMudHNgIGZpbGUgd2FzIG1vdmVkIHRvIGBpbnN0cnVjdGlvbnMvaW5zdHJ1Y3Rpb25zLnRzYCBhbmQgYW5cbiAqIGBpbmRleC50c2AgZmlsZSB3YXMgdXNlZCB0byByZS1leHBvcnQgZXZlcnl0aGluZy4gSGF2aW5nIGhhZCBmaWxlIG5hbWVzIHRoYXQgd2VyZVxuICogaW1wb3J0aW5nIGZyb20gYGluc3RydWN0aW9ucycgZGlyZWN0bHkgKG5vdCB0aGUgZnJvbSB0aGUgc3ViIGZpbGUgb3IgdGhlIGBpbmRleC50c2BcbiAqIGZpbGUpIGNhdXNlZCBzdHJhbmdlIENJIGlzc3Vlcy4gYGluZGV4LnRzYCBoYWQgdG8gYmUgcmVuYW1lZCB0byBgYWxsLnRzYCBmb3IgdGhpc1xuICogdG8gd29yay5cbiAqXG4gKiBKaXJhIElzc3VlID0gRlctMTE4NFxuICovXG5leHBvcnQgKiBmcm9tICcuL2F0dHJpYnV0ZSc7XG5leHBvcnQgKiBmcm9tICcuL2F0dHJpYnV0ZV9pbnRlcnBvbGF0aW9uJztcbmV4cG9ydCAqIGZyb20gJy4vY2hhbmdlX2RldGVjdGlvbic7XG5leHBvcnQgKiBmcm9tICcuL3RlbXBsYXRlJztcbmV4cG9ydCAqIGZyb20gJy4vc3RvcmFnZSc7XG5leHBvcnQgKiBmcm9tICcuL2RpJztcbmV4cG9ydCAqIGZyb20gJy4vZGlfYXR0cic7XG5leHBvcnQgKiBmcm9tICcuL2VsZW1lbnQnO1xuZXhwb3J0ICogZnJvbSAnLi9lbGVtZW50X2NvbnRhaW5lcic7XG5leHBvcnQgKiBmcm9tICcuL2dldF9jdXJyZW50X3ZpZXcnO1xuZXhwb3J0ICogZnJvbSAnLi9saXN0ZW5lcic7XG5leHBvcnQgKiBmcm9tICcuL25hbWVzcGFjZSc7XG5leHBvcnQgKiBmcm9tICcuL25leHRfY29udGV4dCc7XG5leHBvcnQgKiBmcm9tICcuL3Byb2plY3Rpb24nO1xuZXhwb3J0ICogZnJvbSAnLi9wcm9wZXJ0eSc7XG5leHBvcnQgKiBmcm9tICcuL3Byb3BlcnR5X2ludGVycG9sYXRpb24nO1xuZXhwb3J0ICogZnJvbSAnLi9hZHZhbmNlJztcbmV4cG9ydCAqIGZyb20gJy4vc3R5bGluZyc7XG5leHBvcnQgKiBmcm9tICcuL3RleHQnO1xuZXhwb3J0ICogZnJvbSAnLi90ZXh0X2ludGVycG9sYXRpb24nO1xuZXhwb3J0ICogZnJvbSAnLi9jbGFzc19tYXBfaW50ZXJwb2xhdGlvbic7XG5leHBvcnQgKiBmcm9tICcuL3N0eWxlX21hcF9pbnRlcnBvbGF0aW9uJztcbmV4cG9ydCAqIGZyb20gJy4vc3R5bGVfcHJvcF9pbnRlcnBvbGF0aW9uJztcbmV4cG9ydCAqIGZyb20gJy4vaG9zdF9wcm9wZXJ0eSc7XG5leHBvcnQgKiBmcm9tICcuL2kxOG4nO1xuZXhwb3J0IHvJtWdldFVua25vd25Qcm9wZXJ0eVN0cmljdE1vZGUsIMm1c2V0VW5rbm93blByb3BlcnR5U3RyaWN0TW9kZX0gZnJvbSAnLi9zaGFyZWQnO1xuIl19
