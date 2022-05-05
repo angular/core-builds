@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-0483c74
+ * @license Angular v14.1.0-next.0+sha-d380bb4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9454,22 +9454,6 @@ export declare const enum ɵAttributeMarker {
 }
 
 /**
- * Internal bootstrap application API that implements the core bootstrap logic.
- *
- * Platforms (such as `platform-browser`) may require different set of application and platform
- * providers for an application to function correctly. As a result, platforms may use this function
- * internally and supply the necessary providers during the bootstrap, while exposing
- * platform-specific APIs as a part of their public API.
- *
- * @returns A promise that returns an `ApplicationRef` instance once resolved.
- */
-export declare function ɵbootstrapApplication(config: {
-    rootComponent: Type<unknown>;
-    appProviders?: Array<Provider | ImportedNgModuleProviders>;
-    platformProviders?: Provider[];
-}): Promise<ApplicationRef>;
-
-/**
  * Mark `html` string as trusted.
  *
  * This function wraps the trusted string in `String` and brands it in a way which makes it
@@ -10052,6 +10036,22 @@ export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDet
  * they are provided in the root scope.
  */
 export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
+
+/**
+ * Internal bootstrap application API that implements the core bootstrap logic.
+ *
+ * Platforms (such as `platform-browser`) may require different set of application and platform
+ * providers for an application to function correctly. As a result, platforms may use this function
+ * internally and supply the necessary providers during the bootstrap, while exposing
+ * platform-specific APIs as a part of their public API.
+ *
+ * @returns A promise that returns an `ApplicationRef` instance once resolved.
+ */
+export declare function ɵinternalBootstrapApplication(config: {
+    rootComponent: Type<unknown>;
+    appProviders?: Array<Provider | ImportedNgModuleProviders>;
+    platformProviders?: Provider[];
+}): Promise<ApplicationRef>;
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 
