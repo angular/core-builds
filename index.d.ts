@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-d380bb4
+ * @license Angular v14.1.0-next.0+sha-a020872
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7419,11 +7419,12 @@ export declare abstract class TemplateRef<C> {
  */
 export declare class Testability implements PublicTestability {
     private _ngZone;
+    private registry;
     private _pendingCount;
     private _isZoneStable;
     private _callbacks;
     private taskTrackingZone;
-    constructor(_ngZone: NgZone);
+    constructor(_ngZone: NgZone, registry: TestabilityRegistry, testabilityGetter: GetTestability);
     private _watchAngularEvents;
     /**
      * Increases the number of pending request
@@ -7476,7 +7477,6 @@ export declare class Testability implements PublicTestability {
  * @publicApi
  */
 export declare class TestabilityRegistry {
-    constructor();
     /**
      * Registers an application with a testability hook so that it can be tracked
      * @param token token of application, root element
@@ -10804,6 +10804,22 @@ export declare function ɵstore<T>(tView: TView, lView: LView, index: number, va
 
 
 export declare function ɵstringify(token: any): string;
+
+/**
+ * Internal injection token that can used to access an instance of a Testability class.
+ *
+ * This token acts as a bridge between the core bootstrap code and the `Testability` class. This is
+ * needed to ensure that there are no direct references to the `Testability` class, so it can be
+ * tree-shaken away (if not referenced). For the environments/setups when the `Testability` class
+ * should be available, this token is used to add a provider that references the `Testability`
+ * class. Otherwise, only this token is retained in a bundle, but the `Testability` class is not.
+ */
+export declare const ɵTESTABILITY: InjectionToken<Testability>;
+
+/**
+ * Internal injection token to retrieve Testability getter class instance.
+ */
+export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
