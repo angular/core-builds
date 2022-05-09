@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-b5d78f4
+ * @license Angular v14.1.0-next.0+sha-75b3d0f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -439,7 +439,7 @@ export declare interface TestEnvironmentOptions {
 /**
  * @publicApi
  */
-export declare type TestModuleMetadata = {
+export declare interface TestModuleMetadata {
     providers?: any[];
     declarations?: any[];
     imports?: any[];
@@ -459,7 +459,7 @@ export declare type TestModuleMetadata = {
      * @see https://angular.io/errors/NG8002 for the description of the error and how to fix it
      */
     errorOnUnknownProperties?: boolean;
-};
+}
 
 /**
  * Simulates the asynchronous passage of time for the timers in the `fakeAsync` zone.
