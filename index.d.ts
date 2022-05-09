@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-next.16+sha-ac7f046
+ * @license Angular v14.0.0-next.16+sha-6ec6c87
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -771,7 +771,7 @@ export declare abstract class ChangeDetectorRef {
      * Checks the change detector and its children, and throws if any changes are detected.
      *
      * Use in development mode to verify that running change detection doesn't introduce
-     * other changes.
+     * other changes. Calling it in production mode is a noop.
      */
     abstract checkNoChanges(): void;
     /**
