@@ -53,8 +53,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     const componentTag = componentDef.selectors[0][0];
     const hostRenderer = rendererFactory.createRenderer(null, null);
     const hostRNode = locateHostElement(hostRenderer, opts.host || componentTag, componentDef.encapsulation);
-    const rootFlags = componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
-        16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
+    const rootFlags = componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
+        16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
     const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
@@ -113,7 +113,7 @@ export function createRootComponentView(rNode, def, rootView, rendererFactory, h
         }
     }
     const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
+    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
     if (tView.firstCreatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
         markAsComponentHost(tView, tNode);

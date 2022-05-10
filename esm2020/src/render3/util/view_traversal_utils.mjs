@@ -29,7 +29,7 @@ export function getLViewParent(lView) {
 export function getRootView(componentOrLView) {
     ngDevMode && assertDefined(componentOrLView, 'component');
     let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
-    while (lView && !(lView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
+    while (lView && !(lView[FLAGS] & 256 /* LViewFlags.IsRoot */)) {
         lView = getLViewParent(lView);
     }
     ngDevMode && assertLView(lView);
