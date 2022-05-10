@@ -356,7 +356,7 @@ export function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.D
     if (tNode !== null) {
         // If the view or any of its ancestors have an embedded
         // view injector, we have to look it up there first.
-        if (lView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */) {
+        if (lView[FLAGS] & 1024 /* LViewFlags.HasEmbeddedViewInjector */) {
             const embeddedInjectorValue = lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, NOT_FOUND);
             if (embeddedInjectorValue !== NOT_FOUND) {
                 return embeddedInjectorValue;
@@ -699,8 +699,8 @@ function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundVa
     // hierarchy when resolving the value is to walk it node-by-node while attempting to resolve
     // the token at each level.
     while (currentTNode !== null && currentLView !== null &&
-        (currentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */) &&
-        !(currentLView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
+        (currentLView[FLAGS] & 1024 /* LViewFlags.HasEmbeddedViewInjector */) &&
+        !(currentLView[FLAGS] & 256 /* LViewFlags.IsRoot */)) {
         ngDevMode && assertTNodeForLView(currentTNode, currentLView);
         // Note that this lookup on the node injector is using the `Self` flag, because
         // we don't want the node injector to look at any parent injectors since we
