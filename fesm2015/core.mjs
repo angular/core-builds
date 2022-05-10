@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-e441ff4
+ * @license Angular v14.1.0-next.0+sha-3165fa3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21591,7 +21591,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-e441ff4');
+const VERSION = new Version('14.1.0-next.0+sha-3165fa3');
 
 /**
  * @license
@@ -26388,8 +26388,22 @@ const TESTABILITY = new InjectionToken('');
 const TESTABILITY_GETTER = new InjectionToken('');
 /**
  * The Testability service provides testing hooks that can be accessed from
- * the browser. Each bootstrapped Angular application on the page will have
- * an instance of Testability.
+ * the browser.
+ *
+ * Angular applications bootstrapped using an NgModule (via `@NgModule.bootstrap` field) will also
+ * instantiate Testability by default (in both development and production modes).
+ *
+ * For applications bootstrapped using the `bootstrapApplication` function, Testability is not
+ * included by default. You can include it into your applications by getting the list of necessary
+ * providers using the `provideProtractorTestingSupport()` function and adding them into the
+ * `options.providers` array. Example:
+ *
+ * ```typescript
+ * import {provideProtractorTestingSupport} from '@angular/platform-browser';
+ *
+ * await bootstrapApplication(RootComponent, providers: [provideProtractorTestingSupport()]);
+ * ```
+ *
  * @publicApi
  */
 class Testability {
