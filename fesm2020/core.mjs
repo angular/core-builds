@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-74321a4
+ * @license Angular v14.1.0-next.0+sha-d48cfbc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1275,7 +1275,7 @@ function isComponentDef(def) {
     return def.template !== null;
 }
 function isRootView(target) {
-    return (target[FLAGS] & 256 /* LViewFlags.IsRoot */) !== 0;
+    return (target[FLAGS] & 512 /* LViewFlags.IsRoot */) !== 0;
 }
 
 /**
@@ -1804,7 +1804,7 @@ function isCreationMode(view) {
  * into a container. For that, you'll want `viewAttachedToContainer` below.
  */
 function viewAttachedToChangeDetector(view) {
-    return (view[FLAGS] & 64 /* LViewFlags.Attached */) === 64 /* LViewFlags.Attached */;
+    return (view[FLAGS] & 128 /* LViewFlags.Attached */) === 128 /* LViewFlags.Attached */;
 }
 /** Returns a boolean for whether the view is attached to a container. */
 function viewAttachedToContainer(view) {
@@ -2500,7 +2500,7 @@ function incrementInitPhaseFlags(lView, initPhase) {
         assertNotEqual(initPhase, 3 /* InitPhaseState.InitPhaseCompleted */, 'Init hooks phase should not be incremented after all init hooks have been run.');
     let flags = lView[FLAGS];
     if ((flags & 3 /* LViewFlags.InitPhaseStateMask */) === initPhase) {
-        flags &= 2047 /* LViewFlags.IndexWithinInitPhaseReset */;
+        flags &= 4095 /* LViewFlags.IndexWithinInitPhaseReset */;
         flags += 1 /* LViewFlags.InitPhaseStateIncrementer */;
         lView[FLAGS] = flags;
     }
@@ -2564,12 +2564,12 @@ function callHook(currentView, initPhase, arr, i) {
     const directiveIndex = isInitHook ? -arr[i] : arr[i];
     const directive = currentView[directiveIndex];
     if (isInitHook) {
-        const indexWithintInitPhase = currentView[FLAGS] >> 11 /* LViewFlags.IndexWithinInitPhaseShift */;
+        const indexWithintInitPhase = currentView[FLAGS] >> 12 /* LViewFlags.IndexWithinInitPhaseShift */;
         // The init phase state must be always checked here as it may have been recursively updated.
         if (indexWithintInitPhase <
             (currentView[PREORDER_HOOK_FLAGS] >> 16 /* PreOrderHookFlags.NumberOfInitHooksCalledShift */) &&
             (currentView[FLAGS] & 3 /* LViewFlags.InitPhaseStateMask */) === initPhase) {
-            currentView[FLAGS] += 2048 /* LViewFlags.IndexWithinInitPhaseIncrementer */;
+            currentView[FLAGS] += 4096 /* LViewFlags.IndexWithinInitPhaseIncrementer */;
             profiler(4 /* ProfilerEvent.LifecycleHookStart */, directive, hook);
             try {
                 hook.call(directive);
@@ -3406,7 +3406,7 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
     if (tNode !== null) {
         // If the view or any of its ancestors have an embedded
         // view injector, we have to look it up there first.
-        if (lView[FLAGS] & 1024 /* LViewFlags.HasEmbeddedViewInjector */) {
+        if (lView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */) {
             const embeddedInjectorValue = lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, NOT_FOUND);
             if (embeddedInjectorValue !== NOT_FOUND) {
                 return embeddedInjectorValue;
@@ -3749,8 +3749,8 @@ function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundVa
     // hierarchy when resolving the value is to walk it node-by-node while attempting to resolve
     // the token at each level.
     while (currentTNode !== null && currentLView !== null &&
-        (currentLView[FLAGS] & 1024 /* LViewFlags.HasEmbeddedViewInjector */) &&
-        !(currentLView[FLAGS] & 256 /* LViewFlags.IsRoot */)) {
+        (currentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */) &&
+        !(currentLView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
         ngDevMode && assertTNodeForLView(currentTNode, currentLView);
         // Note that this lookup on the node injector is using the `Self` flag, because
         // we don't want the node injector to look at any parent injectors since we
@@ -7113,7 +7113,7 @@ function getLViewParent(lView) {
 function getRootView(componentOrLView) {
     ngDevMode && assertDefined(componentOrLView, 'component');
     let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
-    while (lView && !(lView[FLAGS] & 256 /* LViewFlags.IsRoot */)) {
+    while (lView && !(lView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
         lView = getLViewParent(lView);
     }
     ngDevMode && assertLView(lView);
@@ -7378,7 +7378,7 @@ function insertView(tView, lView, lContainer, index) {
         lQueries.insertView(tView);
     }
     // Sets the attached flag
-    lView[FLAGS] |= 64 /* LViewFlags.Attached */;
+    lView[FLAGS] |= 128 /* LViewFlags.Attached */;
 }
 /**
  * Track views created from the declaration container (TemplateRef) and inserted into a
@@ -7418,8 +7418,8 @@ function detachMovedView(declarationContainer, lView) {
     // If the view was marked for refresh but then detached before it was checked (where the flag
     // would be cleared and the counter decremented), we need to decrement the view counter here
     // instead.
-    if (lView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
-        lView[FLAGS] &= ~512 /* LViewFlags.RefreshTransplantedView */;
+    if (lView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) {
+        lView[FLAGS] &= ~1024 /* LViewFlags.RefreshTransplantedView */;
         updateTransplantedViewCount(insertionLContainer, -1);
     }
     movedViews.splice(declarationViewIndex, 1);
@@ -7457,7 +7457,7 @@ function detachView(lContainer, removeIndex) {
         viewToDetach[PARENT] = null;
         viewToDetach[NEXT] = null;
         // Unsets the attached flag
-        viewToDetach[FLAGS] &= ~64 /* LViewFlags.Attached */;
+        viewToDetach[FLAGS] &= ~128 /* LViewFlags.Attached */;
     }
     return viewToDetach;
 }
@@ -7469,7 +7469,7 @@ function detachView(lContainer, removeIndex) {
  * @param lView The view to be destroyed.
  */
 function destroyLView(tView, lView) {
-    if (!(lView[FLAGS] & 128 /* LViewFlags.Destroyed */)) {
+    if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
         const renderer = lView[RENDERER];
         if (isProceduralRenderer(renderer) && renderer.destroyNode) {
             applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
@@ -7486,16 +7486,16 @@ function destroyLView(tView, lView) {
  * @param lView The LView to clean up
  */
 function cleanUpView(tView, lView) {
-    if (!(lView[FLAGS] & 128 /* LViewFlags.Destroyed */)) {
+    if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
         // Usually the Attached flag is removed when the view is detached from its parent, however
         // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
-        lView[FLAGS] &= ~64 /* LViewFlags.Attached */;
+        lView[FLAGS] &= ~128 /* LViewFlags.Attached */;
         // Mark the LView as destroyed *before* executing the onDestroy hooks. An onDestroy hook
         // runs arbitrary user code, which could include its own `viewRef.destroy()` (or similar). If
         // We don't flag the view as destroyed before the hooks, this could lead to an infinite loop.
         // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
         // really more of an "afterDestroy" hook if you think about it.
-        lView[FLAGS] |= 128 /* LViewFlags.Destroyed */;
+        lView[FLAGS] |= 256 /* LViewFlags.Destroyed */;
         executeOnDestroys(tView, lView);
         processCleanups(tView, lView);
         // For component views only, the local renderer is destroyed at clean up time.
@@ -9237,11 +9237,11 @@ class LViewDebug {
             creationMode: !!(flags & 4 /* LViewFlags.CreationMode */),
             firstViewPass: !!(flags & 8 /* LViewFlags.FirstLViewPass */),
             checkAlways: !!(flags & 16 /* LViewFlags.CheckAlways */),
-            dirty: !!(flags & 32 /* LViewFlags.Dirty */),
-            attached: !!(flags & 64 /* LViewFlags.Attached */),
-            destroyed: !!(flags & 128 /* LViewFlags.Destroyed */),
-            isRoot: !!(flags & 256 /* LViewFlags.IsRoot */),
-            indexWithinInitPhase: flags >> 11 /* LViewFlags.IndexWithinInitPhaseShift */,
+            dirty: !!(flags & 64 /* LViewFlags.Dirty */),
+            attached: !!(flags & 128 /* LViewFlags.Attached */),
+            destroyed: !!(flags & 256 /* LViewFlags.Destroyed */),
+            isRoot: !!(flags & 512 /* LViewFlags.IsRoot */),
+            indexWithinInitPhase: flags >> 12 /* LViewFlags.IndexWithinInitPhaseShift */,
         };
     }
     get parent() {
@@ -9554,10 +9554,10 @@ function renderChildComponents(hostLView, components) {
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector, embeddedViewInjector) {
     const lView = ngDevMode ? cloneToLViewFromTViewBlueprint(tView) : tView.blueprint.slice();
     lView[HOST] = host;
-    lView[FLAGS] = flags | 4 /* LViewFlags.CreationMode */ | 64 /* LViewFlags.Attached */ | 8 /* LViewFlags.FirstLViewPass */;
+    lView[FLAGS] = flags | 4 /* LViewFlags.CreationMode */ | 128 /* LViewFlags.Attached */ | 8 /* LViewFlags.FirstLViewPass */;
     if (embeddedViewInjector !== null ||
-        (parentLView && (parentLView[FLAGS] & 1024 /* LViewFlags.HasEmbeddedViewInjector */))) {
-        lView[FLAGS] |= 1024 /* LViewFlags.HasEmbeddedViewInjector */;
+        (parentLView && (parentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */))) {
+        lView[FLAGS] |= 2048 /* LViewFlags.HasEmbeddedViewInjector */;
     }
     resetPreOrderHookFlags(lView);
     ngDevMode && tView.declTNode && parentLView && assertTNodeForLView(tView.declTNode, parentLView);
@@ -9742,7 +9742,7 @@ function renderView(tView, lView, context) {
 function refreshView(tView, lView, templateFn, context) {
     ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
     const flags = lView[FLAGS];
-    if ((flags & 128 /* LViewFlags.Destroyed */) === 128 /* LViewFlags.Destroyed */)
+    if ((flags & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */)
         return;
     enterView(lView);
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
@@ -9844,10 +9844,10 @@ function refreshView(tView, lView, templateFn, context) {
         // no changes cycle, the component would be not be dirty for the next update pass. This would
         // be different in production mode where the component dirty state is not reset.
         if (!isInCheckNoChangesPass) {
-            lView[FLAGS] &= ~(32 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
+            lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
         }
-        if (lView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
-            lView[FLAGS] &= ~512 /* LViewFlags.RefreshTransplantedView */;
+        if (lView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) {
+            lView[FLAGS] &= ~1024 /* LViewFlags.RefreshTransplantedView */;
             updateTransplantedViewCount(lView[PARENT], -1);
         }
     }
@@ -10336,7 +10336,7 @@ function markDirtyIfOnPush(lView, viewIndex) {
     ngDevMode && assertLView(lView);
     const childComponentLView = getComponentLViewByIndex(viewIndex, lView);
     if (!(childComponentLView[FLAGS] & 16 /* LViewFlags.CheckAlways */)) {
-        childComponentLView[FLAGS] |= 32 /* LViewFlags.Dirty */;
+        childComponentLView[FLAGS] |= 64 /* LViewFlags.Dirty */;
     }
 }
 function setNgReflectProperty(lView, element, type, attrName, value) {
@@ -10757,7 +10757,7 @@ function addComponentLogic(lView, hostTNode, def) {
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     const rendererFactory = lView[RENDERER_FACTORY];
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, rendererFactory, rendererFactory.createRenderer(native, def), null, null, null));
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, rendererFactory, rendererFactory.createRenderer(native, def), null, null, null));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
@@ -10929,14 +10929,14 @@ function markTransplantedViewsForRefresh(lView) {
             ngDevMode && assertLContainer(insertionLContainer);
             // We don't want to increment the counter if the moved LView was already marked for
             // refresh.
-            if ((movedLView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) === 0) {
+            if ((movedLView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) === 0) {
                 updateTransplantedViewCount(insertionLContainer, 1);
             }
             // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
             // those that aren't (declaration component === insertion component). In the latter case,
             // it's fine to add the flag, as we will clear it immediately in
             // `refreshEmbeddedViews` for the view currently being refreshed.
-            movedLView[FLAGS] |= 512 /* LViewFlags.RefreshTransplantedView */;
+            movedLView[FLAGS] |= 1024 /* LViewFlags.RefreshTransplantedView */;
         }
     }
 }
@@ -10952,7 +10952,7 @@ function refreshComponent(hostLView, componentHostIdx) {
     // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
     if (viewAttachedToChangeDetector(componentView)) {
         const tView = componentView[TVIEW];
-        if (componentView[FLAGS] & (16 /* LViewFlags.CheckAlways */ | 32 /* LViewFlags.Dirty */)) {
+        if (componentView[FLAGS] & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */)) {
             refreshView(tView, componentView, tView.template, componentView[CONTEXT]);
         }
         else if (componentView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
@@ -10971,7 +10971,7 @@ function refreshContainsDirtyView(lView) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
-            if (embeddedLView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
+            if (embeddedLView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) {
                 const embeddedTView = embeddedLView[TVIEW];
                 ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
                 refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
@@ -11075,7 +11075,7 @@ function addToViewTree(lView, lViewOrLContainer) {
  */
 function markViewDirty(lView) {
     while (lView) {
-        lView[FLAGS] |= 32 /* LViewFlags.Dirty */;
+        lView[FLAGS] |= 64 /* LViewFlags.Dirty */;
         const parent = getLViewParent(lView);
         // Stop traversing up as soon as you find a root view that wasn't attached to any container
         if (isRootView(lView) && !parent) {
@@ -12243,7 +12243,7 @@ function getOwningComponent(elementOrDir) {
     while (lView[TVIEW].type === 2 /* TViewType.Embedded */ && (parent = getLViewParent(lView))) {
         lView = parent;
     }
-    return lView[FLAGS] & 256 /* LViewFlags.IsRoot */ ? null : lView[CONTEXT];
+    return lView[FLAGS] & 512 /* LViewFlags.IsRoot */ ? null : lView[CONTEXT];
 }
 /**
  * Retrieves all root components associated with a DOM element, directive or component instance.
@@ -12694,8 +12694,8 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const componentTag = componentDef.selectors[0][0];
     const hostRenderer = rendererFactory.createRenderer(null, null);
     const hostRNode = locateHostElement(hostRenderer, opts.host || componentTag, componentDef.encapsulation);
-    const rootFlags = componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
-        16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
+    const rootFlags = componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
+        16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
     const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
     const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
     const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
@@ -12754,7 +12754,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
         }
     }
     const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
+    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 64 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
     if (tView.firstCreatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
         markAsComponentHost(tView, tNode);
@@ -15501,7 +15501,10 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
         const startView = tNode.flags & 2 /* TNodeFlags.isComponentHost */ ?
             getComponentLViewByIndex(tNode.index, lView) :
             lView;
-        markViewDirty(startView);
+        // See interfaces/view.ts for more on LViewFlags.ManualOnPush
+        if ((lView[FLAGS] & 32 /* LViewFlags.ManualOnPush */) === 0) {
+            markViewDirty(startView);
+        }
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
@@ -21605,7 +21608,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-74321a4');
+const VERSION = new Version('14.1.0-next.0+sha-d48cfbc');
 
 /**
  * @license
@@ -21732,7 +21735,7 @@ class ViewRef$1 {
         this._lView[CONTEXT] = value;
     }
     get destroyed() {
-        return (this._lView[FLAGS] & 128 /* LViewFlags.Destroyed */) === 128 /* LViewFlags.Destroyed */;
+        return (this._lView[FLAGS] & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */;
     }
     destroy() {
         if (this._appRef) {
@@ -21845,7 +21848,7 @@ class ViewRef$1 {
      * ```
      */
     detach() {
-        this._lView[FLAGS] &= ~64 /* LViewFlags.Attached */;
+        this._lView[FLAGS] &= ~128 /* LViewFlags.Attached */;
     }
     /**
      * Re-attaches a view to the change detection tree.
@@ -21904,7 +21907,7 @@ class ViewRef$1 {
      * ```
      */
     reattach() {
-        this._lView[FLAGS] |= 64 /* LViewFlags.Attached */;
+        this._lView[FLAGS] |= 128 /* LViewFlags.Attached */;
     }
     /**
      * Checks the view and its children.
@@ -22080,8 +22083,8 @@ class ComponentFactory extends ComponentFactory$1 {
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
             createElementNode(rendererFactory.createRenderer(null, this.componentDef), elementName, getNamespace(elementName));
-        const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
-            16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
+        const rootFlags = this.componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
+            16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
         const rootContext = createRootContext();
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);

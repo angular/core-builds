@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-74321a4
+ * @license Angular v14.1.0-next.0+sha-d48cfbc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4793,27 +4793,43 @@ declare const enum LViewFlags {
     FirstLViewPass = 8,
     /** Whether this view has default change detection strategy (checks always) or onPush */
     CheckAlways = 16,
+    /**
+     * Whether or not manual change detection is turned on for onPush components.
+     *
+     * This is a special mode that only marks components dirty in two cases:
+     * 1) There has been a change to an @Input property
+     * 2) `markDirty()` has been called manually by the user
+     *
+     * Note that in this mode, the firing of events does NOT mark components
+     * dirty automatically.
+     *
+     * Manual mode is turned off by default for backwards compatibility, as events
+     * automatically mark OnPush components dirty in View Engine.
+     *
+     * TODO: Add a public API to ChangeDetectionStrategy to turn this mode on
+     */
+    ManualOnPush = 32,
     /** Whether or not this view is currently dirty (needing check) */
-    Dirty = 32,
+    Dirty = 64,
     /** Whether or not this view is currently attached to change detection tree. */
-    Attached = 64,
+    Attached = 128,
     /** Whether or not this view is destroyed. */
-    Destroyed = 128,
+    Destroyed = 256,
     /** Whether or not this view is the root view */
-    IsRoot = 256,
+    IsRoot = 512,
     /**
      * Whether this moved LView was needs to be refreshed at the insertion location because the
      * declaration was dirty.
      */
-    RefreshTransplantedView = 512,
+    RefreshTransplantedView = 1024,
     /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
-    HasEmbeddedViewInjector = 1024,
+    HasEmbeddedViewInjector = 2048,
     /**
      * Index of the current init phase on last 21 bits
      */
-    IndexWithinInitPhaseIncrementer = 2048,
-    IndexWithinInitPhaseShift = 11,
-    IndexWithinInitPhaseReset = 2047
+    IndexWithinInitPhaseIncrementer = 4096,
+    IndexWithinInitPhaseShift = 12,
+    IndexWithinInitPhaseReset = 4095
 }
 
 /**
