@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-3242f75
+ * @license Angular v14.1.0-next.0+sha-cd04588
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -254,7 +254,7 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
 /** Throws an error when a token is not found in DI. */
 function throwProviderNotFoundError(token, injectorName) {
     const injectorDetails = injectorName ? ` in ${injectorName}` : '';
-    throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
+    throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, ngDevMode && `No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -21594,7 +21594,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-3242f75');
+const VERSION = new Version('14.1.0-next.0+sha-cd04588');
 
 /**
  * @license
