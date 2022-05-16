@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-cd04588
+ * @license Angular v14.1.0-next.0+sha-ca04ece
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -887,6 +887,7 @@ function ɵɵdefineComponent(componentDefinition) {
         // See the `initNgDevMode` docstring for more information.
         (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
         const type = componentDefinition.type;
+        const standalone = componentDefinition.standalone === true;
         const declaredInputs = {};
         const def = {
             type: type,
@@ -908,8 +909,8 @@ function ɵɵdefineComponent(componentDefinition) {
             onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
             directiveDefs: null,
             pipeDefs: null,
-            standalone: componentDefinition.standalone === true,
-            dependencies: componentDefinition.standalone === true && componentDefinition.dependencies || null,
+            standalone,
+            dependencies: standalone && componentDefinition.dependencies || null,
             getStandaloneInjector: null,
             selectors: componentDefinition.selectors || EMPTY_ARRAY,
             viewQuery: componentDefinition.viewQuery || null,
@@ -21608,7 +21609,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-cd04588');
+const VERSION = new Version('14.1.0-next.0+sha-ca04ece');
 
 /**
  * @license
