@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-ca04ece
+ * @license Angular v14.1.0-next.0+sha-db1b6fe
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -254,7 +254,7 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
 /** Throws an error when a token is not found in DI. */
 function throwProviderNotFoundError(token, injectorName) {
     const injectorDetails = injectorName ? ` in ${injectorName}` : '';
-    throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, ngDevMode && `No provider for ${stringifyForError(token)} found${injectorDetails}`);
+    throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, `No provider for ${stringifyForError(token)} found${injectorDetails}`);
 }
 
 /**
@@ -887,7 +887,6 @@ function ɵɵdefineComponent(componentDefinition) {
         // See the `initNgDevMode` docstring for more information.
         (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
         const type = componentDefinition.type;
-        const standalone = componentDefinition.standalone === true;
         const declaredInputs = {};
         const def = {
             type: type,
@@ -909,8 +908,8 @@ function ɵɵdefineComponent(componentDefinition) {
             onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
             directiveDefs: null,
             pipeDefs: null,
-            standalone,
-            dependencies: standalone && componentDefinition.dependencies || null,
+            standalone: componentDefinition.standalone === true,
+            dependencies: componentDefinition.standalone === true && componentDefinition.dependencies || null,
             getStandaloneInjector: null,
             selectors: componentDefinition.selectors || EMPTY_ARRAY,
             viewQuery: componentDefinition.viewQuery || null,
@@ -21609,7 +21608,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-ca04ece');
+const VERSION = new Version('14.1.0-next.0+sha-db1b6fe');
 
 /**
  * @license
