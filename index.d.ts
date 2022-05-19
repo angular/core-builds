@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.1+sha-8869fce
+ * @license Angular v14.0.0-rc.1+sha-2bc6535
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3611,7 +3611,7 @@ export declare type InjectableProvider = ValueSansProvider | ExistingSansProvide
  * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
  *
  * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
- * `InjectorDef`-based `StaticInjector.
+ * `InjectorDef`-based `StaticInjector`.
  *
  * @publicApi
  */
@@ -9693,7 +9693,8 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     tView: TView | null;
     /**
-     * A function added by the {@see ɵɵStandaloneFeature} and used by the framework to create standalone injectors.
+     * A function added by the {@link ɵɵStandaloneFeature} and used by the framework to create
+     * standalone injectors.
      */
     getStandaloneInjector: ((parentInjector: EnvironmentInjector) => EnvironmentInjector | null) | null;
     /**
@@ -13777,7 +13778,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
 }): unknown;
 
 /**
- * A feature that acts as a setup code for the {@see StandaloneService}.
+ * A feature that acts as a setup code for the {@link StandaloneService}.
  *
  * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
  * function (an entry points to a standalone injector creation) on a component definition object. We
