@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-0ff4eda
+ * @license Angular v14.1.0-next.0+sha-cd0096d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21609,7 +21609,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-0ff4eda');
+const VERSION = new Version('14.1.0-next.0+sha-cd0096d');
 
 /**
  * @license
@@ -22337,7 +22337,7 @@ StandaloneService.ɵprov = ɵɵdefineInjectable({
     factory: () => new StandaloneService(ɵɵinject(EnvironmentInjector)),
 });
 /**
- * A feature that acts as a setup code for the {@see StandaloneService}.
+ * A feature that acts as a setup code for the {@link StandaloneService}.
  *
  * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
  * function (an entry points to a standalone injector creation) on a component definition object. We
