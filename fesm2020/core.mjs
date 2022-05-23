@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.1+sha-183b5f3
+ * @license Angular v14.0.0-rc.1+sha-b11a939
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11369,6 +11369,21 @@ function createTNodeAtIndex(tView, index, type, name, attrs) {
     return tNode;
 }
 /**
+ * Checks if the current component is declared inside of a standalone component template.
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function isHostComponentStandalone(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    // Unable to obtain a context, fall back to the non-standalone scenario.
+    if (!context)
+        return false;
+    const componentDef = getComponentDef(context.constructor);
+    return !!(componentDef?.standalone);
+}
+/**
  * When elements are created dynamically after a view blueprint is created (e.g. through
  * i18nApply()), we need to adjust the blueprint for future
  * template passes.
@@ -14948,7 +14963,10 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const attrs = getConstant(tViewConsts, attrsIndex);
     const tNode = getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, name, attrs);
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    ngDevMode && validateElementIsKnown(native, tNode.value, tView.schemas, hasDirectives);
+    if (ngDevMode) {
+        const hostIsStandalone = isHostComponentStandalone(lView);
+        validateElementIsKnown(native, tNode.value, tView.schemas, hasDirectives, hostIsStandalone);
+    }
     if (tNode.attrs !== null) {
         computeStaticStyling(tNode, tNode.attrs, false);
     }
@@ -15088,8 +15106,9 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
  * @param tagName Name of the tag to check
  * @param schemas Array of schemas
  * @param hasDirectives Boolean indicating that the element matches any directive
+ * @param hostIsStandalone Boolean indicating whether the host is a standalone component
  */
-function validateElementIsKnown(element, tagName, schemas, hasDirectives) {
+function validateElementIsKnown(element, tagName, schemas, hasDirectives, hostIsStandalone) {
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
     // defined as an array (as an empty array in case `schemas` field is not defined) and we should
@@ -15109,14 +15128,17 @@ function validateElementIsKnown(element, tagName, schemas, hasDirectives) {
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(schemas, tagName)) {
+            const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
             let message = `'${tagName}' is not a known element:\n`;
-            message += `1. If '${tagName}' is an Angular component, then verify that it is part of this module.\n`;
+            message += `1. If '${tagName}' is an Angular component, then verify that it is ${hostIsStandalone ? 'included in the \'@Component.imports\' of this component' :
+                'a part of this module'}.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
-                message += `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.`;
+                message +=
+                    `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.`;
             }
             else {
                 message +=
-                    `2. To allow any element add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.`;
+                    `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
             }
             if (shouldThrowErrorOnUnknownElement) {
                 throw new RuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message);
@@ -21609,7 +21631,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-rc.1+sha-183b5f3');
+const VERSION = new Version('14.0.0-rc.1+sha-b11a939');
 
 /**
  * @license
