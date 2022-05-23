@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-ae18f00
+ * @license Angular v14.1.0-next.0+sha-8704574
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -780,8 +780,9 @@ class R3TestBedCompiler {
         this.componentToModuleScope = new Map();
         // Map that keeps initial version of component/directive/pipe defs in case
         // we compile a Type again, thus overriding respective static fields. This is
-        // required to make sure we restore defs to their initial states between test runs
-        // TODO: we should support the case with multiple defs on a type
+        // required to make sure we restore defs to their initial states between test runs.
+        // Note: one class may have multiple defs (for example: ɵmod and ɵinj in case of an
+        // NgModule), store all of them in a map.
         this.initialNgDefs = new Map();
         // Array that keeps cleanup operations for initial versions of component/directive/pipe/module
         // defs in case TestBed makes changes to the originals.
@@ -1265,10 +1266,20 @@ class R3TestBedCompiler {
         calcAffectedModulesRecur(arr, []);
         return affectedModules;
     }
+    /**
+     * Preserve an original def (such as ɵmod, ɵinj, etc) before applying an override.
+     * Note: one class may have multiple defs (for example: ɵmod and ɵinj in case of
+     * an NgModule). If there is a def in a set already, don't override it, since
+     * an original one should be restored at the end of a test.
+     */
     maybeStoreNgDef(prop, type) {
         if (!this.initialNgDefs.has(type)) {
+            this.initialNgDefs.set(type, new Map());
+        }
+        const currentDefs = this.initialNgDefs.get(type);
+        if (!currentDefs.has(prop)) {
             const currentDef = Object.getOwnPropertyDescriptor(type, prop);
-            this.initialNgDefs.set(type, [prop, currentDef]);
+            currentDefs.set(prop, currentDef);
         }
     }
     storeFieldOfDefOnType(type, defField, fieldName) {
@@ -1305,20 +1316,21 @@ class R3TestBedCompiler {
             op.object[op.fieldName] = op.originalValue;
         });
         // Restore initial component/directive/pipe defs
-        this.initialNgDefs.forEach((value, type) => {
-            const [prop, descriptor] = value;
-            if (!descriptor) {
-                // Delete operations are generally undesirable since they have performance implications
-                // on objects they were applied to. In this particular case, situations where this code
-                // is invoked should be quite rare to cause any noticeable impact, since it's applied
-                // only to some test cases (for example when class with no annotations extends some
-                // @Component) when we need to clear 'ɵcmp' field on a given class to restore
-                // its original state (before applying overrides and running tests).
-                delete type[prop];
-            }
-            else {
-                Object.defineProperty(type, prop, descriptor);
-            }
+        this.initialNgDefs.forEach((defs, type) => {
+            defs.forEach((descriptor, prop) => {
+                if (!descriptor) {
+                    // Delete operations are generally undesirable since they have performance
+                    // implications on objects they were applied to. In this particular case, situations
+                    // where this code is invoked should be quite rare to cause any noticeable impact,
+                    // since it's applied only to some test cases (for example when class with no
+                    // annotations extends some @Component) when we need to clear 'ɵcmp' field on a given
+                    // class to restore its original state (before applying overrides and running tests).
+                    delete type[prop];
+                }
+                else {
+                    Object.defineProperty(type, prop, descriptor);
+                }
+            });
         });
         this.initialNgDefs.clear();
         this.moduleProvidersOverridden.clear();
