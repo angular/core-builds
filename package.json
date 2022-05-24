@@ -1,11 +1,11 @@
 {
   "name": "@angular/core",
-  "version": "14.1.0-next.0+sha-8629f2d",
+  "version": "13.3.9+18.sha-3e3f8fc",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
   "engines": {
-    "node": "^14.15.0 || >=16.10.0"
+    "node": "^12.20.0 || ^14.15.0 || >=16.10.0"
   },
   "exports": {
     "./schematics/*": {
@@ -15,7 +15,7 @@
       "default": "./package.json"
     },
     ".": {
-      "types": "./index.d.ts",
+      "types": "./core.d.ts",
       "esm2020": "./esm2020/core.mjs",
       "es2020": "./fesm2020/core.mjs",
       "es2015": "./fesm2015/core.mjs",
@@ -23,7 +23,7 @@
       "default": "./fesm2020/core.mjs"
     },
     "./testing": {
-      "types": "./testing/index.d.ts",
+      "types": "./testing/testing.d.ts",
       "esm2020": "./esm2020/testing/testing.mjs",
       "es2020": "./fesm2020/testing.mjs",
       "es2015": "./fesm2015/testing.mjs",
@@ -68,7 +68,7 @@
   "fesm2020": "./fesm2020/core.mjs",
   "fesm2015": "./fesm2015/core.mjs",
   "esm2020": "./esm2020/core.mjs",
-  "typings": "./index.d.ts",
+  "typings": "./core.d.ts",
   "module": "./fesm2015/core.mjs",
   "es2020": "./fesm2020/core.mjs",
   "type": "module"

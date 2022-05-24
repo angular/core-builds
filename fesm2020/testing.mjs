@@ -1,10 +1,10 @@
 /**
- * @license Angular v14.1.0-next.0+sha-8629f2d
+ * @license Angular v13.3.9+18.sha-3e3f8fc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken, Injector, InjectFlags, ɵresetCompiledComponents, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -780,9 +780,8 @@ class R3TestBedCompiler {
         this.componentToModuleScope = new Map();
         // Map that keeps initial version of component/directive/pipe defs in case
         // we compile a Type again, thus overriding respective static fields. This is
-        // required to make sure we restore defs to their initial states between test runs.
-        // Note: one class may have multiple defs (for example: ɵmod and ɵinj in case of an
-        // NgModule), store all of them in a map.
+        // required to make sure we restore defs to their initial states between test runs
+        // TODO: we should support the case with multiple defs on a type
         this.initialNgDefs = new Map();
         // Array that keeps cleanup operations for initial versions of component/directive/pipe/module
         // defs in case TestBed makes changes to the originals.
@@ -838,26 +837,16 @@ class R3TestBedCompiler {
         this.queueTypesFromModulesArray([ngModule]);
     }
     overrideComponent(component, override) {
-        this.verifyNoStandaloneFlagOverrides(component, override);
         this.resolvers.component.addOverride(component, override);
         this.pendingComponents.add(component);
     }
     overrideDirective(directive, override) {
-        this.verifyNoStandaloneFlagOverrides(directive, override);
         this.resolvers.directive.addOverride(directive, override);
         this.pendingDirectives.add(directive);
     }
     overridePipe(pipe, override) {
-        this.verifyNoStandaloneFlagOverrides(pipe, override);
         this.resolvers.pipe.addOverride(pipe, override);
         this.pendingPipes.add(pipe);
-    }
-    verifyNoStandaloneFlagOverrides(type, override) {
-        if (override.add?.hasOwnProperty('standalone') || override.set?.hasOwnProperty('standalone') ||
-            override.remove?.hasOwnProperty('standalone')) {
-            throw new Error(`An override for the ${type.name} class has the \`standalone\` flag. ` +
-                `Changing the \`standalone\` flag via TestBed overrides is not supported.`);
-        }
     }
     overrideProvider(token, provider) {
         let providerDef;
@@ -1077,31 +1066,8 @@ class R3TestBedCompiler {
             return;
         }
         this.moduleProvidersOverridden.add(moduleType);
-        // NOTE: the line below triggers JIT compilation of the module injector,
-        // which also invokes verification of the NgModule semantics, which produces
-        // detailed error messages. The fact that the code relies on this line being
-        // present here is suspicious and should be refactored in a way that the line
-        // below can be moved (for ex. after an early exit check below).
         const injectorDef = moduleType[ɵNG_INJ_DEF];
-        // No provider overrides, exit early.
-        if (this.providerOverridesByToken.size === 0)
-            return;
-        if (isStandaloneComponent(moduleType)) {
-            // Visit all component dependencies and override providers there.
-            const def = getComponentDef(moduleType);
-            const dependencies = maybeUnwrapFn(def.dependencies ?? []);
-            for (const dependency of dependencies) {
-                // Proceed with examining dependencies recursively
-                // when a dependency is a standalone component or an NgModule.
-                // In AOT, the `dependencies` might also contain regular (NgModule-based)
-                // Component, Directive and Pipes. Skip them here, they are handled in a
-                // different location (in the `configureTestingModule` function).
-                if (isStandaloneComponent(dependency) || hasNgModuleDef(dependency)) {
-                    this.applyProviderOverridesToModule(dependency);
-                }
-            }
-        }
-        else {
+        if (this.providerOverridesByToken.size > 0) {
             const providers = [
                 ...injectorDef.providers,
                 ...(this.providerOverridesByModule.get(moduleType) || [])
@@ -1176,11 +1142,8 @@ class R3TestBedCompiler {
             // real module, which was imported. This pattern is understood to mean that the component
             // should use its original scope, but that the testing module should also contain the
             // component in its scope.
-            //
-            // Note: standalone components have no associated NgModule, so the `moduleType` can be `null`.
-            if (moduleType !== null &&
-                (!this.componentToModuleScope.has(type) ||
-                    this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION)) {
+            if (!this.componentToModuleScope.has(type) ||
+                this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION) {
                 this.componentToModuleScope.set(type, moduleType);
             }
             return;
@@ -1223,23 +1186,6 @@ class R3TestBedCompiler {
                 }
                 else if (isModuleWithProviders(value)) {
                     queueTypesFromModulesArrayRecur([value.ngModule]);
-                }
-                else if (isStandaloneComponent(value)) {
-                    this.queueType(value, null);
-                    const def = getComponentDef(value);
-                    const dependencies = maybeUnwrapFn(def.dependencies ?? []);
-                    dependencies.forEach((dependency) => {
-                        // Note: in AOT, the `dependencies` might also contain regular
-                        // (NgModule-based) Component, Directive and Pipes, so we handle
-                        // them separately and proceed with recursive process for standalone
-                        // Components and NgModules only.
-                        if (isStandaloneComponent(dependency) || hasNgModuleDef(dependency)) {
-                            queueTypesFromModulesArrayRecur([dependency]);
-                        }
-                        else {
-                            this.queueType(dependency, null);
-                        }
-                    });
                 }
             }
         };
@@ -1285,20 +1231,10 @@ class R3TestBedCompiler {
         calcAffectedModulesRecur(arr, []);
         return affectedModules;
     }
-    /**
-     * Preserve an original def (such as ɵmod, ɵinj, etc) before applying an override.
-     * Note: one class may have multiple defs (for example: ɵmod and ɵinj in case of
-     * an NgModule). If there is a def in a set already, don't override it, since
-     * an original one should be restored at the end of a test.
-     */
     maybeStoreNgDef(prop, type) {
         if (!this.initialNgDefs.has(type)) {
-            this.initialNgDefs.set(type, new Map());
-        }
-        const currentDefs = this.initialNgDefs.get(type);
-        if (!currentDefs.has(prop)) {
             const currentDef = Object.getOwnPropertyDescriptor(type, prop);
-            currentDefs.set(prop, currentDef);
+            this.initialNgDefs.set(type, [prop, currentDef]);
         }
     }
     storeFieldOfDefOnType(type, defField, fieldName) {
@@ -1335,21 +1271,20 @@ class R3TestBedCompiler {
             op.object[op.fieldName] = op.originalValue;
         });
         // Restore initial component/directive/pipe defs
-        this.initialNgDefs.forEach((defs, type) => {
-            defs.forEach((descriptor, prop) => {
-                if (!descriptor) {
-                    // Delete operations are generally undesirable since they have performance
-                    // implications on objects they were applied to. In this particular case, situations
-                    // where this code is invoked should be quite rare to cause any noticeable impact,
-                    // since it's applied only to some test cases (for example when class with no
-                    // annotations extends some @Component) when we need to clear 'ɵcmp' field on a given
-                    // class to restore its original state (before applying overrides and running tests).
-                    delete type[prop];
-                }
-                else {
-                    Object.defineProperty(type, prop, descriptor);
-                }
-            });
+        this.initialNgDefs.forEach((value, type) => {
+            const [prop, descriptor] = value;
+            if (!descriptor) {
+                // Delete operations are generally undesirable since they have performance implications
+                // on objects they were applied to. In this particular case, situations where this code
+                // is invoked should be quite rare to cause any noticeable impact, since it's applied
+                // only to some test cases (for example when class with no annotations extends some
+                // @Component) when we need to clear 'ɵcmp' field on a given class to restore
+                // its original state (before applying overrides and running tests).
+                delete type[prop];
+            }
+            else {
+                Object.defineProperty(type, prop, descriptor);
+            }
         });
         this.initialNgDefs.clear();
         this.moduleProvidersOverridden.clear();
@@ -1469,13 +1404,6 @@ function initResolvers() {
         pipe: new PipeResolver()
     };
 }
-function isStandaloneComponent(value) {
-    const def = getComponentDef(value);
-    return !!def?.standalone;
-}
-function getComponentDef(value) {
-    return value.ɵcmp ?? null;
-}
 function hasNgModuleDef(value) {
     return value.hasOwnProperty('ɵmod');
 }
@@ -1550,10 +1478,6 @@ class R3TestCompiler {
  */
 /** Whether test modules should be torn down by default. */
 const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
-/** Whether unknown elements in templates should throw by default. */
-const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
-/** Whether unknown properties in templates should throw by default. */
-const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
@@ -1613,9 +1537,9 @@ class TestBedRender3 {
      *
      * @publicApi
      */
-    static initTestEnvironment(ngModule, platform, options) {
+    static initTestEnvironment(ngModule, platform, summariesOrOptions) {
         const testBed = _getTestBedRender3();
-        testBed.initTestEnvironment(ngModule, platform, options);
+        testBed.initTestEnvironment(ngModule, platform, summariesOrOptions);
         return testBed;
     }
     /**
@@ -1713,21 +1637,17 @@ class TestBedRender3 {
      *
      * @publicApi
      */
-    initTestEnvironment(ngModule, platform, options) {
+    initTestEnvironment(ngModule, platform, summariesOrOptions) {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
-        TestBedRender3._environmentTeardownOptions = options?.teardown;
-        TestBedRender3._environmentErrorOnUnknownElementsOption = options?.errorOnUnknownElements;
-        TestBedRender3._environmentErrorOnUnknownPropertiesOption = options?.errorOnUnknownProperties;
+        // If `summariesOrOptions` is a function, it means that it's
+        // an AOT summaries factory which Ivy doesn't support.
+        TestBedRender3._environmentTeardownOptions =
+            typeof summariesOrOptions === 'function' ? undefined : summariesOrOptions?.teardown;
         this.platform = platform;
         this.ngModule = ngModule;
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
-        // TestBed does not have an API which can reliably detect the start of a test, and thus could be
-        // used to track the state of the NgModule registry and reset it correctly. Instead, when we
-        // know we're in a testing scenario, we disable the check for duplicate NgModule registration
-        // completely.
-        ɵsetAllowDuplicateNgModuleIdsForTest(true);
     }
     /**
      * Reset the providers for the test injector.
@@ -1740,7 +1660,6 @@ class TestBedRender3 {
         this.platform = null;
         this.ngModule = null;
         TestBedRender3._environmentTeardownOptions = undefined;
-        ɵsetAllowDuplicateNgModuleIdsForTest(false);
     }
     resetTestingModule() {
         this.checkGlobalCompilationFinished();
@@ -1749,10 +1668,6 @@ class TestBedRender3 {
             this.compiler.restoreOriginalState();
         }
         this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
-        // Restore the previous value of the "error on unknown elements" option
-        ɵsetUnknownElementStrictMode(this._previousErrorOnUnknownElementsOption ?? THROW_ON_UNKNOWN_ELEMENTS_DEFAULT);
-        // Restore the previous value of the "error on unknown properties" option
-        ɵsetUnknownPropertyStrictMode(this._previousErrorOnUnknownPropertiesOption ?? THROW_ON_UNKNOWN_PROPERTIES_DEFAULT);
         // We have to chain a couple of try/finally blocks, because each step can
         // throw errors and we don't want it to interrupt the next step and we also
         // want an error to be thrown at the end.
@@ -1768,8 +1683,6 @@ class TestBedRender3 {
             finally {
                 this._testModuleRef = null;
                 this._instanceTeardownOptions = undefined;
-                this._instanceErrorOnUnknownElementsOption = undefined;
-                this._instanceErrorOnUnknownPropertiesOption = undefined;
             }
         }
     }
@@ -1788,17 +1701,9 @@ class TestBedRender3 {
         // their components scoped properly. See the `checkGlobalCompilationFinished` function
         // description for additional info.
         this.checkGlobalCompilationFinished();
-        // Always re-assign the options, even if they're undefined.
-        // This ensures that we don't carry them between tests.
+        // Always re-assign the teardown options, even if they're undefined.
+        // This ensures that we don't carry the options between tests.
         this._instanceTeardownOptions = moduleDef.teardown;
-        this._instanceErrorOnUnknownElementsOption = moduleDef.errorOnUnknownElements;
-        this._instanceErrorOnUnknownPropertiesOption = moduleDef.errorOnUnknownProperties;
-        // Store the current value of the strict mode option,
-        // so we can restore it later
-        this._previousErrorOnUnknownElementsOption = ɵgetUnknownElementStrictMode();
-        ɵsetUnknownElementStrictMode(this.shouldThrowErrorOnUnknownElements());
-        this._previousErrorOnUnknownPropertiesOption = ɵgetUnknownPropertyStrictMode();
-        ɵsetUnknownPropertyStrictMode(this.shouldThrowErrorOnUnknownProperties());
         this.compiler.configureTestingModule(moduleDef);
     }
     compileComponents() {
@@ -1854,7 +1759,7 @@ class TestBedRender3 {
         testComponentRenderer.insertRootElement(rootElId);
         const componentDef = type.ɵcmp;
         if (!componentDef) {
-            throw new Error(`It looks like '${ɵstringify(type)}' has not been compiled.`);
+            throw new Error(`It looks like '${ɵstringify(type)}' has not been IVY compiled - it has no 'ɵcmp' field`);
         }
         // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
@@ -1946,18 +1851,6 @@ class TestBedRender3 {
         // Otherwise use the configured behavior or default to rethrowing.
         return instanceOptions?.rethrowErrors ?? environmentOptions?.rethrowErrors ??
             this.shouldTearDownTestingModule();
-    }
-    shouldThrowErrorOnUnknownElements() {
-        // Check if a configuration has been provided to throw when an unknown element is found
-        return this._instanceErrorOnUnknownElementsOption ??
-            TestBedRender3._environmentErrorOnUnknownElementsOption ??
-            THROW_ON_UNKNOWN_ELEMENTS_DEFAULT;
-    }
-    shouldThrowErrorOnUnknownProperties() {
-        // Check if a configuration has been provided to throw when an unknown property is found
-        return this._instanceErrorOnUnknownPropertiesOption ??
-            TestBedRender3._environmentErrorOnUnknownPropertiesOption ??
-            THROW_ON_UNKNOWN_PROPERTIES_DEFAULT;
     }
     shouldTearDownTestingModule() {
         return this._instanceTeardownOptions?.destroyAfterEach ??

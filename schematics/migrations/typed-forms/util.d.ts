@@ -7,13 +7,15 @@
  */
 /// <amd-module name="@angular/core/schematics/migrations/typed-forms/util" />
 import ts from 'typescript';
-export declare const classes: Set<string>;
-export declare const formControl = "FormControl";
-export declare const untypedPrefix = "Untyped";
-export declare const forms = "@angular/forms";
+export declare const controlClassNames: string[];
+export declare const builderMethodNames: string[];
+export declare const anySymbolName = "AnyForUntypedForms";
 export interface MigratableNode {
-    node: ts.Node;
-    importName: string;
+    node: ts.Expression;
+    generic: string;
 }
-export declare type rewriteFn = (startPos: number, origLength: number, text: string) => void;
-export declare function migrateFile(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, rewrite: rewriteFn): void;
+export declare function getControlClassImports(sourceFile: ts.SourceFile): (ts.ImportSpecifier | null)[];
+export declare function getFormBuilderImport(sourceFile: ts.SourceFile): ts.ImportSpecifier | null;
+export declare function getAnyImport(sourceFile: ts.SourceFile): ts.ImportSpecifier | null;
+export declare function findControlClassUsages(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, importSpecifier: ts.ImportSpecifier | null): MigratableNode[];
+export declare function findFormBuilderCalls(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, importSpecifier: ts.ImportSpecifier | null): MigratableNode[];
