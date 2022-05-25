@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.9+18.sha-3e3f8fc
+ * @license Angular v13.3.9+20.sha-aa6f0c0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9779,12 +9779,6 @@ export declare function ɵfindLocaleData(locale: string): any;
  * its declarations.
  */
 export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
-
-/**
- * Called to format a runtime error.
- * See additional info on the `message` argument type in the `RuntimeError` class description.
- */
-export declare function ɵformatRuntimeError<T extends number = RuntimeErrorCode>(code: T, message: null | false | string): string;
 
 export declare function ɵgetDebugNodeR2(_nativeNode: any): DebugNode | null;
 
