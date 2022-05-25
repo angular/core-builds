@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-d2ea1ba
+ * @license Angular v14.1.0-next.0+sha-a1e5aad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21627,7 +21627,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-d2ea1ba');
+const VERSION = new Version('14.1.0-next.0+sha-a1e5aad');
 
 /**
  * @license
@@ -24428,6 +24428,12 @@ function isStandalone(type) {
     const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
     return def !== null ? def.standalone : false;
 }
+function generateStandaloneInDeclarationsError(type, location) {
+    const prefix = `Unexpected "${stringifyForError(type)}" found in the "declarations" array of the`;
+    const suffix = `"${stringifyForError(type)}" is marked as standalone and can't be declared ` +
+        'in any NgModule - did you intend to import it instead (by adding it to the "imports" array)?';
+    return `${prefix} ${location}, ${suffix}`;
+}
 function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
     if (verifiedNgModule.get(moduleType))
         return;
@@ -24499,7 +24505,8 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
         type = resolveForwardRef(type);
         const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
         if (def === null || def === void 0 ? void 0 : def.standalone) {
-            errors.push(`Unexpected "${stringifyForError(type)}" declaration in "${stringifyForError(moduleType)}" NgModule. "${stringifyForError(type)}" is marked as standalone and can't be declared in any NgModule - did you intend to import it?`);
+            const location = `"${stringifyForError(moduleType)}" NgModule`;
+            errors.push(generateStandaloneInDeclarationsError(type, location));
         }
     }
     function verifyExportsAreDeclaredOrReExported(type) {
