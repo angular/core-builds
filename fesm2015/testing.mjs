@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.2+sha-542d4c7
+ * @license Angular v14.0.0-rc.2+sha-1798ce9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12352,7 +12352,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
             validateAgainstEventProperties(propName);
             if (!validateProperty(element, tNode.value, propName, tView.schemas)) {
                 // Return here since we only log warnings for unknown properties.
-                handleUnknownPropertyError(propName, tNode);
+                handleUnknownPropertyError(propName, tNode, isHostComponentStandalone(lView));
                 return;
             }
             ngDevMode.rendererSetProperty++;
@@ -12372,7 +12372,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
         if (ngDevMode && !matchingSchemas(tView.schemas, tNode.value)) {
-            handleUnknownPropertyError(propName, tNode);
+            handleUnknownPropertyError(propName, tNode, isHostComponentStandalone(lView));
         }
     }
 }
@@ -12474,11 +12474,18 @@ function matchingSchemas(schemas, tagName) {
     return false;
 }
 /**
+ * The set of known control flow directives.
+ * We use this set to produce a more precises error message with a note
+ * that the `CommonModule` should also be included.
+ */
+const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
+/**
  * Logs or throws an error that a property is not supported on an element.
  * @param propName Name of the invalid property.
  * @param tagName Name of the node on which we encountered the property.
+ * @param hostIsStandalone Boolean indicating whether the host is a standalone component.
  */
-function handleUnknownPropertyError(propName, tNode) {
+function handleUnknownPropertyError(propName, tNode, hostIsStandalone) {
     let tagName = tNode.value;
     // Special-case a situation when a structural directive is applied to
     // an `<ng-template>` element, for example: `<ng-template *ngIf="true">`.
@@ -12489,7 +12496,34 @@ function handleUnknownPropertyError(propName, tNode) {
     if (!tagName && tNode.type === 4 /* TNodeType.Container */) {
         tagName = 'ng-template';
     }
-    const message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'.`;
+    let message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'.`;
+    const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
+    const importLocation = hostIsStandalone ?
+        'included in the \'@Component.imports\' of this component' :
+        'a part of an @NgModule where this component is declared';
+    if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
+        // Most likely this is a control flow directive (such as `*ngIf`) used in
+        // a template, but the `CommonModule` is not imported.
+        message += `\nIf the '${propName}' is an Angular control flow directive, ` +
+            `please make sure that the 'CommonModule' is ${importLocation}.`;
+    }
+    else {
+        // May be an Angular component, which is not imported/declared?
+        message += `\n1. If '${tagName}' is an Angular component and it has the ` +
+            `'${propName}' input, then verify that it is ${importLocation}.`;
+        // May be a Web Component?
+        if (tagName && tagName.indexOf('-') > -1) {
+            message += `\n2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' ` +
+                `to the ${schemas} of this component to suppress this message.`;
+            message += `\n3. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
+                `the ${schemas} of this component.`;
+        }
+        else {
+            // If it's expected, the error can be suppressed by the `NO_ERRORS_SCHEMA` schema.
+            message += `\n2. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
+                `the ${schemas} of this component.`;
+        }
+    }
     if (shouldThrowErrorOnUnknownProperty) {
         throw new RuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message);
     }
@@ -15442,7 +15476,7 @@ function validateElementIsKnown(element, tagName, schemas, hasDirectives, hostIs
             const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
             let message = `'${tagName}' is not a known element:\n`;
             message += `1. If '${tagName}' is an Angular component, then verify that it is ${hostIsStandalone ? 'included in the \'@Component.imports\' of this component' :
-                'a part of this module'}.\n`;
+                'a part of an @NgModule where this component is declared'}.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
                 message +=
                     `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.`;
@@ -21942,7 +21976,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-rc.2+sha-542d4c7');
+const VERSION = new Version('14.0.0-rc.2+sha-1798ce9');
 
 /**
  * @license
