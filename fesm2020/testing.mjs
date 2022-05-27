@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-f87aa2d
+ * @license Angular v14.1.0-next.0+sha-12b4ec3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2043,9 +2043,9 @@ function setCurrentInjector(injector) {
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
         const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `inject() must be called from an injection context` :
+            `inject() must be called from an injection context (a constructor, a factory function or a field initializer)` :
             '';
-        throw new RuntimeError(203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, errorMessage);
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, errorMessage);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -21975,7 +21975,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-f87aa2d');
+const VERSION = new Version('14.1.0-next.0+sha-12b4ec3');
 
 /**
  * @license
