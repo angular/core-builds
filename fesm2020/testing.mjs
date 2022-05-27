@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.2+sha-1798ce9
+ * @license Angular v14.0.0-rc.2+sha-568269f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2518,8 +2518,8 @@ function ɵɵdefineComponent(componentDefinition) {
  */
 function ɵɵsetComponentScope(type, directives, pipes) {
     const def = type.ɵcmp;
-    def.directiveDefs = () => directives.map(extractDirectiveDef);
-    def.pipeDefs = () => pipes.map(getPipeDef$1);
+    def.directiveDefs = () => (typeof directives === 'function' ? directives() : directives).map(extractDirectiveDef);
+    def.pipeDefs = () => (typeof pipes === 'function' ? pipes() : pipes).map(getPipeDef$1);
 }
 function extractDirectiveDef(type) {
     return getComponentDef$1(type) || getDirectiveDef(type);
@@ -21975,7 +21975,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-rc.2+sha-1798ce9');
+const VERSION = new Version('14.0.0-rc.2+sha-568269f');
 
 /**
  * @license
