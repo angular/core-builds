@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-3fdcf99
+ * @license Angular v14.1.0-next.0+sha-f0bf29a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13785,7 +13785,7 @@ export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string
  *
  * @codeGenApi
  */
-export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
+export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[] | (() => Type<any>[]), pipes: Type<any>[] | (() => Type<any>[])): void;
 
 /**
  * Adds the module metadata that is necessary to compute the module's transitive scope to an
