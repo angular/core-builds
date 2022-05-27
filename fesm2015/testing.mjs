@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.2+sha-5dee53b
+ * @license Angular v14.0.0-rc.2+sha-ba9f30c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11670,19 +11670,54 @@ function createTNodeAtIndex(tView, index, type, name, attrs) {
     return tNode;
 }
 /**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode and also it relies on the constructor function being available.
+ *
+ * Gets a reference to the host component def (where a current component is declared).
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function getDeclarationComponentDef(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    // Unable to obtain a context.
+    if (!context)
+        return null;
+    return context.constructor ? getComponentDef$1(context.constructor) : null;
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode.
+ *
  * Checks if the current component is declared inside of a standalone component template.
  *
  * @param lView An `LView` that represents a current component that is being rendered.
  */
 function isHostComponentStandalone(lView) {
     !ngDevMode && throwError('Must never be called in production mode');
-    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
-    const context = declarationLView[CONTEXT];
-    // Unable to obtain a context, fall back to the non-standalone scenario.
-    if (!context)
-        return false;
-    const componentDef = getComponentDef$1(context.constructor);
+    const componentDef = getDeclarationComponentDef(lView);
+    // Treat host component as non-standalone if we can't obtain the def.
     return !!(componentDef === null || componentDef === void 0 ? void 0 : componentDef.standalone);
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode.
+ *
+ * Constructs a string describing the location of the host component template. The function is used
+ * in dev mode to produce error messages.
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function getTemplateLocationDetails(lView) {
+    var _a;
+    !ngDevMode && throwError('Must never be called in production mode');
+    const hostComponentDef = getDeclarationComponentDef(lView);
+    const componentClassName = (_a = hostComponentDef === null || hostComponentDef === void 0 ? void 0 : hostComponentDef.type) === null || _a === void 0 ? void 0 : _a.name;
+    return componentClassName ? ` (used in the '${componentClassName}' component template)` : '';
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -12352,7 +12387,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
             validateAgainstEventProperties(propName);
             if (!validateProperty(element, tNode.value, propName, tView.schemas)) {
                 // Return here since we only log warnings for unknown properties.
-                handleUnknownPropertyError(propName, tNode, isHostComponentStandalone(lView));
+                handleUnknownPropertyError(propName, tNode, lView);
                 return;
             }
             ngDevMode.rendererSetProperty++;
@@ -12372,7 +12407,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
         if (ngDevMode && !matchingSchemas(tView.schemas, tNode.value)) {
-            handleUnknownPropertyError(propName, tNode, isHostComponentStandalone(lView));
+            handleUnknownPropertyError(propName, tNode, lView);
         }
     }
 }
@@ -12481,11 +12516,12 @@ function matchingSchemas(schemas, tagName) {
 const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
 /**
  * Logs or throws an error that a property is not supported on an element.
+ *
  * @param propName Name of the invalid property.
- * @param tagName Name of the node on which we encountered the property.
- * @param hostIsStandalone Boolean indicating whether the host is a standalone component.
+ * @param tNode A `TNode` that represents a current component that is being rendered.
+ * @param lView An `LView` that represents a current component that is being rendered.
  */
-function handleUnknownPropertyError(propName, tNode, hostIsStandalone) {
+function handleUnknownPropertyError(propName, tNode, lView) {
     let tagName = tNode.value;
     // Special-case a situation when a structural directive is applied to
     // an `<ng-template>` element, for example: `<ng-template *ngIf="true">`.
@@ -12496,9 +12532,11 @@ function handleUnknownPropertyError(propName, tNode, hostIsStandalone) {
     if (!tagName && tNode.type === 4 /* TNodeType.Container */) {
         tagName = 'ng-template';
     }
-    let message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'.`;
-    const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
-    const importLocation = hostIsStandalone ?
+    const isHostStandalone = isHostComponentStandalone(lView);
+    const templateLocation = getTemplateLocationDetails(lView);
+    let message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'${templateLocation}.`;
+    const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
+    const importLocation = isHostStandalone ?
         'included in the \'@Component.imports\' of this component' :
         'a part of an @NgModule where this component is declared';
     if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
@@ -15309,8 +15347,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const tNode = getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, name, attrs);
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     if (ngDevMode) {
-        const hostIsStandalone = isHostComponentStandalone(lView);
-        validateElementIsKnown(native, tNode.value, tView.schemas, hasDirectives, hostIsStandalone);
+        validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
     }
     if (tNode.attrs !== null) {
         computeStaticStyling(tNode, tNode.attrs, false);
@@ -15448,12 +15485,12 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
  * - the element is allowed by one of the schemas
  *
  * @param element Element to validate
+ * @param lView An `LView` that represents a current component that is being rendered.
  * @param tagName Name of the tag to check
  * @param schemas Array of schemas
  * @param hasDirectives Boolean indicating that the element matches any directive
- * @param hostIsStandalone Boolean indicating whether the host is a standalone component
  */
-function validateElementIsKnown(element, tagName, schemas, hasDirectives, hostIsStandalone) {
+function validateElementIsKnown(element, lView, tagName, schemas, hasDirectives) {
     // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
     // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
     // defined as an array (as an empty array in case `schemas` field is not defined) and we should
@@ -15473,9 +15510,11 @@ function validateElementIsKnown(element, tagName, schemas, hasDirectives, hostIs
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
                 !customElements.get(tagName));
         if (isUnknown && !matchingSchemas(schemas, tagName)) {
-            const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
-            let message = `'${tagName}' is not a known element:\n`;
-            message += `1. If '${tagName}' is an Angular component, then verify that it is ${hostIsStandalone ? 'included in the \'@Component.imports\' of this component' :
+            const isHostStandalone = isHostComponentStandalone(lView);
+            const templateLocation = getTemplateLocationDetails(lView);
+            const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
+            let message = `'${tagName}' is not a known element${templateLocation}:\n`;
+            message += `1. If '${tagName}' is an Angular component, then verify that it is ${isHostStandalone ? 'included in the \'@Component.imports\' of this component' :
                 'a part of an @NgModule where this component is declared'}.\n`;
             if (tagName && tagName.indexOf('-') > -1) {
                 message +=
@@ -21976,7 +22015,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0-rc.2+sha-5dee53b');
+const VERSION = new Version('14.0.0-rc.2+sha-ba9f30c');
 
 /**
  * @license
