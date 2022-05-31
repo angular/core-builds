@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-a623c4f
+ * @license Angular v14.1.0-next.0+sha-7f65089
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3538,30 +3538,24 @@ export declare interface Inject {
 export declare const Inject: InjectDecorator;
 
 /**
- * Injects a token from the currently active injector.
- *
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
- *
- * Within such a factory function, using this function to request injection of a dependency
- * is faster and more type-safe than providing an additional array of dependencies
- * (as has been common with `useFactory` providers).
- *
- * @param token The injection token for the dependency to be injected.
- * @param flags Optional flags that control how injection is executed.
- * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns the injected value if injection is successful, `null` otherwise.
- *
- * @usageNotes
- *
- * ### Example
- *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ * @param token A token that represents a dependency that should be injected.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
  *
  * @publicApi
  */
-export declare const inject: typeof ɵɵinject;
+export declare function inject<T>(token: ProviderToken<T>): T;
+
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param flags Control how injection is executed. The flags correspond to injection strategies that
+ *     can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and `@Optional`.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
+ *
+ * @publicApi
+ */
+export declare function inject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Type of the Injectable metadata.
@@ -12598,10 +12592,7 @@ export declare function ɵɵi18nStart(index: number, messageIndex: number, subTe
 export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
- * Generated instruction: Injects a token from the currently active injector.
- *
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
+ * Generated instruction: injects a token from the currently active injector.
  *
  * (Additional documentation moved to `inject`, as it is the public API, and an alias for this
  * instruction)
