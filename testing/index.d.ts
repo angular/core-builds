@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.2+sha-ba9f30c
+ * @license Angular v14.0.0-rc.2+sha-c901934
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -187,7 +187,10 @@ export declare function flushMicrotasks(): void;
 export declare const getTestBed: () => TestBed;
 
 /**
- * Allows injecting dependencies in `beforeEach()` and `it()`.
+ * Allows injecting dependencies in `beforeEach()` and `it()`. Note: this function
+ * (imported from the `@angular/core/testing` package) can **only** be used to inject dependencies
+ * in tests. To inject dependencies in your application code, use the [`inject`](api/core/inject)
+ * function from the `@angular/core` package instead.
  *
  * Example:
  *
