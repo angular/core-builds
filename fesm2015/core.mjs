@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-1f01bcc
+ * @license Angular v14.1.0-next.0+sha-6d1e6a8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8858,7 +8858,36 @@ const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
  * another environment injector (such as a route injector). They should not be used in component
  * providers.
  *
- * @returns The collected providers from the specified list of types.
+ * More information about standalone components can be found in [this
+ * guide](guide/standalone-components).
+ *
+ * @usageNotes
+ * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
+ *
+ * ```typescript
+ * await bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *   ]
+ * });
+ * ```
+ *
+ * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
+ * standalone component is used:
+ *
+ * ```typescript
+ * export const ROUTES: Route[] = [
+ *   {
+ *     path: 'foo',
+ *     providers: [
+ *       importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *     ],
+ *     component: YourStandaloneComponent
+ *   }
+ * ];
+ * ```
+ *
+ * @returns Collected providers from the specified list of types.
  * @publicApi
  */
 function importProvidersFrom(...sources) {
@@ -21742,7 +21771,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-1f01bcc');
+const VERSION = new Version('14.1.0-next.0+sha-6d1e6a8');
 
 /**
  * @license
