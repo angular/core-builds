@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-6d1e6a8
+ * @license Angular v14.1.0-next.0+sha-0259035
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1029,6 +1029,8 @@ export declare interface Component extends Directive {
      *
      * More information about standalone components, directives and pipes can be found in [this
      * guide](guide/standalone-components).
+     *
+     * @developerPreview
      */
     standalone?: boolean;
     /**
@@ -1041,6 +1043,8 @@ export declare interface Component extends Directive {
      *
      * More information about standalone components, directives and pipes can be found in [this
      * guide](guide/standalone-components).
+     *
+     * @developerPreview
      */
     imports?: (Type<any> | any[])[];
     /**
@@ -1643,6 +1647,7 @@ declare interface CreateComponentOptions {
  * Create a new environment injector.
  *
  * @publicApi
+ * @developerPreview
  */
 export declare function createEnvironmentInjector(providers: Array<Provider | ImportedNgModuleProviders>, parent?: EnvironmentInjector | null, debugName?: string | null): EnvironmentInjector;
 
@@ -2283,6 +2288,8 @@ export declare interface Directive {
      *
      * More information about standalone components, directives and pipes can be found in [this
      * guide](guide/standalone-components).
+     *
+     * @developerPreview
      */
     standalone?: boolean;
 }
@@ -2610,6 +2617,8 @@ export declare const ENVIRONMENT_INITIALIZER: InjectionToken<() => void>;
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
+ *
+ * @developerPreview
  */
 export declare abstract class EnvironmentInjector implements Injector {
     /**
@@ -3472,6 +3481,7 @@ declare const ID = 20;
  * @see `importProvidersFrom`
  *
  * @publicApi
+ * @developerPreview
  */
 export declare interface ImportedNgModuleProviders {
     ɵproviders: Provider[];
@@ -3516,6 +3526,7 @@ export declare interface ImportedNgModuleProviders {
  *
  * @returns Collected providers from the specified list of types.
  * @publicApi
+ * @developerPreview
  */
 export declare function importProvidersFrom(...sources: ImportProvidersSource[]): ImportedNgModuleProviders;
 
