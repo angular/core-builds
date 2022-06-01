@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0-rc.3+sha-763c5f8
+ * @license Angular v14.0.0-rc.3+sha-536939e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3485,7 +3485,36 @@ export declare interface ImportedNgModuleProviders {
  * another environment injector (such as a route injector). They should not be used in component
  * providers.
  *
- * @returns The collected providers from the specified list of types.
+ * More information about standalone components can be found in [this
+ * guide](guide/standalone-components).
+ *
+ * @usageNotes
+ * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
+ *
+ * ```typescript
+ * await bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *   ]
+ * });
+ * ```
+ *
+ * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
+ * standalone component is used:
+ *
+ * ```typescript
+ * export const ROUTES: Route[] = [
+ *   {
+ *     path: 'foo',
+ *     providers: [
+ *       importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *     ],
+ *     component: YourStandaloneComponent
+ *   }
+ * ];
+ * ```
+ *
+ * @returns Collected providers from the specified list of types.
  * @publicApi
  */
 export declare function importProvidersFrom(...sources: ImportProvidersSource[]): ImportedNgModuleProviders;
