@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-a006ede
+ * @license Angular v14.1.0-next.0+sha-8fb737c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1933,7 +1933,6 @@ function getLView() {
 function getTView() {
     return instructionState.lFrame.tView;
 }
-// TODO(crisbeto): revert the @noinline once Closure issue is resolved.
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
@@ -1945,7 +1944,6 @@ function getTView() {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
- * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 function ɵɵrestoreView(viewToRestore) {
     instructionState.lFrame.contextLView = viewToRestore;
@@ -6719,7 +6717,6 @@ function discoverLocalRefs(lView, nodeIndex) {
  * found in the LICENSE file at https://angular.io/license
  */
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-const ERROR_LOGGER = 'ngErrorLogger';
 function wrappedError(message, originalError) {
     const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
     const error = Error(msg);
@@ -6728,12 +6725,6 @@ function wrappedError(message, originalError) {
 }
 function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
-}
-function getErrorLogger(error) {
-    return error && error[ERROR_LOGGER] || defaultErrorLogger;
-}
-function defaultErrorLogger(console, ...values) {
-    console.error(...values);
 }
 
 /**
@@ -6777,12 +6768,9 @@ class ErrorHandler {
     }
     handleError(error) {
         const originalError = this._findOriginalError(error);
-        // Note: Browser consoles show the place from where console.error was called.
-        // We can use this to give users additional information about the error.
-        const errorLogger = getErrorLogger(error);
-        errorLogger(this._console, `ERROR`, error);
+        this._console.error('ERROR', error);
         if (originalError) {
-            errorLogger(this._console, `ORIGINAL ERROR`, originalError);
+            this._console.error('ORIGINAL ERROR', originalError);
         }
     }
     /** @internal */
@@ -21774,7 +21762,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-a006ede');
+const VERSION = new Version('14.1.0-next.0+sha-8fb737c');
 
 /**
  * @license
