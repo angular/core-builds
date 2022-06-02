@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0+sha-127e794
+ * @license Angular v14.0.0+sha-36983a4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2470,7 +2470,8 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let _renderCompCount = 0;
+/** Counter used to generate unique IDs for component definitions. */
+let componentDefCount = 0;
 /**
  * Create a component definition object.
  *
@@ -2523,7 +2524,7 @@ function ɵɵdefineComponent(componentDefinition) {
             features: componentDefinition.features || null,
             data: componentDefinition.data || {},
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
-            id: 'c',
+            id: `c${componentDefCount++}`,
             styles: componentDefinition.styles || EMPTY_ARRAY,
             _: null,
             setInput: null,
@@ -2532,7 +2533,6 @@ function ɵɵdefineComponent(componentDefinition) {
         };
         const dependencies = componentDefinition.dependencies;
         const feature = componentDefinition.features;
-        def.id += _renderCompCount++;
         def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
             def.outputs = invertObject(componentDefinition.outputs),
             feature && feature.forEach((fn) => fn(def));
@@ -3546,7 +3546,6 @@ function getLView() {
 function getTView() {
     return instructionState.lFrame.tView;
 }
-// TODO(crisbeto): revert the @noinline once Closure issue is resolved.
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
@@ -3558,7 +3557,6 @@ function getTView() {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
- * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 function ɵɵrestoreView(viewToRestore) {
     instructionState.lFrame.contextLView = viewToRestore;
@@ -7008,7 +7006,6 @@ function discoverLocalRefs(lView, nodeIndex) {
  * found in the LICENSE file at https://angular.io/license
  */
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-const ERROR_LOGGER = 'ngErrorLogger';
 function wrappedError(message, originalError) {
     const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
     const error = Error(msg);
@@ -7017,12 +7014,6 @@ function wrappedError(message, originalError) {
 }
 function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
-}
-function getErrorLogger(error) {
-    return error && error[ERROR_LOGGER] || defaultErrorLogger;
-}
-function defaultErrorLogger(console, ...values) {
-    console.error(...values);
 }
 
 /**
@@ -7066,12 +7057,9 @@ class ErrorHandler {
     }
     handleError(error) {
         const originalError = this._findOriginalError(error);
-        // Note: Browser consoles show the place from where console.error was called.
-        // We can use this to give users additional information about the error.
-        const errorLogger = getErrorLogger(error);
-        errorLogger(this._console, `ERROR`, error);
+        this._console.error('ERROR', error);
         if (originalError) {
-            errorLogger(this._console, `ORIGINAL ERROR`, originalError);
+            this._console.error('ORIGINAL ERROR', originalError);
         }
     }
     /** @internal */
@@ -22087,7 +22075,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.0+sha-127e794');
+const VERSION = new Version('14.0.0+sha-36983a4');
 
 /**
  * @license
@@ -22787,14 +22775,14 @@ class StandaloneService {
         if (!componentDef.standalone) {
             return null;
         }
-        if (!this.cachedInjectors.has(componentDef)) {
+        if (!this.cachedInjectors.has(componentDef.id)) {
             const providers = internalImportProvidersFrom(false, componentDef.type);
             const standaloneInjector = providers.length > 0 ?
                 createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`) :
                 null;
-            this.cachedInjectors.set(componentDef, standaloneInjector);
+            this.cachedInjectors.set(componentDef.id, standaloneInjector);
         }
-        return this.cachedInjectors.get(componentDef);
+        return this.cachedInjectors.get(componentDef.id);
     }
     ngOnDestroy() {
         try {

@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0+sha-127e794
+ * @license Angular v14.0.0+sha-36983a4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9692,7 +9692,8 @@ export declare function ɵcompilePipe(type: Type<any>, meta: Pipe): void;
  */
 export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
     /**
-     * Runtime unique component ID.
+     * Unique ID for the component. Used in view encapsulation and
+     * to keep track of the injector in standalone components.
      */
     readonly id: string;
     /**
@@ -13726,7 +13727,6 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
- * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
