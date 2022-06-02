@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-8fb737c
+ * @license Angular v14.1.0-next.0+sha-0206c10
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9692,7 +9692,8 @@ export declare function ɵcompilePipe(type: Type<any>, meta: Pipe): void;
  */
 export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
     /**
-     * Runtime unique component ID.
+     * Unique ID for the component. Used in view encapsulation and
+     * to keep track of the injector in standalone components.
      */
     readonly id: string;
     /**

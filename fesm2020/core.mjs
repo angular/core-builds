@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-8fb737c
+ * @license Angular v14.1.0-next.0+sha-0206c10
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -864,7 +864,8 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let _renderCompCount = 0;
+/** Counter used to generate unique IDs for component definitions. */
+let componentDefCount = 0;
 /**
  * Create a component definition object.
  *
@@ -917,7 +918,7 @@ function ɵɵdefineComponent(componentDefinition) {
             features: componentDefinition.features || null,
             data: componentDefinition.data || {},
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation$1.Emulated,
-            id: 'c',
+            id: `c${componentDefCount++}`,
             styles: componentDefinition.styles || EMPTY_ARRAY,
             _: null,
             setInput: null,
@@ -926,7 +927,6 @@ function ɵɵdefineComponent(componentDefinition) {
         };
         const dependencies = componentDefinition.dependencies;
         const feature = componentDefinition.features;
-        def.id += _renderCompCount++;
         def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
             def.outputs = invertObject(componentDefinition.outputs),
             feature && feature.forEach((fn) => fn(def));
@@ -21775,7 +21775,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-8fb737c');
+const VERSION = new Version('14.1.0-next.0+sha-0206c10');
 
 /**
  * @license
@@ -22475,14 +22475,14 @@ class StandaloneService {
         if (!componentDef.standalone) {
             return null;
         }
-        if (!this.cachedInjectors.has(componentDef)) {
+        if (!this.cachedInjectors.has(componentDef.id)) {
             const providers = internalImportProvidersFrom(false, componentDef.type);
             const standaloneInjector = providers.length > 0 ?
                 createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`) :
                 null;
-            this.cachedInjectors.set(componentDef, standaloneInjector);
+            this.cachedInjectors.set(componentDef.id, standaloneInjector);
         }
-        return this.cachedInjectors.get(componentDef);
+        return this.cachedInjectors.get(componentDef.id);
     }
     ngOnDestroy() {
         try {
