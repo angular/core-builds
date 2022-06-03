@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-07b4084
+ * @license Angular v14.1.0-next.0+sha-243c679
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10240,7 +10240,7 @@ export declare class ɵLContext {
  * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
-export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+export declare function ɵLifecycleHooksFeature(): void;
 
 /**
  * Index of each type of locale data from the locale data array
