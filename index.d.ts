@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-5cfde8b
+ * @license Angular v14.1.0-next.0+sha-f12cf2b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10865,7 +10865,6 @@ export declare function ɵsetDocument(document: Document | undefined): void;
  */
 export declare function ɵsetLocaleId(localeId: string): void;
 
-
 /**
  * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
  * instead of just logging the error.
@@ -12436,6 +12435,7 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  * @codeGenApi
  */
 export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
+
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
