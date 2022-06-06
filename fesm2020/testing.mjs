@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-d846bba
+ * @license Angular v14.1.0-next.0+sha-cc18392
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1842,9 +1842,12 @@ function formatRuntimeError(code, message) {
     // Error code might be a negative number, which is a special marker that instructs the logic to
     // generate a link to the error details page on angular.io.
     const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
     if (ngDevMode && code < 0) {
-        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const separator = addPeriodSeparator ? '.' : '';
+        errorMessage =
+            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
     }
     return errorMessage;
 }
@@ -22082,7 +22085,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-d846bba');
+const VERSION = new Version('14.1.0-next.0+sha-cc18392');
 
 /**
  * @license
