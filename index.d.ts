@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.0+sha-dee2ba9
+ * @license Angular v14.0.0+sha-9f5558c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3533,6 +3533,7 @@ export declare function importProvidersFrom(...sources: ImportProvidersSource[])
 /**
  * A source of providers for the `importProvidersFrom` function.
  *
+ * @developerPreview
  * @publicApi
  */
 export declare type ImportProvidersSource = Type<unknown> | ModuleWithProviders<unknown> | Array<ImportProvidersSource>;
@@ -10865,7 +10866,6 @@ export declare function ɵsetDocument(document: Document | undefined): void;
  */
 export declare function ɵsetLocaleId(localeId: string): void;
 
-
 /**
  * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
  * instead of just logging the error.
@@ -10904,7 +10904,7 @@ export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
- * (eaither a NgModule or a standalone component / directive / pipe).
+ * (either a NgModule or a standalone component / directive / pipe).
  */
 export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
 
@@ -12436,6 +12436,7 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  * @codeGenApi
  */
 export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
+
 
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
