@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-cc18392
+ * @license Angular v14.1.0-next.0+sha-612b408
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10903,7 +10903,7 @@ export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
- * (eaither a NgModule or a standalone component / directive / pipe).
+ * (either a NgModule or a standalone component / directive / pipe).
  */
 export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
 

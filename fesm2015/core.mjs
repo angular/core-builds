@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-cc18392
+ * @license Angular v14.1.0-next.0+sha-612b408
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21772,7 +21772,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-cc18392');
+const VERSION = new Version('14.1.0-next.0+sha-612b408');
 
 /**
  * @license
@@ -22979,12 +22979,25 @@ function getPipeDef(name, registry) {
         }
     }
     if (ngDevMode) {
-        const lView = getLView();
-        const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
-        const context = declarationLView[CONTEXT];
-        const component = context ? ` in the '${context.constructor.name}' component` : '';
-        throw new RuntimeError(-302 /* RuntimeErrorCode.PIPE_NOT_FOUND */, `The pipe '${name}' could not be found${component}!`);
+        throw new RuntimeError(-302 /* RuntimeErrorCode.PIPE_NOT_FOUND */, getPipeNotFoundErrorMessage(name));
     }
+}
+/**
+ * Generates a helpful error message for the user when a pipe is not found.
+ *
+ * @param name Name of the missing pipe
+ * @returns The error message
+ */
+function getPipeNotFoundErrorMessage(name) {
+    const lView = getLView();
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    const hostIsStandalone = isHostComponentStandalone(lView);
+    const componentInfoMessage = context ? ` in the '${context.constructor.name}' component` : '';
+    const verifyMessage = `Verify that it is ${hostIsStandalone ? 'included in the \'@Component.imports\' of this component' :
+        'declared or imported in this module'}`;
+    const errorMessage = `The pipe '${name}' could not be found${componentInfoMessage}. ${verifyMessage}`;
+    return errorMessage;
 }
 /**
  * Invokes a pipe with 1 arguments.
@@ -24830,7 +24843,7 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
 }
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
- * (eaither a NgModule or a standalone component / directive / pipe).
+ * (either a NgModule or a standalone component / directive / pipe).
  */
 function transitiveScopesFor(type) {
     if (isNgModule(type)) {
