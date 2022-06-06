@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-612b408
+ * @license Angular v14.1.0-next.0+sha-aa2e8ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3533,6 +3533,7 @@ export declare function importProvidersFrom(...sources: ImportProvidersSource[])
 /**
  * A source of providers for the `importProvidersFrom` function.
  *
+ * @developerPreview
  * @publicApi
  */
 export declare type ImportProvidersSource = Type<unknown> | ModuleWithProviders<unknown> | Array<ImportProvidersSource>;
