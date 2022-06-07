@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-7b9569d
+ * @license Angular v14.1.0-next.0+sha-7173711
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1026,6 +1026,11 @@ export declare interface Component extends Directive {
      * Angular components marked as `standalone` do not need to be declared in an NgModule. Such
      * components directly manage their own template dependencies (components, directives and pipes
      * used in a template) via the imports property.
+     *
+     * More information about standalone components, directives and pipes can be found in [this
+     * guide](guide/standalone-components).
+     *
+     * @developerPreview
      */
     standalone?: boolean;
     /**
@@ -1035,6 +1040,11 @@ export declare interface Component extends Directive {
      *
      * This property is only available for standalone components - specifying it for components
      * declared in an NgModule generates a compilation error.
+     *
+     * More information about standalone components, directives and pipes can be found in [this
+     * guide](guide/standalone-components).
+     *
+     * @developerPreview
      */
     imports?: (Type<any> | any[])[];
     /**
@@ -1043,6 +1053,9 @@ export declare interface Component extends Directive {
      *
      * This property is only available for standalone components - specifying it for components
      * declared in an NgModule generates a compilation error.
+     *
+     * More information about standalone components, directives and pipes can be found in [this
+     * guide](guide/standalone-components).
      */
     schemas?: SchemaMetadata[];
 }
@@ -1634,6 +1647,7 @@ declare interface CreateComponentOptions {
  * Create a new environment injector.
  *
  * @publicApi
+ * @developerPreview
  */
 export declare function createEnvironmentInjector(providers: Array<Provider | ImportedNgModuleProviders>, parent?: EnvironmentInjector | null, debugName?: string | null): EnvironmentInjector;
 
@@ -2271,6 +2285,11 @@ export declare interface Directive {
      * Angular directives marked as `standalone` do not need to be declared in an NgModule. Such
      * directives don't depend on any "intermediate context" of an NgModule (ex. configured
      * providers).
+     *
+     * More information about standalone components, directives and pipes can be found in [this
+     * guide](guide/standalone-components).
+     *
+     * @developerPreview
      */
     standalone?: boolean;
 }
@@ -2598,6 +2617,8 @@ export declare const ENVIRONMENT_INITIALIZER: InjectionToken<() => void>;
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
+ *
+ * @developerPreview
  */
 export declare abstract class EnvironmentInjector implements Injector {
     /**
@@ -3460,6 +3481,7 @@ declare const ID = 20;
  * @see `importProvidersFrom`
  *
  * @publicApi
+ * @developerPreview
  */
 export declare interface ImportedNgModuleProviders {
     ɵproviders: Provider[];
@@ -3473,14 +3495,45 @@ export declare interface ImportedNgModuleProviders {
  * another environment injector (such as a route injector). They should not be used in component
  * providers.
  *
- * @returns The collected providers from the specified list of types.
+ * More information about standalone components can be found in [this
+ * guide](guide/standalone-components).
+ *
+ * @usageNotes
+ * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
+ *
+ * ```typescript
+ * await bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *   ]
+ * });
+ * ```
+ *
+ * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
+ * standalone component is used:
+ *
+ * ```typescript
+ * export const ROUTES: Route[] = [
+ *   {
+ *     path: 'foo',
+ *     providers: [
+ *       importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *     ],
+ *     component: YourStandaloneComponent
+ *   }
+ * ];
+ * ```
+ *
+ * @returns Collected providers from the specified list of types.
  * @publicApi
+ * @developerPreview
  */
 export declare function importProvidersFrom(...sources: ImportProvidersSource[]): ImportedNgModuleProviders;
 
 /**
  * A source of providers for the `importProvidersFrom` function.
  *
+ * @developerPreview
  * @publicApi
  */
 export declare type ImportProvidersSource = Type<unknown> | ModuleWithProviders<unknown> | Array<ImportProvidersSource>;
@@ -3538,30 +3591,24 @@ export declare interface Inject {
 export declare const Inject: InjectDecorator;
 
 /**
- * Injects a token from the currently active injector.
- *
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
- *
- * Within such a factory function, using this function to request injection of a dependency
- * is faster and more type-safe than providing an additional array of dependencies
- * (as has been common with `useFactory` providers).
- *
- * @param token The injection token for the dependency to be injected.
- * @param flags Optional flags that control how injection is executed.
- * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns the injected value if injection is successful, `null` otherwise.
- *
- * @usageNotes
- *
- * ### Example
- *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ * @param token A token that represents a dependency that should be injected.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
  *
  * @publicApi
  */
-export declare const inject: typeof ɵɵinject;
+export declare function inject<T>(token: ProviderToken<T>): T;
+
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param flags Control how injection is executed. The flags correspond to injection strategies that
+ *     can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and `@Optional`.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
+ *
+ * @publicApi
+ */
+export declare function inject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
 
 /**
  * Type of the Injectable metadata.
@@ -5602,6 +5649,9 @@ export declare interface Pipe {
     /**
      * Angular pipes marked as `standalone` do not need to be declared in an NgModule. Such
      * pipes don't depend on any "intermediate context" of an NgModule (ex. configured providers).
+     *
+     * More information about standalone components, directives and pipes can be found in [this
+     * guide](guide/standalone-components).
      */
     standalone?: boolean;
 }
@@ -6984,7 +7034,7 @@ declare const enum RuntimeErrorCode {
     CYCLIC_DI_DEPENDENCY = -200,
     PROVIDER_NOT_FOUND = -201,
     INVALID_FACTORY_DEPENDENCY = 202,
-    MISSING_INJECTION_CONTEXT = 203,
+    MISSING_INJECTION_CONTEXT = -203,
     INVALID_INJECTION_TOKEN = 204,
     INJECTOR_ALREADY_DESTROYED = 205,
     PROVIDER_IN_WRONG_CONTEXT = 207,
@@ -9643,7 +9693,8 @@ export declare function ɵcompilePipe(type: Type<any>, meta: Pipe): void;
  */
 export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
     /**
-     * Runtime unique component ID.
+     * Unique ID for the component. Used in view encapsulation and
+     * to keep track of the injector in standalone components.
      */
     readonly id: string;
     /**
@@ -10196,7 +10247,7 @@ export declare class ɵLContext {
  * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
-export declare function ɵLifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+export declare function ɵLifecycleHooksFeature(): void;
 
 /**
  * Index of each type of locale data from the locale data array
@@ -10821,7 +10872,6 @@ export declare function ɵsetDocument(document: Document | undefined): void;
  */
 export declare function ɵsetLocaleId(localeId: string): void;
 
-
 /**
  * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
  * instead of just logging the error.
@@ -10860,7 +10910,7 @@ export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
- * (eaither a NgModule or a standalone component / directive / pipe).
+ * (either a NgModule or a standalone component / directive / pipe).
  */
 export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
 
@@ -12393,6 +12443,7 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  */
 export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
 
+
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -12604,10 +12655,7 @@ export declare function ɵɵi18nStart(index: number, messageIndex: number, subTe
 export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
- * Generated instruction: Injects a token from the currently active injector.
- *
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
+ * Generated instruction: injects a token from the currently active injector.
  *
  * (Additional documentation moved to `inject`, as it is the public API, and an alias for this
  * instruction)
@@ -13686,7 +13734,6 @@ export declare function ɵɵresolveWindow(element: RElement & {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
- * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 export declare function ɵɵrestoreView<T = any>(viewToRestore: OpaqueViewState): T;
 
@@ -13791,7 +13838,7 @@ export declare function ɵɵsanitizeUrlOrResourceUrl(unsafeUrl: any, tag: string
  *
  * @codeGenApi
  */
-export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[], pipes: Type<any>[]): void;
+export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, directives: Type<any>[] | (() => Type<any>[]), pipes: Type<any>[] | (() => Type<any>[])): void;
 
 /**
  * Adds the module metadata that is necessary to compute the module's transitive scope to an

@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-7b9569d
+ * @license Angular v14.1.0-next.0+sha-7173711
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -181,9 +181,12 @@ function formatRuntimeError(code, message) {
     // Error code might be a negative number, which is a special marker that instructs the logic to
     // generate a link to the error details page on angular.io.
     const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
     if (ngDevMode && code < 0) {
-        errorMessage = `${errorMessage}. Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const separator = addPeriodSeparator ? '.' : '';
+        errorMessage =
+            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
     }
     return errorMessage;
 }
@@ -864,7 +867,8 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let _renderCompCount = 0;
+/** Counter used to generate unique IDs for component definitions. */
+let componentDefCount = 0;
 /**
  * Create a component definition object.
  *
@@ -917,7 +921,7 @@ function ɵɵdefineComponent(componentDefinition) {
             features: componentDefinition.features || null,
             data: componentDefinition.data || {},
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation$1.Emulated,
-            id: 'c',
+            id: `c${componentDefCount++}`,
             styles: componentDefinition.styles || EMPTY_ARRAY,
             _: null,
             setInput: null,
@@ -926,7 +930,6 @@ function ɵɵdefineComponent(componentDefinition) {
         };
         const dependencies = componentDefinition.dependencies;
         const feature = componentDefinition.features;
-        def.id += _renderCompCount++;
         def.inputs = invertObject(componentDefinition.inputs, declaredInputs),
             def.outputs = invertObject(componentDefinition.outputs),
             feature && feature.forEach((fn) => fn(def));
@@ -954,8 +957,8 @@ function ɵɵdefineComponent(componentDefinition) {
  */
 function ɵɵsetComponentScope(type, directives, pipes) {
     const def = type.ɵcmp;
-    def.directiveDefs = () => directives.map(extractDirectiveDef);
-    def.pipeDefs = () => pipes.map(getPipeDef$1);
+    def.directiveDefs = () => (typeof directives === 'function' ? directives() : directives).map(extractDirectiveDef);
+    def.pipeDefs = () => (typeof pipes === 'function' ? pipes() : pipes).map(getPipeDef$1);
 }
 function extractDirectiveDef(type) {
     return getComponentDef(type) || getDirectiveDef(type);
@@ -1940,7 +1943,6 @@ function getLView() {
 function getTView() {
     return instructionState.lFrame.tView;
 }
-// TODO(crisbeto): revert the @noinline once Closure issue is resolved.
 /**
  * Restores `contextViewData` to the given OpaqueViewState instance.
  *
@@ -1952,7 +1954,6 @@ function getTView() {
  * @returns Context of the restored OpaqueViewState instance.
  *
  * @codeGenApi
- * @noinline Disable inlining due to issue with Closure in listeners inside embedded views.
  */
 function ɵɵrestoreView(viewToRestore) {
     instructionState.lFrame.contextLView = viewToRestore;
@@ -4858,9 +4859,9 @@ function setCurrentInjector(injector) {
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
         const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `inject() must be called from an injection context` :
+            `inject() must be called from an injection context (a constructor, a factory function or a field initializer)` :
             '';
-        throw new RuntimeError(203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, errorMessage);
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, errorMessage);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -4895,29 +4896,71 @@ Please check that 1) the type for the parameter at index ${index} is correct and
 }
 /**
  * Injects a token from the currently active injector.
+ * `inject` is only supported during instantiation of a dependency by the DI system. It can be used
+ * during:
+ * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
+ * as an `@Injectable` or `@Component`.
+ * - In the initializer for fields of such classes.
+ * - In the factory function specified for `useFactory` of a `Provider` or an `@Injectable`.
+ * - In the `factory` function specified for an `InjectionToken`.
  *
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
- *
- * Within such a factory function, using this function to request injection of a dependency
- * is faster and more type-safe than providing an additional array of dependencies
- * (as has been common with `useFactory` providers).
- *
- * @param token The injection token for the dependency to be injected.
+ * @param token A token that represents a dependency that should be injected.
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
  * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns the injected value if injection is successful, `null` otherwise.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
  *
  * @usageNotes
+ * In practice the `inject()` calls are allowed in a constructor, a constructor parameter and a
+ * field initializer:
  *
- * ### Example
+ * ```typescript
+ * @Injectable({providedIn: 'root'})
+ * export class Car {
+ *   radio: Radio|undefined;
+ *   // OK: field initializer
+ *   spareTyre = inject(Tyre);
  *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ *   constructor() {
+ *     // OK: constructor body
+ *     this.radio = inject(Radio);
+ *   }
+ * }
+ * ```
+ *
+ * It is also legal to call `inject` from a provider's factory:
+ *
+ * ```typescript
+ * providers: [
+ *   {provide: Car, useFactory: () => {
+ *     // OK: a class factory
+ *     const engine = inject(Engine);
+ *     return new Car(engine);
+ *   }}
+ * ]
+ * ```
+ *
+ * Calls to the `inject()` function outside of the class creation context will result in error. Most
+ * notably, calls to `inject()` are disallowed after a class instance was created, in methods
+ * (including lifecycle hooks):
+ *
+ * ```typescript
+ * @Component({ ... })
+ * export class CarComponent {
+ *   ngOnInit() {
+ *     // ERROR: too late, the component instance was already created
+ *     const engine = inject(Engine);
+ *     engine.start();
+ *   }
+ * }
+ * ```
  *
  * @publicApi
  */
-const inject = ɵɵinject;
+function inject(token, flags = InjectFlags.Default) {
+    return ɵɵinject(token, flags);
+}
 function injectArgs(types) {
     const args = [];
     for (let i = 0; i < types.length; i++) {
@@ -6314,6 +6357,155 @@ function getSanitizer() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+function wrappedError(message, originalError) {
+    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
+    const error = Error(msg);
+    error[ERROR_ORIGINAL_ERROR] = originalError;
+    return error;
+}
+function getOriginalError(error) {
+    return error[ERROR_ORIGINAL_ERROR];
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * @NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * @publicApi
+ */
+class ErrorHandler {
+    constructor() {
+        /**
+         * @internal
+         */
+        this._console = console;
+    }
+    handleError(error) {
+        const originalError = this._findOriginalError(error);
+        this._console.error('ERROR', error);
+        if (originalError) {
+            this._console.error('ORIGINAL ERROR', originalError);
+        }
+    }
+    /** @internal */
+    _findOriginalError(error) {
+        let e = error && getOriginalError(error);
+        while (e && getOriginalError(e)) {
+            e = getOriginalError(e);
+        }
+        return e || null;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Disallowed strings in the comment.
+ *
+ * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
+ */
+const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
+/**
+ * Delimiter in the disallowed strings which needs to be wrapped with zero with character.
+ */
+const COMMENT_DELIMITER = /(<|>)/;
+const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
+/**
+ * Escape the content of comment strings so that it can be safely inserted into a comment node.
+ *
+ * The issue is that HTML does not specify any way to escape comment end text inside the comment.
+ * Consider: `<!-- The way you close a comment is with ">", and "->" at the beginning or by "-->" or
+ * "--!>" at the end. -->`. Above the `"-->"` is meant to be text not an end to the comment. This
+ * can be created programmatically through DOM APIs. (`<!--` are also disallowed.)
+ *
+ * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
+ *
+ * ```
+ * div.innerHTML = div.innerHTML
+ * ```
+ *
+ * One would expect that the above code would be safe to do, but it turns out that because comment
+ * text is not escaped, the comment may contain text which will prematurely close the comment
+ * opening up the application for XSS attack. (In SSR we programmatically create comment nodes which
+ * may contain such text and expect them to be safe.)
+ *
+ * This function escapes the comment text by looking for comment delimiters (`<` and `>`) and
+ * surrounding them with `_>_` where the `_` is a zero width space `\u200B`. The result is that if a
+ * comment contains any of the comment start/end delimiters (such as `<!--`, `-->` or `--!>`) the
+ * text it will render normally but it will not cause the HTML parser to close/open the comment.
+ *
+ * @param value text to make safe for comment node by escaping the comment open/close character
+ *     sequence.
+ */
+function escapeCommentText(value) {
+    return value.replace(COMMENT_DISALLOWED, (text) => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function normalizeDebugBindingName(name) {
+    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+    return `ng-reflect-${name}`;
+}
+const CAMEL_CASE_REGEXP = /([A-Z])/g;
+function camelCaseToDashCase(input) {
+    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
+}
+function normalizeDebugBindingValue(value) {
+    try {
+        // Limit the size of the value as otherwise the DOM just gets polluted.
+        return value != null ? value.toString().slice(0, 30) : value;
+    }
+    catch (e) {
+        return '[ERROR] Exception while trying to serialize the value';
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 // Keeps track of the currently-active LViews.
 const TRACKED_LVIEWS = new Map();
 // Used for generating unique IDs for LViews.
@@ -6682,196 +6874,6 @@ function discoverLocalRefs(lView, nodeIndex) {
         return result;
     }
     return null;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-const ERROR_LOGGER = 'ngErrorLogger';
-function wrappedError(message, originalError) {
-    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
-    const error = Error(msg);
-    error[ERROR_ORIGINAL_ERROR] = originalError;
-    return error;
-}
-function getOriginalError(error) {
-    return error[ERROR_ORIGINAL_ERROR];
-}
-function getErrorLogger(error) {
-    return error && error[ERROR_LOGGER] || defaultErrorLogger;
-}
-function defaultErrorLogger(console, ...values) {
-    console.error(...values);
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Provides a hook for centralized exception handling.
- *
- * The default implementation of `ErrorHandler` prints error messages to the `console`. To
- * intercept error handling, write a custom exception handler that replaces this default as
- * appropriate for your app.
- *
- * @usageNotes
- * ### Example
- *
- * ```
- * class MyErrorHandler implements ErrorHandler {
- *   handleError(error) {
- *     // do something with the exception
- *   }
- * }
- *
- * @NgModule({
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- * class MyModule {}
- * ```
- *
- * @publicApi
- */
-class ErrorHandler {
-    constructor() {
-        /**
-         * @internal
-         */
-        this._console = console;
-    }
-    handleError(error) {
-        const originalError = this._findOriginalError(error);
-        // Note: Browser consoles show the place from where console.error was called.
-        // We can use this to give users additional information about the error.
-        const errorLogger = getErrorLogger(error);
-        errorLogger(this._console, `ERROR`, error);
-        if (originalError) {
-            errorLogger(this._console, `ORIGINAL ERROR`, originalError);
-        }
-    }
-    /** @internal */
-    _findOriginalError(error) {
-        let e = error && getOriginalError(error);
-        while (e && getOriginalError(e)) {
-            e = getOriginalError(e);
-        }
-        return e || null;
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Defines a schema that allows an NgModule to contain the following:
- * - Non-Angular elements named with dash case (`-`).
- * - Element properties named with dash case (`-`).
- * Dash case is the naming convention for custom elements.
- *
- * @publicApi
- */
-const CUSTOM_ELEMENTS_SCHEMA = {
-    name: 'custom-elements'
-};
-/**
- * Defines a schema that allows any property on any element.
- *
- * This schema allows you to ignore the errors related to any unknown elements or properties in a
- * template. The usage of this schema is generally discouraged because it prevents useful validation
- * and may hide real errors in your template. Consider using the `CUSTOM_ELEMENTS_SCHEMA` instead.
- *
- * @publicApi
- */
-const NO_ERRORS_SCHEMA = {
-    name: 'no-errors-schema'
-};
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Disallowed strings in the comment.
- *
- * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
- */
-const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
-/**
- * Delimiter in the disallowed strings which needs to be wrapped with zero with character.
- */
-const COMMENT_DELIMITER = /(<|>)/;
-const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
-/**
- * Escape the content of comment strings so that it can be safely inserted into a comment node.
- *
- * The issue is that HTML does not specify any way to escape comment end text inside the comment.
- * Consider: `<!-- The way you close a comment is with ">", and "->" at the beginning or by "-->" or
- * "--!>" at the end. -->`. Above the `"-->"` is meant to be text not an end to the comment. This
- * can be created programmatically through DOM APIs. (`<!--` are also disallowed.)
- *
- * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
- *
- * ```
- * div.innerHTML = div.innerHTML
- * ```
- *
- * One would expect that the above code would be safe to do, but it turns out that because comment
- * text is not escaped, the comment may contain text which will prematurely close the comment
- * opening up the application for XSS attack. (In SSR we programmatically create comment nodes which
- * may contain such text and expect them to be safe.)
- *
- * This function escapes the comment text by looking for comment delimiters (`<` and `>`) and
- * surrounding them with `_>_` where the `_` is a zero width space `\u200B`. The result is that if a
- * comment contains any of the comment start/end delimiters (such as `<!--`, `-->` or `--!>`) the
- * text it will render normally but it will not cause the HTML parser to close/open the comment.
- *
- * @param value text to make safe for comment node by escaping the comment open/close character
- *     sequence.
- */
-function escapeCommentText(value) {
-    return value.replace(COMMENT_DISALLOWED, (text) => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function normalizeDebugBindingName(name) {
-    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-    return `ng-reflect-${name}`;
-}
-const CAMEL_CASE_REGEXP = /([A-Z])/g;
-function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
-}
-function normalizeDebugBindingValue(value) {
-    try {
-        // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value != null ? value.toString().slice(0, 30) : value;
-    }
-    catch (e) {
-        return '[ERROR] Exception while trying to serialize the value';
-    }
 }
 
 /**
@@ -8831,8 +8833,38 @@ const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
  * another environment injector (such as a route injector). They should not be used in component
  * providers.
  *
- * @returns The collected providers from the specified list of types.
+ * More information about standalone components can be found in [this
+ * guide](guide/standalone-components).
+ *
+ * @usageNotes
+ * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
+ *
+ * ```typescript
+ * await bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *   ]
+ * });
+ * ```
+ *
+ * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
+ * standalone component is used:
+ *
+ * ```typescript
+ * export const ROUTES: Route[] = [
+ *   {
+ *     path: 'foo',
+ *     providers: [
+ *       importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *     ],
+ *     component: YourStandaloneComponent
+ *   }
+ * ];
+ * ```
+ *
+ * @returns Collected providers from the specified list of types.
  * @publicApi
+ * @developerPreview
  */
 function importProvidersFrom(...sources) {
     return { ɵproviders: internalImportProvidersFrom(true, sources) };
@@ -9110,6 +9142,8 @@ function getNullInjector() {
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
+ *
+ * @developerPreview
  */
 class EnvironmentInjector {
 }
@@ -10397,6 +10431,295 @@ function ɵɵinvalidFactory() {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Defines a schema that allows an NgModule to contain the following:
+ * - Non-Angular elements named with dash case (`-`).
+ * - Element properties named with dash case (`-`).
+ * Dash case is the naming convention for custom elements.
+ *
+ * @publicApi
+ */
+const CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/**
+ * Defines a schema that allows any property on any element.
+ *
+ * This schema allows you to ignore the errors related to any unknown elements or properties in a
+ * template. The usage of this schema is generally discouraged because it prevents useful validation
+ * and may hide real errors in your template. Consider using the `CUSTOM_ELEMENTS_SCHEMA` instead.
+ *
+ * @publicApi
+ */
+const NO_ERRORS_SCHEMA = {
+    name: 'no-errors-schema'
+};
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let shouldThrowErrorOnUnknownElement = false;
+/**
+ * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
+ * instead of just logging the error.
+ * (for AOT-compiled ones this check happens at build time).
+ */
+function ɵsetUnknownElementStrictMode(shouldThrow) {
+    shouldThrowErrorOnUnknownElement = shouldThrow;
+}
+/**
+ * Gets the current value of the strict mode.
+ */
+function ɵgetUnknownElementStrictMode() {
+    return shouldThrowErrorOnUnknownElement;
+}
+let shouldThrowErrorOnUnknownProperty = false;
+/**
+ * Sets a strict mode for JIT-compiled components to throw an error on unknown properties,
+ * instead of just logging the error.
+ * (for AOT-compiled ones this check happens at build time).
+ */
+function ɵsetUnknownPropertyStrictMode(shouldThrow) {
+    shouldThrowErrorOnUnknownProperty = shouldThrow;
+}
+/**
+ * Gets the current value of the strict mode.
+ */
+function ɵgetUnknownPropertyStrictMode() {
+    return shouldThrowErrorOnUnknownProperty;
+}
+/**
+ * Validates that the element is known at runtime and produces
+ * an error if it's not the case.
+ * This check is relevant for JIT-compiled components (for AOT-compiled
+ * ones this check happens at build time).
+ *
+ * The element is considered known if either:
+ * - it's a known HTML element
+ * - it's a known custom element
+ * - the element matches any directive
+ * - the element is allowed by one of the schemas
+ *
+ * @param element Element to validate
+ * @param lView An `LView` that represents a current component that is being rendered
+ * @param tagName Name of the tag to check
+ * @param schemas Array of schemas
+ * @param hasDirectives Boolean indicating that the element matches any directive
+ */
+function validateElementIsKnown(element, lView, tagName, schemas, hasDirectives) {
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (schemas === null)
+        return;
+    // If the element matches any directive, it's considered as valid.
+    if (!hasDirectives && tagName !== null) {
+        // The element is unknown if it's an instance of HTMLUnknownElement, or it isn't registered
+        // as a custom element. Note that unknown elements with a dash in their name won't be instances
+        // of HTMLUnknownElement in browsers that support web components.
+        const isUnknown = 
+        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
+        // because while most browsers return 'function', IE returns 'object'.
+        (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
+            element instanceof HTMLUnknownElement) ||
+            (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
+                !customElements.get(tagName));
+        if (isUnknown && !matchingSchemas(schemas, tagName)) {
+            const isHostStandalone = isHostComponentStandalone(lView);
+            const templateLocation = getTemplateLocationDetails(lView);
+            const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
+            let message = `'${tagName}' is not a known element${templateLocation}:\n`;
+            message += `1. If '${tagName}' is an Angular component, then verify that it is ${isHostStandalone ? 'included in the \'@Component.imports\' of this component' :
+                'a part of an @NgModule where this component is declared'}.\n`;
+            if (tagName && tagName.indexOf('-') > -1) {
+                message +=
+                    `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.`;
+            }
+            else {
+                message +=
+                    `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
+            }
+            if (shouldThrowErrorOnUnknownElement) {
+                throw new RuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message);
+            }
+            else {
+                console.error(formatRuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message));
+            }
+        }
+    }
+}
+/**
+ * Validates that the property of the element is known at runtime and returns
+ * false if it's not the case.
+ * This check is relevant for JIT-compiled components (for AOT-compiled
+ * ones this check happens at build time).
+ *
+ * The property is considered known if either:
+ * - it's a known property of the element
+ * - the element is allowed by one of the schemas
+ * - the property is used for animations
+ *
+ * @param element Element to validate
+ * @param propName Name of the property to check
+ * @param tagName Name of the tag hosting the property
+ * @param schemas Array of schemas
+ */
+function isPropertyValid(element, propName, tagName, schemas) {
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (schemas === null)
+        return true;
+    // The property is considered valid if the element matches the schema, it exists on the element,
+    // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
+    if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
+        return true;
+    }
+    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
+    // need to account for both here, while being careful with `typeof null` also returning 'object'.
+    return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
+}
+/**
+ * Logs or throws an error that a property is not supported on an element.
+ *
+ * @param propName Name of the invalid property
+ * @param tagName Name of the tag hosting the property
+ * @param nodeType Type of the node hosting the property
+ * @param lView An `LView` that represents a current component
+ */
+function handleUnknownPropertyError(propName, tagName, nodeType, lView) {
+    // Special-case a situation when a structural directive is applied to
+    // an `<ng-template>` element, for example: `<ng-template *ngIf="true">`.
+    // In this case the compiler generates the `ɵɵtemplate` instruction with
+    // the `null` as the tagName. The directive matching logic at runtime relies
+    // on this effect (see `isInlineTemplate`), thus using the 'ng-template' as
+    // a default value of the `tNode.value` is not feasible at this moment.
+    if (!tagName && nodeType === 4 /* TNodeType.Container */) {
+        tagName = 'ng-template';
+    }
+    const isHostStandalone = isHostComponentStandalone(lView);
+    const templateLocation = getTemplateLocationDetails(lView);
+    let message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'${templateLocation}.`;
+    const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
+    const importLocation = isHostStandalone ?
+        'included in the \'@Component.imports\' of this component' :
+        'a part of an @NgModule where this component is declared';
+    if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
+        // Most likely this is a control flow directive (such as `*ngIf`) used in
+        // a template, but the `CommonModule` is not imported.
+        message += `\nIf the '${propName}' is an Angular control flow directive, ` +
+            `please make sure that the 'CommonModule' is ${importLocation}.`;
+    }
+    else {
+        // May be an Angular component, which is not imported/declared?
+        message += `\n1. If '${tagName}' is an Angular component and it has the ` +
+            `'${propName}' input, then verify that it is ${importLocation}.`;
+        // May be a Web Component?
+        if (tagName && tagName.indexOf('-') > -1) {
+            message += `\n2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' ` +
+                `to the ${schemas} of this component to suppress this message.`;
+            message += `\n3. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
+                `the ${schemas} of this component.`;
+        }
+        else {
+            // If it's expected, the error can be suppressed by the `NO_ERRORS_SCHEMA` schema.
+            message += `\n2. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
+                `the ${schemas} of this component.`;
+        }
+    }
+    if (shouldThrowErrorOnUnknownProperty) {
+        throw new RuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message);
+    }
+    else {
+        console.error(formatRuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message));
+    }
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode and also it relies on the constructor function being available.
+ *
+ * Gets a reference to the host component def (where a current component is declared).
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function getDeclarationComponentDef(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    // Unable to obtain a context.
+    if (!context)
+        return null;
+    return context.constructor ? getComponentDef(context.constructor) : null;
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode.
+ *
+ * Checks if the current component is declared inside of a standalone component template.
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function isHostComponentStandalone(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const componentDef = getDeclarationComponentDef(lView);
+    // Treat host component as non-standalone if we can't obtain the def.
+    return !!componentDef?.standalone;
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode.
+ *
+ * Constructs a string describing the location of the host component template. The function is used
+ * in dev mode to produce error messages.
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function getTemplateLocationDetails(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const hostComponentDef = getDeclarationComponentDef(lView);
+    const componentClassName = hostComponentDef?.type?.name;
+    return componentClassName ? ` (used in the '${componentClassName}' component template)` : '';
+}
+/**
+ * The set of known control flow directives.
+ * We use this set to produce a more precises error message with a note
+ * that the `CommonModule` should also be included.
+ */
+const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
+/**
+ * Returns true if the tag name is allowed by specified schemas.
+ * @param schemas Array of schemas
+ * @param tagName Name of the tag
+ */
+function matchingSchemas(schemas, tagName) {
+    if (schemas !== null) {
+        for (let i = 0; i < schemas.length; i++) {
+            const schema = schemas[i];
+            if (schema === NO_ERRORS_SCHEMA ||
+                schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
  */
 /**
@@ -11195,21 +11518,6 @@ class LContainerDebug {
     }
 }
 
-let shouldThrowErrorOnUnknownProperty = false;
-/**
- * Sets a strict mode for JIT-compiled components to throw an error on unknown properties,
- * instead of just logging the error.
- * (for AOT-compiled ones this check happens at build time).
- */
-function ɵsetUnknownPropertyStrictMode(shouldThrow) {
-    shouldThrowErrorOnUnknownProperty = shouldThrow;
-}
-/**
- * Gets the current value of the strict mode.
- */
-function ɵgetUnknownPropertyStrictMode() {
-    return shouldThrowErrorOnUnknownProperty;
-}
 /**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
@@ -11367,21 +11675,6 @@ function createTNodeAtIndex(tView, index, type, name, attrs) {
         }
     }
     return tNode;
-}
-/**
- * Checks if the current component is declared inside of a standalone component template.
- *
- * @param lView An `LView` that represents a current component that is being rendered.
- */
-function isHostComponentStandalone(lView) {
-    !ngDevMode && throwError('Must never be called in production mode');
-    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
-    const context = declarationLView[CONTEXT];
-    // Unable to obtain a context, fall back to the non-standalone scenario.
-    if (!context)
-        return false;
-    const componentDef = getComponentDef(context.constructor);
-    return !!(componentDef?.standalone);
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -12049,10 +12342,8 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         propName = mapPropName(propName);
         if (ngDevMode) {
             validateAgainstEventProperties(propName);
-            if (!validateProperty(element, tNode.value, propName, tView.schemas)) {
-                // Return here since we only log warnings for unknown properties.
-                handleUnknownPropertyError(propName, tNode);
-                return;
+            if (!isPropertyValid(element, propName, tNode.value, tView.schemas)) {
+                handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
             }
             ngDevMode.rendererSetProperty++;
         }
@@ -12071,7 +12362,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         // If the node is a container and the property didn't
         // match any of the inputs or schemas we should throw.
         if (ngDevMode && !matchingSchemas(tView.schemas, tNode.value)) {
-            handleUnknownPropertyError(propName, tNode);
+            handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
         }
     }
 }
@@ -12121,79 +12412,6 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
         for (let i = 0; i < dataValue.length; i += 2) {
             setNgReflectProperty(lView, element, type, dataValue[i + 1], value);
         }
-    }
-}
-/**
- * Validates that the property of the element is known at runtime and returns
- * false if it's not the case.
- * This check is relevant for JIT-compiled components (for AOT-compiled
- * ones this check happens at build time).
- *
- * The property is considered known if either:
- * - it's a known property of the element
- * - the element is allowed by one of the schemas
- * - the property is used for animations
- *
- * @param element Element to validate
- * @param tagName Name of the tag to check
- * @param propName Name of the property to check
- * @param schemas Array of schemas
- */
-function validateProperty(element, tagName, propName, schemas) {
-    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
-    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
-    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
-    // execute the check below.
-    if (schemas === null)
-        return true;
-    // The property is considered valid if the element matches the schema, it exists on the element,
-    // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
-        return true;
-    }
-    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
-    // need to account for both here, while being careful with `typeof null` also returning 'object'.
-    return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
-}
-/**
- * Returns true if the tag name is allowed by specified schemas.
- * @param schemas Array of schemas
- * @param tagName Name of the tag
- */
-function matchingSchemas(schemas, tagName) {
-    if (schemas !== null) {
-        for (let i = 0; i < schemas.length; i++) {
-            const schema = schemas[i];
-            if (schema === NO_ERRORS_SCHEMA ||
-                schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-/**
- * Logs or throws an error that a property is not supported on an element.
- * @param propName Name of the invalid property.
- * @param tagName Name of the node on which we encountered the property.
- */
-function handleUnknownPropertyError(propName, tNode) {
-    let tagName = tNode.value;
-    // Special-case a situation when a structural directive is applied to
-    // an `<ng-template>` element, for example: `<ng-template *ngIf="true">`.
-    // In this case the compiler generates the `ɵɵtemplate` instruction with
-    // the `null` as the tagName. The directive matching logic at runtime relies
-    // on this effect (see `isInlineTemplate`), thus using the 'ng-template' as
-    // a default value of the `tNode.value` is not feasible at this moment.
-    if (!tagName && tNode.type === 4 /* TNodeType.Container */) {
-        tagName = 'ng-template';
-    }
-    const message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'.`;
-    if (shouldThrowErrorOnUnknownProperty) {
-        throw new RuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message);
-    }
-    else {
-        console.error(formatRuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message));
     }
 }
 /**
@@ -13769,7 +13987,11 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
     const component = instantiateRootComponent(tView, rootLView, componentDef);
     rootContext.components.push(component);
     componentView[CONTEXT] = component;
-    hostFeatures && hostFeatures.forEach((feature) => feature(component, componentDef));
+    if (hostFeatures !== null) {
+        for (const feature of hostFeatures) {
+            feature(component, componentDef);
+        }
+    }
     // We want to generate an empty QueryList for root content queries for backwards
     // compatibility with ViewEngine.
     if (componentDef.contentQueries) {
@@ -13810,13 +14032,10 @@ function createRootContext(scheduler, playerHandler) {
  * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
-function LifecycleHooksFeature(component, def) {
-    const lView = readPatchedLView(component);
-    ngDevMode && assertDefined(lView, 'LView is required');
-    const tView = lView[TVIEW];
+function LifecycleHooksFeature() {
     const tNode = getCurrentTNode();
     ngDevMode && assertDefined(tNode, 'TNode is required');
-    registerPostOrderHooks(tView, tNode);
+    registerPostOrderHooks(getLView()[TVIEW], tNode);
 }
 /**
  * Wait on component until it is rendered.
@@ -14951,21 +15170,6 @@ function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isCla
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let shouldThrowErrorOnUnknownElement = false;
-/**
- * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
- * instead of just logging the error.
- * (for AOT-compiled ones this check happens at build time).
- */
-function ɵsetUnknownElementStrictMode(shouldThrow) {
-    shouldThrowErrorOnUnknownElement = shouldThrow;
-}
-/**
- * Gets the current value of the strict mode.
- */
-function ɵgetUnknownElementStrictMode() {
-    return shouldThrowErrorOnUnknownElement;
-}
 function elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -14974,8 +15178,7 @@ function elementStartFirstCreatePass(index, tView, lView, native, name, attrsInd
     const tNode = getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, name, attrs);
     const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     if (ngDevMode) {
-        const hostIsStandalone = isHostComponentStandalone(lView);
-        validateElementIsKnown(native, tNode.value, tView.schemas, hasDirectives, hostIsStandalone);
+        validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
     }
     if (tNode.attrs !== null) {
         computeStaticStyling(tNode, tNode.attrs, false);
@@ -15099,65 +15302,6 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
     ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
     ɵɵelementEnd();
     return ɵɵelement;
-}
-/**
- * Validates that the element is known at runtime and produces
- * an error if it's not the case.
- * This check is relevant for JIT-compiled components (for AOT-compiled
- * ones this check happens at build time).
- *
- * The element is considered known if either:
- * - it's a known HTML element
- * - it's a known custom element
- * - the element matches any directive
- * - the element is allowed by one of the schemas
- *
- * @param element Element to validate
- * @param tagName Name of the tag to check
- * @param schemas Array of schemas
- * @param hasDirectives Boolean indicating that the element matches any directive
- * @param hostIsStandalone Boolean indicating whether the host is a standalone component
- */
-function validateElementIsKnown(element, tagName, schemas, hasDirectives, hostIsStandalone) {
-    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
-    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
-    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
-    // execute the check below.
-    if (schemas === null)
-        return;
-    // If the element matches any directive, it's considered as valid.
-    if (!hasDirectives && tagName !== null) {
-        // The element is unknown if it's an instance of HTMLUnknownElement, or it isn't registered
-        // as a custom element. Note that unknown elements with a dash in their name won't be instances
-        // of HTMLUnknownElement in browsers that support web components.
-        const isUnknown = 
-        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
-        // because while most browsers return 'function', IE returns 'object'.
-        (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
-            element instanceof HTMLUnknownElement) ||
-            (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
-                !customElements.get(tagName));
-        if (isUnknown && !matchingSchemas(schemas, tagName)) {
-            const schemas = `'${hostIsStandalone ? '@Component' : '@NgModule'}.schemas'`;
-            let message = `'${tagName}' is not a known element:\n`;
-            message += `1. If '${tagName}' is an Angular component, then verify that it is ${hostIsStandalone ? 'included in the \'@Component.imports\' of this component' :
-                'a part of this module'}.\n`;
-            if (tagName && tagName.indexOf('-') > -1) {
-                message +=
-                    `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.`;
-            }
-            else {
-                message +=
-                    `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
-            }
-            if (shouldThrowErrorOnUnknownElement) {
-                throw new RuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message);
-            }
-            else {
-                console.error(formatRuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message));
-            }
-        }
-    }
 }
 
 /**
@@ -21641,7 +21785,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-7b9569d');
+const VERSION = new Version('14.1.0-next.0+sha-7173711');
 
 /**
  * @license
@@ -22313,6 +22457,7 @@ class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
  * Create a new environment injector.
  *
  * @publicApi
+ * @developerPreview
  */
 function createEnvironmentInjector(providers, parent = null, debugName = null) {
     const adapter = new EnvironmentNgModuleRefAdapter(providers, parent, debugName);
@@ -22340,14 +22485,14 @@ class StandaloneService {
         if (!componentDef.standalone) {
             return null;
         }
-        if (!this.cachedInjectors.has(componentDef)) {
+        if (!this.cachedInjectors.has(componentDef.id)) {
             const providers = internalImportProvidersFrom(false, componentDef.type);
             const standaloneInjector = providers.length > 0 ?
                 createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`) :
                 null;
-            this.cachedInjectors.set(componentDef, standaloneInjector);
+            this.cachedInjectors.set(componentDef.id, standaloneInjector);
         }
-        return this.cachedInjectors.get(componentDef);
+        return this.cachedInjectors.get(componentDef.id);
     }
     ngOnDestroy() {
         try {
@@ -22847,12 +22992,25 @@ function getPipeDef(name, registry) {
         }
     }
     if (ngDevMode) {
-        const lView = getLView();
-        const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
-        const context = declarationLView[CONTEXT];
-        const component = context ? ` in the '${context.constructor.name}' component` : '';
-        throw new RuntimeError(-302 /* RuntimeErrorCode.PIPE_NOT_FOUND */, `The pipe '${name}' could not be found${component}!`);
+        throw new RuntimeError(-302 /* RuntimeErrorCode.PIPE_NOT_FOUND */, getPipeNotFoundErrorMessage(name));
     }
+}
+/**
+ * Generates a helpful error message for the user when a pipe is not found.
+ *
+ * @param name Name of the missing pipe
+ * @returns The error message
+ */
+function getPipeNotFoundErrorMessage(name) {
+    const lView = getLView();
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    const hostIsStandalone = isHostComponentStandalone(lView);
+    const componentInfoMessage = context ? ` in the '${context.constructor.name}' component` : '';
+    const verifyMessage = `Verify that it is ${hostIsStandalone ? 'included in the \'@Component.imports\' of this component' :
+        'declared or imported in this module'}`;
+    const errorMessage = `The pipe '${name}' could not be found${componentInfoMessage}. ${verifyMessage}`;
+    return errorMessage;
 }
 /**
  * Invokes a pipe with 1 arguments.
@@ -24441,6 +24599,12 @@ function isStandalone(type) {
     const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
     return def !== null ? def.standalone : false;
 }
+function generateStandaloneInDeclarationsError(type, location) {
+    const prefix = `Unexpected "${stringifyForError(type)}" found in the "declarations" array of the`;
+    const suffix = `"${stringifyForError(type)}" is marked as standalone and can't be declared ` +
+        'in any NgModule - did you intend to import it instead (by adding it to the "imports" array)?';
+    return `${prefix} ${location}, ${suffix}`;
+}
 function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
     if (verifiedNgModule.get(moduleType))
         return;
@@ -24512,7 +24676,8 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
         type = resolveForwardRef(type);
         const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
         if (def?.standalone) {
-            errors.push(`Unexpected "${stringifyForError(type)}" declaration in "${stringifyForError(moduleType)}" NgModule. "${stringifyForError(type)}" is marked as standalone and can't be declared in any NgModule - did you intend to import it?`);
+            const location = `"${stringifyForError(moduleType)}" NgModule`;
+            errors.push(generateStandaloneInDeclarationsError(type, location));
         }
     }
     function verifyExportsAreDeclaredOrReExported(type) {
@@ -24690,7 +24855,7 @@ function patchComponentDefWithScope(componentDef, transitiveScopes) {
 }
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
- * (eaither a NgModule or a standalone component / directive / pipe).
+ * (either a NgModule or a standalone component / directive / pipe).
  */
 function transitiveScopesFor(type) {
     if (isNgModule(type)) {
