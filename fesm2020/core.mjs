@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-131d029
+ * @license Angular v14.1.0-next.0+sha-b1a3dec
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21785,7 +21785,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.0+sha-131d029');
+const VERSION = new Version('14.1.0-next.0+sha-b1a3dec');
 
 /**
  * @license
@@ -24825,6 +24825,7 @@ function setScopeOnDeclaredComponents(moduleType, ngModule) {
     const declarations = flatten(ngModule.declarations || EMPTY_ARRAY);
     const transitiveScopes = transitiveScopesFor(moduleType);
     declarations.forEach(declaration => {
+        declaration = resolveForwardRef(declaration);
         if (declaration.hasOwnProperty(NG_COMP_DEF)) {
             // A `ɵcmp` field exists - go ahead and patch the component directly.
             const component = declaration;
