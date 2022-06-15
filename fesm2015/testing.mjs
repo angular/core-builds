@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.1+sha-ba4f3aa
+ * @license Angular v14.1.0-next.1+sha-df1652e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2046,10 +2046,8 @@ function setCurrentInjector(injector) {
 }
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `inject() must be called from an injection context (a constructor, a factory function or a field initializer)` :
-            '';
-        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, errorMessage);
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
+            `inject() must be called from an injection context (a constructor, a factory function or a field initializer)`);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -2155,10 +2153,7 @@ function injectArgs(types) {
         const arg = resolveForwardRef(types[i]);
         if (Array.isArray(arg)) {
             if (arg.length === 0) {
-                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                    'Arguments array must have arguments.' :
-                    '';
-                throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, errorMessage);
+                throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode && 'Arguments array must have arguments.');
             }
             let type = undefined;
             let flags = InjectFlags.Default;
@@ -6489,10 +6484,8 @@ function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
     if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* BypassType.ResourceUrl */)) {
         return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
     }
-    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-        'unsafe value used in a resource URL context (see https://g.co/ng/security#xss)' :
-        '';
-    throw new RuntimeError(904 /* RuntimeErrorCode.UNSAFE_VALUE_IN_RESOURCE_URL */, errorMessage);
+    throw new RuntimeError(904 /* RuntimeErrorCode.UNSAFE_VALUE_IN_RESOURCE_URL */, ngDevMode &&
+        'unsafe value used in a resource URL context (see https://g.co/ng/security#xss)');
 }
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -6514,10 +6507,7 @@ function ɵɵsanitizeScript(unsafeScript) {
     if (allowSanitizationBypassAndThrow(unsafeScript, "Script" /* BypassType.Script */)) {
         return trustedScriptFromStringBypass(unwrapSafeValue(unsafeScript));
     }
-    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-        'unsafe value used in a script context' :
-        '';
-    throw new RuntimeError(905 /* RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT */, errorMessage);
+    throw new RuntimeError(905 /* RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT */, ngDevMode && 'unsafe value used in a script context');
 }
 /**
  * A template tag function for promoting the associated constant literal to a
@@ -14387,10 +14377,8 @@ function ɵɵInheritDefinitionFeature(definition) {
         }
         else {
             if (superType.ɵcmp) {
-                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                    `Directives cannot inherit Components. Directive ${stringifyForError(definition.type)} is attempting to extend component ${stringifyForError(superType)}` :
-                    '';
-                throw new RuntimeError(903 /* RuntimeErrorCode.INVALID_INHERITANCE */, errorMessage);
+                throw new RuntimeError(903 /* RuntimeErrorCode.INVALID_INHERITANCE */, ngDevMode &&
+                    `Directives cannot inherit Components. Directive ${stringifyForError(definition.type)} is attempting to extend component ${stringifyForError(superType)}`);
             }
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ɵdir;
@@ -22087,7 +22075,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.1+sha-ba4f3aa');
+const VERSION = new Version('14.1.0-next.1+sha-df1652e');
 
 /**
  * @license
@@ -22425,8 +22413,7 @@ class ViewRef {
     }
     attachToViewContainerRef() {
         if (this._appRef) {
-            const errorMessage = ngDevMode ? 'This view is already attached directly to the ApplicationRef!' : '';
-            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, errorMessage);
+            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached directly to the ApplicationRef!');
         }
         this._attachedToViewContainer = true;
     }
@@ -22436,8 +22423,7 @@ class ViewRef {
     }
     attachToAppRef(appRef) {
         if (this._attachedToViewContainer) {
-            const errorMessage = ngDevMode ? 'This view is already attached to a ViewContainer!' : '';
-            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, errorMessage);
+            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached to a ViewContainer!');
         }
         this._appRef = appRef;
     }
