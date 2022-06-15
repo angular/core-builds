@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.2+sha-88e1655
+ * @license Angular v14.0.2+sha-14b9628
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4837,10 +4837,8 @@ function setCurrentInjector(injector) {
 }
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `inject() must be called from an injection context (a constructor, a factory function or a field initializer)` :
-            '';
-        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, errorMessage);
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
+            `inject() must be called from an injection context (a constructor, a factory function or a field initializer)`);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -4946,10 +4944,7 @@ function injectArgs(types) {
         const arg = resolveForwardRef(types[i]);
         if (Array.isArray(arg)) {
             if (arg.length === 0) {
-                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                    'Arguments array must have arguments.' :
-                    '';
-                throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, errorMessage);
+                throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode && 'Arguments array must have arguments.');
             }
             let type = undefined;
             let flags = InjectFlags.Default;
@@ -6200,10 +6195,8 @@ function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
     if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* BypassType.ResourceUrl */)) {
         return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
     }
-    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-        'unsafe value used in a resource URL context (see https://g.co/ng/security#xss)' :
-        '';
-    throw new RuntimeError(904 /* RuntimeErrorCode.UNSAFE_VALUE_IN_RESOURCE_URL */, errorMessage);
+    throw new RuntimeError(904 /* RuntimeErrorCode.UNSAFE_VALUE_IN_RESOURCE_URL */, ngDevMode &&
+        'unsafe value used in a resource URL context (see https://g.co/ng/security#xss)');
 }
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -6225,10 +6218,7 @@ function ɵɵsanitizeScript(unsafeScript) {
     if (allowSanitizationBypassAndThrow(unsafeScript, "Script" /* BypassType.Script */)) {
         return trustedScriptFromStringBypass(unwrapSafeValue(unsafeScript));
     }
-    const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-        'unsafe value used in a script context' :
-        '';
-    throw new RuntimeError(905 /* RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT */, errorMessage);
+    throw new RuntimeError(905 /* RuntimeErrorCode.UNSAFE_VALUE_IN_SCRIPT */, ngDevMode && 'unsafe value used in a script context');
 }
 /**
  * A template tag function for promoting the associated constant literal to a
@@ -14072,10 +14062,8 @@ function ɵɵInheritDefinitionFeature(definition) {
         }
         else {
             if (superType.ɵcmp) {
-                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                    `Directives cannot inherit Components. Directive ${stringifyForError(definition.type)} is attempting to extend component ${stringifyForError(superType)}` :
-                    '';
-                throw new RuntimeError(903 /* RuntimeErrorCode.INVALID_INHERITANCE */, errorMessage);
+                throw new RuntimeError(903 /* RuntimeErrorCode.INVALID_INHERITANCE */, ngDevMode &&
+                    `Directives cannot inherit Components. Directive ${stringifyForError(definition.type)} is attempting to extend component ${stringifyForError(superType)}`);
             }
             // Don't use getComponentDef/getDirectiveDef. This logic relies on inheritance.
             superDef = superType.ɵdir;
@@ -21772,7 +21760,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.2+sha-88e1655');
+const VERSION = new Version('14.0.2+sha-14b9628');
 
 /**
  * @license
@@ -22110,8 +22098,7 @@ class ViewRef$1 {
     }
     attachToViewContainerRef() {
         if (this._appRef) {
-            const errorMessage = ngDevMode ? 'This view is already attached directly to the ApplicationRef!' : '';
-            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, errorMessage);
+            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached directly to the ApplicationRef!');
         }
         this._attachedToViewContainer = true;
     }
@@ -22121,8 +22108,7 @@ class ViewRef$1 {
     }
     attachToAppRef(appRef) {
         if (this._attachedToViewContainer) {
-            const errorMessage = ngDevMode ? 'This view is already attached to a ViewContainer!' : '';
-            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, errorMessage);
+            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached to a ViewContainer!');
         }
         this._appRef = appRef;
     }
@@ -26962,10 +26948,8 @@ class NgProbeToken {
  */
 function createPlatform(injector) {
     if (_platformInjector && !_platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            'There can be only one platform. Destroy the previous one to create a new one.' :
-            '';
-        throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, errorMessage);
+        throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, ngDevMode &&
+            'There can be only one platform. Destroy the previous one to create a new one.');
     }
     publishDefaultGlobalUtils();
     _platformInjector = injector;
@@ -27085,8 +27069,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
 function assertPlatform(requiredToken) {
     const platform = getPlatform();
     if (!platform) {
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ? 'No platform exists!' : '';
-        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, errorMessage);
+        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode && 'No platform exists!');
     }
     if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
         !platform.injector.get(requiredToken, null)) {
@@ -27166,10 +27149,7 @@ class PlatformRef {
             const moduleRef = moduleFactory.create(ngZoneInjector);
             const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
-                const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                    'No ErrorHandler. Is platform module (BrowserModule) included?' :
-                    '';
-                throw new RuntimeError(402 /* RuntimeErrorCode.ERROR_HANDLER_NOT_FOUND */, errorMessage);
+                throw new RuntimeError(402 /* RuntimeErrorCode.ERROR_HANDLER_NOT_FOUND */, ngDevMode && 'No ErrorHandler. Is platform module (BrowserModule) included?');
             }
             ngZone.runOutsideAngular(() => {
                 const subscription = ngZone.onError.subscribe({
@@ -27225,12 +27205,10 @@ class PlatformRef {
             moduleRef.instance.ngDoBootstrap(appRef);
         }
         else {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
+            throw new RuntimeError(403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
                 `The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, ` +
                     `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
-                    `Please define one of these.` :
-                '';
-            throw new RuntimeError(403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, errorMessage);
+                    `Please define one of these.`);
         }
         this._modules.push(moduleRef);
     }
@@ -27253,10 +27231,7 @@ class PlatformRef {
      */
     destroy() {
         if (this._destroyed) {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                'The platform has already been destroyed!' :
-                '';
-            throw new RuntimeError(404 /* RuntimeErrorCode.PLATFORM_ALREADY_DESTROYED */, errorMessage);
+            throw new RuntimeError(404 /* RuntimeErrorCode.PLATFORM_ALREADY_DESTROYED */, ngDevMode && 'The platform has already been destroyed!');
         }
         this._modules.slice().forEach(module => module.destroy());
         this._destroyListeners.forEach(listener => listener());
@@ -27590,10 +27565,7 @@ class ApplicationRef {
     tick() {
         NG_DEV_MODE && this.warnIfDestroyed();
         if (this._runningTick) {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                'ApplicationRef.tick is called recursively' :
-                '';
-            throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, errorMessage);
+            throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
         }
         try {
             this._runningTick = true;
@@ -27682,7 +27654,7 @@ class ApplicationRef {
      */
     destroy() {
         if (this._destroyed) {
-            throw new RuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, NG_DEV_MODE && 'This instance of the `ApplicationRef` has already been destroyed.');
+            throw new RuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, ngDevMode && 'This instance of the `ApplicationRef` has already been destroyed.');
         }
         const injector = this._injector;
         // Check that this injector instance supports destroy operation.
@@ -28721,10 +28693,8 @@ class DefaultIterableDiffer {
         if (collection == null)
             collection = [];
         if (!isListLikeIterable(collection)) {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed` :
-                '';
-            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, errorMessage);
+            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
+                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
         }
         if (this.check(collection)) {
             return this;
@@ -29325,10 +29295,8 @@ class DefaultKeyValueDiffer {
             map = new Map();
         }
         else if (!(map instanceof Map || isJsObject(map))) {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed` :
-                '';
-            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, errorMessage);
+            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
+                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
         }
         return this.check(map) ? this : null;
     }
@@ -29575,10 +29543,8 @@ class IterableDiffers {
             return factory;
         }
         else {
-            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'` :
-                '';
-            throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, errorMessage);
+            throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode &&
+                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
         }
     }
 }
@@ -29652,10 +29618,7 @@ class KeyValueDiffers {
         if (factory) {
             return factory;
         }
-        const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) ?
-            `Cannot find a differ supporting object '${kv}'` :
-            '';
-        throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, errorMessage);
+        throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode && `Cannot find a differ supporting object '${kv}'`);
     }
 }
 /** @nocollapse */
