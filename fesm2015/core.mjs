@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.1+sha-82acbf9
+ * @license Angular v14.1.0-next.1+sha-bb7c804
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21760,7 +21760,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.1+sha-82acbf9');
+const VERSION = new Version('14.1.0-next.1+sha-bb7c804');
 
 /**
  * @license
@@ -22429,10 +22429,18 @@ class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
 /**
  * Create a new environment injector.
  *
+ * Learn more about environment injectors in
+ * [this guide](guide/standalone-components#environment-injectors).
+ *
+ * @param providers An array of providers.
+ * @param parent A parent environment injector.
+ * @param debugName An optional name for this injector instance, which will be used in error
+ *     messages.
+ *
  * @publicApi
  * @developerPreview
  */
-function createEnvironmentInjector(providers, parent = null, debugName = null) {
+function createEnvironmentInjector(providers, parent, debugName = null) {
     const adapter = new EnvironmentNgModuleRefAdapter(providers, parent, debugName);
     return adapter.injector;
 }
