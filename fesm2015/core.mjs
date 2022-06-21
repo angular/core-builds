@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.2+sha-79a973a
+ * @license Angular v14.0.2+sha-c086653
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21760,7 +21760,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.2+sha-79a973a');
+const VERSION = new Version('14.0.2+sha-c086653');
 
 /**
  * @license
@@ -25139,14 +25139,20 @@ function getStandaloneDefFunctions(type, imports) {
             // Standalone components are always able to self-reference, so include the component's own
             // definition in its `directiveDefs`.
             cachedDirectiveDefs = [getComponentDef(type)];
+            const seen = new Set();
             for (const rawDep of imports) {
                 ngDevMode && verifyStandaloneImport(rawDep, type);
                 const dep = resolveForwardRef(rawDep);
+                if (seen.has(dep)) {
+                    continue;
+                }
+                seen.add(dep);
                 if (!!getNgModuleDef(dep)) {
                     const scope = transitiveScopesFor(dep);
                     for (const dir of scope.exported.directives) {
                         const def = getComponentDef(dir) || getDirectiveDef(dir);
-                        if (def) {
+                        if (def && !seen.has(dir)) {
+                            seen.add(dir);
                             cachedDirectiveDefs.push(def);
                         }
                     }
@@ -25164,11 +25170,22 @@ function getStandaloneDefFunctions(type, imports) {
     const pipeDefs = () => {
         if (cachedPipeDefs === null) {
             cachedPipeDefs = [];
+            const seen = new Set();
             for (const rawDep of imports) {
                 const dep = resolveForwardRef(rawDep);
+                if (seen.has(dep)) {
+                    continue;
+                }
+                seen.add(dep);
                 if (!!getNgModuleDef(dep)) {
                     const scope = transitiveScopesFor(dep);
-                    cachedPipeDefs.push(...Array.from(scope.exported.pipes).map(pipe => getPipeDef$1(pipe)));
+                    for (const pipe of scope.exported.pipes) {
+                        const def = getPipeDef$1(pipe);
+                        if (def && !seen.has(pipe)) {
+                            seen.add(pipe);
+                            cachedPipeDefs.push(def);
+                        }
+                    }
                 }
                 else {
                     const def = getPipeDef$1(dep);
