@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.3+sha-a4c9e8d
+ * @license Angular v14.0.3+sha-51be9bb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -401,7 +401,6 @@ export declare class ApplicationRef {
     private _zone;
     private _injector;
     private _exceptionHandler;
-    private _initStatus;
     private _views;
     private _runningTick;
     private _stable;
