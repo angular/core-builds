@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.3+sha-51be9bb
+ * @license Angular v14.0.3+sha-be43177
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7052,6 +7052,7 @@ declare const enum RuntimeErrorCode {
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
     APPLICATION_REF_ALREADY_DESTROYED = 406,
     INVALID_I18N_STRUCTURE = 700,
+    MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
     INVALID_DIFFER_INPUT = 900,
     NO_SUPPORTING_DIFFER_FACTORY = 901,
