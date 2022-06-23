@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.2+sha-4a2e733
+ * @license Angular v14.1.0-next.2+sha-4eb1ca1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21773,7 +21773,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.2+sha-4a2e733');
+const VERSION = new Version('14.1.0-next.2+sha-4eb1ca1');
 
 /**
  * @license
@@ -27434,11 +27434,10 @@ function optionsReducer(dst, objs) {
  */
 class ApplicationRef {
     /** @internal */
-    constructor(_zone, _injector, _exceptionHandler, _initStatus) {
+    constructor(_zone, _injector, _exceptionHandler) {
         this._zone = _zone;
         this._injector = _injector;
         this._exceptionHandler = _exceptionHandler;
-        this._initStatus = _initStatus;
         /** @internal */
         this._bootstrapListeners = [];
         this._views = [];
@@ -27555,7 +27554,8 @@ class ApplicationRef {
     bootstrap(componentOrFactory, rootSelectorOrNode) {
         NG_DEV_MODE && this.warnIfDestroyed();
         const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
-        if (!this._initStatus.done) {
+        const initStatus = this._injector.get(ApplicationInitStatus);
+        if (!initStatus.done) {
             const standalone = !isComponentFactory && isStandalone(componentOrFactory);
             const errorMessage = 'Cannot bootstrap as there are still asynchronous initializers running.' +
                 (standalone ? '' :
@@ -27714,12 +27714,12 @@ class ApplicationRef {
         }
     }
 }
-ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler), ɵɵinject(ApplicationInitStatus)); };
+ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler)); };
 ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }, { type: ApplicationInitStatus }]; }, null); })();
+    }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }]; }, null); })();
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
