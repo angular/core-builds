@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.2+sha-7558c55
+ * @license Angular v14.1.0-next.2+sha-0782852
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -862,6 +862,68 @@ const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
 // We need to keep these around so we can read off old defs if new defs are unavailable
 const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
 const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Base URL for the error details page.
+ *
+ * Keep the files below in full sync:
+ *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
+ *  - packages/core/src/error_details_base_url.ts
+ */
+const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Class that represents a runtime error.
+ * Formats and outputs the error message in a consistent way.
+ *
+ * Example:
+ * ```
+ *  throw new RuntimeError(
+ *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
+ *    ngDevMode && 'Injector has already been destroyed.');
+ * ```
+ *
+ * Note: the `message` argument contains a descriptive error message as a string in development
+ * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
+ */
+class RuntimeError extends Error {
+    constructor(code, message) {
+        super(formatRuntimeError(code, message));
+        this.code = code;
+    }
+}
+/**
+ * Called to format a runtime error.
+ * See additional info on the `message` argument type in the `RuntimeError` class description.
+ */
+function formatRuntimeError(code, message) {
+    // Error code might be a negative number, which is a special marker that instructs the logic to
+    // generate a link to the error details page on angular.io.
+    const fullCode = `NG0${Math.abs(code)}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
+    if (ngDevMode && code < 0) {
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const separator = addPeriodSeparator ? '.' : '';
+        errorMessage =
+            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
+    }
+    return errorMessage;
+}
 
 /**
  * @license
@@ -1799,68 +1861,6 @@ function initNgDevMode() {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Base URL for the error details page.
- *
- * Keep the files below in full sync:
- *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
- *  - packages/core/src/error_details_base_url.ts
- */
-const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Class that represents a runtime error.
- * Formats and outputs the error message in a consistent way.
- *
- * Example:
- * ```
- *  throw new RuntimeError(
- *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
- *    ngDevMode && 'Injector has already been destroyed.');
- * ```
- *
- * Note: the `message` argument contains a descriptive error message as a string in development
- * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
- * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
- */
-class RuntimeError extends Error {
-    constructor(code, message) {
-        super(formatRuntimeError(code, message));
-        this.code = code;
-    }
-}
-/**
- * Called to format a runtime error.
- * See additional info on the `message` argument type in the `RuntimeError` class description.
- */
-function formatRuntimeError(code, message) {
-    // Error code might be a negative number, which is a special marker that instructs the logic to
-    // generate a link to the error details page on angular.io.
-    const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
-    if (ngDevMode && code < 0) {
-        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
-        const separator = addPeriodSeparator ? '.' : '';
-        errorMessage =
-            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
-    }
-    return errorMessage;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Used for stringify render output in Ivy.
  * Important! This function is very performance-sensitive and we should
  * be extra careful not to introduce megamorphic reads in it.
@@ -2063,22 +2063,17 @@ function ɵɵinject(token, flags = InjectFlags.Default) {
  * Throws an error indicating that a factory function could not be generated by the compiler for a
  * particular class.
  *
- * This instruction allows the actual error message to be optimized away when ngDevMode is turned
- * off, saving bytes of generated code while still providing a good experience in dev mode.
- *
  * The name of the class is not mentioned here, but will be in the generated factory function name
  * and thus in the stack trace.
  *
  * @codeGenApi
  */
 function ɵɵinvalidFactoryDep(index) {
-    const msg = ngDevMode ?
+    throw new RuntimeError(202 /* RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY */, ngDevMode &&
         `This constructor is not compatible with Angular Dependency Injection because its dependency at index ${index} of the parameter list is invalid.
 This can happen if the dependency type is a primitive like a string or if an ancestor of this class is missing an Angular decorator.
 
-Please check that 1) the type for the parameter at index ${index} is correct and 2) the correct Angular decorators are defined for this class and its ancestors.` :
-        'invalid';
-    throw new Error(msg);
+Please check that 1) the type for the parameter at index ${index} is correct and 2) the correct Angular decorators are defined for this class and its ancestors.`);
 }
 /**
  * Injects a token from the currently active injector.
@@ -5476,7 +5471,7 @@ function reflectDependency(dep) {
             }
             else if (param instanceof Attribute) {
                 if (param.attributeName === undefined) {
-                    throw new Error(`Attribute name must be defined.`);
+                    throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && `Attribute name must be defined.`);
                 }
                 meta.attribute = param.attributeName;
             }
@@ -10119,7 +10114,7 @@ class ReflectiveKey {
         this.token = token;
         this.id = id;
         if (!token) {
-            throw new Error('Token must be defined!');
+            throw new RuntimeError(208 /* RuntimeErrorCode.MISSING_INJECTION_TOKEN */, ngDevMode && 'Token must be defined!');
         }
         this.displayName = stringify(this.token);
     }
@@ -22075,7 +22070,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.2+sha-7558c55');
+const VERSION = new Version('14.1.0-next.2+sha-0782852');
 
 /**
  * @license
