@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.2+sha-dedbc2c
+ * @license Angular v14.1.0-next.2+sha-7da389a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21760,7 +21760,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.2+sha-dedbc2c');
+const VERSION = new Version('14.1.0-next.2+sha-7da389a');
 
 /**
  * @license
@@ -26305,7 +26305,7 @@ class NgZone {
          */
         this.onError = new EventEmitter(false);
         if (typeof Zone == 'undefined') {
-            throw new Error(`In this configuration Angular requires Zone.js`);
+            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
         }
         Zone.assertZonePatched();
         const self = this;
@@ -26332,12 +26332,12 @@ class NgZone {
     }
     static assertInAngularZone() {
         if (!NgZone.isInAngularZone()) {
-            throw new Error('Expected to be in Angular Zone, but it is not!');
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
         }
     }
     static assertNotInAngularZone() {
         if (NgZone.isInAngularZone()) {
-            throw new Error('Expected to not be in Angular Zone, but it is!');
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
         }
     }
     /**

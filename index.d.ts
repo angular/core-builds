@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.2+sha-dedbc2c
+ * @license Angular v14.1.0-next.2+sha-7da389a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7069,7 +7069,9 @@ declare const enum RuntimeErrorCode {
     UNSAFE_VALUE_IN_RESOURCE_URL = 904,
     UNSAFE_VALUE_IN_SCRIPT = 905,
     MISSING_GENERATED_DEF = 906,
-    TYPE_IS_NOT_STANDALONE = 907
+    TYPE_IS_NOT_STANDALONE = 907,
+    MISSING_ZONEJS = 908,
+    UNEXPECTED_ZONE_STATE = 909
 }
 
 declare const SANITIZER = 12;
