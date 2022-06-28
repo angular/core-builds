@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.2+sha-1c5f0cd
+ * @license Angular v14.1.0-next.2+sha-a322b7d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1665,8 +1665,17 @@ var RendererStyleFlags3;
 function isProceduralRenderer(renderer) {
     return !!(renderer.listen);
 }
+let renderer3Enabled = false;
+function enableRenderer3() {
+    renderer3Enabled = true;
+}
 const domRendererFactory3 = {
     createRenderer: (hostElement, rendererType) => {
+        if (!renderer3Enabled) {
+            throw new Error(ngDevMode ?
+                `Renderer3 is not supported. This problem is likely caused by some component in the hierarchy was constructed without a correct parent injector.` :
+                'Renderer3 disabled');
+        }
         return getDocument();
     }
 };
@@ -13883,6 +13892,7 @@ const NULL_INJECTOR = {
 function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
     ngDevMode && publishDefaultGlobalUtils$1();
     ngDevMode && assertComponentType(componentType);
+    enableRenderer3();
     const rendererFactory = opts.rendererFactory || domRendererFactory3;
     const sanitizer = opts.sanitizer || null;
     const componentDef = getComponentDef(componentType);
@@ -21768,7 +21778,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.2+sha-1c5f0cd');
+const VERSION = new Version('14.1.0-next.2+sha-a322b7d');
 
 /**
  * @license
