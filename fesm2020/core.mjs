@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-f05ed12
+ * @license Angular v14.1.0-next.3+sha-8d2e5e6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1601,96 +1601,6 @@ function getNamespaceUri(namespace) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
- * inject the `DOCUMENT` token and are done.
- *
- * Ivy is special because it does not rely upon the DI and must get hold of the document some other
- * way.
- *
- * The solution is to define `getDocument()` and `setDocument()` top-level functions for ivy.
- * Wherever ivy needs the global document, it calls `getDocument()` instead.
- *
- * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
- * tell ivy what the global `document` is.
- *
- * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
- * by calling `setDocument()` when providing the `DOCUMENT` token.
- */
-let DOCUMENT = undefined;
-/**
- * Tell ivy what the `document` is for this platform.
- *
- * It is only necessary to call this if the current platform is not a browser.
- *
- * @param document The object representing the global `document` in this environment.
- */
-function setDocument(document) {
-    DOCUMENT = document;
-}
-/**
- * Access the object that represents the `document` for this platform.
- *
- * Ivy calls this whenever it needs to access the `document` object.
- * For example to create the renderer or to do sanitization.
- */
-function getDocument() {
-    if (DOCUMENT !== undefined) {
-        return DOCUMENT;
-    }
-    else if (typeof document !== 'undefined') {
-        return document;
-    }
-    // No "document" can be found. This should only happen if we are running ivy outside Angular and
-    // the current platform is not a browser. Since this is not a supported scenario at the moment
-    // this should not happen in Angular apps.
-    // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
-    // public API. Meanwhile we just return `undefined` and let the application fail.
-    return undefined;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// TODO: cleanup once the code is merged in angular/angular
-var RendererStyleFlags3;
-(function (RendererStyleFlags3) {
-    RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
-    RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
-})(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
-/** Returns whether the `renderer` is a `ProceduralRenderer3` */
-function isProceduralRenderer(renderer) {
-    return !!(renderer.listen);
-}
-let renderer3Enabled = false;
-function enableRenderer3() {
-    renderer3Enabled = true;
-}
-const domRendererFactory3 = {
-    createRenderer: (hostElement, rendererType) => {
-        if (!renderer3Enabled) {
-            throw new Error(ngDevMode ?
-                `Renderer3 is not supported. This problem is likely caused by some component in the hierarchy was constructed without a correct parent injector.` :
-                'Renderer3 disabled');
-        }
-        return getDocument();
-    }
-};
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$6 = 1;
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
  * in same location in `LView`. This is because we don't want to pre-allocate space for it
  * because the storage is sparse. This file contains utilities for dealing with such data types.
@@ -1765,7 +1675,6 @@ function getNativeByTNode(tNode, lView) {
     ngDevMode && assertTNodeForLView(tNode, lView);
     ngDevMode && assertIndexInRange(lView, tNode.index);
     const node = unwrapRNode(lView[tNode.index]);
-    ngDevMode && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
     return node;
 }
 /**
@@ -1781,7 +1690,6 @@ function getNativeByTNodeOrNull(tNode, lView) {
     if (index !== -1) {
         ngDevMode && assertTNodeForLView(tNode, lView);
         const node = unwrapRNode(lView[index]);
-        ngDevMode && node !== null && !isProceduralRenderer(lView[RENDERER]) && assertDomNode(node);
         return node;
     }
     return null;
@@ -2730,7 +2638,7 @@ function isFactory(obj) {
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$5 = 1;
+const unusedValueExportToPlacateAjd$6 = 1;
 
 /**
  * Converts `TNodeType` into human readable text.
@@ -2749,7 +2657,7 @@ function toTNodeTypeAsString(tNodeType) {
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$4 = 1;
+const unusedValueExportToPlacateAjd$5 = 1;
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `class` binding.
  *
@@ -2853,7 +2761,6 @@ function assertPureTNodeType(type) {
  * @returns the index value that was last accessed in the attributes array
  */
 function setUpAttributes(renderer, native, attrs) {
-    const isProc = isProceduralRenderer(renderer);
     let i = 0;
     while (i < attrs.length) {
         const value = attrs[i];
@@ -2870,9 +2777,7 @@ function setUpAttributes(renderer, native, attrs) {
             const attrName = attrs[i++];
             const attrVal = attrs[i++];
             ngDevMode && ngDevMode.rendererSetAttribute++;
-            isProc ?
-                renderer.setAttribute(native, attrName, attrVal, namespaceURI) :
-                native.setAttributeNS(namespaceURI, attrName, attrVal);
+            renderer.setAttribute(native, attrName, attrVal, namespaceURI);
         }
         else {
             // attrName is string;
@@ -2881,14 +2786,10 @@ function setUpAttributes(renderer, native, attrs) {
             // Standard attributes
             ngDevMode && ngDevMode.rendererSetAttribute++;
             if (isAnimationProp(attrName)) {
-                if (isProc) {
-                    renderer.setProperty(native, attrName, attrVal);
-                }
+                renderer.setProperty(native, attrName, attrVal);
             }
             else {
-                isProc ?
-                    renderer.setAttribute(native, attrName, attrVal) :
-                    native.setAttribute(attrName, attrVal);
+                renderer.setAttribute(native, attrName, attrVal);
             }
             i++;
         }
@@ -5352,6 +5253,61 @@ function setAllowDuplicateNgModuleIdsForTest(allowDuplicates) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
+ * inject the `DOCUMENT` token and are done.
+ *
+ * Ivy is special because it does not rely upon the DI and must get hold of the document some other
+ * way.
+ *
+ * The solution is to define `getDocument()` and `setDocument()` top-level functions for ivy.
+ * Wherever ivy needs the global document, it calls `getDocument()` instead.
+ *
+ * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
+ * tell ivy what the global `document` is.
+ *
+ * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
+ * by calling `setDocument()` when providing the `DOCUMENT` token.
+ */
+let DOCUMENT = undefined;
+/**
+ * Tell ivy what the `document` is for this platform.
+ *
+ * It is only necessary to call this if the current platform is not a browser.
+ *
+ * @param document The object representing the global `document` in this environment.
+ */
+function setDocument(document) {
+    DOCUMENT = document;
+}
+/**
+ * Access the object that represents the `document` for this platform.
+ *
+ * Ivy calls this whenever it needs to access the `document` object.
+ * For example to create the renderer or to do sanitization.
+ */
+function getDocument() {
+    if (DOCUMENT !== undefined) {
+        return DOCUMENT;
+    }
+    else if (typeof document !== 'undefined') {
+        return document;
+    }
+    // No "document" can be found. This should only happen if we are running ivy outside Angular and
+    // the current platform is not a browser. Since this is not a supported scenario at the moment
+    // this should not happen in Angular apps.
+    // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
+    // public API. Meanwhile we just return `undefined` and let the application fail.
+    return undefined;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * The Trusted Types policy, or null if Trusted Types are not
  * enabled/supported, or undefined if the policy has not been created yet.
  */
@@ -7082,6 +7038,17 @@ function ensureIcuContainerVisitorLoaded(loader) {
  */
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
+const unusedValueExportToPlacateAjd$4 = 1;
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
 const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
@@ -7155,7 +7122,7 @@ function getNearestLContainer(viewOrContainer) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd$6 + unusedValueExportToPlacateAjd$8;
+const unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd$8;
 /**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
@@ -7180,7 +7147,6 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
             lNodeToHandle = lNodeToHandle[HOST];
         }
         const rNode = unwrapRNode(lNodeToHandle);
-        ngDevMode && !isProceduralRenderer(renderer) && assertDomNode(rNode);
         if (action === 0 /* WalkTNodeTreeAction.Create */ && parent !== null) {
             if (beforeNode == null) {
                 nativeAppendChild(renderer, parent, rNode);
@@ -7207,17 +7173,14 @@ function applyToElementOrContainer(action, renderer, parent, lNodeToHandle, befo
 function createTextNode(renderer, value) {
     ngDevMode && ngDevMode.rendererCreateTextNode++;
     ngDevMode && ngDevMode.rendererSetText++;
-    return isProceduralRenderer(renderer) ? renderer.createText(value) :
-        renderer.createTextNode(value);
+    return renderer.createText(value);
 }
 function updateTextNode(renderer, rNode, value) {
     ngDevMode && ngDevMode.rendererSetText++;
-    isProceduralRenderer(renderer) ? renderer.setValue(rNode, value) : rNode.textContent = value;
+    renderer.setValue(rNode, value);
 }
 function createCommentNode(renderer, value) {
     ngDevMode && ngDevMode.rendererCreateComment++;
-    // isProceduralRenderer check is not needed because both `Renderer2` and `Renderer3` have the same
-    // method name.
     return renderer.createComment(escapeCommentText(value));
 }
 /**
@@ -7229,14 +7192,7 @@ function createCommentNode(renderer, value) {
  */
 function createElementNode(renderer, name, namespace) {
     ngDevMode && ngDevMode.rendererCreateElement++;
-    if (isProceduralRenderer(renderer)) {
-        return renderer.createElement(name, namespace);
-    }
-    else {
-        const namespaceUri = namespace !== null ? getNamespaceUri(namespace) : null;
-        return namespaceUri === null ? renderer.createElement(name) :
-            renderer.createElementNS(namespaceUri, name);
-    }
+    return renderer.createElement(name, namespace);
 }
 /**
  * Removes all DOM elements associated with a view.
@@ -7468,7 +7424,7 @@ function detachView(lContainer, removeIndex) {
 function destroyLView(tView, lView) {
     if (!(lView[FLAGS] & 128 /* LViewFlags.Destroyed */)) {
         const renderer = lView[RENDERER];
-        if (isProceduralRenderer(renderer) && renderer.destroyNode) {
+        if (renderer.destroyNode) {
             applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
         }
         destroyViewTree(lView);
@@ -7496,7 +7452,7 @@ function cleanUpView(tView, lView) {
         executeOnDestroys(tView, lView);
         processCleanups(tView, lView);
         // For component views only, the local renderer is destroyed at clean up time.
-        if (lView[TVIEW].type === 1 /* TViewType.Component */ && isProceduralRenderer(lView[RENDERER])) {
+        if (lView[TVIEW].type === 1 /* TViewType.Component */) {
             ngDevMode && ngDevMode.rendererDestroy++;
             lView[RENDERER].destroy();
         }
@@ -7672,30 +7628,17 @@ function getClosestRElement(tView, tNode, lView) {
     }
 }
 /**
- * Inserts a native node before another native node for a given parent using {@link Renderer3}.
- * This is a utility function that can be used when native nodes were determined - it abstracts an
- * actual renderer being used.
+ * Inserts a native node before another native node for a given parent.
+ * This is a utility function that can be used when native nodes were determined.
  */
 function nativeInsertBefore(renderer, parent, child, beforeNode, isMove) {
     ngDevMode && ngDevMode.rendererInsertBefore++;
-    if (isProceduralRenderer(renderer)) {
-        renderer.insertBefore(parent, child, beforeNode, isMove);
-    }
-    else {
-        const targetParent = isTemplateNode(parent) ? parent.content : parent;
-        targetParent.insertBefore(child, beforeNode, isMove);
-    }
+    renderer.insertBefore(parent, child, beforeNode, isMove);
 }
 function nativeAppendChild(renderer, parent, child) {
     ngDevMode && ngDevMode.rendererAppendChild++;
     ngDevMode && assertDefined(parent, 'parent node must be defined');
-    if (isProceduralRenderer(renderer)) {
-        renderer.appendChild(parent, child);
-    }
-    else {
-        const targetParent = isTemplateNode(parent) ? parent.content : parent;
-        targetParent.appendChild(child);
-    }
+    renderer.appendChild(parent, child);
 }
 function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove) {
     if (beforeNode !== null) {
@@ -7707,12 +7650,7 @@ function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove)
 }
 /** Removes a node from the DOM given its native parent. */
 function nativeRemoveChild(renderer, parent, child, isHostElement) {
-    if (isProceduralRenderer(renderer)) {
-        renderer.removeChild(parent, child, isHostElement);
-    }
-    else {
-        parent.removeChild(child);
-    }
+    renderer.removeChild(parent, child, isHostElement);
 }
 /** Checks if an element is a `<template>` node. */
 function isTemplateNode(node) {
@@ -7722,13 +7660,13 @@ function isTemplateNode(node) {
  * Returns a native parent of a given native node.
  */
 function nativeParentNode(renderer, node) {
-    return (isProceduralRenderer(renderer) ? renderer.parentNode(node) : node.parentNode);
+    return renderer.parentNode(node);
 }
 /**
  * Returns a native sibling of a given native node.
  */
 function nativeNextSibling(renderer, node) {
-    return isProceduralRenderer(renderer) ? renderer.nextSibling(node) : node.nextSibling;
+    return renderer.nextSibling(node);
 }
 /**
  * Find a node in front of which `currentTNode` should be inserted.
@@ -8037,39 +7975,22 @@ function applyContainer(renderer, action, lContainer, parentRElement, beforeNode
  *        otherwise).
  */
 function applyStyling(renderer, isClassBased, rNode, prop, value) {
-    const isProcedural = isProceduralRenderer(renderer);
     if (isClassBased) {
         // We actually want JS true/false here because any truthy value should add the class
         if (!value) {
             ngDevMode && ngDevMode.rendererRemoveClass++;
-            if (isProcedural) {
-                renderer.removeClass(rNode, prop);
-            }
-            else {
-                rNode.classList.remove(prop);
-            }
+            renderer.removeClass(rNode, prop);
         }
         else {
             ngDevMode && ngDevMode.rendererAddClass++;
-            if (isProcedural) {
-                renderer.addClass(rNode, prop);
-            }
-            else {
-                ngDevMode && assertDefined(rNode.classList, 'HTMLElement expected');
-                rNode.classList.add(prop);
-            }
+            renderer.addClass(rNode, prop);
         }
     }
     else {
         let flags = prop.indexOf('-') === -1 ? undefined : RendererStyleFlags2.DashCase;
         if (value == null /** || value === undefined */) {
             ngDevMode && ngDevMode.rendererRemoveStyle++;
-            if (isProcedural) {
-                renderer.removeStyle(rNode, prop, flags);
-            }
-            else {
-                rNode.style.removeProperty(prop);
-            }
+            renderer.removeStyle(rNode, prop, flags);
         }
         else {
             // A value is important if it ends with `!important`. The style
@@ -8081,13 +8002,7 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
                 flags |= RendererStyleFlags2.Important;
             }
             ngDevMode && ngDevMode.rendererSetStyle++;
-            if (isProcedural) {
-                renderer.setStyle(rNode, prop, value, flags);
-            }
-            else {
-                ngDevMode && assertDefined(rNode.style, 'HTMLElement expected');
-                rNode.style.setProperty(prop, value, isImportant ? 'important' : '');
-            }
+            renderer.setStyle(rNode, prop, value, flags);
         }
     }
 }
@@ -8103,12 +8018,7 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
  */
 function writeDirectStyle(renderer, element, newValue) {
     ngDevMode && assertString(newValue, '\'newValue\' should be a string');
-    if (isProceduralRenderer(renderer)) {
-        renderer.setAttribute(element, 'style', newValue);
-    }
-    else {
-        element.style.cssText = newValue;
-    }
+    renderer.setAttribute(element, 'style', newValue);
     ngDevMode && ngDevMode.rendererSetStyle++;
 }
 /**
@@ -8123,17 +8033,12 @@ function writeDirectStyle(renderer, element, newValue) {
  */
 function writeDirectClass(renderer, element, newValue) {
     ngDevMode && assertString(newValue, '\'newValue\' should be a string');
-    if (isProceduralRenderer(renderer)) {
-        if (newValue === '') {
-            // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
-            renderer.removeAttribute(element, 'class');
-        }
-        else {
-            renderer.setAttribute(element, 'class', newValue);
-        }
+    if (newValue === '') {
+        // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
+        renderer.removeAttribute(element, 'class');
     }
     else {
-        element.className = newValue;
+        renderer.setAttribute(element, 'class', newValue);
     }
     ngDevMode && ngDevMode.rendererSetClassName++;
 }
@@ -8183,7 +8088,7 @@ function classIndexOf(className, classToSearch, startingIndex) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$3;
+const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$4;
 const NG_TEMPLATE_SELECTOR = 'ng-template';
 /**
  * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
@@ -11513,6 +11418,13 @@ class LContainerDebug {
 }
 
 /**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * A permanent marker promise which signifies that the current CD tree is
  * clean.
  */
@@ -11579,7 +11491,7 @@ function refreshChildComponents(hostLView, components) {
 /** Renders child components in the current view (creation mode). */
 function renderChildComponents(hostLView, components) {
     for (let i = 0; i < components.length; i++) {
-        renderComponent$1(hostLView, components[i]);
+        renderComponent(hostLView, components[i]);
     }
 }
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector, embeddedViewInjector) {
@@ -12097,16 +12009,6 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
 function createError(text, token) {
     return new Error(`Renderer: ${text} [${stringifyForError(token)}]`);
 }
-function assertHostNodeExists(rElement, elementOrSelector) {
-    if (!rElement) {
-        if (typeof elementOrSelector === 'string') {
-            throw createError('Host node with selector not found:', elementOrSelector);
-        }
-        else {
-            throw createError('Host node is required:', elementOrSelector);
-        }
-    }
-}
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
  *
@@ -12115,21 +12017,9 @@ function assertHostNodeExists(rElement, elementOrSelector) {
  * @param encapsulation View Encapsulation defined for component that requests host element.
  */
 function locateHostElement(renderer, elementOrSelector, encapsulation) {
-    if (isProceduralRenderer(renderer)) {
-        // When using native Shadow DOM, do not clear host element to allow native slot projection
-        const preserveContent = encapsulation === ViewEncapsulation$1.ShadowDom;
-        return renderer.selectRootElement(elementOrSelector, preserveContent);
-    }
-    let rElement = typeof elementOrSelector === 'string' ?
-        renderer.querySelector(elementOrSelector) :
-        elementOrSelector;
-    ngDevMode && assertHostNodeExists(rElement, elementOrSelector);
-    // Always clear host element's content when Renderer3 is in use. For procedural renderer case we
-    // make it depend on whether ShadowDom encapsulation is used (in which case the content should be
-    // preserved to allow native slot projection). ShadowDom encapsulation requires procedural
-    // renderer, and procedural renderer case is handled above.
-    rElement.textContent = '';
-    return rElement;
+    // When using native Shadow DOM, do not clear host element to allow native slot projection
+    const preserveContent = encapsulation === ViewEncapsulation$1.ShadowDom;
+    return renderer.selectRootElement(elementOrSelector, preserveContent);
 }
 /**
  * Saves context for this cleanup function in LView.cleanupInstances.
@@ -12344,13 +12234,7 @@ function elementPropertyInternal(tView, tNode, lView, propName, value, renderer,
         // It is assumed that the sanitizer is only added when the compiler determines that the
         // property is risky, so sanitization can be done without further checks.
         value = sanitizer != null ? sanitizer(value, tNode.value || '', propName) : value;
-        if (isProceduralRenderer(renderer)) {
-            renderer.setProperty(element, propName, value);
-        }
-        else if (!isAnimationProp(propName)) {
-            element.setProperty ? element.setProperty(propName, value) :
-                element[propName] = value;
-        }
+        renderer.setProperty(element, propName, value);
     }
     else if (tNode.type & 12 /* TNodeType.AnyContainer */) {
         // If the node is a container and the property didn't
@@ -12374,23 +12258,15 @@ function setNgReflectProperty(lView, element, type, attrName, value) {
     const debugValue = normalizeDebugBindingValue(value);
     if (type & 3 /* TNodeType.AnyRNode */) {
         if (value == null) {
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element, attrName) :
-                element.removeAttribute(attrName);
+            renderer.removeAttribute(element, attrName);
         }
         else {
-            isProceduralRenderer(renderer) ?
-                renderer.setAttribute(element, attrName, debugValue) :
-                element.setAttribute(attrName, debugValue);
+            renderer.setAttribute(element, attrName, debugValue);
         }
     }
     else {
         const textContent = escapeCommentText(`bindings=${JSON.stringify({ [attrName]: debugValue }, null, 2)}`);
-        if (isProceduralRenderer(renderer)) {
-            renderer.setValue(element, textContent);
-        }
-        else {
-            element.textContent = textContent;
-        }
+        renderer.setValue(element, textContent);
     }
 }
 function setNgReflectProperties(lView, element, type, dataValue, value) {
@@ -12744,19 +12620,12 @@ function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespac
 function setElementAttribute(renderer, element, namespace, tagName, name, value, sanitizer) {
     if (value == null) {
         ngDevMode && ngDevMode.rendererRemoveAttribute++;
-        isProceduralRenderer(renderer) ? renderer.removeAttribute(element, name, namespace) :
-            element.removeAttribute(name);
+        renderer.removeAttribute(element, name, namespace);
     }
     else {
         ngDevMode && ngDevMode.rendererSetAttribute++;
         const strValue = sanitizer == null ? renderStringify(value) : sanitizer(value, tagName || '', name);
-        if (isProceduralRenderer(renderer)) {
-            renderer.setAttribute(element, name, strValue, namespace);
-        }
-        else {
-            namespace ? element.setAttributeNS(namespace, name, strValue) :
-                element.setAttribute(name, strValue);
-        }
+        renderer.setAttribute(element, name, strValue, namespace);
     }
 }
 /**
@@ -12848,7 +12717,6 @@ const LContainerArray = class LContainer extends Array {
  */
 function createLContainer(hostNative, currentView, native, tNode) {
     ngDevMode && assertLView(currentView);
-    ngDevMode && !isProceduralRenderer(currentView[RENDERER]) && assertDomNode(native);
     // https://jsperf.com/array-literal-vs-new-array-really
     const lContainer = new (ngDevMode ? LContainerArray : Array)(hostNative, // host native
     true, // Boolean `true` in this position signifies that this is an `LContainer`
@@ -12964,7 +12832,7 @@ function refreshContainsDirtyView(lView) {
         }
     }
 }
-function renderComponent$1(hostLView, componentHostIdx) {
+function renderComponent(hostLView, componentHostIdx) {
     ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
     const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
     const componentTView = componentView[TVIEW];
@@ -13316,617 +13184,12 @@ function computeStaticStyling(tNode, attrs, writeToHost) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component.
- *
- * @param component The component which the change detection should be performed on.
- */
-function detectChanges(component) {
-    const view = getComponentViewByInstance(component);
-    detectChangesInternal(view[TVIEW], view, component);
-}
-/**
- * Marks the component as dirty (needing change detection). Marking a component dirty will
- * schedule a change detection on it at some point in the future.
- *
- * Marking an already dirty component as dirty won't do anything. Only one outstanding change
- * detection can be scheduled per component tree.
- *
- * @param component Component to mark as dirty.
- */
-function markDirty(component) {
-    ngDevMode && assertDefined(component, 'component');
-    const rootView = markViewDirty(getComponentViewByInstance(component));
-    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
-    scheduleTick(rootView[CONTEXT], 1 /* RootContextFlags.DetectChanges */);
-}
-/**
- * Used to perform change detection on the whole application.
- *
- * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
- * executes lifecycle hooks and conditionally checks components based on their
- * `ChangeDetectionStrategy` and dirtiness.
- *
- * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
- * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
- * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
- * be changed when calling `renderComponent` and providing the `scheduler` option.
- */
-function tick(component) {
-    const rootView = getRootView(component);
-    const rootContext = rootView[CONTEXT];
-    tickRootContext(rootContext);
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Retrieves the component instance associated with a given DOM element.
- *
- * @usageNotes
- * Given the following DOM structure:
- *
- * ```html
- * <app-root>
- *   <div>
- *     <child-comp></child-comp>
- *   </div>
- * </app-root>
- * ```
- *
- * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
- * associated with this DOM element.
- *
- * Calling the function on `<app-root>` will return the `MyApp` instance.
- *
- *
- * @param element DOM element from which the component should be retrieved.
- * @returns Component instance associated with the element or `null` if there
- *    is no component associated with it.
- *
- * @publicApi
- * @globalApi ng
- */
-function getComponent$1(element) {
-    ngDevMode && assertDomElement(element);
-    const context = getLContext(element);
-    if (context === null)
-        return null;
-    if (context.component === undefined) {
-        const lView = context.lView;
-        if (lView === null) {
-            return null;
-        }
-        context.component = getComponentAtNodeIndex(context.nodeIndex, lView);
-    }
-    return context.component;
-}
-/**
- * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
- * view that the element is part of. Otherwise retrieves the instance of the component whose view
- * owns the element (in this case, the result is the same as calling `getOwningComponent`).
- *
- * @param element Element for which to get the surrounding component instance.
- * @returns Instance of the component that is around the element or null if the element isn't
- *    inside any component.
- *
- * @publicApi
- * @globalApi ng
- */
-function getContext(element) {
-    assertDomElement(element);
-    const context = getLContext(element);
-    const lView = context ? context.lView : null;
-    return lView === null ? null : lView[CONTEXT];
-}
-/**
- * Retrieves the component instance whose view contains the DOM element.
- *
- * For example, if `<child-comp>` is used in the template of `<app-comp>`
- * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
- * would return `<app-comp>`.
- *
- * @param elementOrDir DOM element, component or directive instance
- *    for which to retrieve the root components.
- * @returns Component instance whose view owns the DOM element or null if the element is not
- *    part of a component view.
- *
- * @publicApi
- * @globalApi ng
- */
-function getOwningComponent(elementOrDir) {
-    const context = getLContext(elementOrDir);
-    let lView = context ? context.lView : null;
-    if (lView === null)
-        return null;
-    let parent;
-    while (lView[TVIEW].type === 2 /* TViewType.Embedded */ && (parent = getLViewParent(lView))) {
-        lView = parent;
-    }
-    return lView[FLAGS] & 256 /* LViewFlags.IsRoot */ ? null : lView[CONTEXT];
-}
-/**
- * Retrieves all root components associated with a DOM element, directive or component instance.
- * Root components are those which have been bootstrapped by Angular.
- *
- * @param elementOrDir DOM element, component or directive instance
- *    for which to retrieve the root components.
- * @returns Root components associated with the target object.
- *
- * @publicApi
- * @globalApi ng
- */
-function getRootComponents(elementOrDir) {
-    const lView = readPatchedLView(elementOrDir);
-    return lView !== null ? [...getRootContext(lView).components] : [];
-}
-/**
- * Retrieves an `Injector` associated with an element, component or directive instance.
- *
- * @param elementOrDir DOM element, component or directive instance for which to
- *    retrieve the injector.
- * @returns Injector associated with the element, component or directive instance.
- *
- * @publicApi
- * @globalApi ng
- */
-function getInjector(elementOrDir) {
-    const context = getLContext(elementOrDir);
-    const lView = context ? context.lView : null;
-    if (lView === null)
-        return Injector.NULL;
-    const tNode = lView[TVIEW].data[context.nodeIndex];
-    return new NodeInjector(tNode, lView);
-}
-/**
- * Retrieve a set of injection tokens at a given DOM node.
- *
- * @param element Element for which the injection tokens should be retrieved.
- */
-function getInjectionTokens(element) {
-    const context = getLContext(element);
-    const lView = context ? context.lView : null;
-    if (lView === null)
-        return [];
-    const tView = lView[TVIEW];
-    const tNode = tView.data[context.nodeIndex];
-    const providerTokens = [];
-    const startIndex = tNode.providerIndexes & 1048575 /* TNodeProviderIndexes.ProvidersStartIndexMask */;
-    const endIndex = tNode.directiveEnd;
-    for (let i = startIndex; i < endIndex; i++) {
-        let value = tView.data[i];
-        if (isDirectiveDefHack(value)) {
-            // The fact that we sometimes store Type and sometimes DirectiveDef in this location is a
-            // design flaw.  We should always store same type so that we can be monomorphic. The issue
-            // is that for Components/Directives we store the def instead the type. The correct behavior
-            // is that we should always be storing injectable type in this location.
-            value = value.type;
-        }
-        providerTokens.push(value);
-    }
-    return providerTokens;
-}
-/**
- * Retrieves directive instances associated with a given DOM node. Does not include
- * component instances.
- *
- * @usageNotes
- * Given the following DOM structure:
- *
- * ```html
- * <app-root>
- *   <button my-button></button>
- *   <my-comp></my-comp>
- * </app-root>
- * ```
- *
- * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
- * directive that is associated with the DOM node.
- *
- * Calling `getDirectives` on `<my-comp>` will return an empty array.
- *
- * @param node DOM node for which to get the directives.
- * @returns Array of directives associated with the node.
- *
- * @publicApi
- * @globalApi ng
- */
-function getDirectives(node) {
-    // Skip text nodes because we can't have directives associated with them.
-    if (node instanceof Text) {
-        return [];
-    }
-    const context = getLContext(node);
-    const lView = context ? context.lView : null;
-    if (lView === null) {
-        return [];
-    }
-    const tView = lView[TVIEW];
-    const nodeIndex = context.nodeIndex;
-    if (!tView?.data[nodeIndex]) {
-        return [];
-    }
-    if (context.directives === undefined) {
-        context.directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
-    }
-    // The `directives` in this case are a named array called `LComponentView`. Clone the
-    // result so we don't expose an internal data structure in the user's console.
-    return context.directives === null ? [] : [...context.directives];
-}
-/**
- * Returns the debug (partial) metadata for a particular directive or component instance.
- * The function accepts an instance of a directive or component and returns the corresponding
- * metadata.
- *
- * @param directiveOrComponentInstance Instance of a directive or component
- * @returns metadata of the passed directive or component
- *
- * @publicApi
- * @globalApi ng
- */
-function getDirectiveMetadata$1(directiveOrComponentInstance) {
-    const { constructor } = directiveOrComponentInstance;
-    if (!constructor) {
-        throw new Error('Unable to find the instance constructor');
-    }
-    // In case a component inherits from a directive, we may have component and directive metadata
-    // To ensure we don't get the metadata of the directive, we want to call `getComponentDef` first.
-    const componentDef = getComponentDef(constructor);
-    if (componentDef) {
-        return {
-            inputs: componentDef.inputs,
-            outputs: componentDef.outputs,
-            encapsulation: componentDef.encapsulation,
-            changeDetection: componentDef.onPush ? ChangeDetectionStrategy.OnPush :
-                ChangeDetectionStrategy.Default
-        };
-    }
-    const directiveDef = getDirectiveDef(constructor);
-    if (directiveDef) {
-        return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
-    }
-    return null;
-}
-/**
- * Retrieve map of local references.
- *
- * The references are retrieved as a map of local reference name to element or directive instance.
- *
- * @param target DOM element, component or directive instance for which to retrieve
- *    the local references.
- */
-function getLocalRefs(target) {
-    const context = getLContext(target);
-    if (context === null)
-        return {};
-    if (context.localRefs === undefined) {
-        const lView = context.lView;
-        if (lView === null) {
-            return {};
-        }
-        context.localRefs = discoverLocalRefs(lView, context.nodeIndex);
-    }
-    return context.localRefs || {};
-}
-/**
- * Retrieves the host element of a component or directive instance.
- * The host element is the DOM element that matched the selector of the directive.
- *
- * @param componentOrDirective Component or directive instance for which the host
- *     element should be retrieved.
- * @returns Host element of the target.
- *
- * @publicApi
- * @globalApi ng
- */
-function getHostElement(componentOrDirective) {
-    return getLContext(componentOrDirective).native;
-}
-/**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param component The component to return the content text for.
- */
-function getRenderedText(component) {
-    const hostElement = getHostElement(component);
-    return hostElement.textContent || '';
-}
-/**
- * Retrieves a list of event listeners associated with a DOM element. The list does include host
- * listeners, but it does not include event listeners defined outside of the Angular context
- * (e.g. through `addEventListener`).
- *
- * @usageNotes
- * Given the following DOM structure:
- *
- * ```html
- * <app-root>
- *   <div (click)="doSomething()"></div>
- * </app-root>
- * ```
- *
- * Calling `getListeners` on `<div>` will return an object that looks as follows:
- *
- * ```ts
- * {
- *   name: 'click',
- *   element: <div>,
- *   callback: () => doSomething(),
- *   useCapture: false
- * }
- * ```
- *
- * @param element Element for which the DOM listeners should be retrieved.
- * @returns Array of event listeners on the DOM element.
- *
- * @publicApi
- * @globalApi ng
- */
-function getListeners(element) {
-    ngDevMode && assertDomElement(element);
-    const lContext = getLContext(element);
-    const lView = lContext === null ? null : lContext.lView;
-    if (lView === null)
-        return [];
-    const tView = lView[TVIEW];
-    const lCleanup = lView[CLEANUP];
-    const tCleanup = tView.cleanup;
-    const listeners = [];
-    if (tCleanup && lCleanup) {
-        for (let i = 0; i < tCleanup.length;) {
-            const firstParam = tCleanup[i++];
-            const secondParam = tCleanup[i++];
-            if (typeof firstParam === 'string') {
-                const name = firstParam;
-                const listenerElement = unwrapRNode(lView[secondParam]);
-                const callback = lCleanup[tCleanup[i++]];
-                const useCaptureOrIndx = tCleanup[i++];
-                // if useCaptureOrIndx is boolean then report it as is.
-                // if useCaptureOrIndx is positive number then it in unsubscribe method
-                // if useCaptureOrIndx is negative number then it is a Subscription
-                const type = (typeof useCaptureOrIndx === 'boolean' || useCaptureOrIndx >= 0) ? 'dom' : 'output';
-                const useCapture = typeof useCaptureOrIndx === 'boolean' ? useCaptureOrIndx : false;
-                if (element == listenerElement) {
-                    listeners.push({ element, name, callback, useCapture, type });
-                }
-            }
-        }
-    }
-    listeners.sort(sortListeners);
-    return listeners;
-}
-function sortListeners(a, b) {
-    if (a.name == b.name)
-        return 0;
-    return a.name < b.name ? -1 : 1;
-}
-/**
- * This function should not exist because it is megamorphic and only mostly correct.
- *
- * See call site for more info.
- */
-function isDirectiveDefHack(obj) {
-    return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
-}
-/**
- * Returns the attached `DebugNode` instance for an element in the DOM.
- *
- * @param element DOM element which is owned by an existing component's view.
- */
-function getDebugNode$1(element) {
-    if (ngDevMode && !(element instanceof Node)) {
-        throw new Error('Expecting instance of DOM Element');
-    }
-    const lContext = getLContext(element);
-    const lView = lContext ? lContext.lView : null;
-    if (lView === null) {
-        return null;
-    }
-    const nodeIndex = lContext.nodeIndex;
-    if (nodeIndex !== -1) {
-        const valueInLView = lView[nodeIndex];
-        // this means that value in the lView is a component with its own
-        // data. In this situation the TNode is not accessed at the same spot.
-        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] : getTNode(lView[TVIEW], nodeIndex);
-        ngDevMode &&
-            assertEqual(tNode.index, nodeIndex, 'Expecting that TNode at index is same as index');
-        return buildDebugNode(tNode, lView);
-    }
-    return null;
-}
-/**
- * Retrieve the component `LView` from component/element.
- *
- * NOTE: `LView` is a private and should not be leaked outside.
- *       Don't export this method to `ng.*` on window.
- *
- * @param target DOM element or component instance for which to retrieve the LView.
- */
-function getComponentLView(target) {
-    const lContext = getLContext(target);
-    const nodeIndx = lContext.nodeIndex;
-    const lView = lContext.lView;
-    ngDevMode && assertLView(lView);
-    const componentLView = lView[nodeIndx];
-    ngDevMode && assertLView(componentLView);
-    return componentLView;
-}
-/** Asserts that a value is a DOM Element. */
-function assertDomElement(value) {
-    if (typeof Element !== 'undefined' && !(value instanceof Element)) {
-        throw new Error('Expecting instance of DOM Element');
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Marks a component for check (in case of OnPush components) and synchronously
- * performs change detection on the application this component belongs to.
- *
- * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
- *
- * @publicApi
- * @globalApi ng
- */
-function applyChanges(component) {
-    markDirty(component);
-    getRootComponents(component).forEach(rootComponent => detectChanges(rootComponent));
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This file introduces series of globally accessible debug tools
- * to allow for the Angular debugging story to function.
- *
- * To see this in action run the following command:
- *
- *   bazel run //packages/core/test/bundling/todo:devserver
- *
- *  Then load `localhost:5432` and start using the console tools.
- */
-/**
- * This value reflects the property on the window where the dev
- * tools are patched (window.ng).
- * */
-const GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
-let _published = false;
-/**
- * Publishes a collection of default debug tools onto`window.ng`.
- *
- * These functions are available globally when Angular is in development
- * mode and are automatically stripped away from prod mode is on.
- */
-function publishDefaultGlobalUtils$1() {
-    if (!_published) {
-        _published = true;
-        /**
-         * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
-         * The contract of the function might be changed in any release and/or the function can be
-         * removed completely.
-         */
-        publishGlobalUtil('ɵsetProfiler', setProfiler);
-        publishGlobalUtil('getDirectiveMetadata', getDirectiveMetadata$1);
-        publishGlobalUtil('getComponent', getComponent$1);
-        publishGlobalUtil('getContext', getContext);
-        publishGlobalUtil('getListeners', getListeners);
-        publishGlobalUtil('getOwningComponent', getOwningComponent);
-        publishGlobalUtil('getHostElement', getHostElement);
-        publishGlobalUtil('getInjector', getInjector);
-        publishGlobalUtil('getRootComponents', getRootComponents);
-        publishGlobalUtil('getDirectives', getDirectives);
-        publishGlobalUtil('applyChanges', applyChanges);
-    }
-}
-/**
- * Publishes the given function to `window.ng` so that it can be
- * used from the browser console when an application is not in production.
- */
-function publishGlobalUtil(name, fn) {
-    if (typeof COMPILED === 'undefined' || !COMPILED) {
-        // Note: we can't export `ng` when using closure enhanced optimization as:
-        // - closure declares globals itself for minified names, which sometimes clobber our `ng` global
-        // - we can't declare a closure extern as the namespace `ng` is already used within Google
-        //   for typings for AngularJS (via `goog.provide('ng....')`).
-        const w = _global;
-        ngDevMode && assertDefined(fn, 'function not defined');
-        if (w) {
-            let container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
-            if (!container) {
-                container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
-            }
-            container[name] = fn;
-        }
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // TODO: A hack to not pull in the NullInjector from @angular/core.
 const NULL_INJECTOR = {
     get: (token, notFoundValue) => {
         throwProviderNotFoundError(token, 'NullInjector');
     }
 };
-/**
- * Bootstraps a Component into an existing host element and returns an instance
- * of the component.
- *
- * Use this function to bootstrap a component into the DOM tree. Each invocation
- * of this function will create a separate tree of components, injectors and
- * change detection cycles and lifetimes. To dynamically insert a new component
- * into an existing tree such that it shares the same injection, change detection
- * and object lifetime, use {@link ViewContainer#createComponent}.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
-    ngDevMode && publishDefaultGlobalUtils$1();
-    ngDevMode && assertComponentType(componentType);
-    enableRenderer3();
-    const rendererFactory = opts.rendererFactory || domRendererFactory3;
-    const sanitizer = opts.sanitizer || null;
-    const componentDef = getComponentDef(componentType);
-    if (componentDef.type != componentType)
-        componentDef.type = componentType;
-    // The first index of the first selector is the tag name.
-    const componentTag = componentDef.selectors[0][0];
-    const hostRenderer = rendererFactory.createRenderer(null, null);
-    const hostRNode = locateHostElement(hostRenderer, opts.host || componentTag, componentDef.encapsulation);
-    const rootFlags = componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
-        16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
-    const rootContext = createRootContext(opts.scheduler, opts.playerHandler);
-    const renderer = rendererFactory.createRenderer(hostRNode, componentDef);
-    const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
-    const rootView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, renderer, null, opts.injector || null, null);
-    enterView(rootView);
-    let component;
-    try {
-        if (rendererFactory.begin)
-            rendererFactory.begin();
-        const componentView = createRootComponentView(hostRNode, componentDef, rootView, rendererFactory, renderer, sanitizer);
-        component = createRootComponent(componentView, componentDef, rootView, rootContext, opts.hostFeatures || null);
-        // create mode pass
-        renderView(rootTView, rootView, null);
-        // update mode pass
-        refreshView(rootTView, rootView, null, null);
-    }
-    finally {
-        leaveView();
-        if (rendererFactory.end)
-            rendererFactory.end();
-    }
-    return component;
-}
 /**
  * Creates the root component view and the root component node.
  *
@@ -15024,6 +14287,57 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component.
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+function detectChanges(component) {
+    const view = getComponentViewByInstance(component);
+    detectChangesInternal(view[TVIEW], view, component);
+}
+/**
+ * Marks the component as dirty (needing change detection). Marking a component dirty will
+ * schedule a change detection on it at some point in the future.
+ *
+ * Marking an already dirty component as dirty won't do anything. Only one outstanding change
+ * detection can be scheduled per component tree.
+ *
+ * @param component Component to mark as dirty.
+ */
+function markDirty(component) {
+    ngDevMode && assertDefined(component, 'component');
+    const rootView = markViewDirty(getComponentViewByInstance(component));
+    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
+    scheduleTick(rootView[CONTEXT], 1 /* RootContextFlags.DetectChanges */);
+}
+/**
+ * Used to perform change detection on the whole application.
+ *
+ * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
+ * executes lifecycle hooks and conditionally checks components based on their
+ * `ChangeDetectionStrategy` and dirtiness.
+ *
+ * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
+ * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
+ * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
+ * be changed when calling `renderComponent` and providing the `scheduler` option.
+ */
+function tick(component) {
+    const rootView = getRootView(component);
+    const rootContext = rootView[CONTEXT];
+    tickRootContext(rootContext);
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -15561,51 +14875,42 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             tNode.index;
         // In order to match current behavior, native DOM event listeners must be added for all
         // events (including outputs).
-        if (isProceduralRenderer(renderer)) {
-            // There might be cases where multiple directives on the same element try to register an event
-            // handler function for the same event. In this situation we want to avoid registration of
-            // several native listeners as each registration would be intercepted by NgZone and
-            // trigger change detection. This would mean that a single user action would result in several
-            // change detections being invoked. To avoid this situation we want to have only one call to
-            // native handler registration (for the same element and same type of event).
-            //
-            // In order to have just one native event handler in presence of multiple handler functions,
-            // we just register a first handler function as a native event listener and then chain
-            // (coalesce) other handler functions on top of the first native handler function.
-            let existingListener = null;
-            // Please note that the coalescing described here doesn't happen for events specifying an
-            // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
-            // view engine.
-            // Also, we don't have to search for existing listeners is there are no directives
-            // matching on a given node as we can't register multiple event handlers for the same event in
-            // a template (this would mean having duplicate attributes).
-            if (!eventTargetResolver && isTNodeDirectiveHost) {
-                existingListener = findExistingListener(tView, lView, eventName, tNode.index);
-            }
-            if (existingListener !== null) {
-                // Attach a new listener to coalesced listeners list, maintaining the order in which
-                // listeners are registered. For performance reasons, we keep a reference to the last
-                // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-                // the entire set each time we need to add a new listener.
-                const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
-                lastListenerFn.__ngNextListenerFn__ = listenerFn;
-                existingListener.__ngLastListenerFn__ = listenerFn;
-                processOutputs = false;
-            }
-            else {
-                listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
-                const cleanupFn = renderer.listen(target, eventName, listenerFn);
-                ngDevMode && ngDevMode.rendererAddEventListener++;
-                lCleanup.push(listenerFn, cleanupFn);
-                tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
-            }
+        // There might be cases where multiple directives on the same element try to register an event
+        // handler function for the same event. In this situation we want to avoid registration of
+        // several native listeners as each registration would be intercepted by NgZone and
+        // trigger change detection. This would mean that a single user action would result in several
+        // change detections being invoked. To avoid this situation we want to have only one call to
+        // native handler registration (for the same element and same type of event).
+        //
+        // In order to have just one native event handler in presence of multiple handler functions,
+        // we just register a first handler function as a native event listener and then chain
+        // (coalesce) other handler functions on top of the first native handler function.
+        let existingListener = null;
+        // Please note that the coalescing described here doesn't happen for events specifying an
+        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+        // view engine.
+        // Also, we don't have to search for existing listeners is there are no directives
+        // matching on a given node as we can't register multiple event handlers for the same event in
+        // a template (this would mean having duplicate attributes).
+        if (!eventTargetResolver && isTNodeDirectiveHost) {
+            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
+        }
+        if (existingListener !== null) {
+            // Attach a new listener to coalesced listeners list, maintaining the order in which
+            // listeners are registered. For performance reasons, we keep a reference to the last
+            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+            // the entire set each time we need to add a new listener.
+            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
+            lastListenerFn.__ngNextListenerFn__ = listenerFn;
+            existingListener.__ngLastListenerFn__ = listenerFn;
+            processOutputs = false;
         }
         else {
-            listenerFn = wrapListener(tNode, lView, context, listenerFn, true /** preventDefault */);
-            target.addEventListener(eventName, listenerFn, useCapture);
+            listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
+            const cleanupFn = renderer.listen(target, eventName, listenerFn);
             ngDevMode && ngDevMode.rendererAddEventListener++;
-            lCleanup.push(listenerFn);
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, useCapture);
+            lCleanup.push(listenerFn, cleanupFn);
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
         }
     }
     else {
@@ -17679,7 +16984,7 @@ function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
             valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY : undefined;
         }
         let currentValue = isStylingMap ? keyValueArrayGet(valueAtLViewIndex, prop) :
-            key === prop ? valueAtLViewIndex : undefined;
+            (key === prop ? valueAtLViewIndex : undefined);
         if (containsStatics && !isStylingValuePresent(currentValue)) {
             currentValue = keyValueArrayGet(rawKey, prop);
         }
@@ -21532,7 +20837,7 @@ function noComponentFactoryError(component) {
     return error;
 }
 const ERROR_COMPONENT = 'ngComponent';
-function getComponent(error) {
+function getComponent$1(error) {
     return error[ERROR_COMPONENT];
 }
 class _NullComponentFactoryResolver {
@@ -21716,14 +21021,6 @@ class Renderer2 {
  * @nocollapse
  */
 Renderer2.__NG_ELEMENT_ID__ = () => injectRenderer2();
-/** Returns a Renderer2 (or throws when application was bootstrapped with Renderer3) */
-function getOrCreateRenderer2(lView) {
-    const renderer = lView[RENDERER];
-    if (ngDevMode && !isProceduralRenderer(renderer)) {
-        throw new Error('Cannot inject Renderer2 when the application uses Renderer3!');
-    }
-    return renderer;
-}
 /** Injects a Renderer2 for the current component. */
 function injectRenderer2() {
     // We need the Renderer to be based on the component that it's being injected into, however since
@@ -21731,7 +21028,7 @@ function injectRenderer2() {
     const lView = getLView();
     const tNode = getCurrentTNode();
     const nodeAtIndex = getComponentLViewByIndex(tNode.index, lView);
-    return getOrCreateRenderer2(isLView(nodeAtIndex) ? nodeAtIndex : lView);
+    return (isLView(nodeAtIndex) ? nodeAtIndex : lView)[RENDERER];
 }
 
 /**
@@ -21778,7 +21075,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.3+sha-f05ed12');
+const VERSION = new Version('14.1.0-next.3+sha-8d2e5e6');
 
 /**
  * @license
@@ -22242,7 +21539,13 @@ class ComponentFactory extends ComponentFactory$1 {
                 realEnvironmentInjector;
         }
         const rootViewInjector = realEnvironmentInjector ? new ChainedInjector(injector, realEnvironmentInjector) : injector;
-        const rendererFactory = rootViewInjector.get(RendererFactory2, domRendererFactory3);
+        const rendererFactory = rootViewInjector.get(RendererFactory2, null);
+        if (rendererFactory === null) {
+            throw new RuntimeError(407 /* RuntimeErrorCode.RENDERER_NOT_FOUND */, ngDevMode &&
+                'Angular was not able to inject a renderer (RendererFactory2). ' +
+                    'Likely this is due to a broken DI hierarchy. ' +
+                    'Make sure that any injector used to create this component has a correct parent.');
+        }
         const sanitizer = rootViewInjector.get(Sanitizer, null);
         const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
         // Determine a tag name used for creating host elements when this component is created
@@ -22526,6 +21829,416 @@ function ɵɵStandaloneFeature(definition) {
     definition.getStandaloneInjector = (parentInjector) => {
         return parentInjector.get(StandaloneService).getOrCreateStandaloneInjector(definition);
     };
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Retrieves the component instance associated with a given DOM element.
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ *
+ * ```html
+ * <app-root>
+ *   <div>
+ *     <child-comp></child-comp>
+ *   </div>
+ * </app-root>
+ * ```
+ *
+ * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
+ * associated with this DOM element.
+ *
+ * Calling the function on `<app-root>` will return the `MyApp` instance.
+ *
+ *
+ * @param element DOM element from which the component should be retrieved.
+ * @returns Component instance associated with the element or `null` if there
+ *    is no component associated with it.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getComponent(element) {
+    ngDevMode && assertDomElement(element);
+    const context = getLContext(element);
+    if (context === null)
+        return null;
+    if (context.component === undefined) {
+        const lView = context.lView;
+        if (lView === null) {
+            return null;
+        }
+        context.component = getComponentAtNodeIndex(context.nodeIndex, lView);
+    }
+    return context.component;
+}
+/**
+ * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
+ * view that the element is part of. Otherwise retrieves the instance of the component whose view
+ * owns the element (in this case, the result is the same as calling `getOwningComponent`).
+ *
+ * @param element Element for which to get the surrounding component instance.
+ * @returns Instance of the component that is around the element or null if the element isn't
+ *    inside any component.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getContext(element) {
+    assertDomElement(element);
+    const context = getLContext(element);
+    const lView = context ? context.lView : null;
+    return lView === null ? null : lView[CONTEXT];
+}
+/**
+ * Retrieves the component instance whose view contains the DOM element.
+ *
+ * For example, if `<child-comp>` is used in the template of `<app-comp>`
+ * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
+ * would return `<app-comp>`.
+ *
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Component instance whose view owns the DOM element or null if the element is not
+ *    part of a component view.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getOwningComponent(elementOrDir) {
+    const context = getLContext(elementOrDir);
+    let lView = context ? context.lView : null;
+    if (lView === null)
+        return null;
+    let parent;
+    while (lView[TVIEW].type === 2 /* TViewType.Embedded */ && (parent = getLViewParent(lView))) {
+        lView = parent;
+    }
+    return lView[FLAGS] & 256 /* LViewFlags.IsRoot */ ? null : lView[CONTEXT];
+}
+/**
+ * Retrieves all root components associated with a DOM element, directive or component instance.
+ * Root components are those which have been bootstrapped by Angular.
+ *
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Root components associated with the target object.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getRootComponents(elementOrDir) {
+    const lView = readPatchedLView(elementOrDir);
+    return lView !== null ? [...getRootContext(lView).components] : [];
+}
+/**
+ * Retrieves an `Injector` associated with an element, component or directive instance.
+ *
+ * @param elementOrDir DOM element, component or directive instance for which to
+ *    retrieve the injector.
+ * @returns Injector associated with the element, component or directive instance.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getInjector(elementOrDir) {
+    const context = getLContext(elementOrDir);
+    const lView = context ? context.lView : null;
+    if (lView === null)
+        return Injector.NULL;
+    const tNode = lView[TVIEW].data[context.nodeIndex];
+    return new NodeInjector(tNode, lView);
+}
+/**
+ * Retrieve a set of injection tokens at a given DOM node.
+ *
+ * @param element Element for which the injection tokens should be retrieved.
+ */
+function getInjectionTokens(element) {
+    const context = getLContext(element);
+    const lView = context ? context.lView : null;
+    if (lView === null)
+        return [];
+    const tView = lView[TVIEW];
+    const tNode = tView.data[context.nodeIndex];
+    const providerTokens = [];
+    const startIndex = tNode.providerIndexes & 1048575 /* TNodeProviderIndexes.ProvidersStartIndexMask */;
+    const endIndex = tNode.directiveEnd;
+    for (let i = startIndex; i < endIndex; i++) {
+        let value = tView.data[i];
+        if (isDirectiveDefHack(value)) {
+            // The fact that we sometimes store Type and sometimes DirectiveDef in this location is a
+            // design flaw.  We should always store same type so that we can be monomorphic. The issue
+            // is that for Components/Directives we store the def instead the type. The correct behavior
+            // is that we should always be storing injectable type in this location.
+            value = value.type;
+        }
+        providerTokens.push(value);
+    }
+    return providerTokens;
+}
+/**
+ * Retrieves directive instances associated with a given DOM node. Does not include
+ * component instances.
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ *
+ * ```html
+ * <app-root>
+ *   <button my-button></button>
+ *   <my-comp></my-comp>
+ * </app-root>
+ * ```
+ *
+ * Calling `getDirectives` on `<button>` will return an array with an instance of the `MyButton`
+ * directive that is associated with the DOM node.
+ *
+ * Calling `getDirectives` on `<my-comp>` will return an empty array.
+ *
+ * @param node DOM node for which to get the directives.
+ * @returns Array of directives associated with the node.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getDirectives(node) {
+    // Skip text nodes because we can't have directives associated with them.
+    if (node instanceof Text) {
+        return [];
+    }
+    const context = getLContext(node);
+    const lView = context ? context.lView : null;
+    if (lView === null) {
+        return [];
+    }
+    const tView = lView[TVIEW];
+    const nodeIndex = context.nodeIndex;
+    if (!tView?.data[nodeIndex]) {
+        return [];
+    }
+    if (context.directives === undefined) {
+        context.directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
+    }
+    // The `directives` in this case are a named array called `LComponentView`. Clone the
+    // result so we don't expose an internal data structure in the user's console.
+    return context.directives === null ? [] : [...context.directives];
+}
+/**
+ * Returns the debug (partial) metadata for a particular directive or component instance.
+ * The function accepts an instance of a directive or component and returns the corresponding
+ * metadata.
+ *
+ * @param directiveOrComponentInstance Instance of a directive or component
+ * @returns metadata of the passed directive or component
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getDirectiveMetadata$1(directiveOrComponentInstance) {
+    const { constructor } = directiveOrComponentInstance;
+    if (!constructor) {
+        throw new Error('Unable to find the instance constructor');
+    }
+    // In case a component inherits from a directive, we may have component and directive metadata
+    // To ensure we don't get the metadata of the directive, we want to call `getComponentDef` first.
+    const componentDef = getComponentDef(constructor);
+    if (componentDef) {
+        return {
+            inputs: componentDef.inputs,
+            outputs: componentDef.outputs,
+            encapsulation: componentDef.encapsulation,
+            changeDetection: componentDef.onPush ? ChangeDetectionStrategy.OnPush :
+                ChangeDetectionStrategy.Default
+        };
+    }
+    const directiveDef = getDirectiveDef(constructor);
+    if (directiveDef) {
+        return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
+    }
+    return null;
+}
+/**
+ * Retrieve map of local references.
+ *
+ * The references are retrieved as a map of local reference name to element or directive instance.
+ *
+ * @param target DOM element, component or directive instance for which to retrieve
+ *    the local references.
+ */
+function getLocalRefs(target) {
+    const context = getLContext(target);
+    if (context === null)
+        return {};
+    if (context.localRefs === undefined) {
+        const lView = context.lView;
+        if (lView === null) {
+            return {};
+        }
+        context.localRefs = discoverLocalRefs(lView, context.nodeIndex);
+    }
+    return context.localRefs || {};
+}
+/**
+ * Retrieves the host element of a component or directive instance.
+ * The host element is the DOM element that matched the selector of the directive.
+ *
+ * @param componentOrDirective Component or directive instance for which the host
+ *     element should be retrieved.
+ * @returns Host element of the target.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getHostElement(componentOrDirective) {
+    return getLContext(componentOrDirective).native;
+}
+/**
+ * Retrieves the rendered text for a given component.
+ *
+ * This function retrieves the host element of a component and
+ * and then returns the `textContent` for that element. This implies
+ * that the text returned will include re-projected content of
+ * the component as well.
+ *
+ * @param component The component to return the content text for.
+ */
+function getRenderedText(component) {
+    const hostElement = getHostElement(component);
+    return hostElement.textContent || '';
+}
+/**
+ * Retrieves a list of event listeners associated with a DOM element. The list does include host
+ * listeners, but it does not include event listeners defined outside of the Angular context
+ * (e.g. through `addEventListener`).
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ *
+ * ```html
+ * <app-root>
+ *   <div (click)="doSomething()"></div>
+ * </app-root>
+ * ```
+ *
+ * Calling `getListeners` on `<div>` will return an object that looks as follows:
+ *
+ * ```ts
+ * {
+ *   name: 'click',
+ *   element: <div>,
+ *   callback: () => doSomething(),
+ *   useCapture: false
+ * }
+ * ```
+ *
+ * @param element Element for which the DOM listeners should be retrieved.
+ * @returns Array of event listeners on the DOM element.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function getListeners(element) {
+    ngDevMode && assertDomElement(element);
+    const lContext = getLContext(element);
+    const lView = lContext === null ? null : lContext.lView;
+    if (lView === null)
+        return [];
+    const tView = lView[TVIEW];
+    const lCleanup = lView[CLEANUP];
+    const tCleanup = tView.cleanup;
+    const listeners = [];
+    if (tCleanup && lCleanup) {
+        for (let i = 0; i < tCleanup.length;) {
+            const firstParam = tCleanup[i++];
+            const secondParam = tCleanup[i++];
+            if (typeof firstParam === 'string') {
+                const name = firstParam;
+                const listenerElement = unwrapRNode(lView[secondParam]);
+                const callback = lCleanup[tCleanup[i++]];
+                const useCaptureOrIndx = tCleanup[i++];
+                // if useCaptureOrIndx is boolean then report it as is.
+                // if useCaptureOrIndx is positive number then it in unsubscribe method
+                // if useCaptureOrIndx is negative number then it is a Subscription
+                const type = (typeof useCaptureOrIndx === 'boolean' || useCaptureOrIndx >= 0) ? 'dom' : 'output';
+                const useCapture = typeof useCaptureOrIndx === 'boolean' ? useCaptureOrIndx : false;
+                if (element == listenerElement) {
+                    listeners.push({ element, name, callback, useCapture, type });
+                }
+            }
+        }
+    }
+    listeners.sort(sortListeners);
+    return listeners;
+}
+function sortListeners(a, b) {
+    if (a.name == b.name)
+        return 0;
+    return a.name < b.name ? -1 : 1;
+}
+/**
+ * This function should not exist because it is megamorphic and only mostly correct.
+ *
+ * See call site for more info.
+ */
+function isDirectiveDefHack(obj) {
+    return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
+}
+/**
+ * Returns the attached `DebugNode` instance for an element in the DOM.
+ *
+ * @param element DOM element which is owned by an existing component's view.
+ */
+function getDebugNode$1(element) {
+    if (ngDevMode && !(element instanceof Node)) {
+        throw new Error('Expecting instance of DOM Element');
+    }
+    const lContext = getLContext(element);
+    const lView = lContext ? lContext.lView : null;
+    if (lView === null) {
+        return null;
+    }
+    const nodeIndex = lContext.nodeIndex;
+    if (nodeIndex !== -1) {
+        const valueInLView = lView[nodeIndex];
+        // this means that value in the lView is a component with its own
+        // data. In this situation the TNode is not accessed at the same spot.
+        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] : getTNode(lView[TVIEW], nodeIndex);
+        ngDevMode &&
+            assertEqual(tNode.index, nodeIndex, 'Expecting that TNode at index is same as index');
+        return buildDebugNode(tNode, lView);
+    }
+    return null;
+}
+/**
+ * Retrieve the component `LView` from component/element.
+ *
+ * NOTE: `LView` is a private and should not be leaked outside.
+ *       Don't export this method to `ng.*` on window.
+ *
+ * @param target DOM element or component instance for which to retrieve the LView.
+ */
+function getComponentLView(target) {
+    const lContext = getLContext(target);
+    const nodeIndx = lContext.nodeIndex;
+    const lView = lContext.lView;
+    ngDevMode && assertLView(lView);
+    const componentLView = lView[nodeIndx];
+    ngDevMode && assertLView(componentLView);
+    return componentLView;
+}
+/** Asserts that a value is a DOM Element. */
+function assertDomElement(value) {
+    if (typeof Element !== 'undefined' && !(value instanceof Element)) {
+        throw new Error('Expecting instance of DOM Element');
+    }
 }
 
 /**
@@ -23745,7 +23458,7 @@ const unusedValueExportToPlacateAjd = 1;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const unusedValueToPlacateAjd = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd;
+const unusedValueToPlacateAjd = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$6 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd;
 class LQuery_ {
     constructor(queryList) {
         this.queryList = queryList;
@@ -26186,6 +25899,99 @@ class CompilerFactory {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Marks a component for check (in case of OnPush components) and synchronously
+ * performs change detection on the application this component belongs to.
+ *
+ * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+function applyChanges(component) {
+    markDirty(component);
+    getRootComponents(component).forEach(rootComponent => detectChanges(rootComponent));
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This file introduces series of globally accessible debug tools
+ * to allow for the Angular debugging story to function.
+ *
+ * To see this in action run the following command:
+ *
+ *   bazel run //packages/core/test/bundling/todo:devserver
+ *
+ *  Then load `localhost:5432` and start using the console tools.
+ */
+/**
+ * This value reflects the property on the window where the dev
+ * tools are patched (window.ng).
+ * */
+const GLOBAL_PUBLISH_EXPANDO_KEY = 'ng';
+let _published = false;
+/**
+ * Publishes a collection of default debug tools onto`window.ng`.
+ *
+ * These functions are available globally when Angular is in development
+ * mode and are automatically stripped away from prod mode is on.
+ */
+function publishDefaultGlobalUtils$1() {
+    if (!_published) {
+        _published = true;
+        /**
+         * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+         * The contract of the function might be changed in any release and/or the function can be
+         * removed completely.
+         */
+        publishGlobalUtil('ɵsetProfiler', setProfiler);
+        publishGlobalUtil('getDirectiveMetadata', getDirectiveMetadata$1);
+        publishGlobalUtil('getComponent', getComponent);
+        publishGlobalUtil('getContext', getContext);
+        publishGlobalUtil('getListeners', getListeners);
+        publishGlobalUtil('getOwningComponent', getOwningComponent);
+        publishGlobalUtil('getHostElement', getHostElement);
+        publishGlobalUtil('getInjector', getInjector);
+        publishGlobalUtil('getRootComponents', getRootComponents);
+        publishGlobalUtil('getDirectives', getDirectives);
+        publishGlobalUtil('applyChanges', applyChanges);
+    }
+}
+/**
+ * Publishes the given function to `window.ng` so that it can be
+ * used from the browser console when an application is not in production.
+ */
+function publishGlobalUtil(name, fn) {
+    if (typeof COMPILED === 'undefined' || !COMPILED) {
+        // Note: we can't export `ng` when using closure enhanced optimization as:
+        // - closure declares globals itself for minified names, which sometimes clobber our `ng` global
+        // - we can't declare a closure extern as the namespace `ng` is already used within Google
+        //   for typings for AngularJS (via `goog.provide('ng....')`).
+        const w = _global;
+        ngDevMode && assertDefined(fn, 'function not defined');
+        if (w) {
+            let container = w[GLOBAL_PUBLISH_EXPANDO_KEY];
+            if (!container) {
+                container = w[GLOBAL_PUBLISH_EXPANDO_KEY] = {};
+            }
+            container[name] = fn;
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const promise = (() => Promise.resolve(0))();
 function scheduleMicroTask(fn) {
     if (typeof Zone === 'undefined') {
@@ -28082,7 +27888,7 @@ class DebugNode {
     get componentInstance() {
         const nativeElement = this.nativeNode;
         return nativeElement &&
-            (getComponent$1(nativeElement) || getOwningComponent(nativeElement));
+            (getComponent(nativeElement) || getOwningComponent(nativeElement));
     }
     /**
      * An object that provides parent context for this element. Often an ancestor component instance
@@ -28093,7 +27899,7 @@ class DebugNode {
      * of heroes"`.
      */
     get context() {
-        return getComponent$1(this.nativeNode) || getContext(this.nativeNode);
+        return getComponent(this.nativeNode) || getContext(this.nativeNode);
     }
     /**
      * The callbacks attached to the component's @Output properties and/or the element's event
@@ -28433,8 +28239,7 @@ function _queryNodeChildren(tNode, lView, predicate, matches, elementsOnly, root
             // Renderer2, however that's not the case in Ivy. This approach is being used because:
             // 1. Matching the ViewEngine behavior would mean potentially introducing a depedency
             //    from `Renderer2` to Ivy which could bring Ivy code into ViewEngine.
-            // 2. We would have to make `Renderer3` "know" about debug nodes.
-            // 3. It allows us to capture nodes that were inserted directly via the DOM.
+            // 2. It allows us to capture nodes that were inserted directly via the DOM.
             nativeNode && _queryNativeNodeDescendants(nativeNode, predicate, matches, elementsOnly);
         }
         // In all cases, if a dynamic container exists for this node, each view inside it has to be
@@ -29910,5 +29715,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createEnvironmentInjector, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalBootstrapApplication as ɵinternalBootstrapApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isStandalone as ɵisStandalone, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderComponent as ɵrenderComponent, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createEnvironmentInjector, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalBootstrapApplication as ɵinternalBootstrapApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isStandalone as ɵisStandalone, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map

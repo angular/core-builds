@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-f05ed12
+ * @license Angular v14.1.0-next.3+sha-8d2e5e6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1599,49 +1599,6 @@ declare type ContentQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U
 
 declare const CONTEXT = 8;
 
-/** Options that control how the component should be bootstrapped. */
-declare interface CreateComponentOptions {
-    /** Which renderer factory to use. */
-    rendererFactory?: RendererFactory3;
-    /** A custom sanitizer instance */
-    sanitizer?: Sanitizer;
-    /** A custom animation player handler */
-    playerHandler?: ɵPlayerHandler;
-    /**
-     * Host element on which the component will be bootstrapped. If not specified,
-     * the component definition's `tag` is used to query the existing DOM for the
-     * element to bootstrap.
-     */
-    host?: RElement | string;
-    /** Module injector for the component. If unspecified, the injector will be NULL_INJECTOR. */
-    injector?: Injector;
-    /**
-     * List of features to be applied to the created component. Features are simply
-     * functions that decorate a component with a certain behavior.
-     *
-     * Typically, the features in this list are features that cannot be added to the
-     * other features list in the component definition because they rely on other factors.
-     *
-     * Example: `LifecycleHooksFeature` is a function that adds lifecycle hook capabilities
-     * to root components in a tree-shakable way. It cannot be added to the component
-     * features list because there's no way of knowing when the component will be used as
-     * a root component.
-     */
-    hostFeatures?: HostFeature[];
-    /**
-     * A function which is used to schedule change detection work in the future.
-     *
-     * When marking components as dirty, it is necessary to schedule the work of
-     * change detection in the future. This is done to coalesce multiple
-     * {@link markDirty} calls into a single changed detection processing.
-     *
-     * The default value of the scheduler is the `requestAnimationFrame` function.
-     *
-     * It is also useful to override this function for testing purposes.
-     */
-    scheduler?: (work: () => void) => void;
-}
-
 /**
  * Create a new environment injector.
  *
@@ -2944,6 +2901,14 @@ export declare interface GetTestability {
     findTestabilityInTree(registry: TestabilityRegistry, elem: any, findInAncestors: boolean): Testability | null;
 }
 
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 declare type GlobalTargetName = 'document' | 'window' | 'body';
 
 declare type GlobalTargetResolver = (element: any) => EventTarget;
@@ -3147,9 +3112,6 @@ export declare interface HostDecorator {
     (): any;
     new (): Host;
 }
-
-/** See CreateComponentOptions.hostFeatures */
-declare type HostFeature = (<T>(component: T, componentDef: ɵComponentDef<T>) => void);
 
 /**
  * Type of the HostListener metadata.
@@ -4588,9 +4550,9 @@ declare interface LView<T = unknown> extends Array<any> {
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
     /** Factory to be used for creating Renderer. */
-    [RENDERER_FACTORY]: RendererFactory3;
+    [RENDERER_FACTORY]: RendererFactory;
     /** Renderer to be used for this view. */
-    [RENDERER]: Renderer3;
+    [RENDERER]: Renderer;
     /** An optional custom sanitizer. */
     [SANITIZER]: Sanitizer | null;
     /**
@@ -5436,21 +5398,6 @@ declare interface NodeInjectorDebug {
 }
 
 /**
- * Object Oriented style of API needed to create elements and text nodes.
- *
- * This is the native browser API style, e.g. operations are methods on individual objects
- * like HTMLElement. With this style, no additional code is needed as a facade
- * (reducing payload size).
- * */
-declare interface ObjectOrientedRenderer3 {
-    createComment(data: string): RComment;
-    createElement(tagName: string): RElement;
-    createElementNS(namespace: string, tagName: string): RElement;
-    createTextNode(data: string): RText;
-    querySelector(selectors: string): RElement | null;
-}
-
-/**
  * @description
  * A lifecycle hook that is called when any data-bound property of a directive changes.
  * Define an `ngOnChanges()` method to handle the changes.
@@ -5872,41 +5819,6 @@ declare const enum PreOrderHookFlags {
     NumberOfInitHooksCalledIncrementer = 65536,
     NumberOfInitHooksCalledShift = 16,
     NumberOfInitHooksCalledMask = 4294901760
-}
-
-/**
- * Procedural style of API needed to create elements and text nodes.
- *
- * In non-native browser environments (e.g. platforms such as web-workers), this is the
- * facade that enables element manipulation. This also facilitates backwards compatibility
- * with Renderer2.
- */
-declare interface ProceduralRenderer3 {
-    destroy(): void;
-    createComment(value: string): RComment;
-    createElement(name: string, namespace?: string | null): RElement;
-    createText(value: string): RText;
-    /**
-     * This property is allowed to be null / undefined,
-     * in which case the view engine won't call it.
-     * This is used as a performance optimization for production mode.
-     */
-    destroyNode?: ((node: RNode) => void) | null;
-    appendChild(parent: RElement, newChild: RNode): void;
-    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
-    removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
-    selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
-    parentNode(node: RNode): RElement | null;
-    nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
-    removeAttribute(el: RElement, name: string, namespace?: string | null): void;
-    addClass(el: RElement, name: string): void;
-    removeClass(el: RElement, name: string): void;
-    setStyle(el: RElement, style: string, value: any, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
-    removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
-    setProperty(el: RElement, name: string, value: any): void;
-    setValue(node: RText | RComment, value: string): void;
-    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 
 /**
@@ -6638,6 +6550,40 @@ declare interface RElement extends RNode {
 declare const RENDERER = 11;
 
 /**
+ * Procedural style of API needed to create elements and text nodes.
+ *
+ * In non-native browser environments (e.g. platforms such as web-workers), this is the
+ * facade that enables element manipulation. In practice, this is implemented by `Renderer2`.
+ */
+declare interface Renderer {
+    destroy(): void;
+    createComment(value: string): RComment;
+    createElement(name: string, namespace?: string | null): RElement;
+    createText(value: string): RText;
+    /**
+     * This property is allowed to be null / undefined,
+     * in which case the view engine won't call it.
+     * This is used as a performance optimization for production mode.
+     */
+    destroyNode?: ((node: RNode) => void) | null;
+    appendChild(parent: RElement, newChild: RNode): void;
+    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
+    removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
+    selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
+    parentNode(node: RNode): RElement | null;
+    nextSibling(node: RNode): RNode | null;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
+    removeAttribute(el: RElement, name: string, namespace?: string | null): void;
+    addClass(el: RElement, name: string): void;
+    removeClass(el: RElement, name: string): void;
+    setStyle(el: RElement, style: string, value: any, flags?: RendererStyleFlags2): void;
+    removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2): void;
+    setProperty(el: RElement, name: string, value: any): void;
+    setValue(node: RText | RComment, value: string): void;
+    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
+}
+
+/**
  * Extend this base class to implement custom rendering. By default, Angular
  * renders a template into DOM. You can use custom rendering to intercept
  * rendering calls, or to render to something other than DOM.
@@ -6813,9 +6759,13 @@ export declare abstract class Renderer2 {
     abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 
-declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
-
 declare const RENDERER_FACTORY = 10;
+
+declare interface RendererFactory {
+    createRenderer(hostElement: RElement | null, rendererType: RendererType2 | null): Renderer;
+    begin?(): void;
+    end?(): void;
+}
 
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
@@ -6845,12 +6795,6 @@ export declare abstract class RendererFactory2 {
     abstract whenRenderingDone?(): Promise<any>;
 }
 
-declare interface RendererFactory3 {
-    createRenderer(hostElement: RElement | null, rendererType: RendererType2 | null): Renderer3;
-    begin?(): void;
-    end?(): void;
-}
-
 /**
  * Flags for renderer-specific style modifiers.
  * @publicApi
@@ -6863,11 +6807,6 @@ export declare enum RendererStyleFlags2 {
     /**
      * Marks a style as using dash case naming (this-is-dash-case).
      */
-    DashCase = 2
-}
-
-declare enum RendererStyleFlags3 {
-    Important = 1,
     DashCase = 2
 }
 
@@ -7060,6 +6999,7 @@ declare const enum RuntimeErrorCode {
     PLATFORM_ALREADY_DESTROYED = 404,
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
     APPLICATION_REF_ALREADY_DESTROYED = 406,
+    RENDERER_NOT_FOUND = 407,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
@@ -10696,21 +10636,6 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
-
-/**
- * Bootstraps a Component into an existing host element and returns an instance
- * of the component.
- *
- * Use this function to bootstrap a component into the DOM tree. Each invocation
- * of this function will create a separate tree of components, injectors and
- * change detection cycles and lifetimes. To dynamically insert a new component
- * into an existing tree such that it shares the same injection, change detection
- * and object lifetime, use {@link ViewContainer#createComponent}.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-export declare function ɵrenderComponent<T>(componentType: ɵComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
 
 /**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
