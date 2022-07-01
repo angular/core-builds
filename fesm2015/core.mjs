@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-dd3e096
+ * @license Angular v14.1.0-next.3+sha-96c6139
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10540,6 +10540,9 @@ function handleUnknownPropertyError(propName, tagName, nodeType, lView) {
                 `the ${schemas} of this component.`;
         }
     }
+    reportUnknownPropertyError(message);
+}
+function reportUnknownPropertyError(message) {
     if (shouldThrowErrorOnUnknownProperty) {
         throw new RuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message);
     }
@@ -12306,6 +12309,7 @@ function instantiateRootComponent(tView, lView, def) {
         ngDevMode &&
             assertEqual(directiveIndex, rootTNode.directiveStart, 'Because this is a root component the allocated expando should match the TNode component.');
         configureViewWithDirective(tView, rootTNode, lView, directiveIndex, def);
+        initializeInputAndOutputAliases(tView, rootTNode);
     }
     const directive = getNodeInjectable(lView, tView, rootTNode.directiveStart, rootTNode);
     attachPatchData(directive, lView);
@@ -21085,7 +21089,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.3+sha-dd3e096');
+const VERSION = new Version('14.1.0-next.3+sha-96c6139');
 
 /**
  * @license
@@ -21650,6 +21654,23 @@ class ComponentRef extends ComponentRef$1 {
         this.instance = instance;
         this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
         this.componentType = componentType;
+    }
+    setInput(name, value) {
+        const inputData = this._tNode.inputs;
+        let dataValue;
+        if (inputData !== null && (dataValue = inputData[name])) {
+            const lView = this._rootLView;
+            setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
+            markDirtyIfOnPush(lView, this._tNode.index);
+        }
+        else {
+            if (ngDevMode) {
+                const cmpNameForError = stringifyForError(this.componentType);
+                let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
+                message += `Make sure that the '${name}' property is annotated with @Input() or a mapped @Input('${name}') exists.`;
+                reportUnknownPropertyError(message);
+            }
+        }
     }
     get injector() {
         return new NodeInjector(this._tNode, this._rootLView);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-dd3e096
+ * @license Angular v14.1.0-next.3+sha-96c6139
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1320,6 +1320,15 @@ declare type ComponentInstance = {};
  * @publicApi
  */
 export declare abstract class ComponentRef<C> {
+    /**
+     * Updates a specified input name to a new value. Using this method will properly mark for check
+     * component using the `OnPush` change detection strategy. It will also assure that the
+     * `OnChanges` lifecycle hook runs when a dynamically created component is change-detected.
+     *
+     * @param name The name of an input.
+     * @param value The new value of an input.
+     */
+    abstract setInput(name: string, value: unknown): void;
     /**
      * The host or anchor [element](guide/glossary#element) for this component instance.
      */
@@ -10690,6 +10699,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
     constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
+    setInput(name: string, value: unknown): void;
     get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
