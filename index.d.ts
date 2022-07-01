@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-ee2e491
+ * @license Angular v14.1.0-next.3+sha-915e82d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1452,6 +1452,8 @@ export declare interface ContentChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
+     * * **descendants** - If `true` (default) include all descendants of the element. If `false` then
+     * only query direct children of the element.
      * * **read** - Used to read a different token from the queried element.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
@@ -1485,10 +1487,12 @@ export declare interface ContentChildDecorator {
      * @Annotation
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
         read?: any;
         static?: boolean;
     }): any;
     new (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
         read?: any;
         static?: boolean;
     }): ContentChild;
