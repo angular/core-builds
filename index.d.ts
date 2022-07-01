@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-915e82d
+ * @license Angular v14.1.0-next.3+sha-dd3e096
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3591,8 +3591,37 @@ export declare function inject<T>(token: ProviderToken<T>): T;
  * @throws if called outside of a supported context.
  *
  * @publicApi
+ * @deprecated prefer an options object instead of `InjectFlags`
  */
 export declare function inject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
+
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param options Control how injection is executed. Options correspond to injection strategies
+ *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
+ *     `@Optional`.
+ * @returns the injected value if operation is successful.
+ * @throws if called outside of a supported context, or if the token is not found.
+ *
+ * @publicApi
+ */
+export declare function inject<T>(token: ProviderToken<T>, options: InjectOptions & {
+    optional?: false;
+}): T;
+
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param options Control how injection is executed. Options correspond to injection strategies
+ *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
+ *     `@Optional`.
+ * @returns the injected value if operation is successful,  `null` if the token is not
+ *     found and optional injection has been requested.
+ * @throws if called outside of a supported context, or if the token is not found and optional
+ *     injection was not requested.
+ *
+ * @publicApi
+ */
+export declare function inject<T>(token: ProviderToken<T>, options: InjectOptions): T | null;
 
 /**
  * Type of the Injectable metadata.
@@ -3717,6 +3746,7 @@ export declare interface InjectDecorator {
  * Injection flags for DI.
  *
  * @publicApi
+ * @deprecated use an options object for `inject` instead.
  */
 export declare enum InjectFlags {
     /** Check self and check parent injector if needed */
@@ -3789,6 +3819,32 @@ export declare class InjectionToken<T> {
         factory: () => T;
     });
     toString(): string;
+}
+
+/**
+ * Type of the options argument to `inject`.
+ *
+ * @publicApi
+ */
+export declare interface InjectOptions {
+    /**
+     * Use optional injection, and return `null` if the requested token is not found.
+     */
+    optional?: boolean;
+    /**
+     * Start injection at the parent of the current injector.
+     */
+    skipSelf?: boolean;
+    /**
+     * Only query the current injector for the token, and don't fall back to the parent injector if
+     * it's not found.
+     */
+    self?: boolean;
+    /**
+     * Stop injection at the host component's injector. Only relevant when injecting from an element
+     * injector, and a no-op for environment injectors.
+     */
+    host?: boolean;
 }
 
 /**

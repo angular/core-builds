@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-915e82d
+ * @license Angular v14.1.0-next.3+sha-dd3e096
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -499,6 +499,7 @@ const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafePr
  * Injection flags for DI.
  *
  * @publicApi
+ * @deprecated use an options object for `inject` instead.
  */
 var InjectFlags;
 (function (InjectFlags) {
@@ -4841,6 +4842,16 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  * @publicApi
  */
 function inject(token, flags = InjectFlags.Default) {
+    if (typeof flags !== 'number') {
+        // While TypeScript doesn't accept it without a cast, bitwise OR with false-y values in
+        // JavaScript is a no-op. We can use that for a very codesize-efficient conversion from
+        // `InjectOptions` to `InjectFlags`.
+        flags = (0 /* InternalInjectFlags.Default */ | // comment to force a line break in the formatter
+            (flags.optional && 8 /* InternalInjectFlags.Optional */) |
+            (flags.host && 1 /* InternalInjectFlags.Host */) |
+            (flags.self && 2 /* InternalInjectFlags.Self */) |
+            (flags.skipSelf && 4 /* InternalInjectFlags.SkipSelf */));
+    }
     return ɵɵinject(token, flags);
 }
 function injectArgs(types) {
@@ -21074,7 +21085,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.3+sha-915e82d');
+const VERSION = new Version('14.1.0-next.3+sha-dd3e096');
 
 /**
  * @license
