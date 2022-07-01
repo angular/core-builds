@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-6f11a58
+ * @license Angular v14.1.0-next.3+sha-a7a14df
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2596,6 +2596,17 @@ export declare abstract class EnvironmentInjector implements Injector {
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
+    /**
+     * Runs the given function in the context of this `EnvironmentInjector`.
+     *
+     * Within the function's stack frame, `inject` can be used to inject dependencies from this
+     * injector. Note that `inject` is only usable synchronously, and cannot be used in any
+     * asynchronous callbacks or after any `await` points.
+     *
+     * @param fn the closure to be run in the context of this injector
+     * @returns the return value of the function, if any
+     */
+    abstract runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     abstract destroy(): void;
 }
 
@@ -6219,6 +6230,7 @@ declare class R3Injector extends EnvironmentInjector {
      */
     destroy(): void;
     onDestroy(callback: () => void): void;
+    runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
@@ -10633,6 +10645,7 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     readonly componentFactoryResolver: ComponentFactoryResolver_2;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
+    runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }

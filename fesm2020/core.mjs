@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.3+sha-6f11a58
+ * @license Angular v14.1.0-next.3+sha-a7a14df
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9116,6 +9116,18 @@ class R3Injector extends EnvironmentInjector {
     }
     onDestroy(callback) {
         this._onDestroyHooks.push(callback);
+    }
+    runInContext(fn) {
+        this.assertNotDestroyed();
+        const previousInjector = setCurrentInjector(this);
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            return fn();
+        }
+        finally {
+            setCurrentInjector(previousInjector);
+            setInjectImplementation(previousInjectImplementation);
+        }
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this.assertNotDestroyed();
@@ -21075,7 +21087,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.3+sha-6f11a58');
+const VERSION = new Version('14.1.0-next.3+sha-a7a14df');
 
 /**
  * @license
@@ -21705,6 +21717,9 @@ class NgModuleRef extends NgModuleRef$1 {
             return this;
         }
         return this._r3Injector.get(token, notFoundValue, injectFlags);
+    }
+    runInContext(fn) {
+        return this.injector.runInContext(fn);
     }
     destroy() {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
