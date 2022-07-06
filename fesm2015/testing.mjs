@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-2972f07
+ * @license Angular v14.1.0-next.4+sha-e9b5dac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -366,7 +366,7 @@ function fakeAsync(fn) {
  *
  * @publicApi
  */
-function tick$1(millis = 0, tickOptions = {
+function tick(millis = 0, tickOptions = {
     processNewMacroTasksSynchronously: true
 }) {
     if (fakeAsyncTestModule) {
@@ -14642,23 +14642,6 @@ function markDirty(component) {
     ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
     scheduleTick(rootView[CONTEXT], 1 /* RootContextFlags.DetectChanges */);
 }
-/**
- * Used to perform change detection on the whole application.
- *
- * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
- * executes lifecycle hooks and conditionally checks components based on their
- * `ChangeDetectionStrategy` and dirtiness.
- *
- * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
- * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
- * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
- * be changed when calling `renderComponent` and providing the `scheduler` option.
- */
-function tick(component) {
-    const rootView = getRootView(component);
-    const rootContext = rootView[CONTEXT];
-    tickRootContext(rootContext);
-}
 
 /**
  * @license
@@ -21404,7 +21387,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.4+sha-2972f07');
+const VERSION = new Version('14.1.0-next.4+sha-e9b5dac');
 
 /**
  * @license
@@ -26661,5 +26644,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick$1 as tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map
