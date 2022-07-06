@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.4+sha-5001a7f
+ * @license Angular v14.0.4+sha-aee02b7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -608,8 +608,10 @@ export declare interface AttributeDecorator {
 
 /**
  * Provides additional options to the bootstraping process.
+ *
+ * @publicApi
  */
-declare interface BootstrapOptions {
+export declare interface BootstrapOptions {
     /**
      * Optionally specify which `NgZone` should be used.
      *
