@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-33ce388
+ * @license Angular v14.1.0-next.4+sha-71e606d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21072,7 +21072,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.4+sha-33ce388');
+const VERSION = new Version('14.1.0-next.4+sha-71e606d');
 
 /**
  * @license
@@ -27349,7 +27349,9 @@ class ApplicationRef {
     get destroyed() {
         return this._destroyed;
     }
-    /** @internal */
+    /**
+     * The `EnvironmentInjector` used to create this application.
+     */
     get injector() {
         return this._injector;
     }
@@ -27553,13 +27555,13 @@ class ApplicationRef {
         }
     }
 }
-ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(Injector), ɵɵinject(ErrorHandler)); };
+ApplicationRef.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(ɵɵinject(NgZone), ɵɵinject(EnvironmentInjector), ɵɵinject(ErrorHandler)); };
 ApplicationRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 (function () {
     (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
             type: Injectable,
             args: [{ providedIn: 'root' }]
-        }], function () { return [{ type: NgZone }, { type: Injector }, { type: ErrorHandler }]; }, null);
+        }], function () { return [{ type: NgZone }, { type: EnvironmentInjector }, { type: ErrorHandler }]; }, null);
 })();
 function remove(list, el) {
     const index = list.indexOf(el);

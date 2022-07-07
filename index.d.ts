@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-33ce388
+ * @license Angular v14.1.0-next.4+sha-71e606d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -426,6 +426,10 @@ export declare class ApplicationRef {
      * @see  [Usage notes](#is-stable-examples) for examples and caveats when using this API.
      */
     readonly isStable: Observable<boolean>;
+    /**
+     * The `EnvironmentInjector` used to create this application.
+     */
+    get injector(): EnvironmentInjector;
     /**
      * Bootstrap a component onto the element identified by its selector or, optionally, to a
      * specified element.
