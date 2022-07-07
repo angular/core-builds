@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.0.5+sha-ae1264b
+ * @license Angular v14.0.5+sha-72d1aff
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21045,7 +21045,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.0.5+sha-ae1264b');
+const VERSION = new Version('14.0.5+sha-72d1aff');
 
 /**
  * @license
@@ -27471,7 +27471,7 @@ class ApplicationRef {
     }
     /**
      * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
-     * will destroy the associated environnement injectors as well as all the bootstrapped components
+     * will destroy the associated environment injectors as well as all the bootstrapped components
      * with their views.
      */
     destroy() {
