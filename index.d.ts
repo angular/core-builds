@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-71e606d
+ * @license Angular v14.1.0-next.4+sha-5a69903
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -533,7 +533,7 @@ export declare class ApplicationRef {
     private _loadComponent;
     /**
      * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
-     * will destroy the associated environnement injectors as well as all the bootstrapped components
+     * will destroy the associated environment injectors as well as all the bootstrapped components
      * with their views.
      */
     destroy(): void;
