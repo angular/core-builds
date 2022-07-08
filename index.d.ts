@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-cee207e
+ * @license Angular v14.1.0-next.4+sha-c14c701
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -611,7 +611,7 @@ export declare interface AttributeDecorator {
 }
 
 /**
- * Provides additional options to the bootstraping process.
+ * Provides additional options to the bootstrapping process.
  *
  * @publicApi
  */
@@ -634,7 +634,7 @@ export declare interface BootstrapOptions {
      *
      * When button is clicked, because of the event bubbling, both
      * event handlers will be called and 2 change detections will be
-     * triggered. We can colesce such kind of events to only trigger
+     * triggered. We can coalesce such kind of events to only trigger
      * change detection only once.
      *
      * By default, this option will be false. So the events will not be
@@ -743,7 +743,7 @@ export declare abstract class ChangeDetectorRef {
      *
      * Components are normally marked as dirty (in need of rerendering) when inputs
      * have changed or events have fired in the view. Call this method to ensure that
-     * a component is checked even if these triggers have not occured.
+     * a component is checked even if these triggers have not occurred.
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
@@ -4621,8 +4621,8 @@ declare interface LView<T = unknown> extends Array<any> {
      * TView.cleanup saves an index to the necessary context in this array.
      *
      * After `LView` is created it is possible to attach additional instance specific functions at the
-     * end of the `lView[CLENUP]` because we know that no more `T` level cleanup functions will be
-     * addeded here.
+     * end of the `lView[CLEANUP]` because we know that no more `T` level cleanup functions will be
+     * added here.
      */
     [CLEANUP]: any[] | null;
     /**
@@ -8864,7 +8864,7 @@ declare const enum TViewType {
     Component = 1,
     /**
      * `TView` associated with a template. Such as `*ngIf`, `<ng-template>` etc... A `Component`
-     * can have zero or more `Embedede` `TView`s.
+     * can have zero or more `Embedded` `TView`s.
      */
     Embedded = 2
 }
@@ -13442,7 +13442,7 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
  *
  * @param propName The name of the property to update.
- * @param values The collection of values and the strings inbetween those values, beginning with a
+ * @param values The collection of values and the strings in between those values, beginning with a
  * string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param sanitizer An optional sanitizer function
@@ -13881,7 +13881,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
 /**
  * A feature that acts as a setup code for the {@link StandaloneService}.
  *
- * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
+ * The most important responsibility of this feature is to expose the "getStandaloneInjector"
  * function (an entry points to a standalone injector creation) on a component definition object. We
  * go through the features infrastructure to make sure that the standalone injector creation logic
  * is tree-shakable and not included in applications that don't use standalone components.

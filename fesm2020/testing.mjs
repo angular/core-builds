@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-cee207e
+ * @license Angular v14.1.0-next.4+sha-c14c701
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9284,7 +9284,7 @@ function isClassProvider(value) {
  * @publicApi
  */
 const INJECTOR = new InjectionToken('INJECTOR', 
-// Dissable tslint because this is const enum which gets inlined not top level prop access.
+// Disable tslint because this is const enum which gets inlined not top level prop access.
 // tslint:disable-next-line: no-toplevel-property-access
 -1 /* InjectorMarkers.Injector */);
 
@@ -15889,7 +15889,7 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
  * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
  *
  * @param propName The name of the property to update.
- * @param values The collection of values and the strings inbetween those values, beginning with a
+ * @param values The collection of values and the strings in between those values, beginning with a
  * string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param sanitizer An optional sanitizer function
@@ -18956,7 +18956,7 @@ var I18nCreateOpCode;
      */
     I18nCreateOpCode[I18nCreateOpCode["SHIFT"] = 2] = "SHIFT";
     /**
-     * Should the node be appended to parent imedditatly after creation.
+     * Should the node be appended to parent immediately after creation.
      */
     I18nCreateOpCode[I18nCreateOpCode["APPEND_EAGERLY"] = 1] = "APPEND_EAGERLY";
     /**
@@ -21385,7 +21385,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.4+sha-cee207e');
+const VERSION = new Version('14.1.0-next.4+sha-c14c701');
 
 /**
  * @license
@@ -22148,7 +22148,7 @@ StandaloneService.ɵprov = ɵɵdefineInjectable({
 /**
  * A feature that acts as a setup code for the {@link StandaloneService}.
  *
- * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
+ * The most important responsibility of this feature is to expose the "getStandaloneInjector"
  * function (an entry points to a standalone injector creation) on a component definition object. We
  * go through the features infrastructure to make sure that the standalone injector creation logic
  * is tree-shakable and not included in applications that don't use standalone components.
