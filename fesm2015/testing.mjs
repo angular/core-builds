@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-d3a60b3
+ * @license Angular v14.1.0-next.4+sha-a6d5fe2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21199,7 +21199,7 @@ class NgModuleRef$1 {
  * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
  * for additional context. Angular provides APIs that accept NgModule classes directly (such as
  * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
  * using factory-based ones.
  */
 class NgModuleFactory$1 {
@@ -21387,7 +21387,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.0-next.4+sha-d3a60b3');
+const VERSION = new Version('14.1.0-next.4+sha-a6d5fe2');
 
 /**
  * @license
@@ -21990,14 +21990,24 @@ class ComponentRef extends ComponentRef$1 {
  */
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
+ *
  * @param ngModule NgModule class.
  * @param parentInjector Optional injector instance to use as a parent for the module injector. If
  *     not provided, `NullInjector` will be used instead.
+ * @returns NgModuleRef that represents an NgModule instance.
+ *
  * @publicApi
  */
-function createNgModuleRef(ngModule, parentInjector) {
+function createNgModule(ngModule, parentInjector) {
     return new NgModuleRef(ngModule, parentInjector !== null && parentInjector !== void 0 ? parentInjector : null);
 }
+/**
+ * The `createNgModule` function alias for backwards-compatibility.
+ * Please avoid using it directly and use `createNgModule` instead.
+ *
+ * @deprecated Use `createNgModule` instead.
+ */
+const createNgModuleRef = createNgModule;
 class NgModuleRef extends NgModuleRef$1 {
     constructor(ngModuleType, _parent) {
         super();
@@ -23612,7 +23622,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
             // so that a component can use DI tokens provided in MgModules. For this reason, we can not
             // rely on the provided injector, since it might be detached from the DI tree (for example, if
             // it was created via `Injector.create` without specifying a parent injector, or if an
-            // injector is retrieved from an `NgModuleRef` created via `createNgModuleRef` using an
+            // injector is retrieved from an `NgModuleRef` created via `createNgModule` using an
             // NgModule outside of a module tree). Instead, we always use `ViewContainerRef`'s parent
             // injector, which is normally connected to the DI tree, which includes module injector
             // subtree.

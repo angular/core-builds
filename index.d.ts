@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.4+sha-d3a60b3
+ * @license Angular v14.1.0-next.4+sha-a6d5fe2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1636,12 +1636,23 @@ export declare function createEnvironmentInjector(providers: Array<Provider | Im
 
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
+ *
  * @param ngModule NgModule class.
  * @param parentInjector Optional injector instance to use as a parent for the module injector. If
  *     not provided, `NullInjector` will be used instead.
+ * @returns NgModuleRef that represents an NgModule instance.
+ *
  * @publicApi
  */
-export declare function createNgModuleRef<T>(ngModule: Type<T>, parentInjector?: Injector): NgModuleRef<T>;
+export declare function createNgModule<T>(ngModule: Type<T>, parentInjector?: Injector): NgModuleRef<T>;
+
+/**
+ * The `createNgModule` function alias for backwards-compatibility.
+ * Please avoid using it directly and use `createNgModule` instead.
+ *
+ * @deprecated Use `createNgModule` instead.
+ */
+export declare const createNgModuleRef: typeof createNgModule;
 
 /**
  * Creates a platform.
@@ -5238,7 +5249,7 @@ export declare interface NgModuleDecorator {
  * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
  * for additional context. Angular provides APIs that accept NgModule classes directly (such as
  * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
  * using factory-based ones.
  */
 export declare abstract class NgModuleFactory<T> {
