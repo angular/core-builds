@@ -1,10 +1,10 @@
 /**
- * @license Angular v14.2.0-next.0+sha-27d855b
+ * @license Angular v14.2.0-next.0+sha-7e03fc9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, InjectionToken as InjectionToken$1, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
@@ -413,6 +413,37 @@ function flushMicrotasks() {
     }
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Whether test modules should be torn down by default. */
+const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
+/** Whether unknown elements in templates should throw by default. */
+const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
+/** Whether unknown properties in templates should throw by default. */
+const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @publicApi
+ */
+class TestComponentRenderer {
+    insertRootElement(rootElementId) { }
+    removeAllRootElements() { }
+}
+/**
+ * @publicApi
+ */
+const ComponentFixtureAutoDetect = new InjectionToken$1('ComponentFixtureAutoDetect');
+/**
+ * @publicApi
+ */
+const ComponentFixtureNoNgZone = new InjectionToken$1('ComponentFixtureNoNgZone');
 
 /**
  * @license
@@ -21387,7 +21418,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-27d855b');
+const VERSION = new Version('14.2.0-next.0+sha-7e03fc9');
 
 /**
  * @license
@@ -25234,7 +25265,7 @@ function assertNoStandaloneComponents(types, resolver, location) {
         }
     });
 }
-class R3TestBedCompiler {
+class TestBedCompiler {
     constructor(platform, additionalModuleTypes) {
         this.platform = platform;
         this.additionalModuleTypes = additionalModuleTypes;
@@ -26047,49 +26078,23 @@ class R3TestCompiler {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/** Whether test modules should be torn down by default. */
-const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
-/** Whether unknown elements in templates should throw by default. */
-const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
-/** Whether unknown properties in templates should throw by default. */
-const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * @publicApi
- */
-class TestComponentRenderer {
-    insertRootElement(rootElementId) { }
-    removeAllRootElements() { }
-}
-/**
- * @publicApi
- */
-const ComponentFixtureAutoDetect = new InjectionToken$1('ComponentFixtureAutoDetect');
-/**
- * @publicApi
- */
-const ComponentFixtureNoNgZone = new InjectionToken$1('ComponentFixtureNoNgZone');
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _nextRootElementId = 0;
+/**
+ * Returns a singleton of the `TestBed` class.
+ *
+ * @publicApi
+ */
+function getTestBed() {
+    return TestBedImpl.INSTANCE;
+}
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
  * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
- *
- * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
- * according to the compiler used.
  */
-class TestBedRender3 {
+class TestBedImpl {
     constructor() {
         // Properties
         this.platform = null;
@@ -26097,7 +26102,15 @@ class TestBedRender3 {
         this._compiler = null;
         this._testModuleRef = null;
         this._activeFixtures = [];
-        this._globalCompilationChecked = false;
+        /**
+         * Internal-only flag to indicate whether a module
+         * scoping queue has been checked and flushed already.
+         * @nodoc
+         */
+        this.globalCompilationChecked = false;
+    }
+    static get INSTANCE() {
+        return TestBedImpl._INSTANCE = TestBedImpl._INSTANCE || new TestBedImpl();
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -26113,7 +26126,7 @@ class TestBedRender3 {
      * @publicApi
      */
     static initTestEnvironment(ngModule, platform, options) {
-        const testBed = _getTestBedRender3();
+        const testBed = TestBedImpl.INSTANCE;
         testBed.initTestEnvironment(ngModule, platform, options);
         return testBed;
     }
@@ -26123,19 +26136,17 @@ class TestBedRender3 {
      * @publicApi
      */
     static resetTestEnvironment() {
-        _getTestBedRender3().resetTestEnvironment();
+        TestBedImpl.INSTANCE.resetTestEnvironment();
     }
     static configureCompiler(config) {
-        _getTestBedRender3().configureCompiler(config);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.configureCompiler(config);
     }
     /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
      * which are defined in test_injector.js
      */
     static configureTestingModule(moduleDef) {
-        _getTestBedRender3().configureTestingModule(moduleDef);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.configureTestingModule(moduleDef);
     }
     /**
      * Compile components with a `templateUrl` for the test's NgModule.
@@ -26143,27 +26154,22 @@ class TestBedRender3 {
      * as fetching urls is asynchronous.
      */
     static compileComponents() {
-        return _getTestBedRender3().compileComponents();
+        return TestBedImpl.INSTANCE.compileComponents();
     }
     static overrideModule(ngModule, override) {
-        _getTestBedRender3().overrideModule(ngModule, override);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overrideModule(ngModule, override);
     }
     static overrideComponent(component, override) {
-        _getTestBedRender3().overrideComponent(component, override);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overrideComponent(component, override);
     }
     static overrideDirective(directive, override) {
-        _getTestBedRender3().overrideDirective(directive, override);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overrideDirective(directive, override);
     }
     static overridePipe(pipe, override) {
-        _getTestBedRender3().overridePipe(pipe, override);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overridePipe(pipe, override);
     }
     static overrideTemplate(component, template) {
-        _getTestBedRender3().overrideComponent(component, { set: { template, templateUrl: null } });
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overrideTemplate(component, template);
     }
     /**
      * Overrides the template of the given component, compiling the template
@@ -26172,32 +26178,32 @@ class TestBedRender3 {
      * Note: This works for JIT and AOTed components as well.
      */
     static overrideTemplateUsingTestingModule(component, template) {
-        _getTestBedRender3().overrideTemplateUsingTestingModule(component, template);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overrideTemplateUsingTestingModule(component, template);
     }
     static overrideProvider(token, provider) {
-        _getTestBedRender3().overrideProvider(token, provider);
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.overrideProvider(token, provider);
     }
     static inject(token, notFoundValue, flags) {
-        return _getTestBedRender3().inject(token, notFoundValue, flags);
+        return TestBedImpl.INSTANCE.inject(token, notFoundValue, flags);
     }
     /** @deprecated from v9.0.0 use TestBed.inject */
     static get(token, notFoundValue = Injector$1.THROW_IF_NOT_FOUND, flags = InjectFlags$1.Default) {
-        return _getTestBedRender3().inject(token, notFoundValue, flags);
+        return TestBedImpl.INSTANCE.inject(token, notFoundValue, flags);
     }
     static createComponent(component) {
-        return _getTestBedRender3().createComponent(component);
+        return TestBedImpl.INSTANCE.createComponent(component);
     }
     static resetTestingModule() {
-        _getTestBedRender3().resetTestingModule();
-        return TestBedRender3;
+        return TestBedImpl.INSTANCE.resetTestingModule();
     }
-    static shouldTearDownTestingModule() {
-        return _getTestBedRender3().shouldTearDownTestingModule();
+    static execute(tokens, fn, context) {
+        return TestBedImpl.INSTANCE.execute(tokens, fn, context);
     }
-    static tearDownTestingModule() {
-        _getTestBedRender3().tearDownTestingModule();
+    static get platform() {
+        return TestBedImpl.INSTANCE.platform;
+    }
+    static get ngModule() {
+        return TestBedImpl.INSTANCE.ngModule;
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -26216,12 +26222,12 @@ class TestBedRender3 {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
-        TestBedRender3._environmentTeardownOptions = options === null || options === void 0 ? void 0 : options.teardown;
-        TestBedRender3._environmentErrorOnUnknownElementsOption = options === null || options === void 0 ? void 0 : options.errorOnUnknownElements;
-        TestBedRender3._environmentErrorOnUnknownPropertiesOption = options === null || options === void 0 ? void 0 : options.errorOnUnknownProperties;
+        TestBedImpl._environmentTeardownOptions = options === null || options === void 0 ? void 0 : options.teardown;
+        TestBedImpl._environmentErrorOnUnknownElementsOption = options === null || options === void 0 ? void 0 : options.errorOnUnknownElements;
+        TestBedImpl._environmentErrorOnUnknownPropertiesOption = options === null || options === void 0 ? void 0 : options.errorOnUnknownProperties;
         this.platform = platform;
         this.ngModule = ngModule;
-        this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
+        this._compiler = new TestBedCompiler(this.platform, this.ngModule);
         // TestBed does not have an API which can reliably detect the start of a test, and thus could be
         // used to track the state of the NgModule registry and reset it correctly. Instead, when we
         // know we're in a testing scenario, we disable the check for duplicate NgModule registration
@@ -26238,7 +26244,7 @@ class TestBedRender3 {
         this._compiler = null;
         this.platform = null;
         this.ngModule = null;
-        TestBedRender3._environmentTeardownOptions = undefined;
+        TestBedImpl._environmentTeardownOptions = undefined;
         ɵsetAllowDuplicateNgModuleIdsForTest(false);
     }
     resetTestingModule() {
@@ -26248,7 +26254,7 @@ class TestBedRender3 {
         if (this._compiler !== null) {
             this.compiler.restoreOriginalState();
         }
-        this._compiler = new R3TestBedCompiler(this.platform, this.ngModule);
+        this._compiler = new TestBedCompiler(this.platform, this.ngModule);
         // Restore the previous value of the "error on unknown elements" option
         ɵsetUnknownElementStrictMode$1((_a = this._previousErrorOnUnknownElementsOption) !== null && _a !== void 0 ? _a : THROW_ON_UNKNOWN_ELEMENTS_DEFAULT);
         // Restore the previous value of the "error on unknown properties" option
@@ -26272,6 +26278,7 @@ class TestBedRender3 {
                 this._instanceErrorOnUnknownPropertiesOption = undefined;
             }
         }
+        return this;
     }
     configureCompiler(config) {
         if (config.useJit != null) {
@@ -26280,6 +26287,7 @@ class TestBedRender3 {
         if (config.providers !== undefined) {
             this.compiler.setCompilerProviders(config.providers);
         }
+        return this;
     }
     configureTestingModule(moduleDef) {
         this.assertNotInstantiated('R3TestBed.configureTestingModule', 'configure the test module');
@@ -26300,12 +26308,13 @@ class TestBedRender3 {
         this._previousErrorOnUnknownPropertiesOption = ɵgetUnknownPropertyStrictMode$1();
         ɵsetUnknownPropertyStrictMode$1(this.shouldThrowErrorOnUnknownProperties());
         this.compiler.configureTestingModule(moduleDef);
+        return this;
     }
     compileComponents() {
         return this.compiler.compileComponents();
     }
     inject(token, notFoundValue, flags) {
-        if (token === TestBedRender3) {
+        if (token === TestBed) {
             return this;
         }
         const UNDEFINED = {};
@@ -26324,22 +26333,27 @@ class TestBedRender3 {
     overrideModule(ngModule, override) {
         this.assertNotInstantiated('overrideModule', 'override module metadata');
         this.compiler.overrideModule(ngModule, override);
+        return this;
     }
     overrideComponent(component, override) {
         this.assertNotInstantiated('overrideComponent', 'override component metadata');
         this.compiler.overrideComponent(component, override);
+        return this;
     }
     overrideTemplateUsingTestingModule(component, template) {
         this.assertNotInstantiated('R3TestBed.overrideTemplateUsingTestingModule', 'Cannot override template when the test module has already been instantiated');
         this.compiler.overrideTemplateUsingTestingModule(component, template);
+        return this;
     }
     overrideDirective(directive, override) {
         this.assertNotInstantiated('overrideDirective', 'override directive metadata');
         this.compiler.overrideDirective(directive, override);
+        return this;
     }
     overridePipe(pipe, override) {
         this.assertNotInstantiated('overridePipe', 'override pipe metadata');
         this.compiler.overridePipe(pipe, override);
+        return this;
     }
     /**
      * Overwrites all providers for the given token with the given provider definition.
@@ -26347,6 +26361,10 @@ class TestBedRender3 {
     overrideProvider(token, provider) {
         this.assertNotInstantiated('overrideProvider', 'override provider');
         this.compiler.overrideProvider(token, provider);
+        return this;
+    }
+    overrideTemplate(component, template) {
+        return this.overrideComponent(component, { set: { template, templateUrl: null } });
     }
     createComponent(type) {
         const testComponentRenderer = this.inject(TestComponentRenderer);
@@ -26411,10 +26429,10 @@ class TestBedRender3 {
     checkGlobalCompilationFinished() {
         // Checking _testNgModuleRef is null should not be necessary, but is left in as an additional
         // guard that compilations queued in tests (after instantiation) are never flushed accidentally.
-        if (!this._globalCompilationChecked && this._testModuleRef === null) {
+        if (!this.globalCompilationChecked && this._testModuleRef === null) {
             ɵflushModuleScopingQueueAsMuchAsPossible();
         }
-        this._globalCompilationChecked = true;
+        this.globalCompilationChecked = true;
     }
     destroyActiveFixtures() {
         let errorCount = 0;
@@ -26439,7 +26457,7 @@ class TestBedRender3 {
     shouldRethrowTeardownErrors() {
         var _a, _b;
         const instanceOptions = this._instanceTeardownOptions;
-        const environmentOptions = TestBedRender3._environmentTeardownOptions;
+        const environmentOptions = TestBedImpl._environmentTeardownOptions;
         // If the new teardown behavior hasn't been configured, preserve the old behavior.
         if (!instanceOptions && !environmentOptions) {
             return TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
@@ -26450,16 +26468,16 @@ class TestBedRender3 {
     shouldThrowErrorOnUnknownElements() {
         var _a, _b;
         // Check if a configuration has been provided to throw when an unknown element is found
-        return (_b = (_a = this._instanceErrorOnUnknownElementsOption) !== null && _a !== void 0 ? _a : TestBedRender3._environmentErrorOnUnknownElementsOption) !== null && _b !== void 0 ? _b : THROW_ON_UNKNOWN_ELEMENTS_DEFAULT;
+        return (_b = (_a = this._instanceErrorOnUnknownElementsOption) !== null && _a !== void 0 ? _a : TestBedImpl._environmentErrorOnUnknownElementsOption) !== null && _b !== void 0 ? _b : THROW_ON_UNKNOWN_ELEMENTS_DEFAULT;
     }
     shouldThrowErrorOnUnknownProperties() {
         var _a, _b;
         // Check if a configuration has been provided to throw when an unknown property is found
-        return (_b = (_a = this._instanceErrorOnUnknownPropertiesOption) !== null && _a !== void 0 ? _a : TestBedRender3._environmentErrorOnUnknownPropertiesOption) !== null && _b !== void 0 ? _b : THROW_ON_UNKNOWN_PROPERTIES_DEFAULT;
+        return (_b = (_a = this._instanceErrorOnUnknownPropertiesOption) !== null && _a !== void 0 ? _a : TestBedImpl._environmentErrorOnUnknownPropertiesOption) !== null && _b !== void 0 ? _b : THROW_ON_UNKNOWN_PROPERTIES_DEFAULT;
     }
     shouldTearDownTestingModule() {
         var _a, _b, _c, _d;
-        return (_d = (_b = (_a = this._instanceTeardownOptions) === null || _a === void 0 ? void 0 : _a.destroyAfterEach) !== null && _b !== void 0 ? _b : (_c = TestBedRender3._environmentTeardownOptions) === null || _c === void 0 ? void 0 : _c.destroyAfterEach) !== null && _d !== void 0 ? _d : TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
+        return (_d = (_b = (_a = this._instanceTeardownOptions) === null || _a === void 0 ? void 0 : _a.destroyAfterEach) !== null && _b !== void 0 ? _b : (_c = TestBedImpl._environmentTeardownOptions) === null || _c === void 0 ? void 0 : _c.destroyAfterEach) !== null && _d !== void 0 ? _d : TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
     }
     tearDownTestingModule() {
         var _a;
@@ -26489,18 +26507,7 @@ class TestBedRender3 {
         }
     }
 }
-let testBed;
-function _getTestBedRender3() {
-    return testBed = testBed || new TestBedRender3();
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+TestBedImpl._INSTANCE = null;
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
@@ -26508,20 +26515,9 @@ function _getTestBedRender3() {
  *
  * `TestBed` is the primary api for writing unit tests for Angular applications and libraries.
  *
- * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
- * according to the compiler used.
- *
  * @publicApi
  */
-const TestBed = TestBedRender3;
-/**
- * Returns a singleton of the applicable `TestBed`.
- *
- * It will be either an instance of `TestBedViewEngine` or `TestBedRender3`.
- *
- * @publicApi
- */
-const getTestBed = _getTestBedRender3;
+const TestBed = TestBedImpl;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`. Note: this function
  * (imported from the `@angular/core/testing` package) can **only** be used to inject dependencies
@@ -26545,7 +26541,7 @@ const getTestBed = _getTestBedRender3;
  * @publicApi
  */
 function inject(tokens, fn) {
-    const testBed = getTestBed();
+    const testBed = TestBedImpl.INSTANCE;
     // Not using an arrow function to preserve context passed from call site
     return function () {
         return testBed.execute(tokens, fn, this);
@@ -26561,7 +26557,7 @@ class InjectSetupWrapper {
     _addModule() {
         const moduleDef = this._moduleDef();
         if (moduleDef) {
-            getTestBed().configureTestingModule(moduleDef);
+            TestBedImpl.configureTestingModule(moduleDef);
         }
     }
     inject(tokens, fn) {
@@ -26577,7 +26573,7 @@ function withModule(moduleDef, fn) {
     if (fn) {
         // Not using an arrow function to preserve context passed from call site
         return function () {
-            const testBed = getTestBed();
+            const testBed = TestBedImpl.INSTANCE;
             if (moduleDef) {
                 testBed.configureTestingModule(moduleDef);
             }
@@ -26607,9 +26603,9 @@ if (_global.afterEach) {
 }
 function getCleanupHook(expectedTeardownValue) {
     return () => {
-        // TODO(alxhub): find a better type here
-        if (TestBed.shouldTearDownTestingModule() === expectedTeardownValue) {
-            TestBed.resetTestingModule();
+        const testBed = TestBedImpl.INSTANCE;
+        if (testBed.shouldTearDownTestingModule() === expectedTeardownValue) {
+            testBed.resetTestingModule();
             resetFakeAsyncZone();
         }
     };
