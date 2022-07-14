@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-211c353
+ * @license Angular v14.2.0-next.0+sha-4a81fe7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6303,6 +6303,1274 @@ function getSanitizer() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * A multi-provider token for initialization functions that will run upon construction of an
+ * environment injector.
+ *
+ * @publicApi
+ */
+const ENVIRONMENT_INITIALIZER = new InjectionToken('ENVIRONMENT_INITIALIZER');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
+ *
+ * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
+ * project.
+ *
+ * @publicApi
+ */
+const INJECTOR = new InjectionToken('INJECTOR', 
+// Disable tslint because this is const enum which gets inlined not top level prop access.
+// tslint:disable-next-line: no-toplevel-property-access
+-1 /* InjectorMarkers.Injector */);
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class NullInjector {
+    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
+        if (notFoundValue === THROW_IF_NOT_FOUND) {
+            const error = new Error(`NullInjectorError: No provider for ${stringify(token)}!`);
+            error.name = 'NullInjectorError';
+            throw error;
+        }
+        return notFoundValue;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Collects providers from all NgModules and standalone components, including transitively imported
+ * ones.
+ *
+ * Providers extracted via `importProvidersFrom` are only usable in an application injector or
+ * another environment injector (such as a route injector). They should not be used in component
+ * providers.
+ *
+ * More information about standalone components can be found in [this
+ * guide](guide/standalone-components).
+ *
+ * @usageNotes
+ * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
+ *
+ * ```typescript
+ * await bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *   ]
+ * });
+ * ```
+ *
+ * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
+ * standalone component is used:
+ *
+ * ```typescript
+ * export const ROUTES: Route[] = [
+ *   {
+ *     path: 'foo',
+ *     providers: [
+ *       importProvidersFrom(NgModuleOne, NgModuleTwo)
+ *     ],
+ *     component: YourStandaloneComponent
+ *   }
+ * ];
+ * ```
+ *
+ * @returns Collected providers from the specified list of types.
+ * @publicApi
+ * @developerPreview
+ */
+function importProvidersFrom(...sources) {
+    return { ɵproviders: internalImportProvidersFrom(true, sources) };
+}
+function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
+    const providersOut = [];
+    const dedup = new Set(); // already seen types
+    let injectorTypesWithProviders;
+    deepForEach(sources, source => {
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && checkForStandaloneCmp) {
+            const cmpDef = getComponentDef(source);
+            if (cmpDef === null || cmpDef === void 0 ? void 0 : cmpDef.standalone) {
+                throw new RuntimeError(800 /* RuntimeErrorCode.IMPORT_PROVIDERS_FROM_STANDALONE */, `Importing providers supports NgModule or ModuleWithProviders but got a standalone component "${stringifyForError(source)}"`);
+            }
+        }
+        // Narrow `source` to access the internal type analogue for `ModuleWithProviders`.
+        const internalSource = source;
+        if (walkProviderTree(internalSource, providersOut, [], dedup)) {
+            injectorTypesWithProviders || (injectorTypesWithProviders = []);
+            injectorTypesWithProviders.push(internalSource);
+        }
+    });
+    // Collect all providers from `ModuleWithProviders` types.
+    if (injectorTypesWithProviders !== undefined) {
+        processInjectorTypesWithProviders(injectorTypesWithProviders, providersOut);
+    }
+    return providersOut;
+}
+/**
+ * Collects all providers from the list of `ModuleWithProviders` and appends them to the provided
+ * array.
+ */
+function processInjectorTypesWithProviders(typesWithProviders, providersOut) {
+    for (let i = 0; i < typesWithProviders.length; i++) {
+        const { ngModule, providers } = typesWithProviders[i];
+        deepForEach(providers, provider => {
+            ngDevMode && validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
+            providersOut.push(provider);
+        });
+    }
+}
+/**
+ * The logic visits an `InjectorType`, an `InjectorTypeWithProviders`, or a standalone
+ * `ComponentType`, and all of its transitive providers and collects providers.
+ *
+ * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
+ * the function will return "true" to indicate that the providers of the type definition need
+ * to be processed. This allows us to process providers of injector types after all imports of
+ * an injector definition are processed. (following View Engine semantics: see FW-1349)
+ */
+function walkProviderTree(container, providersOut, parents, dedup) {
+    container = resolveForwardRef(container);
+    if (!container)
+        return false;
+    // The actual type which had the definition. Usually `container`, but may be an unwrapped type
+    // from `InjectorTypeWithProviders`.
+    let defType = null;
+    let injDef = getInjectorDef(container);
+    const cmpDef = !injDef && getComponentDef(container);
+    if (!injDef && !cmpDef) {
+        // `container` is not an injector type or a component type. It might be:
+        //  * An `InjectorTypeWithProviders` that wraps an injector type.
+        //  * A standalone directive or pipe that got pulled in from a standalone component's
+        //    dependencies.
+        // Try to unwrap it as an `InjectorTypeWithProviders` first.
+        const ngModule = container.ngModule;
+        injDef = getInjectorDef(ngModule);
+        if (injDef) {
+            defType = ngModule;
+        }
+        else {
+            // Not a component or injector type, so ignore it.
+            return false;
+        }
+    }
+    else if (cmpDef && !cmpDef.standalone) {
+        return false;
+    }
+    else {
+        defType = container;
+    }
+    // Check for circular dependencies.
+    if (ngDevMode && parents.indexOf(defType) !== -1) {
+        const defName = stringify(defType);
+        const path = parents.map(stringify);
+        throwCyclicDependencyError(defName, path);
+    }
+    // Check for multiple imports of the same module
+    const isDuplicate = dedup.has(defType);
+    if (cmpDef) {
+        if (isDuplicate) {
+            // This component definition has already been processed.
+            return false;
+        }
+        dedup.add(defType);
+        if (cmpDef.dependencies) {
+            const deps = typeof cmpDef.dependencies === 'function' ? cmpDef.dependencies() : cmpDef.dependencies;
+            for (const dep of deps) {
+                walkProviderTree(dep, providersOut, parents, dedup);
+            }
+        }
+    }
+    else if (injDef) {
+        // First, include providers from any imports.
+        if (injDef.imports != null && !isDuplicate) {
+            // Before processing defType's imports, add it to the set of parents. This way, if it ends
+            // up deeply importing itself, this can be detected.
+            ngDevMode && parents.push(defType);
+            // Add it to the set of dedups. This way we can detect multiple imports of the same module
+            dedup.add(defType);
+            let importTypesWithProviders;
+            try {
+                deepForEach(injDef.imports, imported => {
+                    if (walkProviderTree(imported, providersOut, parents, dedup)) {
+                        importTypesWithProviders || (importTypesWithProviders = []);
+                        // If the processed import is an injector type with providers, we store it in the
+                        // list of import types with providers, so that we can process those afterwards.
+                        importTypesWithProviders.push(imported);
+                    }
+                });
+            }
+            finally {
+                // Remove it from the parents set when finished.
+                ngDevMode && parents.pop();
+            }
+            // Imports which are declared with providers (TypeWithProviders) need to be processed
+            // after all imported modules are processed. This is similar to how View Engine
+            // processes/merges module imports in the metadata resolver. See: FW-1349.
+            if (importTypesWithProviders !== undefined) {
+                processInjectorTypesWithProviders(importTypesWithProviders, providersOut);
+            }
+        }
+        if (!isDuplicate) {
+            // Track the InjectorType and add a provider for it.
+            // It's important that this is done after the def's imports.
+            const factory = getFactoryDef(defType) || (() => new defType());
+            // Append extra providers to make more info available for consumers (to retrieve an injector
+            // type), as well as internally (to calculate an injection scope correctly and eagerly
+            // instantiate a `defType` when an injector is created).
+            providersOut.push(
+            // Provider to create `defType` using its factory.
+            { provide: defType, useFactory: factory, deps: EMPTY_ARRAY }, 
+            // Make this `defType` available to an internal logic that calculates injector scope.
+            { provide: INJECTOR_DEF_TYPES, useValue: defType, multi: true }, 
+            // Provider to eagerly instantiate `defType` via `ENVIRONMENT_INITIALIZER`.
+            { provide: ENVIRONMENT_INITIALIZER, useValue: () => ɵɵinject(defType), multi: true } //
+            );
+        }
+        // Next, include providers listed on the definition itself.
+        const defProviders = injDef.providers;
+        if (defProviders != null && !isDuplicate) {
+            const injectorType = container;
+            deepForEach(defProviders, provider => {
+                ngDevMode && validateProvider(provider, defProviders, injectorType);
+                providersOut.push(provider);
+            });
+        }
+    }
+    else {
+        // Should not happen, but just in case.
+        return false;
+    }
+    return (defType !== container &&
+        container.providers !== undefined);
+}
+function validateProvider(provider, providers, containerType) {
+    if (isTypeProvider(provider) || isValueProvider(provider) || isFactoryProvider(provider) ||
+        isExistingProvider(provider)) {
+        return;
+    }
+    // Here we expect the provider to be a `useClass` provider (by elimination).
+    const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
+    if (!classRef) {
+        throwInvalidProviderError(containerType, providers, provider);
+    }
+}
+const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+function isValueProvider(value) {
+    return value !== null && typeof value == 'object' && USE_VALUE$1 in value;
+}
+function isExistingProvider(value) {
+    return !!(value && value.useExisting);
+}
+function isFactoryProvider(value) {
+    return !!(value && value.useFactory);
+}
+function isTypeProvider(value) {
+    return typeof value === 'function';
+}
+function isClassProvider(value) {
+    return !!value.useClass;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * An internal token whose presence in an injector indicates that the injector should treat itself
+ * as a root scoped injector when processing requests for unknown tokens which may indicate
+ * they are provided in the root scope.
+ */
+const INJECTOR_SCOPE = new InjectionToken('Set Injector scope.');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Marker which indicates that a value has not yet been created from the factory function.
+ */
+const NOT_YET = {};
+/**
+ * Marker which indicates that the factory function for a token is in the process of being called.
+ *
+ * If the injector is asked to inject a token with its value set to CIRCULAR, that indicates
+ * injection of a dependency has recursively attempted to inject the original token, and there is
+ * a circular dependency among the providers.
+ */
+const CIRCULAR = {};
+/**
+ * A lazily initialized NullInjector.
+ */
+let NULL_INJECTOR$1 = undefined;
+function getNullInjector() {
+    if (NULL_INJECTOR$1 === undefined) {
+        NULL_INJECTOR$1 = new NullInjector();
+    }
+    return NULL_INJECTOR$1;
+}
+/**
+ * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
+ * component tree.
+ *
+ * @developerPreview
+ */
+class EnvironmentInjector {
+}
+class R3Injector extends EnvironmentInjector {
+    constructor(providers, parent, source, scopes) {
+        super();
+        this.parent = parent;
+        this.source = source;
+        this.scopes = scopes;
+        /**
+         * Map of tokens to records which contain the instances of those tokens.
+         * - `null` value implies that we don't have the record. Used by tree-shakable injectors
+         * to prevent further searches.
+         */
+        this.records = new Map();
+        /**
+         * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
+         */
+        this._ngOnDestroyHooks = new Set();
+        this._onDestroyHooks = [];
+        this._destroyed = false;
+        // Start off by creating Records for every provider.
+        forEachSingleProvider(providers, provider => this.processProvider(provider));
+        // Make sure the INJECTOR token provides this injector.
+        this.records.set(INJECTOR, makeRecord(undefined, this));
+        // And `EnvironmentInjector` if the current injector is supposed to be env-scoped.
+        if (scopes.has('environment')) {
+            this.records.set(EnvironmentInjector, makeRecord(undefined, this));
+        }
+        // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
+        // any injectable scoped to APP_ROOT_SCOPE.
+        const record = this.records.get(INJECTOR_SCOPE);
+        if (record != null && typeof record.value === 'string') {
+            this.scopes.add(record.value);
+        }
+        this.injectorDefTypes =
+            new Set(this.get(INJECTOR_DEF_TYPES.multi, EMPTY_ARRAY, InjectFlags.Self));
+    }
+    /**
+     * Flag indicating that this injector was previously destroyed.
+     */
+    get destroyed() {
+        return this._destroyed;
+    }
+    /**
+     * Destroy the injector and release references to every instance or provider associated with it.
+     *
+     * Also calls the `OnDestroy` lifecycle hooks of every instance that was created for which a
+     * hook was found.
+     */
+    destroy() {
+        this.assertNotDestroyed();
+        // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
+        this._destroyed = true;
+        try {
+            // Call all the lifecycle hooks.
+            for (const service of this._ngOnDestroyHooks) {
+                service.ngOnDestroy();
+            }
+            for (const hook of this._onDestroyHooks) {
+                hook();
+            }
+        }
+        finally {
+            // Release all references.
+            this.records.clear();
+            this._ngOnDestroyHooks.clear();
+            this.injectorDefTypes.clear();
+            this._onDestroyHooks.length = 0;
+        }
+    }
+    onDestroy(callback) {
+        this._onDestroyHooks.push(callback);
+    }
+    runInContext(fn) {
+        this.assertNotDestroyed();
+        const previousInjector = setCurrentInjector(this);
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            return fn();
+        }
+        finally {
+            setCurrentInjector(previousInjector);
+            setInjectImplementation(previousInjectImplementation);
+        }
+    }
+    get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
+        this.assertNotDestroyed();
+        // Set the injection context.
+        const previousInjector = setCurrentInjector(this);
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            // Check for the SkipSelf flag.
+            if (!(flags & InjectFlags.SkipSelf)) {
+                // SkipSelf isn't set, check if the record belongs to this injector.
+                let record = this.records.get(token);
+                if (record === undefined) {
+                    // No record, but maybe the token is scoped to this injector. Look for an injectable
+                    // def with a scope matching this injector.
+                    const def = couldBeInjectableType(token) && getInjectableDef(token);
+                    if (def && this.injectableDefInScope(def)) {
+                        // Found an injectable def and it's scoped to this injector. Pretend as if it was here
+                        // all along.
+                        record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
+                    }
+                    else {
+                        record = null;
+                    }
+                    this.records.set(token, record);
+                }
+                // If a record was found, get the instance for it and return it.
+                if (record != null /* NOT null || undefined */) {
+                    return this.hydrate(token, record);
+                }
+            }
+            // Select the next injector based on the Self flag - if self is set, the next injector is
+            // the NullInjector, otherwise it's the parent.
+            const nextInjector = !(flags & InjectFlags.Self) ? this.parent : getNullInjector();
+            // Set the notFoundValue based on the Optional flag - if optional is set and notFoundValue
+            // is undefined, the value is null, otherwise it's the notFoundValue.
+            notFoundValue = (flags & InjectFlags.Optional) && notFoundValue === THROW_IF_NOT_FOUND ?
+                null :
+                notFoundValue;
+            return nextInjector.get(token, notFoundValue);
+        }
+        catch (e) {
+            if (e.name === 'NullInjectorError') {
+                const path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
+                path.unshift(stringify(token));
+                if (previousInjector) {
+                    // We still have a parent injector, keep throwing
+                    throw e;
+                }
+                else {
+                    // Format & throw the final error message when we don't have any previous injector
+                    return catchInjectorError(e, token, 'R3InjectorError', this.source);
+                }
+            }
+            else {
+                throw e;
+            }
+        }
+        finally {
+            // Lastly, restore the previous injection context.
+            setInjectImplementation(previousInjectImplementation);
+            setCurrentInjector(previousInjector);
+        }
+    }
+    /** @internal */
+    resolveInjectorInitializers() {
+        const previousInjector = setCurrentInjector(this);
+        const previousInjectImplementation = setInjectImplementation(undefined);
+        try {
+            const initializers = this.get(ENVIRONMENT_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
+            if (ngDevMode && !Array.isArray(initializers)) {
+                throw new RuntimeError(209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
+                    `(expected an array, but got ${typeof initializers}). ` +
+                    'Please check that the `ENVIRONMENT_INITIALIZER` token is configured as a ' +
+                    '`multi: true` provider.');
+            }
+            for (const initializer of initializers) {
+                initializer();
+            }
+        }
+        finally {
+            setCurrentInjector(previousInjector);
+            setInjectImplementation(previousInjectImplementation);
+        }
+    }
+    toString() {
+        const tokens = [];
+        const records = this.records;
+        for (const token of records.keys()) {
+            tokens.push(stringify(token));
+        }
+        return `R3Injector[${tokens.join(', ')}]`;
+    }
+    assertNotDestroyed() {
+        if (this._destroyed) {
+            throw new RuntimeError(205 /* RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED */, ngDevMode && 'Injector has already been destroyed.');
+        }
+    }
+    /**
+     * Process a `SingleProvider` and add it.
+     */
+    processProvider(provider) {
+        // Determine the token from the provider. Either it's its own token, or has a {provide: ...}
+        // property.
+        provider = resolveForwardRef(provider);
+        let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
+        // Construct a `Record` for the provider.
+        const record = providerToRecord(provider);
+        if (!isTypeProvider(provider) && provider.multi === true) {
+            // If the provider indicates that it's a multi-provider, process it specially.
+            // First check whether it's been defined already.
+            let multiRecord = this.records.get(token);
+            if (multiRecord) {
+                // It has. Throw a nice error if
+                if (ngDevMode && multiRecord.multi === undefined) {
+                    throwMixedMultiProviderError();
+                }
+            }
+            else {
+                multiRecord = makeRecord(undefined, NOT_YET, true);
+                multiRecord.factory = () => injectArgs(multiRecord.multi);
+                this.records.set(token, multiRecord);
+            }
+            token = provider;
+            multiRecord.multi.push(provider);
+        }
+        else {
+            const existing = this.records.get(token);
+            if (ngDevMode && existing && existing.multi !== undefined) {
+                throwMixedMultiProviderError();
+            }
+        }
+        this.records.set(token, record);
+    }
+    hydrate(token, record) {
+        if (ngDevMode && record.value === CIRCULAR) {
+            throwCyclicDependencyError(stringify(token));
+        }
+        else if (record.value === NOT_YET) {
+            record.value = CIRCULAR;
+            record.value = record.factory();
+        }
+        if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
+            this._ngOnDestroyHooks.add(record.value);
+        }
+        return record.value;
+    }
+    injectableDefInScope(def) {
+        if (!def.providedIn) {
+            return false;
+        }
+        const providedIn = resolveForwardRef(def.providedIn);
+        if (typeof providedIn === 'string') {
+            return providedIn === 'any' || (this.scopes.has(providedIn));
+        }
+        else {
+            return this.injectorDefTypes.has(providedIn);
+        }
+    }
+}
+function injectableDefOrInjectorDefFactory(token) {
+    // Most tokens will have an injectable def directly on them, which specifies a factory directly.
+    const injectableDef = getInjectableDef(token);
+    const factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
+    if (factory !== null) {
+        return factory;
+    }
+    // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
+    // If it's missing that, it's an error.
+    if (token instanceof InjectionToken) {
+        throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && `Token ${stringify(token)} is missing a ɵprov definition.`);
+    }
+    // Undecorated types can sometimes be created if they have no constructor arguments.
+    if (token instanceof Function) {
+        return getUndecoratedInjectableFactory(token);
+    }
+    // There was no way to resolve a factory for this token.
+    throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && 'unreachable');
+}
+function getUndecoratedInjectableFactory(token) {
+    // If the token has parameters then it has dependencies that we cannot resolve implicitly.
+    const paramLength = token.length;
+    if (paramLength > 0) {
+        const args = newArray(paramLength, '?');
+        throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
+    }
+    // The constructor function appears to have no parameters.
+    // This might be because it inherits from a super-class. In which case, use an injectable
+    // def from an ancestor if there is one.
+    // Otherwise this really is a simple class with no dependencies, so return a factory that
+    // just instantiates the zero-arg constructor.
+    const inheritedInjectableDef = getInheritedInjectableDef(token);
+    if (inheritedInjectableDef !== null) {
+        return () => inheritedInjectableDef.factory(token);
+    }
+    else {
+        return () => new token();
+    }
+}
+function providerToRecord(provider) {
+    if (isValueProvider(provider)) {
+        return makeRecord(undefined, provider.useValue);
+    }
+    else {
+        const factory = providerToFactory(provider);
+        return makeRecord(factory, NOT_YET);
+    }
+}
+/**
+ * Converts a `SingleProvider` into a factory function.
+ *
+ * @param provider provider to convert to factory
+ */
+function providerToFactory(provider, ngModuleType, providers) {
+    let factory = undefined;
+    if (ngDevMode && isImportedNgModuleProviders(provider)) {
+        throwInvalidProviderError(undefined, providers, provider);
+    }
+    if (isTypeProvider(provider)) {
+        const unwrappedProvider = resolveForwardRef(provider);
+        return getFactoryDef(unwrappedProvider) || injectableDefOrInjectorDefFactory(unwrappedProvider);
+    }
+    else {
+        if (isValueProvider(provider)) {
+            factory = () => resolveForwardRef(provider.useValue);
+        }
+        else if (isFactoryProvider(provider)) {
+            factory = () => provider.useFactory(...injectArgs(provider.deps || []));
+        }
+        else if (isExistingProvider(provider)) {
+            factory = () => ɵɵinject(resolveForwardRef(provider.useExisting));
+        }
+        else {
+            const classRef = resolveForwardRef(provider &&
+                (provider.useClass || provider.provide));
+            if (ngDevMode && !classRef) {
+                throwInvalidProviderError(ngModuleType, providers, provider);
+            }
+            if (hasDeps(provider)) {
+                factory = () => new (classRef)(...injectArgs(provider.deps));
+            }
+            else {
+                return getFactoryDef(classRef) || injectableDefOrInjectorDefFactory(classRef);
+            }
+        }
+    }
+    return factory;
+}
+function makeRecord(factory, value, multi = false) {
+    return {
+        factory: factory,
+        value: value,
+        multi: multi ? [] : undefined,
+    };
+}
+function hasDeps(value) {
+    return !!value.deps;
+}
+function hasOnDestroy(value) {
+    return value !== null && typeof value === 'object' &&
+        typeof value.ngOnDestroy === 'function';
+}
+function couldBeInjectableType(value) {
+    return (typeof value === 'function') ||
+        (typeof value === 'object' && value instanceof InjectionToken);
+}
+function isImportedNgModuleProviders(provider) {
+    return !!provider.ɵproviders;
+}
+function forEachSingleProvider(providers, fn) {
+    for (const provider of providers) {
+        if (Array.isArray(provider)) {
+            forEachSingleProvider(provider, fn);
+        }
+        else if (isImportedNgModuleProviders(provider)) {
+            forEachSingleProvider(provider.ɵproviders, fn);
+        }
+        else {
+            fn(provider);
+        }
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Represents a component created by a `ComponentFactory`.
+ * Provides access to the component instance and related objects,
+ * and provides the means of destroying the instance.
+ *
+ * @publicApi
+ */
+class ComponentRef$1 {
+}
+/**
+ * Base class for a factory that can create a component dynamically.
+ * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
+ * Use the resulting `ComponentFactory.create()` method to create a component of that type.
+ *
+ * @see [Dynamic Components](guide/dynamic-component-loader)
+ *
+ * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
+ */
+class ComponentFactory$1 {
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function noComponentFactoryError(component) {
+    const error = Error(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
+    error[ERROR_COMPONENT] = component;
+    return error;
+}
+const ERROR_COMPONENT = 'ngComponent';
+function getComponent$1(error) {
+    return error[ERROR_COMPONENT];
+}
+class _NullComponentFactoryResolver {
+    resolveComponentFactory(component) {
+        throw noComponentFactoryError(component);
+    }
+}
+/**
+ * A simple registry that maps `Components` to generated `ComponentFactory` classes
+ * that can be used to create instances of components.
+ * Use to obtain the factory for a given component type,
+ * then use the factory's `create()` method to create a component of that type.
+ *
+ * Note: since v13, dynamic component creation via
+ * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
+ * does **not** require resolving component factory: component class can be used directly.
+ *
+ * @publicApi
+ *
+ * @deprecated Angular no longer requires Component factories. Please use other APIs where
+ *     Component class can be used directly.
+ */
+class ComponentFactoryResolver$1 {
+}
+ComponentFactoryResolver$1.NULL = ( /* @__PURE__ */new _NullComponentFactoryResolver());
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Creates an ElementRef from the most recent node.
+ *
+ * @returns The ElementRef instance to use
+ */
+function injectElementRef() {
+    return createElementRef(getCurrentTNode(), getLView());
+}
+/**
+ * Creates an ElementRef given a node.
+ *
+ * @param tNode The node for which you'd like an ElementRef
+ * @param lView The view to which the node belongs
+ * @returns The ElementRef instance to use
+ */
+function createElementRef(tNode, lView) {
+    return new ElementRef(getNativeByTNode(tNode, lView));
+}
+/**
+ * A wrapper around a native element inside of a View.
+ *
+ * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+ * element.
+ *
+ * @security Permitting direct access to the DOM can make your application more vulnerable to
+ * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+ * [Security Guide](https://g.co/ng/security).
+ *
+ * @publicApi
+ */
+// Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
+// i.e. users have to ask for what they need. With that, we can build better analysis tools
+// and could do better codegen in the future.
+class ElementRef {
+    constructor(nativeElement) {
+        this.nativeElement = nativeElement;
+    }
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+ElementRef.__NG_ELEMENT_ID__ = injectElementRef;
+/**
+ * Unwraps `ElementRef` and return the `nativeElement`.
+ *
+ * @param value value to unwrap
+ * @returns `nativeElement` if `ElementRef` otherwise returns value as is.
+ */
+function unwrapElementRef(value) {
+    return value instanceof ElementRef ? value.nativeElement : value;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
+/**
+ * Creates and initializes a custom renderer that implements the `Renderer2` base class.
+ *
+ * @publicApi
+ */
+class RendererFactory2 {
+}
+/**
+ * Extend this base class to implement custom rendering. By default, Angular
+ * renders a template into DOM. You can use custom rendering to intercept
+ * rendering calls, or to render to something other than DOM.
+ *
+ * Create your custom renderer using `RendererFactory2`.
+ *
+ * Use a custom renderer to bypass Angular's templating and
+ * make custom UI changes that can't be expressed declaratively.
+ * For example if you need to set a property or an attribute whose name is
+ * not statically known, use the `setProperty()` or
+ * `setAttribute()` method.
+ *
+ * @publicApi
+ */
+class Renderer2 {
+}
+/**
+ * @internal
+ * @nocollapse
+ */
+Renderer2.__NG_ELEMENT_ID__ = () => injectRenderer2();
+/** Injects a Renderer2 for the current component. */
+function injectRenderer2() {
+    // We need the Renderer to be based on the component that it's being injected into, however since
+    // DI happens before we've entered its view, `getLView` will return the parent view instead.
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const nodeAtIndex = getComponentLViewByIndex(tNode.index, lView);
+    return (isLView(nodeAtIndex) ? nodeAtIndex : lView)[RENDERER];
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Sanitizer is used by the views to sanitize potentially dangerous values.
+ *
+ * @publicApi
+ */
+class Sanitizer {
+}
+/** @nocollapse */
+Sanitizer.ɵprov = ɵɵdefineInjectable({
+    token: Sanitizer,
+    providedIn: 'root',
+    factory: () => null,
+});
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description Represents the version of Angular
+ *
+ * @publicApi
+ */
+class Version {
+    constructor(full) {
+        this.full = full;
+        this.major = full.split('.')[0];
+        this.minor = full.split('.')[1];
+        this.patch = full.split('.').slice(2).join('.');
+    }
+}
+/**
+ * @publicApi
+ */
+const VERSION = new Version('14.2.0-next.0+sha-4a81fe7');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// This default value is when checking the hierarchy for a token.
+//
+// It means both:
+// - the token is not provided by the current injector,
+// - only the element injectors should be checked (ie do not check module injectors
+//
+//          mod1
+//         /
+//       el1   mod2
+//         \  /
+//         el2
+//
+// When requesting el2.injector.get(token), we should check in the following order and return the
+// first found value:
+// - el2.injector.get(token, default)
+// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
+// - mod2.injector.get(token, default)
+const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Defines a schema that allows an NgModule to contain the following:
+ * - Non-Angular elements named with dash case (`-`).
+ * - Element properties named with dash case (`-`).
+ * Dash case is the naming convention for custom elements.
+ *
+ * @publicApi
+ */
+const CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/**
+ * Defines a schema that allows any property on any element.
+ *
+ * This schema allows you to ignore the errors related to any unknown elements or properties in a
+ * template. The usage of this schema is generally discouraged because it prevents useful validation
+ * and may hide real errors in your template. Consider using the `CUSTOM_ELEMENTS_SCHEMA` instead.
+ *
+ * @publicApi
+ */
+const NO_ERRORS_SCHEMA = {
+    name: 'no-errors-schema'
+};
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let shouldThrowErrorOnUnknownElement = false;
+/**
+ * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
+ * instead of just logging the error.
+ * (for AOT-compiled ones this check happens at build time).
+ */
+function ɵsetUnknownElementStrictMode(shouldThrow) {
+    shouldThrowErrorOnUnknownElement = shouldThrow;
+}
+/**
+ * Gets the current value of the strict mode.
+ */
+function ɵgetUnknownElementStrictMode() {
+    return shouldThrowErrorOnUnknownElement;
+}
+let shouldThrowErrorOnUnknownProperty = false;
+/**
+ * Sets a strict mode for JIT-compiled components to throw an error on unknown properties,
+ * instead of just logging the error.
+ * (for AOT-compiled ones this check happens at build time).
+ */
+function ɵsetUnknownPropertyStrictMode(shouldThrow) {
+    shouldThrowErrorOnUnknownProperty = shouldThrow;
+}
+/**
+ * Gets the current value of the strict mode.
+ */
+function ɵgetUnknownPropertyStrictMode() {
+    return shouldThrowErrorOnUnknownProperty;
+}
+/**
+ * Validates that the element is known at runtime and produces
+ * an error if it's not the case.
+ * This check is relevant for JIT-compiled components (for AOT-compiled
+ * ones this check happens at build time).
+ *
+ * The element is considered known if either:
+ * - it's a known HTML element
+ * - it's a known custom element
+ * - the element matches any directive
+ * - the element is allowed by one of the schemas
+ *
+ * @param element Element to validate
+ * @param lView An `LView` that represents a current component that is being rendered
+ * @param tagName Name of the tag to check
+ * @param schemas Array of schemas
+ * @param hasDirectives Boolean indicating that the element matches any directive
+ */
+function validateElementIsKnown(element, lView, tagName, schemas, hasDirectives) {
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (schemas === null)
+        return;
+    // If the element matches any directive, it's considered as valid.
+    if (!hasDirectives && tagName !== null) {
+        // The element is unknown if it's an instance of HTMLUnknownElement, or it isn't registered
+        // as a custom element. Note that unknown elements with a dash in their name won't be instances
+        // of HTMLUnknownElement in browsers that support web components.
+        const isUnknown = 
+        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
+        // because while most browsers return 'function', IE returns 'object'.
+        (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
+            element instanceof HTMLUnknownElement) ||
+            (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
+                !customElements.get(tagName));
+        if (isUnknown && !matchingSchemas(schemas, tagName)) {
+            const isHostStandalone = isHostComponentStandalone(lView);
+            const templateLocation = getTemplateLocationDetails(lView);
+            const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
+            let message = `'${tagName}' is not a known element${templateLocation}:\n`;
+            message += `1. If '${tagName}' is an Angular component, then verify that it is ${isHostStandalone ? 'included in the \'@Component.imports\' of this component' :
+                'a part of an @NgModule where this component is declared'}.\n`;
+            if (tagName && tagName.indexOf('-') > -1) {
+                message +=
+                    `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.`;
+            }
+            else {
+                message +=
+                    `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
+            }
+            if (shouldThrowErrorOnUnknownElement) {
+                throw new RuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message);
+            }
+            else {
+                console.error(formatRuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message));
+            }
+        }
+    }
+}
+/**
+ * Validates that the property of the element is known at runtime and returns
+ * false if it's not the case.
+ * This check is relevant for JIT-compiled components (for AOT-compiled
+ * ones this check happens at build time).
+ *
+ * The property is considered known if either:
+ * - it's a known property of the element
+ * - the element is allowed by one of the schemas
+ * - the property is used for animations
+ *
+ * @param element Element to validate
+ * @param propName Name of the property to check
+ * @param tagName Name of the tag hosting the property
+ * @param schemas Array of schemas
+ */
+function isPropertyValid(element, propName, tagName, schemas) {
+    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
+    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
+    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
+    // execute the check below.
+    if (schemas === null)
+        return true;
+    // The property is considered valid if the element matches the schema, it exists on the element,
+    // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
+    if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
+        return true;
+    }
+    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
+    // need to account for both here, while being careful with `typeof null` also returning 'object'.
+    return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
+}
+/**
+ * Logs or throws an error that a property is not supported on an element.
+ *
+ * @param propName Name of the invalid property
+ * @param tagName Name of the tag hosting the property
+ * @param nodeType Type of the node hosting the property
+ * @param lView An `LView` that represents a current component
+ */
+function handleUnknownPropertyError(propName, tagName, nodeType, lView) {
+    // Special-case a situation when a structural directive is applied to
+    // an `<ng-template>` element, for example: `<ng-template *ngIf="true">`.
+    // In this case the compiler generates the `ɵɵtemplate` instruction with
+    // the `null` as the tagName. The directive matching logic at runtime relies
+    // on this effect (see `isInlineTemplate`), thus using the 'ng-template' as
+    // a default value of the `tNode.value` is not feasible at this moment.
+    if (!tagName && nodeType === 4 /* TNodeType.Container */) {
+        tagName = 'ng-template';
+    }
+    const isHostStandalone = isHostComponentStandalone(lView);
+    const templateLocation = getTemplateLocationDetails(lView);
+    let message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'${templateLocation}.`;
+    const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
+    const importLocation = isHostStandalone ?
+        'included in the \'@Component.imports\' of this component' :
+        'a part of an @NgModule where this component is declared';
+    if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
+        // Most likely this is a control flow directive (such as `*ngIf`) used in
+        // a template, but the `CommonModule` is not imported.
+        message += `\nIf the '${propName}' is an Angular control flow directive, ` +
+            `please make sure that the 'CommonModule' is ${importLocation}.`;
+    }
+    else {
+        // May be an Angular component, which is not imported/declared?
+        message += `\n1. If '${tagName}' is an Angular component and it has the ` +
+            `'${propName}' input, then verify that it is ${importLocation}.`;
+        // May be a Web Component?
+        if (tagName && tagName.indexOf('-') > -1) {
+            message += `\n2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' ` +
+                `to the ${schemas} of this component to suppress this message.`;
+            message += `\n3. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
+                `the ${schemas} of this component.`;
+        }
+        else {
+            // If it's expected, the error can be suppressed by the `NO_ERRORS_SCHEMA` schema.
+            message += `\n2. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
+                `the ${schemas} of this component.`;
+        }
+    }
+    reportUnknownPropertyError(message);
+}
+function reportUnknownPropertyError(message) {
+    if (shouldThrowErrorOnUnknownProperty) {
+        throw new RuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message);
+    }
+    else {
+        console.error(formatRuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message));
+    }
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode and also it relies on the constructor function being available.
+ *
+ * Gets a reference to the host component def (where a current component is declared).
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function getDeclarationComponentDef(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    // Unable to obtain a context.
+    if (!context)
+        return null;
+    return context.constructor ? getComponentDef(context.constructor) : null;
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode.
+ *
+ * Checks if the current component is declared inside of a standalone component template.
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function isHostComponentStandalone(lView) {
+    !ngDevMode && throwError('Must never be called in production mode');
+    const componentDef = getDeclarationComponentDef(lView);
+    // Treat host component as non-standalone if we can't obtain the def.
+    return !!(componentDef === null || componentDef === void 0 ? void 0 : componentDef.standalone);
+}
+/**
+ * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
+ * and must **not** be used in production bundles. The function makes megamorphic reads, which might
+ * be too slow for production mode.
+ *
+ * Constructs a string describing the location of the host component template. The function is used
+ * in dev mode to produce error messages.
+ *
+ * @param lView An `LView` that represents a current component that is being rendered.
+ */
+function getTemplateLocationDetails(lView) {
+    var _a;
+    !ngDevMode && throwError('Must never be called in production mode');
+    const hostComponentDef = getDeclarationComponentDef(lView);
+    const componentClassName = (_a = hostComponentDef === null || hostComponentDef === void 0 ? void 0 : hostComponentDef.type) === null || _a === void 0 ? void 0 : _a.name;
+    return componentClassName ? ` (used in the '${componentClassName}' component template)` : '';
+}
+/**
+ * The set of known control flow directives.
+ * We use this set to produce a more precises error message with a note
+ * that the `CommonModule` should also be included.
+ */
+const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
+/**
+ * Returns true if the tag name is allowed by specified schemas.
+ * @param schemas Array of schemas
+ * @param tagName Name of the tag
+ */
+function matchingSchemas(schemas, tagName) {
+    if (schemas !== null) {
+        for (let i = 0; i < schemas.length; i++) {
+            const schema = schemas[i];
+            if (schema === NO_ERRORS_SCHEMA ||
+                schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
     const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
@@ -6891,16 +8159,20 @@ function maybeUnwrapFn(value) {
  */
 /** Verifies that a given type is a Standalone Component. */
 function assertStandaloneComponentType(type) {
+    assertComponentDef(type);
     const componentDef = getComponentDef(type);
-    if (!componentDef) {
-        throw new RuntimeError(906 /* RuntimeErrorCode.MISSING_GENERATED_DEF */, `The ${stringifyForError(type)} is not an Angular component, ` +
-            `make sure it has the \`@Component\` decorator.`);
-    }
     if (!componentDef.standalone) {
         throw new RuntimeError(907 /* RuntimeErrorCode.TYPE_IS_NOT_STANDALONE */, `The ${stringifyForError(type)} component is not marked as standalone, ` +
             `but Angular expects to have a standalone component here. ` +
             `Please make sure the ${stringifyForError(type)} component has ` +
             `the \`standalone: true\` flag in the decorator.`);
+    }
+}
+/** Verifies whether a given type is a component */
+function assertComponentDef(type) {
+    if (!getComponentDef(type)) {
+        throw new RuntimeError(906 /* RuntimeErrorCode.MISSING_GENERATED_DEF */, `The ${stringifyForError(type)} is not an Angular component, ` +
+            `make sure it has the \`@Component\` decorator.`);
     }
 }
 /** Called when there are multiple component selectors that match a given node */
@@ -8625,12 +9897,12 @@ function compileInjectable(type, meta) {
         });
     }
 }
-const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
 function isUseClassProvider(meta) {
     return meta.useClass !== undefined;
 }
 function isUseValueProvider(meta) {
-    return USE_VALUE$1 in meta;
+    return USE_VALUE in meta;
 }
 function isUseFactoryProvider(meta) {
     return meta.useFactory !== undefined;
@@ -8680,731 +9952,6 @@ function getInjectableMetadata(type, srcMeta) {
  * @publicApi
  */
 const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => compileInjectable(type, meta));
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * A multi-provider token for initialization functions that will run upon construction of an
- * environment injector.
- *
- * @publicApi
- */
-const ENVIRONMENT_INITIALIZER = new InjectionToken('ENVIRONMENT_INITIALIZER');
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Collects providers from all NgModules and standalone components, including transitively imported
- * ones.
- *
- * Providers extracted via `importProvidersFrom` are only usable in an application injector or
- * another environment injector (such as a route injector). They should not be used in component
- * providers.
- *
- * More information about standalone components can be found in [this
- * guide](guide/standalone-components).
- *
- * @usageNotes
- * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
- *
- * ```typescript
- * await bootstrapApplication(RootComponent, {
- *   providers: [
- *     importProvidersFrom(NgModuleOne, NgModuleTwo)
- *   ]
- * });
- * ```
- *
- * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
- * standalone component is used:
- *
- * ```typescript
- * export const ROUTES: Route[] = [
- *   {
- *     path: 'foo',
- *     providers: [
- *       importProvidersFrom(NgModuleOne, NgModuleTwo)
- *     ],
- *     component: YourStandaloneComponent
- *   }
- * ];
- * ```
- *
- * @returns Collected providers from the specified list of types.
- * @publicApi
- * @developerPreview
- */
-function importProvidersFrom(...sources) {
-    return { ɵproviders: internalImportProvidersFrom(true, sources) };
-}
-function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
-    const providersOut = [];
-    const dedup = new Set(); // already seen types
-    let injectorTypesWithProviders;
-    deepForEach(sources, source => {
-        if ((typeof ngDevMode === 'undefined' || ngDevMode) && checkForStandaloneCmp) {
-            const cmpDef = getComponentDef(source);
-            if (cmpDef === null || cmpDef === void 0 ? void 0 : cmpDef.standalone) {
-                throw new RuntimeError(800 /* RuntimeErrorCode.IMPORT_PROVIDERS_FROM_STANDALONE */, `Importing providers supports NgModule or ModuleWithProviders but got a standalone component "${stringifyForError(source)}"`);
-            }
-        }
-        // Narrow `source` to access the internal type analogue for `ModuleWithProviders`.
-        const internalSource = source;
-        if (walkProviderTree(internalSource, providersOut, [], dedup)) {
-            injectorTypesWithProviders || (injectorTypesWithProviders = []);
-            injectorTypesWithProviders.push(internalSource);
-        }
-    });
-    // Collect all providers from `ModuleWithProviders` types.
-    if (injectorTypesWithProviders !== undefined) {
-        processInjectorTypesWithProviders(injectorTypesWithProviders, providersOut);
-    }
-    return providersOut;
-}
-/**
- * Collects all providers from the list of `ModuleWithProviders` and appends them to the provided
- * array.
- */
-function processInjectorTypesWithProviders(typesWithProviders, providersOut) {
-    for (let i = 0; i < typesWithProviders.length; i++) {
-        const { ngModule, providers } = typesWithProviders[i];
-        deepForEach(providers, provider => {
-            ngDevMode && validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
-            providersOut.push(provider);
-        });
-    }
-}
-/**
- * The logic visits an `InjectorType`, an `InjectorTypeWithProviders`, or a standalone
- * `ComponentType`, and all of its transitive providers and collects providers.
- *
- * If an `InjectorTypeWithProviders` that declares providers besides the type is specified,
- * the function will return "true" to indicate that the providers of the type definition need
- * to be processed. This allows us to process providers of injector types after all imports of
- * an injector definition are processed. (following View Engine semantics: see FW-1349)
- */
-function walkProviderTree(container, providersOut, parents, dedup) {
-    container = resolveForwardRef(container);
-    if (!container)
-        return false;
-    // The actual type which had the definition. Usually `container`, but may be an unwrapped type
-    // from `InjectorTypeWithProviders`.
-    let defType = null;
-    let injDef = getInjectorDef(container);
-    const cmpDef = !injDef && getComponentDef(container);
-    if (!injDef && !cmpDef) {
-        // `container` is not an injector type or a component type. It might be:
-        //  * An `InjectorTypeWithProviders` that wraps an injector type.
-        //  * A standalone directive or pipe that got pulled in from a standalone component's
-        //    dependencies.
-        // Try to unwrap it as an `InjectorTypeWithProviders` first.
-        const ngModule = container.ngModule;
-        injDef = getInjectorDef(ngModule);
-        if (injDef) {
-            defType = ngModule;
-        }
-        else {
-            // Not a component or injector type, so ignore it.
-            return false;
-        }
-    }
-    else if (cmpDef && !cmpDef.standalone) {
-        return false;
-    }
-    else {
-        defType = container;
-    }
-    // Check for circular dependencies.
-    if (ngDevMode && parents.indexOf(defType) !== -1) {
-        const defName = stringify(defType);
-        const path = parents.map(stringify);
-        throwCyclicDependencyError(defName, path);
-    }
-    // Check for multiple imports of the same module
-    const isDuplicate = dedup.has(defType);
-    if (cmpDef) {
-        if (isDuplicate) {
-            // This component definition has already been processed.
-            return false;
-        }
-        dedup.add(defType);
-        if (cmpDef.dependencies) {
-            const deps = typeof cmpDef.dependencies === 'function' ? cmpDef.dependencies() : cmpDef.dependencies;
-            for (const dep of deps) {
-                walkProviderTree(dep, providersOut, parents, dedup);
-            }
-        }
-    }
-    else if (injDef) {
-        // First, include providers from any imports.
-        if (injDef.imports != null && !isDuplicate) {
-            // Before processing defType's imports, add it to the set of parents. This way, if it ends
-            // up deeply importing itself, this can be detected.
-            ngDevMode && parents.push(defType);
-            // Add it to the set of dedups. This way we can detect multiple imports of the same module
-            dedup.add(defType);
-            let importTypesWithProviders;
-            try {
-                deepForEach(injDef.imports, imported => {
-                    if (walkProviderTree(imported, providersOut, parents, dedup)) {
-                        importTypesWithProviders || (importTypesWithProviders = []);
-                        // If the processed import is an injector type with providers, we store it in the
-                        // list of import types with providers, so that we can process those afterwards.
-                        importTypesWithProviders.push(imported);
-                    }
-                });
-            }
-            finally {
-                // Remove it from the parents set when finished.
-                ngDevMode && parents.pop();
-            }
-            // Imports which are declared with providers (TypeWithProviders) need to be processed
-            // after all imported modules are processed. This is similar to how View Engine
-            // processes/merges module imports in the metadata resolver. See: FW-1349.
-            if (importTypesWithProviders !== undefined) {
-                processInjectorTypesWithProviders(importTypesWithProviders, providersOut);
-            }
-        }
-        if (!isDuplicate) {
-            // Track the InjectorType and add a provider for it.
-            // It's important that this is done after the def's imports.
-            const factory = getFactoryDef(defType) || (() => new defType());
-            // Append extra providers to make more info available for consumers (to retrieve an injector
-            // type), as well as internally (to calculate an injection scope correctly and eagerly
-            // instantiate a `defType` when an injector is created).
-            providersOut.push(
-            // Provider to create `defType` using its factory.
-            { provide: defType, useFactory: factory, deps: EMPTY_ARRAY }, 
-            // Make this `defType` available to an internal logic that calculates injector scope.
-            { provide: INJECTOR_DEF_TYPES, useValue: defType, multi: true }, 
-            // Provider to eagerly instantiate `defType` via `ENVIRONMENT_INITIALIZER`.
-            { provide: ENVIRONMENT_INITIALIZER, useValue: () => ɵɵinject(defType), multi: true } //
-            );
-        }
-        // Next, include providers listed on the definition itself.
-        const defProviders = injDef.providers;
-        if (defProviders != null && !isDuplicate) {
-            const injectorType = container;
-            deepForEach(defProviders, provider => {
-                ngDevMode && validateProvider(provider, defProviders, injectorType);
-                providersOut.push(provider);
-            });
-        }
-    }
-    else {
-        // Should not happen, but just in case.
-        return false;
-    }
-    return (defType !== container &&
-        container.providers !== undefined);
-}
-function validateProvider(provider, providers, containerType) {
-    if (isTypeProvider(provider) || isValueProvider(provider) || isFactoryProvider(provider) ||
-        isExistingProvider(provider)) {
-        return;
-    }
-    // Here we expect the provider to be a `useClass` provider (by elimination).
-    const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
-    if (!classRef) {
-        throwInvalidProviderError(containerType, providers, provider);
-    }
-}
-const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
-function isValueProvider(value) {
-    return value !== null && typeof value == 'object' && USE_VALUE in value;
-}
-function isExistingProvider(value) {
-    return !!(value && value.useExisting);
-}
-function isFactoryProvider(value) {
-    return !!(value && value.useFactory);
-}
-function isTypeProvider(value) {
-    return typeof value === 'function';
-}
-function isClassProvider(value) {
-    return !!value.useClass;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
- *
- * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
- * project.
- *
- * @publicApi
- */
-const INJECTOR = new InjectionToken('INJECTOR', 
-// Disable tslint because this is const enum which gets inlined not top level prop access.
-// tslint:disable-next-line: no-toplevel-property-access
--1 /* InjectorMarkers.Injector */);
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-class NullInjector {
-    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
-        if (notFoundValue === THROW_IF_NOT_FOUND) {
-            const error = new Error(`NullInjectorError: No provider for ${stringify(token)}!`);
-            error.name = 'NullInjectorError';
-            throw error;
-        }
-        return notFoundValue;
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * An internal token whose presence in an injector indicates that the injector should treat itself
- * as a root scoped injector when processing requests for unknown tokens which may indicate
- * they are provided in the root scope.
- */
-const INJECTOR_SCOPE = new InjectionToken('Set Injector scope.');
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Marker which indicates that a value has not yet been created from the factory function.
- */
-const NOT_YET = {};
-/**
- * Marker which indicates that the factory function for a token is in the process of being called.
- *
- * If the injector is asked to inject a token with its value set to CIRCULAR, that indicates
- * injection of a dependency has recursively attempted to inject the original token, and there is
- * a circular dependency among the providers.
- */
-const CIRCULAR = {};
-/**
- * A lazily initialized NullInjector.
- */
-let NULL_INJECTOR$1 = undefined;
-function getNullInjector() {
-    if (NULL_INJECTOR$1 === undefined) {
-        NULL_INJECTOR$1 = new NullInjector();
-    }
-    return NULL_INJECTOR$1;
-}
-/**
- * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
- * component tree.
- *
- * @developerPreview
- */
-class EnvironmentInjector {
-}
-class R3Injector extends EnvironmentInjector {
-    constructor(providers, parent, source, scopes) {
-        super();
-        this.parent = parent;
-        this.source = source;
-        this.scopes = scopes;
-        /**
-         * Map of tokens to records which contain the instances of those tokens.
-         * - `null` value implies that we don't have the record. Used by tree-shakable injectors
-         * to prevent further searches.
-         */
-        this.records = new Map();
-        /**
-         * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
-         */
-        this._ngOnDestroyHooks = new Set();
-        this._onDestroyHooks = [];
-        this._destroyed = false;
-        // Start off by creating Records for every provider.
-        forEachSingleProvider(providers, provider => this.processProvider(provider));
-        // Make sure the INJECTOR token provides this injector.
-        this.records.set(INJECTOR, makeRecord(undefined, this));
-        // And `EnvironmentInjector` if the current injector is supposed to be env-scoped.
-        if (scopes.has('environment')) {
-            this.records.set(EnvironmentInjector, makeRecord(undefined, this));
-        }
-        // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
-        // any injectable scoped to APP_ROOT_SCOPE.
-        const record = this.records.get(INJECTOR_SCOPE);
-        if (record != null && typeof record.value === 'string') {
-            this.scopes.add(record.value);
-        }
-        this.injectorDefTypes =
-            new Set(this.get(INJECTOR_DEF_TYPES.multi, EMPTY_ARRAY, InjectFlags.Self));
-    }
-    /**
-     * Flag indicating that this injector was previously destroyed.
-     */
-    get destroyed() {
-        return this._destroyed;
-    }
-    /**
-     * Destroy the injector and release references to every instance or provider associated with it.
-     *
-     * Also calls the `OnDestroy` lifecycle hooks of every instance that was created for which a
-     * hook was found.
-     */
-    destroy() {
-        this.assertNotDestroyed();
-        // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
-        this._destroyed = true;
-        try {
-            // Call all the lifecycle hooks.
-            for (const service of this._ngOnDestroyHooks) {
-                service.ngOnDestroy();
-            }
-            for (const hook of this._onDestroyHooks) {
-                hook();
-            }
-        }
-        finally {
-            // Release all references.
-            this.records.clear();
-            this._ngOnDestroyHooks.clear();
-            this.injectorDefTypes.clear();
-            this._onDestroyHooks.length = 0;
-        }
-    }
-    onDestroy(callback) {
-        this._onDestroyHooks.push(callback);
-    }
-    runInContext(fn) {
-        this.assertNotDestroyed();
-        const previousInjector = setCurrentInjector(this);
-        const previousInjectImplementation = setInjectImplementation(undefined);
-        try {
-            return fn();
-        }
-        finally {
-            setCurrentInjector(previousInjector);
-            setInjectImplementation(previousInjectImplementation);
-        }
-    }
-    get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        this.assertNotDestroyed();
-        // Set the injection context.
-        const previousInjector = setCurrentInjector(this);
-        const previousInjectImplementation = setInjectImplementation(undefined);
-        try {
-            // Check for the SkipSelf flag.
-            if (!(flags & InjectFlags.SkipSelf)) {
-                // SkipSelf isn't set, check if the record belongs to this injector.
-                let record = this.records.get(token);
-                if (record === undefined) {
-                    // No record, but maybe the token is scoped to this injector. Look for an injectable
-                    // def with a scope matching this injector.
-                    const def = couldBeInjectableType(token) && getInjectableDef(token);
-                    if (def && this.injectableDefInScope(def)) {
-                        // Found an injectable def and it's scoped to this injector. Pretend as if it was here
-                        // all along.
-                        record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
-                    }
-                    else {
-                        record = null;
-                    }
-                    this.records.set(token, record);
-                }
-                // If a record was found, get the instance for it and return it.
-                if (record != null /* NOT null || undefined */) {
-                    return this.hydrate(token, record);
-                }
-            }
-            // Select the next injector based on the Self flag - if self is set, the next injector is
-            // the NullInjector, otherwise it's the parent.
-            const nextInjector = !(flags & InjectFlags.Self) ? this.parent : getNullInjector();
-            // Set the notFoundValue based on the Optional flag - if optional is set and notFoundValue
-            // is undefined, the value is null, otherwise it's the notFoundValue.
-            notFoundValue = (flags & InjectFlags.Optional) && notFoundValue === THROW_IF_NOT_FOUND ?
-                null :
-                notFoundValue;
-            return nextInjector.get(token, notFoundValue);
-        }
-        catch (e) {
-            if (e.name === 'NullInjectorError') {
-                const path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
-                path.unshift(stringify(token));
-                if (previousInjector) {
-                    // We still have a parent injector, keep throwing
-                    throw e;
-                }
-                else {
-                    // Format & throw the final error message when we don't have any previous injector
-                    return catchInjectorError(e, token, 'R3InjectorError', this.source);
-                }
-            }
-            else {
-                throw e;
-            }
-        }
-        finally {
-            // Lastly, restore the previous injection context.
-            setInjectImplementation(previousInjectImplementation);
-            setCurrentInjector(previousInjector);
-        }
-    }
-    /** @internal */
-    resolveInjectorInitializers() {
-        const previousInjector = setCurrentInjector(this);
-        const previousInjectImplementation = setInjectImplementation(undefined);
-        try {
-            const initializers = this.get(ENVIRONMENT_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
-            if (ngDevMode && !Array.isArray(initializers)) {
-                throw new RuntimeError(209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
-                    `(expected an array, but got ${typeof initializers}). ` +
-                    'Please check that the `ENVIRONMENT_INITIALIZER` token is configured as a ' +
-                    '`multi: true` provider.');
-            }
-            for (const initializer of initializers) {
-                initializer();
-            }
-        }
-        finally {
-            setCurrentInjector(previousInjector);
-            setInjectImplementation(previousInjectImplementation);
-        }
-    }
-    toString() {
-        const tokens = [];
-        const records = this.records;
-        for (const token of records.keys()) {
-            tokens.push(stringify(token));
-        }
-        return `R3Injector[${tokens.join(', ')}]`;
-    }
-    assertNotDestroyed() {
-        if (this._destroyed) {
-            throw new RuntimeError(205 /* RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED */, ngDevMode && 'Injector has already been destroyed.');
-        }
-    }
-    /**
-     * Process a `SingleProvider` and add it.
-     */
-    processProvider(provider) {
-        // Determine the token from the provider. Either it's its own token, or has a {provide: ...}
-        // property.
-        provider = resolveForwardRef(provider);
-        let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
-        // Construct a `Record` for the provider.
-        const record = providerToRecord(provider);
-        if (!isTypeProvider(provider) && provider.multi === true) {
-            // If the provider indicates that it's a multi-provider, process it specially.
-            // First check whether it's been defined already.
-            let multiRecord = this.records.get(token);
-            if (multiRecord) {
-                // It has. Throw a nice error if
-                if (ngDevMode && multiRecord.multi === undefined) {
-                    throwMixedMultiProviderError();
-                }
-            }
-            else {
-                multiRecord = makeRecord(undefined, NOT_YET, true);
-                multiRecord.factory = () => injectArgs(multiRecord.multi);
-                this.records.set(token, multiRecord);
-            }
-            token = provider;
-            multiRecord.multi.push(provider);
-        }
-        else {
-            const existing = this.records.get(token);
-            if (ngDevMode && existing && existing.multi !== undefined) {
-                throwMixedMultiProviderError();
-            }
-        }
-        this.records.set(token, record);
-    }
-    hydrate(token, record) {
-        if (ngDevMode && record.value === CIRCULAR) {
-            throwCyclicDependencyError(stringify(token));
-        }
-        else if (record.value === NOT_YET) {
-            record.value = CIRCULAR;
-            record.value = record.factory();
-        }
-        if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
-            this._ngOnDestroyHooks.add(record.value);
-        }
-        return record.value;
-    }
-    injectableDefInScope(def) {
-        if (!def.providedIn) {
-            return false;
-        }
-        const providedIn = resolveForwardRef(def.providedIn);
-        if (typeof providedIn === 'string') {
-            return providedIn === 'any' || (this.scopes.has(providedIn));
-        }
-        else {
-            return this.injectorDefTypes.has(providedIn);
-        }
-    }
-}
-function injectableDefOrInjectorDefFactory(token) {
-    // Most tokens will have an injectable def directly on them, which specifies a factory directly.
-    const injectableDef = getInjectableDef(token);
-    const factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
-    if (factory !== null) {
-        return factory;
-    }
-    // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
-    // If it's missing that, it's an error.
-    if (token instanceof InjectionToken) {
-        throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && `Token ${stringify(token)} is missing a ɵprov definition.`);
-    }
-    // Undecorated types can sometimes be created if they have no constructor arguments.
-    if (token instanceof Function) {
-        return getUndecoratedInjectableFactory(token);
-    }
-    // There was no way to resolve a factory for this token.
-    throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && 'unreachable');
-}
-function getUndecoratedInjectableFactory(token) {
-    // If the token has parameters then it has dependencies that we cannot resolve implicitly.
-    const paramLength = token.length;
-    if (paramLength > 0) {
-        const args = newArray(paramLength, '?');
-        throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
-    }
-    // The constructor function appears to have no parameters.
-    // This might be because it inherits from a super-class. In which case, use an injectable
-    // def from an ancestor if there is one.
-    // Otherwise this really is a simple class with no dependencies, so return a factory that
-    // just instantiates the zero-arg constructor.
-    const inheritedInjectableDef = getInheritedInjectableDef(token);
-    if (inheritedInjectableDef !== null) {
-        return () => inheritedInjectableDef.factory(token);
-    }
-    else {
-        return () => new token();
-    }
-}
-function providerToRecord(provider) {
-    if (isValueProvider(provider)) {
-        return makeRecord(undefined, provider.useValue);
-    }
-    else {
-        const factory = providerToFactory(provider);
-        return makeRecord(factory, NOT_YET);
-    }
-}
-/**
- * Converts a `SingleProvider` into a factory function.
- *
- * @param provider provider to convert to factory
- */
-function providerToFactory(provider, ngModuleType, providers) {
-    let factory = undefined;
-    if (ngDevMode && isImportedNgModuleProviders(provider)) {
-        throwInvalidProviderError(undefined, providers, provider);
-    }
-    if (isTypeProvider(provider)) {
-        const unwrappedProvider = resolveForwardRef(provider);
-        return getFactoryDef(unwrappedProvider) || injectableDefOrInjectorDefFactory(unwrappedProvider);
-    }
-    else {
-        if (isValueProvider(provider)) {
-            factory = () => resolveForwardRef(provider.useValue);
-        }
-        else if (isFactoryProvider(provider)) {
-            factory = () => provider.useFactory(...injectArgs(provider.deps || []));
-        }
-        else if (isExistingProvider(provider)) {
-            factory = () => ɵɵinject(resolveForwardRef(provider.useExisting));
-        }
-        else {
-            const classRef = resolveForwardRef(provider &&
-                (provider.useClass || provider.provide));
-            if (ngDevMode && !classRef) {
-                throwInvalidProviderError(ngModuleType, providers, provider);
-            }
-            if (hasDeps(provider)) {
-                factory = () => new (classRef)(...injectArgs(provider.deps));
-            }
-            else {
-                return getFactoryDef(classRef) || injectableDefOrInjectorDefFactory(classRef);
-            }
-        }
-    }
-    return factory;
-}
-function makeRecord(factory, value, multi = false) {
-    return {
-        factory: factory,
-        value: value,
-        multi: multi ? [] : undefined,
-    };
-}
-function hasDeps(value) {
-    return !!value.deps;
-}
-function hasOnDestroy(value) {
-    return value !== null && typeof value === 'object' &&
-        typeof value.ngOnDestroy === 'function';
-}
-function couldBeInjectableType(value) {
-    return (typeof value === 'function') ||
-        (typeof value === 'object' && value instanceof InjectionToken);
-}
-function isImportedNgModuleProviders(provider) {
-    return !!provider.ɵproviders;
-}
-function forEachSingleProvider(providers, fn) {
-    for (const provider of providers) {
-        if (Array.isArray(provider)) {
-            forEachSingleProvider(provider, fn);
-        }
-        else if (isImportedNgModuleProviders(provider)) {
-            forEachSingleProvider(provider.ɵproviders, fn);
-        }
-        else {
-            fn(provider);
-        }
-    }
-}
 
 /**
  * @license
@@ -10335,299 +10882,6 @@ function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
 function ɵɵinvalidFactory() {
     const msg = ngDevMode ? `This constructor was not compatible with Dependency Injection.` : 'invalid';
     throw new Error(msg);
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Defines a schema that allows an NgModule to contain the following:
- * - Non-Angular elements named with dash case (`-`).
- * - Element properties named with dash case (`-`).
- * Dash case is the naming convention for custom elements.
- *
- * @publicApi
- */
-const CUSTOM_ELEMENTS_SCHEMA = {
-    name: 'custom-elements'
-};
-/**
- * Defines a schema that allows any property on any element.
- *
- * This schema allows you to ignore the errors related to any unknown elements or properties in a
- * template. The usage of this schema is generally discouraged because it prevents useful validation
- * and may hide real errors in your template. Consider using the `CUSTOM_ELEMENTS_SCHEMA` instead.
- *
- * @publicApi
- */
-const NO_ERRORS_SCHEMA = {
-    name: 'no-errors-schema'
-};
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-let shouldThrowErrorOnUnknownElement = false;
-/**
- * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
- * instead of just logging the error.
- * (for AOT-compiled ones this check happens at build time).
- */
-function ɵsetUnknownElementStrictMode(shouldThrow) {
-    shouldThrowErrorOnUnknownElement = shouldThrow;
-}
-/**
- * Gets the current value of the strict mode.
- */
-function ɵgetUnknownElementStrictMode() {
-    return shouldThrowErrorOnUnknownElement;
-}
-let shouldThrowErrorOnUnknownProperty = false;
-/**
- * Sets a strict mode for JIT-compiled components to throw an error on unknown properties,
- * instead of just logging the error.
- * (for AOT-compiled ones this check happens at build time).
- */
-function ɵsetUnknownPropertyStrictMode(shouldThrow) {
-    shouldThrowErrorOnUnknownProperty = shouldThrow;
-}
-/**
- * Gets the current value of the strict mode.
- */
-function ɵgetUnknownPropertyStrictMode() {
-    return shouldThrowErrorOnUnknownProperty;
-}
-/**
- * Validates that the element is known at runtime and produces
- * an error if it's not the case.
- * This check is relevant for JIT-compiled components (for AOT-compiled
- * ones this check happens at build time).
- *
- * The element is considered known if either:
- * - it's a known HTML element
- * - it's a known custom element
- * - the element matches any directive
- * - the element is allowed by one of the schemas
- *
- * @param element Element to validate
- * @param lView An `LView` that represents a current component that is being rendered
- * @param tagName Name of the tag to check
- * @param schemas Array of schemas
- * @param hasDirectives Boolean indicating that the element matches any directive
- */
-function validateElementIsKnown(element, lView, tagName, schemas, hasDirectives) {
-    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
-    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
-    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
-    // execute the check below.
-    if (schemas === null)
-        return;
-    // If the element matches any directive, it's considered as valid.
-    if (!hasDirectives && tagName !== null) {
-        // The element is unknown if it's an instance of HTMLUnknownElement, or it isn't registered
-        // as a custom element. Note that unknown elements with a dash in their name won't be instances
-        // of HTMLUnknownElement in browsers that support web components.
-        const isUnknown = 
-        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
-        // because while most browsers return 'function', IE returns 'object'.
-        (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
-            element instanceof HTMLUnknownElement) ||
-            (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
-                !customElements.get(tagName));
-        if (isUnknown && !matchingSchemas(schemas, tagName)) {
-            const isHostStandalone = isHostComponentStandalone(lView);
-            const templateLocation = getTemplateLocationDetails(lView);
-            const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
-            let message = `'${tagName}' is not a known element${templateLocation}:\n`;
-            message += `1. If '${tagName}' is an Angular component, then verify that it is ${isHostStandalone ? 'included in the \'@Component.imports\' of this component' :
-                'a part of an @NgModule where this component is declared'}.\n`;
-            if (tagName && tagName.indexOf('-') > -1) {
-                message +=
-                    `2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas} of this component to suppress this message.`;
-            }
-            else {
-                message +=
-                    `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas} of this component.`;
-            }
-            if (shouldThrowErrorOnUnknownElement) {
-                throw new RuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message);
-            }
-            else {
-                console.error(formatRuntimeError(304 /* RuntimeErrorCode.UNKNOWN_ELEMENT */, message));
-            }
-        }
-    }
-}
-/**
- * Validates that the property of the element is known at runtime and returns
- * false if it's not the case.
- * This check is relevant for JIT-compiled components (for AOT-compiled
- * ones this check happens at build time).
- *
- * The property is considered known if either:
- * - it's a known property of the element
- * - the element is allowed by one of the schemas
- * - the property is used for animations
- *
- * @param element Element to validate
- * @param propName Name of the property to check
- * @param tagName Name of the tag hosting the property
- * @param schemas Array of schemas
- */
-function isPropertyValid(element, propName, tagName, schemas) {
-    // If `schemas` is set to `null`, that's an indication that this Component was compiled in AOT
-    // mode where this check happens at compile time. In JIT mode, `schemas` is always present and
-    // defined as an array (as an empty array in case `schemas` field is not defined) and we should
-    // execute the check below.
-    if (schemas === null)
-        return true;
-    // The property is considered valid if the element matches the schema, it exists on the element,
-    // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
-    if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
-        return true;
-    }
-    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
-    // need to account for both here, while being careful with `typeof null` also returning 'object'.
-    return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
-}
-/**
- * Logs or throws an error that a property is not supported on an element.
- *
- * @param propName Name of the invalid property
- * @param tagName Name of the tag hosting the property
- * @param nodeType Type of the node hosting the property
- * @param lView An `LView` that represents a current component
- */
-function handleUnknownPropertyError(propName, tagName, nodeType, lView) {
-    // Special-case a situation when a structural directive is applied to
-    // an `<ng-template>` element, for example: `<ng-template *ngIf="true">`.
-    // In this case the compiler generates the `ɵɵtemplate` instruction with
-    // the `null` as the tagName. The directive matching logic at runtime relies
-    // on this effect (see `isInlineTemplate`), thus using the 'ng-template' as
-    // a default value of the `tNode.value` is not feasible at this moment.
-    if (!tagName && nodeType === 4 /* TNodeType.Container */) {
-        tagName = 'ng-template';
-    }
-    const isHostStandalone = isHostComponentStandalone(lView);
-    const templateLocation = getTemplateLocationDetails(lView);
-    let message = `Can't bind to '${propName}' since it isn't a known property of '${tagName}'${templateLocation}.`;
-    const schemas = `'${isHostStandalone ? '@Component' : '@NgModule'}.schemas'`;
-    const importLocation = isHostStandalone ?
-        'included in the \'@Component.imports\' of this component' :
-        'a part of an @NgModule where this component is declared';
-    if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
-        // Most likely this is a control flow directive (such as `*ngIf`) used in
-        // a template, but the `CommonModule` is not imported.
-        message += `\nIf the '${propName}' is an Angular control flow directive, ` +
-            `please make sure that the 'CommonModule' is ${importLocation}.`;
-    }
-    else {
-        // May be an Angular component, which is not imported/declared?
-        message += `\n1. If '${tagName}' is an Angular component and it has the ` +
-            `'${propName}' input, then verify that it is ${importLocation}.`;
-        // May be a Web Component?
-        if (tagName && tagName.indexOf('-') > -1) {
-            message += `\n2. If '${tagName}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' ` +
-                `to the ${schemas} of this component to suppress this message.`;
-            message += `\n3. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
-                `the ${schemas} of this component.`;
-        }
-        else {
-            // If it's expected, the error can be suppressed by the `NO_ERRORS_SCHEMA` schema.
-            message += `\n2. To allow any property add 'NO_ERRORS_SCHEMA' to ` +
-                `the ${schemas} of this component.`;
-        }
-    }
-    reportUnknownPropertyError(message);
-}
-function reportUnknownPropertyError(message) {
-    if (shouldThrowErrorOnUnknownProperty) {
-        throw new RuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message);
-    }
-    else {
-        console.error(formatRuntimeError(303 /* RuntimeErrorCode.UNKNOWN_BINDING */, message));
-    }
-}
-/**
- * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
- * and must **not** be used in production bundles. The function makes megamorphic reads, which might
- * be too slow for production mode and also it relies on the constructor function being available.
- *
- * Gets a reference to the host component def (where a current component is declared).
- *
- * @param lView An `LView` that represents a current component that is being rendered.
- */
-function getDeclarationComponentDef(lView) {
-    !ngDevMode && throwError('Must never be called in production mode');
-    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
-    const context = declarationLView[CONTEXT];
-    // Unable to obtain a context.
-    if (!context)
-        return null;
-    return context.constructor ? getComponentDef(context.constructor) : null;
-}
-/**
- * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
- * and must **not** be used in production bundles. The function makes megamorphic reads, which might
- * be too slow for production mode.
- *
- * Checks if the current component is declared inside of a standalone component template.
- *
- * @param lView An `LView` that represents a current component that is being rendered.
- */
-function isHostComponentStandalone(lView) {
-    !ngDevMode && throwError('Must never be called in production mode');
-    const componentDef = getDeclarationComponentDef(lView);
-    // Treat host component as non-standalone if we can't obtain the def.
-    return !!(componentDef === null || componentDef === void 0 ? void 0 : componentDef.standalone);
-}
-/**
- * WARNING: this is a **dev-mode only** function (thus should always be guarded by the `ngDevMode`)
- * and must **not** be used in production bundles. The function makes megamorphic reads, which might
- * be too slow for production mode.
- *
- * Constructs a string describing the location of the host component template. The function is used
- * in dev mode to produce error messages.
- *
- * @param lView An `LView` that represents a current component that is being rendered.
- */
-function getTemplateLocationDetails(lView) {
-    var _a;
-    !ngDevMode && throwError('Must never be called in production mode');
-    const hostComponentDef = getDeclarationComponentDef(lView);
-    const componentClassName = (_a = hostComponentDef === null || hostComponentDef === void 0 ? void 0 : hostComponentDef.type) === null || _a === void 0 ? void 0 : _a.name;
-    return componentClassName ? ` (used in the '${componentClassName}' component template)` : '';
-}
-/**
- * The set of known control flow directives.
- * We use this set to produce a more precises error message with a note
- * that the `CommonModule` should also be included.
- */
-const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
-/**
- * Returns true if the tag name is allowed by specified schemas.
- * @param schemas Array of schemas
- * @param tagName Name of the tag
- */
-function matchingSchemas(schemas, tagName) {
-    if (schemas !== null) {
-        for (let i = 0; i < schemas.length; i++) {
-            const schema = schemas[i];
-            if (schema === NO_ERRORS_SCHEMA ||
-                schema === CUSTOM_ELEMENTS_SCHEMA && tagName && tagName.indexOf('-') > -1) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 /**
@@ -13204,6 +13458,564 @@ function computeStaticStyling(tNode, attrs, writeToHost) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
+    while (tNode !== null) {
+        ngDevMode &&
+            assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 16 /* TNodeType.Projection */ | 32 /* TNodeType.Icu */);
+        const lNode = lView[tNode.index];
+        if (lNode !== null) {
+            result.push(unwrapRNode(lNode));
+        }
+        // A given lNode can represent either a native node or a LContainer (when it is a host of a
+        // ViewContainerRef). When we find a LContainer we need to descend into it to collect root nodes
+        // from the views in this container.
+        if (isLContainer(lNode)) {
+            for (let i = CONTAINER_HEADER_OFFSET; i < lNode.length; i++) {
+                const lViewInAContainer = lNode[i];
+                const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
+                if (lViewFirstChildTNode !== null) {
+                    collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
+                }
+            }
+        }
+        const tNodeType = tNode.type;
+        if (tNodeType & 8 /* TNodeType.ElementContainer */) {
+            collectNativeNodes(tView, lView, tNode.child, result);
+        }
+        else if (tNodeType & 32 /* TNodeType.Icu */) {
+            const nextRNode = icuContainerIterate(tNode, lView);
+            let rNode;
+            while (rNode = nextRNode()) {
+                result.push(rNode);
+            }
+        }
+        else if (tNodeType & 16 /* TNodeType.Projection */) {
+            const nodesInSlot = getProjectionNodes(lView, tNode);
+            if (Array.isArray(nodesInSlot)) {
+                result.push(...nodesInSlot);
+            }
+            else {
+                const parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
+                ngDevMode && assertParentView(parentView);
+                collectNativeNodes(parentView[TVIEW], parentView, nodesInSlot, result, true);
+            }
+        }
+        tNode = isProjection ? tNode.projectionNext : tNode.next;
+    }
+    return result;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class ViewRef$1 {
+    constructor(
+    /**
+     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
+     *
+     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
+     * component.
+     *
+     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
+     * view.
+     *
+     * @internal
+     */
+    _lView, 
+    /**
+     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
+     * requested.
+     *
+     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
+     */
+    _cdRefInjectingView) {
+        this._lView = _lView;
+        this._cdRefInjectingView = _cdRefInjectingView;
+        this._appRef = null;
+        this._attachedToViewContainer = false;
+    }
+    get rootNodes() {
+        const lView = this._lView;
+        const tView = lView[TVIEW];
+        return collectNativeNodes(tView, lView, tView.firstChild, []);
+    }
+    get context() {
+        return this._lView[CONTEXT];
+    }
+    set context(value) {
+        this._lView[CONTEXT] = value;
+    }
+    get destroyed() {
+        return (this._lView[FLAGS] & 128 /* LViewFlags.Destroyed */) === 128 /* LViewFlags.Destroyed */;
+    }
+    destroy() {
+        if (this._appRef) {
+            this._appRef.detachView(this);
+        }
+        else if (this._attachedToViewContainer) {
+            const parent = this._lView[PARENT];
+            if (isLContainer(parent)) {
+                const viewRefs = parent[VIEW_REFS];
+                const index = viewRefs ? viewRefs.indexOf(this) : -1;
+                if (index > -1) {
+                    ngDevMode &&
+                        assertEqual(index, parent.indexOf(this._lView) - CONTAINER_HEADER_OFFSET, 'An attached view should be in the same position within its container as its ViewRef in the VIEW_REFS array.');
+                    detachView(parent, index);
+                    removeFromArray(viewRefs, index);
+                }
+            }
+            this._attachedToViewContainer = false;
+        }
+        destroyLView(this._lView[TVIEW], this._lView);
+    }
+    onDestroy(callback) {
+        storeCleanupWithContext(this._lView[TVIEW], this._lView, null, callback);
+    }
+    /**
+     * Marks a view and all of its ancestors dirty.
+     *
+     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush OnPush} component is
+     * checked when it needs to be re-rendered but the two normal triggers haven't marked it
+     * dirty (i.e. inputs haven't changed and events haven't fired in the view).
+     *
+     * <!-- TODO: Add a link to a chapter on OnPush components -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * ```typescript
+     * @Component({
+     *   selector: 'app-root',
+     *   template: `Number of ticks: {{numberOfTicks}}`
+     *   changeDetection: ChangeDetectionStrategy.OnPush,
+     * })
+     * class AppComponent {
+     *   numberOfTicks = 0;
+     *
+     *   constructor(private ref: ChangeDetectorRef) {
+     *     setInterval(() => {
+     *       this.numberOfTicks++;
+     *       // the following is required, otherwise the view will not be updated
+     *       this.ref.markForCheck();
+     *     }, 1000);
+     *   }
+     * }
+     * ```
+     */
+    markForCheck() {
+        markViewDirty(this._cdRefInjectingView || this._lView);
+    }
+    /**
+     * Detaches the view from the change detection tree.
+     *
+     * Detached views will not be checked during change detection runs until they are
+     * re-attached, even if they are dirty. `detach` can be used in combination with
+     * {@link ChangeDetectorRef#detectChanges detectChanges} to implement local change
+     * detection checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example defines a component with a large list of readonly data.
+     * Imagine the data changes constantly, many times per second. For performance reasons,
+     * we want to check and update the list every five seconds. We can do that by detaching
+     * the component's change detector and doing a local check every five seconds.
+     *
+     * ```typescript
+     * class DataProvider {
+     *   // in a real application the returned data will be different every time
+     *   get data() {
+     *     return [1,2,3,4,5];
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'giant-list',
+     *   template: `
+     *     <li *ngFor="let d of dataProvider.data">Data {{d}}</li>
+     *   `,
+     * })
+     * class GiantList {
+     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {
+     *     ref.detach();
+     *     setInterval(() => {
+     *       this.ref.detectChanges();
+     *     }, 5000);
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'app',
+     *   providers: [DataProvider],
+     *   template: `
+     *     <giant-list><giant-list>
+     *   `,
+     * })
+     * class App {
+     * }
+     * ```
+     */
+    detach() {
+        this._lView[FLAGS] &= ~64 /* LViewFlags.Attached */;
+    }
+    /**
+     * Re-attaches a view to the change detection tree.
+     *
+     * This can be used to re-attach views that were previously detached from the tree
+     * using {@link ChangeDetectorRef#detach detach}. Views are attached to the tree by default.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example creates a component displaying `live` data. The component will detach
+     * its change detector from the main change detector tree when the component's live property
+     * is set to false.
+     *
+     * ```typescript
+     * class DataProvider {
+     *   data = 1;
+     *
+     *   constructor() {
+     *     setInterval(() => {
+     *       this.data = this.data * 2;
+     *     }, 500);
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'live-data',
+     *   inputs: ['live'],
+     *   template: 'Data: {{dataProvider.data}}'
+     * })
+     * class LiveData {
+     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {}
+     *
+     *   set live(value) {
+     *     if (value) {
+     *       this.ref.reattach();
+     *     } else {
+     *       this.ref.detach();
+     *     }
+     *   }
+     * }
+     *
+     * @Component({
+     *   selector: 'app-root',
+     *   providers: [DataProvider],
+     *   template: `
+     *     Live Update: <input type="checkbox" [(ngModel)]="live">
+     *     <live-data [live]="live"><live-data>
+     *   `,
+     * })
+     * class AppComponent {
+     *   live = true;
+     * }
+     * ```
+     */
+    reattach() {
+        this._lView[FLAGS] |= 64 /* LViewFlags.Attached */;
+    }
+    /**
+     * Checks the view and its children.
+     *
+     * This can also be used in combination with {@link ChangeDetectorRef#detach detach} to implement
+     * local change detection checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example defines a component with a large list of readonly data.
+     * Imagine, the data changes constantly, many times per second. For performance reasons,
+     * we want to check and update the list every five seconds.
+     *
+     * We can do that by detaching the component's change detector and doing a local change detection
+     * check every five seconds.
+     *
+     * See {@link ChangeDetectorRef#detach detach} for more information.
+     */
+    detectChanges() {
+        detectChangesInternal(this._lView[TVIEW], this._lView, this.context);
+    }
+    /**
+     * Checks the change detector and its children, and throws if any changes are detected.
+     *
+     * This is used in development mode to verify that running change detection doesn't
+     * introduce other changes.
+     */
+    checkNoChanges() {
+        if (ngDevMode) {
+            checkNoChangesInternal(this._lView[TVIEW], this._lView, this.context);
+        }
+    }
+    attachToViewContainerRef() {
+        if (this._appRef) {
+            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached directly to the ApplicationRef!');
+        }
+        this._attachedToViewContainer = true;
+    }
+    detachFromAppRef() {
+        this._appRef = null;
+        renderDetachView(this._lView[TVIEW], this._lView);
+    }
+    attachToAppRef(appRef) {
+        if (this._attachedToViewContainer) {
+            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached to a ViewContainer!');
+        }
+        this._appRef = appRef;
+    }
+}
+/** @internal */
+class RootViewRef extends ViewRef$1 {
+    constructor(_view) {
+        super(_view);
+        this._view = _view;
+    }
+    detectChanges() {
+        detectChangesInRootView(this._view);
+    }
+    checkNoChanges() {
+        if (ngDevMode) {
+            checkNoChangesInRootView(this._view);
+        }
+    }
+    get context() {
+        return null;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
+    /**
+     * @param ngModule The NgModuleRef to which all resolved factories are bound.
+     */
+    constructor(ngModule) {
+        super();
+        this.ngModule = ngModule;
+    }
+    resolveComponentFactory(component) {
+        ngDevMode && assertComponentType(component);
+        const componentDef = getComponentDef(component);
+        return new ComponentFactory(componentDef, this.ngModule);
+    }
+}
+function toRefArray(map) {
+    const array = [];
+    for (let nonMinified in map) {
+        if (map.hasOwnProperty(nonMinified)) {
+            const minified = map[nonMinified];
+            array.push({ propName: minified, templateName: nonMinified });
+        }
+    }
+    return array;
+}
+function getNamespace(elementName) {
+    const name = elementName.toLowerCase();
+    return name === 'svg' ? SVG_NAMESPACE : (name === 'math' ? MATH_ML_NAMESPACE : null);
+}
+/**
+ * Injector that looks up a value using a specific injector, before falling back to the module
+ * injector. Used primarily when creating components or embedded views dynamically.
+ */
+class ChainedInjector {
+    constructor(injector, parentInjector) {
+        this.injector = injector;
+        this.parentInjector = parentInjector;
+    }
+    get(token, notFoundValue, flags) {
+        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
+        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+            // Return the value from the root element injector when
+            // - it provides it
+            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            // - the module injector should not be checked
+            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            return value;
+        }
+        return this.parentInjector.get(token, notFoundValue, flags);
+    }
+}
+/**
+ * Render3 implementation of {@link viewEngine_ComponentFactory}.
+ */
+class ComponentFactory extends ComponentFactory$1 {
+    /**
+     * @param componentDef The component definition.
+     * @param ngModule The NgModuleRef to which the factory is bound.
+     */
+    constructor(componentDef, ngModule) {
+        super();
+        this.componentDef = componentDef;
+        this.ngModule = ngModule;
+        this.componentType = componentDef.type;
+        this.selector = stringifyCSSSelectorList(componentDef.selectors);
+        this.ngContentSelectors =
+            componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
+        this.isBoundToModule = !!ngModule;
+    }
+    get inputs() {
+        return toRefArray(this.componentDef.inputs);
+    }
+    get outputs() {
+        return toRefArray(this.componentDef.outputs);
+    }
+    create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
+        environmentInjector = environmentInjector || this.ngModule;
+        let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
+            environmentInjector :
+            environmentInjector === null || environmentInjector === void 0 ? void 0 : environmentInjector.injector;
+        if (realEnvironmentInjector && this.componentDef.getStandaloneInjector !== null) {
+            realEnvironmentInjector = this.componentDef.getStandaloneInjector(realEnvironmentInjector) ||
+                realEnvironmentInjector;
+        }
+        const rootViewInjector = realEnvironmentInjector ? new ChainedInjector(injector, realEnvironmentInjector) : injector;
+        const rendererFactory = rootViewInjector.get(RendererFactory2, null);
+        if (rendererFactory === null) {
+            throw new RuntimeError(407 /* RuntimeErrorCode.RENDERER_NOT_FOUND */, ngDevMode &&
+                'Angular was not able to inject a renderer (RendererFactory2). ' +
+                    'Likely this is due to a broken DI hierarchy. ' +
+                    'Make sure that any injector used to create this component has a correct parent.');
+        }
+        const sanitizer = rootViewInjector.get(Sanitizer, null);
+        const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
+        // Determine a tag name used for creating host elements when this component is created
+        // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
+        const elementName = this.componentDef.selectors[0][0] || 'div';
+        const hostRNode = rootSelectorOrNode ?
+            locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
+            createElementNode(rendererFactory.createRenderer(null, this.componentDef), elementName, getNamespace(elementName));
+        const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
+            16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
+        const rootContext = createRootContext();
+        // Create the root view. Uses empty TView and ContentTemplate.
+        const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
+        const rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null);
+        // rootView is the parent when bootstrapping
+        // TODO(misko): it looks like we are entering view here but we don't really need to as
+        // `renderView` does that. However as the code is written it is needed because
+        // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
+        // issues would allow us to drop this.
+        enterView(rootLView);
+        let component;
+        let tElementNode;
+        try {
+            const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, hostRenderer);
+            if (hostRNode) {
+                if (rootSelectorOrNode) {
+                    setUpAttributes(hostRenderer, hostRNode, ['ng-version', VERSION.full]);
+                }
+                else {
+                    // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
+                    // is not defined), also apply attributes and classes extracted from component selector.
+                    // Extract attributes and classes from the first selector only to match VE behavior.
+                    const { attrs, classes } = extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
+                    if (attrs) {
+                        setUpAttributes(hostRenderer, hostRNode, attrs);
+                    }
+                    if (classes && classes.length > 0) {
+                        writeDirectClass(hostRenderer, hostRNode, classes.join(' '));
+                    }
+                }
+            }
+            tElementNode = getTNode(rootTView, HEADER_OFFSET);
+            if (projectableNodes !== undefined) {
+                const projection = tElementNode.projection = [];
+                for (let i = 0; i < this.ngContentSelectors.length; i++) {
+                    const nodesforSlot = projectableNodes[i];
+                    // Projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
+                    // case). Here we do normalize passed data structure to be an array of arrays to avoid
+                    // complex checks down the line.
+                    // We also normalize the length of the passed in projectable nodes (to match the number of
+                    // <ng-container> slots defined by a component).
+                    projection.push(nodesforSlot != null ? Array.from(nodesforSlot) : null);
+                }
+            }
+            // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
+            // executed here?
+            // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
+            component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
+            renderView(rootTView, rootLView, null);
+        }
+        finally {
+            leaveView();
+        }
+        return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
+    }
+}
+const componentFactoryResolver = new ComponentFactoryResolver();
+/**
+ * Creates a ComponentFactoryResolver and stores it on the injector. Or, if the
+ * ComponentFactoryResolver
+ * already exists, retrieves the existing ComponentFactoryResolver.
+ *
+ * @returns The ComponentFactoryResolver instance to use
+ */
+function injectComponentFactoryResolver() {
+    return componentFactoryResolver;
+}
+/**
+ * Represents an instance of a Component created via a {@link ComponentFactory}.
+ *
+ * `ComponentRef` provides access to the Component Instance as well other objects related to this
+ * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
+ * method.
+ *
+ */
+class ComponentRef extends ComponentRef$1 {
+    constructor(componentType, instance, location, _rootLView, _tNode) {
+        super();
+        this.location = location;
+        this._rootLView = _rootLView;
+        this._tNode = _tNode;
+        this.instance = instance;
+        this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
+        this.componentType = componentType;
+    }
+    setInput(name, value) {
+        const inputData = this._tNode.inputs;
+        let dataValue;
+        if (inputData !== null && (dataValue = inputData[name])) {
+            const lView = this._rootLView;
+            setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
+            markDirtyIfOnPush(lView, this._tNode.index);
+        }
+        else {
+            if (ngDevMode) {
+                const cmpNameForError = stringifyForError(this.componentType);
+                let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
+                message += `Make sure that the '${name}' property is annotated with @Input() or a mapped @Input('${name}') exists.`;
+                reportUnknownPropertyError(message);
+            }
+        }
+    }
+    get injector() {
+        return new NodeInjector(this._tNode, this._rootLView);
+    }
+    destroy() {
+        this.hostView.destroy();
+    }
+    onDestroy(callback) {
+        this.hostView.onDestroy(callback);
+    }
+}
 // TODO: A hack to not pull in the NullInjector from @angular/core.
 const NULL_INJECTOR = {
     get: (token, notFoundValue) => {
@@ -13256,7 +14068,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     return rootView[index] = componentView;
 }
 /**
- * Creates a root component and sets it up with features and host bindings. Shared by
+ * Creates a root component and sets it up with features and host bindings.Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
 function createRootComponent(componentView, componentDef, rootLView, rootContext, hostFeatures) {
@@ -20834,46 +21646,6 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-function noComponentFactoryError(component) {
-    const error = Error(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
-    error[ERROR_COMPONENT] = component;
-    return error;
-}
-const ERROR_COMPONENT = 'ngComponent';
-function getComponent$1(error) {
-    return error[ERROR_COMPONENT];
-}
-class _NullComponentFactoryResolver {
-    resolveComponentFactory(component) {
-        throw noComponentFactoryError(component);
-    }
-}
-/**
- * A simple registry that maps `Components` to generated `ComponentFactory` classes
- * that can be used to create instances of components.
- * Use to obtain the factory for a given component type,
- * then use the factory's `create()` method to create a component of that type.
- *
- * Note: since v13, dynamic component creation via
- * [`ViewContainerRef.createComponent`](api/core/ViewContainerRef#createComponent)
- * does **not** require resolving component factory: component class can be used directly.
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
- */
-class ComponentFactoryResolver$1 {
-}
-ComponentFactoryResolver$1.NULL = ( /* @__PURE__ */new _NullComponentFactoryResolver());
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
  * Provides access to the `NgModule` instance and related objects.
@@ -20894,782 +21666,6 @@ class NgModuleRef$1 {
  * using factory-based ones.
  */
 class NgModuleFactory$1 {
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Represents a component created by a `ComponentFactory`.
- * Provides access to the component instance and related objects,
- * and provides the means of destroying the instance.
- *
- * @publicApi
- */
-class ComponentRef$1 {
-}
-/**
- * Base class for a factory that can create a component dynamically.
- * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
- * Use the resulting `ComponentFactory.create()` method to create a component of that type.
- *
- * @see [Dynamic Components](guide/dynamic-component-loader)
- *
- * @publicApi
- *
- * @deprecated Angular no longer requires Component factories. Please use other APIs where
- *     Component class can be used directly.
- */
-class ComponentFactory$1 {
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Creates an ElementRef from the most recent node.
- *
- * @returns The ElementRef instance to use
- */
-function injectElementRef() {
-    return createElementRef(getCurrentTNode(), getLView());
-}
-/**
- * Creates an ElementRef given a node.
- *
- * @param tNode The node for which you'd like an ElementRef
- * @param lView The view to which the node belongs
- * @returns The ElementRef instance to use
- */
-function createElementRef(tNode, lView) {
-    return new ElementRef(getNativeByTNode(tNode, lView));
-}
-/**
- * A wrapper around a native element inside of a View.
- *
- * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
- * element.
- *
- * @security Permitting direct access to the DOM can make your application more vulnerable to
- * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
- * [Security Guide](https://g.co/ng/security).
- *
- * @publicApi
- */
-// Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
-// i.e. users have to ask for what they need. With that, we can build better analysis tools
-// and could do better codegen in the future.
-class ElementRef {
-    constructor(nativeElement) {
-        this.nativeElement = nativeElement;
-    }
-}
-/**
- * @internal
- * @nocollapse
- */
-ElementRef.__NG_ELEMENT_ID__ = injectElementRef;
-/**
- * Unwraps `ElementRef` and return the `nativeElement`.
- *
- * @param value value to unwrap
- * @returns `nativeElement` if `ElementRef` otherwise returns value as is.
- */
-function unwrapElementRef(value) {
-    return value instanceof ElementRef ? value.nativeElement : value;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
-/**
- * Creates and initializes a custom renderer that implements the `Renderer2` base class.
- *
- * @publicApi
- */
-class RendererFactory2 {
-}
-/**
- * Extend this base class to implement custom rendering. By default, Angular
- * renders a template into DOM. You can use custom rendering to intercept
- * rendering calls, or to render to something other than DOM.
- *
- * Create your custom renderer using `RendererFactory2`.
- *
- * Use a custom renderer to bypass Angular's templating and
- * make custom UI changes that can't be expressed declaratively.
- * For example if you need to set a property or an attribute whose name is
- * not statically known, use the `setProperty()` or
- * `setAttribute()` method.
- *
- * @publicApi
- */
-class Renderer2 {
-}
-/**
- * @internal
- * @nocollapse
- */
-Renderer2.__NG_ELEMENT_ID__ = () => injectRenderer2();
-/** Injects a Renderer2 for the current component. */
-function injectRenderer2() {
-    // We need the Renderer to be based on the component that it's being injected into, however since
-    // DI happens before we've entered its view, `getLView` will return the parent view instead.
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const nodeAtIndex = getComponentLViewByIndex(tNode.index, lView);
-    return (isLView(nodeAtIndex) ? nodeAtIndex : lView)[RENDERER];
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Sanitizer is used by the views to sanitize potentially dangerous values.
- *
- * @publicApi
- */
-class Sanitizer {
-}
-/** @nocollapse */
-Sanitizer.ɵprov = ɵɵdefineInjectable({
-    token: Sanitizer,
-    providedIn: 'root',
-    factory: () => null,
-});
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @description Represents the version of Angular
- *
- * @publicApi
- */
-class Version {
-    constructor(full) {
-        this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
-    }
-}
-/**
- * @publicApi
- */
-const VERSION = new Version('14.2.0-next.0+sha-211c353');
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// This default value is when checking the hierarchy for a token.
-//
-// It means both:
-// - the token is not provided by the current injector,
-// - only the element injectors should be checked (ie do not check module injectors
-//
-//          mod1
-//         /
-//       el1   mod2
-//         \  /
-//         el2
-//
-// When requesting el2.injector.get(token), we should check in the following order and return the
-// first found value:
-// - el2.injector.get(token, default)
-// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
-// - mod2.injector.get(token, default)
-const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
-    while (tNode !== null) {
-        ngDevMode &&
-            assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 16 /* TNodeType.Projection */ | 32 /* TNodeType.Icu */);
-        const lNode = lView[tNode.index];
-        if (lNode !== null) {
-            result.push(unwrapRNode(lNode));
-        }
-        // A given lNode can represent either a native node or a LContainer (when it is a host of a
-        // ViewContainerRef). When we find a LContainer we need to descend into it to collect root nodes
-        // from the views in this container.
-        if (isLContainer(lNode)) {
-            for (let i = CONTAINER_HEADER_OFFSET; i < lNode.length; i++) {
-                const lViewInAContainer = lNode[i];
-                const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
-                if (lViewFirstChildTNode !== null) {
-                    collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
-                }
-            }
-        }
-        const tNodeType = tNode.type;
-        if (tNodeType & 8 /* TNodeType.ElementContainer */) {
-            collectNativeNodes(tView, lView, tNode.child, result);
-        }
-        else if (tNodeType & 32 /* TNodeType.Icu */) {
-            const nextRNode = icuContainerIterate(tNode, lView);
-            let rNode;
-            while (rNode = nextRNode()) {
-                result.push(rNode);
-            }
-        }
-        else if (tNodeType & 16 /* TNodeType.Projection */) {
-            const nodesInSlot = getProjectionNodes(lView, tNode);
-            if (Array.isArray(nodesInSlot)) {
-                result.push(...nodesInSlot);
-            }
-            else {
-                const parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
-                ngDevMode && assertParentView(parentView);
-                collectNativeNodes(parentView[TVIEW], parentView, nodesInSlot, result, true);
-            }
-        }
-        tNode = isProjection ? tNode.projectionNext : tNode.next;
-    }
-    return result;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-class ViewRef$1 {
-    constructor(
-    /**
-     * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
-     *
-     * When ViewRef is created for a dynamic component, this also represents the `LView` for the
-     * component.
-     *
-     * For a "regular" ViewRef created for an embedded view, this is the `LView` for the embedded
-     * view.
-     *
-     * @internal
-     */
-    _lView, 
-    /**
-     * This represents the `LView` associated with the point where `ChangeDetectorRef` was
-     * requested.
-     *
-     * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
-     */
-    _cdRefInjectingView) {
-        this._lView = _lView;
-        this._cdRefInjectingView = _cdRefInjectingView;
-        this._appRef = null;
-        this._attachedToViewContainer = false;
-    }
-    get rootNodes() {
-        const lView = this._lView;
-        const tView = lView[TVIEW];
-        return collectNativeNodes(tView, lView, tView.firstChild, []);
-    }
-    get context() {
-        return this._lView[CONTEXT];
-    }
-    set context(value) {
-        this._lView[CONTEXT] = value;
-    }
-    get destroyed() {
-        return (this._lView[FLAGS] & 128 /* LViewFlags.Destroyed */) === 128 /* LViewFlags.Destroyed */;
-    }
-    destroy() {
-        if (this._appRef) {
-            this._appRef.detachView(this);
-        }
-        else if (this._attachedToViewContainer) {
-            const parent = this._lView[PARENT];
-            if (isLContainer(parent)) {
-                const viewRefs = parent[VIEW_REFS];
-                const index = viewRefs ? viewRefs.indexOf(this) : -1;
-                if (index > -1) {
-                    ngDevMode &&
-                        assertEqual(index, parent.indexOf(this._lView) - CONTAINER_HEADER_OFFSET, 'An attached view should be in the same position within its container as its ViewRef in the VIEW_REFS array.');
-                    detachView(parent, index);
-                    removeFromArray(viewRefs, index);
-                }
-            }
-            this._attachedToViewContainer = false;
-        }
-        destroyLView(this._lView[TVIEW], this._lView);
-    }
-    onDestroy(callback) {
-        storeCleanupWithContext(this._lView[TVIEW], this._lView, null, callback);
-    }
-    /**
-     * Marks a view and all of its ancestors dirty.
-     *
-     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush OnPush} component is
-     * checked when it needs to be re-rendered but the two normal triggers haven't marked it
-     * dirty (i.e. inputs haven't changed and events haven't fired in the view).
-     *
-     * <!-- TODO: Add a link to a chapter on OnPush components -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * ```typescript
-     * @Component({
-     *   selector: 'app-root',
-     *   template: `Number of ticks: {{numberOfTicks}}`
-     *   changeDetection: ChangeDetectionStrategy.OnPush,
-     * })
-     * class AppComponent {
-     *   numberOfTicks = 0;
-     *
-     *   constructor(private ref: ChangeDetectorRef) {
-     *     setInterval(() => {
-     *       this.numberOfTicks++;
-     *       // the following is required, otherwise the view will not be updated
-     *       this.ref.markForCheck();
-     *     }, 1000);
-     *   }
-     * }
-     * ```
-     */
-    markForCheck() {
-        markViewDirty(this._cdRefInjectingView || this._lView);
-    }
-    /**
-     * Detaches the view from the change detection tree.
-     *
-     * Detached views will not be checked during change detection runs until they are
-     * re-attached, even if they are dirty. `detach` can be used in combination with
-     * {@link ChangeDetectorRef#detectChanges detectChanges} to implement local change
-     * detection checks.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example defines a component with a large list of readonly data.
-     * Imagine the data changes constantly, many times per second. For performance reasons,
-     * we want to check and update the list every five seconds. We can do that by detaching
-     * the component's change detector and doing a local check every five seconds.
-     *
-     * ```typescript
-     * class DataProvider {
-     *   // in a real application the returned data will be different every time
-     *   get data() {
-     *     return [1,2,3,4,5];
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'giant-list',
-     *   template: `
-     *     <li *ngFor="let d of dataProvider.data">Data {{d}}</li>
-     *   `,
-     * })
-     * class GiantList {
-     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {
-     *     ref.detach();
-     *     setInterval(() => {
-     *       this.ref.detectChanges();
-     *     }, 5000);
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'app',
-     *   providers: [DataProvider],
-     *   template: `
-     *     <giant-list><giant-list>
-     *   `,
-     * })
-     * class App {
-     * }
-     * ```
-     */
-    detach() {
-        this._lView[FLAGS] &= ~64 /* LViewFlags.Attached */;
-    }
-    /**
-     * Re-attaches a view to the change detection tree.
-     *
-     * This can be used to re-attach views that were previously detached from the tree
-     * using {@link ChangeDetectorRef#detach detach}. Views are attached to the tree by default.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example creates a component displaying `live` data. The component will detach
-     * its change detector from the main change detector tree when the component's live property
-     * is set to false.
-     *
-     * ```typescript
-     * class DataProvider {
-     *   data = 1;
-     *
-     *   constructor() {
-     *     setInterval(() => {
-     *       this.data = this.data * 2;
-     *     }, 500);
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'live-data',
-     *   inputs: ['live'],
-     *   template: 'Data: {{dataProvider.data}}'
-     * })
-     * class LiveData {
-     *   constructor(private ref: ChangeDetectorRef, private dataProvider: DataProvider) {}
-     *
-     *   set live(value) {
-     *     if (value) {
-     *       this.ref.reattach();
-     *     } else {
-     *       this.ref.detach();
-     *     }
-     *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'app-root',
-     *   providers: [DataProvider],
-     *   template: `
-     *     Live Update: <input type="checkbox" [(ngModel)]="live">
-     *     <live-data [live]="live"><live-data>
-     *   `,
-     * })
-     * class AppComponent {
-     *   live = true;
-     * }
-     * ```
-     */
-    reattach() {
-        this._lView[FLAGS] |= 64 /* LViewFlags.Attached */;
-    }
-    /**
-     * Checks the view and its children.
-     *
-     * This can also be used in combination with {@link ChangeDetectorRef#detach detach} to implement
-     * local change detection checks.
-     *
-     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
-     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example defines a component with a large list of readonly data.
-     * Imagine, the data changes constantly, many times per second. For performance reasons,
-     * we want to check and update the list every five seconds.
-     *
-     * We can do that by detaching the component's change detector and doing a local change detection
-     * check every five seconds.
-     *
-     * See {@link ChangeDetectorRef#detach detach} for more information.
-     */
-    detectChanges() {
-        detectChangesInternal(this._lView[TVIEW], this._lView, this.context);
-    }
-    /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
-     */
-    checkNoChanges() {
-        if (ngDevMode) {
-            checkNoChangesInternal(this._lView[TVIEW], this._lView, this.context);
-        }
-    }
-    attachToViewContainerRef() {
-        if (this._appRef) {
-            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached directly to the ApplicationRef!');
-        }
-        this._attachedToViewContainer = true;
-    }
-    detachFromAppRef() {
-        this._appRef = null;
-        renderDetachView(this._lView[TVIEW], this._lView);
-    }
-    attachToAppRef(appRef) {
-        if (this._attachedToViewContainer) {
-            throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached to a ViewContainer!');
-        }
-        this._appRef = appRef;
-    }
-}
-/** @internal */
-class RootViewRef extends ViewRef$1 {
-    constructor(_view) {
-        super(_view);
-        this._view = _view;
-    }
-    detectChanges() {
-        detectChangesInRootView(this._view);
-    }
-    checkNoChanges() {
-        if (ngDevMode) {
-            checkNoChangesInRootView(this._view);
-        }
-    }
-    get context() {
-        return null;
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
-    /**
-     * @param ngModule The NgModuleRef to which all resolved factories are bound.
-     */
-    constructor(ngModule) {
-        super();
-        this.ngModule = ngModule;
-    }
-    resolveComponentFactory(component) {
-        ngDevMode && assertComponentType(component);
-        const componentDef = getComponentDef(component);
-        return new ComponentFactory(componentDef, this.ngModule);
-    }
-}
-function toRefArray(map) {
-    const array = [];
-    for (let nonMinified in map) {
-        if (map.hasOwnProperty(nonMinified)) {
-            const minified = map[nonMinified];
-            array.push({ propName: minified, templateName: nonMinified });
-        }
-    }
-    return array;
-}
-function getNamespace(elementName) {
-    const name = elementName.toLowerCase();
-    return name === 'svg' ? SVG_NAMESPACE : (name === 'math' ? MATH_ML_NAMESPACE : null);
-}
-/**
- * Injector that looks up a value using a specific injector, before falling back to the module
- * injector. Used primarily when creating components or embedded views dynamically.
- */
-class ChainedInjector {
-    constructor(injector, parentInjector) {
-        this.injector = injector;
-        this.parentInjector = parentInjector;
-    }
-    get(token, notFoundValue, flags) {
-        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
-        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
-            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
-            // Return the value from the root element injector when
-            // - it provides it
-            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            // - the module injector should not be checked
-            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            return value;
-        }
-        return this.parentInjector.get(token, notFoundValue, flags);
-    }
-}
-/**
- * Render3 implementation of {@link viewEngine_ComponentFactory}.
- */
-class ComponentFactory extends ComponentFactory$1 {
-    /**
-     * @param componentDef The component definition.
-     * @param ngModule The NgModuleRef to which the factory is bound.
-     */
-    constructor(componentDef, ngModule) {
-        super();
-        this.componentDef = componentDef;
-        this.ngModule = ngModule;
-        this.componentType = componentDef.type;
-        this.selector = stringifyCSSSelectorList(componentDef.selectors);
-        this.ngContentSelectors =
-            componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
-        this.isBoundToModule = !!ngModule;
-    }
-    get inputs() {
-        return toRefArray(this.componentDef.inputs);
-    }
-    get outputs() {
-        return toRefArray(this.componentDef.outputs);
-    }
-    create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
-        environmentInjector = environmentInjector || this.ngModule;
-        let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
-            environmentInjector :
-            environmentInjector === null || environmentInjector === void 0 ? void 0 : environmentInjector.injector;
-        if (realEnvironmentInjector && this.componentDef.getStandaloneInjector !== null) {
-            realEnvironmentInjector = this.componentDef.getStandaloneInjector(realEnvironmentInjector) ||
-                realEnvironmentInjector;
-        }
-        const rootViewInjector = realEnvironmentInjector ? new ChainedInjector(injector, realEnvironmentInjector) : injector;
-        const rendererFactory = rootViewInjector.get(RendererFactory2, null);
-        if (rendererFactory === null) {
-            throw new RuntimeError(407 /* RuntimeErrorCode.RENDERER_NOT_FOUND */, ngDevMode &&
-                'Angular was not able to inject a renderer (RendererFactory2). ' +
-                    'Likely this is due to a broken DI hierarchy. ' +
-                    'Make sure that any injector used to create this component has a correct parent.');
-        }
-        const sanitizer = rootViewInjector.get(Sanitizer, null);
-        const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
-        // Determine a tag name used for creating host elements when this component is created
-        // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
-        const elementName = this.componentDef.selectors[0][0] || 'div';
-        const hostRNode = rootSelectorOrNode ?
-            locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
-            createElementNode(rendererFactory.createRenderer(null, this.componentDef), elementName, getNamespace(elementName));
-        const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
-            16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
-        const rootContext = createRootContext();
-        // Create the root view. Uses empty TView and ContentTemplate.
-        const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
-        const rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null);
-        // rootView is the parent when bootstrapping
-        // TODO(misko): it looks like we are entering view here but we don't really need to as
-        // `renderView` does that. However as the code is written it is needed because
-        // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
-        // issues would allow us to drop this.
-        enterView(rootLView);
-        let component;
-        let tElementNode;
-        try {
-            const componentView = createRootComponentView(hostRNode, this.componentDef, rootLView, rendererFactory, hostRenderer);
-            if (hostRNode) {
-                if (rootSelectorOrNode) {
-                    setUpAttributes(hostRenderer, hostRNode, ['ng-version', VERSION.full]);
-                }
-                else {
-                    // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
-                    // is not defined), also apply attributes and classes extracted from component selector.
-                    // Extract attributes and classes from the first selector only to match VE behavior.
-                    const { attrs, classes } = extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
-                    if (attrs) {
-                        setUpAttributes(hostRenderer, hostRNode, attrs);
-                    }
-                    if (classes && classes.length > 0) {
-                        writeDirectClass(hostRenderer, hostRNode, classes.join(' '));
-                    }
-                }
-            }
-            tElementNode = getTNode(rootTView, HEADER_OFFSET);
-            if (projectableNodes !== undefined) {
-                const projection = tElementNode.projection = [];
-                for (let i = 0; i < this.ngContentSelectors.length; i++) {
-                    const nodesforSlot = projectableNodes[i];
-                    // Projectable nodes can be passed as array of arrays or an array of iterables (ngUpgrade
-                    // case). Here we do normalize passed data structure to be an array of arrays to avoid
-                    // complex checks down the line.
-                    // We also normalize the length of the passed in projectable nodes (to match the number of
-                    // <ng-container> slots defined by a component).
-                    projection.push(nodesforSlot != null ? Array.from(nodesforSlot) : null);
-                }
-            }
-            // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
-            // executed here?
-            // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-            component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
-            renderView(rootTView, rootLView, null);
-        }
-        finally {
-            leaveView();
-        }
-        return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
-    }
-}
-const componentFactoryResolver = new ComponentFactoryResolver();
-/**
- * Creates a ComponentFactoryResolver and stores it on the injector. Or, if the
- * ComponentFactoryResolver
- * already exists, retrieves the existing ComponentFactoryResolver.
- *
- * @returns The ComponentFactoryResolver instance to use
- */
-function injectComponentFactoryResolver() {
-    return componentFactoryResolver;
-}
-/**
- * Represents an instance of a Component created via a {@link ComponentFactory}.
- *
- * `ComponentRef` provides access to the Component Instance as well other objects related to this
- * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
- * method.
- *
- */
-class ComponentRef extends ComponentRef$1 {
-    constructor(componentType, instance, location, _rootLView, _tNode) {
-        super();
-        this.location = location;
-        this._rootLView = _rootLView;
-        this._tNode = _tNode;
-        this.instance = instance;
-        this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
-        this.componentType = componentType;
-    }
-    setInput(name, value) {
-        const inputData = this._tNode.inputs;
-        let dataValue;
-        if (inputData !== null && (dataValue = inputData[name])) {
-            const lView = this._rootLView;
-            setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
-            markDirtyIfOnPush(lView, this._tNode.index);
-        }
-        else {
-            if (ngDevMode) {
-                const cmpNameForError = stringifyForError(this.componentType);
-                let message = `Can't set value of the '${name}' input on the '${cmpNameForError}' component. `;
-                message += `Make sure that the '${name}' property is annotated with @Input() or a mapped @Input('${name}') exists.`;
-                reportUnknownPropertyError(message);
-            }
-        }
-    }
-    get injector() {
-        return new NodeInjector(this._tNode, this._rootLView);
-    }
-    destroy() {
-        this.hostView.destroy();
-    }
-    onDestroy(callback) {
-        this.hostView.onDestroy(callback);
-    }
 }
 
 /**
@@ -29718,6 +29714,145 @@ function ɵɵngDeclarePipe(decl) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Creates a `ComponentRef` instance based on provided component type and a set of options.
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how the `createComponent` function can be used
+ * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
+ * so that it gets included into change detection cycles.
+ *
+ * Note: the example uses standalone components, but the function can also be used for
+ * non-standalone components (declared in an NgModule) as well.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   template: `Hello {{ name }}!`
+ * })
+ * class HelloComponent {
+ *   name = 'Angular';
+ * }
+ *
+ * @Component({
+ *   standalone: true,
+ *   template: `<div id="hello-component-host"></div>`
+ * })
+ * class RootComponent {}
+ *
+ * // Bootstrap an application.
+ * const applicationRef = await bootstrapApplication(RootComponent);
+ *
+ * // Locate a DOM node that would be used as a host.
+ * const host = document.getElementById('hello-component-host');
+ *
+ * // Get an `EnvironmentInjector` instance from the `ApplicationRef`.
+ * const environmentInjector = applicationRef.injector;
+ *
+ * // We can now create a `ComponentRef` instance.
+ * const componentRef = createComponent(HelloComponent, {host, environmentInjector});
+ *
+ * // Last step is to register the newly created ref using the `ApplicationRef` instance
+ * // to include the component view into change detection cycles.
+ * applicationRef.attachView(componentRef.hostView);
+ * ```
+ *
+ * @param component Component class reference.
+ * @param options Set of options to use:
+ *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component, see
+ * additional info about it at https://angular.io/guide/standalone-components#environment-injectors.
+ *  * `hostElement` (optional): A DOM node that should act as a host node for the component. If not
+ * provided, Angular creates one based on the tag name used in the component selector (and falls
+ * back to using `div` if selector doesn't have tag name info).
+ *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it at
+ * https://angular.io/guide/hierarchical-dependency-injection#elementinjector.
+ *  * `projectableNodes` (optional): A list of DOM nodes that should be projected through
+ *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
+ * @returns ComponentRef instance that represents a given Component.
+ *
+ * @publicApi
+ */
+function createComponent(component, options) {
+    ngDevMode && assertComponentDef(component);
+    const componentDef = getComponentDef(component);
+    const elementInjector = options.elementInjector || getNullInjector();
+    const factory = new ComponentFactory(componentDef);
+    return factory.create(elementInjector, options.projectableNodes, options.hostElement, options.environmentInjector);
+}
+/**
+ * Creates an object that allows to retrieve component metadata.
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how to use the function and how the fields
+ * of the returned object map to the component metadata.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   selector: 'foo-component',
+ *   template: `
+ *     <ng-content></ng-content>
+ *     <ng-content select="content-selector-a"></ng-content>
+ *   `,
+ * })
+ * class FooComponent {
+ *   @Input('inputName') inputPropName: string;
+ *   @Output('outputName') outputPropName = new EventEmitter<void>();
+ * }
+ *
+ * const mirror = reflectComponentType(FooComponent);
+ * expect(mirror.type).toBe(FooComponent);
+ * expect(mirror.selector).toBe('foo-component');
+ * expect(mirror.isStandalone).toBe(true);
+ * expect(mirror.inputs).toEqual([{propName: 'inputName', templateName: 'inputPropName'}]);
+ * expect(mirror.outputs).toEqual([{propName: 'outputName', templateName: 'outputPropName'}]);
+ * expect(mirror.ngContentSelectors).toEqual([
+ *   '*',                 // first `<ng-content>` in a template, the selector defaults to `*`
+ *   'content-selector-a' // second `<ng-content>` in a template
+ * ]);
+ * ```
+ *
+ * @param component Component class reference.
+ * @returns An object that allows to retrieve component metadata.
+ *
+ * @publicApi
+ */
+function reflectComponentType(component) {
+    const componentDef = getComponentDef(component);
+    if (!componentDef)
+        return null;
+    const factory = new ComponentFactory(componentDef);
+    return {
+        get selector() {
+            return factory.selector;
+        },
+        get type() {
+            return factory.componentType;
+        },
+        get inputs() {
+            return factory.inputs;
+        },
+        get outputs() {
+            return factory.outputs;
+        },
+        get ngContentSelectors() {
+            return factory.ngContentSelectors;
+        },
+        get isStandalone() {
+            return componentDef.standalone;
+        },
+    };
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     // This helper is to give a reasonable error message to people upgrading to v9 that have not yet
     // installed `@angular/localize` in their app.
@@ -29752,5 +29887,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalBootstrapApplication as ɵinternalBootstrapApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isStandalone as ɵisStandalone, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, reflectComponentType, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalBootstrapApplication as ɵinternalBootstrapApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isStandalone as ɵisStandalone, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, markDirty as ɵmarkDirty, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenRendered as ɵwhenRendered, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map
