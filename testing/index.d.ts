@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-6cdff63
+ * @license Angular v14.2.0-next.0+sha-dac77d9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -235,7 +235,7 @@ export declare type MetadataOverride<T> = {
  * @publicApi
  */
 export declare interface ModuleTeardownOptions {
-    /** Whether the test module should be destroyed after every test. */
+    /** Whether the test module should be destroyed after every test. Defaults to `true`. */
     destroyAfterEach: boolean;
     /** Whether errors during test module destruction should be re-thrown. Defaults to `true`. */
     rethrowErrors?: boolean;
