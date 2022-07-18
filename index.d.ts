@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-6fed377
+ * @license Angular v14.2.0-next.0+sha-9285c66
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10317,7 +10317,8 @@ export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDet
 export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
 
 /**
- * Internal bootstrap application API that implements the core bootstrap logic.
+ * Internal create application API that implements the core application creation logic and optional
+ * bootstrap logic.
  *
  * Platforms (such as `platform-browser`) may require different set of application and platform
  * providers for an application to function correctly. As a result, platforms may use this function
@@ -10326,8 +10327,8 @@ export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
  *
  * @returns A promise that returns an `ApplicationRef` instance once resolved.
  */
-export declare function ɵinternalBootstrapApplication(config: {
-    rootComponent: Type<unknown>;
+export declare function ɵinternalCreateApplication(config: {
+    rootComponent?: Type<unknown>;
     appProviders?: Array<Provider | ImportedNgModuleProviders>;
     platformProviders?: Provider[];
 }): Promise<ApplicationRef>;
