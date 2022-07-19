@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-1314b1c
+ * @license Angular v14.2.0-next.0+sha-186245a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -178,13 +178,11 @@ export declare function flush(maxTurns?: number): number;
 export declare function flushMicrotasks(): void;
 
 /**
- * Returns a singleton of the applicable `TestBed`.
- *
- * It will be either an instance of `TestBedViewEngine` or `TestBedRender3`.
+ * Returns a singleton of the `TestBed` class.
  *
  * @publicApi
  */
-export declare const getTestBed: () => TestBed;
+export declare function getTestBed(): TestBed;
 
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`. Note: this function
@@ -237,7 +235,7 @@ export declare type MetadataOverride<T> = {
  * @publicApi
  */
 export declare interface ModuleTeardownOptions {
-    /** Whether the test module should be destroyed after every test. */
+    /** Whether the test module should be destroyed after every test. Defaults to `true`. */
     destroyAfterEach: boolean;
     /** Whether errors during test module destruction should be re-thrown. Defaults to `true`. */
     rethrowErrors?: boolean;
@@ -255,8 +253,8 @@ export declare function resetFakeAsyncZone(): void;
  * @publicApi
  */
 export declare interface TestBed {
-    platform: PlatformRef;
-    ngModule: Type<any> | Type<any>[];
+    get platform(): PlatformRef;
+    get ngModule(): Type<any> | Type<any>[];
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -273,12 +271,12 @@ export declare interface TestBed {
      * Reset the providers for the test injector.
      */
     resetTestEnvironment(): void;
-    resetTestingModule(): void;
+    resetTestingModule(): TestBed;
     configureCompiler(config: {
         providers?: any[];
         useJit?: boolean;
     }): void;
-    configureTestingModule(moduleDef: TestModuleMetadata): void;
+    configureTestingModule(moduleDef: TestModuleMetadata): TestBed;
     compileComponents(): Promise<any>;
     inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
@@ -287,26 +285,27 @@ export declare interface TestBed {
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
-    overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
-    overrideComponent(component: Type<any>, override: MetadataOverride<Component>): void;
-    overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): void;
-    overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): void;
+    overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): TestBed;
+    overrideComponent(component: Type<any>, override: MetadataOverride<Component>): TestBed;
+    overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): TestBed;
+    overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): TestBed;
+    overrideTemplate(component: Type<any>, template: string): TestBed;
     /**
      * Overwrites all providers for the given token with the given provider definition.
      */
     overrideProvider(token: any, provider: {
         useFactory: Function;
         deps: any[];
-    }): void;
+    }): TestBed;
     overrideProvider(token: any, provider: {
         useValue: any;
-    }): void;
+    }): TestBed;
     overrideProvider(token: any, provider: {
         useFactory?: Function;
         useValue?: any;
         deps?: any[];
-    }): void;
-    overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
+    }): TestBed;
+    overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
 
@@ -317,92 +316,17 @@ export declare interface TestBed {
  *
  * `TestBed` is the primary api for writing unit tests for Angular applications and libraries.
  *
- * Note: Use `TestBed` in tests. It will be set to either `TestBedViewEngine` or `TestBedRender3`
- * according to the compiler used.
- *
  * @publicApi
  */
 export declare const TestBed: TestBedStatic;
 
 /**
- * Static methods implemented by the `TestBedViewEngine` and `TestBedRender3`
+ * Static methods implemented by the `TestBed`.
  *
  * @publicApi
  */
-export declare interface TestBedStatic {
+export declare interface TestBedStatic extends TestBed {
     new (...args: any[]): TestBed;
-    /**
-     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-     * angular module. These are common to every test in the suite.
-     *
-     * This may only be called once, to set up the common providers for the current test
-     * suite on the current platform. If you absolutely need to change the providers,
-     * first use `resetTestEnvironment`.
-     *
-     * Test modules and platforms for individual platforms are available from
-     * '@angular/<platform_name>/testing'.
-     */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, options?: TestEnvironmentOptions): TestBed;
-    /**
-     * Reset the providers for the test injector.
-     */
-    resetTestEnvironment(): void;
-    resetTestingModule(): TestBedStatic;
-    /**
-     * Allows overriding default compiler providers and settings
-     * which are defined in test_injector.js
-     */
-    configureCompiler(config: {
-        providers?: any[];
-        useJit?: boolean;
-    }): TestBedStatic;
-    /**
-     * Allows overriding default providers, directives, pipes, modules of the test injector,
-     * which are defined in test_injector.js
-     */
-    configureTestingModule(moduleDef: TestModuleMetadata): TestBedStatic;
-    /**
-     * Compile components with a `templateUrl` for the test's NgModule.
-     * It is necessary to call this function
-     * as fetching urls is asynchronous.
-     */
-    compileComponents(): Promise<any>;
-    overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): TestBedStatic;
-    overrideComponent(component: Type<any>, override: MetadataOverride<Component>): TestBedStatic;
-    overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): TestBedStatic;
-    overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): TestBedStatic;
-    overrideTemplate(component: Type<any>, template: string): TestBedStatic;
-    /**
-     * Overrides the template of the given component, compiling the template
-     * in the context of the TestingModule.
-     *
-     * Note: This works for JIT and AOTed components as well.
-     */
-    overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBedStatic;
-    /**
-     * Overwrites all providers for the given token with the given provider definition.
-     *
-     * Note: This works for JIT and AOTed components as well.
-     */
-    overrideProvider(token: any, provider: {
-        useFactory: Function;
-        deps: any[];
-    }): TestBedStatic;
-    overrideProvider(token: any, provider: {
-        useValue: any;
-    }): TestBedStatic;
-    overrideProvider(token: any, provider: {
-        useFactory?: Function;
-        useValue?: any;
-        deps?: any[];
-    }): TestBedStatic;
-    inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
-    inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
-    /** @deprecated from v9.0.0 use TestBed.inject */
-    get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
-    /** @deprecated from v9.0.0 use TestBed.inject */
-    get(token: any, notFoundValue?: any): any;
-    createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
 
 /**

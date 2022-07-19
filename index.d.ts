@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-next.0+sha-1314b1c
+ * @license Angular v14.2.0-next.0+sha-186245a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -401,7 +401,6 @@ export declare class ApplicationRef {
     private _zone;
     private _injector;
     private _exceptionHandler;
-    private _initStatus;
     private _views;
     private _runningTick;
     private _stable;
@@ -427,6 +426,10 @@ export declare class ApplicationRef {
      * @see  [Usage notes](#is-stable-examples) for examples and caveats when using this API.
      */
     readonly isStable: Observable<boolean>;
+    /**
+     * The `EnvironmentInjector` used to create this application.
+     */
+    get injector(): EnvironmentInjector;
     /**
      * Bootstrap a component onto the element identified by its selector or, optionally, to a
      * specified element.
@@ -530,7 +533,7 @@ export declare class ApplicationRef {
     private _loadComponent;
     /**
      * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
-     * will destroy the associated environnement injectors as well as all the bootstrapped components
+     * will destroy the associated environment injectors as well as all the bootstrapped components
      * with their views.
      */
     destroy(): void;
@@ -608,9 +611,11 @@ export declare interface AttributeDecorator {
 }
 
 /**
- * Provides additional options to the bootstraping process.
+ * Provides additional options to the bootstrapping process.
+ *
+ * @publicApi
  */
-declare interface BootstrapOptions {
+export declare interface BootstrapOptions {
     /**
      * Optionally specify which `NgZone` should be used.
      *
@@ -629,7 +634,7 @@ declare interface BootstrapOptions {
      *
      * When button is clicked, because of the event bubbling, both
      * event handlers will be called and 2 change detections will be
-     * triggered. We can colesce such kind of events to only trigger
+     * triggered. We can coalesce such kind of events to only trigger
      * change detection only once.
      *
      * By default, this option will be false. So the events will not be
@@ -738,7 +743,7 @@ export declare abstract class ChangeDetectorRef {
      *
      * Components are normally marked as dirty (in need of rerendering) when inputs
      * have changed or events have fired in the view. Call this method to ensure that
-     * a component is checked even if these triggers have not occured.
+     * a component is checked even if these triggers have not occurred.
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
@@ -1314,6 +1319,46 @@ declare class ComponentFactoryResolver_2 extends ComponentFactoryResolver {
 declare type ComponentInstance = {};
 
 /**
+ * An interface that describes the subset of component metadata
+ * that can be retrieved using the `reflectComponentType` function.
+ *
+ * @publicApi
+ */
+export declare interface ComponentMirror<C> {
+    /**
+     * The component's HTML selector.
+     */
+    get selector(): string;
+    /**
+     * The type of component the factory will create.
+     */
+    get type(): Type<C>;
+    /**
+     * The inputs of the component.
+     */
+    get inputs(): ReadonlyArray<{
+        readonly propName: string;
+        readonly templateName: string;
+    }>;
+    /**
+     * The outputs of the component.
+     */
+    get outputs(): ReadonlyArray<{
+        readonly propName: string;
+        readonly templateName: string;
+    }>;
+    /**
+     * Selector for all <ng-content> elements in the component.
+     */
+    get ngContentSelectors(): ReadonlyArray<string>;
+    /**
+     * Whether this component is marked as standalone.
+     * Note: an extra flag, not present in `ComponentFactory`.
+     */
+    get isStandalone(): boolean;
+}
+
+/**
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
@@ -1321,6 +1366,15 @@ declare type ComponentInstance = {};
  * @publicApi
  */
 export declare abstract class ComponentRef<C> {
+    /**
+     * Updates a specified input name to a new value. Using this method will properly mark for check
+     * component using the `OnPush` change detection strategy. It will also assure that the
+     * `OnChanges` lifecycle hook runs when a dynamically created component is change-detected.
+     *
+     * @param name The name of an input.
+     * @param value The new value of an input.
+     */
+    abstract setInput(name: string, value: unknown): void;
     /**
      * The host or anchor [element](guide/glossary#element) for this component instance.
      */
@@ -1453,6 +1507,8 @@ export declare interface ContentChildDecorator {
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
+     * * **descendants** - If `true` (default) include all descendants of the element. If `false` then
+     * only query direct children of the element.
      * * **read** - Used to read a different token from the queried element.
      * * **static** - True to resolve query results before change detection runs,
      * false to resolve after change detection. Defaults to false.
@@ -1486,10 +1542,12 @@ export declare interface ContentChildDecorator {
      * @Annotation
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
         read?: any;
         static?: boolean;
     }): any;
     new (selector: ProviderToken<unknown> | Function | string, opts?: {
+        descendants?: boolean;
         read?: any;
         static?: boolean;
     }): ContentChild;
@@ -1600,65 +1658,107 @@ declare type ContentQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U
 
 declare const CONTEXT = 8;
 
-/** Options that control how the component should be bootstrapped. */
-declare interface CreateComponentOptions {
-    /** Which renderer factory to use. */
-    rendererFactory?: RendererFactory3;
-    /** A custom sanitizer instance */
-    sanitizer?: Sanitizer;
-    /** A custom animation player handler */
-    playerHandler?: ɵPlayerHandler;
-    /**
-     * Host element on which the component will be bootstrapped. If not specified,
-     * the component definition's `tag` is used to query the existing DOM for the
-     * element to bootstrap.
-     */
-    host?: RElement | string;
-    /** Module injector for the component. If unspecified, the injector will be NULL_INJECTOR. */
-    injector?: Injector;
-    /**
-     * List of features to be applied to the created component. Features are simply
-     * functions that decorate a component with a certain behavior.
-     *
-     * Typically, the features in this list are features that cannot be added to the
-     * other features list in the component definition because they rely on other factors.
-     *
-     * Example: `LifecycleHooksFeature` is a function that adds lifecycle hook capabilities
-     * to root components in a tree-shakable way. It cannot be added to the component
-     * features list because there's no way of knowing when the component will be used as
-     * a root component.
-     */
-    hostFeatures?: HostFeature[];
-    /**
-     * A function which is used to schedule change detection work in the future.
-     *
-     * When marking components as dirty, it is necessary to schedule the work of
-     * change detection in the future. This is done to coalesce multiple
-     * {@link markDirty} calls into a single changed detection processing.
-     *
-     * The default value of the scheduler is the `requestAnimationFrame` function.
-     *
-     * It is also useful to override this function for testing purposes.
-     */
-    scheduler?: (work: () => void) => void;
-}
+/**
+ * Creates a `ComponentRef` instance based on provided component type and a set of options.
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how the `createComponent` function can be used
+ * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
+ * so that it gets included into change detection cycles.
+ *
+ * Note: the example uses standalone components, but the function can also be used for
+ * non-standalone components (declared in an NgModule) as well.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   template: `Hello {{ name }}!`
+ * })
+ * class HelloComponent {
+ *   name = 'Angular';
+ * }
+ *
+ * @Component({
+ *   standalone: true,
+ *   template: `<div id="hello-component-host"></div>`
+ * })
+ * class RootComponent {}
+ *
+ * // Bootstrap an application.
+ * const applicationRef = await bootstrapApplication(RootComponent);
+ *
+ * // Locate a DOM node that would be used as a host.
+ * const host = document.getElementById('hello-component-host');
+ *
+ * // Get an `EnvironmentInjector` instance from the `ApplicationRef`.
+ * const environmentInjector = applicationRef.injector;
+ *
+ * // We can now create a `ComponentRef` instance.
+ * const componentRef = createComponent(HelloComponent, {host, environmentInjector});
+ *
+ * // Last step is to register the newly created ref using the `ApplicationRef` instance
+ * // to include the component view into change detection cycles.
+ * applicationRef.attachView(componentRef.hostView);
+ * ```
+ *
+ * @param component Component class reference.
+ * @param options Set of options to use:
+ *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component, see
+ * additional info about it at https://angular.io/guide/standalone-components#environment-injectors.
+ *  * `hostElement` (optional): A DOM node that should act as a host node for the component. If not
+ * provided, Angular creates one based on the tag name used in the component selector (and falls
+ * back to using `div` if selector doesn't have tag name info).
+ *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it at
+ * https://angular.io/guide/hierarchical-dependency-injection#elementinjector.
+ *  * `projectableNodes` (optional): A list of DOM nodes that should be projected through
+ *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
+ * @returns ComponentRef instance that represents a given Component.
+ *
+ * @publicApi
+ */
+export declare function createComponent<C>(component: Type<C>, options: {
+    environmentInjector: EnvironmentInjector;
+    hostElement?: Element;
+    elementInjector?: Injector;
+    projectableNodes?: Node[][];
+}): ComponentRef<C>;
 
 /**
  * Create a new environment injector.
  *
+ * Learn more about environment injectors in
+ * [this guide](guide/standalone-components#environment-injectors).
+ *
+ * @param providers An array of providers.
+ * @param parent A parent environment injector.
+ * @param debugName An optional name for this injector instance, which will be used in error
+ *     messages.
+ *
  * @publicApi
  * @developerPreview
  */
-export declare function createEnvironmentInjector(providers: Array<Provider | ImportedNgModuleProviders>, parent?: EnvironmentInjector | null, debugName?: string | null): EnvironmentInjector;
+export declare function createEnvironmentInjector(providers: Array<Provider | ImportedNgModuleProviders>, parent: EnvironmentInjector, debugName?: string | null): EnvironmentInjector;
 
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
+ *
  * @param ngModule NgModule class.
  * @param parentInjector Optional injector instance to use as a parent for the module injector. If
  *     not provided, `NullInjector` will be used instead.
+ * @returns NgModuleRef that represents an NgModule instance.
+ *
  * @publicApi
  */
-export declare function createNgModuleRef<T>(ngModule: Type<T>, parentInjector?: Injector): NgModuleRef<T>;
+export declare function createNgModule<T>(ngModule: Type<T>, parentInjector?: Injector): NgModuleRef<T>;
+
+/**
+ * The `createNgModule` function alias for backwards-compatibility.
+ * Please avoid using it directly and use `createNgModule` instead.
+ *
+ * @deprecated Use `createNgModule` instead.
+ */
+export declare const createNgModuleRef: typeof createNgModule;
 
 /**
  * Creates a platform.
@@ -2632,6 +2732,17 @@ export declare abstract class EnvironmentInjector implements Injector {
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
+    /**
+     * Runs the given function in the context of this `EnvironmentInjector`.
+     *
+     * Within the function's stack frame, `inject` can be used to inject dependencies from this
+     * injector. Note that `inject` is only usable synchronously, and cannot be used in any
+     * asynchronous callbacks or after any `await` points.
+     *
+     * @param fn the closure to be run in the context of this injector
+     * @returns the return value of the function, if any
+     */
+    abstract runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     abstract destroy(): void;
 }
 
@@ -2937,6 +3048,14 @@ export declare interface GetTestability {
     findTestabilityInTree(registry: TestabilityRegistry, elem: any, findInAncestors: boolean): Testability | null;
 }
 
+/**
+ * The goal here is to make sure that the browser DOM API is the Renderer.
+ * We do this by defining a subset of DOM API to be the renderer and then
+ * use that at runtime for rendering.
+ *
+ * At runtime we can then use the DOM api directly, in server or web-worker
+ * it will be easy to implement such API.
+ */
 declare type GlobalTargetName = 'document' | 'window' | 'body';
 
 declare type GlobalTargetResolver = (element: any) => EventTarget;
@@ -3140,9 +3259,6 @@ export declare interface HostDecorator {
     (): any;
     new (): Host;
 }
-
-/** See CreateComponentOptions.hostFeatures */
-declare type HostFeature = (<T>(component: T, componentDef: ɵComponentDef<T>) => void);
 
 /**
  * Type of the HostListener metadata.
@@ -3607,8 +3723,37 @@ export declare function inject<T>(token: ProviderToken<T>): T;
  * @throws if called outside of a supported context.
  *
  * @publicApi
+ * @deprecated prefer an options object instead of `InjectFlags`
  */
 export declare function inject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
+
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param options Control how injection is executed. Options correspond to injection strategies
+ *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
+ *     `@Optional`.
+ * @returns the injected value if operation is successful.
+ * @throws if called outside of a supported context, or if the token is not found.
+ *
+ * @publicApi
+ */
+export declare function inject<T>(token: ProviderToken<T>, options: InjectOptions & {
+    optional?: false;
+}): T;
+
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param options Control how injection is executed. Options correspond to injection strategies
+ *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
+ *     `@Optional`.
+ * @returns the injected value if operation is successful,  `null` if the token is not
+ *     found and optional injection has been requested.
+ * @throws if called outside of a supported context, or if the token is not found and optional
+ *     injection was not requested.
+ *
+ * @publicApi
+ */
+export declare function inject<T>(token: ProviderToken<T>, options: InjectOptions): T | null;
 
 /**
  * Type of the Injectable metadata.
@@ -3733,6 +3878,7 @@ export declare interface InjectDecorator {
  * Injection flags for DI.
  *
  * @publicApi
+ * @deprecated use an options object for `inject` instead.
  */
 export declare enum InjectFlags {
     /** Check self and check parent injector if needed */
@@ -3805,6 +3951,32 @@ export declare class InjectionToken<T> {
         factory: () => T;
     });
     toString(): string;
+}
+
+/**
+ * Type of the options argument to `inject`.
+ *
+ * @publicApi
+ */
+export declare interface InjectOptions {
+    /**
+     * Use optional injection, and return `null` if the requested token is not found.
+     */
+    optional?: boolean;
+    /**
+     * Start injection at the parent of the current injector.
+     */
+    skipSelf?: boolean;
+    /**
+     * Only query the current injector for the token, and don't fall back to the parent injector if
+     * it's not found.
+     */
+    self?: boolean;
+    /**
+     * Stop injection at the host component's injector. Only relevant when injecting from an element
+     * injector, and a no-op for environment injectors.
+     */
+    host?: boolean;
 }
 
 /**
@@ -4566,8 +4738,8 @@ declare interface LView<T = unknown> extends Array<any> {
      * TView.cleanup saves an index to the necessary context in this array.
      *
      * After `LView` is created it is possible to attach additional instance specific functions at the
-     * end of the `lView[CLENUP]` because we know that no more `T` level cleanup functions will be
-     * addeded here.
+     * end of the `lView[CLEANUP]` because we know that no more `T` level cleanup functions will be
+     * added here.
      */
     [CLEANUP]: any[] | null;
     /**
@@ -4581,9 +4753,9 @@ declare interface LView<T = unknown> extends Array<any> {
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
     /** Factory to be used for creating Renderer. */
-    [RENDERER_FACTORY]: RendererFactory3;
+    [RENDERER_FACTORY]: RendererFactory;
     /** Renderer to be used for this view. */
-    [RENDERER]: Renderer3;
+    [RENDERER]: Renderer;
     /** An optional custom sanitizer. */
     [SANITIZER]: Sanitizer | null;
     /**
@@ -5183,7 +5355,7 @@ export declare interface NgModuleDecorator {
  * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
  * for additional context. Angular provides APIs that accept NgModule classes directly (such as
  * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModuleRef](api/core/createNgModuleRef)), consider switching to those APIs instead of
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
  * using factory-based ones.
  */
 export declare abstract class NgModuleFactory<T> {
@@ -5426,21 +5598,6 @@ declare interface NodeInjectorDebug {
      * Location of the parent `TNode`.
      */
     parentInjectorIndex: number;
-}
-
-/**
- * Object Oriented style of API needed to create elements and text nodes.
- *
- * This is the native browser API style, e.g. operations are methods on individual objects
- * like HTMLElement. With this style, no additional code is needed as a facade
- * (reducing payload size).
- * */
-declare interface ObjectOrientedRenderer3 {
-    createComment(data: string): RComment;
-    createElement(tagName: string): RElement;
-    createElementNS(namespace: string, tagName: string): RElement;
-    createTextNode(data: string): RText;
-    querySelector(selectors: string): RElement | null;
 }
 
 /**
@@ -5868,41 +6025,6 @@ declare const enum PreOrderHookFlags {
 }
 
 /**
- * Procedural style of API needed to create elements and text nodes.
- *
- * In non-native browser environments (e.g. platforms such as web-workers), this is the
- * facade that enables element manipulation. This also facilitates backwards compatibility
- * with Renderer2.
- */
-declare interface ProceduralRenderer3 {
-    destroy(): void;
-    createComment(value: string): RComment;
-    createElement(name: string, namespace?: string | null): RElement;
-    createText(value: string): RText;
-    /**
-     * This property is allowed to be null / undefined,
-     * in which case the view engine won't call it.
-     * This is used as a performance optimization for production mode.
-     */
-    destroyNode?: ((node: RNode) => void) | null;
-    appendChild(parent: RElement, newChild: RNode): void;
-    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
-    removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
-    selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
-    parentNode(node: RNode): RElement | null;
-    nextSibling(node: RNode): RNode | null;
-    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
-    removeAttribute(el: RElement, name: string, namespace?: string | null): void;
-    addClass(el: RElement, name: string): void;
-    removeClass(el: RElement, name: string): void;
-    setStyle(el: RElement, style: string, value: any, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
-    removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2 | RendererStyleFlags3): void;
-    setProperty(el: RElement, name: string, value: any): void;
-    setValue(node: RText | RComment, value: string): void;
-    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
-}
-
-/**
  * Describes a function that is used to process provider lists (such as provider
  * overrides).
  */
@@ -6300,6 +6422,7 @@ declare class R3Injector extends EnvironmentInjector {
      */
     destroy(): void;
     onDestroy(callback: () => void): void;
+    runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     toString(): string;
     private assertNotDestroyed;
@@ -6324,6 +6447,47 @@ declare interface RDomTokenList {
     add(token: string): void;
     remove(token: string): void;
 }
+
+/**
+ * Creates an object that allows to retrieve component metadata.
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how to use the function and how the fields
+ * of the returned object map to the component metadata.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   selector: 'foo-component',
+ *   template: `
+ *     <ng-content></ng-content>
+ *     <ng-content select="content-selector-a"></ng-content>
+ *   `,
+ * })
+ * class FooComponent {
+ *   @Input('inputName') inputPropName: string;
+ *   @Output('outputName') outputPropName = new EventEmitter<void>();
+ * }
+ *
+ * const mirror = reflectComponentType(FooComponent);
+ * expect(mirror.type).toBe(FooComponent);
+ * expect(mirror.selector).toBe('foo-component');
+ * expect(mirror.isStandalone).toBe(true);
+ * expect(mirror.inputs).toEqual([{propName: 'inputName', templateName: 'inputPropName'}]);
+ * expect(mirror.outputs).toEqual([{propName: 'outputName', templateName: 'outputPropName'}]);
+ * expect(mirror.ngContentSelectors).toEqual([
+ *   '*',                 // first `<ng-content>` in a template, the selector defaults to `*`
+ *   'content-selector-a' // second `<ng-content>` in a template
+ * ]);
+ * ```
+ *
+ * @param component Component class reference.
+ * @returns An object that allows to retrieve component metadata.
+ *
+ * @publicApi
+ */
+export declare function reflectComponentType<C>(component: Type<C>): ComponentMirror<C> | null;
 
 /**
  * `Dependency` is used by the framework to extend DI.
@@ -6631,6 +6795,40 @@ declare interface RElement extends RNode {
 declare const RENDERER = 11;
 
 /**
+ * Procedural style of API needed to create elements and text nodes.
+ *
+ * In non-native browser environments (e.g. platforms such as web-workers), this is the
+ * facade that enables element manipulation. In practice, this is implemented by `Renderer2`.
+ */
+declare interface Renderer {
+    destroy(): void;
+    createComment(value: string): RComment;
+    createElement(name: string, namespace?: string | null): RElement;
+    createText(value: string): RText;
+    /**
+     * This property is allowed to be null / undefined,
+     * in which case the view engine won't call it.
+     * This is used as a performance optimization for production mode.
+     */
+    destroyNode?: ((node: RNode) => void) | null;
+    appendChild(parent: RElement, newChild: RNode): void;
+    insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
+    removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
+    selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
+    parentNode(node: RNode): RElement | null;
+    nextSibling(node: RNode): RNode | null;
+    setAttribute(el: RElement, name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL, namespace?: string | null): void;
+    removeAttribute(el: RElement, name: string, namespace?: string | null): void;
+    addClass(el: RElement, name: string): void;
+    removeClass(el: RElement, name: string): void;
+    setStyle(el: RElement, style: string, value: any, flags?: RendererStyleFlags2): void;
+    removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2): void;
+    setProperty(el: RElement, name: string, value: any): void;
+    setValue(node: RText | RComment, value: string): void;
+    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
+}
+
+/**
  * Extend this base class to implement custom rendering. By default, Angular
  * renders a template into DOM. You can use custom rendering to intercept
  * rendering calls, or to render to something other than DOM.
@@ -6806,9 +7004,13 @@ export declare abstract class Renderer2 {
     abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 
-declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
-
 declare const RENDERER_FACTORY = 10;
+
+declare interface RendererFactory {
+    createRenderer(hostElement: RElement | null, rendererType: RendererType2 | null): Renderer;
+    begin?(): void;
+    end?(): void;
+}
 
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
@@ -6838,12 +7040,6 @@ export declare abstract class RendererFactory2 {
     abstract whenRenderingDone?(): Promise<any>;
 }
 
-declare interface RendererFactory3 {
-    createRenderer(hostElement: RElement | null, rendererType: RendererType2 | null): Renderer3;
-    begin?(): void;
-    end?(): void;
-}
-
 /**
  * Flags for renderer-specific style modifiers.
  * @publicApi
@@ -6856,11 +7052,6 @@ export declare enum RendererStyleFlags2 {
     /**
      * Marks a style as using dash case naming (this-is-dash-case).
      */
-    DashCase = 2
-}
-
-declare enum RendererStyleFlags3 {
-    Important = 1,
     DashCase = 2
 }
 
@@ -7038,6 +7229,8 @@ declare const enum RuntimeErrorCode {
     INVALID_INJECTION_TOKEN = 204,
     INJECTOR_ALREADY_DESTROYED = 205,
     PROVIDER_IN_WRONG_CONTEXT = 207,
+    MISSING_INJECTION_TOKEN = 208,
+    INVALID_MULTI_PROVIDER = 209,
     MULTIPLE_COMPONENTS_MATCH = -300,
     EXPORT_NOT_FOUND = -301,
     PIPE_NOT_FOUND = -302,
@@ -7052,7 +7245,9 @@ declare const enum RuntimeErrorCode {
     PLATFORM_ALREADY_DESTROYED = 404,
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
     APPLICATION_REF_ALREADY_DESTROYED = 406,
+    RENDERER_NOT_FOUND = 407,
     INVALID_I18N_STRUCTURE = 700,
+    MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
     INVALID_DIFFER_INPUT = 900,
     NO_SUPPORTING_DIFFER_FACTORY = 901,
@@ -7061,7 +7256,9 @@ declare const enum RuntimeErrorCode {
     UNSAFE_VALUE_IN_RESOURCE_URL = 904,
     UNSAFE_VALUE_IN_SCRIPT = 905,
     MISSING_GENERATED_DEF = 906,
-    TYPE_IS_NOT_STANDALONE = 907
+    TYPE_IS_NOT_STANDALONE = 907,
+    MISSING_ZONEJS = 908,
+    UNEXPECTED_ZONE_STATE = 909
 }
 
 declare const SANITIZER = 12;
@@ -8826,7 +9023,7 @@ declare const enum TViewType {
     Component = 1,
     /**
      * `TView` associated with a template. Such as `*ngIf`, `<ng-template>` etc... A `Component`
-     * can have zero or more `Embedede` `TView`s.
+     * can have zero or more `Embedded` `TView`s.
      */
     Embedded = 2
 }
@@ -10126,7 +10323,8 @@ export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDet
 export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
 
 /**
- * Internal bootstrap application API that implements the core bootstrap logic.
+ * Internal create application API that implements the core application creation logic and optional
+ * bootstrap logic.
  *
  * Platforms (such as `platform-browser`) may require different set of application and platform
  * providers for an application to function correctly. As a result, platforms may use this function
@@ -10135,8 +10333,8 @@ export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
  *
  * @returns A promise that returns an `ApplicationRef` instance once resolved.
  */
-export declare function ɵinternalBootstrapApplication(config: {
-    rootComponent: Type<unknown>;
+export declare function ɵinternalCreateApplication(config: {
+    rootComponent?: Type<unknown>;
     appProviders?: Array<Provider | ImportedNgModuleProviders>;
     platformProviders?: Provider[];
 }): Promise<ApplicationRef>;
@@ -10673,6 +10871,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
     constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
+    setInput(name: string, value: unknown): void;
     get injector(): Injector;
     destroy(): void;
     onDestroy(callback: () => void): void;
@@ -10688,24 +10887,10 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     readonly componentFactoryResolver: ComponentFactoryResolver_2;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
     get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
+    runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
-
-/**
- * Bootstraps a Component into an existing host element and returns an instance
- * of the component.
- *
- * Use this function to bootstrap a component into the DOM tree. Each invocation
- * of this function will create a separate tree of components, injectors and
- * change detection cycles and lifetimes. To dynamically insert a new component
- * into an existing tree such that it shares the same injection, change detection
- * and object lifetime, use {@link ViewContainer#createComponent}.
- *
- * @param componentType Component to bootstrap
- * @param options Optional parameters which control bootstrapping
- */
-export declare function ɵrenderComponent<T>(componentType: ɵComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
 
 /**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
@@ -12756,9 +12941,6 @@ export declare function ɵɵinvalidFactory(): never;
  * Throws an error indicating that a factory function could not be generated by the compiler for a
  * particular class.
  *
- * This instruction allows the actual error message to be optimized away when ngDevMode is turned
- * off, saving bytes of generated code while still providing a good experience in dev mode.
- *
  * The name of the class is not mentioned here, but will be in the generated factory function name
  * and thus in the stack trace.
  *
@@ -13426,7 +13608,7 @@ export declare function ɵɵpropertyInterpolate8(propName: string, prefix: strin
  * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
  *
  * @param propName The name of the property to update.
- * @param values The collection of values and the strings inbetween those values, beginning with a
+ * @param values The collection of values and the strings in between those values, beginning with a
  * string prefix and ending with a string suffix.
  * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
  * @param sanitizer An optional sanitizer function
@@ -13865,7 +14047,7 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: {
 /**
  * A feature that acts as a setup code for the {@link StandaloneService}.
  *
- * The most important responsaibility of this feature is to expose the "getStandaloneInjector"
+ * The most important responsibility of this feature is to expose the "getStandaloneInjector"
  * function (an entry points to a standalone injector creation) on a component definition object. We
  * go through the features infrastructure to make sure that the standalone injector creation logic
  * is tree-shakable and not included in applications that don't use standalone components.
