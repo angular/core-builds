@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-e736f95
+ * @license Angular v14.2.0-next.0+sha-14081dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7243,7 +7243,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-e736f95');
+const VERSION = new Version('14.2.0-next.0+sha-14081dc');
 
 /**
  * @license
@@ -21733,7 +21733,7 @@ class NgModuleRef extends NgModuleRef$1 {
         return this._r3Injector.get(token, notFoundValue, injectFlags);
     }
     runInContext(fn) {
-        return this.injector.runInContext(fn);
+        return this._r3Injector.runInContext(fn);
     }
     destroy() {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
