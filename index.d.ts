@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.0-rc.0+sha-b431b5c
+ * @license Angular v14.1.0-rc.0+sha-10d46b4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10870,17 +10870,15 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     onDestroy(callback: () => void): void;
 }
 
-export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T>, EnvironmentInjector {
+export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T> {
     _parent: Injector | null;
     _bootstrapComponents: Type<any>[];
     _r3Injector: R3Injector;
-    injector: EnvironmentInjector;
     instance: T;
     destroyCbs: (() => void)[] | null;
     readonly componentFactoryResolver: ComponentFactoryResolver_2;
     constructor(ngModuleType: Type<T>, _parent: Injector | null);
-    get(token: any, notFoundValue?: any, injectFlags?: InjectFlags): any;
-    runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
+    get injector(): EnvironmentInjector;
     destroy(): void;
     onDestroy(callback: () => void): void;
 }
