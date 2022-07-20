@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-f55224a
+ * @license Angular v14.2.0-next.0+sha-4e328c4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7258,7 +7258,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-f55224a');
+const VERSION = new Version('14.2.0-next.0+sha-4e328c4');
 
 /**
  * @license
@@ -21714,7 +21714,6 @@ class NgModuleRef extends NgModuleRef$1 {
         this._parent = _parent;
         // tslint:disable-next-line:require-internal-with-underscore
         this._bootstrapComponents = [];
-        this.injector = this;
         this.destroyCbs = [];
         // When bootstrapping a module we have a dependency graph that looks like this:
         // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
@@ -21737,16 +21736,10 @@ class NgModuleRef extends NgModuleRef$1 {
         // the module might be trying to use this ref in its constructor for DI which will cause a
         // circular error that will eventually error out, because the injector isn't created yet.
         this._r3Injector.resolveInjectorInitializers();
-        this.instance = this.get(ngModuleType);
+        this.instance = this._r3Injector.get(ngModuleType);
     }
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = InjectFlags.Default) {
-        if (token === Injector || token === NgModuleRef$1 || token === INJECTOR) {
-            return this;
-        }
-        return this._r3Injector.get(token, notFoundValue, injectFlags);
-    }
-    runInContext(fn) {
-        return this._r3Injector.runInContext(fn);
+    get injector() {
+        return this._r3Injector;
     }
     destroy() {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
