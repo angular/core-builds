@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-d583f85
+ * @license Angular v14.2.0-next.0+sha-76790a6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7649,7 +7649,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-d583f85');
+const VERSION = new Version('14.2.0-next.0+sha-76790a6');
 
 /**
  * @license
@@ -7865,9 +7865,10 @@ function handleUnknownPropertyError(propName, tagName, nodeType, lView) {
         'a part of an @NgModule where this component is declared';
     if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
         // Most likely this is a control flow directive (such as `*ngIf`) used in
-        // a template, but the `CommonModule` is not imported.
+        // a template, but the directive or the `CommonModule` is not imported.
+        const correspondingImport = KNOWN_CONTROL_FLOW_DIRECTIVES.get(propName);
         message += `\nIf the '${propName}' is an Angular control flow directive, ` +
-            `please make sure that the 'CommonModule' is ${importLocation}.`;
+            `please make sure that either the '${correspondingImport}' directive or the 'CommonModule' is ${importLocation}.`;
     }
     else {
         // May be an Angular component, which is not imported/declared?
@@ -7947,11 +7948,14 @@ function getTemplateLocationDetails(lView) {
     return componentClassName ? ` (used in the '${componentClassName}' component template)` : '';
 }
 /**
- * The set of known control flow directives.
+ * The set of known control flow directives and their corresponding imports.
  * We use this set to produce a more precises error message with a note
  * that the `CommonModule` should also be included.
  */
-const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
+const KNOWN_CONTROL_FLOW_DIRECTIVES = new Map([
+    ['ngIf', 'NgIf'], ['ngFor', 'NgForOf'], ['ngSwitchCase', 'NgSwitchCase'],
+    ['ngSwitchDefault', 'NgSwitchDefault']
+]);
 /**
  * Returns true if the tag name is allowed by specified schemas.
  * @param schemas Array of schemas
