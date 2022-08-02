@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-65fd757
+ * @license Angular v14.2.0-next.0+sha-37ce31f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7243,7 +7243,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-65fd757');
+const VERSION = new Version('14.2.0-next.0+sha-37ce31f');
 
 /**
  * @license
@@ -7459,9 +7459,10 @@ function handleUnknownPropertyError(propName, tagName, nodeType, lView) {
         'a part of an @NgModule where this component is declared';
     if (KNOWN_CONTROL_FLOW_DIRECTIVES.has(propName)) {
         // Most likely this is a control flow directive (such as `*ngIf`) used in
-        // a template, but the `CommonModule` is not imported.
+        // a template, but the directive or the `CommonModule` is not imported.
+        const correspondingImport = KNOWN_CONTROL_FLOW_DIRECTIVES.get(propName);
         message += `\nIf the '${propName}' is an Angular control flow directive, ` +
-            `please make sure that the 'CommonModule' is ${importLocation}.`;
+            `please make sure that either the '${correspondingImport}' directive or the 'CommonModule' is ${importLocation}.`;
     }
     else {
         // May be an Angular component, which is not imported/declared?
@@ -7541,11 +7542,14 @@ function getTemplateLocationDetails(lView) {
     return componentClassName ? ` (used in the '${componentClassName}' component template)` : '';
 }
 /**
- * The set of known control flow directives.
+ * The set of known control flow directives and their corresponding imports.
  * We use this set to produce a more precises error message with a note
  * that the `CommonModule` should also be included.
  */
-const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set(['ngIf', 'ngFor', 'ngSwitch', 'ngSwitchCase', 'ngSwitchDefault']);
+const KNOWN_CONTROL_FLOW_DIRECTIVES = new Map([
+    ['ngIf', 'NgIf'], ['ngFor', 'NgForOf'], ['ngSwitchCase', 'NgSwitchCase'],
+    ['ngSwitchDefault', 'NgSwitchDefault']
+]);
 /**
  * Returns true if the tag name is allowed by specified schemas.
  * @param schemas Array of schemas
@@ -21701,7 +21705,6 @@ class NgModuleRef extends NgModuleRef$1 {
         this._parent = _parent;
         // tslint:disable-next-line:require-internal-with-underscore
         this._bootstrapComponents = [];
-        this.injector = this;
         this.destroyCbs = [];
         // When bootstrapping a module we have a dependency graph that looks like this:
         // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
@@ -21724,16 +21727,10 @@ class NgModuleRef extends NgModuleRef$1 {
         // the module might be trying to use this ref in its constructor for DI which will cause a
         // circular error that will eventually error out, because the injector isn't created yet.
         this._r3Injector.resolveInjectorInitializers();
-        this.instance = this.get(ngModuleType);
+        this.instance = this._r3Injector.get(ngModuleType);
     }
-    get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = InjectFlags.Default) {
-        if (token === Injector || token === NgModuleRef$1 || token === INJECTOR) {
-            return this;
-        }
-        return this._r3Injector.get(token, notFoundValue, injectFlags);
-    }
-    runInContext(fn) {
-        return this._r3Injector.runInContext(fn);
+    get injector() {
+        return this._r3Injector;
     }
     destroy() {
         ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
