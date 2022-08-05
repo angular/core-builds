@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-0920a15
+ * @license Angular v14.2.0-next.0+sha-0abb67a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -833,6 +833,9 @@ function ɵɵdefineInjector(options) {
  */
 function getInjectableDef(type) {
     return getOwnDefinition(type, NG_PROV_DEF) || getOwnDefinition(type, NG_INJECTABLE_DEF);
+}
+function isInjectable(type) {
+    return getInjectableDef(type) !== null;
 }
 /**
  * Return definition only if it is defined directly on `type` and is not inherited from a base
@@ -2775,6 +2778,10 @@ function getDirectiveDef(type) {
 }
 function getPipeDef$1(type) {
     return type[NG_PIPE_DEF] || null;
+}
+function isStandalone(type) {
+    const def = getComponentDef$1(type) || getDirectiveDef(type) || getPipeDef$1(type);
+    return def !== null ? def.standalone : false;
 }
 function getNgModuleDef(type, throwNotFound) {
     const ngModuleDef = type[NG_MOD_DEF] || null;
@@ -7644,7 +7651,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-0920a15');
+const VERSION = new Version('14.2.0-next.0+sha-0abb67a');
 
 /**
  * @license
@@ -24566,10 +24573,6 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
         // Make the property configurable in dev mode to allow overriding in tests
         configurable: !!ngDevMode,
     });
-}
-function isStandalone(type) {
-    const def = getComponentDef$1(type) || getDirectiveDef(type) || getPipeDef$1(type);
-    return def !== null ? def.standalone : false;
 }
 function generateStandaloneInDeclarationsError(type, location) {
     const prefix = `Unexpected "${stringifyForError(type)}" found in the "declarations" array of the`;

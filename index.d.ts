@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-0920a15
+ * @license Angular v14.2.0-next.0+sha-0abb67a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10343,6 +10343,8 @@ export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
  * @see `ChangeDetectorRef`
  */
 export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
+
+export declare function ɵisInjectable(type: any): boolean;
 
 export declare function ɵisListLikeIterable(obj: any): boolean;
 
