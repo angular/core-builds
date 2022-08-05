@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-0b392af
+ * @license Angular v14.2.0-next.0+sha-c1ad37d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10478,17 +10478,6 @@ export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]
     (...args: any[]): (cls: any) => any;
 };
 
-/**
- * Marks the component as dirty (needing change detection). Marking a component dirty will
- * schedule a change detection on it at some point in the future.
- *
- * Marking an already dirty component as dirty won't do anything. Only one outstanding change
- * detection can be scheduled per component tree.
- *
- * @param component Component to mark as dirty.
- */
-export declare function ɵmarkDirty(component: {}): void;
-
 
 export declare const ɵNG_COMP_DEF: string;
 
@@ -11312,24 +11301,6 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
     detachFromAppRef(): void;
     attachToAppRef(appRef: ViewRefTracker): void;
 }
-
-/**
- * Wait on component until it is rendered.
- *
- * This function returns a `Promise` which is resolved when the component's
- * change detection is executed. This is determined by finding the scheduler
- * associated with the `component`'s render tree and waiting until the scheduler
- * flushes. If nothing is scheduled, the function returns a resolved promise.
- *
- * Example:
- * ```
- * await whenRendered(myComponent);
- * ```
- *
- * @param component Component to wait upon
- * @returns Promise which resolves when the component is rendered.
- */
-export declare function ɵwhenRendered(component: any): Promise<null>;
 
 /**
  * Advances to an element for later binding instructions.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-0b392af
+ * @license Angular v14.2.0-next.0+sha-c1ad37d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5502,11 +5502,6 @@ function setAllowDuplicateNgModuleIdsForTest(allowDuplicates) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const defaultScheduler = (() => (typeof requestAnimationFrame !== 'undefined' &&
-    requestAnimationFrame || // browser only
-    setTimeout // everything else
-)
-    .bind(_global$1))();
 /**
  *
  * @codeGenApi
@@ -7649,7 +7644,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-0b392af');
+const VERSION = new Version('14.2.0-next.0+sha-c1ad37d');
 
 /**
  * @license
@@ -12048,11 +12043,6 @@ class LContainerDebug {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * A permanent marker promise which signifies that the current CD tree is
- * clean.
- */
-const _CLEAN_PROMISE = (() => Promise.resolve(null))();
-/**
  * Invoke `HostBindingsFunction`s for view.
  *
  * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
@@ -13547,42 +13537,6 @@ function markViewDirty(lView) {
     }
     return null;
 }
-/**
- * Used to schedule change detection on the whole application.
- *
- * Unlike `tick`, `scheduleTick` coalesces multiple calls into one change detection run.
- * It is usually called indirectly by calling `markDirty` when the view needs to be
- * re-rendered.
- *
- * Typically `scheduleTick` uses `requestAnimationFrame` to coalesce multiple
- * `scheduleTick` requests. The scheduling function can be overridden in
- * `renderComponent`'s `scheduler` option.
- */
-function scheduleTick(rootContext, flags) {
-    const nothingScheduled = rootContext.flags === 0 /* RootContextFlags.Empty */;
-    if (nothingScheduled && rootContext.clean == _CLEAN_PROMISE) {
-        // https://github.com/angular/angular/issues/39296
-        // should only attach the flags when really scheduling a tick
-        rootContext.flags |= flags;
-        let res;
-        rootContext.clean = new Promise((r) => res = r);
-        rootContext.scheduler(() => {
-            if (rootContext.flags & 1 /* RootContextFlags.DetectChanges */) {
-                rootContext.flags &= ~1 /* RootContextFlags.DetectChanges */;
-                tickRootContext(rootContext);
-            }
-            if (rootContext.flags & 2 /* RootContextFlags.FlushPlayers */) {
-                rootContext.flags &= ~2 /* RootContextFlags.FlushPlayers */;
-                const playerHandler = rootContext.playerHandler;
-                if (playerHandler) {
-                    playerHandler.flushPlayers();
-                }
-            }
-            rootContext.clean = _CLEAN_PROMISE;
-            res(null);
-        });
-    }
-}
 function tickRootContext(rootContext) {
     for (let i = 0; i < rootContext.components.length; i++) {
         const rootComponent = rootContext.components[i];
@@ -13691,7 +13645,6 @@ function storePropertyBindingMetadata(tData, tNode, propertyName, bindingIndex, 
         }
     }
 }
-const CLEAN_PROMISE = _CLEAN_PROMISE;
 function getOrCreateLViewCleanup(view) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new LCleanup() : []);
@@ -14450,14 +14403,8 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
     }
     return component;
 }
-function createRootContext(scheduler, playerHandler) {
-    return {
-        components: [],
-        scheduler: scheduler || defaultScheduler,
-        clean: CLEAN_PROMISE,
-        playerHandler: playerHandler || null,
-        flags: 0 /* RootContextFlags.Empty */
-    };
+function createRootContext() {
+    return { components: [] };
 }
 /**
  * Used to enable lifecycle hooks on the root component.
@@ -14476,25 +14423,6 @@ function LifecycleHooksFeature() {
     const tNode = getCurrentTNode();
     ngDevMode && assertDefined(tNode, 'TNode is required');
     registerPostOrderHooks(getLView()[TVIEW], tNode);
-}
-/**
- * Wait on component until it is rendered.
- *
- * This function returns a `Promise` which is resolved when the component's
- * change detection is executed. This is determined by finding the scheduler
- * associated with the `component`'s render tree and waiting until the scheduler
- * flushes. If nothing is scheduled, the function returns a resolved promise.
- *
- * Example:
- * ```
- * await whenRendered(myComponent);
- * ```
- *
- * @param component Component to wait upon
- * @returns Promise which resolves when the component is rendered.
- */
-function whenRendered(component) {
-    return getRootContext(component).clean;
 }
 
 /**
@@ -15479,21 +15407,6 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
 function detectChanges(component) {
     const view = getComponentViewByInstance(component);
     detectChangesInternal(view[TVIEW], view, component);
-}
-/**
- * Marks the component as dirty (needing change detection). Marking a component dirty will
- * schedule a change detection on it at some point in the future.
- *
- * Marking an already dirty component as dirty won't do anything. Only one outstanding change
- * detection can be scheduled per component tree.
- *
- * @param component Component to mark as dirty.
- */
-function markDirty(component) {
-    ngDevMode && assertDefined(component, 'component');
-    const rootView = markViewDirty(getComponentViewByInstance(component));
-    ngDevMode && assertDefined(rootView[CONTEXT], 'rootContext should be defined');
-    scheduleTick(rootView[CONTEXT], 1 /* RootContextFlags.DetectChanges */);
 }
 
 /**
