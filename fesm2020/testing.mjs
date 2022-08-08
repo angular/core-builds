@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-4ae8b2e
+ * @license Angular v14.2.0-next.0+sha-7343ec7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2607,7 +2607,6 @@ function extractDirectiveDef(type) {
 function nonNull(value) {
     return value !== null;
 }
-const autoRegisterModuleById = {};
 /**
  * @codeGenApi
  */
@@ -2623,9 +2622,6 @@ function ɵɵdefineNgModule(def) {
             schemas: def.schemas || null,
             id: def.id || null,
         };
-        if (def.id != null) {
-            autoRegisterModuleById[def.id] = def.type;
-        }
         return res;
     });
 }
@@ -7651,7 +7647,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-4ae8b2e');
+const VERSION = new Version('14.2.0-next.0+sha-7343ec7');
 
 /**
  * @license
