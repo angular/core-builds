@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.1.1+sha-d14235c
+ * @license Angular v14.1.1+sha-874d78b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -967,7 +967,6 @@ function extractDirectiveDef(type) {
 function nonNull(value) {
     return value !== null;
 }
-const autoRegisterModuleById = {};
 /**
  * @codeGenApi
  */
@@ -983,9 +982,6 @@ function ɵɵdefineNgModule(def) {
             schemas: def.schemas || null,
             id: def.id || null,
         };
-        if (def.id != null) {
-            autoRegisterModuleById[def.id] = def.type;
-        }
         return res;
     });
 }
@@ -7258,7 +7254,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.1.1+sha-d14235c');
+const VERSION = new Version('14.1.1+sha-874d78b');
 
 /**
  * @license
@@ -13099,13 +13095,15 @@ function refreshContainsDirtyView(lView) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
-            if (embeddedLView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
-                const embeddedTView = embeddedLView[TVIEW];
-                ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
-                refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
-            }
-            else if (embeddedLView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
-                refreshContainsDirtyView(embeddedLView);
+            if (viewAttachedToChangeDetector(embeddedLView)) {
+                if (embeddedLView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
+                    const embeddedTView = embeddedLView[TVIEW];
+                    ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
+                    refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
+                }
+                else if (embeddedLView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
+                    refreshContainsDirtyView(embeddedLView);
+                }
             }
         }
     }
