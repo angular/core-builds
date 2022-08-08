@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-561cd84
+ * @license Angular v14.2.0-next.0+sha-3ef4d8a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1316,8 +1316,6 @@ declare class ComponentFactoryResolver_2 extends ComponentFactoryResolver {
     resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 
-declare type ComponentInstance = {};
-
 /**
  * An interface that describes the subset of component metadata
  * that can be retrieved using the `reflectComponentType` function.
@@ -2511,8 +2509,6 @@ declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
  * The function is necessary to be able to support forward declarations.
  */
 declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
-
-declare type DirectiveInstance = {};
 
 /**
  * @description
@@ -10652,69 +10648,6 @@ export declare interface ɵPipeDef<T> {
      */
     readonly standalone: boolean;
     onDestroy: (() => void) | null;
-}
-
-
-/**
- * A shared interface which contains an animation player
- */
-export declare interface ɵPlayer {
-    parent?: ɵPlayer | null;
-    state: ɵPlayState;
-    play(): void;
-    pause(): void;
-    finish(): void;
-    destroy(): void;
-    addEventListener(state: ɵPlayState | string, cb: (data?: any) => any): void;
-}
-
-/**
- * Used as a reference to build a player from a styling template binding
- * (`[style]` and `[class]`).
- *
- * The `fn` function will be called once any styling-related changes are
- * evaluated on an element and is expected to return a player that will
- * be then run on the element.
- *
- * `[style]`, `[style.prop]`, `[class]` and `[class.name]` template bindings
- * all accept a `PlayerFactory` as input and this player factories.
- */
-export declare interface ɵPlayerFactory {
-    '__brand__': 'Brand for PlayerFactory that nothing will match';
-}
-
-/**
- * Designed to be used as an injection service to capture all animation players.
- *
- * When present all animation players will be passed into the flush method below.
- * This feature is designed to service application-wide animation testing, live
- * debugging as well as custom animation choreographing tools.
- */
-export declare interface ɵPlayerHandler {
-    /**
-     * Designed to kick off the player at the end of change detection
-     */
-    flushPlayers(): void;
-    /**
-     * @param player The player that has been scheduled to run within the application.
-     * @param context The context as to where the player was bound to
-     */
-    queuePlayer(player: ɵPlayer, context: ComponentInstance | DirectiveInstance | HTMLElement): void;
-}
-
-/**
- * The state of a given player
- *
- * Do not change the increasing nature of the numbers since the player
- * code may compare state by checking if a number is higher or lower than
- * a certain numeric value.
- */
-export declare const enum ɵPlayState {
-    Pending = 0,
-    Running = 1,
-    Paused = 2,
-    Finished = 100,
-    Destroyed = 200
 }
 
 /**
