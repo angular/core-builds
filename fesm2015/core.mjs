@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.0-next.0+sha-951d02e
+ * @license Angular v14.2.0-next.0+sha-dbed2cf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7246,7 +7246,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.0-next.0+sha-951d02e');
+const VERSION = new Version('14.2.0-next.0+sha-dbed2cf');
 
 /**
  * @license
@@ -13079,13 +13079,15 @@ function refreshContainsDirtyView(lView) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
-            if (embeddedLView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
-                const embeddedTView = embeddedLView[TVIEW];
-                ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
-                refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
-            }
-            else if (embeddedLView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
-                refreshContainsDirtyView(embeddedLView);
+            if (viewAttachedToChangeDetector(embeddedLView)) {
+                if (embeddedLView[FLAGS] & 512 /* LViewFlags.RefreshTransplantedView */) {
+                    const embeddedTView = embeddedLView[TVIEW];
+                    ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
+                    refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
+                }
+                else if (embeddedLView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
+                    refreshContainsDirtyView(embeddedLView);
+                }
             }
         }
     }
