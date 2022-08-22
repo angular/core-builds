@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.3.0-next.0+sha-b6fbbea
+ * @license Angular v14.3.0-next.0+sha-54ceed5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3256,6 +3256,13 @@ export declare interface HostDecorator {
     new (): Host;
 }
 
+/** Values that can be used to define a host directive through the `HostDirectivesFeature`. */
+declare type HostDirectiveDefiniton = Type<unknown> | {
+    directive: Type<unknown>;
+    inputs?: string[];
+    outputs?: string[];
+};
+
 /**
  * Type of the HostListener metadata.
  *
@@ -6322,6 +6329,7 @@ declare interface R3DeclareDirectiveFacade {
     usesInheritance?: boolean;
     usesOnChanges?: boolean;
     isStandalone?: boolean;
+    hostDirectives?: R3HostDirectiveMetadataFacade[] | null;
 }
 
 declare interface R3DeclareFactoryFacade {
@@ -6387,6 +6395,12 @@ declare interface R3DeclareQueryMetadataFacade {
 declare type R3DeclareTemplateDependencyFacade = {
     kind: string;
 } & (R3DeclareDirectiveDependencyFacade | R3DeclarePipeDependencyFacade | R3DeclareNgModuleDependencyFacade);
+
+declare interface R3HostDirectiveMetadataFacade {
+    directive: Type_2;
+    inputs?: string[];
+    outputs?: string[];
+}
 
 declare class R3Injector extends EnvironmentInjector {
     readonly parent: Injector;
@@ -10156,6 +10170,11 @@ export declare interface ɵDirectiveDef<T> {
      * The features applied to this directive
      */
     readonly features: DirectiveDefFeature[] | null;
+    /**
+     * Function that will apply the host directives to the list of matches during directive matching.
+     * Patched onto the definition by the `HostDirectivesFeature`.
+     */
+    applyHostDirectives: ((tView: TView, viewData: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, matches: any[]) => void) | null;
     setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
 }
 
@@ -11898,7 +11917,7 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never> = unknown;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -12421,7 +12440,7 @@ export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportA
     [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never> = unknown;
 
 /**
  * Returns the value associated to the given token from the injectors.
@@ -12598,6 +12617,28 @@ export declare function ɵɵgetCurrentView(): OpaqueViewState;
  * @codeGenApi
  */
 export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+
+/**
+ * This feature add the host directives behavior to a directive definition by patching a
+ * function onto it. The expectation is that the runtime will invoke the function during
+ * directive matching.
+ *
+ * For example:
+ * ```ts
+ * class ComponentWithHostDirective {
+ *   static ɵcmp = defineComponent({
+ *    type: ComponentWithHostDirective,
+ *    features: [ɵɵHostDirectivesFeature([
+ *      SimpleHostDirective,
+ *      {directive: AdvancedHostDirective, inputs: ['foo: alias'], outputs: ['bar']},
+ *    ])]
+ *  });
+ * }
+ * ```
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveDefiniton[] | (() => HostDirectiveDefiniton[])): (definition: ɵDirectiveDef<unknown>) => void;
 
 /**
  * Update a property on a host element. Only applies to native node properties, not inputs.

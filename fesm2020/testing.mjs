@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.3.0-next.0+sha-b6fbbea
+ * @license Angular v14.3.0-next.0+sha-54ceed5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2568,6 +2568,7 @@ function ɵɵdefineComponent(componentDefinition) {
             setInput: null,
             schemas: componentDefinition.schemas || null,
             tView: null,
+            applyHostDirectives: null,
         };
         const dependencies = componentDefinition.dependencies;
         const feature = componentDefinition.features;
@@ -7643,7 +7644,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.3.0-next.0+sha-b6fbbea');
+const VERSION = new Version('14.3.0-next.0+sha-54ceed5');
 
 /**
  * @license
@@ -13122,6 +13123,7 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                 else {
                     matches.push(def);
                 }
+                def.applyHostDirectives?.(tView, viewData, tNode, matches);
             }
         }
     }
@@ -14659,6 +14661,54 @@ function ɵɵCopyDefinitionFeature(definition) {
             defAny[field] = superDef[field];
         }
     }
+}
+
+/**
+ * This feature add the host directives behavior to a directive definition by patching a
+ * function onto it. The expectation is that the runtime will invoke the function during
+ * directive matching.
+ *
+ * For example:
+ * ```ts
+ * class ComponentWithHostDirective {
+ *   static ɵcmp = defineComponent({
+ *    type: ComponentWithHostDirective,
+ *    features: [ɵɵHostDirectivesFeature([
+ *      SimpleHostDirective,
+ *      {directive: AdvancedHostDirective, inputs: ['foo: alias'], outputs: ['bar']},
+ *    ])]
+ *  });
+ * }
+ * ```
+ *
+ * @codeGenApi
+ */
+function ɵɵHostDirectivesFeature(rawHostDirectives) {
+    const unwrappedHostDirectives = Array.isArray(rawHostDirectives) ? rawHostDirectives : rawHostDirectives();
+    const hostDirectives = unwrappedHostDirectives.map(dir => typeof dir === 'function' ? { directive: dir, inputs: EMPTY_OBJ, outputs: EMPTY_OBJ } : {
+        directive: dir.directive,
+        inputs: bindingArrayToMap(dir.inputs),
+        outputs: bindingArrayToMap(dir.outputs)
+    });
+    return (definition) => {
+        // TODO(crisbeto): implement host directive matching logic.
+        definition.applyHostDirectives =
+            (tView, viewData, tNode, matches) => { };
+    };
+}
+/**
+ * Converts an array in the form of `['publicName', 'alias', 'otherPublicName', 'otherAlias']` into
+ * a map in the form of `{publicName: 'alias', otherPublicName: 'otherAlias'}`.
+ */
+function bindingArrayToMap(bindings) {
+    if (!bindings || bindings.length === 0) {
+        return EMPTY_OBJ;
+    }
+    const result = {};
+    for (let i = 1; i < bindings.length; i += 2) {
+        result[bindings[i - 1]] = bindings[i];
+    }
+    return result;
 }
 
 /**
@@ -24262,6 +24312,7 @@ const angularCoreEnv = (() => ({
     'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
     'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
     'ɵɵresetView': ɵɵresetView,
+    'ɵɵHostDirectivesFeature': ɵɵHostDirectivesFeature,
     'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
     'ɵɵProvidersFeature': ɵɵProvidersFeature,
     'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
