@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.1+sha-bd66f49
+ * @license Angular v15.0.0-next.1+sha-4e10a74
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3262,7 +3262,7 @@ function injectAttributeImpl(tNode, attrNameToInject) {
     return null;
 }
 function notFoundValueOrThrow(notFoundValue, token, flags) {
-    if (flags & InjectFlags.Optional) {
+    if ((flags & InjectFlags.Optional) || notFoundValue !== undefined) {
         return notFoundValue;
     }
     else {
@@ -3279,7 +3279,7 @@ function notFoundValueOrThrow(notFoundValue, token, flags) {
  * @returns the value from the injector or throws an exception
  */
 function lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue) {
-    if (flags & InjectFlags.Optional && notFoundValue === undefined) {
+    if ((flags & InjectFlags.Optional) && notFoundValue === undefined) {
         // This must be set or the NullInjector will throw for optional deps
         notFoundValue = null;
     }
@@ -7258,7 +7258,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.1+sha-bd66f49');
+const VERSION = new Version('15.0.0-next.1+sha-4e10a74');
 
 /**
  * @license
