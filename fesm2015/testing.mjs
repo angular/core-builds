@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.1+sha-4a13210
+ * @license Angular v15.0.0-next.1+sha-9e2d3ed
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6102,10 +6102,6 @@ function _sanitizeUrl(url) {
     }
     return 'unsafe:' + url;
 }
-function sanitizeSrcset(srcset) {
-    srcset = String(srcset);
-    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
-}
 
 /**
  * @license
@@ -6152,12 +6148,10 @@ const INLINE_ELEMENTS = merge(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,a
 const VALID_ELEMENTS = merge(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
 // Attributes that have href and hence need to be sanitized
 const URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
-// Attributes that have special href set hence need to be sanitized
-const SRCSET_ATTRS = tagSet('srcset');
 const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
     'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
     'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
-    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+    'scope,scrolling,shape,size,sizes,span,srclang,srcset,start,summary,tabindex,target,title,translate,type,usemap,' +
     'valign,value,vspace,width');
 // Accessibility attributes as per WAI-ARIA 1.1 (W3C Working Draft 14 December 2018)
 const ARIA_ATTRS = tagSet('aria-activedescendant,aria-atomic,aria-autocomplete,aria-busy,aria-checked,aria-colcount,aria-colindex,' +
@@ -6173,7 +6167,7 @@ const ARIA_ATTRS = tagSet('aria-activedescendant,aria-atomic,aria-autocomplete,a
 // NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
 // can be sanitized, but they increase security surface area without a legitimate use case, so they
 // are left out here.
-const VALID_ATTRS = merge(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS, ARIA_ATTRS);
+const VALID_ATTRS = merge(URI_ATTRS, HTML_ATTRS, ARIA_ATTRS);
 // Elements whose content should not be traversed/preserved, if the elements themselves are invalid.
 //
 // Typically, `<invalid>Some content</invalid>` would traverse (and in this case preserve)
@@ -6256,8 +6250,6 @@ class SanitizingHtmlSerializer {
             // TODO(martinprobst): Special case image URIs for data:image/...
             if (URI_ATTRS[lower])
                 value = _sanitizeUrl(value);
-            if (SRCSET_ATTRS[lower])
-                value = sanitizeSrcset(value);
             this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
         }
         this.buf.push('>');
@@ -7644,7 +7636,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.1+sha-4a13210');
+const VERSION = new Version('15.0.0-next.1+sha-9e2d3ed');
 
 /**
  * @license
@@ -21301,9 +21293,6 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                             if (VALID_ATTRS.hasOwnProperty(lowerAttrName)) {
                                 if (URI_ATTRS[lowerAttrName]) {
                                     generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, _sanitizeUrl);
-                                }
-                                else if (SRCSET_ATTRS[lowerAttrName]) {
-                                    generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, sanitizeSrcset);
                                 }
                                 else {
                                     generateBindingUpdateOpCodes(update, attr.value, newIndex, attr.name, 0, null);
