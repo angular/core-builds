@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.1+sha-7e0de5b
+ * @license Angular v15.0.0-next.1+sha-710d1da
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7644,7 +7644,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.1+sha-7e0de5b');
+const VERSION = new Version('15.0.0-next.1+sha-710d1da');
 
 /**
  * @license
@@ -7947,7 +7947,7 @@ function getTemplateLocationDetails(lView) {
  * that the `CommonModule` should also be included.
  */
 const KNOWN_CONTROL_FLOW_DIRECTIVES = new Map([
-    ['ngIf', 'NgIf'], ['ngFor', 'NgForOf'], ['ngSwitchCase', 'NgSwitchCase'],
+    ['ngIf', 'NgIf'], ['ngFor', 'NgFor'], ['ngSwitchCase', 'NgSwitchCase'],
     ['ngSwitchDefault', 'NgSwitchDefault']
 ]);
 /**
