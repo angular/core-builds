@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.1+sha-7ec196e
+ * @license Angular v15.0.0-next.1+sha-69ecbd5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7235,7 +7235,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.1+sha-7ec196e');
+const VERSION = new Version('15.0.0-next.1+sha-69ecbd5');
 
 /**
  * @license
@@ -8343,16 +8343,16 @@ function getRootView(componentOrLView) {
     return lView;
 }
 /**
- * Returns the `RootContext` instance that is associated with
- * the application where the target is situated. It does this by walking the parent views until it
- * gets to the root view, then getting the context off of that.
+ * Returns the context information associated with the application where the target is situated. It
+ * does this by walking the parent views until it gets to the root view, then getting the context
+ * off of that.
  *
  * @param viewOrComponent the `LView` or component to get the root context for.
  */
 function getRootContext(viewOrComponent) {
     const rootView = getRootView(viewOrComponent);
     ngDevMode &&
-        assertDefined(rootView[CONTEXT], 'RootView has no context. Perhaps it is disconnected?');
+        assertDefined(rootView[CONTEXT], 'Root view has no context. Perhaps it is disconnected?');
     return rootView[CONTEXT];
 }
 /**
@@ -12057,28 +12057,6 @@ function refreshView(tView, lView, templateFn, context) {
         leaveView();
     }
 }
-function renderComponentOrTemplate(tView, lView, templateFn, context) {
-    const rendererFactory = lView[RENDERER_FACTORY];
-    // Check no changes mode is a dev only mode used to verify that bindings have not changed
-    // since they were assigned. We do not want to invoke renderer factory functions in that mode
-    // to avoid any possible side-effects.
-    const checkNoChangesMode = !!ngDevMode && isInCheckNoChangesMode();
-    const creationModeIsActive = isCreationMode(lView);
-    try {
-        if (!checkNoChangesMode && !creationModeIsActive && rendererFactory.begin) {
-            rendererFactory.begin();
-        }
-        if (creationModeIsActive) {
-            renderView(tView, lView, context);
-        }
-        refreshView(tView, lView, templateFn, context);
-    }
-    finally {
-        if (!checkNoChangesMode && !creationModeIsActive && rendererFactory.end) {
-            rendererFactory.end();
-        }
-    }
-}
 function executeTemplate(tView, lView, templateFn, rf, context) {
     const prevSelectedIndex = getSelectedIndex();
     const isUpdatePhase = rf & 2 /* RenderFlags.Update */;
@@ -12149,7 +12127,7 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor = getNative
  * @param def ComponentDef
  * @returns TView
  */
-function getOrCreateTComponentView(def) {
+function getOrCreateComponentTView(def) {
     const tView = def.tView;
     // Create a TView if there isn't one, or recreate it if the first create pass didn't
     // complete successfully since we can't know for sure whether it's in a usable shape.
@@ -12860,7 +12838,7 @@ function configureViewWithDirective(tView, tNode, lView, directiveIndex, def) {
 }
 function addComponentLogic(lView, hostTNode, def) {
     const native = getNativeByTNode(hostTNode, lView);
-    const tView = getOrCreateTComponentView(def);
+    const tView = getOrCreateComponentTView(def);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     const rendererFactory = lView[RENDERER_FACTORY];
@@ -13187,63 +13165,32 @@ function markViewDirty(lView) {
     }
     return null;
 }
-function tickRootContext(rootContext) {
-    for (let i = 0; i < rootContext.components.length; i++) {
-        const rootComponent = rootContext.components[i];
-        const lView = readPatchedLView(rootComponent);
-        // We might not have an `LView` if the component was destroyed.
-        if (lView !== null) {
-            const tView = lView[TVIEW];
-            renderComponentOrTemplate(tView, lView, tView.template, rootComponent);
-        }
-    }
-}
-function detectChangesInternal(tView, lView, context) {
+function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
     const rendererFactory = lView[RENDERER_FACTORY];
-    if (rendererFactory.begin)
+    // Check no changes mode is a dev only mode used to verify that bindings have not changed
+    // since they were assigned. We do not want to invoke renderer factory functions in that mode
+    // to avoid any possible side-effects.
+    const checkNoChangesMode = !!ngDevMode && isInCheckNoChangesMode();
+    if (!checkNoChangesMode && rendererFactory.begin)
         rendererFactory.begin();
     try {
         refreshView(tView, lView, tView.template, context);
     }
     catch (error) {
-        handleError(lView, error);
+        if (notifyErrorHandler) {
+            handleError(lView, error);
+        }
         throw error;
     }
     finally {
-        if (rendererFactory.end)
+        if (!checkNoChangesMode && rendererFactory.end)
             rendererFactory.end();
     }
 }
-/**
- * Synchronously perform change detection on a root view and its components.
- *
- * @param lView The view which the change detection should be performed on.
- */
-function detectChangesInRootView(lView) {
-    tickRootContext(lView[CONTEXT]);
-}
-function checkNoChangesInternal(tView, view, context) {
+function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
     setIsInCheckNoChangesMode(true);
     try {
-        detectChangesInternal(tView, view, context);
-    }
-    finally {
-        setIsInCheckNoChangesMode(false);
-    }
-}
-/**
- * Checks the change detector on a root view and its components, and throws if any changes are
- * detected.
- *
- * This is used in development mode to verify that running change detection doesn't
- * introduce other changes.
- *
- * @param lView The view which the change detection should be checked on.
- */
-function checkNoChangesInRootView(lView) {
-    setIsInCheckNoChangesMode(true);
-    try {
-        detectChangesInRootView(lView);
+        detectChangesInternal(tView, lView, context, notifyErrorHandler);
     }
     finally {
         setIsInCheckNoChangesMode(false);
@@ -13736,11 +13683,17 @@ class RootViewRef extends ViewRef$1 {
         this._view = _view;
     }
     detectChanges() {
-        detectChangesInRootView(this._view);
+        const lView = this._view;
+        const tView = lView[TVIEW];
+        const context = lView[CONTEXT];
+        detectChangesInternal(tView, lView, context, false);
     }
     checkNoChanges() {
         if (ngDevMode) {
-            checkNoChangesInRootView(this._view);
+            const lView = this._view;
+            const tView = lView[TVIEW];
+            const context = lView[CONTEXT];
+            checkNoChangesInternal(tView, lView, context, false);
         }
     }
     get context() {
@@ -13807,7 +13760,7 @@ class ChainedInjector {
     }
 }
 /**
- * Render3 implementation of {@link viewEngine_ComponentFactory}.
+ * ComponentFactory interface implementation.
  */
 class ComponentFactory extends ComponentFactory$1 {
     /**
@@ -13857,10 +13810,9 @@ class ComponentFactory extends ComponentFactory$1 {
             createElementNode(rendererFactory.createRenderer(null, this.componentDef), elementName, getNamespace(elementName));
         const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
             16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
-        const rootContext = createRootContext();
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
-        const rootLView = createLView(null, rootTView, rootContext, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null);
+        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null);
         // rootView is the parent when bootstrapping
         // TODO(misko): it looks like we are entering view here but we don't really need to as
         // `renderView` does that. However as the code is written it is needed because
@@ -13904,7 +13856,8 @@ class ComponentFactory extends ComponentFactory$1 {
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-            component = createRootComponent(componentView, this.componentDef, rootLView, rootContext, [LifecycleHooksFeature]);
+            component =
+                createRootComponent(componentView, this.componentDef, rootLView, [LifecycleHooksFeature]);
             renderView(rootTView, rootLView, null);
         }
         finally {
@@ -14010,7 +13963,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
         }
     }
     const viewRenderer = rendererFactory.createRenderer(rNode, def);
-    const componentView = createLView(rootView, getOrCreateTComponentView(def), null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
+    const componentView = createLView(rootView, getOrCreateComponentTView(def), null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
     if (tView.firstCreatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
         markAsComponentHost(tView, tNode);
@@ -14024,12 +13977,13 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
  * Creates a root component and sets it up with features and host bindings.Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-function createRootComponent(componentView, componentDef, rootLView, rootContext, hostFeatures) {
+function createRootComponent(componentView, componentDef, rootLView, hostFeatures) {
     const tView = rootLView[TVIEW];
     // Create directive instance with factory() and store at next index in viewData
     const component = instantiateRootComponent(tView, rootLView, componentDef);
-    rootContext.components.push(component);
-    componentView[CONTEXT] = component;
+    // Root view only contains an instance of this component,
+    // so we use a reference to that component instance as a context.
+    componentView[CONTEXT] = rootLView[CONTEXT] = component;
     if (hostFeatures !== null) {
         for (const feature of hostFeatures) {
             feature(component, componentDef);
@@ -14052,9 +14006,6 @@ function createRootComponent(componentView, componentDef, rootLView, rootContext
         invokeHostBindingsInCreationMode(componentDef, component);
     }
     return component;
-}
-function createRootContext() {
-    return { components: [] };
 }
 /**
  * Used to enable lifecycle hooks on the root component.
@@ -21916,7 +21867,7 @@ function getOwningComponent(elementOrDir) {
  */
 function getRootComponents(elementOrDir) {
     const lView = readPatchedLView(elementOrDir);
-    return lView !== null ? [...getRootContext(lView).components] : [];
+    return lView !== null ? [getRootContext(lView)] : [];
 }
 /**
  * Retrieves an `Injector` associated with an element, component or directive instance.
