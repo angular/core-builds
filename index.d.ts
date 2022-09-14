@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.1+sha-bb06432
+ * @license Angular v14.2.1+sha-a0cb501
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4741,8 +4741,8 @@ declare interface LView<T = unknown> extends Array<any> {
     /**
      * - For dynamic views, this is the context with which to render the template (e.g.
      *   `NgForContext`), or `{}` if not defined explicitly.
-     * - For root view of the root component the context contains change detection data.
-     * - For non-root components, the context is the component instance,
+     * - For root view of the root component it's a reference to the component instance itself.
+     * - For components, the context is a reference to the component instance itself.
      * - For inline views, the context is null.
      */
     [CONTEXT]: T;
@@ -10752,7 +10752,7 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
 export declare function ɵregisterLocaleData(data: any, localeId?: string | any, extraData?: any): void;
 
 /**
- * Render3 implementation of {@link viewEngine_ComponentFactory}.
+ * ComponentFactory interface implementation.
  */
 export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
     private componentDef;
