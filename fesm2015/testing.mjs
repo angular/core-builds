@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.2+sha-8deedc5
+ * @license Angular v15.0.0-next.2+sha-deaa05a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7636,7 +7636,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.2+sha-8deedc5');
+const VERSION = new Version('15.0.0-next.2+sha-deaa05a');
 
 /**
  * @license
@@ -12743,17 +12743,16 @@ function initializeInputAndOutputAliases(tView, tNode) {
     let outputsStore = null;
     for (let i = start; i < end; i++) {
         const directiveDef = tViewData[i];
-        const directiveInputs = directiveDef.inputs;
+        inputsStore = generatePropertyAliases(directiveDef.inputs, i, inputsStore);
+        outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
         // Do not use unbound attributes as inputs to structural directives, since structural
         // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
         // TODO(FW-1930): microsyntax expressions may also contain unbound/static attributes, which
         // should be set for inline templates.
-        const initialInputs = (tNodeAttrs !== null && !isInlineTemplate(tNode)) ?
-            generateInitialInputs(directiveInputs, tNodeAttrs) :
+        const initialInputs = (inputsStore !== null && tNodeAttrs !== null && !isInlineTemplate(tNode)) ?
+            generateInitialInputs(inputsStore, i, tNodeAttrs) :
             null;
         inputsFromAttrs.push(initialInputs);
-        inputsStore = generatePropertyAliases(directiveInputs, i, inputsStore);
-        outputsStore = generatePropertyAliases(directiveDef.outputs, i, outputsStore);
     }
     if (inputsStore !== null) {
         if (inputsStore.hasOwnProperty('class')) {
@@ -13255,10 +13254,11 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initial
  *
  * <my-component name="Bess"></my-component>
  *
- * @param inputs The list of inputs from the directive def
- * @param attrs The static attrs on this node
+ * @param inputs Input alias map that was generated from the directive def inputs.
+ * @param directiveIndex Index of the directive that is currently being processed.
+ * @param attrs Static attrs on this node.
  */
-function generateInitialInputs(inputs, attrs) {
+function generateInitialInputs(inputs, directiveIndex, attrs) {
     let inputsToStore = null;
     let i = 0;
     while (i < attrs.length) {
@@ -13279,7 +13279,17 @@ function generateInitialInputs(inputs, attrs) {
         if (inputs.hasOwnProperty(attrName)) {
             if (inputsToStore === null)
                 inputsToStore = [];
-            inputsToStore.push(attrName, inputs[attrName], attrs[i + 1]);
+            // Find the input's public name from the input store. Note that we can be found easier
+            // through the directive def, but we want to do it using the inputs store so that it can
+            // account for host directive aliases.
+            const inputConfig = inputs[attrName];
+            for (let j = 0; j < inputConfig.length; j += 2) {
+                if (inputConfig[j] === directiveIndex) {
+                    inputsToStore.push(attrName, inputConfig[j + 1], attrs[i + 1]);
+                    // A directive can't have multiple inputs with the same name so we can break here.
+                    break;
+                }
+            }
         }
         i += 2;
     }
