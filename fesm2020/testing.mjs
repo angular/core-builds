@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.2+sha-8654e5c
+ * @license Angular v15.0.0-next.2+sha-14cb9fb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2568,7 +2568,8 @@ function ɵɵdefineComponent(componentDefinition) {
             setInput: null,
             schemas: componentDefinition.schemas || null,
             tView: null,
-            applyHostDirectives: null,
+            findHostDirectiveDefs: null,
+            hostDirectives: null,
         };
         const dependencies = componentDefinition.dependencies;
         const feature = componentDefinition.features;
@@ -7636,7 +7637,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.2+sha-8654e5c');
+const VERSION = new Version('15.0.0-next.2+sha-14cb9fb');
 
 /**
  * @license
@@ -12895,7 +12896,10 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     ngDevMode && assertFirstCreatePass(tView);
     let hasDirectives = false;
     if (getBindingsEnabled()) {
-        const directiveDefs = findDirectiveDefMatches(tView, lView, tNode);
+        const directiveDefsMatchedBySelectors = findDirectiveDefMatches(tView, lView, tNode);
+        const directiveDefs = directiveDefsMatchedBySelectors ?
+            findHostDirectiveDefs$1(directiveDefsMatchedBySelectors, tView, lView, tNode) :
+            null;
         const exportsMap = localRefs === null ? null : { '': -1 };
         if (directiveDefs !== null) {
             hasDirectives = true;
@@ -13092,7 +13096,6 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                 else {
                     matches.push(def);
                 }
-                def.applyHostDirectives?.(tView, viewData, tNode, matches);
             }
         }
     }
@@ -13108,6 +13111,26 @@ function markAsComponentHost(tView, hostTNode) {
     hostTNode.flags |= 2 /* TNodeFlags.isComponentHost */;
     (tView.components || (tView.components = ngDevMode ? new TViewComponents() : []))
         .push(hostTNode.index);
+}
+/**
+ * Given an array of directives that were matched by their selectors, this function
+ * produces a new array that also includes any host directives that have to be applied.
+ * @param selectorMatches Directives matched in a template based on their selectors.
+ * @param tView Current TView.
+ * @param lView Current LView.
+ * @param tNode Current TNode that is being matched.
+ */
+function findHostDirectiveDefs$1(selectorMatches, tView, lView, tNode) {
+    const matches = [];
+    for (const def of selectorMatches) {
+        if (def.findHostDirectiveDefs === null) {
+            matches.push(def);
+        }
+        else {
+            def.findHostDirectiveDefs(matches, def, tView, lView, tNode);
+        }
+    }
+    return matches;
 }
 /** Caches local names and their matching directive indices for query and template lookups. */
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
@@ -14617,6 +14640,13 @@ function ɵɵCopyDefinitionFeature(definition) {
 }
 
 /**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * This feature add the host directives behavior to a directive definition by patching a
  * function onto it. The expectation is that the runtime will invoke the function during
  * directive matching.
@@ -14637,29 +14667,43 @@ function ɵɵCopyDefinitionFeature(definition) {
  * @codeGenApi
  */
 function ɵɵHostDirectivesFeature(rawHostDirectives) {
-    const unwrappedHostDirectives = Array.isArray(rawHostDirectives) ? rawHostDirectives : rawHostDirectives();
-    const hostDirectives = unwrappedHostDirectives.map(dir => typeof dir === 'function' ? { directive: dir, inputs: EMPTY_OBJ, outputs: EMPTY_OBJ } : {
-        directive: dir.directive,
-        inputs: bindingArrayToMap(dir.inputs),
-        outputs: bindingArrayToMap(dir.outputs)
-    });
     return (definition) => {
-        // TODO(crisbeto): implement host directive matching logic.
-        definition.applyHostDirectives =
-            (tView, viewData, tNode, matches) => { };
+        definition.findHostDirectiveDefs = findHostDirectiveDefs;
+        definition.hostDirectives =
+            (Array.isArray(rawHostDirectives) ? rawHostDirectives : rawHostDirectives()).map(dir => {
+                return typeof dir === 'function' ?
+                    { directive: resolveForwardRef(dir), inputs: EMPTY_OBJ, outputs: EMPTY_OBJ } :
+                    {
+                        directive: resolveForwardRef(dir.directive),
+                        inputs: bindingArrayToMap(dir.inputs),
+                        outputs: bindingArrayToMap(dir.outputs)
+                    };
+            });
     };
+}
+function findHostDirectiveDefs(matches, def, tView, lView, tNode) {
+    if (def.hostDirectives !== null) {
+        for (const hostDirectiveConfig of def.hostDirectives) {
+            const hostDirectiveDef = getDirectiveDef(hostDirectiveConfig.directive);
+            // TODO(crisbeto): assert that the def exists.
+            // Host directives execute before the host so that its host bindings can be overwritten.
+            findHostDirectiveDefs(matches, hostDirectiveDef, tView, lView, tNode);
+        }
+    }
+    // Push the def itself at the end since it needs to execute after the host directives.
+    matches.push(def);
 }
 /**
  * Converts an array in the form of `['publicName', 'alias', 'otherPublicName', 'otherAlias']` into
  * a map in the form of `{publicName: 'alias', otherPublicName: 'otherAlias'}`.
  */
 function bindingArrayToMap(bindings) {
-    if (!bindings || bindings.length === 0) {
+    if (bindings === undefined || bindings.length === 0) {
         return EMPTY_OBJ;
     }
     const result = {};
-    for (let i = 1; i < bindings.length; i += 2) {
-        result[bindings[i - 1]] = bindings[i];
+    for (let i = 0; i < bindings.length; i += 2) {
+        result[bindings[i]] = bindings[i + 1];
     }
     return result;
 }
