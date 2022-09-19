@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.2+sha-adb1a61
+ * @license Angular v15.0.0-next.2+sha-8654e5c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3257,25 +3257,11 @@ export declare interface HostDecorator {
 }
 
 /** Values that can be used to define a host directive through the `HostDirectivesFeature`. */
-declare type HostDirectiveConfig = Type<unknown> | {
+declare type HostDirectiveDefiniton = Type<unknown> | {
     directive: Type<unknown>;
     inputs?: string[];
     outputs?: string[];
 };
-
-/** Runtime information used to configure a host directive. */
-declare interface HostDirectiveDef<T = unknown> {
-    /** Class representing the host directive. */
-    directive: Type<T>;
-    /** Directive inputs that have been exposed. */
-    inputs: {
-        [publicName: string]: string;
-    };
-    /** Directive outputs that have been exposed. */
-    outputs: {
-        [publicName: string]: string;
-    };
-}
 
 /**
  * Type of the HostListener metadata.
@@ -10185,12 +10171,10 @@ export declare interface ɵDirectiveDef<T> {
      */
     readonly features: DirectiveDefFeature[] | null;
     /**
-     * Function that will add the host directives to the list of matches during directive matching.
+     * Function that will apply the host directives to the list of matches during directive matching.
      * Patched onto the definition by the `HostDirectivesFeature`.
      */
-    findHostDirectiveDefs: ((matches: ɵDirectiveDef<unknown>[], def: ɵDirectiveDef<unknown>, tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode) => void) | null;
-    /** Additional directives to be applied whenever the directive has been matched. */
-    hostDirectives: HostDirectiveDef[] | null;
+    applyHostDirectives: ((tView: TView, viewData: LView, tNode: TElementNode | TContainerNode | TElementContainerNode, matches: any[]) => void) | null;
     setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
 }
 
@@ -12654,7 +12638,7 @@ export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type
  *
  * @codeGenApi
  */
-export declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveConfig[] | (() => HostDirectiveConfig[])): (definition: ɵDirectiveDef<unknown>) => void;
+export declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveDefiniton[] | (() => HostDirectiveDefiniton[])): (definition: ɵDirectiveDef<unknown>) => void;
 
 /**
  * Update a property on a host element. Only applies to native node properties, not inputs.
