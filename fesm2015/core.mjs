@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.2+sha-59aa2c0
+ * @license Angular v15.0.0-next.2+sha-06ca0dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1266,10 +1266,10 @@ function isLContainer(value) {
     return Array.isArray(value) && value[TYPE] === true;
 }
 function isContentQueryHost(tNode) {
-    return (tNode.flags & 8 /* TNodeFlags.hasContentQuery */) !== 0;
+    return (tNode.flags & 4 /* TNodeFlags.hasContentQuery */) !== 0;
 }
 function isComponentHost(tNode) {
-    return (tNode.flags & 2 /* TNodeFlags.isComponentHost */) === 2 /* TNodeFlags.isComponentHost */;
+    return tNode.componentOffset > -1;
 }
 function isDirectiveHost(tNode) {
     return (tNode.flags & 1 /* TNodeFlags.isDirectiveHost */) === 1 /* TNodeFlags.isDirectiveHost */;
@@ -2679,7 +2679,7 @@ const unusedValueExportToPlacateAjd$5 = 1;
  * @param tNode
  */
 function hasClassInput(tNode) {
-    return (tNode.flags & 16 /* TNodeFlags.hasClassInput */) !== 0;
+    return (tNode.flags & 8 /* TNodeFlags.hasClassInput */) !== 0;
 }
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `style` binding.
@@ -2703,7 +2703,7 @@ function hasClassInput(tNode) {
  * @param tNode
  */
 function hasStyleInput(tNode) {
-    return (tNode.flags & 32 /* TNodeFlags.hasStyleInput */) !== 0;
+    return (tNode.flags & 16 /* TNodeFlags.hasStyleInput */) !== 0;
 }
 
 /**
@@ -7236,7 +7236,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.2+sha-59aa2c0');
+const VERSION = new Version('15.0.0-next.2+sha-06ca0dc');
 
 /**
  * @license
@@ -8056,18 +8056,21 @@ function findViaDirective(lView, directiveInstance) {
  */
 function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
     const tNode = lView[TVIEW].data[nodeIndex];
-    let directiveStartIndex = tNode.directiveStart;
-    if (directiveStartIndex == 0)
+    if (tNode.directiveStart === 0)
         return EMPTY_ARRAY;
-    const directiveEndIndex = tNode.directiveEnd;
-    if (!includeComponents && tNode.flags & 2 /* TNodeFlags.isComponentHost */)
-        directiveStartIndex++;
-    return lView.slice(directiveStartIndex, directiveEndIndex);
+    const results = [];
+    for (let i = tNode.directiveStart; i < tNode.directiveEnd; i++) {
+        const directiveInstance = lView[i];
+        if (!isComponentInstance(directiveInstance) || includeComponents) {
+            results.push(directiveInstance);
+        }
+    }
+    return results;
 }
 function getComponentAtNodeIndex(nodeIndex, lView) {
     const tNode = lView[TVIEW].data[nodeIndex];
-    let directiveStartIndex = tNode.directiveStart;
-    return tNode.flags & 2 /* TNodeFlags.isComponentHost */ ? lView[directiveStartIndex] : null;
+    const { directiveStart, componentOffset } = tNode;
+    return componentOffset > -1 ? lView[directiveStart + componentOffset] : null;
 }
 /**
  * Returns a map of local references (local reference name => element or directive instance) that
@@ -8870,9 +8873,10 @@ function getClosestRElement(tView, tNode, lView) {
     }
     else {
         ngDevMode && assertTNodeType(parentTNode, 3 /* TNodeType.AnyRNode */ | 4 /* TNodeType.Container */);
-        if (parentTNode.flags & 2 /* TNodeFlags.isComponentHost */) {
+        const { componentOffset } = parentTNode;
+        if (componentOffset > -1) {
             ngDevMode && assertTNodeForLView(parentTNode, lView);
-            const encapsulation = tView.data[parentTNode.directiveStart].encapsulation;
+            const { encapsulation } = tView.data[parentTNode.directiveStart + componentOffset];
             // We've got a parent which is an element in the current view. We just need to verify if the
             // parent element is not a component. Component's content nodes are not inserted immediately
             // because they will be projected, and so doing insert at this point would be wasteful.
@@ -9105,10 +9109,10 @@ function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, 
         if (isProjection) {
             if (action === 0 /* WalkTNodeTreeAction.Create */) {
                 rawSlotValue && attachPatchData(unwrapRNode(rawSlotValue), lView);
-                tNode.flags |= 4 /* TNodeFlags.isProjected */;
+                tNode.flags |= 2 /* TNodeFlags.isProjected */;
             }
         }
-        if ((tNode.flags & 64 /* TNodeFlags.isDetached */) !== 64 /* TNodeFlags.isDetached */) {
+        if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
             if (tNodeType & 8 /* TNodeType.ElementContainer */) {
                 applyNodes(renderer, action, tNode.child, lView, parentRElement, beforeNode, false);
                 applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
@@ -11163,6 +11167,7 @@ class TNode {
     index, //
     insertBeforeIndex, //
     injectorIndex, //
+    componentOffset, //
     directiveStart, //
     directiveEnd, //
     directiveStylingLast, //
@@ -11195,6 +11200,7 @@ class TNode {
         this.index = index;
         this.insertBeforeIndex = insertBeforeIndex;
         this.injectorIndex = injectorIndex;
+        this.componentOffset = componentOffset;
         this.directiveStart = directiveStart;
         this.directiveEnd = directiveEnd;
         this.directiveStylingLast = directiveStylingLast;
@@ -11272,21 +11278,19 @@ class TNode {
     }
     get flags_() {
         const flags = [];
-        if (this.flags & 16 /* TNodeFlags.hasClassInput */)
+        if (this.flags & 8 /* TNodeFlags.hasClassInput */)
             flags.push('TNodeFlags.hasClassInput');
-        if (this.flags & 8 /* TNodeFlags.hasContentQuery */)
+        if (this.flags & 4 /* TNodeFlags.hasContentQuery */)
             flags.push('TNodeFlags.hasContentQuery');
-        if (this.flags & 32 /* TNodeFlags.hasStyleInput */)
+        if (this.flags & 16 /* TNodeFlags.hasStyleInput */)
             flags.push('TNodeFlags.hasStyleInput');
-        if (this.flags & 128 /* TNodeFlags.hasHostBindings */)
+        if (this.flags & 64 /* TNodeFlags.hasHostBindings */)
             flags.push('TNodeFlags.hasHostBindings');
-        if (this.flags & 2 /* TNodeFlags.isComponentHost */)
-            flags.push('TNodeFlags.isComponentHost');
         if (this.flags & 1 /* TNodeFlags.isDirectiveHost */)
             flags.push('TNodeFlags.isDirectiveHost');
-        if (this.flags & 64 /* TNodeFlags.isDetached */)
+        if (this.flags & 32 /* TNodeFlags.isDetached */)
             flags.push('TNodeFlags.isDetached');
-        if (this.flags & 4 /* TNodeFlags.isProjected */)
+        if (this.flags & 2 /* TNodeFlags.isProjected */)
             flags.push('TNodeFlags.isProjected');
         return flags.join('|');
     }
@@ -11796,7 +11800,7 @@ function getOrCreateTNode(tView, index, type, name, attrs) {
             // See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
             // If the `TNode` was not pre-declared than it means it was not mentioned which means it was
             // removed, so we mark it as detached.
-            tNode.flags |= 64 /* TNodeFlags.isDetached */;
+            tNode.flags |= 32 /* TNodeFlags.isDetached */;
         }
     }
     else if (tNode.type & 64 /* TNodeType.Placeholder */) {
@@ -12100,7 +12104,7 @@ function createDirectivesInstances(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
     instantiateAllDirectives(tView, lView, tNode, getNativeByTNode(tNode, lView));
-    if ((tNode.flags & 128 /* TNodeFlags.hasHostBindings */) === 128 /* TNodeFlags.hasHostBindings */) {
+    if ((tNode.flags & 64 /* TNodeFlags.hasHostBindings */) === 64 /* TNodeFlags.hasHostBindings */) {
         invokeDirectivesHostBindings(tView, lView, tNode);
     }
 }
@@ -12300,6 +12304,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         index, // index: number
         null, // insertBeforeIndex: null|-1|number|number[]
         injectorIndex, // injectorIndex: number
+        -1, // componentOffset: number
         -1, // directiveStart: number
         -1, // directiveEnd: number
         -1, // directiveStylingLast: number
@@ -12335,6 +12340,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
             directiveStart: -1,
             directiveEnd: -1,
             directiveStylingLast: -1,
+            componentOffset: -1,
             propertyBindings: null,
             flags: 0,
             providerIndexes: 0,
@@ -12411,10 +12417,10 @@ function initializeInputAndOutputAliases(tView, tNode) {
     }
     if (inputsStore !== null) {
         if (inputsStore.hasOwnProperty('class')) {
-            tNode.flags |= 16 /* TNodeFlags.hasClassInput */;
+            tNode.flags |= 8 /* TNodeFlags.hasClassInput */;
         }
         if (inputsStore.hasOwnProperty('style')) {
-            tNode.flags |= 32 /* TNodeFlags.hasStyleInput */;
+            tNode.flags |= 16 /* TNodeFlags.hasStyleInput */;
         }
     }
     tNode.initialInputs = inputsFromAttrs;
@@ -12535,7 +12541,7 @@ function instantiateRootComponent(tView, lView, def) {
         configureViewWithDirective(tView, rootTNode, lView, directiveIndex, def);
         initializeInputAndOutputAliases(tView, rootTNode);
     }
-    const directive = getNodeInjectable(lView, tView, rootTNode.directiveStart, rootTNode);
+    const directive = getNodeInjectable(lView, tView, rootTNode.directiveStart + rootTNode.componentOffset, rootTNode);
     attachPatchData(directive, lView);
     const native = getNativeByTNode(rootTNode, lView);
     if (native) {
@@ -12584,9 +12590,9 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
                 configureViewWithDirective(tView, tNode, lView, directiveIdx, def);
                 saveNameToExportMap(directiveIdx, def, exportsMap);
                 if (def.contentQueries !== null)
-                    tNode.flags |= 8 /* TNodeFlags.hasContentQuery */;
+                    tNode.flags |= 4 /* TNodeFlags.hasContentQuery */;
                 if (def.hostBindings !== null || def.hostAttrs !== null || def.hostVars !== 0)
-                    tNode.flags |= 128 /* TNodeFlags.hasHostBindings */;
+                    tNode.flags |= 64 /* TNodeFlags.hasHostBindings */;
                 const lifeCycleHooks = def.type.prototype;
                 // Only push a node index into the preOrderHooks array if this is the first
                 // pre-order hook found on this node.
@@ -12739,13 +12745,13 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
                     if (ngDevMode) {
                         assertTNodeType(tNode, 2 /* TNodeType.Element */, `"${tNode.value}" tags cannot be used as component hosts. ` +
                             `Please use a different tag to activate the ${stringify(def.type)} component.`);
-                        if (tNode.flags & 2 /* TNodeFlags.isComponentHost */) {
+                        if (isComponentHost(tNode)) {
                             // If another component has been matched previously, it's the first element in the
                             // `matches` array, see how we store components/directives in `matches` below.
                             throwMultipleComponentError(tNode, matches[0].type, def.type);
                         }
                     }
-                    markAsComponentHost(tView, tNode);
+                    markAsComponentHost(tView, tNode, 0);
                     // The component is always stored first with directives after.
                     matches.unshift(def);
                 }
@@ -12759,12 +12765,13 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
 }
 /**
  * Marks a given TNode as a component's host. This consists of:
- * - setting appropriate TNode flags;
+ * - setting the component offset on the TNode.
  * - storing index of component's host element so it will be queued for view refresh during CD.
  */
-function markAsComponentHost(tView, hostTNode) {
+function markAsComponentHost(tView, hostTNode, componentOffset) {
     ngDevMode && assertFirstCreatePass(tView);
-    hostTNode.flags |= 2 /* TNodeFlags.isComponentHost */;
+    ngDevMode && assertGreaterThan(componentOffset, -1, 'componentOffset must be great than -1');
+    hostTNode.componentOffset = componentOffset;
     (tView.components || (tView.components = ngDevMode ? new TViewComponents() : []))
         .push(hostTNode.index);
 }
@@ -13998,7 +14005,7 @@ function createRootComponentView(rNode, def, rootView, rendererFactory, hostRend
     const componentView = createLView(rootView, getOrCreateComponentTView(def), null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
     if (tView.firstCreatePass) {
         diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, def.type);
-        markAsComponentHost(tView, tNode);
+        markAsComponentHost(tView, tNode, 0);
         initTNodeFlags(tNode, rootView.length, 1);
     }
     addToViewTree(rootView, componentView);
@@ -15318,7 +15325,7 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     if (styles !== null) {
         writeDirectStyle(renderer, native, styles);
     }
-    if ((tNode.flags & 64 /* TNodeFlags.isDetached */) !== 64 /* TNodeFlags.isDetached */) {
+    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
         // In the i18n case, the translation may have removed this element, so only add it if it is not
         // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
         appendChild(tView, lView, native, tNode);
@@ -15756,9 +15763,7 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
         }
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
-        const startView = tNode.flags & 2 /* TNodeFlags.isComponentHost */ ?
-            getComponentLViewByIndex(tNode.index, lView) :
-            lView;
+        const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
         markViewDirty(startView);
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
@@ -15915,7 +15920,7 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
         tProjectionNode.projection = selectorIndex;
     // `<ng-content>` has no content
     setCurrentTNodeAsNotParent();
-    if ((tProjectionNode.flags & 64 /* TNodeFlags.isDetached */) !== 64 /* TNodeFlags.isDetached */) {
+    if ((tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(tView, lView, tProjectionNode);
     }
@@ -17829,7 +17834,7 @@ function normalizeSuffix(value, suffix) {
  * @param isClassBased `true` if `class` (`false` if `style`)
  */
 function hasStylingInputShadow(tNode, isClassBased) {
-    return (tNode.flags & (isClassBased ? 16 /* TNodeFlags.hasClassInput */ : 32 /* TNodeFlags.hasStyleInput */)) !== 0;
+    return (tNode.flags & (isClassBased ? 8 /* TNodeFlags.hasClassInput */ : 16 /* TNodeFlags.hasStyleInput */)) !== 0;
 }
 
 /**
@@ -19521,7 +19526,7 @@ function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parent
             anchorRNode = i18nParent;
             i18nParent = parentRElement;
         }
-        if (i18nParent !== null && (childTNode.flags & 2 /* TNodeFlags.isComponentHost */) === 0) {
+        if (i18nParent !== null && childTNode.componentOffset === -1) {
             for (let i = 1; i < tNodeInsertBeforeIndex.length; i++) {
                 // No need to `unwrapRNode` because all of the indexes point to i18n text nodes.
                 // see `assertDomNode` below.
@@ -28284,7 +28289,7 @@ function _queryNodeChildren(tNode, lView, predicate, matches, elementsOnly, root
     if (rootNativeNode !== nativeNode) {
         // To determine the next node to be processed, we need to use the next or the projectionNext
         // link, depending on whether the current node has been projected.
-        const nextTNode = (tNode.flags & 4 /* TNodeFlags.isProjected */) ? tNode.projectionNext : tNode.next;
+        const nextTNode = (tNode.flags & 2 /* TNodeFlags.isProjected */) ? tNode.projectionNext : tNode.next;
         if (nextTNode) {
             _queryNodeChildren(nextTNode, lView, predicate, matches, elementsOnly, rootNativeNode);
         }

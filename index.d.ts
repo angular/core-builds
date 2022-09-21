@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.2+sha-59aa2c0
+ * @license Angular v15.0.0-next.2+sha-06ca0dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7965,11 +7965,7 @@ declare interface TNode {
      * injector.
      */
     injectorIndex: number;
-    /**
-     * Stores starting index of the directives.
-     *
-     * NOTE: The first directive is always component (if present).
-     */
+    /** Stores starting index of the directives. */
     directiveStart: number;
     /**
      * Stores final exclusive index of the directives.
@@ -7979,6 +7975,12 @@ declare interface TNode {
      * `LFrame.bindingRootIndex` before `HostBindingFunction` is executed.
      */
     directiveEnd: number;
+    /**
+     * Offset from the `directiveStart` at which the component (one at most) of the node is stored.
+     * Set to -1 if no components have been applied to the node. Component index can be found using
+     * `directiveStart + componentOffset`.
+     */
+    componentOffset: number;
     /**
      * Stores the last directive which had a styling instruction.
      *
@@ -8291,29 +8293,23 @@ declare interface TNode {
 declare const enum TNodeFlags {
     /** Bit #1 - This bit is set if the node is a host for any directive (including a component) */
     isDirectiveHost = 1,
+    /** Bit #2 - This bit is set if the node has been projected */
+    isProjected = 2,
+    /** Bit #3 - This bit is set if any directive on this node has content queries */
+    hasContentQuery = 4,
+    /** Bit #4 - This bit is set if the node has any "class" inputs */
+    hasClassInput = 8,
+    /** Bit #5 - This bit is set if the node has any "style" inputs */
+    hasStyleInput = 16,
+    /** Bit #6 This bit is set if the node has been detached by i18n */
+    isDetached = 32,
     /**
-     * Bit #2 - This bit is set if the node is a host for a component.
-     *
-     * Setting this bit implies that the `isDirectiveHost` bit is set as well.
-     * */
-    isComponentHost = 2,
-    /** Bit #3 - This bit is set if the node has been projected */
-    isProjected = 4,
-    /** Bit #4 - This bit is set if any directive on this node has content queries */
-    hasContentQuery = 8,
-    /** Bit #5 - This bit is set if the node has any "class" inputs */
-    hasClassInput = 16,
-    /** Bit #6 - This bit is set if the node has any "style" inputs */
-    hasStyleInput = 32,
-    /** Bit #7 This bit is set if the node has been detached by i18n */
-    isDetached = 64,
-    /**
-     * Bit #8 - This bit is set if the node has directives with host bindings.
+     * Bit #7 - This bit is set if the node has directives with host bindings.
      *
      * This flags allows us to guard host-binding logic and invoke it only on nodes
      * that actually have directives with host bindings.
      */
-    hasHostBindings = 128
+    hasHostBindings = 64
 }
 
 /**

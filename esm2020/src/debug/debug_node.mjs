@@ -450,7 +450,7 @@ function _queryNodeChildren(tNode, lView, predicate, matches, elementsOnly, root
     if (rootNativeNode !== nativeNode) {
         // To determine the next node to be processed, we need to use the next or the projectionNext
         // link, depending on whether the current node has been projected.
-        const nextTNode = (tNode.flags & 4 /* TNodeFlags.isProjected */) ? tNode.projectionNext : tNode.next;
+        const nextTNode = (tNode.flags & 2 /* TNodeFlags.isProjected */) ? tNode.projectionNext : tNode.next;
         if (nextTNode) {
             _queryNodeChildren(nextTNode, lView, predicate, matches, elementsOnly, rootNativeNode);
         }
