@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-3fe21a6
+ * @license Angular v15.0.0-next.3+sha-85330f3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7251,7 +7251,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.3+sha-3fe21a6');
+const VERSION = new Version('15.0.0-next.3+sha-85330f3');
 
 /**
  * @license
@@ -27591,24 +27591,16 @@ function _mergeArrays(parts) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * This file is used to control if the default rendering pipeline should be `ViewEngine` or `Ivy`.
+ * Returns whether Angular is in development mode.
  *
- * For more information on how to run and debug tests with either Ivy or View Engine (legacy),
- * please see [BAZEL.md](./docs/BAZEL.md).
- */
-let _devMode = true;
-let _runModeLocked = false;
-/**
- * Returns whether Angular is in development mode. After called once,
- * the value is locked and won't change any more.
- *
- * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ * By default, this is true, unless `enableProdMode` is invoked prior to calling this method or the
+ * application is built using the Angular CLI with the `optimization` option.
+ * @see {@link cli/build ng build}
  *
  * @publicApi
  */
 function isDevMode() {
-    _runModeLocked = true;
-    return _devMode;
+    return typeof ngDevMode === 'undefined' || !!ngDevMode;
 }
 /**
  * Disable Angular's development mode, which turns off assertions and other
@@ -27618,18 +27610,18 @@ function isDevMode() {
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
  *
+ * Using this method is discouraged as the Angular CLI will set production mode when using the
+ * `optimization` option.
+ * @see {@link cli/build ng build}
+ *
  * @publicApi
  */
 function enableProdMode() {
-    if (_runModeLocked) {
-        throw new Error('Cannot enable prod mode after platform setup.');
-    }
     // The below check is there so when ngDevMode is set via terser
     // `global['ngDevMode'] = false;` is also dropped.
     if (typeof ngDevMode === undefined || !!ngDevMode) {
         _global['ngDevMode'] = false;
     }
-    _devMode = false;
 }
 
 /**
