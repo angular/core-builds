@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-7a5ba93
+ * @license Angular v15.0.0-next.3+sha-3fe21a6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7236,7 +7236,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.3+sha-7a5ba93');
+const VERSION = new Version('15.0.0-next.3+sha-3fe21a6');
 
 /**
  * @license
@@ -7831,7 +7831,7 @@ function getLContext(target) {
                 if (nodeIndex == -1) {
                     throw new Error('The provided directive was not found in the application');
                 }
-                directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
+                directives = getDirectivesAtNodeIndex(nodeIndex, lView);
             }
             else {
                 nodeIndex = findViaNativeElement(lView, target);
@@ -8047,21 +8047,21 @@ function findViaDirective(lView, directiveInstance) {
     return -1;
 }
 /**
- * Returns a list of directives extracted from the given view based on the
- * provided list of directive index values.
+ * Returns a list of directives applied to a node at a specific index. The list includes
+ * directives matched by selector and any host directives, but it excludes components.
+ * Use `getComponentAtNodeIndex` to find the component applied to a node.
  *
  * @param nodeIndex The node index
  * @param lView The target view data
- * @param includeComponents Whether or not to include components in returned directives
  */
-function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
+function getDirectivesAtNodeIndex(nodeIndex, lView) {
     const tNode = lView[TVIEW].data[nodeIndex];
     if (tNode.directiveStart === 0)
         return EMPTY_ARRAY;
     const results = [];
     for (let i = tNode.directiveStart; i < tNode.directiveEnd; i++) {
         const directiveInstance = lView[i];
-        if (!isComponentInstance(directiveInstance) || includeComponents) {
+        if (!isComponentInstance(directiveInstance)) {
             results.push(directiveInstance);
         }
     }
@@ -12558,12 +12558,14 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     ngDevMode && assertFirstCreatePass(tView);
     let hasDirectives = false;
     if (getBindingsEnabled()) {
-        const directiveDefsMatchedBySelectors = findDirectiveDefMatches(tView, lView, tNode);
-        const directiveDefs = directiveDefsMatchedBySelectors ?
-            findHostDirectiveDefs$1(directiveDefsMatchedBySelectors, tView, lView, tNode) :
-            null;
+        const directiveDefs = findDirectiveDefMatches(tView, lView, tNode);
         const exportsMap = localRefs === null ? null : { '': -1 };
         if (directiveDefs !== null) {
+            // Publishes the directive types to DI so they can be injected. Needs to
+            // happen in a separate pass before the TNode flags have been initialized.
+            for (let i = 0; i < directiveDefs.length; i++) {
+                diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, directiveDefs[i].type);
+            }
             hasDirectives = true;
             initTNodeFlags(tNode, tView.data.length, directiveDefs.length);
             // When the same token is provided by several directives on the same node, some rules apply in
@@ -12730,7 +12732,8 @@ function invokeHostBindingsInCreationMode(def, directive) {
  * Matches the current node against all available selectors.
  * If a component is matched (at most one), it is returned in first position in the array.
  */
-function findDirectiveDefMatches(tView, viewData, tNode) {
+function findDirectiveDefMatches(tView, lView, tNode) {
+    var _a;
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
     const registry = tView.directiveRegistry;
@@ -12740,22 +12743,45 @@ function findDirectiveDefMatches(tView, viewData, tNode) {
             const def = registry[i];
             if (isNodeMatchingSelectorList(tNode, def.selectors, /* isProjectionMode */ false)) {
                 matches || (matches = ngDevMode ? new MatchesArray() : []);
-                diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, viewData), tView, def.type);
                 if (isComponentDef(def)) {
                     if (ngDevMode) {
                         assertTNodeType(tNode, 2 /* TNodeType.Element */, `"${tNode.value}" tags cannot be used as component hosts. ` +
                             `Please use a different tag to activate the ${stringify(def.type)} component.`);
                         if (isComponentHost(tNode)) {
-                            // If another component has been matched previously, it's the first element in the
-                            // `matches` array, see how we store components/directives in `matches` below.
-                            throwMultipleComponentError(tNode, matches[0].type, def.type);
+                            throwMultipleComponentError(tNode, matches.find(isComponentDef).type, def.type);
                         }
                     }
-                    markAsComponentHost(tView, tNode, 0);
-                    // The component is always stored first with directives after.
-                    matches.unshift(def);
+                    // Components are inserted at the front of the matches array so that their lifecycle
+                    // hooks run before any directive lifecycle hooks. This appears to be for ViewEngine
+                    // compatibility. This logic doesn't make sense with host directives, because it
+                    // would allow the host directives to undo any overrides the host may have made.
+                    // To handle this case, the host directives of components are inserted at the beginning
+                    // of the array, followed by the component. As such, the insertion order is as follows:
+                    // 1. Host directives belonging to the selector-matched component.
+                    // 2. Selector-matched component.
+                    // 3. Host directives belonging to selector-matched directives.
+                    // 4. Selector-matched directives.
+                    if (def.findHostDirectiveDefs !== null) {
+                        const hostDirectiveMatches = [];
+                        def.findHostDirectiveDefs(hostDirectiveMatches, def, tView, lView, tNode);
+                        // Add all host directives declared on this component, followed by the component itself.
+                        // Host directives should execute first so the host has a chance to override changes
+                        // to the DOM made by them.
+                        matches.unshift(...hostDirectiveMatches, def);
+                        // Component is offset starting from the beginning of the host directives array.
+                        const componentOffset = hostDirectiveMatches.length;
+                        markAsComponentHost(tView, tNode, componentOffset);
+                    }
+                    else {
+                        // No host directives on this component, just add the
+                        // component def to the beginning of the matches.
+                        matches.unshift(def);
+                        markAsComponentHost(tView, tNode, 0);
+                    }
                 }
                 else {
+                    // Append any host directives to the matches first.
+                    (_a = def.findHostDirectiveDefs) === null || _a === void 0 ? void 0 : _a.call(def, matches, def, tView, lView, tNode);
                     matches.push(def);
                 }
             }
@@ -12774,26 +12800,6 @@ function markAsComponentHost(tView, hostTNode, componentOffset) {
     hostTNode.componentOffset = componentOffset;
     (tView.components || (tView.components = ngDevMode ? new TViewComponents() : []))
         .push(hostTNode.index);
-}
-/**
- * Given an array of directives that were matched by their selectors, this function
- * produces a new array that also includes any host directives that have to be applied.
- * @param selectorMatches Directives matched in a template based on their selectors.
- * @param tView Current TView.
- * @param lView Current LView.
- * @param tNode Current TNode that is being matched.
- */
-function findHostDirectiveDefs$1(selectorMatches, tView, lView, tNode) {
-    const matches = [];
-    for (const def of selectorMatches) {
-        if (def.findHostDirectiveDefs === null) {
-            matches.push(def);
-        }
-        else {
-            def.findHostDirectiveDefs(matches, def, tView, lView, tNode);
-        }
-    }
-    return matches;
 }
 /** Caches local names and their matching directive indices for query and template lookups. */
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
@@ -14351,10 +14357,9 @@ function findHostDirectiveDefs(matches, def, tView, lView, tNode) {
             // TODO(crisbeto): assert that the def exists.
             // Host directives execute before the host so that its host bindings can be overwritten.
             findHostDirectiveDefs(matches, hostDirectiveDef, tView, lView, tNode);
+            matches.push(hostDirectiveDef);
         }
     }
-    // Push the def itself at the end since it needs to execute after the host directives.
-    matches.push(def);
 }
 /**
  * Converts an array in the form of `['publicName', 'alias', 'otherPublicName', 'otherAlias']` into
@@ -22014,7 +22019,7 @@ function getDirectives(node) {
         return [];
     }
     if (context.directives === undefined) {
-        context.directives = getDirectivesAtNodeIndex(nodeIndex, lView, false);
+        context.directives = getDirectivesAtNodeIndex(nodeIndex, lView);
     }
     // The `directives` in this case are a named array called `LComponentView`. Clone the
     // result so we don't expose an internal data structure in the user's console.
