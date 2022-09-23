@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-291a5b3
+ * @license Angular v15.0.0-next.3+sha-8637253
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7251,7 +7251,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.3+sha-291a5b3');
+const VERSION = new Version('15.0.0-next.3+sha-8637253');
 
 /**
  * @license
@@ -26047,6 +26047,34 @@ function getNativeRequestAnimationFrame() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+class AsyncStackTaggingZoneSpec {
+    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
+        this.name = 'asyncStackTagging for ' + namePrefix;
+        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
+    }
+    onScheduleTask(delegate, _current, target, task) {
+        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
+        return delegate.scheduleTask(target, task);
+    }
+    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
+        let ret;
+        if (task.consoleTask) {
+            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
+        }
+        else {
+            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
+        }
+        return ret;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
  *
@@ -26156,8 +26184,12 @@ class NgZone {
         const self = this;
         self._nesting = 0;
         self._outer = self._inner = Zone.current;
-        if (Zone['AsyncStackTaggingZoneSpec']) {
-            const AsyncStackTaggingZoneSpec = Zone['AsyncStackTaggingZoneSpec'];
+        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
+        // where the async operation is scheduled. For more details, refer
+        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
+        // And we only import this AsyncStackTaggingZoneSpec in development mode,
+        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
+        if (ngDevMode) {
             self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
         }
         if (Zone['TaskTrackingZoneSpec']) {
