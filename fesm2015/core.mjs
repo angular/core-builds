@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-ddef448
+ * @license Angular v15.0.0-next.3+sha-aef8d0b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7236,7 +7236,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.3+sha-ddef448');
+const VERSION = new Version('15.0.0-next.3+sha-aef8d0b');
 
 /**
  * @license
@@ -27610,7 +27610,7 @@ function isDevMode() {
 function enableProdMode() {
     // The below check is there so when ngDevMode is set via terser
     // `global['ngDevMode'] = false;` is also dropped.
-    if (typeof ngDevMode === undefined || !!ngDevMode) {
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
         _global['ngDevMode'] = false;
     }
 }
