@@ -1,10 +1,10 @@
 /**
- * @license Angular v15.0.0-next.3+sha-85b5d12
+ * @license Angular v15.0.0-next.3+sha-120555a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
 
@@ -2174,17 +2174,21 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  * @publicApi
  */
 function inject$1(token, flags = InjectFlags.Default) {
-    if (typeof flags !== 'number') {
-        // While TypeScript doesn't accept it without a cast, bitwise OR with false-y values in
-        // JavaScript is a no-op. We can use that for a very codesize-efficient conversion from
-        // `InjectOptions` to `InjectFlags`.
-        flags = (0 /* InternalInjectFlags.Default */ | // comment to force a line break in the formatter
-            (flags.optional && 8 /* InternalInjectFlags.Optional */) |
-            (flags.host && 1 /* InternalInjectFlags.Host */) |
-            (flags.self && 2 /* InternalInjectFlags.Self */) |
-            (flags.skipSelf && 4 /* InternalInjectFlags.SkipSelf */));
+    return ɵɵinject(token, convertToBitFlags(flags));
+}
+// Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).
+function convertToBitFlags(flags) {
+    if (typeof flags === 'undefined' || typeof flags === 'number') {
+        return flags;
     }
-    return ɵɵinject(token, flags);
+    // While TypeScript doesn't accept it without a cast, bitwise OR with false-y values in
+    // JavaScript is a no-op. We can use that for a very codesize-efficient conversion from
+    // `InjectOptions` to `InjectFlags`.
+    return (0 /* InternalInjectFlags.Default */ | // comment to force a line break in the formatter
+        (flags.optional && 8 /* InternalInjectFlags.Optional */) |
+        (flags.host && 1 /* InternalInjectFlags.Host */) |
+        (flags.self && 2 /* InternalInjectFlags.Self */) |
+        (flags.skipSelf && 4 /* InternalInjectFlags.SkipSelf */));
 }
 function injectArgs(types) {
     const args = [];
@@ -5239,7 +5243,7 @@ class NodeInjector {
         this._lView = _lView;
     }
     get(token, notFoundValue, flags) {
-        return getOrCreateInjectable(this._tNode, this._lView, token, flags, notFoundValue);
+        return getOrCreateInjectable(this._tNode, this._lView, token, convertToBitFlags(flags), notFoundValue);
     }
 }
 /** Creates a `NodeInjector` for the current node. */
@@ -7136,6 +7140,7 @@ class R3Injector extends EnvironmentInjector {
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this.assertNotDestroyed();
+        flags = convertToBitFlags(flags);
         // Set the injection context.
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
@@ -7637,7 +7642,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.3+sha-85b5d12');
+const VERSION = new Version('15.0.0-next.3+sha-120555a');
 
 /**
  * @license
@@ -14134,6 +14139,7 @@ class ChainedInjector {
         this.parentInjector = parentInjector;
     }
     get(token, notFoundValue, flags) {
+        flags = convertToBitFlags(flags);
         const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
         if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
             notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
@@ -26139,7 +26145,7 @@ class TestBedImpl {
         return TestBedImpl.INSTANCE.overrideProvider(token, provider);
     }
     static inject(token, notFoundValue, flags) {
-        return TestBedImpl.INSTANCE.inject(token, notFoundValue, flags);
+        return TestBedImpl.INSTANCE.inject(token, notFoundValue, ɵconvertToBitFlags(flags));
     }
     /** @deprecated from v9.0.0 use TestBed.inject */
     static get(token, notFoundValue = Injector$1.THROW_IF_NOT_FOUND, flags = InjectFlags$1.Default) {
@@ -26272,7 +26278,7 @@ class TestBedImpl {
             return this;
         }
         const UNDEFINED = {};
-        const result = this.testModuleRef.injector.get(token, UNDEFINED, flags);
+        const result = this.testModuleRef.injector.get(token, UNDEFINED, ɵconvertToBitFlags(flags));
         return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) :
             result;
     }

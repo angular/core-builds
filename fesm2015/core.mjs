@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-85b5d12
+ * @license Angular v15.0.0-next.3+sha-120555a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -589,6 +589,327 @@ function assertInjectImplementationNotEqual(fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// Always use __globalThis if available, which is the spec-defined global variable across all
+// environments, then fallback to __global first, because in Node tests both __global and
+// __window may be defined and _global should be __global in that case. Note: Typeof/Instanceof
+// checks are considered side-effects in Terser. We explicitly mark this as side-effect free:
+// https://github.com/terser/terser/issues/250.
+const _global = ( /* @__PURE__ */(() => (typeof globalThis !== 'undefined' && globalThis) ||
+    (typeof global !== 'undefined' && global) || (typeof window !== 'undefined' && window) ||
+    (typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+        self instanceof WorkerGlobalScope && self))());
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function ngDevModeResetPerfCounters() {
+    const locationString = typeof location !== 'undefined' ? location.toString() : '';
+    const newCounters = {
+        namedConstructors: locationString.indexOf('ngDevMode=namedConstructors') != -1,
+        firstCreatePass: 0,
+        tNode: 0,
+        tView: 0,
+        rendererCreateTextNode: 0,
+        rendererSetText: 0,
+        rendererCreateElement: 0,
+        rendererAddEventListener: 0,
+        rendererSetAttribute: 0,
+        rendererRemoveAttribute: 0,
+        rendererSetProperty: 0,
+        rendererSetClassName: 0,
+        rendererAddClass: 0,
+        rendererRemoveClass: 0,
+        rendererSetStyle: 0,
+        rendererRemoveStyle: 0,
+        rendererDestroy: 0,
+        rendererDestroyNode: 0,
+        rendererMoveNode: 0,
+        rendererRemoveNode: 0,
+        rendererAppendChild: 0,
+        rendererInsertBefore: 0,
+        rendererCreateComment: 0,
+    };
+    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
+    const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
+    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
+    return newCounters;
+}
+/**
+ * This function checks to see if the `ngDevMode` has been set. If yes,
+ * then we honor it, otherwise we default to dev mode with additional checks.
+ *
+ * The idea is that unless we are doing production build where we explicitly
+ * set `ngDevMode == false` we should be helping the developer by providing
+ * as much early warning and errors as possible.
+ *
+ * `ɵɵdefineComponent` is guaranteed to have been called before any component template functions
+ * (and thus Ivy instructions), so a single initialization there is sufficient to ensure ngDevMode
+ * is defined for the entire instruction set.
+ *
+ * When checking `ngDevMode` on toplevel, always init it before referencing it
+ * (e.g. `((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode())`), otherwise you can
+ *  get a `ReferenceError` like in https://github.com/angular/angular/issues/31595.
+ *
+ * Details on possible values for `ngDevMode` can be found on its docstring.
+ *
+ * NOTE:
+ * - changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
+ */
+function initNgDevMode() {
+    // The below checks are to ensure that calling `initNgDevMode` multiple times does not
+    // reset the counters.
+    // If the `ngDevMode` is not an object, then it means we have not created the perf counters
+    // yet.
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        if (typeof ngDevMode !== 'object') {
+            ngDevModeResetPerfCounters();
+        }
+        return typeof ngDevMode !== 'undefined' && !!ngDevMode;
+    }
+    return false;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const _THROW_IF_NOT_FOUND = {};
+const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+/*
+ * Name of a property (that we patch onto DI decorator), which is used as an annotation of which
+ * InjectFlag this decorator represents. This allows to avoid direct references to the DI decorators
+ * in the code, thus making them tree-shakable.
+ */
+const DI_DECORATOR_FLAG = '__NG_DI_FLAG__';
+const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+const NG_TOKEN_PATH = 'ngTokenPath';
+const NEW_LINE = /\n/gm;
+const NO_NEW_LINE = 'ɵ';
+const SOURCE = '__source';
+/**
+ * Current injector value used by `inject`.
+ * - `undefined`: it is an error to call `inject`
+ * - `null`: `inject` can be called but there is no injector (limp-mode).
+ * - Injector instance: Use the injector for resolution.
+ */
+let _currentInjector = undefined;
+function setCurrentInjector(injector) {
+    const former = _currentInjector;
+    _currentInjector = injector;
+    return former;
+}
+function injectInjectorOnly(token, flags = InjectFlags.Default) {
+    if (_currentInjector === undefined) {
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
+            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`EnvironmentInjector#runInContext\`.`);
+    }
+    else if (_currentInjector === null) {
+        return injectRootLimpMode(token, undefined, flags);
+    }
+    else {
+        return _currentInjector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
+    }
+}
+function ɵɵinject(token, flags = InjectFlags.Default) {
+    return (getInjectImplementation() || injectInjectorOnly)(resolveForwardRef(token), flags);
+}
+/**
+ * Throws an error indicating that a factory function could not be generated by the compiler for a
+ * particular class.
+ *
+ * The name of the class is not mentioned here, but will be in the generated factory function name
+ * and thus in the stack trace.
+ *
+ * @codeGenApi
+ */
+function ɵɵinvalidFactoryDep(index) {
+    throw new RuntimeError(202 /* RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY */, ngDevMode &&
+        `This constructor is not compatible with Angular Dependency Injection because its dependency at index ${index} of the parameter list is invalid.
+This can happen if the dependency type is a primitive like a string or if an ancestor of this class is missing an Angular decorator.
+
+Please check that 1) the type for the parameter at index ${index} is correct and 2) the correct Angular decorators are defined for this class and its ancestors.`);
+}
+/**
+ * Injects a token from the currently active injector.
+ * `inject` is only supported during instantiation of a dependency by the DI system. It can be used
+ * during:
+ * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
+ * as an `@Injectable` or `@Component`.
+ * - In the initializer for fields of such classes.
+ * - In the factory function specified for `useFactory` of a `Provider` or an `@Injectable`.
+ * - In the `factory` function specified for an `InjectionToken`.
+ *
+ * @param token A token that represents a dependency that should be injected.
+ * @param flags Optional flags that control how injection is executed.
+ * The flags correspond to injection strategies that can be specified with
+ * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
+ *
+ * @usageNotes
+ * In practice the `inject()` calls are allowed in a constructor, a constructor parameter and a
+ * field initializer:
+ *
+ * ```typescript
+ * @Injectable({providedIn: 'root'})
+ * export class Car {
+ *   radio: Radio|undefined;
+ *   // OK: field initializer
+ *   spareTyre = inject(Tyre);
+ *
+ *   constructor() {
+ *     // OK: constructor body
+ *     this.radio = inject(Radio);
+ *   }
+ * }
+ * ```
+ *
+ * It is also legal to call `inject` from a provider's factory:
+ *
+ * ```typescript
+ * providers: [
+ *   {provide: Car, useFactory: () => {
+ *     // OK: a class factory
+ *     const engine = inject(Engine);
+ *     return new Car(engine);
+ *   }}
+ * ]
+ * ```
+ *
+ * Calls to the `inject()` function outside of the class creation context will result in error. Most
+ * notably, calls to `inject()` are disallowed after a class instance was created, in methods
+ * (including lifecycle hooks):
+ *
+ * ```typescript
+ * @Component({ ... })
+ * export class CarComponent {
+ *   ngOnInit() {
+ *     // ERROR: too late, the component instance was already created
+ *     const engine = inject(Engine);
+ *     engine.start();
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+function inject(token, flags = InjectFlags.Default) {
+    return ɵɵinject(token, convertToBitFlags(flags));
+}
+// Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).
+function convertToBitFlags(flags) {
+    if (typeof flags === 'undefined' || typeof flags === 'number') {
+        return flags;
+    }
+    // While TypeScript doesn't accept it without a cast, bitwise OR with false-y values in
+    // JavaScript is a no-op. We can use that for a very codesize-efficient conversion from
+    // `InjectOptions` to `InjectFlags`.
+    return (0 /* InternalInjectFlags.Default */ | // comment to force a line break in the formatter
+        (flags.optional && 8 /* InternalInjectFlags.Optional */) |
+        (flags.host && 1 /* InternalInjectFlags.Host */) |
+        (flags.self && 2 /* InternalInjectFlags.Self */) |
+        (flags.skipSelf && 4 /* InternalInjectFlags.SkipSelf */));
+}
+function injectArgs(types) {
+    const args = [];
+    for (let i = 0; i < types.length; i++) {
+        const arg = resolveForwardRef(types[i]);
+        if (Array.isArray(arg)) {
+            if (arg.length === 0) {
+                throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode && 'Arguments array must have arguments.');
+            }
+            let type = undefined;
+            let flags = InjectFlags.Default;
+            for (let j = 0; j < arg.length; j++) {
+                const meta = arg[j];
+                const flag = getInjectFlag(meta);
+                if (typeof flag === 'number') {
+                    // Special case when we handle @Inject decorator.
+                    if (flag === -1 /* DecoratorFlags.Inject */) {
+                        type = meta.token;
+                    }
+                    else {
+                        flags |= flag;
+                    }
+                }
+                else {
+                    type = meta;
+                }
+            }
+            args.push(ɵɵinject(type, flags));
+        }
+        else {
+            args.push(ɵɵinject(arg));
+        }
+    }
+    return args;
+}
+/**
+ * Attaches a given InjectFlag to a given decorator using monkey-patching.
+ * Since DI decorators can be used in providers `deps` array (when provider is configured using
+ * `useFactory`) without initialization (e.g. `Host`) and as an instance (e.g. `new Host()`), we
+ * attach the flag to make it available both as a static property and as a field on decorator
+ * instance.
+ *
+ * @param decorator Provided DI decorator.
+ * @param flag InjectFlag that should be applied.
+ */
+function attachInjectFlag(decorator, flag) {
+    decorator[DI_DECORATOR_FLAG] = flag;
+    decorator.prototype[DI_DECORATOR_FLAG] = flag;
+    return decorator;
+}
+/**
+ * Reads monkey-patched property that contains InjectFlag attached to a decorator.
+ *
+ * @param token Token that may contain monkey-patched DI flags property.
+ */
+function getInjectFlag(token) {
+    return token[DI_DECORATOR_FLAG];
+}
+function catchInjectorError(e, token, injectorErrorName, source) {
+    const tokenPath = e[NG_TEMP_TOKEN_PATH];
+    if (token[SOURCE]) {
+        tokenPath.unshift(token[SOURCE]);
+    }
+    e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
+    e[NG_TOKEN_PATH] = tokenPath;
+    e[NG_TEMP_TOKEN_PATH] = null;
+    throw e;
+}
+function formatError(text, obj, injectorErrorName, source = null) {
+    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.slice(2) : text;
+    let context = stringify(obj);
+    if (Array.isArray(obj)) {
+        context = obj.map(stringify).join(' -> ');
+    }
+    else if (typeof obj === 'object') {
+        let parts = [];
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                let value = obj[key];
+                parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
+            }
+        }
+        context = `{${parts.join(', ')}}`;
+    }
+    return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Convince closure compiler that the wrapped function has no side-effects.
  *
@@ -727,97 +1048,6 @@ var ViewEncapsulation$1;
      */
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
 })(ViewEncapsulation$1 || (ViewEncapsulation$1 = {}));
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// Always use __globalThis if available, which is the spec-defined global variable across all
-// environments, then fallback to __global first, because in Node tests both __global and
-// __window may be defined and _global should be __global in that case. Note: Typeof/Instanceof
-// checks are considered side-effects in Terser. We explicitly mark this as side-effect free:
-// https://github.com/terser/terser/issues/250.
-const _global = ( /* @__PURE__ */(() => (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof global !== 'undefined' && global) || (typeof window !== 'undefined' && window) ||
-    (typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-        self instanceof WorkerGlobalScope && self))());
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function ngDevModeResetPerfCounters() {
-    const locationString = typeof location !== 'undefined' ? location.toString() : '';
-    const newCounters = {
-        namedConstructors: locationString.indexOf('ngDevMode=namedConstructors') != -1,
-        firstCreatePass: 0,
-        tNode: 0,
-        tView: 0,
-        rendererCreateTextNode: 0,
-        rendererSetText: 0,
-        rendererCreateElement: 0,
-        rendererAddEventListener: 0,
-        rendererSetAttribute: 0,
-        rendererRemoveAttribute: 0,
-        rendererSetProperty: 0,
-        rendererSetClassName: 0,
-        rendererAddClass: 0,
-        rendererRemoveClass: 0,
-        rendererSetStyle: 0,
-        rendererRemoveStyle: 0,
-        rendererDestroy: 0,
-        rendererDestroyNode: 0,
-        rendererMoveNode: 0,
-        rendererRemoveNode: 0,
-        rendererAppendChild: 0,
-        rendererInsertBefore: 0,
-        rendererCreateComment: 0,
-    };
-    // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
-    const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
-    return newCounters;
-}
-/**
- * This function checks to see if the `ngDevMode` has been set. If yes,
- * then we honor it, otherwise we default to dev mode with additional checks.
- *
- * The idea is that unless we are doing production build where we explicitly
- * set `ngDevMode == false` we should be helping the developer by providing
- * as much early warning and errors as possible.
- *
- * `ɵɵdefineComponent` is guaranteed to have been called before any component template functions
- * (and thus Ivy instructions), so a single initialization there is sufficient to ensure ngDevMode
- * is defined for the entire instruction set.
- *
- * When checking `ngDevMode` on toplevel, always init it before referencing it
- * (e.g. `((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode())`), otherwise you can
- *  get a `ReferenceError` like in https://github.com/angular/angular/issues/31595.
- *
- * Details on possible values for `ngDevMode` can be found on its docstring.
- *
- * NOTE:
- * - changes to the `ngDevMode` name must be synced with `compiler-cli/src/tooling.ts`.
- */
-function initNgDevMode() {
-    // The below checks are to ensure that calling `initNgDevMode` multiple times does not
-    // reset the counters.
-    // If the `ngDevMode` is not an object, then it means we have not created the perf counters
-    // yet.
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        if (typeof ngDevMode !== 'object') {
-            ngDevModeResetPerfCounters();
-        }
-        return typeof ngDevMode !== 'undefined' && !!ngDevMode;
-    }
-    return false;
-}
 
 /**
  * @license
@@ -3595,7 +3825,7 @@ class NodeInjector {
         this._lView = _lView;
     }
     get(token, notFoundValue, flags) {
-        return getOrCreateInjectable(this._tNode, this._lView, token, flags, notFoundValue);
+        return getOrCreateInjectable(this._tNode, this._lView, token, convertToBitFlags(flags), notFoundValue);
     }
 }
 /** Creates a `NodeInjector` for the current node. */
@@ -4717,232 +4947,6 @@ function getParentCtor(ctor) {
     // Note: We always use `Object` as the null value
     // to simplify checking later on.
     return parentCtor || Object;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const _THROW_IF_NOT_FOUND = {};
-const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-/*
- * Name of a property (that we patch onto DI decorator), which is used as an annotation of which
- * InjectFlag this decorator represents. This allows to avoid direct references to the DI decorators
- * in the code, thus making them tree-shakable.
- */
-const DI_DECORATOR_FLAG = '__NG_DI_FLAG__';
-const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
-const NG_TOKEN_PATH = 'ngTokenPath';
-const NEW_LINE = /\n/gm;
-const NO_NEW_LINE = 'ɵ';
-const SOURCE = '__source';
-/**
- * Current injector value used by `inject`.
- * - `undefined`: it is an error to call `inject`
- * - `null`: `inject` can be called but there is no injector (limp-mode).
- * - Injector instance: Use the injector for resolution.
- */
-let _currentInjector = undefined;
-function setCurrentInjector(injector) {
-    const former = _currentInjector;
-    _currentInjector = injector;
-    return former;
-}
-function injectInjectorOnly(token, flags = InjectFlags.Default) {
-    if (_currentInjector === undefined) {
-        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
-            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`EnvironmentInjector#runInContext\`.`);
-    }
-    else if (_currentInjector === null) {
-        return injectRootLimpMode(token, undefined, flags);
-    }
-    else {
-        return _currentInjector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
-    }
-}
-function ɵɵinject(token, flags = InjectFlags.Default) {
-    return (getInjectImplementation() || injectInjectorOnly)(resolveForwardRef(token), flags);
-}
-/**
- * Throws an error indicating that a factory function could not be generated by the compiler for a
- * particular class.
- *
- * The name of the class is not mentioned here, but will be in the generated factory function name
- * and thus in the stack trace.
- *
- * @codeGenApi
- */
-function ɵɵinvalidFactoryDep(index) {
-    throw new RuntimeError(202 /* RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY */, ngDevMode &&
-        `This constructor is not compatible with Angular Dependency Injection because its dependency at index ${index} of the parameter list is invalid.
-This can happen if the dependency type is a primitive like a string or if an ancestor of this class is missing an Angular decorator.
-
-Please check that 1) the type for the parameter at index ${index} is correct and 2) the correct Angular decorators are defined for this class and its ancestors.`);
-}
-/**
- * Injects a token from the currently active injector.
- * `inject` is only supported during instantiation of a dependency by the DI system. It can be used
- * during:
- * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
- * as an `@Injectable` or `@Component`.
- * - In the initializer for fields of such classes.
- * - In the factory function specified for `useFactory` of a `Provider` or an `@Injectable`.
- * - In the `factory` function specified for an `InjectionToken`.
- *
- * @param token A token that represents a dependency that should be injected.
- * @param flags Optional flags that control how injection is executed.
- * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns the injected value if operation is successful, `null` otherwise.
- * @throws if called outside of a supported context.
- *
- * @usageNotes
- * In practice the `inject()` calls are allowed in a constructor, a constructor parameter and a
- * field initializer:
- *
- * ```typescript
- * @Injectable({providedIn: 'root'})
- * export class Car {
- *   radio: Radio|undefined;
- *   // OK: field initializer
- *   spareTyre = inject(Tyre);
- *
- *   constructor() {
- *     // OK: constructor body
- *     this.radio = inject(Radio);
- *   }
- * }
- * ```
- *
- * It is also legal to call `inject` from a provider's factory:
- *
- * ```typescript
- * providers: [
- *   {provide: Car, useFactory: () => {
- *     // OK: a class factory
- *     const engine = inject(Engine);
- *     return new Car(engine);
- *   }}
- * ]
- * ```
- *
- * Calls to the `inject()` function outside of the class creation context will result in error. Most
- * notably, calls to `inject()` are disallowed after a class instance was created, in methods
- * (including lifecycle hooks):
- *
- * ```typescript
- * @Component({ ... })
- * export class CarComponent {
- *   ngOnInit() {
- *     // ERROR: too late, the component instance was already created
- *     const engine = inject(Engine);
- *     engine.start();
- *   }
- * }
- * ```
- *
- * @publicApi
- */
-function inject(token, flags = InjectFlags.Default) {
-    if (typeof flags !== 'number') {
-        // While TypeScript doesn't accept it without a cast, bitwise OR with false-y values in
-        // JavaScript is a no-op. We can use that for a very codesize-efficient conversion from
-        // `InjectOptions` to `InjectFlags`.
-        flags = (0 /* InternalInjectFlags.Default */ | // comment to force a line break in the formatter
-            (flags.optional && 8 /* InternalInjectFlags.Optional */) |
-            (flags.host && 1 /* InternalInjectFlags.Host */) |
-            (flags.self && 2 /* InternalInjectFlags.Self */) |
-            (flags.skipSelf && 4 /* InternalInjectFlags.SkipSelf */));
-    }
-    return ɵɵinject(token, flags);
-}
-function injectArgs(types) {
-    const args = [];
-    for (let i = 0; i < types.length; i++) {
-        const arg = resolveForwardRef(types[i]);
-        if (Array.isArray(arg)) {
-            if (arg.length === 0) {
-                throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode && 'Arguments array must have arguments.');
-            }
-            let type = undefined;
-            let flags = InjectFlags.Default;
-            for (let j = 0; j < arg.length; j++) {
-                const meta = arg[j];
-                const flag = getInjectFlag(meta);
-                if (typeof flag === 'number') {
-                    // Special case when we handle @Inject decorator.
-                    if (flag === -1 /* DecoratorFlags.Inject */) {
-                        type = meta.token;
-                    }
-                    else {
-                        flags |= flag;
-                    }
-                }
-                else {
-                    type = meta;
-                }
-            }
-            args.push(ɵɵinject(type, flags));
-        }
-        else {
-            args.push(ɵɵinject(arg));
-        }
-    }
-    return args;
-}
-/**
- * Attaches a given InjectFlag to a given decorator using monkey-patching.
- * Since DI decorators can be used in providers `deps` array (when provider is configured using
- * `useFactory`) without initialization (e.g. `Host`) and as an instance (e.g. `new Host()`), we
- * attach the flag to make it available both as a static property and as a field on decorator
- * instance.
- *
- * @param decorator Provided DI decorator.
- * @param flag InjectFlag that should be applied.
- */
-function attachInjectFlag(decorator, flag) {
-    decorator[DI_DECORATOR_FLAG] = flag;
-    decorator.prototype[DI_DECORATOR_FLAG] = flag;
-    return decorator;
-}
-/**
- * Reads monkey-patched property that contains InjectFlag attached to a decorator.
- *
- * @param token Token that may contain monkey-patched DI flags property.
- */
-function getInjectFlag(token) {
-    return token[DI_DECORATOR_FLAG];
-}
-function catchInjectorError(e, token, injectorErrorName, source) {
-    const tokenPath = e[NG_TEMP_TOKEN_PATH];
-    if (token[SOURCE]) {
-        tokenPath.unshift(token[SOURCE]);
-    }
-    e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
-    e[NG_TOKEN_PATH] = tokenPath;
-    e[NG_TEMP_TOKEN_PATH] = null;
-    throw e;
-}
-function formatError(text, obj, injectorErrorName, source = null) {
-    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.slice(2) : text;
-    let context = stringify(obj);
-    if (Array.isArray(obj)) {
-        context = obj.map(stringify).join(' -> ');
-    }
-    else if (typeof obj === 'object') {
-        let parts = [];
-        for (let key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                let value = obj[key];
-                parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
-            }
-        }
-        context = `{${parts.join(', ')}}`;
-    }
-    return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
 }
 
 /**
@@ -6735,6 +6739,7 @@ class R3Injector extends EnvironmentInjector {
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this.assertNotDestroyed();
+        flags = convertToBitFlags(flags);
         // Set the injection context.
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
@@ -7236,7 +7241,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.3+sha-85b5d12');
+const VERSION = new Version('15.0.0-next.3+sha-120555a');
 
 /**
  * @license
@@ -13791,6 +13796,7 @@ class ChainedInjector {
         this.parentInjector = parentInjector;
     }
     get(token, notFoundValue, flags) {
+        flags = convertToBitFlags(flags);
         const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
         if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
             notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
@@ -29887,5 +29893,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, reflectComponentType, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isInjectable as ɵisInjectable, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isStandalone as ɵisStandalone, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, platformCore, reflectComponentType, resolveForwardRef, setTestabilityGetter, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDebugNodeR2 as ɵgetDebugNodeR2, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isInjectable as ɵisInjectable, isListLikeIterable as ɵisListLikeIterable, isObservable as ɵisObservable, isPromise as ɵisPromise, isStandalone as ɵisStandalone, isSubscribable as ɵisSubscribable, ɵivyEnabled, makeDecorator as ɵmakeDecorator, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map

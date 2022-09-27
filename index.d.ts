@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-85b5d12
+ * @license Angular v15.0.0-next.3+sha-120555a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2726,6 +2726,27 @@ export declare abstract class EnvironmentInjector implements Injector {
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
      */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue: undefined, options: InjectOptions & {
+        optional?: false;
+    }): T;
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue: null | undefined, options: InjectOptions): T | null;
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     * @deprecated use object-based flags (`InjectOptions`) instead.
+     */
     abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
      * @deprecated from v4.0.0 use ProviderToken<T>
@@ -4038,9 +4059,36 @@ export declare abstract class Injector {
     static THROW_IF_NOT_FOUND: {};
     static NULL: Injector;
     /**
+     * Internal note on the `options?: InjectOptions|InjectFlags` override of the `get`
+     * method: consider dropping the `InjectFlags` part in one of the major versions.
+     * It can **not** be done in minor/patch, since it's breaking for custom injectors
+     * that only implement the old `InjectorFlags` interface.
+     */
+    /**
      * Retrieves an instance from the injector based on the provided token.
      * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
      * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue: undefined, options: InjectOptions & {
+        optional?: false;
+    }): T;
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue: null | undefined, options: InjectOptions): T | null;
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     */
+    abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions | InjectFlags): T;
+    /**
+     * Retrieves an instance from the injector based on the provided token.
+     * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+     * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+     * @deprecated use object-based flags (`InjectOptions`) instead.
      */
     abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
     /**
@@ -6452,7 +6500,7 @@ declare class R3Injector extends EnvironmentInjector {
     destroy(): void;
     onDestroy(callback: () => void): void;
     runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
-    get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
+    get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags | InjectOptions): T;
     toString(): string;
     private assertNotDestroyed;
     /**
@@ -10022,6 +10070,8 @@ export declare class ɵConsole {
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵConsole, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ɵConsole>;
 }
+
+export declare function ɵconvertToBitFlags(flags: InjectOptions | InjectFlags | undefined): InjectFlags | undefined;
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.

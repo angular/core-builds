@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.3+sha-85b5d12
+ * @license Angular v15.0.0-next.3+sha-120555a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,6 +13,7 @@ import { Directive } from '@angular/core';
 import { ElementRef } from '@angular/core';
 import { InjectFlags } from '@angular/core';
 import { InjectionToken } from '@angular/core';
+import { InjectOptions } from '@angular/core';
 import { NgModule } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { Pipe } from '@angular/core';
@@ -278,7 +279,14 @@ export declare interface TestBed {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): TestBed;
     compileComponents(): Promise<any>;
+    inject<T>(token: ProviderToken<T>, notFoundValue: undefined, options: InjectOptions & {
+        optional?: false;
+    }): T;
+    inject<T>(token: ProviderToken<T>, notFoundValue: null | undefined, options: InjectOptions): T | null;
+    inject<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
+    /** @deprecated use object-based flags (`InjectOptions`) instead. */
     inject<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): T;
+    /** @deprecated use object-based flags (`InjectOptions`) instead. */
     inject<T>(token: ProviderToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
