@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-26ad19e
+ * @license Angular v15.0.0-next.4+sha-76a8c68
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3281,6 +3281,15 @@ export declare interface HostDecorator {
     new (): Host;
 }
 
+/**
+ * Mapping between the public aliases of directive bindings and the underlying inputs/outputs that
+ * they represent. Also serves as an allowlist of the inputs/outputs from the host directive that
+ * the author has decided to expose.
+ */
+declare type HostDirectiveBindingMap = {
+    [publicName: string]: string;
+};
+
 /** Values that can be used to define a host directive through the `HostDirectivesFeature`. */
 declare type HostDirectiveConfig = Type<unknown> | {
     directive: Type<unknown>;
@@ -3293,14 +3302,16 @@ declare interface HostDirectiveDef<T = unknown> {
     /** Class representing the host directive. */
     directive: Type<T>;
     /** Directive inputs that have been exposed. */
-    inputs: {
-        [publicName: string]: string;
-    };
+    inputs: HostDirectiveBindingMap;
     /** Directive outputs that have been exposed. */
-    outputs: {
-        [publicName: string]: string;
-    };
+    outputs: HostDirectiveBindingMap;
 }
+
+/**
+ * Mapping between a directive that was used as a host directive
+ * and the configuration that was used to define it as such.
+ */
+declare type HostDirectiveDefs = Map<ɵDirectiveDef<unknown>, HostDirectiveDef>;
 
 /**
  * Type of the HostListener metadata.
@@ -10238,8 +10249,13 @@ export declare interface ɵDirectiveDef<T> {
     /**
      * Function that will add the host directives to the list of matches during directive matching.
      * Patched onto the definition by the `HostDirectivesFeature`.
+     * @param currentDef Definition that has been matched.
+     * @param matchedDefs List of all matches for a specified node. Will be mutated to include the
+     * host directives.
+     * @param hostDirectiveDefs Mapping of directive definitions to their host directive
+     * configuration. Host directives will be added to the map as they're being matched to the node.
      */
-    findHostDirectiveDefs: ((matches: ɵDirectiveDef<unknown>[], def: ɵDirectiveDef<unknown>, tView: TView, lView: LView, tNode: TElementNode | TContainerNode | TElementContainerNode) => void) | null;
+    findHostDirectiveDefs: ((currentDef: ɵDirectiveDef<unknown>, matchedDefs: ɵDirectiveDef<unknown>[], hostDirectiveDefs: HostDirectiveDefs) => void) | null;
     /** Additional directives to be applied whenever the directive has been matched. */
     hostDirectives: HostDirectiveDef[] | null;
     setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
