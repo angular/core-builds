@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-d3c25f2
+ * @license Angular v15.0.0-next.4+sha-89006b1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1029,10 +1029,10 @@ export declare interface Component extends Directive {
     preserveWhitespaces?: boolean;
     /**
      * Angular components marked as `standalone` do not need to be declared in an NgModule. Such
-     * components directly manage their own template dependencies (components, directives and pipes
+     * components directly manage their own template dependencies (components, directives, and pipes
      * used in a template) via the imports property.
      *
-     * More information about standalone components, directives and pipes can be found in [this
+     * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
      *
      * @developerPreview
@@ -1041,12 +1041,12 @@ export declare interface Component extends Directive {
     /**
      * The imports property specifies the standalone component's template dependencies — those
      * directives, components, and pipes that can be used within its template. Standalone components
-     * can import other standalone components, directives and pipes as well as existing NgModules.
+     * can import other standalone components, directives, and pipes as well as existing NgModules.
      *
      * This property is only available for standalone components - specifying it for components
      * declared in an NgModule generates a compilation error.
      *
-     * More information about standalone components, directives and pipes can be found in [this
+     * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
      *
      * @developerPreview
@@ -1059,7 +1059,7 @@ export declare interface Component extends Directive {
      * This property is only available for standalone components - specifying it for components
      * declared in an NgModule generates a compilation error.
      *
-     * More information about standalone components, directives and pipes can be found in [this
+     * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
      */
     schemas?: SchemaMetadata[];
@@ -2384,7 +2384,7 @@ export declare interface Directive {
      * directives don't depend on any "intermediate context" of an NgModule (ex. configured
      * providers).
      *
-     * More information about standalone components, directives and pipes can be found in [this
+     * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
      *
      * @developerPreview
@@ -5888,7 +5888,7 @@ export declare interface Pipe {
      * Angular pipes marked as `standalone` do not need to be declared in an NgModule. Such
      * pipes don't depend on any "intermediate context" of an NgModule (ex. configured providers).
      *
-     * More information about standalone components, directives and pipes can be found in [this
+     * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
      */
     standalone?: boolean;

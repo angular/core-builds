@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-d3c25f2
+ * @license Angular v15.0.0-next.4+sha-89006b1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7642,7 +7642,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.4+sha-d3c25f2');
+const VERSION = new Version('15.0.0-next.4+sha-89006b1');
 
 /**
  * @license
@@ -24681,7 +24681,7 @@ function generateStandaloneInDeclarationsError(type, location) {
 function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot, importingModule) {
     if (verifiedNgModule.get(moduleType))
         return;
-    // skip verifications of standalone components, directives and pipes
+    // skip verifications of standalone components, directives, and pipes
     if (isStandalone(moduleType))
         return;
     verifiedNgModule.set(moduleType, true);
