@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-4ba2d3d
+ * @license Angular v15.0.0-next.4+sha-07d9a27
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1759,11 +1759,12 @@ function rememberChangeHistoryAndInvokeOnChangesHook() {
     }
 }
 function ngOnChangesSetInput(instance, value, publicName, privateName) {
+    const declaredName = this.declaredInputs[publicName];
+    ngDevMode && assertString(declaredName, 'Name of input in ngOnChanges has to be a string');
     const simpleChangesStore = getSimpleChangesStore(instance) ||
         setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
     const current = simpleChangesStore.current || (simpleChangesStore.current = {});
     const previous = simpleChangesStore.previous;
-    const declaredName = this.declaredInputs[publicName];
     const previousChange = previous[declaredName];
     current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
     instance[privateName] = value;
@@ -7256,7 +7257,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.4+sha-4ba2d3d');
+const VERSION = new Version('15.0.0-next.4+sha-07d9a27');
 
 /**
  * @license
@@ -14384,7 +14385,7 @@ function ɵɵCopyDefinitionFeature(definition) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * This feature add the host directives behavior to a directive definition by patching a
+ * This feature adds the host directives behavior to a directive definition by patching a
  * function onto it. The expectation is that the runtime will invoke the function during
  * directive matching.
  *
@@ -14425,6 +14426,9 @@ function findHostDirectiveDefs(currentDef, matchedDefs, hostDirectiveDefs) {
             if (typeof ngDevMode === 'undefined' || ngDevMode) {
                 validateHostDirective(hostDirectiveConfig, hostDirectiveDef, matchedDefs);
             }
+            // We need to patch the `declaredInputs` so that
+            // `ngOnChanges` can map the properties correctly.
+            patchDeclaredInputs(hostDirectiveDef.declaredInputs, hostDirectiveConfig.inputs);
             // Host directives execute before the host so that its host bindings can be overwritten.
             findHostDirectiveDefs(hostDirectiveDef, matchedDefs, hostDirectiveDefs);
             hostDirectiveDefs.set(hostDirectiveDef, hostDirectiveConfig);
@@ -14445,6 +14449,42 @@ function bindingArrayToMap(bindings) {
         result[bindings[i]] = bindings[i + 1];
     }
     return result;
+}
+/**
+ * `ngOnChanges` has some leftover legacy ViewEngine behavior where the keys inside the
+ * `SimpleChanges` event refer to the *declared* name of the input, not its public name or its
+ * minified name. E.g. in `@Input('alias') foo: string`, the name in the `SimpleChanges` object
+ * will always be `foo`, and not `alias` or the minified name of `foo` in apps using property
+ * minification.
+ *
+ * This is achieved through the `DirectiveDef.declaredInputs` map that is constructed when the
+ * definition is declared. When a property is written to the directive instance, the
+ * `NgOnChangesFeature` will try to remap the property name being written to using the
+ * `declaredInputs`.
+ *
+ * Since the host directive input remapping happens during directive matching, `declaredInputs`
+ * won't contain the new alias that the input is available under. This function addresses the
+ * issue by patching the host directive aliases to the `declaredInputs`. There is *not* a risk of
+ * this patching accidentally introducing new inputs to the host directive, because `declaredInputs`
+ * is used *only* by the `NgOnChangesFeature` when determining what name is used in the
+ * `SimpleChanges` object which won't be reached if an input doesn't exist.
+ */
+function patchDeclaredInputs(declaredInputs, exposedInputs) {
+    for (const publicName in exposedInputs) {
+        if (exposedInputs.hasOwnProperty(publicName)) {
+            const remappedPublicName = exposedInputs[publicName];
+            const privateName = declaredInputs[publicName];
+            // We *technically* shouldn't be able to hit this case because we can't have multiple
+            // inputs on the same property and we have validations against conflicting aliases in
+            // `validateMappings`. If we somehow did, it would lead to `ngOnChanges` being invoked
+            // with the wrong name so we have a non-user-friendly assertion here just in case.
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
+                declaredInputs.hasOwnProperty(remappedPublicName)) {
+                assertEqual(declaredInputs[remappedPublicName], declaredInputs[publicName], `Conflicting host directive input alias ${publicName}.`);
+            }
+            declaredInputs[remappedPublicName] = privateName;
+        }
+    }
 }
 /**
  * Verifies that the host directive has been configured correctly.

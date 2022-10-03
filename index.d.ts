@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-4ba2d3d
+ * @license Angular v15.0.0-next.4+sha-07d9a27
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12708,7 +12708,7 @@ export declare function ɵɵgetCurrentView(): OpaqueViewState;
 export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
 
 /**
- * This feature add the host directives behavior to a directive definition by patching a
+ * This feature adds the host directives behavior to a directive definition by patching a
  * function onto it. The expectation is that the runtime will invoke the function during
  * directive matching.
  *
