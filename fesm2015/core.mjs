@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-7ab10a5
+ * @license Angular v15.0.0-next.4+sha-e3cef4a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4121,8 +4121,11 @@ const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attribut
  * As you can see in the Tree-shakable InjectionToken example below.
  *
  * Additionally, if a `factory` is specified you can also specify the `providedIn` option, which
- * overrides the above behavior and marks the token as belonging to a particular `@NgModule`. As
- * mentioned above, `'root'` is the default value for `providedIn`.
+ * overrides the above behavior and marks the token as belonging to a particular `@NgModule` (note:
+ * this option is now deprecated). As mentioned above, `'root'` is the default value for
+ * `providedIn`.
+ *
+ * The `providedIn: NgModule` and `providedIn: 'any'` options are deprecated.
  *
  * @usageNotes
  * ### Basic Examples
@@ -7242,7 +7245,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.4+sha-7ab10a5');
+const VERSION = new Version('15.0.0-next.4+sha-e3cef4a');
 
 /**
  * @license
