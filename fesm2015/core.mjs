@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.4+sha-2e1ddde
+ * @license Angular v15.0.0-next.4+sha-7ab10a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7242,7 +7242,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.4+sha-2e1ddde');
+const VERSION = new Version('15.0.0-next.4+sha-7ab10a5');
 
 /**
  * @license
@@ -12267,9 +12267,6 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
     }
     return blueprint;
 }
-function createError(text, token) {
-    return new Error(`Renderer: ${text} [${stringifyForError(token)}]`);
-}
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
  *
@@ -12584,7 +12581,7 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     let hasDirectives = false;
     if (getBindingsEnabled()) {
         const exportsMap = localRefs === null ? null : { '': -1 };
-        const matchResult = findDirectiveDefMatches(tView, lView, tNode);
+        const matchResult = findDirectiveDefMatches(tView, tNode);
         let directiveDefs;
         let hostDirectiveDefs;
         if (matchResult === null) {
@@ -12594,11 +12591,6 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             [directiveDefs, hostDirectiveDefs] = matchResult;
         }
         if (directiveDefs !== null) {
-            // Publishes the directive types to DI so they can be injected. Needs to
-            // happen in a separate pass before the TNode flags have been initialized.
-            for (let i = 0; i < directiveDefs.length; i++) {
-                diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, directiveDefs[i].type);
-            }
             hasDirectives = true;
             initializeDirectives(tView, lView, tNode, directiveDefs, exportsMap, hostDirectiveDefs);
         }
@@ -12612,6 +12604,11 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
 /** Initializes the data structures necessary for a list of directives to be instantiated. */
 function initializeDirectives(tView, lView, tNode, directives, exportsMap, hostDirectiveDefs) {
     ngDevMode && assertFirstCreatePass(tView);
+    // Publishes the directive types to DI so they can be injected. Needs to
+    // happen in a separate pass before the TNode flags have been initialized.
+    for (let i = 0; i < directives.length; i++) {
+        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, lView), tView, directives[i].type);
+    }
     initTNodeFlags(tNode, tView.data.length, directives.length);
     // When the same token is provided by several directives on the same node, some rules apply in
     // the viewEngine:
@@ -12769,7 +12766,7 @@ function invokeHostBindingsInCreationMode(def, directive) {
  * Matches the current node against all available selectors.
  * If a component is matched (at most one), it is returned in first position in the array.
  */
-function findDirectiveDefMatches(tView, lView, tNode) {
+function findDirectiveDefMatches(tView, tNode) {
     var _a;
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
@@ -13908,15 +13905,26 @@ class ComponentFactory extends ComponentFactory$1 {
         let component;
         let tElementNode;
         try {
-            const rootDirectives = [this.componentDef];
+            const rootComponentDef = this.componentDef;
+            let rootDirectives;
+            let hostDirectiveDefs = null;
+            if (rootComponentDef.findHostDirectiveDefs) {
+                rootDirectives = [];
+                hostDirectiveDefs = new Map();
+                rootComponentDef.findHostDirectiveDefs(rootComponentDef, rootDirectives, hostDirectiveDefs);
+                rootDirectives.push(rootComponentDef);
+            }
+            else {
+                rootDirectives = [rootComponentDef];
+            }
             const hostTNode = createRootComponentTNode(rootLView, hostRNode);
-            const componentView = createRootComponentView(hostTNode, hostRNode, this.componentDef, rootDirectives, rootLView, rendererFactory, hostRenderer);
+            const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, rendererFactory, hostRenderer);
             tElementNode = getTNode(rootTView, HEADER_OFFSET);
             // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some tests
             // where the renderer is mocked out and `undefined` is returned. We should update the tests so
             // that this check can be removed.
             if (hostRNode) {
-                setRootNodeAttributes(hostRenderer, this.componentDef, hostRNode, rootSelectorOrNode);
+                setRootNodeAttributes(hostRenderer, rootComponentDef, hostRNode, rootSelectorOrNode);
             }
             if (projectableNodes !== undefined) {
                 projectNodes(tElementNode, this.ngContentSelectors, projectableNodes);
@@ -13924,7 +13932,7 @@ class ComponentFactory extends ComponentFactory$1 {
             // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
             // executed here?
             // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-            component = createRootComponent(componentView, this.componentDef, rootDirectives, rootLView, [LifecycleHooksFeature]);
+            component = createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, [LifecycleHooksFeature]);
             renderView(rootTView, rootLView, null);
         }
         finally {
@@ -14024,8 +14032,7 @@ function createRootComponentView(tNode, rNode, rootComponentDef, rootDirectives,
     const viewRenderer = rendererFactory.createRenderer(rNode, rootComponentDef);
     const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
     if (tView.firstCreatePass) {
-        diPublicInInjector(getOrCreateNodeInjectorForNode(tNode, rootView), tView, rootComponentDef.type);
-        markAsComponentHost(tView, tNode, 0);
+        markAsComponentHost(tView, tNode, rootDirectives.length - 1);
     }
     addToViewTree(rootView, componentView);
     // Store component view at node index, with node as the HOST
@@ -14047,12 +14054,12 @@ function applyRootComponentStyling(rootDirectives, tNode, rNode, hostRenderer) {
  * Creates a root component and sets it up with features and host bindings.Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
-function createRootComponent(componentView, rootComponentDef, rootDirectives, rootLView, hostFeatures) {
+function createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, hostFeatures) {
     const rootTNode = getCurrentTNode();
     ngDevMode && assertDefined(rootTNode, 'tNode should have been already created');
     const tView = rootLView[TVIEW];
     const native = getNativeByTNode(rootTNode, rootLView);
-    initializeDirectives(tView, rootLView, rootTNode, rootDirectives, null, null);
+    initializeDirectives(tView, rootLView, rootTNode, rootDirectives, null, hostDirectiveDefs);
     for (let i = 0; i < rootDirectives.length; i++) {
         const directiveIndex = rootTNode.directiveStart + i;
         const directiveInstance = getNodeInjectable(rootLView, tView, directiveIndex, rootTNode);
