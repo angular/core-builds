@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.5+sha-e0dd2c5
+ * @license Angular v15.0.0-next.5+sha-db28bad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2390,6 +2390,16 @@ export declare interface Directive {
      * @developerPreview
      */
     standalone?: boolean;
+    /**
+     * Standalone directives that should be applied to the host whenever the directive is matched.
+     * By default none of the inputs or outputs of the host directives will be available on the host,
+     * unless they are specified in the `inputs` or `outputs` properties.
+     */
+    hostDirectives?: (Type<unknown> | {
+        directive: Type<unknown>;
+        inputs?: string[];
+        outputs?: string[];
+    })[];
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.5+sha-e0dd2c5
+ * @license Angular v15.0.0-next.5+sha-db28bad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7260,7 +7260,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.5+sha-e0dd2c5');
+const VERSION = new Version('15.0.0-next.5+sha-db28bad');
 
 /**
  * @license
@@ -25190,11 +25190,7 @@ function directiveMetadata(type, metadata) {
         providers: metadata.providers || null,
         viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
         isStandalone: !!metadata.standalone,
-        hostDirectives: 
-        // TODO(crisbeto): remove the `as any` usage here and down in the `map` call once
-        // host directives are exposed in the public API.
-        metadata
-            .hostDirectives?.map((directive) => typeof directive === 'function' ? { directive } : directive) ||
+        hostDirectives: metadata.hostDirectives?.map(directive => typeof directive === 'function' ? { directive } : directive) ||
             null
     };
 }
