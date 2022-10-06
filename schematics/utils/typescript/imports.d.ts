@@ -34,10 +34,20 @@ export declare function getImportOfIdentifier(typeChecker: ts.TypeChecker, node:
 export declare function getImportSpecifier(sourceFile: ts.SourceFile, moduleName: string, specifierName: string): ts.ImportSpecifier | null;
 /**
  * Replaces an import inside a named imports node with a different one.
+ *
  * @param node Node that contains the imports.
  * @param existingImport Import that should be replaced.
  * @param newImportName Import that should be inserted.
  */
 export declare function replaceImport(node: ts.NamedImports, existingImport: string, newImportName: string): ts.NamedImports;
+/**
+ * Removes a symbol from the named imports and updates a node
+ * that represents a given named imports.
+ *
+ * @param node Node that contains the imports.
+ * @param symbol Symbol that should be removed.
+ * @returns An updated node (ts.NamedImports).
+ */
+export declare function removeSymbolFromNamedImports(node: ts.NamedImports, symbol: ts.ImportSpecifier): ts.NamedImports;
 /** Finds an import specifier with a particular name. */
 export declare function findImportSpecifier(nodes: ts.NodeArray<ts.ImportSpecifier>, specifierName: string): ts.ImportSpecifier | undefined;
