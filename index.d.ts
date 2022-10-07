@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-next.5+sha-deb4cab
+ * @license Angular v15.0.0-next.5+sha-07017a7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1736,7 +1736,7 @@ export declare function createComponent<C>(component: Type<C>, options: {
  * @publicApi
  * @developerPreview
  */
-export declare function createEnvironmentInjector(providers: Array<Provider | ImportedNgModuleProviders>, parent: EnvironmentInjector, debugName?: string | null): EnvironmentInjector;
+export declare function createEnvironmentInjector(providers: Array<Provider | EnvironmentProviders>, parent: EnvironmentInjector, debugName?: string | null): EnvironmentInjector;
 
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
@@ -2777,6 +2777,25 @@ export declare abstract class EnvironmentInjector implements Injector {
     abstract destroy(): void;
 }
 
+/**
+ * Encapsulated `Provider`s that are only accepted during creation of an `EnvironmentInjector` (e.g.
+ * in an `NgModule`).
+ *
+ * Using this wrapper type prevents providers which are only designed to work in
+ * application/environment injectors from being accidentally included in
+ * `@Component.providers` and ending up in a component injector.
+ *
+ * This wrapper type prevents access to the `Provider`s inside.
+ *
+ * @see `makeEnvironmentProviders`
+ * @see `importProvidersFrom`
+ *
+ * @publicApi
+ */
+export declare type EnvironmentProviders = {
+    ɵbrand: 'EnvironmentProviders';
+};
+
 
 /**
  * Provides a hook for centralized exception handling.
@@ -3660,11 +3679,9 @@ declare const ID = 20;
  * @see `importProvidersFrom`
  *
  * @publicApi
- * @developerPreview
+ * @deprecated replaced by `EnvironmentProviders`
  */
-export declare interface ImportedNgModuleProviders {
-    ɵproviders: Provider[];
-}
+export declare type ImportedNgModuleProviders = EnvironmentProviders;
 
 /**
  * Collects providers from all NgModules and standalone components, including transitively imported
@@ -3707,7 +3724,7 @@ export declare interface ImportedNgModuleProviders {
  * @publicApi
  * @developerPreview
  */
-export declare function importProvidersFrom(...sources: ImportProvidersSource[]): ImportedNgModuleProviders;
+export declare function importProvidersFrom(...sources: ImportProvidersSource[]): EnvironmentProviders;
 
 /**
  * A source of providers for the `importProvidersFrom` function.
@@ -4175,7 +4192,7 @@ export declare interface InjectorType<T> extends Type<T> {
  */
 declare interface InjectorTypeWithProviders<T> {
     ngModule: InjectorType<T>;
-    providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
+    providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | EnvironmentProviders | any[])[];
 }
 
 /**
@@ -5163,6 +5180,12 @@ declare const enum LViewFlags {
 }
 
 /**
+ * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
+ * referenced in `@Component in a component injector.
+ */
+export declare function makeEnvironmentProviders(providers: Provider[]): EnvironmentProviders;
+
+/**
  * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
  * that the compiler should use in case of missing translations:
  * - Error: throw if you have missing translations.
@@ -5217,7 +5240,7 @@ export declare class ModuleWithComponentFactories<T> {
  */
 export declare interface ModuleWithProviders<T> {
     ngModule: Type<T>;
-    providers?: Provider[];
+    providers?: Array<Provider | EnvironmentProviders>;
 }
 
 declare const MOVED_VIEWS = 9;
@@ -5286,7 +5309,7 @@ export declare interface NgModule {
      * }
      * ```
      */
-    providers?: Provider[];
+    providers?: Array<Provider | EnvironmentProviders>;
     /**
      * The set of components, directives, and pipes ([declarables](guide/glossary#declarable))
      * that belong to this module.
@@ -6515,7 +6538,7 @@ declare class R3Injector extends EnvironmentInjector {
     get destroyed(): boolean;
     private _destroyed;
     private injectorDefTypes;
-    constructor(providers: Array<Provider | ImportedNgModuleProviders>, parent: Injector, source: string | null, scopes: Set<InjectorScope>);
+    constructor(providers: Array<Provider | EnvironmentProviders>, parent: Injector, source: string | null, scopes: Set<InjectorScope>);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
@@ -10452,9 +10475,19 @@ export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
  */
 export declare function ɵinternalCreateApplication(config: {
     rootComponent?: Type<unknown>;
-    appProviders?: Array<Provider | ImportedNgModuleProviders>;
+    appProviders?: Array<Provider | EnvironmentProviders>;
     platformProviders?: Provider[];
 }): Promise<ApplicationRef>;
+
+export declare interface ɵInternalEnvironmentProviders extends EnvironmentProviders {
+    ɵproviders: Provider[];
+    /**
+     * If present, indicates that the `EnvironmentProviders` were derived from NgModule providers.
+     *
+     * This is used to produce clearer error messages.
+     */
+    ɵfromNgModule?: true;
+}
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 
@@ -10466,6 +10499,8 @@ export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
  * @see `ChangeDetectorRef`
  */
 export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
+
+export declare function ɵisEnvironmentProviders(value: Provider | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
 
 export declare function ɵisInjectable(type: any): boolean;
 
@@ -12966,7 +13001,7 @@ export declare type ɵɵInjectorDeclaration<T> = unknown;
  * @codeGenApi
  */
 export declare interface ɵɵInjectorDef<T> {
-    providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | any[])[];
+    providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | EnvironmentProviders | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
 

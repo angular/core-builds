@@ -1,10 +1,10 @@
 /**
- * @license Angular v15.0.0-next.5+sha-deb4cab
+ * @license Angular v15.0.0-next.5+sha-07017a7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
 
@@ -1893,6 +1893,17 @@ function initNgDevMode() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function isEnvironmentProviders(value) {
+    return value && !!value.ɵproviders;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Used for stringify render output in Ivy.
  * Important! This function is very performance-sensitive and we should
@@ -1942,8 +1953,13 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
         const providerDetail = providers.map(v => v == provider ? '?' + provider + '?' : '...');
         throw new Error(`Invalid provider for the NgModule '${stringify(ngModuleType)}' - only instances of Provider and Type are allowed, got: [${providerDetail.join(', ')}]`);
     }
-    else if (provider.ɵproviders) {
-        throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, `Invalid providers from 'importProvidersFrom' present in a non-environment injector. 'importProvidersFrom' can't be used for component providers.`);
+    else if (isEnvironmentProviders(provider)) {
+        if (provider.ɵfromNgModule) {
+            throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, `Invalid providers from 'importProvidersFrom' present in a non-environment injector. 'importProvidersFrom' can't be used for component providers.`);
+        }
+        else {
+            throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, `Invalid providers present in a non-environment injector. 'EnvironmentProviders' can't be used for component providers.`);
+        }
     }
     else {
         throw new Error('Invalid provider');
@@ -6776,6 +6792,15 @@ class NullInjector {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
+ * referenced in `@Component in a component injector.
+ */
+function makeEnvironmentProviders(providers) {
+    return {
+        ɵproviders: providers,
+    };
+}
+/**
  * Collects providers from all NgModules and standalone components, including transitively imported
  * ones.
  *
@@ -6817,7 +6842,10 @@ class NullInjector {
  * @developerPreview
  */
 function importProvidersFrom(...sources) {
-    return { ɵproviders: internalImportProvidersFrom(true, sources) };
+    return {
+        ɵproviders: internalImportProvidersFrom(true, sources),
+        ɵfromNgModule: true,
+    };
 }
 function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
     const providersOut = [];
@@ -6850,7 +6878,7 @@ function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
 function processInjectorTypesWithProviders(typesWithProviders, providersOut) {
     for (let i = 0; i < typesWithProviders.length; i++) {
         const { ngModule, providers } = typesWithProviders[i];
-        deepForEach(providers, provider => {
+        deepForEachProvider(providers, provider => {
             ngDevMode && validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
             providersOut.push(provider);
         });
@@ -6967,7 +6995,7 @@ function walkProviderTree(container, providersOut, parents, dedup) {
         const defProviders = injDef.providers;
         if (defProviders != null && !isDuplicate) {
             const injectorType = container;
-            deepForEach(defProviders, provider => {
+            deepForEachProvider(defProviders, provider => {
                 ngDevMode && validateProvider(provider, defProviders, injectorType);
                 providersOut.push(provider);
             });
@@ -6989,6 +7017,19 @@ function validateProvider(provider, providers, containerType) {
     const classRef = resolveForwardRef(provider && (provider.useClass || provider.provide));
     if (!classRef) {
         throwInvalidProviderError(containerType, providers, provider);
+    }
+}
+function deepForEachProvider(providers, fn) {
+    for (let provider of providers) {
+        if (isEnvironmentProviders(provider)) {
+            provider = provider.ɵproviders;
+        }
+        if (Array.isArray(provider)) {
+            deepForEachProvider(provider, fn);
+        }
+        else {
+            fn(provider);
+        }
     }
 }
 const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
@@ -7356,7 +7397,7 @@ function providerToRecord(provider) {
  */
 function providerToFactory(provider, ngModuleType, providers) {
     let factory = undefined;
-    if (ngDevMode && isImportedNgModuleProviders(provider)) {
+    if (ngDevMode && isEnvironmentProviders(provider)) {
         throwInvalidProviderError(undefined, providers, provider);
     }
     if (isTypeProvider(provider)) {
@@ -7407,15 +7448,12 @@ function couldBeInjectableType(value) {
     return (typeof value === 'function') ||
         (typeof value === 'object' && value instanceof InjectionToken);
 }
-function isImportedNgModuleProviders(provider) {
-    return !!provider.ɵproviders;
-}
 function forEachSingleProvider(providers, fn) {
     for (const provider of providers) {
         if (Array.isArray(provider)) {
             forEachSingleProvider(provider, fn);
         }
-        else if (isImportedNgModuleProviders(provider)) {
+        else if (provider && isEnvironmentProviders(provider)) {
             forEachSingleProvider(provider.ɵproviders, fn);
         }
         else {
@@ -7646,7 +7684,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-next.5+sha-deb4cab');
+const VERSION = new Version('15.0.0-next.5+sha-07017a7');
 
 /**
  * @license
@@ -26039,17 +26077,17 @@ class TestBedCompiler {
     getProviderOverrides(providers) {
         if (!providers || !providers.length || this.providerOverridesByToken.size === 0)
             return [];
-        // There are two flattening operations here. The inner flatten() operates on the metadata's
-        // providers and applies a mapping function which retrieves overrides for each incoming
-        // provider. The outer flatten() then flattens the produced overrides array. If this is not
-        // done, the array can contain other empty arrays (e.g. `[[], []]`) which leak into the
+        // There are two flattening operations here. The inner flattenProviders() operates on the
+        // metadata's providers and applies a mapping function which retrieves overrides for each
+        // incoming provider. The outer flatten() then flattens the produced overrides array. If this is
+        // not done, the array can contain other empty arrays (e.g. `[[], []]`) which leak into the
         // providers array and contaminate any error messages that might be generated.
-        return flatten(flatten(providers, (provider) => this.getSingleProviderOverrides(provider) || []));
+        return flatten(flattenProviders(providers, (provider) => this.getSingleProviderOverrides(provider) || []));
     }
     getOverriddenProviders(providers) {
         if (!providers || !providers.length || this.providerOverridesByToken.size === 0)
             return [];
-        const flattenedProviders = flatten(providers);
+        const flattenedProviders = flattenProviders(providers);
         const overrides = this.getProviderOverrides(flattenedProviders);
         const overriddenProviders = [...flattenedProviders, ...overrides];
         const final = [];
@@ -26113,16 +26151,34 @@ function isNgModule(value) {
 function maybeUnwrapFn(maybeFn) {
     return maybeFn instanceof Function ? maybeFn() : maybeFn;
 }
-function flatten(values, mapFn) {
+function flatten(values) {
     const out = [];
     values.forEach(value => {
         if (Array.isArray(value)) {
-            out.push(...flatten(value, mapFn));
+            out.push(...flatten(value));
         }
         else {
-            out.push(mapFn ? mapFn(value) : value);
+            out.push(value);
         }
     });
+    return out;
+}
+function identityFn(value) {
+    return value;
+}
+function flattenProviders(providers, mapFn = identityFn) {
+    const out = [];
+    for (let provider of providers) {
+        if (ɵisEnvironmentProviders(provider)) {
+            provider = provider.ɵproviders;
+        }
+        if (Array.isArray(provider)) {
+            out.push(...flattenProviders(provider, mapFn));
+        }
+        else {
+            out.push(mapFn(provider));
+        }
+    }
     return out;
 }
 function getProviderField(provider, field) {
