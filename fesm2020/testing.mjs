@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-cd25cb2
+ * @license Angular v15.1.0-next.0+sha-f97bebf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7684,7 +7684,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-cd25cb2');
+const VERSION = new Version('15.1.0-next.0+sha-f97bebf');
 
 /**
  * @license
@@ -14872,7 +14872,6 @@ function patchDeclaredInputs(declaredInputs, exposedInputs) {
  * @param matchedDefs Directives that have been matched so far.
  */
 function validateHostDirective(hostDirectiveConfig, directiveDef, matchedDefs) {
-    // TODO(crisbeto): implement more of these checks in the compiler.
     const type = hostDirectiveConfig.directive;
     if (directiveDef === null) {
         if (getComponentDef$1(type) !== null) {
@@ -14895,17 +14894,17 @@ function validateHostDirective(hostDirectiveConfig, directiveDef, matchedDefs) {
  * Checks that the host directive inputs/outputs configuration is valid.
  * @param bindingType Kind of binding that is being validated. Used in the error message.
  * @param def Definition of the host directive that is being validated against.
- * @param hostDirectiveDefs Host directive mapping object that shold be validated.
+ * @param hostDirectiveBindings Host directive mapping object that shold be validated.
  */
-function validateMappings(bindingType, def, hostDirectiveDefs) {
+function validateMappings(bindingType, def, hostDirectiveBindings) {
     const className = def.type.name;
     const bindings = bindingType === 'input' ? def.inputs : def.outputs;
-    for (const publicName in hostDirectiveDefs) {
-        if (hostDirectiveDefs.hasOwnProperty(publicName)) {
+    for (const publicName in hostDirectiveBindings) {
+        if (hostDirectiveBindings.hasOwnProperty(publicName)) {
             if (!bindings.hasOwnProperty(publicName)) {
                 throw new RuntimeError(311 /* RuntimeErrorCode.HOST_DIRECTIVE_UNDEFINED_BINDING */, `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`);
             }
-            const remappedPublicName = hostDirectiveDefs[publicName];
+            const remappedPublicName = hostDirectiveBindings[publicName];
             if (bindings.hasOwnProperty(remappedPublicName) &&
                 bindings[remappedPublicName] !== publicName) {
                 throw new RuntimeError(312 /* RuntimeErrorCode.HOST_DIRECTIVE_CONFLICTING_ALIAS */, `Cannot alias ${bindingType} ${publicName} of host directive ${className} to ${remappedPublicName}, because it already has a different ${bindingType} with the same public name.`);
