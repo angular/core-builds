@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-6140bae
+ * @license Angular v15.1.0-next.0+sha-0d65e1d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1034,8 +1034,6 @@ export declare interface Component extends Directive {
      *
      * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
-     *
-     * @developerPreview
      */
     standalone?: boolean;
     /**
@@ -1048,8 +1046,6 @@ export declare interface Component extends Directive {
      *
      * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
-     *
-     * @developerPreview
      */
     imports?: (Type<any> | any[])[];
     /**
@@ -1734,7 +1730,6 @@ export declare function createComponent<C>(component: Type<C>, options: {
  *     messages.
  *
  * @publicApi
- * @developerPreview
  */
 export declare function createEnvironmentInjector(providers: Array<Provider | EnvironmentProviders>, parent: EnvironmentInjector, debugName?: string | null): EnvironmentInjector;
 
@@ -2386,8 +2381,6 @@ export declare interface Directive {
      *
      * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
-     *
-     * @developerPreview
      */
     standalone?: boolean;
     /**
@@ -2727,8 +2720,6 @@ export declare const ENVIRONMENT_INITIALIZER: InjectionToken<() => void>;
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
- *
- * @developerPreview
  */
 export declare abstract class EnvironmentInjector implements Injector {
     /**
@@ -3722,14 +3713,12 @@ export declare type ImportedNgModuleProviders = EnvironmentProviders;
  *
  * @returns Collected providers from the specified list of types.
  * @publicApi
- * @developerPreview
  */
 export declare function importProvidersFrom(...sources: ImportProvidersSource[]): EnvironmentProviders;
 
 /**
  * A source of providers for the `importProvidersFrom` function.
  *
- * @developerPreview
  * @publicApi
  */
 export declare type ImportProvidersSource = Type<unknown> | ModuleWithProviders<unknown> | Array<ImportProvidersSource>;

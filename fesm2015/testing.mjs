@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-6140bae
+ * @license Angular v15.1.0-next.0+sha-0d65e1d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6839,7 +6839,6 @@ function makeEnvironmentProviders(providers) {
  *
  * @returns Collected providers from the specified list of types.
  * @publicApi
- * @developerPreview
  */
 function importProvidersFrom(...sources) {
     return {
@@ -7095,8 +7094,6 @@ function getNullInjector() {
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
- *
- * @developerPreview
  */
 class EnvironmentInjector {
 }
@@ -7684,7 +7681,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-6140bae');
+const VERSION = new Version('15.1.0-next.0+sha-0d65e1d');
 
 /**
  * @license
@@ -22282,7 +22279,6 @@ class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
  *     messages.
  *
  * @publicApi
- * @developerPreview
  */
 function createEnvironmentInjector(providers, parent, debugName = null) {
     const adapter = new EnvironmentNgModuleRefAdapter(providers, parent, debugName);
