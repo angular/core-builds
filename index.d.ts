@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-rc.1+sha-f24da6b
+ * @license Angular v15.0.0-rc.1+sha-96c0e42
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1047,7 +1047,7 @@ export declare interface Component extends Directive {
      * More information about standalone components, directives, and pipes can be found in [this
      * guide](guide/standalone-components).
      */
-    imports?: (Type<any> | any[])[];
+    imports?: (Type<any> | ReadonlyArray<any>)[];
     /**
      * The set of schemas that declare elements to be allowed in a standalone component. Elements and
      * properties that are neither Angular components nor directives must be declared in a schema.
