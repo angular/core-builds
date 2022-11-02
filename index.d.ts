@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-0bc4405
+ * @license Angular v15.1.0-next.0+sha-2d08965
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7378,7 +7378,8 @@ declare const enum RuntimeErrorCode {
     MISSING_GENERATED_DEF = 906,
     TYPE_IS_NOT_STANDALONE = 907,
     MISSING_ZONEJS = 908,
-    UNEXPECTED_ZONE_STATE = 909
+    UNEXPECTED_ZONE_STATE = 909,
+    UNSAFE_IFRAME_ATTRS = 910
 }
 
 declare const SANITIZER = 12;
@@ -12629,7 +12630,7 @@ export declare function ɵɵdisableBindings(): void;
  *
  * @codeGenApi
  */
-export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵelement;
+export declare function ɵɵelement(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number, staticAttrsSanitizer?: (attrs: TAttributes) => void): typeof ɵɵelement;
 
 /**
  * Creates an empty logical container using {@link elementContainerStart}
@@ -12677,7 +12678,6 @@ export declare function ɵɵelementContainerStart(index: number, attrsIndex?: nu
  */
 export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
 
-
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -12693,7 +12693,7 @@ export declare function ɵɵelementEnd(): typeof ɵɵelementEnd;
  *
  * @codeGenApi
  */
-export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number): typeof ɵɵelementStart;
+export declare function ɵɵelementStart(index: number, name: string, attrsIndex?: number | null, localRefsIndex?: number, staticAttrsSanitizer?: (attrs: TAttributes) => void): typeof ɵɵelementStart;
 
 /**
  * Enables directive matching on elements.
@@ -15103,6 +15103,26 @@ export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): Trust
  * @codeGenApi
  */
 export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
+
+/**
+ * Validation function invoked at runtime for each binding that might potentially
+ * represent a security-sensitive attribute of an <iframe>
+ * (see `IFRAME_SECURITY_SENSITIVE_ATTRS` for the full list of such attributes).
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵvalidateIframeAttribute(attrValue: any, tagName: string, attrName: string): void;
+
+/**
+ * Validation function invoked at runtime for each <iframe>, which verifies that
+ * all security-sensitive attributes are located before an `src` or `srcdoc` attributes.
+ * This is needed to make sure that these security-sensitive attributes are taken into
+ * account while creating an <iframe> at runtime. See `IFRAME_SECURITY_SENSITIVE_ATTRS`
+ * for the full list of such attributes.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵvalidateIframeStaticAttributes(attrs: TAttributes): void;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
