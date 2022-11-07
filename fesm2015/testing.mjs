@@ -1,5 +1,5 @@
 /**
- * @license Angular v14.2.9+sha-db867fe
+ * @license Angular v14.2.9+sha-c3bc035
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7635,7 +7635,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('14.2.9+sha-db867fe');
+const VERSION = new Version('14.2.9+sha-c3bc035');
 
 /**
  * @license
@@ -14150,7 +14150,7 @@ class ComponentFactory extends ComponentFactory$1 {
         const elementName = this.componentDef.selectors[0][0] || 'div';
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
-            createElementNode(rendererFactory.createRenderer(null, this.componentDef), elementName, getNamespace(elementName));
+            createElementNode(hostRenderer, elementName, getNamespace(elementName));
         const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
             16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
         // Create the root view. Uses empty TView and ContentTemplate.
