@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-rc.2+sha-2625dc1
+ * @license Angular v15.0.0-rc.2+sha-a93a1a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -947,6 +947,7 @@ class RuntimeError extends Error {
 function formatRuntimeError(code, message) {
     // Error code might be a negative number, which is a special marker that instructs the logic to
     // generate a link to the error details page on angular.io.
+    // We also prepend `0` to non-compile-time errors.
     const fullCode = `NG0${Math.abs(code)}`;
     let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
     if (ngDevMode && code < 0) {
@@ -7681,7 +7682,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.0-rc.2+sha-2625dc1');
+const VERSION = new Version('15.0.0-rc.2+sha-a93a1a5');
 
 /**
  * @license
