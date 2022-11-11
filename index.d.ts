@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.0-rc.3+sha-0c0550b
+ * @license Angular v15.0.0-rc.3+sha-154ca82
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7379,7 +7379,7 @@ declare const enum RuntimeErrorCode {
     TYPE_IS_NOT_STANDALONE = 907,
     MISSING_ZONEJS = 908,
     UNEXPECTED_ZONE_STATE = 909,
-    UNSAFE_IFRAME_ATTRS = 910
+    UNSAFE_IFRAME_ATTRS = -910
 }
 
 declare const SANITIZER = 12;
