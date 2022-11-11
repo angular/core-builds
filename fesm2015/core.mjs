@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-85d9b61
+ * @license Angular v15.1.0-next.0+sha-ec8b52a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7233,7 +7233,7 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
                 `as a static attribute only. \n` +
                 `To fix this, switch the \`${attrName}\` binding to a static attribute ` +
                 `in a template or in host bindings section.`;
-        throw new RuntimeError(910 /* RuntimeErrorCode.UNSAFE_IFRAME_ATTRS */, errorMessage);
+        throw new RuntimeError(-910 /* RuntimeErrorCode.UNSAFE_IFRAME_ATTRS */, errorMessage);
     }
     return attrValue;
 }
@@ -9131,7 +9131,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-85d9b61');
+const VERSION = new Version('15.1.0-next.0+sha-ec8b52a');
 
 /**
  * @license
