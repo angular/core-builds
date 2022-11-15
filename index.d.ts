@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-38b2ed3
+ * @license Angular v15.1.0-next.0+sha-fc47141
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2385,8 +2385,13 @@ export declare interface Directive {
     standalone?: boolean;
     /**
      * Standalone directives that should be applied to the host whenever the directive is matched.
-     * By default none of the inputs or outputs of the host directives will be available on the host,
+     * By default, none of the inputs or outputs of the host directives will be available on the host,
      * unless they are specified in the `inputs` or `outputs` properties.
+     *
+     * You can additionally alias inputs and outputs by putting a colon and the alias after the
+     * original input or output name. For example, if a directive applied via `hostDirectives`
+     * defines an input named `menuDisabled`, you can alias this to `disabled` by adding
+     * `'menuDisabled: disabled'` as an entry to `inputs`.
      */
     hostDirectives?: (Type<unknown> | {
         directive: Type<unknown>;
