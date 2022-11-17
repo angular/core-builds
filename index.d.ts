@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-8a45dab
+ * @license Angular v15.1.0-next.0+sha-414b1b2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11393,6 +11393,11 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
     detachFromAppRef(): void;
     attachToAppRef(appRef: ViewRefTracker): void;
 }
+
+/**
+ * URL for the XSS security documentation.
+ */
+export declare const ɵXSS_SECURITY_URL = "https://g.co/ng/security#xss";
 
 /**
  * Advances to an element for later binding instructions.

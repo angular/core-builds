@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-8a45dab
+ * @license Angular v15.1.0-next.0+sha-414b1b2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -907,11 +907,15 @@ const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafePr
 /**
  * Base URL for the error details page.
  *
- * Keep the files below in full sync:
+ * Keep this constant in sync across:
  *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
  *  - packages/core/src/error_details_base_url.ts
  */
 const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+/**
+ * URL for the XSS security documentation.
+ */
+const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
 
 /**
  * @license
@@ -7684,7 +7688,7 @@ class SafeValueImpl {
     }
     toString() {
         return `SafeValue must use [property]=binding: ${this.changingThisBreaksApplicationSecurity}` +
-            ` (see https://g.co/ng/security#xss)`;
+            ` (see ${XSS_SECURITY_URL})`;
     }
 }
 class SafeHtmlImpl extends SafeValueImpl {
@@ -7722,7 +7726,7 @@ function allowSanitizationBypassAndThrow(value, type) {
         // Allow ResourceURLs in URL contexts, they are strictly more trusted.
         if (actualType === "ResourceURL" /* BypassType.ResourceUrl */ && type === "URL" /* BypassType.Url */)
             return true;
-        throw new Error(`Required a safe ${type}, got a ${actualType} (see https://g.co/ng/security#xss)`);
+        throw new Error(`Required a safe ${type}, got a ${actualType} (see ${XSS_SECURITY_URL})`);
     }
     return actualType === type;
 }
@@ -7962,7 +7966,7 @@ function _sanitizeUrl(url) {
     if (url.match(SAFE_URL_PATTERN))
         return url;
     if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see https://g.co/ng/security#xss)`);
+        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see ${XSS_SECURITY_URL})`);
     }
     return 'unsafe:' + url;
 }
@@ -8190,7 +8194,7 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
         const sanitizer = new SanitizingHtmlSerializer();
         const safeHtml = sanitizer.sanitizeChildren(getTemplateContent(inertBodyElement) || inertBodyElement);
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && sanitizer.sanitizedSomething) {
-            console.warn('WARNING: sanitizing HTML stripped some content, see https://g.co/ng/security#xss');
+            console.warn(`WARNING: sanitizing HTML stripped some content, see ${XSS_SECURITY_URL}`);
         }
         return trustedHTMLFromString(safeHtml);
     }
@@ -8337,8 +8341,7 @@ function ɵɵsanitizeResourceUrl(unsafeResourceUrl) {
     if (allowSanitizationBypassAndThrow(unsafeResourceUrl, "ResourceURL" /* BypassType.ResourceUrl */)) {
         return trustedScriptURLFromStringBypass(unwrapSafeValue(unsafeResourceUrl));
     }
-    throw new RuntimeError(904 /* RuntimeErrorCode.UNSAFE_VALUE_IN_RESOURCE_URL */, ngDevMode &&
-        'unsafe value used in a resource URL context (see https://g.co/ng/security#xss)');
+    throw new RuntimeError(904 /* RuntimeErrorCode.UNSAFE_VALUE_IN_RESOURCE_URL */, ngDevMode && `unsafe value used in a resource URL context (see ${XSS_SECURITY_URL})`);
 }
 /**
  * A `script` sanitizer which only lets trusted javascript through.
@@ -9523,7 +9526,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-8a45dab');
+const VERSION = new Version('15.1.0-next.0+sha-414b1b2');
 
 /**
  * @license
@@ -21531,7 +21534,7 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                                 ngDevMode &&
                                     console.warn(`WARNING: ignoring unsafe attribute value ` +
                                         `${lowerAttrName} on element ${tagName} ` +
-                                        `(see https://g.co/ng/security#xss)`);
+                                        `(see ${XSS_SECURITY_URL})`);
                             }
                         }
                         else {
