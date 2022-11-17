@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-b592cda
+ * @license Angular v15.1.0-next.0+sha-b51929a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13033,7 +13033,8 @@ export declare function ɵɵinvalidFactoryDep(index: number): never;
  *
  * @param eventName Name of the event
  * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
+ * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
+ *     from the Renderer3 infrastructure and should be removed from the instruction arguments
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
  *
