@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-b592cda
+ * @license Angular v15.1.0-next.0+sha-779a76f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6817,26 +6817,17 @@ function processCleanups(tView, lView) {
     if (tCleanup !== null) {
         for (let i = 0; i < tCleanup.length - 1; i += 2) {
             if (typeof tCleanup[i] === 'string') {
-                // This is a native DOM listener
-                const idxOrTargetGetter = tCleanup[i + 1];
-                const target = typeof idxOrTargetGetter === 'function' ?
-                    idxOrTargetGetter(lView) :
-                    unwrapRNode(lView[idxOrTargetGetter]);
-                const listener = lCleanup[lastLCleanupIndex = tCleanup[i + 2]];
-                const useCaptureOrSubIdx = tCleanup[i + 3];
-                if (typeof useCaptureOrSubIdx === 'boolean') {
-                    // native DOM listener registered with Renderer3
-                    target.removeEventListener(tCleanup[i], listener, useCaptureOrSubIdx);
+                // This is a native DOM listener. It will occupy 4 entries in the TCleanup array (hence i +=
+                // 2 at the end of this block).
+                const targetIdx = tCleanup[i + 3];
+                ngDevMode && assertNumber(targetIdx, 'cleanup target must be a number');
+                if (targetIdx >= 0) {
+                    // unregister
+                    lCleanup[lastLCleanupIndex = targetIdx]();
                 }
                 else {
-                    if (useCaptureOrSubIdx >= 0) {
-                        // unregister
-                        lCleanup[lastLCleanupIndex = useCaptureOrSubIdx]();
-                    }
-                    else {
-                        // Subscription
-                        lCleanup[lastLCleanupIndex = -useCaptureOrSubIdx].unsubscribe();
-                    }
+                    // Subscription
+                    lCleanup[lastLCleanupIndex = -targetIdx].unsubscribe();
                 }
                 i += 2;
             }
@@ -9531,7 +9522,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-b592cda');
+const VERSION = new Version('15.1.0-next.0+sha-779a76f');
 
 /**
  * @license
@@ -16136,7 +16127,8 @@ const isObservable = isSubscribable;
  *
  * @param eventName Name of the event
  * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
+ * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
+ *     from the Renderer3 infrastructure and should be removed from the instruction arguments
  * @param eventTargetResolver Function that returns global target information in case this listener
  * should be attached to a global object like window, document or body
  *
@@ -16146,7 +16138,7 @@ function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
     const lView = getLView();
     const tView = getTView();
     const tNode = getCurrentTNode();
-    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, !!useCapture, eventTargetResolver);
+    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
     return ɵɵlistener;
 }
 /**
@@ -16176,7 +16168,7 @@ function ɵɵsyntheticHostListener(eventName, listenerFn) {
     const tView = getTView();
     const currentDef = getCurrentDirectiveDef(tView.data);
     const renderer = loadComponentRenderer(currentDef, tNode, lView);
-    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, false);
+    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
     return ɵɵsyntheticHostListener;
 }
 /**
@@ -16209,7 +16201,7 @@ function findExistingListener(tView, lView, eventName, tNodeIdx) {
     }
     return null;
 }
-function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, useCapture, eventTargetResolver) {
+function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
     const isTNodeDirectiveHost = isDirectiveHost(tNode);
     const firstCreatePass = tView.firstCreatePass;
     const tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
