@@ -1,5 +1,5 @@
 /**
- * @license Angular v13.3.11+sha-3b91101
+ * @license Angular v13.3.11+sha-4ea399a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6897,7 +6897,8 @@ declare const enum RuntimeErrorCode {
     VIEW_ALREADY_ATTACHED = 902,
     INVALID_INHERITANCE = 903,
     UNSAFE_VALUE_IN_RESOURCE_URL = 904,
-    UNSAFE_VALUE_IN_SCRIPT = 905
+    UNSAFE_VALUE_IN_SCRIPT = 905,
+    UNSAFE_IFRAME_ATTRS = -910
 }
 
 declare const SANITIZER = 12;
@@ -14532,6 +14533,18 @@ export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): Trust
  * @codeGenApi
  */
 export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
+
+
+/**
+ * Validation function invoked at runtime for each binding that might potentially
+ * represent a security-sensitive attribute of an <iframe>.
+ * See `IFRAME_SECURITY_SENSITIVE_ATTRS` in the
+ * `packages/compiler/src/schema/dom_security_schema.ts` script for the full list
+ * of such attributes.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵvalidateIframeAttribute(attrValue: any, tagName: string, attrName: string): any;
 
 /**
  * Creates new QueryList, stores the reference in LView and returns QueryList.
