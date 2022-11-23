@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-3c6a439
+ * @license Angular v15.1.0-next.0+sha-6acae14
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -292,6 +292,12 @@ export declare interface TestBed {
     get<T>(token: ProviderToken<T>, notFoundValue?: T, flags?: InjectFlags): any;
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token: any, notFoundValue?: any): any;
+    /**
+     * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
+     *
+     * @see EnvironmentInjector#runInContext
+     */
+    runInInjectionContext<T>(fn: () => T): T;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): TestBed;
     overrideComponent(component: Type<any>, override: MetadataOverride<Component>): TestBed;

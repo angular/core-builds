@@ -1,10 +1,10 @@
 /**
- * @license Angular v15.1.0-next.0+sha-3c6a439
+ * @license Angular v15.1.0-next.0+sha-6acae14
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode as getDebugNode$1, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
@@ -9526,7 +9526,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-3c6a439');
+const VERSION = new Version('15.1.0-next.0+sha-6acae14');
 
 /**
  * @license
@@ -26390,6 +26390,14 @@ class TestBedImpl {
     static get(token, notFoundValue = Injector$1.THROW_IF_NOT_FOUND, flags = InjectFlags$1.Default) {
         return TestBedImpl.INSTANCE.inject(token, notFoundValue, flags);
     }
+    /**
+     * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
+     *
+     * @see EnvironmentInjector#runInContext
+     */
+    static runInInjectionContext(fn) {
+        return TestBedImpl.INSTANCE.runInInjectionContext(fn);
+    }
     static createComponent(component) {
         return TestBedImpl.INSTANCE.createComponent(component);
     }
@@ -26525,6 +26533,9 @@ class TestBedImpl {
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token, notFoundValue = Injector$1.THROW_IF_NOT_FOUND, flags = InjectFlags$1.Default) {
         return this.inject(token, notFoundValue, flags);
+    }
+    runInInjectionContext(fn) {
+        return this.inject(EnvironmentInjector$1).runInContext(fn);
     }
     execute(tokens, fn, context) {
         const params = tokens.map(t => this.inject(t));
