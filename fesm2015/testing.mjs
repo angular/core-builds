@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.1+sha-cfd8702
+ * @license Angular v15.0.1+sha-458d62b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3024,10 +3024,6 @@ function assertDirectiveDef(obj) {
 function assertIndexInDeclRange(lView, index) {
     const tView = lView[1];
     assertBetween(HEADER_OFFSET, tView.bindingStartIndex, index);
-}
-function assertIndexInVarsRange(lView, index) {
-    const tView = lView[1];
-    assertBetween(tView.bindingStartIndex, tView.expandoStartIndex, index);
 }
 function assertIndexInExpandoRange(lView, index) {
     const tView = lView[1];
@@ -9442,7 +9438,6 @@ function unwrapElementRef(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
 /**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
  *
@@ -9526,7 +9521,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.1+sha-cfd8702');
+const VERSION = new Version('15.0.1+sha-458d62b');
 
 /**
  * @license
@@ -14361,17 +14356,6 @@ class ComponentFactory extends ComponentFactory$1 {
         }
         return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
     }
-}
-const componentFactoryResolver = new ComponentFactoryResolver();
-/**
- * Creates a ComponentFactoryResolver and stores it on the injector. Or, if the
- * ComponentFactoryResolver
- * already exists, retrieves the existing ComponentFactoryResolver.
- *
- * @returns The ComponentFactoryResolver instance to use
- */
-function injectComponentFactoryResolver() {
-    return componentFactoryResolver;
 }
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
