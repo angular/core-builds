@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.0+sha-e777588
+ * @license Angular v15.1.0-next.0+sha-da7318e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1482,15 +1482,6 @@ const EMBEDDED_VIEW_INJECTOR = 21;
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
 const HEADER_OFFSET = 22;
-/**
- * Converts `TViewType` into human readable text.
- * Make sure this matches with `TViewType`
- */
-const TViewTypeAsString = [
-    'Root',
-    'Component',
-    'Embedded', // 2
-];
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$7 = 1;
@@ -9120,7 +9111,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.0+sha-e777588');
+const VERSION = new Version('15.1.0-next.0+sha-da7318e');
 
 /**
  * @license
@@ -10977,812 +10968,6 @@ function ɵɵinvalidFactory() {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * THIS FILE CONTAINS CODE WHICH SHOULD BE TREE SHAKEN AND NEVER CALLED FROM PRODUCTION CODE!!!
- */
-/**
- * Creates an `Array` construction with a given name. This is useful when
- * looking for memory consumption to see what time of array it is.
- *
- *
- * @param name Name to give to the constructor
- * @returns A subclass of `Array` if possible. This can only be done in
- *          environments which support `class` construct.
- */
-function createNamedArrayType(name) {
-    // This should never be called in prod mode, so let's verify that is the case.
-    if (ngDevMode) {
-        try {
-            // If this function were compromised the following could lead to arbitrary
-            // script execution. We bless it with Trusted Types anyway since this
-            // function is stripped out of production binaries.
-            return (newTrustedFunctionForDev('Array', `return class ${name} extends Array{}`))(Array);
-        }
-        catch (e) {
-            // If it does not work just give up and fall back to regular Array.
-            return Array;
-        }
-    }
-    else {
-        throw new Error('Looks like we are in \'prod mode\', but we are creating a named Array type, which is wrong! Check your code');
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-function toTStylingRange(prev, next) {
-    ngDevMode && assertNumberInRange(prev, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return (prev << 17 /* StylingRange.PREV_SHIFT */ | next << 2 /* StylingRange.NEXT_SHIFT */);
-}
-function getTStylingRangePrev(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange >> 17 /* StylingRange.PREV_SHIFT */) & 32767 /* StylingRange.UNSIGNED_MASK */;
-}
-function getTStylingRangePrevDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 2 /* StylingRange.PREV_DUPLICATE */) ==
-        2 /* StylingRange.PREV_DUPLICATE */;
-}
-function setTStylingRangePrev(tStylingRange, previous) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    ngDevMode && assertNumberInRange(previous, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & ~4294836224 /* StylingRange.PREV_MASK */) |
-        (previous << 17 /* StylingRange.PREV_SHIFT */));
-}
-function setTStylingRangePrevDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange | 2 /* StylingRange.PREV_DUPLICATE */);
-}
-function getTStylingRangeNext(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 131068 /* StylingRange.NEXT_MASK */) >> 2 /* StylingRange.NEXT_SHIFT */;
-}
-function setTStylingRangeNext(tStylingRange, next) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & ~131068 /* StylingRange.NEXT_MASK */) | //
-        next << 2 /* StylingRange.NEXT_SHIFT */);
-}
-function getTStylingRangeNextDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 1 /* StylingRange.NEXT_DUPLICATE */) ===
-        1 /* StylingRange.NEXT_DUPLICATE */;
-}
-function setTStylingRangeNextDuplicate(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange | 1 /* StylingRange.NEXT_DUPLICATE */);
-}
-function getTStylingRangeTail(tStylingRange) {
-    ngDevMode && assertNumber(tStylingRange, 'expected number');
-    const next = getTStylingRangeNext(tStylingRange);
-    return next === 0 ? getTStylingRangePrev(tStylingRange) : next;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Patch a `debug` property on top of the existing object.
- *
- * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
- *
- * @param obj Object to patch
- * @param debug Value to patch
- */
-function attachDebugObject(obj, debug) {
-    if (ngDevMode) {
-        Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
-    }
-    else {
-        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
-    }
-}
-/**
- * Patch a `debug` property getter on top of the existing object.
- *
- * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
- *
- * @param obj Object to patch
- * @param debugGetter Getter returning a value to patch
- */
-function attachDebugGetter(obj, debugGetter) {
-    if (ngDevMode) {
-        Object.defineProperty(obj, 'debug', { get: debugGetter, enumerable: false });
-    }
-    else {
-        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/*
- * This file contains conditionally attached classes which provide human readable (debug) level
- * information for `LView`, `LContainer` and other internal data structures. These data structures
- * are stored internally as array which makes it very difficult during debugging to reason about the
- * current state of the system.
- *
- * Patching the array with extra property does change the array's hidden class' but it does not
- * change the cost of access, therefore this patching should not have significant if any impact in
- * `ngDevMode` mode. (see: https://jsperf.com/array-vs-monkey-patch-array)
- *
- * So instead of seeing:
- * ```
- * Array(30) [Object, 659, null, …]
- * ```
- *
- * You get to see:
- * ```
- * LViewDebug {
- *   views: [...],
- *   flags: {attached: true, ...}
- *   nodes: [
- *     {html: '<div id="123">', ..., nodes: [
- *       {html: '<span>', ..., nodes: null}
- *     ]}
- *   ]
- * }
- * ```
- */
-let LVIEW_COMPONENT_CACHE;
-let LVIEW_EMBEDDED_CACHE;
-let LVIEW_ROOT;
-let LVIEW_COMPONENT;
-let LVIEW_EMBEDDED;
-/**
- * This function clones a blueprint and creates LView.
- *
- * Simple slice will keep the same type, and we need it to be LView
- */
-function cloneToLViewFromTViewBlueprint(tView) {
-    const debugTView = tView;
-    const lView = getLViewToClone(debugTView.type, tView.template && tView.template.name);
-    return lView.concat(tView.blueprint);
-}
-class LRootView extends Array {
-}
-class LComponentView extends Array {
-}
-class LEmbeddedView extends Array {
-}
-function getLViewToClone(type, name) {
-    switch (type) {
-        case 0 /* TViewType.Root */:
-            if (LVIEW_ROOT === undefined)
-                LVIEW_ROOT = new LRootView();
-            return LVIEW_ROOT;
-        case 1 /* TViewType.Component */:
-            if (!ngDevMode || !ngDevMode.namedConstructors) {
-                if (LVIEW_COMPONENT === undefined)
-                    LVIEW_COMPONENT = new LComponentView();
-                return LVIEW_COMPONENT;
-            }
-            if (LVIEW_COMPONENT_CACHE === undefined)
-                LVIEW_COMPONENT_CACHE = new Map();
-            let componentArray = LVIEW_COMPONENT_CACHE.get(name);
-            if (componentArray === undefined) {
-                componentArray = new (createNamedArrayType('LComponentView' + nameSuffix(name)))();
-                LVIEW_COMPONENT_CACHE.set(name, componentArray);
-            }
-            return componentArray;
-        case 2 /* TViewType.Embedded */:
-            if (!ngDevMode || !ngDevMode.namedConstructors) {
-                if (LVIEW_EMBEDDED === undefined)
-                    LVIEW_EMBEDDED = new LEmbeddedView();
-                return LVIEW_EMBEDDED;
-            }
-            if (LVIEW_EMBEDDED_CACHE === undefined)
-                LVIEW_EMBEDDED_CACHE = new Map();
-            let embeddedArray = LVIEW_EMBEDDED_CACHE.get(name);
-            if (embeddedArray === undefined) {
-                embeddedArray = new (createNamedArrayType('LEmbeddedView' + nameSuffix(name)))();
-                LVIEW_EMBEDDED_CACHE.set(name, embeddedArray);
-            }
-            return embeddedArray;
-    }
-}
-function nameSuffix(text) {
-    if (text == null)
-        return '';
-    const index = text.lastIndexOf('_Template');
-    return '_' + (index === -1 ? text : text.slice(0, index));
-}
-/**
- * This class is a debug version of Object literal so that we can have constructor name show up
- * in
- * debug tools in ngDevMode.
- */
-const TViewConstructor = class TView {
-    constructor(type, blueprint, template, queries, viewQuery, declTNode, data, bindingStartIndex, expandoStartIndex, hostBindingOpCodes, firstCreatePass, firstUpdatePass, staticViewQueries, staticContentQueries, preOrderHooks, preOrderCheckHooks, contentHooks, contentCheckHooks, viewHooks, viewCheckHooks, destroyHooks, cleanup, contentQueries, components, directiveRegistry, pipeRegistry, firstChild, schemas, consts, incompleteFirstPass, _decls, _vars) {
-        this.type = type;
-        this.blueprint = blueprint;
-        this.template = template;
-        this.queries = queries;
-        this.viewQuery = viewQuery;
-        this.declTNode = declTNode;
-        this.data = data;
-        this.bindingStartIndex = bindingStartIndex;
-        this.expandoStartIndex = expandoStartIndex;
-        this.hostBindingOpCodes = hostBindingOpCodes;
-        this.firstCreatePass = firstCreatePass;
-        this.firstUpdatePass = firstUpdatePass;
-        this.staticViewQueries = staticViewQueries;
-        this.staticContentQueries = staticContentQueries;
-        this.preOrderHooks = preOrderHooks;
-        this.preOrderCheckHooks = preOrderCheckHooks;
-        this.contentHooks = contentHooks;
-        this.contentCheckHooks = contentCheckHooks;
-        this.viewHooks = viewHooks;
-        this.viewCheckHooks = viewCheckHooks;
-        this.destroyHooks = destroyHooks;
-        this.cleanup = cleanup;
-        this.contentQueries = contentQueries;
-        this.components = components;
-        this.directiveRegistry = directiveRegistry;
-        this.pipeRegistry = pipeRegistry;
-        this.firstChild = firstChild;
-        this.schemas = schemas;
-        this.consts = consts;
-        this.incompleteFirstPass = incompleteFirstPass;
-        this._decls = _decls;
-        this._vars = _vars;
-    }
-    get template_() {
-        const buf = [];
-        processTNodeChildren(this.firstChild, buf);
-        return buf.join('');
-    }
-    get type_() {
-        return TViewTypeAsString[this.type] || `TViewType.?${this.type}?`;
-    }
-};
-class TNode {
-    constructor(tView_, //
-    type, //
-    index, //
-    insertBeforeIndex, //
-    injectorIndex, //
-    componentOffset, //
-    directiveStart, //
-    directiveEnd, //
-    directiveStylingLast, //
-    propertyBindings, //
-    flags, //
-    providerIndexes, //
-    value, //
-    attrs, //
-    mergedAttrs, //
-    localNames, //
-    initialInputs, //
-    inputs, //
-    outputs, //
-    tViews, //
-    next, //
-    projectionNext, //
-    child, //
-    parent, //
-    projection, //
-    styles, //
-    stylesWithoutHost, //
-    residualStyles, //
-    classes, //
-    classesWithoutHost, //
-    residualClasses, //
-    classBindings, //
-    styleBindings) {
-        this.tView_ = tView_;
-        this.type = type;
-        this.index = index;
-        this.insertBeforeIndex = insertBeforeIndex;
-        this.injectorIndex = injectorIndex;
-        this.componentOffset = componentOffset;
-        this.directiveStart = directiveStart;
-        this.directiveEnd = directiveEnd;
-        this.directiveStylingLast = directiveStylingLast;
-        this.propertyBindings = propertyBindings;
-        this.flags = flags;
-        this.providerIndexes = providerIndexes;
-        this.value = value;
-        this.attrs = attrs;
-        this.mergedAttrs = mergedAttrs;
-        this.localNames = localNames;
-        this.initialInputs = initialInputs;
-        this.inputs = inputs;
-        this.outputs = outputs;
-        this.tViews = tViews;
-        this.next = next;
-        this.projectionNext = projectionNext;
-        this.child = child;
-        this.parent = parent;
-        this.projection = projection;
-        this.styles = styles;
-        this.stylesWithoutHost = stylesWithoutHost;
-        this.residualStyles = residualStyles;
-        this.classes = classes;
-        this.classesWithoutHost = classesWithoutHost;
-        this.residualClasses = residualClasses;
-        this.classBindings = classBindings;
-        this.styleBindings = styleBindings;
-    }
-    /**
-     * Return a human debug version of the set of `NodeInjector`s which will be consulted when
-     * resolving tokens from this `TNode`.
-     *
-     * When debugging applications, it is often difficult to determine which `NodeInjector`s will be
-     * consulted. This method shows a list of `DebugNode`s representing the `TNode`s which will be
-     * consulted in order when resolving a token starting at this `TNode`.
-     *
-     * The original data is stored in `LView` and `TView` with a lot of offset indexes, and so it is
-     * difficult to reason about.
-     *
-     * @param lView The `LView` instance for this `TNode`.
-     */
-    debugNodeInjectorPath(lView) {
-        const path = [];
-        let injectorIndex = getInjectorIndex(this, lView);
-        if (injectorIndex === -1) {
-            // Looks like the current `TNode` does not have `NodeInjector` associated with it => look for
-            // parent NodeInjector.
-            const parentLocation = getParentInjectorLocation(this, lView);
-            if (parentLocation !== NO_PARENT_INJECTOR) {
-                // We found a parent, so start searching from the parent location.
-                injectorIndex = getParentInjectorIndex(parentLocation);
-                lView = getParentInjectorView(parentLocation, lView);
-            }
-            else {
-                // No parents have been found, so there are no `NodeInjector`s to consult.
-            }
-        }
-        while (injectorIndex !== -1) {
-            ngDevMode && assertNodeInjector(lView, injectorIndex);
-            const tNode = lView[TVIEW].data[injectorIndex + 8 /* NodeInjectorOffset.TNODE */];
-            path.push(buildDebugNode(tNode, lView));
-            const parentLocation = lView[injectorIndex + 8 /* NodeInjectorOffset.PARENT */];
-            if (parentLocation === NO_PARENT_INJECTOR) {
-                injectorIndex = -1;
-            }
-            else {
-                injectorIndex = getParentInjectorIndex(parentLocation);
-                lView = getParentInjectorView(parentLocation, lView);
-            }
-        }
-        return path;
-    }
-    get type_() {
-        return toTNodeTypeAsString(this.type) || `TNodeType.?${this.type}?`;
-    }
-    get flags_() {
-        const flags = [];
-        if (this.flags & 8 /* TNodeFlags.hasClassInput */)
-            flags.push('TNodeFlags.hasClassInput');
-        if (this.flags & 4 /* TNodeFlags.hasContentQuery */)
-            flags.push('TNodeFlags.hasContentQuery');
-        if (this.flags & 16 /* TNodeFlags.hasStyleInput */)
-            flags.push('TNodeFlags.hasStyleInput');
-        if (this.flags & 64 /* TNodeFlags.hasHostBindings */)
-            flags.push('TNodeFlags.hasHostBindings');
-        if (this.flags & 1 /* TNodeFlags.isDirectiveHost */)
-            flags.push('TNodeFlags.isDirectiveHost');
-        if (this.flags & 32 /* TNodeFlags.isDetached */)
-            flags.push('TNodeFlags.isDetached');
-        if (this.flags & 2 /* TNodeFlags.isProjected */)
-            flags.push('TNodeFlags.isProjected');
-        return flags.join('|');
-    }
-    get template_() {
-        if (this.type & 1 /* TNodeType.Text */)
-            return this.value;
-        const buf = [];
-        const tagName = typeof this.value === 'string' && this.value || this.type_;
-        buf.push('<', tagName);
-        if (this.flags) {
-            buf.push(' ', this.flags_);
-        }
-        if (this.attrs) {
-            for (let i = 0; i < this.attrs.length;) {
-                const attrName = this.attrs[i++];
-                if (typeof attrName == 'number') {
-                    break;
-                }
-                const attrValue = this.attrs[i++];
-                buf.push(' ', attrName, '="', attrValue, '"');
-            }
-        }
-        buf.push('>');
-        processTNodeChildren(this.child, buf);
-        buf.push('</', tagName, '>');
-        return buf.join('');
-    }
-    get styleBindings_() {
-        return toDebugStyleBinding(this, false);
-    }
-    get classBindings_() {
-        return toDebugStyleBinding(this, true);
-    }
-    get providerIndexStart_() {
-        return this.providerIndexes & 1048575 /* TNodeProviderIndexes.ProvidersStartIndexMask */;
-    }
-    get providerIndexEnd_() {
-        return this.providerIndexStart_ +
-            (this.providerIndexes >>> 20 /* TNodeProviderIndexes.CptViewProvidersCountShift */);
-    }
-}
-const TNodeDebug = TNode;
-function toDebugStyleBinding(tNode, isClassBased) {
-    const tData = tNode.tView_.data;
-    const bindings = [];
-    const range = isClassBased ? tNode.classBindings : tNode.styleBindings;
-    const prev = getTStylingRangePrev(range);
-    const next = getTStylingRangeNext(range);
-    let isTemplate = next !== 0;
-    let cursor = isTemplate ? next : prev;
-    while (cursor !== 0) {
-        const itemKey = tData[cursor];
-        const itemRange = tData[cursor + 1];
-        bindings.unshift({
-            key: itemKey,
-            index: cursor,
-            isTemplate: isTemplate,
-            prevDuplicate: getTStylingRangePrevDuplicate(itemRange),
-            nextDuplicate: getTStylingRangeNextDuplicate(itemRange),
-            nextIndex: getTStylingRangeNext(itemRange),
-            prevIndex: getTStylingRangePrev(itemRange),
-        });
-        if (cursor === prev)
-            isTemplate = false;
-        cursor = getTStylingRangePrev(itemRange);
-    }
-    bindings.push((isClassBased ? tNode.residualClasses : tNode.residualStyles) || null);
-    return bindings;
-}
-function processTNodeChildren(tNode, buf) {
-    while (tNode) {
-        buf.push(tNode.template_);
-        tNode = tNode.next;
-    }
-}
-class TViewData extends Array {
-}
-let TVIEWDATA_EMPTY; // can't initialize here or it will not be tree shaken, because
-// `LView` constructor could have side-effects.
-/**
- * This function clones a blueprint and creates TData.
- *
- * Simple slice will keep the same type, and we need it to be TData
- */
-function cloneToTViewData(list) {
-    if (TVIEWDATA_EMPTY === undefined)
-        TVIEWDATA_EMPTY = new TViewData();
-    return TVIEWDATA_EMPTY.concat(list);
-}
-class LViewBlueprint extends Array {
-}
-class MatchesArray extends Array {
-}
-class TViewComponents extends Array {
-}
-class TNodeLocalNames extends Array {
-}
-class TNodeInitialInputs extends Array {
-}
-class LCleanup extends Array {
-}
-class TCleanup extends Array {
-}
-function attachLViewDebug(lView) {
-    attachDebugObject(lView, new LViewDebug(lView));
-}
-function attachLContainerDebug(lContainer) {
-    attachDebugObject(lContainer, new LContainerDebug(lContainer));
-}
-function toDebug(obj) {
-    if (obj) {
-        const debug = obj.debug;
-        assertDefined(debug, 'Object does not have a debug representation.');
-        return debug;
-    }
-    else {
-        return obj;
-    }
-}
-/**
- * Use this method to unwrap a native element in `LView` and convert it into HTML for easier
- * reading.
- *
- * @param value possibly wrapped native DOM node.
- * @param includeChildren If `true` then the serialized HTML form will include child elements
- * (same
- * as `outerHTML`). If `false` then the serialized HTML form will only contain the element
- * itself
- * (will not serialize child elements).
- */
-function toHtml(value, includeChildren = false) {
-    const node = unwrapRNode(value);
-    if (node) {
-        switch (node.nodeType) {
-            case Node.TEXT_NODE:
-                return node.textContent;
-            case Node.COMMENT_NODE:
-                return `<!--${node.textContent}-->`;
-            case Node.ELEMENT_NODE:
-                const outerHTML = node.outerHTML;
-                if (includeChildren) {
-                    return outerHTML;
-                }
-                else {
-                    const innerHTML = '>' + node.innerHTML + '<';
-                    return (outerHTML.split(innerHTML)[0]) + '>';
-                }
-        }
-    }
-    return null;
-}
-class LViewDebug {
-    constructor(_raw_lView) {
-        this._raw_lView = _raw_lView;
-    }
-    /**
-     * Flags associated with the `LView` unpacked into a more readable state.
-     */
-    get flags() {
-        const flags = this._raw_lView[FLAGS];
-        return {
-            __raw__flags__: flags,
-            initPhaseState: flags & 3 /* LViewFlags.InitPhaseStateMask */,
-            creationMode: !!(flags & 4 /* LViewFlags.CreationMode */),
-            firstViewPass: !!(flags & 8 /* LViewFlags.FirstLViewPass */),
-            checkAlways: !!(flags & 16 /* LViewFlags.CheckAlways */),
-            dirty: !!(flags & 32 /* LViewFlags.Dirty */),
-            attached: !!(flags & 64 /* LViewFlags.Attached */),
-            destroyed: !!(flags & 128 /* LViewFlags.Destroyed */),
-            isRoot: !!(flags & 256 /* LViewFlags.IsRoot */),
-            indexWithinInitPhase: flags >> 11 /* LViewFlags.IndexWithinInitPhaseShift */,
-        };
-    }
-    get parent() {
-        return toDebug(this._raw_lView[PARENT]);
-    }
-    get hostHTML() {
-        return toHtml(this._raw_lView[HOST], true);
-    }
-    get html() {
-        return (this.nodes || []).map(mapToHTML).join('');
-    }
-    get context() {
-        return this._raw_lView[CONTEXT];
-    }
-    /**
-     * The tree of nodes associated with the current `LView`. The nodes have been normalized into
-     * a tree structure with relevant details pulled out for readability.
-     */
-    get nodes() {
-        const lView = this._raw_lView;
-        const tNode = lView[TVIEW].firstChild;
-        return toDebugNodes(tNode, lView);
-    }
-    get template() {
-        return this.tView.template_;
-    }
-    get tView() {
-        return this._raw_lView[TVIEW];
-    }
-    get cleanup() {
-        return this._raw_lView[CLEANUP];
-    }
-    get injector() {
-        return this._raw_lView[INJECTOR$1];
-    }
-    get rendererFactory() {
-        return this._raw_lView[RENDERER_FACTORY];
-    }
-    get renderer() {
-        return this._raw_lView[RENDERER];
-    }
-    get sanitizer() {
-        return this._raw_lView[SANITIZER];
-    }
-    get childHead() {
-        return toDebug(this._raw_lView[CHILD_HEAD]);
-    }
-    get next() {
-        return toDebug(this._raw_lView[NEXT]);
-    }
-    get childTail() {
-        return toDebug(this._raw_lView[CHILD_TAIL]);
-    }
-    get declarationView() {
-        return toDebug(this._raw_lView[DECLARATION_VIEW]);
-    }
-    get queries() {
-        return this._raw_lView[QUERIES];
-    }
-    get tHost() {
-        return this._raw_lView[T_HOST];
-    }
-    get id() {
-        return this._raw_lView[ID];
-    }
-    get decls() {
-        return toLViewRange(this.tView, this._raw_lView, HEADER_OFFSET, this.tView.bindingStartIndex);
-    }
-    get vars() {
-        return toLViewRange(this.tView, this._raw_lView, this.tView.bindingStartIndex, this.tView.expandoStartIndex);
-    }
-    get expando() {
-        return toLViewRange(this.tView, this._raw_lView, this.tView.expandoStartIndex, this._raw_lView.length);
-    }
-    /**
-     * Normalized view of child views (and containers) attached at this location.
-     */
-    get childViews() {
-        const childViews = [];
-        let child = this.childHead;
-        while (child) {
-            childViews.push(child);
-            child = child.next;
-        }
-        return childViews;
-    }
-}
-function mapToHTML(node) {
-    if (node.type === 'ElementContainer') {
-        return (node.children || []).map(mapToHTML).join('');
-    }
-    else if (node.type === 'IcuContainer') {
-        throw new Error('Not implemented');
-    }
-    else {
-        return toHtml(node.native, true) || '';
-    }
-}
-function toLViewRange(tView, lView, start, end) {
-    let content = [];
-    for (let index = start; index < end; index++) {
-        content.push({ index: index, t: tView.data[index], l: lView[index] });
-    }
-    return { start: start, end: end, length: end - start, content: content };
-}
-/**
- * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
- *
- * @param tNode
- * @param lView
- */
-function toDebugNodes(tNode, lView) {
-    if (tNode) {
-        const debugNodes = [];
-        let tNodeCursor = tNode;
-        while (tNodeCursor) {
-            debugNodes.push(buildDebugNode(tNodeCursor, lView));
-            tNodeCursor = tNodeCursor.next;
-        }
-        return debugNodes;
-    }
-    else {
-        return [];
-    }
-}
-function buildDebugNode(tNode, lView) {
-    const rawValue = lView[tNode.index];
-    const native = unwrapRNode(rawValue);
-    const factories = [];
-    const instances = [];
-    const tView = lView[TVIEW];
-    for (let i = tNode.directiveStart; i < tNode.directiveEnd; i++) {
-        const def = tView.data[i];
-        factories.push(def.type);
-        instances.push(lView[i]);
-    }
-    return {
-        html: toHtml(native),
-        type: toTNodeTypeAsString(tNode.type),
-        tNode,
-        native: native,
-        children: toDebugNodes(tNode.child, lView),
-        factories,
-        instances,
-        injector: buildNodeInjectorDebug(tNode, tView, lView),
-        get injectorResolutionPath() {
-            return tNode.debugNodeInjectorPath(lView);
-        },
-    };
-}
-function buildNodeInjectorDebug(tNode, tView, lView) {
-    const viewProviders = [];
-    for (let i = tNode.providerIndexStart_; i < tNode.providerIndexEnd_; i++) {
-        viewProviders.push(tView.data[i]);
-    }
-    const providers = [];
-    for (let i = tNode.providerIndexEnd_; i < tNode.directiveEnd; i++) {
-        providers.push(tView.data[i]);
-    }
-    const nodeInjectorDebug = {
-        bloom: toBloom(lView, tNode.injectorIndex),
-        cumulativeBloom: toBloom(tView.data, tNode.injectorIndex),
-        providers,
-        viewProviders,
-        parentInjectorIndex: lView[tNode.providerIndexStart_ - 1],
-    };
-    return nodeInjectorDebug;
-}
-/**
- * Convert a number at `idx` location in `array` into binary representation.
- *
- * @param array
- * @param idx
- */
-function binary(array, idx) {
-    const value = array[idx];
-    // If not a number we print 8 `?` to retain alignment but let user know that it was called on
-    // wrong type.
-    if (typeof value !== 'number')
-        return '????????';
-    // We prefix 0s so that we have constant length number
-    const text = '00000000' + value.toString(2);
-    return text.substring(text.length - 8);
-}
-/**
- * Convert a bloom filter at location `idx` in `array` into binary representation.
- *
- * @param array
- * @param idx
- */
-function toBloom(array, idx) {
-    if (idx < 0) {
-        return 'NO_NODE_INJECTOR';
-    }
-    return `${binary(array, idx + 7)}_${binary(array, idx + 6)}_${binary(array, idx + 5)}_${binary(array, idx + 4)}_${binary(array, idx + 3)}_${binary(array, idx + 2)}_${binary(array, idx + 1)}_${binary(array, idx + 0)}`;
-}
-class LContainerDebug {
-    constructor(_raw_lContainer) {
-        this._raw_lContainer = _raw_lContainer;
-    }
-    get hasTransplantedViews() {
-        return this._raw_lContainer[HAS_TRANSPLANTED_VIEWS];
-    }
-    get views() {
-        return this._raw_lContainer.slice(CONTAINER_HEADER_OFFSET)
-            .map(toDebug);
-    }
-    get parent() {
-        return toDebug(this._raw_lContainer[PARENT]);
-    }
-    get movedViews() {
-        return this._raw_lContainer[MOVED_VIEWS];
-    }
-    get host() {
-        return this._raw_lContainer[HOST];
-    }
-    get native() {
-        return this._raw_lContainer[NATIVE];
-    }
-    get next() {
-        return toDebug(this._raw_lContainer[NEXT]);
-    }
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Invoke `HostBindingsFunction`s for view.
  *
  * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
@@ -11848,7 +11033,7 @@ function renderChildComponents(hostLView, components) {
     }
 }
 function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector, embeddedViewInjector) {
-    const lView = ngDevMode ? cloneToLViewFromTViewBlueprint(tView) : tView.blueprint.slice();
+    const lView = tView.blueprint.slice();
     lView[HOST] = host;
     lView[FLAGS] = flags | 4 /* LViewFlags.CreationMode */ | 64 /* LViewFlags.Attached */ | 8 /* LViewFlags.FirstLViewPass */;
     if (embeddedViewInjector !== null ||
@@ -11872,7 +11057,6 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
         assertEqual(tView.type == 2 /* TViewType.Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
     lView[DECLARATION_COMPONENT_VIEW] =
         tView.type == 2 /* TViewType.Embedded */ ? parentLView[DECLARATION_COMPONENT_VIEW] : lView;
-    ngDevMode && attachLViewDebug(lView);
     return lView;
 }
 function getOrCreateTNode(tView, index, type, name, attrs) {
@@ -12255,73 +11439,38 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
     const initialViewLength = bindingStartIndex + vars;
     const blueprint = createViewBlueprint(bindingStartIndex, initialViewLength);
     const consts = typeof constsOrFactory === 'function' ? constsOrFactory() : constsOrFactory;
-    const tView = blueprint[TVIEW] = ngDevMode ?
-        new TViewConstructor(type, // type: TViewType,
-        blueprint, // blueprint: LView,
-        templateFn, // template: ComponentTemplate<{}>|null,
-        null, // queries: TQueries|null
-        viewQuery, // viewQuery: ViewQueriesFunction<{}>|null,
-        declTNode, // declTNode: TNode|null,
-        cloneToTViewData(blueprint).fill(null, bindingStartIndex), // data: TData,
-        bindingStartIndex, // bindingStartIndex: number,
-        initialViewLength, // expandoStartIndex: number,
-        null, // hostBindingOpCodes: HostBindingOpCodes,
-        true, // firstCreatePass: boolean,
-        true, // firstUpdatePass: boolean,
-        false, // staticViewQueries: boolean,
-        false, // staticContentQueries: boolean,
-        null, // preOrderHooks: HookData|null,
-        null, // preOrderCheckHooks: HookData|null,
-        null, // contentHooks: HookData|null,
-        null, // contentCheckHooks: HookData|null,
-        null, // viewHooks: HookData|null,
-        null, // viewCheckHooks: HookData|null,
-        null, // destroyHooks: DestroyHookData|null,
-        null, // cleanup: any[]|null,
-        null, // contentQueries: number[]|null,
-        null, // components: number[]|null,
-        typeof directives === 'function' ? //
-            directives() : //
-            directives, // directiveRegistry: DirectiveDefList|null,
-        typeof pipes === 'function' ? pipes() : pipes, // pipeRegistry: PipeDefList|null,
-        null, // firstChild: TNode|null,
-        schemas, // schemas: SchemaMetadata[]|null,
-        consts, // consts: TConstants|null
-        false, // incompleteFirstPass: boolean
-        decls, // ngDevMode only: decls
-        vars) :
-        {
-            type: type,
-            blueprint: blueprint,
-            template: templateFn,
-            queries: null,
-            viewQuery: viewQuery,
-            declTNode: declTNode,
-            data: blueprint.slice().fill(null, bindingStartIndex),
-            bindingStartIndex: bindingStartIndex,
-            expandoStartIndex: initialViewLength,
-            hostBindingOpCodes: null,
-            firstCreatePass: true,
-            firstUpdatePass: true,
-            staticViewQueries: false,
-            staticContentQueries: false,
-            preOrderHooks: null,
-            preOrderCheckHooks: null,
-            contentHooks: null,
-            contentCheckHooks: null,
-            viewHooks: null,
-            viewCheckHooks: null,
-            destroyHooks: null,
-            cleanup: null,
-            contentQueries: null,
-            components: null,
-            directiveRegistry: typeof directives === 'function' ? directives() : directives,
-            pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
-            firstChild: null,
-            schemas: schemas,
-            consts: consts,
-            incompleteFirstPass: false
-        };
+    const tView = blueprint[TVIEW] = {
+        type: type,
+        blueprint: blueprint,
+        template: templateFn,
+        queries: null,
+        viewQuery: viewQuery,
+        declTNode: declTNode,
+        data: blueprint.slice().fill(null, bindingStartIndex),
+        bindingStartIndex: bindingStartIndex,
+        expandoStartIndex: initialViewLength,
+        hostBindingOpCodes: null,
+        firstCreatePass: true,
+        firstUpdatePass: true,
+        staticViewQueries: false,
+        staticContentQueries: false,
+        preOrderHooks: null,
+        preOrderCheckHooks: null,
+        contentHooks: null,
+        contentCheckHooks: null,
+        viewHooks: null,
+        viewCheckHooks: null,
+        destroyHooks: null,
+        cleanup: null,
+        contentQueries: null,
+        components: null,
+        directiveRegistry: typeof directives === 'function' ? directives() : directives,
+        pipeRegistry: typeof pipes === 'function' ? pipes() : pipes,
+        firstChild: null,
+        schemas: schemas,
+        consts: consts,
+        incompleteFirstPass: false
+    };
     if (ngDevMode) {
         // For performance reasons it is important that the tView retains the same shape during runtime.
         // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
@@ -12331,7 +11480,7 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
     return tView;
 }
 function createViewBlueprint(bindingStartIndex, initialViewLength) {
-    const blueprint = ngDevMode ? new LViewBlueprint() : [];
+    const blueprint = [];
     for (let i = 0; i < initialViewLength; i++) {
         blueprint.push(i < bindingStartIndex ? null : NO_CHANGE);
     }
@@ -12384,74 +11533,40 @@ function createTNode(tView, tParent, type, index, value, attrs) {
     ngDevMode && ngDevMode.tNode++;
     ngDevMode && tParent && assertTNodeForTView(tParent, tView);
     let injectorIndex = tParent ? tParent.injectorIndex : -1;
-    const tNode = ngDevMode ?
-        new TNodeDebug(tView, // tView_: TView
-        type, // type: TNodeType
-        index, // index: number
-        null, // insertBeforeIndex: null|-1|number|number[]
-        injectorIndex, // injectorIndex: number
-        -1, // componentOffset: number
-        -1, // directiveStart: number
-        -1, // directiveEnd: number
-        -1, // directiveStylingLast: number
-        null, // propertyBindings: number[]|null
-        0, // flags: TNodeFlags
-        0, // providerIndexes: TNodeProviderIndexes
-        value, // value: string|null
-        attrs, // attrs: (string|AttributeMarker|(string|SelectorFlags)[])[]|null
-        null, // mergedAttrs
-        null, // localNames: (string|number)[]|null
-        undefined, // initialInputs: (string[]|null)[]|null|undefined
-        null, // inputs: PropertyAliases|null
-        null, // outputs: PropertyAliases|null
-        null, // tViews: ITView|ITView[]|null
-        null, // next: ITNode|null
-        null, // projectionNext: ITNode|null
-        null, // child: ITNode|null
-        tParent, // parent: TElementNode|TContainerNode|null
-        null, // projection: number|(ITNode|RNode[])[]|null
-        null, // styles: string|null
-        null, // stylesWithoutHost: string|null
-        undefined, // residualStyles: string|null
-        null, // classes: string|null
-        null, // classesWithoutHost: string|null
-        undefined, // residualClasses: string|null
-        0, // classBindings: TStylingRange;
-        0) :
-        {
-            type,
-            index,
-            insertBeforeIndex: null,
-            injectorIndex,
-            directiveStart: -1,
-            directiveEnd: -1,
-            directiveStylingLast: -1,
-            componentOffset: -1,
-            propertyBindings: null,
-            flags: 0,
-            providerIndexes: 0,
-            value: value,
-            attrs: attrs,
-            mergedAttrs: null,
-            localNames: null,
-            initialInputs: undefined,
-            inputs: null,
-            outputs: null,
-            tViews: null,
-            next: null,
-            projectionNext: null,
-            child: null,
-            parent: tParent,
-            projection: null,
-            styles: null,
-            stylesWithoutHost: null,
-            residualStyles: undefined,
-            classes: null,
-            classesWithoutHost: null,
-            residualClasses: undefined,
-            classBindings: 0,
-            styleBindings: 0,
-        };
+    const tNode = {
+        type,
+        index,
+        insertBeforeIndex: null,
+        injectorIndex,
+        directiveStart: -1,
+        directiveEnd: -1,
+        directiveStylingLast: -1,
+        componentOffset: -1,
+        propertyBindings: null,
+        flags: 0,
+        providerIndexes: 0,
+        value: value,
+        attrs: attrs,
+        mergedAttrs: null,
+        localNames: null,
+        initialInputs: undefined,
+        inputs: null,
+        outputs: null,
+        tViews: null,
+        next: null,
+        projectionNext: null,
+        child: null,
+        parent: tParent,
+        projection: null,
+        styles: null,
+        stylesWithoutHost: null,
+        residualStyles: undefined,
+        classes: null,
+        classesWithoutHost: null,
+        residualClasses: undefined,
+        classBindings: 0,
+        styleBindings: 0,
+    };
     if (ngDevMode) {
         // For performance reasons it is important that the tNode retains the same shape during runtime.
         // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
@@ -12508,7 +11623,7 @@ function initializeInputAndOutputAliases(tView, tNode, hostDirectiveDefinitionMa
     const end = tNode.directiveEnd;
     const tViewData = tView.data;
     const tNodeAttrs = tNode.attrs;
-    const inputsFromAttrs = ngDevMode ? new TNodeInitialInputs() : [];
+    const inputsFromAttrs = [];
     let inputsStore = null;
     let outputsStore = null;
     for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
@@ -12847,7 +11962,7 @@ function findDirectiveDefMatches(tView, tNode) {
         for (let i = 0; i < registry.length; i++) {
             const def = registry[i];
             if (isNodeMatchingSelectorList(tNode, def.selectors, /* isProjectionMode */ false)) {
-                matches || (matches = ngDevMode ? new MatchesArray() : []);
+                matches || (matches = []);
                 if (isComponentDef(def)) {
                     if (ngDevMode) {
                         assertTNodeType(tNode, 2 /* TNodeType.Element */, `"${tNode.value}" tags cannot be used as component hosts. ` +
@@ -12905,13 +12020,12 @@ function markAsComponentHost(tView, hostTNode, componentOffset) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && assertGreaterThan(componentOffset, -1, 'componentOffset must be great than -1');
     hostTNode.componentOffset = componentOffset;
-    (tView.components || (tView.components = ngDevMode ? new TViewComponents() : []))
-        .push(hostTNode.index);
+    (tView.components || (tView.components = [])).push(hostTNode.index);
 }
 /** Caches local names and their matching directive indices for query and template lookups. */
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
     if (localRefs) {
-        const localNames = tNode.localNames = ngDevMode ? new TNodeLocalNames() : [];
+        const localNames = tNode.localNames = [];
         // Local names must be stored in tNode in the same order that localRefs are defined
         // in the template to ensure the data is loaded in the same slots as their refs
         // in the template (for template queries).
@@ -13094,9 +12208,6 @@ function generateInitialInputs(inputs, directiveIndex, attrs) {
 //////////////////////////
 //// ViewContainer & View
 //////////////////////////
-// Not sure why I need to do `any` here but TS complains later.
-const LContainerArray = class LContainer extends Array {
-};
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
@@ -13109,20 +12220,20 @@ const LContainerArray = class LContainer extends Array {
  */
 function createLContainer(hostNative, currentView, native, tNode) {
     ngDevMode && assertLView(currentView);
-    // https://jsperf.com/array-literal-vs-new-array-really
-    const lContainer = new (ngDevMode ? LContainerArray : Array)(hostNative, // host native
-    true, // Boolean `true` in this position signifies that this is an `LContainer`
-    false, // has transplanted views
-    currentView, // parent
-    null, // next
-    0, // transplanted views to refresh count
-    tNode, // t_host
-    native, // native,
-    null, // view refs
-    null);
+    const lContainer = [
+        hostNative,
+        true,
+        false,
+        currentView,
+        null,
+        0,
+        tNode,
+        native,
+        null,
+        null, // moved views
+    ];
     ngDevMode &&
         assertEqual(lContainer.length, CONTAINER_HEADER_OFFSET, 'Should allocate correct number of slots for LContainer header.');
-    ngDevMode && attachLContainerDebug(lContainer);
     return lContainer;
 }
 /**
@@ -13396,10 +12507,10 @@ function storePropertyBindingMetadata(tData, tNode, propertyName, bindingIndex, 
 }
 function getOrCreateLViewCleanup(view) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return view[CLEANUP] || (view[CLEANUP] = ngDevMode ? new LCleanup() : []);
+    return view[CLEANUP] || (view[CLEANUP] = []);
 }
 function getOrCreateTViewCleanup(tView) {
-    return tView.cleanup || (tView.cleanup = ngDevMode ? new TCleanup() : []);
+    return tView.cleanup || (tView.cleanup = []);
 }
 /**
  * There are cases where the sub component's renderer needs to be included
@@ -16594,6 +15705,62 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
         }
     }
     return ɵɵpropertyInterpolateV;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function toTStylingRange(prev, next) {
+    ngDevMode && assertNumberInRange(prev, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    return (prev << 17 /* StylingRange.PREV_SHIFT */ | next << 2 /* StylingRange.NEXT_SHIFT */);
+}
+function getTStylingRangePrev(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange >> 17 /* StylingRange.PREV_SHIFT */) & 32767 /* StylingRange.UNSIGNED_MASK */;
+}
+function getTStylingRangePrevDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange & 2 /* StylingRange.PREV_DUPLICATE */) ==
+        2 /* StylingRange.PREV_DUPLICATE */;
+}
+function setTStylingRangePrev(tStylingRange, previous) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    ngDevMode && assertNumberInRange(previous, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    return ((tStylingRange & ~4294836224 /* StylingRange.PREV_MASK */) |
+        (previous << 17 /* StylingRange.PREV_SHIFT */));
+}
+function setTStylingRangePrevDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange | 2 /* StylingRange.PREV_DUPLICATE */);
+}
+function getTStylingRangeNext(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange & 131068 /* StylingRange.NEXT_MASK */) >> 2 /* StylingRange.NEXT_SHIFT */;
+}
+function setTStylingRangeNext(tStylingRange, next) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
+    return ((tStylingRange & ~131068 /* StylingRange.NEXT_MASK */) | //
+        next << 2 /* StylingRange.NEXT_SHIFT */);
+}
+function getTStylingRangeNextDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange & 1 /* StylingRange.NEXT_DUPLICATE */) ===
+        1 /* StylingRange.NEXT_DUPLICATE */;
+}
+function setTStylingRangeNextDuplicate(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    return (tStylingRange | 1 /* StylingRange.NEXT_DUPLICATE */);
+}
+function getTStylingRangeTail(tStylingRange) {
+    ngDevMode && assertNumber(tStylingRange, 'expected number');
+    const next = getTStylingRangeNext(tStylingRange);
+    return next === 0 ? getTStylingRangePrev(tStylingRange) : next;
 }
 
 /**
@@ -20425,6 +19592,46 @@ function loadIcuContainerVisitor() {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Patch a `debug` property on top of the existing object.
+ *
+ * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
+ *
+ * @param obj Object to patch
+ * @param debug Value to patch
+ */
+function attachDebugObject(obj, debug) {
+    if (ngDevMode) {
+        Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
+    }
+    else {
+        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
+    }
+}
+/**
+ * Patch a `debug` property getter on top of the existing object.
+ *
+ * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
+ *
+ * @param obj Object to patch
+ * @param debugGetter Getter returning a value to patch
+ */
+function attachDebugGetter(obj, debugGetter) {
+    if (ngDevMode) {
+        Object.defineProperty(obj, 'debug', { get: debugGetter, enumerable: false });
+    }
+    else {
+        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Converts `I18nCreateOpCodes` array into a human readable format.
  *
  * This function is attached to the `I18nCreateOpCodes.debug` property if `ngDevMode` is enabled.
@@ -22385,32 +21592,6 @@ function sortListeners(a, b) {
  */
 function isDirectiveDefHack(obj) {
     return obj.type !== undefined && obj.template !== undefined && obj.declaredInputs !== undefined;
-}
-/**
- * Returns the attached `DebugNode` instance for an element in the DOM.
- *
- * @param element DOM element which is owned by an existing component's view.
- */
-function getDebugNode$1(element) {
-    if (ngDevMode && !(element instanceof Node)) {
-        throw new Error('Expecting instance of DOM Element');
-    }
-    const lContext = getLContext(element);
-    const lView = lContext ? lContext.lView : null;
-    if (lView === null) {
-        return null;
-    }
-    const nodeIndex = lContext.nodeIndex;
-    if (nodeIndex !== -1) {
-        const valueInLView = lView[nodeIndex];
-        // this means that value in the lView is a component with its own
-        // data. In this situation the TNode is not accessed at the same spot.
-        const tNode = isLView(valueInLView) ? valueInLView[T_HOST] : getTNode(lView[TVIEW], nodeIndex);
-        ngDevMode &&
-            assertEqual(tNode.index, nodeIndex, 'Expecting that TNode at index is same as index');
-        return buildDebugNode(tNode, lView);
-    }
-    return null;
 }
 /**
  * Retrieve the component `LView` from component/element.
