@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.1+sha-b4ab710
+ * @license Angular v15.1.0-next.1+sha-3842157
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2803,6 +2803,14 @@ function getDirectiveDef(type) {
 function getPipeDef$1(type) {
     return type[NG_PIPE_DEF] || null;
 }
+/**
+ * Checks whether a given Component, Directive or Pipe is marked as standalone.
+ * This will return false if passed anything other than a Component, Directive, or Pipe class
+ * See this guide for additional information: https://angular.io/guide/standalone-components
+ *
+ * @param type A reference to a Component, Directive or Pipe.
+ * @publicApi
+ */
 function isStandalone(type) {
     const def = getComponentDef$1(type) || getDirectiveDef(type) || getPipeDef$1(type);
     return def !== null ? def.standalone : false;
@@ -9512,7 +9520,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.1+sha-b4ab710');
+const VERSION = new Version('15.1.0-next.1+sha-3842157');
 
 /**
  * @license
@@ -23988,8 +23996,7 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
     Object.defineProperty(moduleType, NG_INJ_DEF, {
         get: () => {
             if (ngInjectorDef === null) {
-                ngDevMode &&
-                    verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot);
+                ngDevMode && verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRoot);
                 const meta = {
                     name: moduleType.name,
                     type: moduleType,

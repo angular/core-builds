@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.1+sha-b4ab710
+ * @license Angular v15.1.0-next.1+sha-3842157
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4242,6 +4242,16 @@ declare interface InternalViewRef extends ViewRef {
  * @publicApi
  */
 export declare function isDevMode(): boolean;
+
+/**
+ * Checks whether a given Component, Directive or Pipe is marked as standalone.
+ * This will return false if passed anything other than a Component, Directive, or Pipe class
+ * See this guide for additional information: https://angular.io/guide/standalone-components
+ *
+ * @param type A reference to a Component, Directive or Pipe.
+ * @publicApi
+ */
+export declare function isStandalone(type: Type<unknown>): boolean;
 
 /**
  * Record representing the item change information.
@@ -10295,8 +10305,6 @@ export declare const ɵisObservable: (obj: any | Observable<any>) => obj is Obse
  * Determine if the argument is shaped like a Promise
  */
 export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
-
-export declare function ɵisStandalone<T>(type: Type<T>): boolean;
 
 /**
  * Determine if the argument is a Subscribable
