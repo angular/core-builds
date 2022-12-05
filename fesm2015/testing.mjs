@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.2+sha-50b1c2b
+ * @license Angular v15.0.2+sha-45cc5f4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1096,17 +1096,6 @@ function assertOneOf(value, ...validValues) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Equivalent to ES6 spread, add each item to an array.
- *
- * @param items The items to add
- * @param arr The array to which you want to add the items
- */
-function addAllToArray(items, arr) {
-    for (let i = 0; i < items.length; i++) {
-        arr.push(items[i]);
-    }
-}
-/**
  * Determines if the contents of two arrays is identical
  *
  * @param a first array
@@ -1260,46 +1249,6 @@ function arrayInsert2(array, index, value1, value2) {
         array[index] = value1;
         array[index + 1] = value2;
     }
-}
-/**
- * Insert a `value` into an `array` so that the array remains sorted.
- *
- * NOTE:
- * - Duplicates are not allowed, and are ignored.
- * - This uses binary search algorithm for fast inserts.
- *
- * @param array A sorted array to insert into.
- * @param value The value to insert.
- * @returns index of the inserted value.
- */
-function arrayInsertSorted(array, value) {
-    let index = arrayIndexOfSorted(array, value);
-    if (index < 0) {
-        // if we did not find it insert it.
-        index = ~index;
-        arrayInsert(array, index, value);
-    }
-    return index;
-}
-/**
- * Remove `value` from a sorted `array`.
- *
- * NOTE:
- * - This uses binary search algorithm for fast removals.
- *
- * @param array A sorted array to remove from.
- * @param value The value to remove.
- * @returns index of the removed value.
- *   - positive index if value found and removed.
- *   - negative index if value not found. (`~index` to get the value where it should have been
- *     inserted)
- */
-function arrayRemoveSorted(array, value) {
-    const index = arrayIndexOfSorted(array, value);
-    if (index >= 0) {
-        arraySplice(array, index, 1);
-    }
-    return index;
 }
 /**
  * Get an index of an `value` in a sorted `array`.
@@ -2981,11 +2930,6 @@ function assertHasParent(tNode) {
     assertDefined(tNode, 'currentTNode should exist!');
     assertDefined(tNode.parent, 'currentTNode should have a parent');
 }
-function assertDataNext(lView, index, arr) {
-    if (arr == null)
-        arr = lView;
-    assertEqual(arr.length, index, `index ${index} expected to be at the end of arr (length ${arr.length})`);
-}
 function assertLContainer(value) {
     assertDefined(value, 'LContainer must be defined');
     assertEqual(isLContainer(value), true, 'Expecting LContainer');
@@ -3234,14 +3178,7 @@ const profiler = function (event, instance, hookOrListener) {
  * found in the LICENSE file at https://angular.io/license
  */
 const SVG_NAMESPACE = 'svg';
-const SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg';
 const MATH_ML_NAMESPACE = 'math';
-const MATH_ML_NAMESPACE_URI = 'http://www.w3.org/1998/MathML/';
-function getNamespaceUri(namespace) {
-    const name = namespace.toLowerCase();
-    return name === SVG_NAMESPACE ? SVG_NAMESPACE_URI :
-        (name === MATH_ML_NAMESPACE ? MATH_ML_NAMESPACE_URI : null);
-}
 
 /**
  * @license
@@ -3285,20 +3222,6 @@ function unwrapLView(value) {
         // This check is same as `isLView()` but we don't call at as we don't want to call
         // `Array.isArray()` twice and give JITer more work for inlining.
         if (typeof value[TYPE] === 'object')
-            return value;
-        value = value[HOST];
-    }
-    return null;
-}
-/**
- * Returns `LContainer` or `null` if not found.
- * @param value wrapped value of `RNode`, `LView`, `LContainer`
- */
-function unwrapLContainer(value) {
-    while (Array.isArray(value)) {
-        // This check is same as `isLContainer()` but we don't call at as we don't want to call
-        // `Array.isArray()` twice and give JITer more work for inlining.
-        if (value[TYPE] === true)
             return value;
         value = value[HOST];
     }
@@ -3562,9 +3485,6 @@ function isCurrentTNodeParent() {
 }
 function setCurrentTNodeAsNotParent() {
     instructionState.lFrame.isParent = false;
-}
-function setCurrentTNodeAsParent() {
-    instructionState.lFrame.isParent = true;
 }
 function getContextLView() {
     const contextLView = instructionState.lFrame.contextLView;
@@ -9512,7 +9432,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.2+sha-50b1c2b');
+const VERSION = new Version('15.0.2+sha-45cc5f4');
 
 /**
  * @license
