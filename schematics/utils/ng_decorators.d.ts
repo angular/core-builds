@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/utils/ng_decorators" />
 import ts from 'typescript';
-export declare type CallExpressionDecorator = ts.Decorator & {
+export type CallExpressionDecorator = ts.Decorator & {
     expression: ts.CallExpression;
 };
 export interface NgDecorator {

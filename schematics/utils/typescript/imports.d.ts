@@ -7,7 +7,7 @@
  */
 /// <amd-module name="@angular/core/schematics/utils/typescript/imports" />
 import ts from 'typescript';
-export declare type Import = {
+export type Import = {
     name: string;
     importModule: string;
     node: ts.ImportDeclaration;

@@ -15,5 +15,5 @@ export interface RewriteEntity {
     width: number;
     replacement: string;
 }
-export declare type RewriteFn = (startPos: number, width: number, text: string) => void;
+export type RewriteFn = (startPos: number, width: number, text: string) => void;
 export declare function migrateFile(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, rewrite: RewriteFn): void;

@@ -16,5 +16,5 @@ export interface MigratableNode {
     objectLiteral: ts.ObjectLiteralExpression;
     property: ts.ObjectLiteralElementLike;
 }
-export declare type RewriteFn = (startPos: number, origLength: number, text: string) => void;
+export type RewriteFn = (startPos: number, origLength: number, text: string) => void;
 export declare function migrateFile(sourceFile: ts.SourceFile, rewriteFn: RewriteFn): void;

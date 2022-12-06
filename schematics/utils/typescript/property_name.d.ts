@@ -8,7 +8,7 @@
 /// <amd-module name="@angular/core/schematics/utils/typescript/property_name" />
 import ts from 'typescript';
 /** Type that describes a property name with an obtainable text. */
-declare type PropertyNameWithText = Exclude<ts.PropertyName, ts.ComputedPropertyName>;
+type PropertyNameWithText = Exclude<ts.PropertyName, ts.ComputedPropertyName>;
 /**
  * Gets the text of the given property name. Returns null if the property
  * name couldn't be determined statically.

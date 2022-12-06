@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.1+sha-8656ac0
+ * @license Angular v15.1.0-next.1+sha-dd42974
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5917,6 +5917,10 @@ function unregisterLView(lView) {
  * of the context.
  */
 class LContext {
+    /** Component's parent view data. */
+    get lView() {
+        return getLViewById(this.lViewId);
+    }
     constructor(
     /**
      * ID of the component's parent view data.
@@ -5933,10 +5937,6 @@ class LContext {
         this.lViewId = lViewId;
         this.nodeIndex = nodeIndex;
         this.native = native;
-    }
-    /** Component's parent view data. */
-    get lView() {
-        return getLViewById(this.lViewId);
     }
 }
 
@@ -8835,6 +8835,12 @@ function getNullInjector() {
 class EnvironmentInjector {
 }
 class R3Injector extends EnvironmentInjector {
+    /**
+     * Flag indicating that this injector was previously destroyed.
+     */
+    get destroyed() {
+        return this._destroyed;
+    }
     constructor(providers, parent, source, scopes) {
         super();
         this.parent = parent;
@@ -8868,12 +8874,6 @@ class R3Injector extends EnvironmentInjector {
         }
         this.injectorDefTypes =
             new Set(this.get(INJECTOR_DEF_TYPES.multi, EMPTY_ARRAY, InjectFlags.Self));
-    }
-    /**
-     * Flag indicating that this injector was previously destroyed.
-     */
-    get destroyed() {
-        return this._destroyed;
     }
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
@@ -9417,7 +9417,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.1+sha-8656ac0');
+const VERSION = new Version('15.1.0-next.1+sha-dd42974');
 
 /**
  * @license
@@ -12926,6 +12926,11 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
  * found in the LICENSE file at https://angular.io/license
  */
 class ViewRef {
+    get rootNodes() {
+        const lView = this._lView;
+        const tView = lView[TVIEW];
+        return collectNativeNodes(tView, lView, tView.firstChild, []);
+    }
     constructor(
     /**
      * This represents `LView` associated with the component when ViewRef is a ChangeDetectorRef.
@@ -12950,11 +12955,6 @@ class ViewRef {
         this._cdRefInjectingView = _cdRefInjectingView;
         this._appRef = null;
         this._attachedToViewContainer = false;
-    }
-    get rootNodes() {
-        const lView = this._lView;
-        const tView = lView[TVIEW];
-        return collectNativeNodes(tView, lView, tView.firstChild, []);
     }
     get context() {
         return this._lView[CONTEXT];
@@ -13277,6 +13277,12 @@ class ChainedInjector {
  * ComponentFactory interface implementation.
  */
 class ComponentFactory extends ComponentFactory$1 {
+    get inputs() {
+        return toRefArray(this.componentDef.inputs);
+    }
+    get outputs() {
+        return toRefArray(this.componentDef.outputs);
+    }
     /**
      * @param componentDef The component definition.
      * @param ngModule The NgModuleRef to which the factory is bound.
@@ -13290,12 +13296,6 @@ class ComponentFactory extends ComponentFactory$1 {
         this.ngContentSelectors =
             componentDef.ngContentSelectors ? componentDef.ngContentSelectors : [];
         this.isBoundToModule = !!ngModule;
-    }
-    get inputs() {
-        return toRefArray(this.componentDef.inputs);
-    }
-    get outputs() {
-        return toRefArray(this.componentDef.outputs);
     }
     create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
         environmentInjector = environmentInjector || this.ngModule;
@@ -22549,6 +22549,12 @@ function symbolIterator() {
  */
 class QueryList {
     /**
+     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
+     */
+    get changes() {
+        return this._changes || (this._changes = new EventEmitter());
+    }
+    /**
      * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
      *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
      *     the same result)
@@ -22570,12 +22576,6 @@ class QueryList {
         const proto = QueryList.prototype;
         if (!proto[symbol])
             proto[symbol] = symbolIterator;
-    }
-    /**
-     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
-     */
-    get changes() {
-        return this._changes || (this._changes = new EventEmitter());
     }
     /**
      * Returns the QueryList entry at `index`.
