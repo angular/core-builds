@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.1+sha-a403286
+ * @license Angular v15.1.0-next.1+sha-eae182d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1121,25 +1121,8 @@ function arrayEquals(a, b, identityAccessor) {
 /**
  * Flattens an array.
  */
-function flatten$1(list, dst) {
-    if (dst === undefined)
-        dst = list;
-    for (let i = 0; i < list.length; i++) {
-        let item = list[i];
-        if (Array.isArray(item)) {
-            // we need to inline it.
-            if (dst === list) {
-                // Our assumption that the list was already flat was wrong and
-                // we need to clone flat since we need to write to it.
-                dst = list.slice(0, i);
-            }
-            flatten$1(item, dst);
-        }
-        else if (dst !== list) {
-            dst.push(item);
-        }
-    }
-    return dst;
+function flatten$1(list) {
+    return list.flat(Number.POSITIVE_INFINITY);
 }
 function deepForEach(input, fn) {
     input.forEach(value => Array.isArray(value) ? deepForEach(value, fn) : fn(value));
@@ -9416,7 +9399,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.1+sha-a403286');
+const VERSION = new Version('15.1.0-next.1+sha-eae182d');
 
 /**
  * @license
