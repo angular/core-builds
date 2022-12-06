@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.2+sha-ac51e5c
+ * @license Angular v15.0.2+sha-40d6a06
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1446,7 +1446,7 @@ const EMBEDDED_VIEW_INJECTOR = 21;
 const HEADER_OFFSET = 22;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$8 = 1;
+const unusedValueExportToPlacateAjd$4 = 1;
 
 /**
  * @license
@@ -1491,7 +1491,7 @@ const MOVED_VIEWS = 9;
 const CONTAINER_HEADER_OFFSET = 10;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$7 = 1;
+const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * @license
@@ -2854,7 +2854,7 @@ function isFactory(obj) {
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$6 = 1;
+const unusedValueExportToPlacateAjd$2 = 1;
 
 /**
  * Converts `TNodeType` into human readable text.
@@ -2873,7 +2873,7 @@ function toTNodeTypeAsString(tNodeType) {
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$5 = 1;
+const unusedValueExportToPlacateAjd$1 = 1;
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `class` binding.
  *
@@ -5983,28 +5983,6 @@ function ensureIcuContainerVisitorLoaded(loader) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$4 = 1;
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$3 = 1;
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
  * that LContainer, which is an LView
@@ -6069,7 +6047,6 @@ function getNearestLContainer(viewOrContainer) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const unusedValueToPlacateAjd$2 = unusedValueExportToPlacateAjd$7 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$4 + unusedValueExportToPlacateAjd$3 + unusedValueExportToPlacateAjd$8;
 /**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
@@ -9045,7 +9022,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.2+sha-ac51e5c');
+const VERSION = new Version('15.0.2+sha-40d6a06');
 
 /**
  * @license
@@ -9366,7 +9343,6 @@ function classIndexOf(className, classToSearch, startingIndex) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const unusedValueToPlacateAjd$1 = unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd$4;
 const NG_TEMPLATE_SELECTOR = 'ng-template';
 /**
  * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
@@ -18747,7 +18723,7 @@ var I18nCreateOpCode;
 })(I18nCreateOpCode || (I18nCreateOpCode = {}));
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-const unusedValueExportToPlacateAjd$2 = 1;
+const unusedValueExportToPlacateAjd = 1;
 
 /**
  * @license
@@ -22744,29 +22720,6 @@ function createContainerRef(hostTNode, hostLView) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$1 = 1;
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd = 1;
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const unusedValueToPlacateAjd = unusedValueExportToPlacateAjd$1 + unusedValueExportToPlacateAjd$6 + unusedValueExportToPlacateAjd$5 + unusedValueExportToPlacateAjd;
 class LQuery_ {
     constructor(queryList) {
         this.queryList = queryList;
