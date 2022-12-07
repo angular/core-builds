@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.1+sha-02691a7
+ * @license Angular v15.1.0-next.1+sha-11a24c3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8999,7 +8999,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.1+sha-02691a7');
+const VERSION = new Version('15.1.0-next.1+sha-11a24c3');
 
 /**
  * @license
@@ -11779,6 +11779,12 @@ function lastSelectedElementIdx(hostBindingOpCodes) {
 function instantiateAllDirectives(tView, lView, tNode, native) {
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
+    // The component view needs to be created before creating the node injector
+    // since it is used to inject some special symbols like `ChangeDetectorRef`.
+    if (isComponentHost(tNode)) {
+        ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */);
+        addComponentLogic(lView, tNode, tView.data[start + tNode.componentOffset]);
+    }
     if (!tView.firstCreatePass) {
         getOrCreateNodeInjectorForNode(tNode, lView);
     }
@@ -11786,19 +11792,14 @@ function instantiateAllDirectives(tView, lView, tNode, native) {
     const initialInputs = tNode.initialInputs;
     for (let i = start; i < end; i++) {
         const def = tView.data[i];
-        const isComponent = isComponentDef(def);
-        if (isComponent) {
-            ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */);
-            addComponentLogic(lView, tNode, def);
-        }
         const directive = getNodeInjectable(lView, tView, i, tNode);
         attachPatchData(directive, lView);
         if (initialInputs !== null) {
             setInputsFromAttrs(lView, i - start, directive, def, tNode, initialInputs);
         }
-        if (isComponent) {
+        if (isComponentDef(def)) {
             const componentView = getComponentLViewByIndex(tNode.index, lView);
-            componentView[CONTEXT] = directive;
+            componentView[CONTEXT] = getNodeInjectable(lView, tView, i, tNode);
         }
     }
 }
