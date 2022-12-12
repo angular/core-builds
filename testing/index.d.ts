@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.2+sha-e362214
+ * @license Angular v15.1.0-next.2+sha-caa1ad0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -310,17 +310,14 @@ export declare interface TestBed {
     overrideProvider(token: any, provider: {
         useFactory: Function;
         deps: any[];
-        multi?: boolean;
     }): TestBed;
     overrideProvider(token: any, provider: {
         useValue: any;
-        multi?: boolean;
     }): TestBed;
     overrideProvider(token: any, provider: {
         useFactory?: Function;
         useValue?: any;
         deps?: any[];
-        multi?: boolean;
     }): TestBed;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
