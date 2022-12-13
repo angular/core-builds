@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.3+sha-0f61672
+ * @license Angular v15.0.3+sha-d181b93
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8961,7 +8961,7 @@ class R3Injector extends EnvironmentInjector {
         try {
             const initializers = this.get(ENVIRONMENT_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
             if (ngDevMode && !Array.isArray(initializers)) {
-                throw new RuntimeError(209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
+                throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
                     `(expected an array, but got ${typeof initializers}). ` +
                     'Please check that the `ENVIRONMENT_INITIALIZER` token is configured as a ' +
                     '`multi: true` provider.');
@@ -9391,7 +9391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.3+sha-0f61672');
+const VERSION = new Version('15.0.3+sha-d181b93');
 
 /**
  * @license
