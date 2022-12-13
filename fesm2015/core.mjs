@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.2+sha-279e7d4
+ * @license Angular v15.1.0-next.2+sha-ff84c73
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8569,7 +8569,7 @@ class R3Injector extends EnvironmentInjector {
         try {
             const initializers = this.get(ENVIRONMENT_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
             if (ngDevMode && !Array.isArray(initializers)) {
-                throw new RuntimeError(209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
+                throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
                     `(expected an array, but got ${typeof initializers}). ` +
                     'Please check that the `ENVIRONMENT_INITIALIZER` token is configured as a ' +
                     '`multi: true` provider.');
@@ -8999,7 +8999,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.2+sha-279e7d4');
+const VERSION = new Version('15.1.0-next.2+sha-ff84c73');
 
 /**
  * @license
@@ -24666,6 +24666,7 @@ class ApplicationInitStatus {
         this.reject = noop;
         this.initialized = false;
         this.done = false;
+        // TODO: Throw RuntimeErrorCode.INVALID_MULTI_PROVIDER if appInits is not an array
         this.donePromise = new Promise((res, rej) => {
             this.resolve = res;
             this.reject = rej;
@@ -26757,7 +26758,14 @@ class ApplicationRef {
         this.tick();
         this.components.push(componentRef);
         // Get the listeners lazily to prevent DI cycles.
-        const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
+        const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []);
+        if (ngDevMode && !Array.isArray(listeners)) {
+            throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `APP_BOOTSTRAP_LISTENER` token value ' +
+                `(expected an array, but got ${typeof listeners}). ` +
+                'Please check that the `APP_BOOTSTRAP_LISTENER` token is configured as a ' +
+                '`multi: true` provider.');
+        }
+        listeners.push(...this._bootstrapListeners);
         listeners.forEach((listener) => listener(componentRef));
     }
     /** @internal */

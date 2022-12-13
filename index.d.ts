@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.2+sha-279e7d4
+ * @license Angular v15.1.0-next.2+sha-ff84c73
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7138,7 +7138,7 @@ declare const enum RuntimeErrorCode {
     INJECTOR_ALREADY_DESTROYED = 205,
     PROVIDER_IN_WRONG_CONTEXT = 207,
     MISSING_INJECTION_TOKEN = 208,
-    INVALID_MULTI_PROVIDER = 209,
+    INVALID_MULTI_PROVIDER = -209,
     MULTIPLE_COMPONENTS_MATCH = -300,
     EXPORT_NOT_FOUND = -301,
     PIPE_NOT_FOUND = -302,
