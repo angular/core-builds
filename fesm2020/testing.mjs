@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.0.4+sha-125b3df
+ * @license Angular v15.0.4+sha-d7ff276
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,13 +8,6 @@ import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
  * complete when all asynchronous calls within this zone are done. Can be used
@@ -58,13 +51,6 @@ function async(fn) {
     return waitForAsync(fn);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Fixture for debugging and testing a component.
  *
@@ -249,13 +235,6 @@ function scheduleMicroTask(fn) {
     Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
 const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
 const fakeAsyncTestModuleNotLoadedErrorMessage = `zone-testing.js is needed for the fakeAsync() test helper but could not be found.
@@ -413,13 +392,6 @@ function flushMicrotasks() {
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** Whether test modules should be torn down by default. */
 const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
 /** Whether unknown elements in templates should throw by default. */
@@ -444,13 +416,6 @@ const ComponentFixtureAutoDetect = new InjectionToken$1('ComponentFixtureAutoDet
  */
 const ComponentFixtureNoNgZone = new InjectionToken$1('ComponentFixtureNoNgZone');
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
  *
@@ -558,13 +523,6 @@ function componentDefResolved(type) {
     componentDefPendingResolution.delete(type);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // Always use __globalThis if available, which is the spec-defined global variable across all
 // environments, then fallback to __global first, because in Node tests both __global and
 // __window may be defined and _global should be __global in that case. Note: Typeof/Instanceof
@@ -575,13 +533,6 @@ const _global$1 = ( /* @__PURE__ */(() => (typeof globalThis !== 'undefined' && 
     (typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
         self instanceof WorkerGlobalScope && self))());
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 var FactoryTarget;
 (function (FactoryTarget) {
     FactoryTarget[FactoryTarget["Directive"] = 0] = "Directive";
@@ -604,13 +555,6 @@ var ViewEncapsulation$1;
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
 })(ViewEncapsulation$1 || (ViewEncapsulation$1 = {}));
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function getCompilerFacade(request) {
     const globalNg = _global$1['ng'];
     if (globalNg && globalNg.ɵcompilerFacade) {
@@ -645,13 +589,6 @@ function getCompilerFacade(request) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function getClosureSafeProperty(objWithPropertyToExtract) {
     for (let key in objWithPropertyToExtract) {
         if (objWithPropertyToExtract[key] === getClosureSafeProperty) {
@@ -674,13 +611,6 @@ function fillProperties(target, source) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function stringify(token) {
     if (typeof token === 'string') {
         return token;
@@ -718,13 +648,6 @@ function concatStringsWithSpace(before, after) {
         ((after == null || after === '') ? before : before + ' ' + after);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
 /**
  * Allows to refer to references which are not yet defined.
@@ -767,13 +690,6 @@ function isForwardRef(fn) {
         fn.__forward_ref__ === forwardRef;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Construct an injectable definition which defines how a token will be constructed by the DI
  * system, and in which injectors (if any) it will be available.
@@ -897,13 +813,6 @@ const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSa
 const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Base URL for the error details page.
  *
  * Keep this constant in sync across:
@@ -916,13 +825,6 @@ const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
  */
 const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Class that represents a runtime error.
  * Formats and outputs the error message in a consistent way.
@@ -964,13 +866,6 @@ function formatRuntimeError(code, message) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @description
  *
  * Represents a type that a Component or other object is instances of.
@@ -985,13 +880,7 @@ function isType(v) {
     return typeof v === 'function';
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+// The functions in this file verify that the assumptions we are making
 function assertNumber(actual, msg) {
     if (!(typeof actual === 'number')) {
         throwError(msg, typeof actual, 'number', '===');
@@ -1087,13 +976,6 @@ function assertOneOf(value, ...validValues) {
     throwError(`Expected value to be one of ${JSON.stringify(validValues)} but was ${JSON.stringify(value)}.`);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Determines if the contents of two arrays is identical
  *
@@ -1352,13 +1234,6 @@ function _arrayIndexOfSorted(array, value, shift) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Convince closure compiler that the wrapped function has no side-effects.
  *
  * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
@@ -1371,13 +1246,6 @@ function noSideEffects(fn) {
     return { toString: fn }.toString();
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const ANNOTATIONS = '__annotations__';
 const PARAMETERS = '__parameters__';
 const PROP_METADATA = '__prop__metadata__';
@@ -1491,13 +1359,6 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
     });
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /*
  * #########################
  * Attention: These Regular expressions have to hold even if the code is minified!
@@ -1749,13 +1610,6 @@ function getParentCtor(ctor) {
     return parentCtor || Object;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function ngDevModeResetPerfCounters() {
     const locationString = typeof location !== 'undefined' ? location.toString() : '';
     const newCounters = {
@@ -1823,24 +1677,10 @@ function initNgDevMode() {
     return false;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function isEnvironmentProviders(value) {
     return value && !!value.ɵproviders;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Used for stringify render output in Ivy.
  * Important! This function is very performance-sensitive and we should
@@ -1870,13 +1710,6 @@ function stringifyForError(value) {
     return renderStringify(value);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token, path) {
     const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
@@ -1909,13 +1742,6 @@ function throwProviderNotFoundError(token, injectorName) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Injection flags for DI.
  *
  * @publicApi
@@ -1940,13 +1766,6 @@ var InjectFlags;
     InjectFlags[InjectFlags["Optional"] = 8] = "Optional";
 })(InjectFlags || (InjectFlags = {}));
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Current implementation of inject.
  *
@@ -1999,13 +1818,6 @@ function assertInjectImplementationNotEqual(fn) {
         assertNotEqual(_injectImplementation, fn, 'Calling ɵɵinject would cause infinite recursion');
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const _THROW_IF_NOT_FOUND = {};
 const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 /*
@@ -2230,13 +2042,6 @@ function formatError(text, obj, injectorErrorName, source = null) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Inject decorator and metadata.
  *
  * @Annotation
@@ -2287,13 +2092,6 @@ const Host =
 // tslint:disable-next-line: no-toplevel-property-access
 attachInjectFlag(makeParamDecorator('Host'), 1 /* InternalInjectFlags.Host */);
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
@@ -2367,13 +2165,6 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
  * `encapsulation` option.
  *
@@ -2414,13 +2205,6 @@ var ViewEncapsulation;
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * This file contains reuseable "empty" symbols that can be used as default return values
  * in different parts of the rendering code. Because the same symbols are returned, this
  * allows for identity checks against these values to be consistently used by the framework
@@ -2438,13 +2222,6 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
     Object.freeze(EMPTY_ARRAY);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
 const NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
 const NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
@@ -2458,13 +2235,6 @@ const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty })
 // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
 const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** Counter used to generate unique IDs for component definitions. */
 let componentDefCount = 0;
 /**
@@ -2746,13 +2516,6 @@ function getNgModuleDef(type, throwNotFound) {
     return ngModuleDef;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // Below are constants for LView indices to help us look up LView members
 // without having to remember the specific indices.
 // Uglify will inline these when minifying so there shouldn't be a cost.
@@ -2792,13 +2555,6 @@ const HEADER_OFFSET = 22;
 const unusedValueExportToPlacateAjd$4 = 1;
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Special location which allows easy identification of type. If we have an array which was
  * retrieved from the `LView` and that array has `true` at `TYPE` location, we know it is
  * `LContainer`.
@@ -2837,13 +2593,6 @@ const CONTAINER_HEADER_OFFSET = 10;
 const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * True if `value` is `LView`.
  * @param value wrapped value of `RNode`, `LView`, `LContainer`
  */
@@ -2873,13 +2622,6 @@ function isRootView(target) {
     return (target[FLAGS] & 256 /* LViewFlags.IsRoot */) !== 0;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // [Assert functions do not constraint type when they are guarded by a truthy
 // expression.](https://github.com/microsoft/TypeScript/issues/37295)
 function assertTNodeForLView(tNode, lView) {
@@ -2987,13 +2729,6 @@ function assertNodeInjector(lView, injectorIndex) {
     assertNumber(lView[injectorIndex + 8 /* NodeInjectorOffset.PARENT */], 'injectorIndex should point to parent injector');
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function getFactoryDef(type, throwNotFound) {
     const hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
     if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
@@ -3002,13 +2737,6 @@ function getFactoryDef(type, throwNotFound) {
     return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Represents a basic change from a previous to a new value for a single
  * property on a directive instance. Passed as a value in a
@@ -3032,13 +2760,6 @@ class SimpleChange {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
  * lifecycle hook, so it should be included in any component that implements
@@ -3123,13 +2844,6 @@ function setSimpleChangesStore(instance, store) {
     return instance[SIMPLE_CHANGES_STORE] = store;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let profilerCallback = null;
 /**
  * Sets the callback function which will be invoked before and after performing certain actions at
@@ -3159,23 +2873,9 @@ const profiler = function (event, instance, hookOrListener) {
     }
 };
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const SVG_NAMESPACE = 'svg';
 const MATH_ML_NAMESPACE = 'math';
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * For efficiency reasons we often put several different data types (`RNode`, `LView`, `LContainer`)
  * in same location in `LView`. This is because we don't want to pre-allocate space for it
@@ -3326,13 +3026,6 @@ function updateTransplantedViewCount(lContainer, amount) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const instructionState = {
     lFrame: createLFrame(null),
     bindingsEnabled: true,
@@ -3836,13 +3529,6 @@ function getNamespace$1() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Adds all directive lifecycle hooks from the given `DirectiveDef` to the given `TView`.
  *
  * Must be run *only* on the first template pass.
@@ -4068,13 +3754,6 @@ function callHook(currentView, initPhase, arr, i) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const NO_PARENT_INJECTOR = -1;
 /**
  * Each injector is saved in 9 contiguous slots in `LView` and 9 contiguous slots in
@@ -4266,13 +3945,6 @@ function hasStyleInput(tNode) {
     return (tNode.flags & 16 /* TNodeFlags.hasStyleInput */) !== 0;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function assertTNodeType(tNode, expectedTypes, message) {
     assertDefined(tNode, 'should be called with a TNode');
     if ((tNode.type & expectedTypes) === 0) {
@@ -4492,13 +4164,6 @@ function mergeHostAttribute(dst, marker, key1, key2, value) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /// Parent Injector Utils ///////////////////////////////////////////////////////////////
 function hasParentInjector(parentLocation) {
     return parentLocation !== NO_PARENT_INJECTOR;
@@ -4537,13 +4202,6 @@ function getParentInjectorView(location, startView) {
     return parentView;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Defines if the call to `inject` should include `viewProviders` in its resolution.
  *
@@ -5269,13 +4927,6 @@ function getTNodeFromLView(lView) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Facade for the attribute injection from DI.
  *
  * @codeGenApi
@@ -5285,13 +4936,6 @@ function ɵɵinjectAttribute(attrNameToInject) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Attribute decorator and metadata.
  *
  * @Annotation
@@ -5299,13 +4943,6 @@ function ɵɵinjectAttribute(attrNameToInject) {
  */
 const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName, __NG_ELEMENT_ID__: () => ɵɵinjectAttribute(attributeName) }));
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _reflect = null;
 function getReflect() {
     return (_reflect = _reflect || new ReflectionCapabilities());
@@ -5369,13 +5006,6 @@ function reflectDependency(dep) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Map of module-id to the corresponding NgModule.
  */
 const modules = new Map();
@@ -5422,13 +5052,6 @@ function setAllowDuplicateNgModuleIdsForTest(allowDuplicates) {
     checkForDuplicateNgModules = !allowDuplicates;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  *
  * @codeGenApi
@@ -5478,13 +5101,6 @@ function maybeUnwrapFn$1(value) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Defines a schema that allows an NgModule to contain the following:
  * - Non-Angular elements named with dash case (`-`).
  * - Element properties named with dash case (`-`).
@@ -5508,13 +5124,6 @@ const NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let shouldThrowErrorOnUnknownElement = false;
 /**
  * Sets a strict mode for JIT-compiled components to throw an error on unknown elements,
@@ -5774,13 +5383,6 @@ function matchingSchemas(schemas, tagName) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Flags for renderer-specific style modifiers.
  * @publicApi
  */
@@ -5799,13 +5401,6 @@ var RendererStyleFlags2;
     RendererStyleFlags2[RendererStyleFlags2["DashCase"] = 2] = "DashCase";
 })(RendererStyleFlags2 || (RendererStyleFlags2 = {}));
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Disallowed strings in the comment.
  *
@@ -5848,13 +5443,6 @@ function escapeCommentText(value) {
     return value.replace(COMMENT_DISALLOWED, (text) => text.replace(COMMENT_DELIMITER, COMMENT_DELIMITER_ESCAPED));
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // Keeps track of the currently-active LViews.
 const TRACKED_LVIEWS = new Map();
 // Used for generating unique IDs for LViews.
@@ -5879,13 +5467,6 @@ function unregisterLView(lView) {
     TRACKED_LVIEWS.delete(lView[ID]);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * The internal view context which is specific to a given DOM element, directive or
  * component instance. Each value in here (besides the LView and element node details)
@@ -5920,13 +5501,6 @@ class LContext {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Returns the matching `LContext` data for a given DOM node, directive or component instance.
  *
@@ -6228,13 +5802,6 @@ function discoverLocalRefs(lView, nodeIndex) {
     return null;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _icuContainerIterate;
 /**
  * Iterator which provides ability to visit all of the `TIcuContainerNode` root `RNode`s.
@@ -6256,13 +5823,6 @@ function ensureIcuContainerVisitorLoaded(loader) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
  * that LContainer, which is an LView
@@ -6320,13 +5880,6 @@ function getNearestLContainer(viewOrContainer) {
     return viewOrContainer;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
@@ -7253,11 +6806,13 @@ function setupStaticAttributes(renderer, element, tNode) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @fileoverview
+ * A module to facilitate use of a Trusted Types policy internally within
+ * Angular. It lazily constructs the Trusted Types policy, providing helper
+ * utilities for promoting strings to Trusted Types. When Trusted Types are not
+ * available, strings are used as a fallback.
+ * @security All use of this module is security-sensitive and should go through
+ * security review.
  */
 /**
  * The Trusted Types policy, or null if Trusted Types are not
@@ -7373,13 +6928,6 @@ function newTrustedFunctionForDev(...args) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Validation function invoked at runtime for each binding that might potentially
  * represent a security-sensitive attribute of an <iframe>.
  * See `IFRAME_SECURITY_SENSITIVE_ATTRS` in the
@@ -7414,13 +6962,6 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
     return attrValue;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
  * inject the `DOCUMENT` token and are done.
@@ -7470,11 +7011,14 @@ function getDocument() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @fileoverview
+ * A module to facilitate use of a Trusted Types policy internally within
+ * Angular specifically for bypassSecurityTrust* and custom sanitizers. It
+ * lazily constructs the Trusted Types policy, providing helper utilities for
+ * promoting strings to Trusted Types. When Trusted Types are not available,
+ * strings are used as a fallback.
+ * @security All use of this module is security-sensitive and should go through
+ * security review.
  */
 /**
  * The Trusted Types policy, or null if Trusted Types are not
@@ -7541,13 +7085,6 @@ function trustedScriptURLFromStringBypass(url) {
     return getPolicy()?.createScriptURL(url) || url;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class SafeValueImpl {
     constructor(changingThisBreaksApplicationSecurity) {
         this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
@@ -7660,13 +7197,6 @@ function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
     return new SafeResourceUrlImpl(trustedResourceUrl);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * This helper is used to get hold of an inert tree of DOM elements containing dirty HTML
  * that needs sanitizing.
@@ -7794,13 +7324,6 @@ function isDOMParserAvailable() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A pattern that recognizes a commonly useful subset of URLs that are safe.
  *
  * This regular expression matches a subset of URLs that will not cause script
@@ -7837,13 +7360,6 @@ function _sanitizeUrl(url) {
     return 'unsafe:' + url;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function tagSet(tags) {
     const res = {};
     for (const t of tags.split(','))
@@ -8084,13 +7600,6 @@ function isTemplateElement(el) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
  * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
  * handled.
@@ -8109,13 +7618,6 @@ var SecurityContext;
     SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
 })(SecurityContext || (SecurityContext = {}));
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
  * dangerous content.
@@ -8337,13 +7839,6 @@ function getSanitizer() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Creates a token that can be used in a DI Provider.
  *
  * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
@@ -8426,13 +7921,6 @@ class InjectionToken {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A multi-provider token for initialization functions that will run upon construction of an
  * environment injector.
  *
@@ -8440,13 +7928,6 @@ class InjectionToken {
  */
 const ENVIRONMENT_INITIALIZER = new InjectionToken('ENVIRONMENT_INITIALIZER');
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
  *
@@ -8460,22 +7941,8 @@ const INJECTOR = new InjectionToken('INJECTOR',
 // tslint:disable-next-line: no-toplevel-property-access
 -1 /* InjectorMarkers.Injector */);
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class NullInjector {
     get(token, notFoundValue = THROW_IF_NOT_FOUND) {
         if (notFoundValue === THROW_IF_NOT_FOUND) {
@@ -8487,21 +7954,6 @@ class NullInjector {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
  * referenced in `@Component in a component injector.
@@ -8760,26 +8212,12 @@ function isClassProvider(value) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * An internal token whose presence in an injector indicates that the injector should treat itself
  * as a root scoped injector when processing requests for unknown tokens which may indicate
  * they are provided in the root scope.
  */
 const INJECTOR_SCOPE = new InjectionToken('Set Injector scope.');
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Marker which indicates that a value has not yet been created from the factory function.
  */
@@ -9171,13 +8609,6 @@ function forEachSingleProvider(providers, fn) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
@@ -9201,13 +8632,6 @@ class ComponentRef$1 {
 class ComponentFactory$1 {
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function noComponentFactoryError(component) {
     const error = Error(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
     error[ERROR_COMPONENT] = component;
@@ -9241,13 +8665,6 @@ class ComponentFactoryResolver$1 {
 }
 ComponentFactoryResolver$1.NULL = ( /* @__PURE__ */new _NullComponentFactoryResolver());
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Creates an ElementRef from the most recent node.
  *
@@ -9302,13 +8719,6 @@ function unwrapElementRef(value) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Creates and initializes a custom renderer that implements the `Renderer2` base class.
  *
  * @publicApi
@@ -9348,13 +8758,6 @@ function injectRenderer2() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
  * @publicApi
@@ -9368,13 +8771,6 @@ Sanitizer.ɵprov = ɵɵdefineInjectable({
     factory: () => null,
 });
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * @description Represents the version of Angular
  *
@@ -9391,15 +8787,8 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.0.4+sha-125b3df');
+const VERSION = new Version('15.0.4+sha-d7ff276');
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // This default value is when checking the hierarchy for a token.
 //
 // It means both:
@@ -9419,13 +8808,6 @@ const VERSION = new Version('15.0.4+sha-125b3df');
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
     const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
@@ -9437,13 +8819,6 @@ function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Provides a hook for centralized exception handling.
  *
@@ -9493,13 +8868,6 @@ class ErrorHandler {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
     name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
@@ -9519,13 +8887,6 @@ function normalizeDebugBindingValue(value) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** Verifies that a given type is a Standalone Component. */
 function assertStandaloneComponentType(type) {
     assertComponentDef(type);
@@ -9613,13 +8974,6 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Returns an index of `classToSearch` in `className` taking token boundaries into account.
  *
  * `classIndexOf('AB A', 'A', 0)` will be 3 (not 0 since `AB!==A`)
@@ -9650,13 +9004,6 @@ function classIndexOf(className, classToSearch, startingIndex) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const NG_TEMPLATE_SELECTOR = 'ng-template';
 /**
  * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
@@ -10060,23 +9407,9 @@ function extractAttrsAndClassesFromSelector(selector) {
     return { attrs, classes };
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** A special value which designates that a value has not changed. */
 const NO_CHANGE = (typeof ngDevMode === 'undefined' || ngDevMode) ? { __brand__: 'NO_CHANGE' } : {};
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Advances to an element for later binding instructions.
  *
@@ -10131,13 +9464,6 @@ function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
  *
  * This should be kept up to date with the public exports of @angular/core.
@@ -10150,13 +9476,6 @@ const angularCoreDiEnv = {
     'resolveForwardRef': resolveForwardRef,
 };
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Compile an Angular injectable according to its `Injectable` metadata, and patch the resulting
  * injectable def (`ɵprov`) onto the injectable type.
@@ -10239,13 +9558,6 @@ function getInjectableMetadata(type, srcMeta) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Injectable decorator and metadata.
  *
  * @Annotation
@@ -10253,13 +9565,6 @@ function getInjectableMetadata(type, srcMeta) {
  */
 const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => compileInjectable(type, meta));
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
  *
@@ -10284,13 +9589,6 @@ function createInjectorWithoutInjectorInstances(defType, parent = null, addition
     return new R3Injector(providers, parent || getNullInjector(), name || null, scopes);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Concrete injectors implement this interface. Injectors are configured
  * with [providers](guide/glossary#provider) that associate
@@ -10340,13 +9638,6 @@ Injector.ɵprov = ɵɵdefineInjectable({
  */
 Injector.__NG_ELEMENT_ID__ = -1 /* InjectorMarkers.Injector */;
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function findFirstClosedCycle(keys) {
     const res = [];
     for (let i = 0; i < keys.length; ++i) {
@@ -10556,13 +9847,6 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A unique object used for retrieving items from the {@link ReflectiveInjector}.
  *
  * Keys have:
@@ -10625,13 +9909,6 @@ class KeyRegistry {
 }
 const _globalKeyRegistry = new KeyRegistry();
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
@@ -10827,13 +10104,6 @@ function _createDependency(token, optional, visibility) {
     return new ReflectiveDependency(ReflectiveKey.get(token), optional, visibility);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // Threshold for the dynamic version
 const UNDEFINED = {};
 /**
@@ -11132,28 +10402,28 @@ function _mapProviders(injector, fn) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @module
+ * @description
+ * The `di` module provides dependency injection container services.
  */
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
+ * This file should not be necessary because node resolution should just default to `./di/index`!
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * However it does not seem to work and it breaks:
+ *  - //packages/animations/browser/test:test_web_chromium-local
+ *  - //packages/compiler-cli/test:extract_i18n
+ *  - //packages/compiler-cli/test:ngc
+ *  - //packages/compiler-cli/test:perform_watch
+ *  - //packages/compiler-cli/test/diagnostics:check_types
+ *  - //packages/compiler-cli/test/transformers:test
+ *  - //packages/compiler/test:test
+ *  - //tools/public_api_guard:core_api
+ *
+ * Remove this file once the above is solved or wait until `ngc` is deleted and then it should be
+ * safe to delete this file.
  */
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
     const lView = getLView();
     // Fall back to inject() if view hasn't been created. This situation can happen in tests
@@ -11183,13 +10453,6 @@ function ɵɵinvalidFactory() {
     throw new Error(msg);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Invoke `HostBindingsFunction`s for view.
  *
@@ -12794,13 +12057,6 @@ function textBindingInternal(lView, index, value) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Compute the static styling (class/style) from `TAttributes`.
  *
  * This function should be called during `firstCreatePass` only.
@@ -12837,13 +12093,6 @@ function computeStaticStyling(tNode, attrs, writeToHost) {
     writeToHost ? tNode.classes = classes : tNode.classesWithoutHost = classes;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     while (tNode !== null) {
         ngDevMode &&
@@ -12891,13 +12140,6 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     return result;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class ViewRef {
     constructor(
     /**
@@ -13187,13 +12429,6 @@ class RootViewRef extends ViewRef {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
     /**
      * @param ngModule The NgModuleRef to which all resolved factories are bound.
@@ -13528,13 +12763,6 @@ function LifecycleHooksFeature() {
     registerPostOrderHooks(getLView()[TVIEW], tNode);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function getSuperType(type) {
     return Object.getPrototypeOf(type.prototype).constructor;
 }
@@ -13686,13 +12914,6 @@ function inheritHostBindings(definition, superHostBindings) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Fields which exist on either directive or component definitions, and need to be copied from
  * parent to child classes by the `ɵɵCopyDefinitionFeature`.
  */
@@ -13765,13 +12986,6 @@ function ɵɵCopyDefinitionFeature(definition) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * This feature adds the host directives behavior to a directive definition by patching a
  * function onto it. The expectation is that the runtime will invoke the function during
@@ -13922,13 +13136,6 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _symbolIterator = null;
 function getSymbolIterator() {
     if (!_symbolIterator) {
@@ -13951,13 +13158,6 @@ function getSymbolIterator() {
     return _symbolIterator;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function isIterable(obj) {
     return obj !== null && typeof obj === 'object' && obj[getSymbolIterator()] !== undefined;
 }
@@ -14000,13 +13200,6 @@ function isJsObject(o) {
     return o !== null && (typeof o === 'function' || typeof o === 'object');
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function devModeEqual(a, b) {
     const isListLikeIterableA = isListLikeIterable(a);
     const isListLikeIterableB = isListLikeIterable(b);
@@ -14025,13 +13218,6 @@ function devModeEqual(a, b) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // TODO(misko): consider inlining
 /** Updates binding and returns the value. */
 function updateBinding(lView, bindingIndex, value) {
@@ -14101,13 +13287,6 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Updates the value of or removes a bound attribute on an Element.
  *
  * Used in the case of `[attr.title]="value"`
@@ -14132,13 +13311,6 @@ function ɵɵattribute(name, value, sanitizer, namespace) {
     return ɵɵattribute;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
@@ -14651,13 +13823,6 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *
  * This function triggers change detection in a synchronous way on a component.
@@ -14669,13 +13834,6 @@ function detectChanges(component) {
     detectChangesInternal(view[TVIEW], view, component);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -14729,13 +13887,6 @@ function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, local
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /** Store a value in the `data` at a given `index`. */
 function store(tView, lView, index, value) {
     // We don't store any static data for local variables, so the first time
@@ -14761,13 +13912,6 @@ function ɵɵreference(index) {
     return load(contextLView, HEADER_OFFSET + index);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Update a property on a selected element.
  *
@@ -14808,13 +13952,6 @@ function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isCla
     setInputsForProperty(tView, lView, inputs[property], property, value);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -14938,13 +14075,6 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
     return ɵɵelement;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) {
     ngDevMode && ngDevMode.firstCreatePass++;
     const tViewConsts = tView.consts;
@@ -15059,13 +14189,6 @@ function ɵɵgetCurrentView() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Determine if the argument is shaped like a Promise
  */
 function isPromise(obj) {
@@ -15090,13 +14213,6 @@ function isSubscribable(obj) {
  */
 const isObservable = isSubscribable;
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Adds an event listener to the current node.
  *
@@ -15325,21 +14441,6 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Retrieves a context at the level specified and saves it as the global, contextViewData.
  * Will get the next level up if level is not specified.
  *
@@ -15355,13 +14456,6 @@ function ɵɵnextContext(level = 1) {
     return nextContextImpl(level);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Checks a given node against matching projection slots and returns the
  * determined slot index. Returns "null" if no slot matched the given node.
@@ -15930,13 +15024,6 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     return ɵɵpropertyInterpolateV;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function toTStylingRange(prev, next) {
     ngDevMode && assertNumberInRange(prev, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
     ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
@@ -15986,13 +15073,6 @@ function getTStylingRangeTail(tStylingRange) {
     return next === 0 ? getTStylingRangePrev(tStylingRange) : next;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * NOTE: The word `styling` is used interchangeably as style or class styling.
  *
@@ -16393,13 +15473,6 @@ function isStylingMatch(tStylingKeyCursor, tStylingKey) {
     return false;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // Global state of the parser. (This makes parser non-reentrant, but that is not an issue)
 const parserState = {
     textEnd: 0,
@@ -16658,13 +15731,6 @@ function malformedStyleError(text, expecting, index) {
         `'. Expecting '${expecting}'.`);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Update a style binding on an element with the provided value.
  *
@@ -17435,13 +16501,6 @@ function hasStylingInputShadow(tNode, isClassBased) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Create static text node
  *
  * @param index Index of the node in the data array
@@ -17465,13 +16524,6 @@ function ɵɵtext(index, value = '') {
     setCurrentTNode(tNode, false);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  *
  * Update text content with a lone bound value
@@ -17753,13 +16805,6 @@ function ɵɵtextInterpolateV(values) {
     return ɵɵtextInterpolateV;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  *
  * Update an interpolated class on an element with single bound value surrounded by text.
@@ -18059,13 +17104,6 @@ function ɵɵclassMapInterpolateV(values) {
     checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  *
  * Update an interpolated style on an element with single bound value surrounded by text.
@@ -18372,13 +17410,6 @@ function ɵɵstyleMapInterpolateV(values) {
     ɵɵstyleMap(interpolatedValue);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  *
  * Update an interpolated style property on an element with single bound value surrounded by text.
@@ -18731,13 +17762,6 @@ function ɵɵstylePropInterpolateV(prop, values, valueSuffix) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Update a property on a host element. Only applies to native node properties, not inputs.
  *
  * Operates on the element selected by index via the {@link select} instruction.
@@ -18798,13 +17822,6 @@ function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * NOTE: changes to the `ngI18nClosureMode` name must be synced with `compiler-cli/src/tooling.ts`.
  */
 if (typeof ngI18nClosureMode === 'undefined') {
@@ -18821,13 +17838,6 @@ if (typeof ngI18nClosureMode === 'undefined') {
     })();
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // THIS CODE IS GENERATED - DO NOT MODIFY.
 const u = undefined;
 function plural(val) {
@@ -18838,13 +17848,6 @@ function plural(val) {
 }
 var localeEn = ["en", [["a", "p"], ["AM", "PM"], u], [["AM", "PM"], u, u], [["S", "M", "T", "W", "T", "F", "S"], ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]], u, [["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]], u, [["B", "A"], ["BC", "AD"], ["Before Christ", "Anno Domini"]], 0, [6, 0], ["M/d/yy", "MMM d, y", "MMMM d, y", "EEEE, MMMM d, y"], ["h:mm a", "h:mm:ss a", "h:mm:ss a z", "h:mm:ss a zzzz"], ["{1}, {0}", u, "{1} 'at' {0}", u], [".", ",", ";", "%", "+", "-", "E", "×", "‰", "∞", "NaN", ":"], ["#,##0.###", "#,##0%", "¤#,##0.00", "#E0"], "USD", "$", "US Dollar", {}, "ltr", plural];
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * This const is used to store the locale data registered with `registerLocaleData`
  */
@@ -18968,13 +17971,6 @@ function normalizeLocale(locale) {
     return locale.toLowerCase().replace(/_/g, '-');
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const pluralMapping = ['zero', 'one', 'two', 'few', 'many'];
 /**
  * Returns the plural case based on the locale
@@ -18994,13 +17990,6 @@ const DEFAULT_LOCALE_ID = 'en-US';
  */
 const USD_CURRENCY_CODE = 'USD';
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Marks that the next string is an element name.
  *
@@ -19041,13 +18030,6 @@ var I18nCreateOpCode;
 const unusedValueExportToPlacateAjd = 1;
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * The locale id that the application is currently using (for translations and ICU expressions).
  * This is the ivy version of `LOCALE_ID` that was defined as an injection token for the view engine
  * but is now defined as a global value.
@@ -19075,13 +18057,6 @@ function getLocaleId() {
     return LOCALE_ID;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Find a node in front of which `currentTNode` should be inserted (takes i18n into account).
  *
@@ -19134,13 +18109,6 @@ function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parent
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Add `tNode` to `previousTNodes` list and update relevant `TNode`s in `previousTNodes` list
  * `tNode.insertBeforeIndex`.
@@ -19214,13 +18182,6 @@ function setInsertBeforeIndex(tNode, value) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Retrieve `TIcu` at a given `index`.
  *
@@ -19332,13 +18293,6 @@ function icuCreateOpCode(opCode, parentIdx, refIdx) {
     return opCode | parentIdx << 17 /* IcuCreateOpCode.SHIFT_PARENT */ | refIdx << 1 /* IcuCreateOpCode.SHIFT_REF */;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Keep track of which input bindings in `ɵɵi18nExp` have changed.
  *
@@ -19727,13 +18681,6 @@ function getCaseIndex(icuExpression, bindingValue) {
     return index === -1 ? null : index;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function loadIcuContainerVisitor() {
     const _stack = [];
     let _index = -1;
@@ -19808,13 +18755,6 @@ function loadIcuContainerVisitor() {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Patch a `debug` property on top of the existing object.
  *
  * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
@@ -19847,13 +18787,6 @@ function attachDebugGetter(obj, debugGetter) {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Converts `I18nCreateOpCodes` array into a human readable format.
  *
@@ -20060,13 +18993,6 @@ class OpCodeParser {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const BINDING_REGEXP = /�(\d+):?\d*�/gi;
 const ICU_REGEXP = /({\s*�\d+:?\d*�\s*,\s*\S{6}\s*,[\s\S]*})/gi;
 const NESTED_ICU = /�(\d+)�/;
@@ -20669,13 +19595,6 @@ function addCreateAttribute(create, newIndex, attr) {
     create.push(newIndex << 1 /* IcuCreateOpCode.SHIFT_REF */ | 1 /* IcuCreateOpCode.Attr */, attr.name, attr.value);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 // i18nPostprocess consts
 const ROOT_TEMPLATE_ID = 0;
 const PP_MULTI_VALUE_PLACEHOLDERS_REGEXP = /\[(�.+?�?)\]/;
@@ -20790,13 +19709,6 @@ function i18nPostprocess(message, replacements = {}) {
     return result;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Marks a block of text as translatable.
  *
@@ -20946,21 +19858,26 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
     return i18nPostprocess(message, replacements);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
+/*
+ * This file re-exports all symbols contained in this directory.
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * Why is this file not `index.ts`?
+ *
+ * There seems to be an inconsistent path resolution of an `index.ts` file
+ * when only the parent directory is referenced. This could be due to the
+ * node module resolution configuration differing from rollup and/or typescript.
+ *
+ * With commit
+ * https://github.com/angular/angular/commit/d5e3f2c64bd13ce83e7c70788b7fc514ca4a9918
+ * the `instructions.ts` file was moved to `instructions/instructions.ts` and an
+ * `index.ts` file was used to re-export everything. Having had file names that were
+ * importing from `instructions' directly (not the from the sub file or the `index.ts`
+ * file) caused strange CI issues. `index.ts` had to be renamed to `all.ts` for this
+ * to work.
+ *
+ * Jira Issue = FW-1184
  */
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Resolves the providers which are defined in the DirectiveDef.
  *
@@ -21244,13 +20161,6 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
  * Provides access to the `NgModule` instance and related objects.
  *
@@ -21272,13 +20182,6 @@ class NgModuleRef$1 {
 class NgModuleFactory$1 {
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
  *
@@ -21392,13 +20295,6 @@ function createEnvironmentInjector(providers, parent, debugName = null) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * A service used by the framework to create instances of standalone injectors. Those injectors are
  * created on demand in case of dynamic component instantiation and contain ambient providers
  * collected from the imports graph rooted at a given standalone component.
@@ -21456,13 +20352,6 @@ function ɵɵStandaloneFeature(definition) {
     };
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Retrieves the component instance associated with a given DOM element.
  *
@@ -21841,13 +20730,6 @@ function assertDomElement(value) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
  * on the type.
  *
@@ -21888,13 +20770,6 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
     });
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Bindings for pure functions are stored after regular bindings.
  *
@@ -22237,13 +21112,6 @@ function pureFunctionVInternal(lView, bindingRoot, slotOffset, pureFn, exps, thi
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Create a pipe.
  *
  * @param index Pipe index where the pipe will be stored.
@@ -22432,13 +21300,7 @@ function isPure(lView, index) {
     return lView[TVIEW].data[index].pure;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+/// <reference types="rxjs" />
 class EventEmitter_ extends Subject {
     constructor(isAsync = false) {
         super();
@@ -22483,13 +21345,6 @@ function _wrapInTimeout(fn) {
  */
 const EventEmitter = EventEmitter_;
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function symbolIterator() {
     return this._results[getSymbolIterator()]();
 }
@@ -22651,13 +21506,6 @@ class QueryList {
 Symbol.iterator;
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Represents an embedded template that can be used to instantiate embedded views.
  * To instantiate embedded views based on a template, use the `ViewContainerRef`
  * method `createEmbeddedView()`.
@@ -22729,13 +21577,6 @@ function createTemplateRef(hostTNode, hostLView) {
     return null;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * Represents a container where one or more views can be attached to a component.
  *
@@ -23028,13 +21869,6 @@ function createContainerRef(hostTNode, hostLView) {
     return new R3ViewContainerRef(lContainer, hostTNode, hostLView);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class LQuery_ {
     constructor(queryList) {
         this.queryList = queryList;
@@ -23493,13 +22327,6 @@ function getTQuery(tView, index) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
  *
@@ -23509,21 +22336,6 @@ function ɵɵtemplateRefExtractor(tNode, lView) {
     return createTemplateRef(tNode, lView);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
  *
@@ -23682,24 +22494,10 @@ const angularCoreEnv = (() => ({
     'resolveForwardRef': resolveForwardRef,
 }))();
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function patchModuleCompilation() {
     // Does nothing, but exists as a target for patching.
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 function isModuleWithProviders$1(value) {
     return value.ngModule !== undefined;
 }
@@ -23707,13 +22505,6 @@ function isNgModule$1(value) {
     return !!getNgModuleDef(value);
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const moduleQueue = [];
 /**
  * Enqueues moduleDef to be checked later to see if scope can be set on its
@@ -24236,13 +23027,6 @@ function expandModuleWithProviders(value) {
     return value;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 let _nextReferenceId = 0;
 class MetadataOverrider {
     constructor() {
@@ -24364,13 +23148,6 @@ function _valueProps(obj) {
     return props;
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 const reflection = new ɵReflectionCapabilities();
 /**
  * Allows to override ivy metadata for tests (via the `TestBed`).
@@ -24448,13 +23225,6 @@ class NgModuleResolver extends OverrideResolver {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 var TestingModuleOverride;
 (function (TestingModuleOverride) {
     TestingModuleOverride[TestingModuleOverride["DECLARATION"] = 0] = "DECLARATION";
@@ -25284,13 +24054,7 @@ class R3TestCompiler {
     }
 }
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+// The formatter and CI disagree on how this import statement should be formatted. Both try to keep
 let _nextRootElementId = 0;
 /**
  * Returns a singleton of the `TestBed` class.
@@ -25797,11 +24561,9 @@ function withModule(moduleDef, fn) {
 }
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * Public Test Library for unit testing Angular applications. Assumes that you are running
+ * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
+ * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 const _global = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
@@ -25835,37 +24597,15 @@ function getCleanupHook(expectedTeardownValue) {
 const __core_private_testing_placeholder__ = '';
 
 /**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * @module
+ * @description
+ * Entry point for all public APIs of the core/testing package.
  */
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+/// <reference types="jasmine" />
 // This file only reexports content of the `src` folder. Keep it that way.
 
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+// This file is not used to build this module. It is only used during editing
 
 /**
  * Generated bundle index. Do not edit.
