@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.3+sha-b3fca32
+ * @license Angular v15.1.0-next.3+sha-29efedf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8437,7 +8437,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.3+sha-b3fca32');
+const VERSION = new Version('15.1.0-next.3+sha-29efedf');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -18453,39 +18453,6 @@ function loadIcuContainerVisitor() {
 }
 
 /**
- * Patch a `debug` property on top of the existing object.
- *
- * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
- *
- * @param obj Object to patch
- * @param debug Value to patch
- */
-function attachDebugObject(obj, debug) {
-    if (ngDevMode) {
-        Object.defineProperty(obj, 'debug', { value: debug, enumerable: false });
-    }
-    else {
-        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
-    }
-}
-/**
- * Patch a `debug` property getter on top of the existing object.
- *
- * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
- *
- * @param obj Object to patch
- * @param debugGetter Getter returning a value to patch
- */
-function attachDebugGetter(obj, debugGetter) {
-    if (ngDevMode) {
-        Object.defineProperty(obj, 'debug', { get: debugGetter, enumerable: false });
-    }
-    else {
-        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
-    }
-}
-
-/**
  * Converts `I18nCreateOpCodes` array into a human readable format.
  *
  * This function is attached to the `I18nCreateOpCodes.debug` property if `ngDevMode` is enabled.
@@ -18708,6 +18675,22 @@ const PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
 const NGSP_UNICODE_REGEXP = /\uE500/g;
 function replaceNgsp(value) {
     return value.replace(NGSP_UNICODE_REGEXP, ' ');
+}
+/**
+ * Patch a `debug` property getter on top of the existing object.
+ *
+ * NOTE: always call this method with `ngDevMode && attachDebugObject(...)`
+ *
+ * @param obj Object to patch
+ * @param debugGetter Getter returning a value to patch
+ */
+function attachDebugGetter(obj, debugGetter) {
+    if (ngDevMode) {
+        Object.defineProperty(obj, 'debug', { get: debugGetter, enumerable: false });
+    }
+    else {
+        throw new Error('This method should be guarded with `ngDevMode` so that it can be tree shaken in production!');
+    }
 }
 /**
  * Create dynamic nodes from i18n translation block.
