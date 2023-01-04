@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.3+sha-c8310a8
+ * @license Angular v15.1.0-next.3+sha-a532d71
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9462,7 +9462,7 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * @param callback A handler function that cleans up developer-defined data
      * associated with a view. Called when the `destroy()` method is invoked.
      */
-    abstract onDestroy(callback: Function): any /** TODO #9100, replace by void in a major release*/;
+    abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
 
 /**
