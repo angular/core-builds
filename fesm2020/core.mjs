@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.3+sha-3944aa7
+ * @license Angular v15.1.0-next.3+sha-c5a8485
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8437,7 +8437,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.3+sha-3944aa7');
+const VERSION = new Version('15.1.0-next.3+sha-c5a8485');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25048,7 +25048,7 @@ class PlatformRef {
             moduleRef.instance.ngDoBootstrap(appRef);
         }
         else {
-            throw new RuntimeError(403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
+            throw new RuntimeError(-403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
                 `The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, ` +
                     `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
                     `Please define one of these.`);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.3+sha-3944aa7
+ * @license Angular v15.1.0-next.3+sha-c5a8485
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7155,7 +7155,7 @@ declare const enum RuntimeErrorCode {
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = 401,
     ERROR_HANDLER_NOT_FOUND = 402,
-    BOOTSTRAP_COMPONENTS_NOT_FOUND = 403,
+    BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
     PLATFORM_ALREADY_DESTROYED = 404,
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
     APPLICATION_REF_ALREADY_DESTROYED = 406,
