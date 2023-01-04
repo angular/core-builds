@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.1.0-next.3+sha-2f4f063
+ * @license Angular v15.1.0-next.3+sha-687ab04
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1888,7 +1888,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  * @param token A token that represents a dependency that should be injected.
  * @param flags Optional flags that control how injection is executed.
  * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+ * parameter decorators `@Host`, `@Self`, `@SkipSelf`, and `@Optional`.
  * @returns the injected value if operation is successful, `null` otherwise.
  * @throws if called outside of a supported context.
  *
@@ -8803,7 +8803,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.1.0-next.3+sha-2f4f063');
+const VERSION = new Version('15.1.0-next.3+sha-687ab04');
 
 // This default value is when checking the hierarchy for a token.
 //
