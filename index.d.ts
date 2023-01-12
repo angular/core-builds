@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.0-next.0+sha-8802b4a
+ * @license Angular v15.2.0-next.0+sha-f00bf71
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4989,7 +4989,7 @@ declare const enum LViewFlags {
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
  * referenced in `@Component in a component injector.
  */
-export declare function makeEnvironmentProviders(providers: Provider[]): EnvironmentProviders;
+export declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
 
 /**
  * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
@@ -10264,7 +10264,7 @@ export declare function ɵinternalCreateApplication(config: {
 }): Promise<ApplicationRef>;
 
 export declare interface ɵInternalEnvironmentProviders extends EnvironmentProviders {
-    ɵproviders: Provider[];
+    ɵproviders: (Provider | EnvironmentProviders)[];
     /**
      * If present, indicates that the `EnvironmentProviders` were derived from NgModule providers.
      *
@@ -10284,7 +10284,7 @@ export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
  */
 export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
 
-export declare function ɵisEnvironmentProviders(value: Provider | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
+export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentProviders | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
 
 export declare function ɵisInjectable(type: any): boolean;
 
