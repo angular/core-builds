@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "15.2.0-next.1+sha-a154db8",
+  "version": "15.2.0-next.1+sha-c03e6a6",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -64,7 +64,6 @@
       "@angular/service-worker"
     ]
   },
-  "schematics": "./schematics/collection.json",
   "sideEffects": false,
   "fesm2020": "./fesm2020/core.mjs",
   "fesm2015": "./fesm2015/core.mjs",

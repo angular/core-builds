@@ -154,14 +154,11 @@ function parseTsconfigFile(tsconfigPath, basePath) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/compiler_host.mjs
 function createMigrationProgram(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
-  const { rootNames, options, host } = createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles);
-  return import_typescript2.default.createProgram(rootNames, options, host);
-}
-function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
   tsconfigPath = (0, import_path.resolve)(basePath, tsconfigPath);
   const parsed = parseTsconfigFile(tsconfigPath, (0, import_path.dirname)(tsconfigPath));
   const host = createMigrationCompilerHost(tree, parsed.options, basePath, fakeFileRead);
-  return { rootNames: parsed.fileNames.concat(additionalFiles || []), options: parsed.options, host };
+  const program = import_typescript2.default.createProgram(parsed.fileNames.concat(additionalFiles || []), parsed.options, host);
+  return { parsed, host, program };
 }
 function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
   const host = import_typescript2.default.createCompilerHost(options, true);
@@ -239,7 +236,7 @@ function relative_link_resolution_default() {
   });
 }
 function runRelativeLinkResolutionMigration(tree, tsconfigPath, basePath) {
-  const program = createMigrationProgram(tree, tsconfigPath, basePath);
+  const { program } = createMigrationProgram(tree, tsconfigPath, basePath);
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => canMigrateFile(basePath, sourceFile, program));
   for (const sourceFile of sourceFiles) {
     let update = null;

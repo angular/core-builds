@@ -154,14 +154,11 @@ function parseTsconfigFile(tsconfigPath, basePath) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/compiler_host.mjs
 function createMigrationProgram(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
-  const { rootNames, options, host } = createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles);
-  return import_typescript2.default.createProgram(rootNames, options, host);
-}
-function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
   tsconfigPath = (0, import_path.resolve)(basePath, tsconfigPath);
   const parsed = parseTsconfigFile(tsconfigPath, (0, import_path.dirname)(tsconfigPath));
   const host = createMigrationCompilerHost(tree, parsed.options, basePath, fakeFileRead);
-  return { rootNames: parsed.fileNames.concat(additionalFiles || []), options: parsed.options, host };
+  const program = import_typescript2.default.createProgram(parsed.fileNames.concat(additionalFiles || []), parsed.options, host);
+  return { parsed, host, program };
 }
 function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
   const host = import_typescript2.default.createCompilerHost(options, true);
@@ -209,12 +206,10 @@ function getImportOfIdentifier(typeChecker, node) {
   };
 }
 function getImportSpecifier(sourceFile, moduleName, specifierName) {
-  var _a;
   for (const node of sourceFile.statements) {
-    if (import_typescript3.default.isImportDeclaration(node) && import_typescript3.default.isStringLiteral(node.moduleSpecifier)) {
-      const isMatch = typeof moduleName === "string" ? node.moduleSpecifier.text === moduleName : moduleName.test(node.moduleSpecifier.text);
-      const namedBindings = (_a = node.importClause) == null ? void 0 : _a.namedBindings;
-      if (isMatch && namedBindings && import_typescript3.default.isNamedImports(namedBindings)) {
+    if (import_typescript3.default.isImportDeclaration(node) && import_typescript3.default.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === moduleName) {
+      const namedBindings = node.importClause && node.importClause.namedBindings;
+      if (namedBindings && import_typescript3.default.isNamedImports(namedBindings)) {
         const match = findImportSpecifier(namedBindings.elements, specifierName);
         if (match) {
           return match;
@@ -238,10 +233,10 @@ function findImportSpecifier(nodes, specifierName) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/nodes.mjs
 var import_typescript4 = __toESM(require("typescript"), 1);
-function closestNode(node, predicate) {
-  let current = node.parent;
+function closestNode(node, kind) {
+  let current = node;
   while (current && !import_typescript4.default.isSourceFile(current)) {
-    if (predicate(current)) {
+    if (current.kind === kind) {
       return current;
     }
     current = current.parent;
@@ -260,7 +255,7 @@ function migrateFile(sourceFile, typeChecker, rewrite) {
   let rewrites = findUsages(sourceFile, typeChecker);
   const routerLinkSpec = getImportSpecifier(sourceFile, routerModule, routerLink);
   if (routerLinkSpec) {
-    const routerLinkNamedImports = routerLinkWithHrefSpec ? closestNode(routerLinkWithHrefSpec, import_typescript5.default.isNamedImports) : null;
+    const routerLinkNamedImports = routerLinkWithHrefSpec ? closestNode(routerLinkWithHrefSpec, import_typescript5.default.SyntaxKind.NamedImports) : null;
     if (routerLinkNamedImports !== null) {
       const rewrittenNamedImports = removeSymbolFromNamedImports(routerLinkNamedImports, routerLinkWithHrefSpec);
       const printer = import_typescript5.default.createPrinter();
@@ -323,7 +318,7 @@ function router_link_with_href_default() {
   });
 }
 function runRouterLinkWithHrefMigration(tree, tsconfigPath, basePath) {
-  const program = createMigrationProgram(tree, tsconfigPath, basePath);
+  const { program } = createMigrationProgram(tree, tsconfigPath, basePath);
   const typeChecker = program.getTypeChecker();
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => canMigrateFile(basePath, sourceFile, program));
   for (const sourceFile of sourceFiles) {
