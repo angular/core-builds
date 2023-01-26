@@ -167,10 +167,10 @@ function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
     var _a;
     const treeRelativePath = (0, import_path.relative)(basePath, fileName);
     let result = fakeRead == null ? void 0 : fakeRead(treeRelativePath);
-    if (result === void 0) {
+    if (typeof result !== "string") {
       result = treeRelativePath.startsWith("..") ? defaultReadFile.call(host, fileName) : (_a = tree.read(treeRelativePath)) == null ? void 0 : _a.toString();
     }
-    return result ? result.replace(/^\uFEFF/, "") : void 0;
+    return typeof result === "string" ? result.replace(/^\uFEFF/, "") : void 0;
   };
   return host;
 }
