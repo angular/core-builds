@@ -16118,7 +16118,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.0-next.2+sha-869c9ac");
+var VERSION2 = new Version("15.2.0-next.2+sha-f82bdc4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17433,7 +17433,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17502,7 +17502,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17684,7 +17684,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17707,7 +17707,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17745,7 +17745,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17766,7 +17766,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17801,7 +17801,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-869c9ac"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-f82bdc4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17818,7 +17818,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.0-next.2+sha-869c9ac");
+var VERSION3 = new Version("15.2.0-next.2+sha-f82bdc4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35189,7 +35189,7 @@ function removeExportReferences(locations, tracker) {
 }
 function canRemoveClass(node, typeChecker) {
   var _a;
-  const decorator = (_a = getAngularDecorators(typeChecker, import_typescript109.default.getDecorators(node) || []).find((decorator2) => decorator2.name === "NgModule")) == null ? void 0 : _a.node;
+  const decorator = (_a = findNgModuleDecorator(node, typeChecker)) == null ? void 0 : _a.node;
   if (!decorator || !import_typescript109.default.isCallExpression(decorator.expression)) {
     return false;
   }
@@ -35204,8 +35204,17 @@ function canRemoveClass(node, typeChecker) {
   }
   const literal3 = decorator.expression.arguments[0];
   const imports = findLiteralProperty(literal3, "imports");
-  if (imports && isNonEmptyNgModuleProperty(imports) && imports.initializer.elements.some((el) => !import_typescript109.default.isIdentifier(el))) {
-    return false;
+  if (imports && isNonEmptyNgModuleProperty(imports)) {
+    for (const dep of imports.initializer.elements) {
+      if (!import_typescript109.default.isIdentifier(dep)) {
+        return false;
+      }
+      const depDeclaration = findClassDeclaration(dep, typeChecker);
+      const depNgModule = depDeclaration ? findNgModuleDecorator(depDeclaration, typeChecker) : null;
+      if (depDeclaration !== null && depNgModule !== null && !canRemoveClass(depDeclaration, typeChecker)) {
+        return false;
+      }
+    }
   }
   for (const prop of literal3.properties) {
     if (isNonEmptyNgModuleProperty(prop) && (prop.name.text === "declarations" || prop.name.text === "providers" || prop.name.text === "bootstrap")) {
@@ -35264,6 +35273,10 @@ function addRemovalTodos(nodes, tracker) {
   for (const node of nodes) {
     tracker.insertText(node.getSourceFile(), node.getFullStart(), ` /* TODO(standalone-migration): clean up removed NgModule reference manually. */ `);
   }
+}
+function findNgModuleDecorator(node, typeChecker) {
+  const decorators = getAngularDecorators(typeChecker, import_typescript109.default.getDecorators(node) || []);
+  return decorators.find((decorator) => decorator.name === "NgModule") || null;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/standalone-migration/standalone-bootstrap.mjs
