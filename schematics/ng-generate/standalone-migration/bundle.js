@@ -16118,7 +16118,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.0-next.2+sha-584976e");
+var VERSION2 = new Version("15.2.0-next.2+sha-65329a9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17433,7 +17433,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17502,7 +17502,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17684,7 +17684,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17707,7 +17707,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17745,7 +17745,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17766,7 +17766,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17801,7 +17801,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.0-next.2+sha-584976e"));
+  definitionMap.set("version", literal("15.2.0-next.2+sha-65329a9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17818,7 +17818,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.0-next.2+sha-584976e");
+var VERSION3 = new Version("15.2.0-next.2+sha-65329a9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35328,9 +35328,9 @@ function toStandalone(sourceFiles, program, printer) {
     convertNgModuleDeclarationToStandalone(declaration, declarations, tracker, templateTypeChecker);
   }
   for (const node of modulesToMigrate) {
-    migrateNgModuleClass(node, tracker, templateTypeChecker);
+    migrateNgModuleClass(node, declarations, tracker, typeChecker, templateTypeChecker);
   }
-  migrateTestDeclarations(testObjectsToMigrate, tracker, typeChecker);
+  migrateTestDeclarations(testObjectsToMigrate, declarations, tracker, typeChecker);
   return tracker.recordChanges();
 }
 function convertNgModuleDeclarationToStandalone(ref, allDeclarations, tracker, typeChecker) {
@@ -35370,46 +35370,67 @@ function getComponentImportExpressions(ref, allDeclarations, tracker, typeChecke
   }
   return imports;
 }
-function migrateNgModuleClass(node, tracker, typeChecker) {
+function migrateNgModuleClass(node, allDeclarations, tracker, typeChecker, templateTypeChecker) {
   var _a;
-  const decorator = (_a = typeChecker.getNgModuleMetadata(node)) == null ? void 0 : _a.decorator;
+  const decorator = (_a = templateTypeChecker.getNgModuleMetadata(node)) == null ? void 0 : _a.decorator;
   if (decorator && import_typescript111.default.isCallExpression(decorator.expression) && decorator.expression.arguments.length === 1 && import_typescript111.default.isObjectLiteralExpression(decorator.expression.arguments[0])) {
-    moveDeclarationsToImports(decorator.expression.arguments[0], tracker);
+    moveDeclarationsToImports(decorator.expression.arguments[0], allDeclarations.map((decl) => decl.node), typeChecker, tracker);
   }
 }
-function moveDeclarationsToImports(literal3, tracker) {
-  const properties = literal3.properties.map((prop) => {
+function moveDeclarationsToImports(literal3, allDeclarations, typeChecker, tracker) {
+  const declarationsProp = findLiteralProperty(literal3, "declarations");
+  if (!declarationsProp) {
+    return;
+  }
+  const declarationsToPreserve = [];
+  const declarationsToCopy = [];
+  const properties = [];
+  const importsProp = findLiteralProperty(literal3, "imports");
+  if (import_typescript111.default.isPropertyAssignment(declarationsProp)) {
+    if (import_typescript111.default.isArrayLiteralExpression(declarationsProp.initializer)) {
+      for (const el of declarationsProp.initializer.elements) {
+        if (import_typescript111.default.isIdentifier(el)) {
+          const correspondingClass = findClassDeclaration(el, typeChecker);
+          if (!correspondingClass || allDeclarations.includes(correspondingClass)) {
+            declarationsToCopy.push(el);
+          } else {
+            declarationsToPreserve.push(el);
+          }
+        } else {
+          declarationsToCopy.push(el);
+        }
+      }
+    } else {
+      declarationsToCopy.push(import_typescript111.default.factory.createSpreadElement(declarationsProp.initializer));
+    }
+  }
+  if (!importsProp && declarationsToCopy.length > 0) {
+    properties.push(import_typescript111.default.factory.createPropertyAssignment("imports", import_typescript111.default.factory.createArrayLiteralExpression(declarationsToCopy)));
+  }
+  for (const prop of literal3.properties) {
     if (!isNamedPropertyAssignment(prop)) {
-      return prop;
+      properties.push(prop);
+      continue;
     }
-    if (prop.name.text === "declarations" && !findLiteralProperty(literal3, "imports")) {
-      return import_typescript111.default.factory.createPropertyAssignment("imports", prop.initializer);
+    if (prop === declarationsProp) {
+      if (declarationsToPreserve.length > 0) {
+        properties.push(import_typescript111.default.factory.updatePropertyAssignment(prop, prop.name, import_typescript111.default.factory.createArrayLiteralExpression(declarationsToPreserve)));
+      }
+      continue;
     }
-    if (prop.name.text === "imports") {
-      const declarations = findLiteralProperty(literal3, "declarations");
-      return declarations && import_typescript111.default.isPropertyAssignment(declarations) ? mergeDeclarationsIntoImports(declarations, prop) : prop;
+    if (prop === importsProp && declarationsToCopy.length > 0) {
+      let initializer;
+      if (import_typescript111.default.isArrayLiteralExpression(prop.initializer)) {
+        initializer = import_typescript111.default.factory.updateArrayLiteralExpression(prop.initializer, [...prop.initializer.elements, ...declarationsToCopy]);
+      } else {
+        initializer = import_typescript111.default.factory.createArrayLiteralExpression([import_typescript111.default.factory.createSpreadElement(prop.initializer), ...declarationsToCopy]);
+      }
+      properties.push(import_typescript111.default.factory.updatePropertyAssignment(prop, prop.name, initializer));
+      continue;
     }
-    return prop;
-  }).filter((prop) => isNamedPropertyAssignment(prop) && prop.name.text !== "declarations");
-  tracker.replaceNode(literal3, import_typescript111.default.factory.createObjectLiteralExpression(properties, true), import_typescript111.default.EmitHint.Expression);
-}
-function mergeDeclarationsIntoImports(declarations, imports) {
-  const importsIsArray = import_typescript111.default.isArrayLiteralExpression(imports.initializer);
-  const declarationsIsArray = import_typescript111.default.isArrayLiteralExpression(declarations.initializer);
-  let arrayElements;
-  if (importsIsArray && declarationsIsArray) {
-    arrayElements = [...imports.initializer.elements, ...declarations.initializer.elements];
-  } else if (importsIsArray) {
-    arrayElements = [...imports.initializer.elements, import_typescript111.default.factory.createSpreadElement(declarations.initializer)];
-  } else if (declarationsIsArray) {
-    arrayElements = [import_typescript111.default.factory.createSpreadElement(imports.initializer), ...declarations.initializer.elements];
-  } else {
-    arrayElements = [
-      import_typescript111.default.factory.createSpreadElement(imports.initializer),
-      import_typescript111.default.factory.createSpreadElement(declarations.initializer)
-    ];
+    properties.push(prop);
   }
-  return import_typescript111.default.factory.createPropertyAssignment(imports.name, import_typescript111.default.factory.createArrayLiteralExpression(arrayElements));
+  tracker.replaceNode(literal3, import_typescript111.default.factory.updateObjectLiteralExpression(literal3, properties), import_typescript111.default.EmitHint.Expression);
 }
 function addStandaloneToDecorator(node) {
   return addPropertyToAngularDecorator(node, import_typescript111.default.factory.createPropertyAssignment("standalone", import_typescript111.default.factory.createToken(import_typescript111.default.SyntaxKind.TrueKeyword)));
@@ -35501,14 +35522,22 @@ function extractDeclarationsFromModule(ngModule, typeChecker) {
   var _a;
   return ((_a = typeChecker.getNgModuleMetadata(ngModule)) == null ? void 0 : _a.declarations.filter((decl) => import_typescript111.default.isClassDeclaration(decl.node))) || [];
 }
-function migrateTestDeclarations(testObjects, tracker, typeChecker) {
-  const { decorators, componentImports } = analyzeTestingModules(testObjects, tracker, typeChecker);
+function migrateTestDeclarations(testObjects, declarationsOutsideOfTestFiles, tracker, typeChecker) {
+  const { decorators, componentImports } = analyzeTestingModules(testObjects, typeChecker);
+  const allDeclarations = declarationsOutsideOfTestFiles.map((ref) => ref.node);
   for (const decorator of decorators) {
+    const closestClass = closestNode(decorator.node, import_typescript111.default.isClassDeclaration);
     if (decorator.name === "Pipe" || decorator.name === "Directive") {
       tracker.replaceNode(decorator.node, addStandaloneToDecorator(decorator.node));
+      if (closestClass) {
+        allDeclarations.push(closestClass);
+      }
     } else if (decorator.name === "Component") {
       const newDecorator = addStandaloneToDecorator(decorator.node);
       const importsToAdd = componentImports.get(decorator.node);
+      if (closestClass) {
+        allDeclarations.push(closestClass);
+      }
       if (importsToAdd && importsToAdd.size > 0) {
         tracker.replaceNode(decorator.node, addPropertyToAngularDecorator(newDecorator, import_typescript111.default.factory.createPropertyAssignment("imports", import_typescript111.default.factory.createArrayLiteralExpression(Array.from(importsToAdd)))));
       } else {
@@ -35516,8 +35545,11 @@ function migrateTestDeclarations(testObjects, tracker, typeChecker) {
       }
     }
   }
+  for (const obj of testObjects) {
+    moveDeclarationsToImports(obj, allDeclarations, typeChecker, tracker);
+  }
 }
-function analyzeTestingModules(testObjects, tracker, typeChecker) {
+function analyzeTestingModules(testObjects, typeChecker) {
   const seenDeclarations = /* @__PURE__ */ new Set();
   const decorators = [];
   const componentImports = /* @__PURE__ */ new Map();
@@ -35528,7 +35560,6 @@ function analyzeTestingModules(testObjects, tracker, typeChecker) {
     }
     const importsProp = findLiteralProperty(obj, "imports");
     const importElements = importsProp && hasNgModuleMetadataElements(importsProp) ? importsProp.initializer.elements : null;
-    moveDeclarationsToImports(obj, tracker);
     for (const decl of declarations) {
       if (seenDeclarations.has(decl)) {
         continue;
