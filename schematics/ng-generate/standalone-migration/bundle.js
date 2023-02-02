@@ -6281,7 +6281,6 @@ var animationKeywords = /* @__PURE__ */ new Set([
 ]);
 var ShadowCss = class {
   constructor() {
-    this.strictStyling = true;
     this._animationDeclarationKeyframesRe = /(^|\s+)(?:(?:(['"])((?:\\\\|\\\2|(?!\2).)+)\2)|(-?[A-Za-z][\w\-]*))(?=[,\s]|$)/g;
   }
   shimCssText(cssText, selector, hostSelector = "") {
@@ -6403,7 +6402,7 @@ var ShadowCss = class {
       let selector = rule.selector;
       let content = rule.content;
       if (rule.selector[0] !== "@") {
-        selector = this._scopeSelector(rule.selector, scopeSelector, hostSelector, this.strictStyling);
+        selector = this._scopeSelector(rule.selector, scopeSelector, hostSelector);
       } else if (rule.selector.startsWith("@media") || rule.selector.startsWith("@supports") || rule.selector.startsWith("@document") || rule.selector.startsWith("@layer") || rule.selector.startsWith("@container")) {
         content = this._scopeSelectors(rule.content, scopeSelector, hostSelector);
       } else if (rule.selector.startsWith("@font-face") || rule.selector.startsWith("@page")) {
@@ -6418,12 +6417,12 @@ var ShadowCss = class {
       return new CssRule(selector, rule.content);
     });
   }
-  _scopeSelector(selector, scopeSelector, hostSelector, strict) {
+  _scopeSelector(selector, scopeSelector, hostSelector) {
     return selector.split(",").map((part) => part.trim().split(_shadowDeepSelectors)).map((deepParts) => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = (shallowPart2) => {
         if (this._selectorNeedsScoping(shallowPart2, scopeSelector)) {
-          return strict ? this._applyStrictSelectorScope(shallowPart2, scopeSelector, hostSelector) : this._applySelectorScope(shallowPart2, scopeSelector, hostSelector);
+          return this._applySelectorScope(shallowPart2, scopeSelector, hostSelector);
         } else {
           return shallowPart2;
         }
@@ -6441,13 +6440,10 @@ var ShadowCss = class {
     scopeSelector = scopeSelector.replace(lre, "\\[").replace(rre, "\\]");
     return new RegExp("^(" + scopeSelector + ")" + _selectorReSuffix, "m");
   }
-  _applySelectorScope(selector, scopeSelector, hostSelector) {
-    return this._applySimpleSelectorScope(selector, scopeSelector, hostSelector);
-  }
   _applySimpleSelectorScope(selector, scopeSelector, hostSelector) {
     _polyfillHostRe.lastIndex = 0;
     if (_polyfillHostRe.test(selector)) {
-      const replaceBy = this.strictStyling ? `[${hostSelector}]` : scopeSelector;
+      const replaceBy = `[${hostSelector}]`;
       return selector.replace(_polyfillHostNoCombinatorRe, (hnc, selector2) => {
         return selector2.replace(/([^:]*)(:*)(.*)/, (_, before, colon, after) => {
           return before + replaceBy + colon + after;
@@ -6456,7 +6452,7 @@ var ShadowCss = class {
     }
     return scopeSelector + " " + selector;
   }
-  _applyStrictSelectorScope(selector, scopeSelector, hostSelector) {
+  _applySelectorScope(selector, scopeSelector, hostSelector) {
     var _a;
     const isRe = /\[is=([^\]]*)\]/g;
     scopeSelector = scopeSelector.replace(isRe, (_, ...parts) => parts[0]);
@@ -16118,7 +16114,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.0-next.3+sha-617a010");
+var VERSION2 = new Version("15.2.0-next.3+sha-f5a7e02");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17433,7 +17429,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17502,7 +17498,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17684,7 +17680,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17707,7 +17703,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17745,7 +17741,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17766,7 +17762,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17801,7 +17797,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-617a010"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-f5a7e02"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17818,7 +17814,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.0-next.3+sha-617a010");
+var VERSION3 = new Version("15.2.0-next.3+sha-f5a7e02");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
