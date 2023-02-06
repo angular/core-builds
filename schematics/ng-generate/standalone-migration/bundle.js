@@ -16114,7 +16114,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.0-next.3+sha-54b24eb");
+var VERSION2 = new Version("15.2.0-next.3+sha-32cf4e5");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17429,7 +17429,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17498,7 +17498,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17680,7 +17680,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17703,7 +17703,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17741,7 +17741,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17762,7 +17762,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17797,7 +17797,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.0-next.3+sha-54b24eb"));
+  definitionMap.set("version", literal("15.2.0-next.3+sha-32cf4e5"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17814,7 +17814,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.0-next.3+sha-54b24eb");
+var VERSION3 = new Version("15.2.0-next.3+sha-32cf4e5");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35462,16 +35462,20 @@ function isNamedPropertyAssignment(node) {
 }
 function findImportLocation(target, inComponent, importMode, typeChecker) {
   const importLocations = typeChecker.getPotentialImportsFor(target, inComponent.node, importMode);
+  let firstSameFileImport = null;
   let firstModuleImport = null;
   for (const location of importLocations) {
     if (location.kind === PotentialImportKind.Standalone) {
       return location;
     }
-    if (location.kind === PotentialImportKind.NgModule && !firstModuleImport) {
+    if (!location.moduleSpecifier && !firstSameFileImport) {
+      firstSameFileImport = location;
+    }
+    if (location.kind === PotentialImportKind.NgModule && !firstModuleImport && !location.symbolName.startsWith("\u0275")) {
       firstModuleImport = location;
     }
   }
-  return firstModuleImport;
+  return firstSameFileImport || firstModuleImport || importLocations[0] || null;
 }
 function hasNgModuleMetadataElements(node) {
   return import_typescript111.default.isPropertyAssignment(node) && (!import_typescript111.default.isArrayLiteralExpression(node.initializer) || node.initializer.elements.length > 0);
@@ -35980,15 +35984,20 @@ function standalone_migration_default(options) {
     const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
     const allPaths = [...buildPaths, ...testPaths];
+    const pathToMigrate = normalizePath((0, import_path8.join)(basePath, options.path));
+    let migratedFiles = 0;
     if (!allPaths.length) {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the standalone migration.");
     }
     for (const tsconfigPath of allPaths) {
-      standaloneMigration(tree, tsconfigPath, basePath, options);
+      migratedFiles += standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
+    }
+    if (migratedFiles === 0) {
+      throw new import_schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the standalone migration.`);
     }
   });
 }
-function standaloneMigration(tree, tsconfigPath, basePath, options) {
+function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, options) {
   if (options.path.startsWith("..")) {
     throw new import_schematics.SchematicsException("Cannot run standalone migration outside of the current project.");
   }
@@ -35999,7 +36008,6 @@ function standaloneMigration(tree, tsconfigPath, basePath, options) {
     options: { _enableTemplateTypeChecker: true, compileNonExportedClasses: true }
   });
   const printer = import_typescript113.default.createPrinter();
-  const pathToMigrate = normalizePath((0, import_path8.join)(basePath, options.path));
   if ((0, import_fs2.existsSync)(pathToMigrate) && !(0, import_fs2.statSync)(pathToMigrate).isDirectory()) {
     throw new import_schematics.SchematicsException(`Migration path ${pathToMigrate} has to be a directory. Cannot run the standalone migration.`);
   }
@@ -36007,7 +36015,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, options) {
     return sourceFile.fileName.startsWith(pathToMigrate) && canMigrateFile(basePath, sourceFile, program.getTsProgram());
   });
   if (sourceFiles.length === 0) {
-    throw new import_schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the standalone migration.`);
+    return 0;
   }
   let pendingChanges;
   let filesToRemove = null;
@@ -36038,6 +36046,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, options) {
       tree.delete((0, import_path8.relative)(basePath, file.fileName));
     }
   }
+  return sourceFiles.length;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {});
