@@ -2,8 +2,22 @@ var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -157,11 +171,12 @@ function createMigrationProgram(tree, tsconfigPath, basePath, fakeFileRead, addi
   const { rootNames, options, host } = createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles);
   return import_typescript2.default.createProgram(rootNames, options, host);
 }
-function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
+function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles, optionOverrides) {
   tsconfigPath = (0, import_path.resolve)(basePath, tsconfigPath);
   const parsed = parseTsconfigFile(tsconfigPath, (0, import_path.dirname)(tsconfigPath));
-  const host = createMigrationCompilerHost(tree, parsed.options, basePath, fakeFileRead);
-  return { rootNames: parsed.fileNames.concat(additionalFiles || []), options: parsed.options, host };
+  const options = optionOverrides ? __spreadValues(__spreadValues({}, parsed.options), optionOverrides) : parsed.options;
+  const host = createMigrationCompilerHost(tree, options, basePath, fakeFileRead);
+  return { rootNames: parsed.fileNames.concat(additionalFiles || []), options, host };
 }
 function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
   const host = import_typescript2.default.createCompilerHost(options, true);
@@ -178,7 +193,7 @@ function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
   return host;
 }
 function canMigrateFile(basePath, sourceFile, program) {
-  if (sourceFile.isDeclarationFile || program.isSourceFileFromExternalLibrary(sourceFile)) {
+  if (sourceFile.fileName.endsWith(".ngtypecheck.ts") || sourceFile.isDeclarationFile || program.isSourceFileFromExternalLibrary(sourceFile)) {
     return false;
   }
   return !(0, import_path.relative)(basePath, sourceFile.fileName).startsWith("..");
