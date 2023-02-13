@@ -16114,7 +16114,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.0-next.4+sha-b97d591");
+var VERSION2 = new Version("15.2.0-next.4+sha-816e76a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17429,7 +17429,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17498,7 +17498,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17680,7 +17680,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17703,7 +17703,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17741,7 +17741,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17762,7 +17762,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17797,7 +17797,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.0-next.4+sha-b97d591"));
+  definitionMap.set("version", literal("15.2.0-next.4+sha-816e76a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17814,7 +17814,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.0-next.4+sha-b97d591");
+var VERSION3 = new Version("15.2.0-next.4+sha-816e76a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35802,7 +35802,7 @@ function migrateBootstrapCall(analysis, tracker, referenceResolver, typeChecker,
   const providersInNewCall = [];
   const moduleImportsInNewCall = [];
   let nodeLookup = null;
-  tracker.insertText(moduleSourceFile, analysis.metadata.getStart(), '/* TODO(standalone-migration): clean up removed NgModule class manually or run the "Remove unnecessary NgModule classes" step of the migration again. \n');
+  tracker.insertText(moduleSourceFile, analysis.metadata.getStart(), "/* TODO(standalone-migration): clean up removed NgModule class manually. \n");
   tracker.insertText(moduleSourceFile, analysis.metadata.getEnd(), " */");
   if (providers && import_typescript112.default.isPropertyAssignment(providers)) {
     nodeLookup = nodeLookup || getNodeLookup(moduleSourceFile);
@@ -36100,7 +36100,7 @@ var MigrationMode;
   MigrationMode2["standaloneBootstrap"] = "standalone-bootstrap";
 })(MigrationMode || (MigrationMode = {}));
 function standalone_migration_default(options) {
-  return (tree) => __async(this, null, function* () {
+  return (tree, context) => __async(this, null, function* () {
     const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
     const allPaths = [...buildPaths, ...testPaths];
@@ -36115,9 +36115,11 @@ function standalone_migration_default(options) {
     if (migratedFiles === 0) {
       throw new import_schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the standalone migration.`);
     }
+    context.logger.info("\u{1F389} Automated migration step has finished! \u{1F389}");
+    context.logger.info("IMPORTANT! Please verify manually that your application builds and behaves as expected.");
   });
 }
-function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions) {
+function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions, oldProgram) {
   if (schematicOptions.path.startsWith("..")) {
     throw new import_schematics.SchematicsException("Cannot run standalone migration outside of the current project.");
   }
@@ -36128,7 +36130,7 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
     skipDefaultLibCheck: true
   });
   const referenceLookupExcludedFiles = /node_modules|\.ngtypecheck\.ts/;
-  const program = createProgram({ rootNames, host, options });
+  const program = createProgram({ rootNames, host, options, oldProgram });
   const printer = import_typescript113.default.createPrinter();
   if ((0, import_fs2.existsSync)(pathToMigrate) && !(0, import_fs2.statSync)(pathToMigrate).isDirectory()) {
     throw new import_schematics.SchematicsException(`Migration path ${pathToMigrate} has to be a directory. Cannot run the standalone migration.`);
@@ -36165,6 +36167,9 @@ function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schema
     for (const file of filesToRemove) {
       tree.delete((0, import_path8.relative)(basePath, file.fileName));
     }
+  }
+  if (schematicOptions.mode === MigrationMode.standaloneBootstrap) {
+    return standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, __spreadProps(__spreadValues({}, schematicOptions), { mode: MigrationMode.pruneModules }), program) + sourceFiles.length;
   }
   return sourceFiles.length;
 }
