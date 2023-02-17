@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-6b8636f
+ * @license Angular v16.0.0-next.0+sha-918e6f0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8743,7 +8743,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.0+sha-6b8636f');
+const VERSION = new Version('16.0.0-next.0+sha-918e6f0');
 
 // This default value is when checking the hierarchy for a token.
 //
