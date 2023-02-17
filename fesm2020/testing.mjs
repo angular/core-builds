@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.0-rc.0+sha-440b51b
+ * @license Angular v15.2.0-rc.0+sha-25e220a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -772,10 +772,9 @@ function getInheritedInjectableDef(type) {
     const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
     if (def) {
         const typeName = getTypeName(type);
-        // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-        // ngDevMode &&
-        console.warn(`DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
-            `This will become an error in a future version of Angular. Please add @Injectable() to the "${typeName}" class.`);
+        ngDevMode &&
+            console.warn(`DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+                `This will become an error in a future version of Angular. Please add @Injectable() to the "${typeName}" class.`);
         return def;
     }
     else {
@@ -8743,7 +8742,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.0-rc.0+sha-440b51b');
+const VERSION = new Version('15.2.0-rc.0+sha-25e220a');
 
 // This default value is when checking the hierarchy for a token.
 //
