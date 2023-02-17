@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-18c7fac
+ * @license Angular v16.0.0-next.0+sha-9b9c818
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6991,7 +6991,7 @@ export declare interface RendererType2 {
     /**
      * Defines CSS styles to be stored on a renderer instance.
      */
-    styles: (string | any[])[];
+    styles: string[];
     /**
      * Defines arbitrary developer-defined data to be stored on a renderer instance.
      * This is useful for renderers that delegate to other renderers.
