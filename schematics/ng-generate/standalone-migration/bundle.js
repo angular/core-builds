@@ -16114,7 +16114,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.0-rc.0+sha-0950ef6");
+var VERSION2 = new Version("15.2.0-rc.0+sha-7b4d3c0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17429,7 +17429,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17498,7 +17498,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17680,7 +17680,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17703,7 +17703,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17741,7 +17741,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17762,7 +17762,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17797,7 +17797,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.0-rc.0+sha-0950ef6"));
+  definitionMap.set("version", literal("15.2.0-rc.0+sha-7b4d3c0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17814,7 +17814,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.0-rc.0+sha-0950ef6");
+var VERSION3 = new Version("15.2.0-rc.0+sha-7b4d3c0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -34900,7 +34900,7 @@ var ImportManager2 = class {
     if (symbolName) {
       const { propertyName, name } = this._getImportParts(sourceFile, symbolName, alias);
       const importMap = this.newImports.get(sourceFile).namedImports;
-      identifier = propertyName || name;
+      identifier = name;
       if (!importMap.has(moduleName)) {
         importMap.set(moduleName, []);
       }
@@ -35219,6 +35219,23 @@ function normalizePath(path3) {
 }
 function knownInternalAliasRemapper(imports) {
   return imports.map((current) => current.moduleSpecifier === "@angular/common" && current.symbolName === "NgForOf" ? __spreadProps(__spreadValues({}, current), { symbolName: "NgFor" }) : current);
+}
+function closestOrSelf(node, predicate) {
+  return predicate(node) ? node : closestNode(node, predicate);
+}
+function isClassReferenceInAngularModule(node, className, moduleName, typeChecker) {
+  var _a;
+  const symbol = typeChecker.getTypeAtLocation(node).getSymbol();
+  const externalName = `@angular/${moduleName}`;
+  const internalName = `angular2/rc/packages/${moduleName}`;
+  return !!((_a = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _a.some((decl) => {
+    const closestClass = closestOrSelf(decl, import_typescript107.default.isClassDeclaration);
+    const closestClassFileName = closestClass == null ? void 0 : closestClass.getSourceFile().fileName;
+    if (!closestClass || !closestClassFileName || !closestClass.name || !import_typescript107.default.isIdentifier(closestClass.name) || !closestClassFileName.includes(externalName) && !closestClassFileName.includes(internalName)) {
+      return false;
+    }
+    return typeof className === "string" ? closestClass.name.text === className : className.test(closestClass.name.text);
+  }));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/standalone-migration/prune-modules.mjs
@@ -35714,7 +35731,9 @@ function analyzeTestingModules(testObjects, typeChecker) {
       continue;
     }
     const importsProp = findLiteralProperty(obj, "imports");
-    const importElements = importsProp && hasNgModuleMetadataElements(importsProp) ? importsProp.initializer.elements.filter((el) => !import_typescript110.default.isCallExpression(el)) : null;
+    const importElements = importsProp && hasNgModuleMetadataElements(importsProp) ? importsProp.initializer.elements.filter((el) => {
+      return !import_typescript110.default.isCallExpression(el) && !isClassReferenceInAngularModule(el, /^BrowserAnimationsModule|NoopAnimationsModule$/, "platform-browser/animations", typeChecker);
+    }) : null;
     for (const decl of declarations) {
       if (seenDeclarations.has(decl)) {
         continue;
@@ -36090,22 +36109,8 @@ function remapRelativeImport(targetFileName, specifier) {
 function isExported3(node) {
   return import_typescript111.default.canHaveModifiers(node) && node.modifiers ? node.modifiers.some((modifier) => modifier.kind === import_typescript111.default.SyntaxKind.ExportKeyword) : false;
 }
-function closestOrSelf(node, predicate) {
-  return predicate(node) ? node : closestNode(node, predicate);
-}
 function isExportableDeclaration(node) {
   return import_typescript111.default.isEnumDeclaration(node) || import_typescript111.default.isClassDeclaration(node) || import_typescript111.default.isFunctionDeclaration(node) || import_typescript111.default.isInterfaceDeclaration(node) || import_typescript111.default.isTypeAliasDeclaration(node);
-}
-function isClassReferenceInAngularModule(node, className, moduleName, typeChecker) {
-  var _a;
-  const symbol = typeChecker.getTypeAtLocation(node).getSymbol();
-  const externalName = `@angular/${moduleName}`;
-  const internalName = `angular2/rc/packages/${moduleName}`;
-  return !!((_a = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _a.some((decl) => {
-    const closestClass = closestOrSelf(decl, import_typescript111.default.isClassDeclaration);
-    const closestClassFileName = closestClass == null ? void 0 : closestClass.getSourceFile().fileName;
-    return closestClass && closestClassFileName && closestClass.name && import_typescript111.default.isIdentifier(closestClass.name) && closestClass.name.text === className && (closestClassFileName.includes(externalName) || closestClassFileName.includes(internalName));
-  }));
 }
 function getLastImportEnd(sourceFile) {
   let index = 0;
