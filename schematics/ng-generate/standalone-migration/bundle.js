@@ -16111,7 +16111,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.0.0-next.0+sha-7dd1957");
+var VERSION2 = new Version("16.0.0-next.0+sha-b6c6dfd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17426,7 +17426,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17495,7 +17495,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17677,7 +17677,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17700,7 +17700,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17738,7 +17738,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17759,7 +17759,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17794,7 +17794,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.0.0-next.0+sha-7dd1957"));
+  definitionMap.set("version", literal("16.0.0-next.0+sha-b6c6dfd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17811,7 +17811,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.0.0-next.0+sha-7dd1957");
+var VERSION3 = new Version("16.0.0-next.0+sha-b6c6dfd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -25745,7 +25745,7 @@ function parseExtractedTemplate(template, sourceStr, sourceParseRange, escapedSt
     file: new ParseSourceFile(sourceStr, sourceMapUrl != null ? sourceMapUrl : "")
   });
 }
-function parseTemplateDeclaration(decorator, component, containingFile, evaluator, resourceLoader, defaultPreserveWhitespaces) {
+function parseTemplateDeclaration(node, decorator, component, containingFile, evaluator, depTracker, resourceLoader, defaultPreserveWhitespaces) {
   let preserveWhitespaces = defaultPreserveWhitespaces;
   if (component.has("preserveWhitespaces")) {
     const expr = component.get("preserveWhitespaces");
@@ -25781,6 +25781,9 @@ function parseTemplateDeclaration(decorator, component, containingFile, evaluato
         resolvedTemplateUrl: resourceUrl
       };
     } catch (e) {
+      if (depTracker !== null) {
+        depTracker.recordDependencyAnalysisFailure(node.getSourceFile());
+      }
       throw makeResourceNotFoundError(templateUrl, templateUrlExpr, 0);
     }
   } else if (component.has("template")) {
@@ -25808,7 +25811,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
       const templatePromise = resourceLoader.preload(resourceUrl, { type: "template", containingFile });
       if (templatePromise !== void 0) {
         return templatePromise.then(() => {
-          const templateDecl = parseTemplateDeclaration(decorator, component, containingFile, evaluator, resourceLoader, defaultPreserveWhitespaces);
+          const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, evaluator, depTracker, resourceLoader, defaultPreserveWhitespaces);
           const template = extractTemplate(node, templateDecl, evaluator, depTracker, resourceLoader, options);
           preanalyzeTemplateCache.set(node, template);
           return template;
@@ -25817,10 +25820,13 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
         return Promise.resolve(null);
       }
     } catch (e) {
+      if (depTracker !== null) {
+        depTracker.recordDependencyAnalysisFailure(node.getSourceFile());
+      }
       throw makeResourceNotFoundError(templateUrl, templateUrlExpr, 0);
     }
   } else {
-    const templateDecl = parseTemplateDeclaration(decorator, component, containingFile, evaluator, resourceLoader, defaultPreserveWhitespaces);
+    const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, evaluator, depTracker, resourceLoader, defaultPreserveWhitespaces);
     const template = extractTemplate(node, templateDecl, evaluator, depTracker, resourceLoader, options);
     preanalyzeTemplateCache.set(node, template);
     return Promise.resolve(template);
@@ -26250,7 +26256,7 @@ var ComponentDecoratorHandler = class {
       this.preanalyzeTemplateCache.delete(node);
       template = preanalyzed;
     } else {
-      const templateDecl = parseTemplateDeclaration(decorator, component, containingFile, this.evaluator, this.resourceLoader, this.defaultPreserveWhitespaces);
+      const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, this.evaluator, this.depTracker, this.resourceLoader, this.defaultPreserveWhitespaces);
       template = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, {
         enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
         i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
@@ -26276,6 +26282,9 @@ var ComponentDecoratorHandler = class {
           this.depTracker.addResourceDependency(node.getSourceFile(), absoluteFrom(resourceUrl));
         }
       } catch (e) {
+        if (this.depTracker !== null) {
+          this.depTracker.recordDependencyAnalysisFailure(node.getSourceFile());
+        }
         if (diagnostics === void 0) {
           diagnostics = [];
         }
