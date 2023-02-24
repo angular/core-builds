@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.0+sha-d7835e4
+ * @license Angular v15.2.0+sha-d0fa598
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8750,7 +8750,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.0+sha-d7835e4');
+const VERSION = new Version('15.2.0+sha-d0fa598');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11213,7 +11213,6 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in
     // tsickle.
     ngDevMode && assertFirstCreatePass(tView);
-    let hasDirectives = false;
     if (getBindingsEnabled()) {
         const exportsMap = localRefs === null ? null : { '': -1 };
         const matchResult = findDirectiveDefMatches(tView, tNode);
@@ -11226,7 +11225,6 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
             [directiveDefs, hostDirectiveDefs] = matchResult;
         }
         if (directiveDefs !== null) {
-            hasDirectives = true;
             initializeDirectives(tView, lView, tNode, directiveDefs, exportsMap, hostDirectiveDefs);
         }
         if (exportsMap)
@@ -11234,7 +11232,6 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     }
     // Merge the template attrs last so that they have the highest priority.
     tNode.mergedAttrs = mergeHostAttrs(tNode.mergedAttrs, tNode.attrs);
-    return hasDirectives;
 }
 /** Initializes the data structures necessary for a list of directives to be instantiated. */
 function initializeDirectives(tView, lView, tNode, directives, exportsMap, hostDirectiveDefs) {
@@ -13917,16 +13914,13 @@ function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isCla
     setInputsForProperty(tView, lView, inputs[property], property, value);
 }
 
-function elementStartFirstCreatePass(index, tView, lView, native, name, attrsIndex, localRefsIndex) {
+function elementStartFirstCreatePass(index, tView, lView, name, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
     const tViewConsts = tView.consts;
     const attrs = getConstant(tViewConsts, attrsIndex);
     const tNode = getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, name, attrs);
-    const hasDirectives = resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    if (ngDevMode) {
-        validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
-    }
+    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     if (tNode.attrs !== null) {
         computeStaticStyling(tNode, tNode.attrs, false);
     }
@@ -13961,10 +13955,14 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
         assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
     ngDevMode && assertIndexInRange(lView, adjustedIndex);
     const renderer = lView[RENDERER];
-    const native = lView[adjustedIndex] = createElementNode(renderer, name, getNamespace$1());
     const tNode = tView.firstCreatePass ?
-        elementStartFirstCreatePass(adjustedIndex, tView, lView, native, name, attrsIndex, localRefsIndex) :
+        elementStartFirstCreatePass(adjustedIndex, tView, lView, name, attrsIndex, localRefsIndex) :
         tView.data[adjustedIndex];
+    const native = lView[adjustedIndex] = createElementNode(renderer, name, getNamespace$1());
+    const hasDirectives = isDirectiveHost(tNode);
+    if (ngDevMode && tView.firstCreatePass) {
+        validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
+    }
     setCurrentTNode(tNode, true);
     setupStaticAttributes(renderer, native, tNode);
     if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
@@ -13979,7 +13977,7 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
         attachPatchData(native, lView);
     }
     increaseElementDepthCount();
-    if (isDirectiveHost(tNode)) {
+    if (hasDirectives) {
         createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
