@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-455c728
+ * @license Angular v16.0.0-next.0+sha-459fbb3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10389,6 +10389,8 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
     ɵfac: unknown;
 }
 
+export declare function ɵescapeTransferStateContent(text: string): string;
+
 /**
  * Index of each type of locale data from the extra locale data array
  */
@@ -10715,6 +10717,22 @@ export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]
     (...args: any[]): any;
     (...args: any[]): (cls: any) => any;
 };
+
+/**
+ * Create a `StateKey<T>` that can be used to store value of type T with `TransferState`.
+ *
+ * Example:
+ *
+ * ```
+ * const COUNTER_KEY = makeStateKey<number>('counter');
+ * let value = 10;
+ *
+ * transferState.set(COUNTER_KEY, value);
+ * ```
+ *
+ * @publicApi
+ */
+export declare function ɵmakeStateKey<T = void>(key: string): ɵStateKey<T>;
 
 
 export declare const ɵNG_COMP_DEF: string;
@@ -11227,6 +11245,25 @@ export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): voi
  */
 export declare function ɵsetUnknownPropertyStrictMode(shouldThrow: boolean): void;
 
+/**
+ * A type-safe key to use with `TransferState`.
+ *
+ * Example:
+ *
+ * ```
+ * const COUNTER_KEY = makeStateKey<number>('counter');
+ * let value = 10;
+ *
+ * transferState.set(COUNTER_KEY, value);
+ * ```
+ *
+ * @publicApi
+ */
+export declare type ɵStateKey<T> = string & {
+    __not_a_string: never;
+    __value_type?: T;
+};
+
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
 
@@ -11250,10 +11287,63 @@ export declare const ɵTESTABILITY: InjectionToken<Testability>;
 export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
 
 /**
+ * A key value store that is transferred from the application on the server side to the application
+ * on the client side.
+ *
+ * The `TransferState` is available as an injectable token.
+ * On the client, just inject this token using DI and use it, it will be lazily initialized.
+ * On the server it's already included if `renderApplication` function is used. Otherwise, import
+ * the `ServerTransferStateModule` module to make the `TransferState` available.
+ *
+ * The values in the store are serialized/deserialized using JSON.stringify/JSON.parse. So only
+ * boolean, number, string, null and non-class objects will be serialized and deserialized in a
+ * non-lossy manner.
+ *
+ * @publicApi
+ */
+export declare class ɵTransferState {
+    private store;
+    private onSerializeCallbacks;
+    constructor();
+    /**
+     * Get the value corresponding to a key. Return `defaultValue` if key is not found.
+     */
+    get<T>(key: ɵStateKey<T>, defaultValue: T): T;
+    /**
+     * Set the value corresponding to a key.
+     */
+    set<T>(key: ɵStateKey<T>, value: T): void;
+    /**
+     * Remove a key from the store.
+     */
+    remove<T>(key: ɵStateKey<T>): void;
+    /**
+     * Test whether a key exists in the store.
+     */
+    hasKey<T>(key: ɵStateKey<T>): boolean;
+    /**
+     * Indicates whether the state is empty.
+     */
+    get isEmpty(): boolean;
+    /**
+     * Register a callback to provide the value for a key when `toJson` is called.
+     */
+    onSerialize<T>(key: ɵStateKey<T>, callback: () => T): void;
+    /**
+     * Serialize the current state of the store to JSON.
+     */
+    toJson(): string;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵTransferState, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ɵTransferState>;
+}
+
+/**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
  * (either a NgModule or a standalone component / directive / pipe).
  */
 export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
+
+export declare function ɵunescapeTransferStateContent(text: string): string;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
