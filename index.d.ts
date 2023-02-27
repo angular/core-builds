@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-1d08a93
+ * @license Angular v16.0.0-next.0+sha-b4703a7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8257,6 +8257,11 @@ declare interface TNode {
      * to insert them or remove them from the DOM.
      */
     next: TNode | null;
+    /**
+     * The previous sibling node.
+     * This simplifies operations when we need a pointer to the previous node.
+     */
+    prev: TNode | null;
     /**
      * The next projected sibling. Since in Angular content projection works on the node-by-node
      * basis the act of projecting nodes might change nodes relationship at the insertion point
