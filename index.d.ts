@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-d420ab9
+ * @license Angular v16.0.0-next.0+sha-7e35a91
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10581,6 +10581,10 @@ export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentPr
 export declare function ɵisInjectable(type: any): boolean;
 
 export declare function ɵisListLikeIterable(obj: any): boolean;
+
+export declare function ɵisNgModule<T>(value: Type<T>): value is Type<T> & {
+    ɵmod: ɵNgModuleDef<T>;
+};
 
 /**
  * Determine if the argument is an Observable
