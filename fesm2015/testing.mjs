@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.0+sha-a852862
+ * @license Angular v15.2.0+sha-3062442
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8750,7 +8750,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.0+sha-a852862');
+const VERSION = new Version('15.2.0+sha-3062442');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10564,6 +10564,7 @@ function createTNodeAtIndex(tView, index, type, name, attrs) {
                 // In the case of i18n the `currentTNode` may already be linked, in which case we don't want
                 // to break the links which i18n created.
                 currentTNode.next = tNode;
+                tNode.prev = currentTNode;
             }
         }
     }
@@ -11004,6 +11005,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         outputs: null,
         tViews: null,
         next: null,
+        prev: null,
         projectionNext: null,
         child: null,
         parent: tParent,
