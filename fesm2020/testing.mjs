@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-f594725
+ * @license Angular v16.0.0-next.0+sha-0f5c800
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2233,6 +2233,15 @@ const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty })
  */
 // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
 const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
+/**
+ * The `NG_ENV_ID` field on a DI token indicates special processing in the `EnvironmentInjector`:
+ * getting such tokens from the `EnvironmentInjector` will bypass the standard DI resolution
+ * strategy and instead will return implementation produced by the `NG_ENV_ID` factory function.
+ *
+ * This particular retrieval of DI tokens is mostly done to eliminate circular dependencies and
+ * improve tree-shaking.
+ */
+const NG_ENV_ID = getClosureSafeProperty({ __NG_ENV_ID__: getClosureSafeProperty });
 
 /** Counter used to generate unique IDs for component definitions. */
 let componentDefCount = 0;
@@ -2549,6 +2558,7 @@ const PREORDER_HOOK_FLAGS = 18;
 const QUERIES = 19;
 const ID = 20;
 const EMBEDDED_VIEW_INJECTOR = 21;
+const ON_DESTROY_HOOKS = 22;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -2556,7 +2566,7 @@ const EMBEDDED_VIEW_INJECTOR = 21;
  * instruction index into `LView` index. All other indexes should be in the `LView` index space and
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
-const HEADER_OFFSET = 22;
+const HEADER_OFFSET = 23;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$4 = 1;
@@ -3031,6 +3041,15 @@ function updateTransplantedViewCount(lContainer, amount) {
         viewOrContainer = parent;
         parent = parent[PARENT];
     }
+}
+/**
+ * Stores a LView-specific destroy callback.
+ */
+function storeLViewOnDestroy(lView, onDestroyCallback) {
+    if (lView[ON_DESTROY_HOOKS] === null) {
+        lView[ON_DESTROY_HOOKS] = [];
+    }
+    lView[ON_DESTROY_HOOKS].push(onDestroyCallback);
 }
 
 const instructionState = {
@@ -6242,10 +6261,6 @@ function cleanUpView(tView, lView) {
 function processCleanups(tView, lView) {
     const tCleanup = tView.cleanup;
     const lCleanup = lView[CLEANUP];
-    // `LCleanup` contains both share information with `TCleanup` as well as instance specific
-    // information appended at the end. We need to know where the end of the `TCleanup` information
-    // is, and we track this with `lastLCleanupIndex`.
-    let lastLCleanupIndex = -1;
     if (tCleanup !== null) {
         for (let i = 0; i < tCleanup.length - 1; i += 2) {
             if (typeof tCleanup[i] === 'string') {
@@ -6255,28 +6270,32 @@ function processCleanups(tView, lView) {
                 ngDevMode && assertNumber(targetIdx, 'cleanup target must be a number');
                 if (targetIdx >= 0) {
                     // unregister
-                    lCleanup[lastLCleanupIndex = targetIdx]();
+                    lCleanup[targetIdx]();
                 }
                 else {
                     // Subscription
-                    lCleanup[lastLCleanupIndex = -targetIdx].unsubscribe();
+                    lCleanup[-targetIdx].unsubscribe();
                 }
                 i += 2;
             }
             else {
                 // This is a cleanup function that is grouped with the index of its context
-                const context = lCleanup[lastLCleanupIndex = tCleanup[i + 1]];
+                const context = lCleanup[tCleanup[i + 1]];
                 tCleanup[i].call(context);
             }
         }
     }
     if (lCleanup !== null) {
-        for (let i = lastLCleanupIndex + 1; i < lCleanup.length; i++) {
-            const instanceCleanupFn = lCleanup[i];
-            ngDevMode && assertFunction(instanceCleanupFn, 'Expecting instance cleanup function.');
-            instanceCleanupFn();
-        }
         lView[CLEANUP] = null;
+    }
+    const destroyHooks = lView[ON_DESTROY_HOOKS];
+    if (destroyHooks !== null) {
+        for (let i = 0; i < destroyHooks.length; i++) {
+            const destroyHooksFn = destroyHooks[i];
+            ngDevMode && assertFunction(destroyHooksFn, 'Expecting destroy hook to be a function.');
+            destroyHooksFn();
+        }
+        lView[ON_DESTROY_HOOKS] = null;
     }
 }
 /** Calls onDestroy hooks for this view */
@@ -8287,6 +8306,9 @@ class R3Injector extends EnvironmentInjector {
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
         this.assertNotDestroyed();
+        if (token.hasOwnProperty(NG_ENV_ID)) {
+            return token[NG_ENV_ID](this);
+        }
         flags = convertToBitFlags(flags);
         // Set the injection context.
         const previousInjector = setCurrentInjector(this);
@@ -8743,7 +8765,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.0+sha-f594725');
+const VERSION = new Version('16.0.0-next.0+sha-0f5c800');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10947,24 +10969,24 @@ function locateHostElement(renderer, elementOrSelector, encapsulation) {
  * On the first template pass, saves in TView:
  * - Cleanup function
  * - Index of context we just saved in LView.cleanupInstances
- *
- * This function can also be used to store instance specific cleanup fns. In that case the `context`
- * is `null` and the function is store in `LView` (rather than it `TView`).
  */
 function storeCleanupWithContext(tView, lView, context, cleanupFn) {
     const lCleanup = getOrCreateLViewCleanup(lView);
-    if (context === null) {
-        // If context is null that this is instance specific callback. These callbacks can only be
-        // inserted after template shared instances. For this reason in ngDevMode we freeze the TView.
-        if (ngDevMode) {
-            Object.freeze(getOrCreateTViewCleanup(tView));
-        }
-        lCleanup.push(cleanupFn);
+    // Historically the `storeCleanupWithContext` was used to register both framework-level and
+    // user-defined cleanup callbacks, but over time those two types of cleanups were separated. This
+    // dev mode checks assures that user-level cleanup callbacks are _not_ stored in data structures
+    // reserved for framework-specific hooks.
+    ngDevMode &&
+        assertDefined(context, 'Cleanup context is mandatory when registering framework-level destroy hooks');
+    lCleanup.push(context);
+    if (tView.firstCreatePass) {
+        getOrCreateTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
     }
     else {
-        lCleanup.push(context);
-        if (tView.firstCreatePass) {
-            getOrCreateTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
+        // Make sure that no new framework-level cleanup functions are registered after the first
+        // template pass is done (and TView data structures are meant to fully constructed).
+        if (ngDevMode) {
+            Object.freeze(getOrCreateTViewCleanup(tView));
         }
     }
 }
@@ -12156,7 +12178,7 @@ class ViewRef {
         destroyLView(this._lView[TVIEW], this._lView);
     }
     onDestroy(callback) {
-        storeCleanupWithContext(this._lView[TVIEW], this._lView, null, callback);
+        storeLViewOnDestroy(this._lView, callback);
     }
     /**
      * Marks a view and all of its ancestors dirty.

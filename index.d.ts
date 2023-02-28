@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-f594725
+ * @license Angular v16.0.0-next.0+sha-0f5c800
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2203,6 +2203,20 @@ declare type DestroyHookData = (HookEntry | HookData)[];
  * @publicApi
  */
 export declare function destroyPlatform(): void;
+
+
+/**
+ * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
+ * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
+ * is injected in a component or directive, the callbacks run when that component or
+ * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ */
+export declare abstract class DestroyRef {
+    /**
+     * Registers a destroy callback in a given lifecycle scope.
+     */
+    abstract onDestroy(callback: () => void): void;
+}
 
 /**
  * Directive decorator and metadata.
@@ -5078,6 +5092,12 @@ declare interface LView<T = unknown> extends Array<any> {
      * precedence over the element and module injectors.
      */
     readonly [EMBEDDED_VIEW_INJECTOR]: Injector | null;
+    /**
+     * A collection of callbacks functions that are executed when a given LView is destroyed. Those
+     * are user defined, LView-specific destroy callbacks that don't have any corresponding TView
+     * entries.
+     */
+    [ON_DESTROY_HOOKS]: Array<() => void> | null;
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -5642,6 +5662,8 @@ export declare class NgZone {
  * @publicApi
  */
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
+
+declare const ON_DESTROY_HOOKS = 22;
 
 /**
  * @description
