@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.0+sha-6d30f60
+ * @license Angular v16.0.0-next.0+sha-99d874f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3709,8 +3709,9 @@ function callHooks(currentView, arr, initPhase, currentNodeIndex) {
         }
         else {
             const isInitHook = arr[i] < 0;
-            if (isInitHook)
+            if (isInitHook) {
                 currentView[PREORDER_HOOK_FLAGS] += 65536 /* PreOrderHookFlags.NumberOfInitHooksCalledIncrementer */;
+            }
             if (lastNodeIndexFound < nodeIndexLimit || nodeIndexLimit == -1) {
                 callHook(currentView, initPhase, arr, i);
                 currentView[PREORDER_HOOK_FLAGS] =
@@ -8742,7 +8743,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.0+sha-6d30f60');
+const VERSION = new Version('16.0.0-next.0+sha-99d874f');
 
 // This default value is when checking the hierarchy for a token.
 //
