@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.0+sha-600fd12
+ * @license Angular v15.2.0+sha-dafb765
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8384,7 +8384,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.0+sha-600fd12');
+const VERSION = new Version('15.2.0+sha-dafb765');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12780,41 +12780,19 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
     }
 }
 
-let _symbolIterator = null;
-function getSymbolIterator() {
-    if (!_symbolIterator) {
-        const Symbol = _global['Symbol'];
-        if (Symbol && Symbol.iterator) {
-            _symbolIterator = Symbol.iterator;
-        }
-        else {
-            // es6-shim specific logic
-            const keys = Object.getOwnPropertyNames(Map.prototype);
-            for (let i = 0; i < keys.length; ++i) {
-                const key = keys[i];
-                if (key !== 'entries' && key !== 'size' &&
-                    Map.prototype[key] === Map.prototype['entries']) {
-                    _symbolIterator = key;
-                }
-            }
-        }
-    }
-    return _symbolIterator;
-}
-
 function isIterable(obj) {
-    return obj !== null && typeof obj === 'object' && obj[getSymbolIterator()] !== undefined;
+    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
 }
 function isListLikeIterable(obj) {
     if (!isJsObject(obj))
         return false;
     return Array.isArray(obj) ||
         (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+            Symbol.iterator in obj); // JS Iterable have a Symbol.iterator prop
 }
 function areIterablesEqual(a, b, comparator) {
-    const iterator1 = a[getSymbolIterator()]();
-    const iterator2 = b[getSymbolIterator()]();
+    const iterator1 = a[Symbol.iterator]();
+    const iterator2 = b[Symbol.iterator]();
     while (true) {
         const item1 = iterator1.next();
         const item2 = iterator2.next();
@@ -12833,7 +12811,7 @@ function iterateListLike(obj, fn) {
         }
     }
     else {
-        const iterator = obj[getSymbolIterator()]();
+        const iterator = obj[Symbol.iterator]();
         let item;
         while (!((item = iterator.next()).done)) {
             fn(item.value);
@@ -20974,7 +20952,8 @@ function _wrapInTimeout(fn) {
 const EventEmitter = EventEmitter_;
 
 function symbolIterator() {
-    return this._results[getSymbolIterator()]();
+    // @ts-expect-error accessing a private member
+    return this._results[Symbol.iterator]();
 }
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
@@ -21026,11 +21005,10 @@ class QueryList {
         // This function should be declared on the prototype, but doing so there will cause the class
         // declaration to have side-effects and become not tree-shakable. For this reason we do it in
         // the constructor.
-        // [getSymbolIterator()](): Iterator<T> { ... }
-        const symbol = getSymbolIterator();
+        // [Symbol.iterator](): Iterator<T> { ... }
         const proto = QueryList.prototype;
-        if (!proto[symbol])
-            proto[symbol] = symbolIterator;
+        if (!proto[Symbol.iterator])
+            proto[Symbol.iterator] = symbolIterator;
     }
     /**
      * Returns the QueryList entry at `index`.
