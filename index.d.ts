@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-41bed34
+ * @license Angular v16.0.0-next.1+sha-4e9531f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -272,6 +272,18 @@ export declare const APP_ID: InjectionToken<string>;
 export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
 
 declare function _appIdRandomProviderFactory(): string;
+
+/**
+ * Set of config options available during the application bootstrap operation.
+ *
+ * @publicApi
+ */
+export declare interface ApplicationConfig {
+    /**
+     * List of providers that should be available to the root component and all its children.
+     */
+    providers: Array<Provider | EnvironmentProviders>;
+}
 
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER} functions.
@@ -5152,6 +5164,16 @@ declare const enum LViewFlags {
  * referenced in `@Component in a component injector.
  */
 export declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
+
+/**
+ * Merge multiple application configurations from left to right.
+ *
+ * @param configs Two or more configurations to be merged.
+ * @returns A merged [ApplicationConfig](api/core/ApplicationConfig).
+ *
+ * @publicApi
+ */
+export declare function mergeApplicationConfig(...configs: ApplicationConfig[]): ApplicationConfig;
 
 /**
  * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
@@ -10411,6 +10433,7 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
     ɵfac: unknown;
 }
 
+
 export declare function ɵescapeTransferStateContent(text: string): string;
 
 /**
@@ -11324,9 +11347,9 @@ export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
  * @publicApi
  */
 export declare class ɵTransferState {
-    private store;
+    /** @nocollapse */
+    static ɵprov: unknown;
     private onSerializeCallbacks;
-    constructor();
     /**
      * Get the value corresponding to a key. Return `defaultValue` if key is not found.
      */
@@ -11355,8 +11378,6 @@ export declare class ɵTransferState {
      * Serialize the current state of the store to JSON.
      */
     toJson(): string;
-    static ɵfac: i0.ɵɵFactoryDeclaration<ɵTransferState, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<ɵTransferState>;
 }
 
 /**
