@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-2e568b8
+ * @license Angular v16.0.0-next.1+sha-b5278cc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10466,6 +10466,13 @@ export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
  * See additional info on the `message` argument type in the `RuntimeError` class description.
  */
 export declare function ɵformatRuntimeError<T extends number = RuntimeErrorCode>(code: T, message: null | false | string): string;
+
+/**
+ * The following getter methods retrieve the definition from the type. Currently the retrieval
+ * honors inheritance, but in the future we may change the rule to require that definitions are
+ * explicit. This would require some sort of migration strategy.
+ */
+export declare function ɵgetComponentDef<T>(type: any): ɵComponentDef<T> | null;
 
 export declare function ɵgetDebugNodeR2(_nativeNode: any): DebugNode | null;
 
