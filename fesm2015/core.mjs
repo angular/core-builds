@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-6d9e979
+ * @license Angular v16.0.0-next.1+sha-8beb852
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8400,7 +8400,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-6d9e979');
+const VERSION = new Version('16.0.0-next.1+sha-8beb852');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22753,7 +22753,7 @@ function compileComponent(type, metadata) {
                     //  * for NgModule-based components, they're set when the NgModule which declares the
                     //    component resolves in the module scoping queue
                     //  * for standalone components, they're set just below, after `compileComponent`.
-                    declarations: [], changeDetection: metadata.changeDetection, encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null, isStandalone: !!metadata.standalone });
+                    declarations: [], changeDetection: metadata.changeDetection, encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 compilationDepth++;
                 try {
                     if (meta.usesInheritance) {

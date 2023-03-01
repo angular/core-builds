@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-6d9e979
+ * @license Angular v16.0.0-next.1+sha-8beb852
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8407,7 +8407,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-6d9e979');
+const VERSION = new Version('16.0.0-next.1+sha-8beb852');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22768,7 +22768,6 @@ function compileComponent(type, metadata) {
                     encapsulation,
                     interpolation: metadata.interpolation,
                     viewProviders: metadata.viewProviders || null,
-                    isStandalone: !!metadata.standalone,
                 };
                 compilationDepth++;
                 try {
