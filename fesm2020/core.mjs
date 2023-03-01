@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-2fbaee3
+ * @license Angular v16.0.0-next.1+sha-41bed34
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8407,7 +8407,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-2fbaee3');
+const VERSION = new Version('16.0.0-next.1+sha-41bed34');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23499,17 +23499,6 @@ const PLATFORM_ID = new InjectionToken('Platform ID', {
     factory: () => 'unknown', // set a default platform name, when none set explicitly
 });
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
- * be called for every component that is bootstrapped.
- *
- * Each callback must take a `ComponentRef` instance and return nothing.
- *
- * `(componentRef: ComponentRef) => void`
- *
- * @publicApi
- */
-const APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
-/**
  * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
  * the application
  * @publicApi
@@ -24634,6 +24623,7 @@ function setTestabilityGetter(getter) {
 }
 let _testabilityGetter;
 
+const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
 let _platformInjector = null;
 /**
  * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
@@ -24647,7 +24637,17 @@ const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
  * entire class tree-shakeable.
  */
 const PLATFORM_DESTROY_LISTENERS = new InjectionToken('PlatformDestroyListeners');
-const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
+/**
+ * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
+ * be called for every component that is bootstrapped.
+ *
+ * Each callback must take a `ComponentRef` instance and return nothing.
+ *
+ * `(componentRef: ComponentRef) => void`
+ *
+ * @publicApi
+ */
+const APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
     const moduleFactory = new NgModuleFactory(moduleType);
