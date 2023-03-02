@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-e7948d3
+ * @license Angular v16.0.0-next.1+sha-e57d5db
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10472,8 +10472,6 @@ export declare function ɵformatRuntimeError<T extends number = RuntimeErrorCode
  * explicit. This would require some sort of migration strategy.
  */
 export declare function ɵgetComponentDef<T>(type: any): ɵComponentDef<T> | null;
-
-export declare function ɵgetDebugNodeR2(_nativeNode: any): DebugNode | null;
 
 /**
  * Retrieves directive instances associated with a given DOM node. Does not include
