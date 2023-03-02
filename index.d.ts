@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-cc34d5b
+ * @license Angular v16.0.0-next.1+sha-3f650bd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10632,8 +10632,6 @@ export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrate
 export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentProviders | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
 
 export declare function ɵisInjectable(type: any): boolean;
-
-export declare function ɵisListLikeIterable(obj: any): boolean;
 
 export declare function ɵisNgModule<T>(value: Type<T>): value is Type<T> & {
     ɵmod: ɵNgModuleDef<T>;
