@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-3aec17e
+ * @license Angular v16.0.0-next.1+sha-cc34d5b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8407,7 +8407,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-3aec17e');
+const VERSION = new Version('16.0.0-next.1+sha-cc34d5b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23292,10 +23292,6 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
  * to be used by the decorator versions of these annotations.
  */
 
-function noop(...args) {
-    // Do nothing.
-}
-
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
  *
@@ -23393,17 +23389,15 @@ const APP_INITIALIZER = new InjectionToken('Application Initializer');
  * @publicApi
  */
 class ApplicationInitStatus {
-    constructor(appInits) {
-        this.appInits = appInits;
-        this.resolve = noop;
-        this.reject = noop;
+    constructor() {
         this.initialized = false;
         this.done = false;
-        // TODO: Throw RuntimeErrorCode.INVALID_MULTI_PROVIDER if appInits is not an array
         this.donePromise = new Promise((res, rej) => {
             this.resolve = res;
             this.reject = rej;
         });
+        // TODO: Throw RuntimeErrorCode.INVALID_MULTI_PROVIDER if appInits is not an array
+        this.appInits = inject(APP_INITIALIZER, { optional: true }) ?? [];
     }
     /** @internal */
     runInitializers() {
@@ -23411,24 +23405,23 @@ class ApplicationInitStatus {
             return;
         }
         const asyncInitPromises = [];
+        for (const appInits of this.appInits) {
+            const initResult = appInits();
+            if (isPromise(initResult)) {
+                asyncInitPromises.push(initResult);
+            }
+            else if (isObservable(initResult)) {
+                const observableAsPromise = new Promise((resolve, reject) => {
+                    initResult.subscribe({ complete: resolve, error: reject });
+                });
+                asyncInitPromises.push(observableAsPromise);
+            }
+        }
         const complete = () => {
+            // @ts-expect-error overwriting a readonly
             this.done = true;
             this.resolve();
         };
-        if (this.appInits) {
-            for (let i = 0; i < this.appInits.length; i++) {
-                const initResult = this.appInits[i]();
-                if (isPromise(initResult)) {
-                    asyncInitPromises.push(initResult);
-                }
-                else if (isObservable(initResult)) {
-                    const observableAsPromise = new Promise((resolve, reject) => {
-                        initResult.subscribe({ complete: resolve, error: reject });
-                    });
-                    asyncInitPromises.push(observableAsPromise);
-                }
-            }
-        }
         Promise.all(asyncInitPromises)
             .then(() => {
             complete();
@@ -23442,17 +23435,12 @@ class ApplicationInitStatus {
         this.initialized = true;
     }
 }
-ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(ɵɵinject(APP_INITIALIZER, 8)); };
+ApplicationInitStatus.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(); };
 ApplicationInitStatus.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], function () { return [{ type: undefined, decorators: [{
-                type: Inject,
-                args: [APP_INITIALIZER]
-            }, {
-                type: Optional
-            }] }]; }, null); })();
+    }], null, null); })();
 
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
@@ -23900,6 +23888,10 @@ function scheduleMicroTask(fn) {
     else {
         Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
     }
+}
+
+function noop(...args) {
+    // Do nothing.
 }
 
 function getNativeRequestAnimationFrame() {
@@ -24665,7 +24657,7 @@ function compileNgModuleFactory(injector, options, moduleType) {
     if (isComponentResourceResolutionQueueEmpty()) {
         return Promise.resolve(moduleFactory);
     }
-    const compilerProviders = _mergeArrays(compilerOptions.map(o => o.providers));
+    const compilerProviders = compilerOptions.flatMap((option) => option.providers ?? []);
     // In case there are no compiler providers, we just return the module factory as
     // there won't be any resource loader. This can happen with Ivy, because AOT compiled
     // modules can be still passed through "bootstrapModule". In that case we shouldn't
@@ -24738,9 +24730,7 @@ function createOrReusePlatformInjector(providers = []) {
 }
 function runPlatformInitializers(injector) {
     const inits = injector.get(PLATFORM_INITIALIZER, null);
-    if (inits) {
-        inits.forEach((init) => init());
-    }
+    inits?.forEach((init) => init());
 }
 /**
  * Internal create application API that implements the core application creation logic and optional
@@ -24765,7 +24755,7 @@ function internalCreateApplication(config) {
         // bootstrap level as well as providers passed to the bootstrap call by a user.
         const allAppProviders = [
             { provide: NgZone, useValue: ngZone },
-            ...(appProviders || []), //
+            ...(appProviders || []),
         ];
         const envInjector = createEnvironmentInjector(allAppProviders, platformInjector, 'Environment Injector');
         const exceptionHandler = envInjector.get(ErrorHandler, null);
@@ -25034,8 +25024,8 @@ PlatformRef.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, fa
 function getNgZoneOptions(options) {
     return {
         enableLongStackTrace: typeof ngDevMode === 'undefined' ? false : !!ngDevMode,
-        shouldCoalesceEventChangeDetection: !!(options && options.ngZoneEventCoalescing) || false,
-        shouldCoalesceRunChangeDetection: !!(options && options.ngZoneRunCoalescing) || false,
+        shouldCoalesceEventChangeDetection: options?.ngZoneEventCoalescing ?? false,
+        shouldCoalesceRunChangeDetection: options?.ngZoneRunCoalescing ?? false,
     };
 }
 function getNgZone(ngZoneToUse, options) {
@@ -25068,12 +25058,9 @@ function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
 }
 function optionsReducer(dst, objs) {
     if (Array.isArray(objs)) {
-        dst = objs.reduce(optionsReducer, dst);
+        return objs.reduce(optionsReducer, dst);
     }
-    else {
-        dst = { ...dst, ...objs };
-    }
-    return dst;
+    return { ...dst, ...objs };
 }
 /**
  * A reference to an Angular application running on a page.
@@ -25249,8 +25236,7 @@ class ApplicationRef {
                 unstableSub.unsubscribe();
             };
         });
-        this.isStable =
-            merge$1(isCurrentlyStable, isStable.pipe(share()));
+        this.isStable = merge$1(isCurrentlyStable, isStable.pipe(share()));
     }
     /**
      * Bootstrap a component onto the element identified by its selector or, optionally, to a
@@ -25478,11 +25464,6 @@ function _lastDefined(args) {
         }
     }
     return undefined;
-}
-function _mergeArrays(parts) {
-    const result = [];
-    parts.forEach((part) => part && result.push(...part));
-    return result;
 }
 
 /**

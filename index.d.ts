@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-3aec17e
+ * @license Angular v16.0.0-next.1+sha-cc34d5b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -291,14 +291,13 @@ export declare interface ApplicationConfig {
  * @publicApi
  */
 export declare class ApplicationInitStatus {
-    private readonly appInits;
     private resolve;
     private reject;
     private initialized;
-    readonly donePromise: Promise<any>;
     readonly done = false;
-    constructor(appInits: ReadonlyArray<() => Observable<unknown> | Promise<unknown> | void>);
-    static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationInitStatus, [{ optional: true; }]>;
+    readonly donePromise: Promise<any>;
+    private readonly appInits;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationInitStatus, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationInitStatus>;
 }
 
