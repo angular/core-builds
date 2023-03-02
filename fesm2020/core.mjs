@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-e57d5db
+ * @license Angular v16.0.0-next.1+sha-675fe2f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8407,7 +8407,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-e57d5db');
+const VERSION = new Version('16.0.0-next.1+sha-675fe2f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25028,15 +25028,14 @@ function getNgZoneOptions(options) {
         shouldCoalesceRunChangeDetection: options?.ngZoneRunCoalescing ?? false,
     };
 }
-function getNgZone(ngZoneToUse, options) {
-    let ngZone;
+function getNgZone(ngZoneToUse = 'zone.js', options) {
     if (ngZoneToUse === 'noop') {
-        ngZone = new NoopNgZone();
+        return new NoopNgZone();
     }
-    else {
-        ngZone = (ngZoneToUse === 'zone.js' ? undefined : ngZoneToUse) || new NgZone(options);
+    if (ngZoneToUse === 'zone.js') {
+        return new NgZone(options);
     }
-    return ngZone;
+    return ngZoneToUse;
 }
 function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
     try {
