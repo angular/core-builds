@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-1ba551b
+ * @license Angular v16.0.0-next.1+sha-47dda6e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10655,8 +10655,6 @@ export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
  * Determine if the argument is a Subscribable
  */
 export declare function ɵisSubscribable(obj: any | Subscribable<any>): obj is Subscribable<any>;
-
-export declare const ɵivyEnabled = true;
 
 /**
  * The internal view context which is specific to a given DOM element, directive or
