@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-1a1f260
+ * @license Angular v16.0.0-next.1+sha-06b0003
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7815,7 +7815,7 @@ declare interface TContainerNode extends TNode {
      * - They are dynamically created
      */
     parent: TElementNode | TElementContainerNode | null;
-    tView: TView | null;
+    tViews: TView | TView[] | null;
     projection: null;
     value: null;
 }
@@ -7855,7 +7855,7 @@ declare interface TElementContainerNode extends TNode {
     index: number;
     child: TElementNode | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
     parent: TElementNode | TElementContainerNode | null;
-    tView: null;
+    tViews: null;
     projection: null;
 }
 
@@ -7870,7 +7870,7 @@ declare interface TElementNode extends TNode {
      * retrieved using viewData[HOST_NODE]).
      */
     parent: TElementNode | TElementContainerNode | null;
-    tView: null;
+    tViews: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
      * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node
@@ -8308,14 +8308,26 @@ declare interface TNode {
      */
     outputs: PropertyAliases | null;
     /**
-     * The TView attached to this node.
+     * The TView or TViews attached to this node.
+     *
+     * If this TNode corresponds to an LContainer with inline views, the container will
+     * need to store separate static data for each of its view blocks (TView[]). Otherwise,
+     * nodes in inline views with the same index as nodes in their parent views will overwrite
+     * each other, as they are in the same template.
+     *
+     * Each index in this array corresponds to the static data for a certain
+     * view. So if you had V(0) and V(1) in a container, you might have:
+     *
+     * [
+     *   [{tagName: 'div', attrs: ...}, null],     // V(0) TView
+     *   [{tagName: 'button', attrs ...}, null]    // V(1) TView
      *
      * If this TNode corresponds to an LContainer with a template (e.g. structural
      * directive), the template's TView will be stored here.
      *
-     * If this TNode corresponds to an element, tView will be `null`.
+     * If this TNode corresponds to an element, tViews will be null .
      */
-    tView: TView | null;
+    tViews: TView | TView[] | null;
     /**
      * The next sibling node. Necessary so we can propagate through the root nodes of a view
      * to insert them or remove them from the DOM.
@@ -8616,7 +8628,7 @@ declare interface TProjectionNode extends TNode {
      * retrieved using LView.node).
      */
     parent: TElementNode | TElementContainerNode | null;
-    tView: null;
+    tViews: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
     value: null;
@@ -9007,7 +9019,7 @@ declare interface TTextNode extends TNode {
      * retrieved using LView.node).
      */
     parent: TElementNode | TElementContainerNode | null;
-    tView: null;
+    tViews: null;
     projection: null;
 }
 

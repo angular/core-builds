@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-1a1f260
+ * @license Angular v16.0.0-next.1+sha-06b0003
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9054,7 +9054,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-1a1f260');
+const VERSION = new Version('16.0.0-next.1+sha-06b0003');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11333,7 +11333,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         initialInputs: undefined,
         inputs: null,
         outputs: null,
-        tView: null,
+        tViews: null,
         next: null,
         prev: null,
         projectionNext: null,
@@ -14124,7 +14124,7 @@ function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, t
     const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
     resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     registerPostOrderHooks(tView, tNode);
-    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
+    const embeddedTView = tNode.tViews = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
     if (tView.queries !== null) {
         tView.queries.template(tView, tNode);
         embeddedTView.queries = tView.queries.embeddedTView(tNode);
@@ -18483,7 +18483,7 @@ function getTIcu(tView, index) {
     if (value === null || typeof value === 'string')
         return null;
     if (ngDevMode &&
-        !(value.hasOwnProperty('tView') || value.hasOwnProperty('currentCaseLViewIndex'))) {
+        !(value.hasOwnProperty('tViews') || value.hasOwnProperty('currentCaseLViewIndex'))) {
         throwError('We expect to get \'null\'|\'TIcu\'|\'TIcuContainer\', but got: ' + value);
     }
     // Here the `value.hasOwnProperty('currentCaseLViewIndex')` is a polymorphic read as it can be
@@ -18512,7 +18512,7 @@ function getTIcu(tView, index) {
 function setTIcu(tView, index, tIcu) {
     const tNode = tView.data[index];
     ngDevMode &&
-        assertEqual(tNode === null || tNode.hasOwnProperty('tView'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
+        assertEqual(tNode === null || tNode.hasOwnProperty('tViews'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
     if (tNode === null) {
         tView.data[index] = tIcu;
     }
@@ -21807,7 +21807,7 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
         this.elementRef = elementRef;
     }
     createEmbeddedView(context, injector) {
-        const embeddedTView = this._declarationTContainer.tView;
+        const embeddedTView = this._declarationTContainer.tViews;
         const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, null, injector || null, null);
         const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
         ngDevMode && assertLContainer(declarationLContainer);
@@ -21837,7 +21837,7 @@ function injectTemplateRef() {
  */
 function createTemplateRef(hostTNode, hostLView) {
     if (hostTNode.type & 4 /* TNodeType.Container */) {
-        ngDevMode && assertDefined(hostTNode.tView, 'TView must be allocated');
+        ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
         return new R3TemplateRef(hostLView, hostTNode, createElementRef(hostTNode, hostLView));
     }
     return null;
