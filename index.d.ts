@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-e1355e7
+ * @license Angular v16.0.0-next.1+sha-4ae4090
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -412,7 +412,6 @@ export declare class ApplicationRef {
     private _zone;
     private _injector;
     private _exceptionHandler;
-    private _views;
     private _runningTick;
     private _stable;
     private _onMicrotaskEmptySubscription;
@@ -2185,6 +2184,24 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
  */
 export declare const defineInjectable: typeof ɵɵdefineInjectable;
 
+/**
+ * An object that contains hydration-related information serialized
+ * on the server, as well as the necessary references to segments of
+ * the DOM, to facilitate the hydration process for a given hydration
+ * boundary on the client.
+ */
+declare interface DehydratedView {
+    /**
+     * The readonly hydration annotation data.
+     */
+    data: Readonly<SerializedView>;
+    /**
+     * A reference to the first child in a DOM segment associated
+     * with a given hydration boundary.
+     */
+    firstChild: RNode | null;
+}
+
 declare type DependencyTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | PipeType<any> | Type<any>)[];
 
 /**
@@ -3558,6 +3575,8 @@ export declare interface HostListenerDecorator {
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
 }
+
+declare const HYDRATION = 23;
 
 declare namespace i0 {
     export {
@@ -5098,6 +5117,10 @@ declare interface LView<T = unknown> extends Array<any> {
     [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
     /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
     [ID]: number;
+    /**
+     * A container related to hydration annotation information that's associated with this LView.
+     */
+    [HYDRATION]: DehydratedView | null;
     /**
      * Optional injector assigned to embedded views that takes
      * precedence over the element and module injectors.
@@ -6942,9 +6965,11 @@ export declare class ReflectiveKey {
 declare interface RElement extends RNode {
     style: RCssStyleDeclaration;
     classList: RDomTokenList;
+    firstChild: RNode | null;
     className: string;
     tagName: string;
     textContent: string | null;
+    getAttribute(name: string): string | null;
     setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;
     setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
@@ -7536,6 +7561,14 @@ export declare interface SelfDecorator {
      */
     (): any;
     new (): Self;
+}
+
+/**
+ * Serialized data structure that contains relevant hydration
+ * annotation information that describes a given hydration boundary
+ * (e.g. a component).
+ */
+declare interface SerializedView {
 }
 
 /**
@@ -9838,6 +9871,15 @@ export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBy
 export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType): boolean;
 
 /**
+ * Annotates all components bootstrapped in a given ApplicationRef
+ * with info needed for hydration.
+ *
+ * @param appRef An instance of an ApplicationRef.
+ * @param doc A reference to the current Document instance.
+ */
+export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): void;
+
+/**
  * Providers that generate a random `APP_ID_TOKEN`.
  * @publicApi
  */
@@ -10616,6 +10658,11 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
     ɵfromNgModule?: true;
 }
 
+/**
+ * Internal token that specifies whether hydration is enabled.
+ */
+export declare const ɵIS_HYDRATION_FEATURE_ENABLED: InjectionToken<boolean>;
+
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 
 /**
@@ -11007,6 +11054,50 @@ export declare const enum ɵProfilerEvent {
      */
     OutputEnd = 7
 }
+
+/**
+ * Returns a set of providers required to setup hydration support
+ * for an application that is server side rendered.
+ *
+ * ## NgModule-based bootstrap
+ *
+ * You can add the function call to the root AppModule of an application:
+ * ```
+ * import {provideHydrationSupport} from '@angular/core';
+ *
+ * @NgModule({
+ *   providers: [
+ *     // ... other providers ...
+ *     provideHydrationSupport()
+ *   ],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent]
+ * })
+ * class AppModule {}
+ * ```
+ *
+ * ## Standalone-based bootstrap
+ *
+ * Add the function to the `bootstrapApplication` call:
+ * ```
+ * import {provideHydrationSupport} from '@angular/core';
+ *
+ * bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     // ... other providers ...
+ *     provideHydrationSupport()
+ *   ]
+ * });
+ * ```
+ *
+ * The function sets up an internal flag that would be recognized during
+ * the server side rendering time as well, so there is no need to
+ * configure or change anything in NgUniversal to enable the feature.
+ *
+ * @publicApi
+ * @developerPreview
+ */
+export declare function ɵprovideHydrationSupport(): EnvironmentProviders;
 
 /**
  * Publishes a collection of default debug tools onto`window.ng`.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-e1355e7
+ * @license Angular v16.0.0-next.1+sha-4ae4090
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1338,6 +1338,7 @@ const QUERIES = 19;
 const ID = 20;
 const EMBEDDED_VIEW_INJECTOR = 21;
 const ON_DESTROY_HOOKS = 22;
+const HYDRATION = 23;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -1345,7 +1346,7 @@ const ON_DESTROY_HOOKS = 22;
  * instruction index into `LView` index. All other indexes should be in the `LView` index space and
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
-const HEADER_OFFSET = 23;
+const HEADER_OFFSET = 24;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$3 = 1;
@@ -8222,6 +8223,295 @@ function forEachSingleProvider(providers, fn) {
 }
 
 /**
+ * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
+ * primarily for prefixing application attributes and CSS styles when
+ * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
+ *
+ * BY default, the value is randomly generated and assigned to the application by Angular.
+ * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
+ * the root {@link Injector} that uses this token.
+ *
+ * @publicApi
+ */
+const APP_ID = new InjectionToken('AppId', {
+    providedIn: 'root',
+    factory: _appIdRandomProviderFactory,
+});
+function _appIdRandomProviderFactory() {
+    return `${_randomChar()}${_randomChar()}${_randomChar()}`;
+}
+/**
+ * Providers that generate a random `APP_ID_TOKEN`.
+ * @publicApi
+ */
+const APP_ID_RANDOM_PROVIDER = {
+    provide: APP_ID,
+    useFactory: _appIdRandomProviderFactory,
+    deps: [],
+};
+function _randomChar() {
+    return String.fromCharCode(97 + Math.floor(Math.random() * 25));
+}
+/**
+ * A function that is executed when a platform is initialized.
+ * @publicApi
+ */
+const PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
+/**
+ * A token that indicates an opaque platform ID.
+ * @publicApi
+ */
+const PLATFORM_ID = new InjectionToken('Platform ID', {
+    providedIn: 'platform',
+    factory: () => 'unknown', // set a default platform name, when none set explicitly
+});
+/**
+ * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
+ * the application
+ * @publicApi
+ */
+const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
+// We keep this token here, rather than the animations package, so that modules that only care
+// about which animations module is loaded (e.g. the CDK) can retrieve it without having to
+// include extra dependencies. See #44970 for more context.
+/**
+ * A [DI token](guide/glossary#di-token "DI token definition") that indicates which animations
+ * module has been loaded.
+ * @publicApi
+ */
+const ANIMATION_MODULE_TYPE = new InjectionToken('AnimationModuleType');
+
+function escapeTransferStateContent(text) {
+    const escapedText = {
+        '&': '&a;',
+        '"': '&q;',
+        '\'': '&s;',
+        '<': '&l;',
+        '>': '&g;',
+    };
+    return text.replace(/[&"'<>]/g, s => escapedText[s]);
+}
+function unescapeTransferStateContent(text) {
+    const unescapedText = {
+        '&a;': '&',
+        '&q;': '"',
+        '&s;': '\'',
+        '&l;': '<',
+        '&g;': '>',
+    };
+    return text.replace(/&[^;]+;/g, s => unescapedText[s]);
+}
+/**
+ * Create a `StateKey<T>` that can be used to store value of type T with `TransferState`.
+ *
+ * Example:
+ *
+ * ```
+ * const COUNTER_KEY = makeStateKey<number>('counter');
+ * let value = 10;
+ *
+ * transferState.set(COUNTER_KEY, value);
+ * ```
+ *
+ * @publicApi
+ */
+function makeStateKey(key) {
+    return key;
+}
+function initTransferState() {
+    const transferState = new TransferState();
+    transferState.store = retrieveTransferredState(getDocument(), inject(APP_ID));
+    return transferState;
+}
+/**
+ * A key value store that is transferred from the application on the server side to the application
+ * on the client side.
+ *
+ * The `TransferState` is available as an injectable token.
+ * On the client, just inject this token using DI and use it, it will be lazily initialized.
+ * On the server it's already included if `renderApplication` function is used. Otherwise, import
+ * the `ServerTransferStateModule` module to make the `TransferState` available.
+ *
+ * The values in the store are serialized/deserialized using JSON.stringify/JSON.parse. So only
+ * boolean, number, string, null and non-class objects will be serialized and deserialized in a
+ * non-lossy manner.
+ *
+ * @publicApi
+ */
+class TransferState {
+    constructor() {
+        /** @internal */
+        this.store = {};
+        this.onSerializeCallbacks = {};
+    }
+    /**
+     * Get the value corresponding to a key. Return `defaultValue` if key is not found.
+     */
+    get(key, defaultValue) {
+        return this.store[key] !== undefined ? this.store[key] : defaultValue;
+    }
+    /**
+     * Set the value corresponding to a key.
+     */
+    set(key, value) {
+        this.store[key] = value;
+    }
+    /**
+     * Remove a key from the store.
+     */
+    remove(key) {
+        delete this.store[key];
+    }
+    /**
+     * Test whether a key exists in the store.
+     */
+    hasKey(key) {
+        return this.store.hasOwnProperty(key);
+    }
+    /**
+     * Indicates whether the state is empty.
+     */
+    get isEmpty() {
+        return Object.keys(this.store).length === 0;
+    }
+    /**
+     * Register a callback to provide the value for a key when `toJson` is called.
+     */
+    onSerialize(key, callback) {
+        this.onSerializeCallbacks[key] = callback;
+    }
+    /**
+     * Serialize the current state of the store to JSON.
+     */
+    toJson() {
+        // Call the onSerialize callbacks and put those values into the store.
+        for (const key in this.onSerializeCallbacks) {
+            if (this.onSerializeCallbacks.hasOwnProperty(key)) {
+                try {
+                    this.store[key] = this.onSerializeCallbacks[key]();
+                }
+                catch (e) {
+                    console.warn('Exception in onSerialize callback: ', e);
+                }
+            }
+        }
+        return JSON.stringify(this.store);
+    }
+}
+/** @nocollapse */
+TransferState.ɵprov =
+    /** @pureOrBreakMyCode */ ɵɵdefineInjectable({
+        token: TransferState,
+        providedIn: 'root',
+        factory: initTransferState,
+    });
+function retrieveTransferredState(doc, appId) {
+    // Locate the script tag with the JSON data transferred from the server.
+    // The id of the script tag is set to the Angular appId + 'state'.
+    const script = doc.getElementById(appId + '-state');
+    let initialState = {};
+    if (script && script.textContent) {
+        try {
+            // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
+            initialState = JSON.parse(unescapeTransferStateContent(script.textContent));
+        }
+        catch (e) {
+            console.warn('Exception while restoring TransferState for app ' + appId, e);
+        }
+    }
+    return initialState;
+}
+
+/**
+ * The name of the key used in the TransferState collection,
+ * where hydration information is located.
+ */
+const TRANSFER_STATE_TOKEN_ID = '__ɵnghData__';
+/**
+ * Lookup key used to reference DOM hydration data (ngh) in `TransferState`.
+ */
+const NGH_DATA_KEY = makeStateKey(TRANSFER_STATE_TOKEN_ID);
+/**
+ * The name of the attribute that would be added to host component
+ * nodes and contain a reference to a particular slot in transferred
+ * state that contains the necessary hydration info for this component.
+ */
+const NGH_ATTR_NAME = 'ngh';
+/**
+ * Reference to a function that reads `ngh` attribute value from a given RNode
+ * and retrieves hydration information from the TransferState using that value
+ * as an index. Returns `null` by default, when hydration is not enabled.
+ *
+ * @param rNode Component's host element.
+ * @param injector Injector that this component has access to.
+ */
+let _retrieveHydrationInfoImpl = (rNode, injector) => null;
+function retrieveHydrationInfoImpl(rNode, injector) {
+    var _a;
+    const nghAttrValue = rNode.getAttribute(NGH_ATTR_NAME);
+    if (nghAttrValue == null)
+        return null;
+    let data = {};
+    // An element might have an empty `ngh` attribute value (e.g. `<comp ngh="" />`),
+    // which means that no special annotations are required. Do not attempt to read
+    // from the TransferState in this case.
+    if (nghAttrValue !== '') {
+        const transferState = injector.get(TransferState, null, { optional: true });
+        if (transferState !== null) {
+            const nghData = transferState.get(NGH_DATA_KEY, []);
+            // The nghAttrValue is always a number referencing an index
+            // in the hydration TransferState data.
+            data = nghData[Number(nghAttrValue)];
+            // If the `ngh` attribute exists and has a non-empty value,
+            // the hydration info *must* be present in the TransferState.
+            // If there is no data for some reasons, this is an error.
+            ngDevMode && assertDefined(data, 'Unable to retrieve hydration info from the TransferState.');
+        }
+    }
+    const dehydratedView = {
+        data,
+        firstChild: (_a = rNode.firstChild) !== null && _a !== void 0 ? _a : null,
+    };
+    // The `ngh` attribute is cleared from the DOM node now
+    // that the data has been retrieved.
+    rNode.removeAttribute(NGH_ATTR_NAME);
+    return dehydratedView;
+}
+/**
+ * Sets the implementation for the `retrieveNghInfo` function.
+ */
+function enableRetrieveHydrationInfoImpl() {
+    _retrieveHydrationInfoImpl = retrieveHydrationInfoImpl;
+}
+/**
+ * Retrieves hydration info by reading the value from the `ngh` attribute
+ * and accessing a corresponding slot in TransferState storage.
+ */
+function retrieveHydrationInfo(rNode, injector) {
+    return _retrieveHydrationInfoImpl(rNode, injector);
+}
+/**
+ * Retrieves an instance of a component LView from a given ViewRef.
+ * Returns an instance of a component LView or `null` in case of an embedded view.
+ */
+function getComponentLViewForHydration(viewRef) {
+    // Reading an internal field from `ViewRef` instance.
+    let lView = viewRef._lView;
+    const tView = lView[TVIEW];
+    // A registered ViewRef might represent an instance of an
+    // embedded view, in which case we do not need to annotate it.
+    if (tView.type === 2 /* TViewType.Embedded */) {
+        return null;
+    }
+    // Check if it's a root view and if so, retrieve component's
+    // LView from the first slot after the header.
+    if (isRootView(lView)) {
+        lView = lView[HEADER_OFFSET];
+    }
+    return lView;
+}
+
+/**
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
@@ -8400,7 +8690,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-e1355e7');
+const VERSION = new Version('16.0.0-next.1+sha-4ae4090');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -8480,6 +8770,23 @@ class ErrorHandler {
         return e || null;
     }
 }
+
+const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
+/**
+ * Internal token that specifies whether hydration is enabled.
+ */
+const IS_HYDRATION_FEATURE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_FEATURE_ENABLED' : '');
+// By default (in client rendering mode), we remove all the contents
+// of the host element and render an application after that.
+const PRESERVE_HOST_CONTENT_DEFAULT = false;
+/**
+ * Internal token that indicates whether host element content should be
+ * retained during the bootstrap.
+ */
+const PRESERVE_HOST_CONTENT = new InjectionToken(NG_DEV_MODE$1 ? 'PRESERVE_HOST_CONTENT' : '', {
+    providedIn: 'root',
+    factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
+});
 
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
@@ -10180,7 +10487,7 @@ function renderChildComponents(hostLView, components) {
         renderComponent(hostLView, components[i]);
     }
 }
-function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector, embeddedViewInjector) {
+function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector, embeddedViewInjector, hydrationInfo) {
     const lView = tView.blueprint.slice();
     lView[HOST] = host;
     lView[FLAGS] = flags | 4 /* LViewFlags.CreationMode */ | 64 /* LViewFlags.Attached */ | 8 /* LViewFlags.FirstLViewPass */;
@@ -10200,6 +10507,7 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     lView[INJECTOR$1] = injector || parentLView && parentLView[INJECTOR$1] || null;
     lView[T_HOST] = tHostNode;
     lView[ID] = getUniqueLViewId();
+    lView[HYDRATION] = hydrationInfo;
     lView[EMBEDDED_VIEW_INJECTOR] = embeddedViewInjector;
     ngDevMode &&
         assertEqual(tView.type == 2 /* TViewType.Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
@@ -10641,10 +10949,19 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
  * @param rendererFactory Factory function to create renderer instance.
  * @param elementOrSelector Render element or CSS selector to locate the element.
  * @param encapsulation View Encapsulation defined for component that requests host element.
+ * @param injector Root view injector instance.
  */
-function locateHostElement(renderer, elementOrSelector, encapsulation) {
-    // When using native Shadow DOM, do not clear host element to allow native slot projection
-    const preserveContent = encapsulation === ViewEncapsulation$1.ShadowDom;
+function locateHostElement(renderer, elementOrSelector, encapsulation, injector) {
+    // Note: we use default value for the `PRESERVE_HOST_CONTENT` here even though it's a
+    // tree-shakable one (providedIn:'root'). This code path can be triggered during dynamic component
+    // creation (after calling ViewContainerRef.createComponent) when an injector instance can be
+    // provided. The injector instance might be disconnected from the main DI tree, thus the
+    // `PRESERVE_HOST_CONTENT` woild not be able to instantiate. In this case, the default value will
+    // be used.
+    const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
+    // When using native Shadow DOM, do not clear host element to allow native slot
+    // projection.
+    const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation$1.ShadowDom;
     return renderer.selectRootElement(elementOrSelector, preserveContent);
 }
 /**
@@ -11245,7 +11562,7 @@ function addComponentLogic(lView, hostTNode, def) {
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     const rendererFactory = lView[RENDERER_FACTORY];
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, rendererFactory, rendererFactory.createRenderer(native, def), null, null, null));
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, rendererFactory, rendererFactory.createRenderer(native, def), null, null, null, null));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
@@ -11490,6 +11807,11 @@ function renderComponent(hostLView, componentHostIdx) {
     const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
     const componentTView = componentView[TVIEW];
     syncViewWithBlueprint(componentTView, componentView);
+    const hostRNode = componentView[HOST];
+    // Populate an LView with hydration info retrieved from the DOM via TransferState.
+    if (hostRNode !== null && componentView[HYDRATION] === null) {
+        componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR$1]);
+    }
     renderView(componentTView, componentView, componentView[CONTEXT]);
 }
 /**
@@ -12190,13 +12512,13 @@ class ComponentFactory extends ComponentFactory$1 {
         // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
         const elementName = this.componentDef.selectors[0][0] || 'div';
         const hostRNode = rootSelectorOrNode ?
-            locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation) :
+            locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation, rootViewInjector) :
             createElementNode(hostRenderer, elementName, getNamespace(elementName));
         const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
             16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null);
-        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null);
+        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null, null);
         // rootView is the parent when bootstrapping
         // TODO(misko): it looks like we are entering view here but we don't really need to as
         // `renderView` does that. However as the code is written it is needed because
@@ -12307,7 +12629,7 @@ function createRootComponentTNode(lView, rNode) {
 /**
  * Creates the root component view and the root component node.
  *
- * @param rNode Render host element.
+ * @param hostRNode Render host element.
  * @param rootComponentDef ComponentDef
  * @param rootView The parent view where the host node is stored
  * @param rendererFactory Factory to be used for creating child renderers.
@@ -12316,11 +12638,17 @@ function createRootComponentTNode(lView, rNode) {
  *
  * @returns Component view created
  */
-function createRootComponentView(tNode, rNode, rootComponentDef, rootDirectives, rootView, rendererFactory, hostRenderer, sanitizer) {
+function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirectives, rootView, rendererFactory, hostRenderer, sanitizer) {
     const tView = rootView[TVIEW];
-    applyRootComponentStyling(rootDirectives, tNode, rNode, hostRenderer);
-    const viewRenderer = rendererFactory.createRenderer(rNode, rootComponentDef);
-    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null);
+    applyRootComponentStyling(rootDirectives, tNode, hostRNode, hostRenderer);
+    // Hydration info is on the host element and needs to be retreived
+    // and passed to the component LView.
+    let hydrationInfo = null;
+    if (hostRNode !== null) {
+        hydrationInfo = retrieveHydrationInfo(hostRNode, rootView[INJECTOR$1]);
+    }
+    const viewRenderer = rendererFactory.createRenderer(hostRNode, rootComponentDef);
+    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null, hydrationInfo);
     if (tView.firstCreatePass) {
         markAsComponentHost(tView, tNode, rootDirectives.length - 1);
     }
@@ -21167,7 +21495,7 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
     }
     createEmbeddedView(context, injector) {
         const embeddedTView = this._declarationTContainer.tViews;
-        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, null, injector || null);
+        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, null, injector || null, null);
         const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
         ngDevMode && assertLContainer(declarationLContainer);
         embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
@@ -23431,65 +23759,6 @@ ApplicationInitStatus.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Appli
         }], null, null);
 })();
 
-/**
- * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
- * primarily for prefixing application attributes and CSS styles when
- * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
- *
- * BY default, the value is randomly generated and assigned to the application by Angular.
- * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
- * the root {@link Injector} that uses this token.
- *
- * @publicApi
- */
-const APP_ID = new InjectionToken('AppId', {
-    providedIn: 'root',
-    factory: _appIdRandomProviderFactory,
-});
-function _appIdRandomProviderFactory() {
-    return `${_randomChar()}${_randomChar()}${_randomChar()}`;
-}
-/**
- * Providers that generate a random `APP_ID_TOKEN`.
- * @publicApi
- */
-const APP_ID_RANDOM_PROVIDER = {
-    provide: APP_ID,
-    useFactory: _appIdRandomProviderFactory,
-    deps: [],
-};
-function _randomChar() {
-    return String.fromCharCode(97 + Math.floor(Math.random() * 25));
-}
-/**
- * A function that is executed when a platform is initialized.
- * @publicApi
- */
-const PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
-/**
- * A token that indicates an opaque platform ID.
- * @publicApi
- */
-const PLATFORM_ID = new InjectionToken('Platform ID', {
-    providedIn: 'platform',
-    factory: () => 'unknown', // set a default platform name, when none set explicitly
-});
-/**
- * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
- * the application
- * @publicApi
- */
-const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
-// We keep this token here, rather than the animations package, so that modules that only care
-// about which animations module is loaded (e.g. the CDK) can retrieve it without having to
-// include extra dependencies. See #44970 for more context.
-/**
- * A [DI token](guide/glossary#di-token "DI token definition") that indicates which animations
- * module has been loaded.
- * @publicApi
- */
-const ANIMATION_MODULE_TYPE = new InjectionToken('AnimationModuleType');
-
 class Console {
     log(message) {
         // tslint:disable-next-line:no-console
@@ -25180,11 +25449,12 @@ class ApplicationRef {
         this._exceptionHandler = _exceptionHandler;
         /** @internal */
         this._bootstrapListeners = [];
-        this._views = [];
         this._runningTick = false;
         this._stable = true;
         this._destroyed = false;
         this._destroyListeners = [];
+        /** @internal */
+        this._views = [];
         /**
          * Get a list of component types registered to this application.
          * This list is populated even before the component is created.
@@ -27367,145 +27637,209 @@ ApplicationModule.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({});
         }], function () { return [{ type: ApplicationRef }]; }, null);
 })();
 
-function escapeTransferStateContent(text) {
-    const escapedText = {
-        '&': '&a;',
-        '"': '&q;',
-        '\'': '&s;',
-        '<': '&l;',
-        '>': '&g;',
-    };
-    return text.replace(/[&"'<>]/g, s => escapedText[s]);
-}
-function unescapeTransferStateContent(text) {
-    const unescapedText = {
-        '&a;': '&',
-        '&q;': '"',
-        '&s;': '\'',
-        '&l;': '<',
-        '&g;': '>',
-    };
-    return text.replace(/&[^;]+;/g, s => unescapedText[s]);
-}
 /**
- * Create a `StateKey<T>` that can be used to store value of type T with `TransferState`.
- *
- * Example:
- *
- * ```
- * const COUNTER_KEY = makeStateKey<number>('counter');
- * let value = 10;
- *
- * transferState.set(COUNTER_KEY, value);
- * ```
- *
- * @publicApi
+ * A collection that tracks all serialized views (`ngh` DOM annotations)
+ * to avoid duplication. An attempt to add a duplicate view results in the
+ * collection returning the index of the previously collected serialized view.
+ * This reduces the number of annotations needed for a given page.
  */
-function makeStateKey(key) {
-    return key;
-}
-function initTransferState() {
-    const transferState = new TransferState();
-    transferState.store = retrieveTransferredState(getDocument(), inject(APP_ID));
-    return transferState;
-}
-/**
- * A key value store that is transferred from the application on the server side to the application
- * on the client side.
- *
- * The `TransferState` is available as an injectable token.
- * On the client, just inject this token using DI and use it, it will be lazily initialized.
- * On the server it's already included if `renderApplication` function is used. Otherwise, import
- * the `ServerTransferStateModule` module to make the `TransferState` available.
- *
- * The values in the store are serialized/deserialized using JSON.stringify/JSON.parse. So only
- * boolean, number, string, null and non-class objects will be serialized and deserialized in a
- * non-lossy manner.
- *
- * @publicApi
- */
-class TransferState {
+class SerializedViewCollection {
     constructor() {
-        /** @internal */
-        this.store = {};
-        this.onSerializeCallbacks = {};
+        this.views = [];
+        this.indexByContent = new Map();
     }
-    /**
-     * Get the value corresponding to a key. Return `defaultValue` if key is not found.
-     */
-    get(key, defaultValue) {
-        return this.store[key] !== undefined ? this.store[key] : defaultValue;
+    add(serializedView) {
+        const viewAsString = JSON.stringify(serializedView);
+        if (!this.indexByContent.has(viewAsString)) {
+            const index = this.views.length;
+            this.views.push(serializedView);
+            this.indexByContent.set(viewAsString, index);
+            return index;
+        }
+        return this.indexByContent.get(viewAsString);
     }
-    /**
-     * Set the value corresponding to a key.
-     */
-    set(key, value) {
-        this.store[key] = value;
+    getAll() {
+        return this.views;
     }
-    /**
-     * Remove a key from the store.
-     */
-    remove(key) {
-        delete this.store[key];
-    }
-    /**
-     * Test whether a key exists in the store.
-     */
-    hasKey(key) {
-        return this.store.hasOwnProperty(key);
-    }
-    /**
-     * Indicates whether the state is empty.
-     */
-    get isEmpty() {
-        return Object.keys(this.store).length === 0;
-    }
-    /**
-     * Register a callback to provide the value for a key when `toJson` is called.
-     */
-    onSerialize(key, callback) {
-        this.onSerializeCallbacks[key] = callback;
-    }
-    /**
-     * Serialize the current state of the store to JSON.
-     */
-    toJson() {
-        // Call the onSerialize callbacks and put those values into the store.
-        for (const key in this.onSerializeCallbacks) {
-            if (this.onSerializeCallbacks.hasOwnProperty(key)) {
-                try {
-                    this.store[key] = this.onSerializeCallbacks[key]();
-                }
-                catch (e) {
-                    console.warn('Exception in onSerialize callback: ', e);
-                }
+}
+/**
+ * Annotates all components bootstrapped in a given ApplicationRef
+ * with info needed for hydration.
+ *
+ * @param appRef An instance of an ApplicationRef.
+ * @param doc A reference to the current Document instance.
+ */
+function annotateForHydration(appRef, doc) {
+    const serializedViewCollection = new SerializedViewCollection();
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lView = getComponentLViewForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lView !== null) {
+            const hostElement = lView[HOST];
+            if (hostElement) {
+                const context = {
+                    serializedViewCollection,
+                };
+                annotateHostElementForHydration(hostElement, lView, context);
             }
         }
-        return JSON.stringify(this.store);
+    }
+    const allSerializedViews = serializedViewCollection.getAll();
+    if (allSerializedViews.length > 0) {
+        const transferState = appRef.injector.get(TransferState);
+        transferState.set(NGH_DATA_KEY, allSerializedViews);
     }
 }
-/** @nocollapse */
-TransferState.ɵprov =
-    /** @pureOrBreakMyCode */ ɵɵdefineInjectable({
-        token: TransferState,
-        providedIn: 'root',
-        factory: initTransferState,
-    });
-function retrieveTransferredState(doc, appId) {
-    // Locate the script tag with the JSON data transferred from the server.
-    // The id of the script tag is set to the Angular appId + 'state'.
-    const script = doc.getElementById(appId + '-state');
-    let initialState = {};
-    if (script && script.textContent) {
-        try {
-            // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
-            initialState = JSON.parse(unescapeTransferStateContent(script.textContent));
+/**
+ * Serializes the lView data into a SerializedView object that will later be added
+ * to the TransferState storage and referenced using the `ngh` attribute on a host
+ * element.
+ *
+ * @param lView the lView we are serializing
+ * @param context the hydration context
+ * @returns the `SerializedView` object containing the data to be added to the host node
+ */
+function serializeLView(lView, context) {
+    const ngh = {};
+    const tView = lView[TVIEW];
+    // Iterate over DOM element references in an LView.
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        const tNode = tView.data[i];
+        // Local refs (e.g. <div #localRef>) take up an extra slot in LViews
+        // to store the same element. In this case, there is no information in
+        // a corresponding slot in TNode data structure. If that's the case, just
+        // skip this slot and move to the next one.
+        if (!tNode) {
+            continue;
         }
-        catch (e) {
-            console.warn('Exception while restoring TransferState for app ' + appId, e);
+        if (isLContainer(lView[i])) {
+            // TODO: serialization of LContainers will be added
+            // in followup PRs.
+        }
+        else if (Array.isArray(lView[i])) {
+            // This is a component, annotate the host node with an `ngh` attribute.
+            const targetNode = unwrapRNode(lView[i][HOST]);
+            annotateHostElementForHydration(targetNode, lView[i], context);
         }
     }
-    return initialState;
+    return ngh;
+}
+/**
+ * Physically adds the `ngh` attribute and serialized data to the host element.
+ *
+ * @param element The Host element to be annotated
+ * @param lView The associated LView
+ * @param context The hydration context
+ */
+function annotateHostElementForHydration(element, lView, context) {
+    const ngh = serializeLView(lView, context);
+    const index = context.serializedViewCollection.add(ngh);
+    const renderer = lView[RENDERER];
+    renderer.setAttribute(element, NGH_ATTR_NAME, index.toString());
+}
+
+/**
+ * Indicates whether the hydration-related code was added,
+ * prevents adding it multiple times.
+ */
+let isHydrationSupportEnabled = false;
+/**
+ * Brings the necessary hydration code in tree-shakable manner.
+ * The code is only present when the `provideHydrationSupport` is
+ * invoked. Otherwise, this code is tree-shaken away during the
+ * build optimization step.
+ *
+ * This technique allows us to swap implementations of methods so
+ * tree shaking works appropriately when hydration is disabled or
+ * enabled. It brings in the appropriate version of the method that
+ * supports hydration only when enabled.
+ */
+function enableHydrationRuntimeSupport() {
+    if (!isHydrationSupportEnabled) {
+        isHydrationSupportEnabled = true;
+        enableRetrieveHydrationInfoImpl();
+    }
+}
+/**
+ * Detects whether the code is invoked in a browser.
+ * Later on, this check should be replaced with a tree-shakable
+ * flag (e.g. `!isServer`).
+ */
+function isBrowser() {
+    return inject(PLATFORM_ID) === 'browser';
+}
+/**
+ * Returns a set of providers required to setup hydration support
+ * for an application that is server side rendered.
+ *
+ * ## NgModule-based bootstrap
+ *
+ * You can add the function call to the root AppModule of an application:
+ * ```
+ * import {provideHydrationSupport} from '@angular/core';
+ *
+ * @NgModule({
+ *   providers: [
+ *     // ... other providers ...
+ *     provideHydrationSupport()
+ *   ],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent]
+ * })
+ * class AppModule {}
+ * ```
+ *
+ * ## Standalone-based bootstrap
+ *
+ * Add the function to the `bootstrapApplication` call:
+ * ```
+ * import {provideHydrationSupport} from '@angular/core';
+ *
+ * bootstrapApplication(RootComponent, {
+ *   providers: [
+ *     // ... other providers ...
+ *     provideHydrationSupport()
+ *   ]
+ * });
+ * ```
+ *
+ * The function sets up an internal flag that would be recognized during
+ * the server side rendering time as well, so there is no need to
+ * configure or change anything in NgUniversal to enable the feature.
+ *
+ * @publicApi
+ * @developerPreview
+ */
+function provideHydrationSupport() {
+    return makeEnvironmentProviders([
+        {
+            provide: ENVIRONMENT_INITIALIZER,
+            useValue: () => {
+                // Since this function is used across both server and client,
+                // make sure that the runtime code is only added when invoked
+                // on the client. Moving forward, the `isBrowser` check should
+                // be replaced with a tree-shakable alternative (e.g. `isServer`
+                // flag).
+                if (isBrowser()) {
+                    enableHydrationRuntimeSupport();
+                }
+            },
+            multi: true,
+        },
+        {
+            provide: IS_HYDRATION_FEATURE_ENABLED,
+            useValue: true,
+        },
+        {
+            provide: PRESERVE_HOST_CONTENT,
+            // Preserve host element content only in a browser
+            // environment. On a server, an application is rendered
+            // from scratch, so the host content needs to be empty.
+            useFactory: () => isBrowser(),
+        }
+    ]);
 }
 
 /** Coerces a value (typically a string) to a boolean. */
@@ -28265,5 +28599,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, mergeApplicationConfig, platformCore, reflectComponentType, resolveForwardRef, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TransferState as ɵTransferState, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, escapeTransferStateContent as ɵescapeTransferStateContent, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getComponentDef as ɵgetComponentDef, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isObservable as ɵisObservable, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, makeDecorator as ɵmakeDecorator, makeStateKey as ɵmakeStateKey, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unescapeTransferStateContent as ɵunescapeTransferStateContent, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, mergeApplicationConfig, platformCore, reflectComponentType, resolveForwardRef, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ChangeDetectorStatus as ɵChangeDetectorStatus, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_FEATURE_ENABLED as ɵIS_HYDRATION_FEATURE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TransferState as ɵTransferState, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, escapeTransferStateContent as ɵescapeTransferStateContent, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getComponentDef as ɵgetComponentDef, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isObservable as ɵisObservable, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, makeDecorator as ɵmakeDecorator, makeStateKey as ɵmakeStateKey, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, provideHydrationSupport as ɵprovideHydrationSupport, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unescapeTransferStateContent as ɵunescapeTransferStateContent, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map
