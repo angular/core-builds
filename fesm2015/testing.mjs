@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.1+sha-ac59054
+ * @license Angular v15.2.1+sha-b13e079
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2115,54 +2115,6 @@ var ChangeDetectionStrategy;
      */
     ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 1] = "Default";
 })(ChangeDetectionStrategy || (ChangeDetectionStrategy = {}));
-/**
- * Defines the possible states of the default change detector.
- * @see `ChangeDetectorRef`
- */
-var ChangeDetectorStatus;
-(function (ChangeDetectorStatus) {
-    /**
-     * A state in which, after calling `detectChanges()`, the change detector
-     * state becomes `Checked`, and must be explicitly invoked or reactivated.
-     */
-    ChangeDetectorStatus[ChangeDetectorStatus["CheckOnce"] = 0] = "CheckOnce";
-    /**
-     * A state in which change detection is skipped until the change detector mode
-     * becomes `CheckOnce`.
-     */
-    ChangeDetectorStatus[ChangeDetectorStatus["Checked"] = 1] = "Checked";
-    /**
-     * A state in which change detection continues automatically until explicitly
-     * deactivated.
-     */
-    ChangeDetectorStatus[ChangeDetectorStatus["CheckAlways"] = 2] = "CheckAlways";
-    /**
-     * A state in which a change detector sub tree is not a part of the main tree and
-     * should be skipped.
-     */
-    ChangeDetectorStatus[ChangeDetectorStatus["Detached"] = 3] = "Detached";
-    /**
-     * Indicates that the change detector encountered an error checking a binding
-     * or calling a directive lifecycle method and is now in an inconsistent state. Change
-     * detectors in this state do not detect changes.
-     */
-    ChangeDetectorStatus[ChangeDetectorStatus["Errored"] = 4] = "Errored";
-    /**
-     * Indicates that the change detector has been destroyed.
-     */
-    ChangeDetectorStatus[ChangeDetectorStatus["Destroyed"] = 5] = "Destroyed";
-})(ChangeDetectorStatus || (ChangeDetectorStatus = {}));
-/**
- * Reports whether a given strategy is currently the default for change detection.
- * @param changeDetectionStrategy The strategy to check.
- * @returns True if the given strategy is the current default, false otherwise.
- * @see `ChangeDetectorStatus`
- * @see `ChangeDetectorRef`
- */
-function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
-    return changeDetectionStrategy == null ||
-        changeDetectionStrategy === ChangeDetectionStrategy.Default;
-}
 
 /**
  * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
@@ -8750,7 +8702,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.1+sha-ac59054');
+const VERSION = new Version('15.2.1+sha-b13e079');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11003,7 +10955,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         initialInputs: undefined,
         inputs: null,
         outputs: null,
-        tViews: null,
+        tView: null,
         next: null,
         prev: null,
         projectionNext: null,
@@ -13784,7 +13736,7 @@ function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, t
     const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
     resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     registerPostOrderHooks(tView, tNode);
-    const embeddedTView = tNode.tViews = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
+    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts);
     if (tView.queries !== null) {
         tView.queries.template(tView, tNode);
         embeddedTView.queries = tView.queries.embeddedTView(tNode);
@@ -18143,7 +18095,7 @@ function getTIcu(tView, index) {
     if (value === null || typeof value === 'string')
         return null;
     if (ngDevMode &&
-        !(value.hasOwnProperty('tViews') || value.hasOwnProperty('currentCaseLViewIndex'))) {
+        !(value.hasOwnProperty('tView') || value.hasOwnProperty('currentCaseLViewIndex'))) {
         throwError('We expect to get \'null\'|\'TIcu\'|\'TIcuContainer\', but got: ' + value);
     }
     // Here the `value.hasOwnProperty('currentCaseLViewIndex')` is a polymorphic read as it can be
@@ -18172,7 +18124,7 @@ function getTIcu(tView, index) {
 function setTIcu(tView, index, tIcu) {
     const tNode = tView.data[index];
     ngDevMode &&
-        assertEqual(tNode === null || tNode.hasOwnProperty('tViews'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
+        assertEqual(tNode === null || tNode.hasOwnProperty('tView'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
     if (tNode === null) {
         tView.data[index] = tIcu;
     }
@@ -21468,7 +21420,7 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
         this.elementRef = elementRef;
     }
     createEmbeddedView(context, injector) {
-        const embeddedTView = this._declarationTContainer.tViews;
+        const embeddedTView = this._declarationTContainer.tView;
         const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, null, injector || null);
         const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
         ngDevMode && assertLContainer(declarationLContainer);
@@ -21498,7 +21450,7 @@ function injectTemplateRef() {
  */
 function createTemplateRef(hostTNode, hostLView) {
     if (hostTNode.type & 4 /* TNodeType.Container */) {
-        ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
+        ngDevMode && assertDefined(hostTNode.tView, 'TView must be allocated');
         return new R3TemplateRef(hostLView, hostTNode, createElementRef(hostTNode, hostLView));
     }
     return null;

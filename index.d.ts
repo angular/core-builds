@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.1+sha-ac59054
+ * @license Angular v15.2.1+sha-b13e079
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7482,7 +7482,7 @@ declare interface TContainerNode extends TNode {
      * - They are dynamically created
      */
     parent: TElementNode | TElementContainerNode | null;
-    tViews: TView | TView[] | null;
+    tView: TView | null;
     projection: null;
     value: null;
 }
@@ -7522,7 +7522,7 @@ declare interface TElementContainerNode extends TNode {
     index: number;
     child: TElementNode | TTextNode | TContainerNode | TElementContainerNode | TProjectionNode | null;
     parent: TElementNode | TElementContainerNode | null;
-    tViews: null;
+    tView: null;
     projection: null;
 }
 
@@ -7537,7 +7537,7 @@ declare interface TElementNode extends TNode {
      * retrieved using viewData[HOST_NODE]).
      */
     parent: TElementNode | TElementContainerNode | null;
-    tViews: null;
+    tView: null;
     /**
      * If this is a component TNode with projection, this will be an array of projected
      * TNodes or native nodes (see TNode.projection for more info). If it's a regular element node
@@ -7975,26 +7975,14 @@ declare interface TNode {
      */
     outputs: PropertyAliases | null;
     /**
-     * The TView or TViews attached to this node.
-     *
-     * If this TNode corresponds to an LContainer with inline views, the container will
-     * need to store separate static data for each of its view blocks (TView[]). Otherwise,
-     * nodes in inline views with the same index as nodes in their parent views will overwrite
-     * each other, as they are in the same template.
-     *
-     * Each index in this array corresponds to the static data for a certain
-     * view. So if you had V(0) and V(1) in a container, you might have:
-     *
-     * [
-     *   [{tagName: 'div', attrs: ...}, null],     // V(0) TView
-     *   [{tagName: 'button', attrs ...}, null]    // V(1) TView
+     * The TView attached to this node.
      *
      * If this TNode corresponds to an LContainer with a template (e.g. structural
      * directive), the template's TView will be stored here.
      *
-     * If this TNode corresponds to an element, tViews will be null .
+     * If this TNode corresponds to an element, tView will be `null`.
      */
-    tViews: TView | TView[] | null;
+    tView: TView | null;
     /**
      * The next sibling node. Necessary so we can propagate through the root nodes of a view
      * to insert them or remove them from the DOM.
@@ -8295,7 +8283,7 @@ declare interface TProjectionNode extends TNode {
      * retrieved using LView.node).
      */
     parent: TElementNode | TElementContainerNode | null;
-    tViews: null;
+    tView: null;
     /** Index of the projection node. (See TNode.projection for more info.) */
     projection: number;
     value: null;
@@ -8686,7 +8674,7 @@ declare interface TTextNode extends TNode {
      * retrieved using LView.node).
      */
     parent: TElementNode | TElementContainerNode | null;
-    tViews: null;
+    tView: null;
     projection: null;
 }
 
@@ -9712,43 +9700,6 @@ export declare const enum ɵBypassType {
     Style = "Style"
 }
 
-/**
- * Defines the possible states of the default change detector.
- * @see `ChangeDetectorRef`
- */
-export declare enum ɵChangeDetectorStatus {
-    /**
-     * A state in which, after calling `detectChanges()`, the change detector
-     * state becomes `Checked`, and must be explicitly invoked or reactivated.
-     */
-    CheckOnce = 0,
-    /**
-     * A state in which change detection is skipped until the change detector mode
-     * becomes `CheckOnce`.
-     */
-    Checked = 1,
-    /**
-     * A state in which change detection continues automatically until explicitly
-     * deactivated.
-     */
-    CheckAlways = 2,
-    /**
-     * A state in which a change detector sub tree is not a part of the main tree and
-     * should be skipped.
-     */
-    Detached = 3,
-    /**
-     * Indicates that the change detector encountered an error checking a binding
-     * or calling a directive lifecycle method and is now in an inconsistent state. Change
-     * detectors in this state do not detect changes.
-     */
-    Errored = 4,
-    /**
-     * Indicates that the change detector has been destroyed.
-     */
-    Destroyed = 5
-}
-
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
 
 
@@ -10282,15 +10233,6 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
 }
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
-
-/**
- * Reports whether a given strategy is currently the default for change detection.
- * @param changeDetectionStrategy The strategy to check.
- * @returns True if the given strategy is the current default, false otherwise.
- * @see `ChangeDetectorStatus`
- * @see `ChangeDetectorRef`
- */
-export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
 
 export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentProviders | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
 
