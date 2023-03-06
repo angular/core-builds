@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-27379d0
+ * @license Angular v16.0.0-next.1+sha-10ffd03
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10069,43 +10069,6 @@ export declare const enum ɵBypassType {
     Style = "Style"
 }
 
-/**
- * Defines the possible states of the default change detector.
- * @see `ChangeDetectorRef`
- */
-export declare enum ɵChangeDetectorStatus {
-    /**
-     * A state in which, after calling `detectChanges()`, the change detector
-     * state becomes `Checked`, and must be explicitly invoked or reactivated.
-     */
-    CheckOnce = 0,
-    /**
-     * A state in which change detection is skipped until the change detector mode
-     * becomes `CheckOnce`.
-     */
-    Checked = 1,
-    /**
-     * A state in which change detection continues automatically until explicitly
-     * deactivated.
-     */
-    CheckAlways = 2,
-    /**
-     * A state in which a change detector sub tree is not a part of the main tree and
-     * should be skipped.
-     */
-    Detached = 3,
-    /**
-     * Indicates that the change detector encountered an error checking a binding
-     * or calling a directive lifecycle method and is now in an inconsistent state. Change
-     * detectors in this state do not detect changes.
-     */
-    Errored = 4,
-    /**
-     * Indicates that the change detector has been destroyed.
-     */
-    Destroyed = 5
-}
-
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
 
 
@@ -10652,15 +10615,6 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
 export declare const ɵIS_HYDRATION_FEATURE_ENABLED: InjectionToken<boolean>;
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
-
-/**
- * Reports whether a given strategy is currently the default for change detection.
- * @param changeDetectionStrategy The strategy to check.
- * @returns True if the given strategy is the current default, false otherwise.
- * @see `ChangeDetectorStatus`
- * @see `ChangeDetectorRef`
- */
-export declare function ɵisDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;
 
 export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentProviders | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
 
