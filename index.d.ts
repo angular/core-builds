@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-fc51009
+ * @license Angular v16.0.0-next.1+sha-e489304
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6963,9 +6963,9 @@ export declare class ReflectiveKey {
  * listeners on Element.
  */
 declare interface RElement extends RNode {
+    firstChild: RNode | null;
     style: RCssStyleDeclaration;
     classList: RDomTokenList;
-    firstChild: RNode | null;
     className: string;
     tagName: string;
     textContent: string | null;

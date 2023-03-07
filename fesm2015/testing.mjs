@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-fc51009
+ * @license Angular v16.0.0-next.1+sha-e489304
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1636,6 +1636,8 @@ function ngDevModeResetPerfCounters() {
         rendererAppendChild: 0,
         rendererInsertBefore: 0,
         rendererCreateComment: 0,
+        hydratedNodes: 0,
+        hydratedComponents: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
@@ -3506,6 +3508,21 @@ function namespaceHTMLInternal() {
 }
 function getNamespace$1() {
     return instructionState.lFrame.currentNamespace;
+}
+let _wasLastNodeCreated = true;
+/**
+ * Retrieves a global flag that indicates whether the most recent DOM node
+ * was created or hydrated.
+ */
+function wasLastNodeCreated() {
+    return _wasLastNodeCreated;
+}
+/**
+ * Sets a global flag to indicate whether the most recent DOM node
+ * was created or hydrated.
+ */
+function lastNodeWasCreated(flag) {
+    _wasLastNodeCreated = flag;
 }
 
 /**
@@ -8800,6 +8817,11 @@ function retrieveHydrationInfoImpl(rNode, injector) {
     // The `ngh` attribute is cleared from the DOM node now
     // that the data has been retrieved.
     rNode.removeAttribute(NGH_ATTR_NAME);
+    // Note: don't check whether this node was claimed for hydration,
+    // because this node might've been previously claimed while processing
+    // template instructions.
+    ngDevMode && markRNodeAsClaimedByHydration(rNode, /* checkIfAlreadyClaimed */ false);
+    ngDevMode && ngDevMode.hydratedComponents++;
     return dehydratedView;
 }
 /**
@@ -8834,6 +8856,25 @@ function getComponentLViewForHydration(viewRef) {
         lView = lView[HEADER_OFFSET];
     }
     return lView;
+}
+/**
+ * Marks a node as "claimed" by hydration process.
+ * This is needed to make assessments in tests whether
+ * the hydration process handled all nodes.
+ */
+function markRNodeAsClaimedByHydration(node, checkIfAlreadyClaimed = true) {
+    if (!ngDevMode) {
+        throw new Error('Calling `markRNodeAsClaimedByHydration` in prod mode ' +
+            'is not supported and likely a mistake.');
+    }
+    if (checkIfAlreadyClaimed && isRNodeClaimedForHydration(node)) {
+        throw new Error('Trying to claim a node, which was claimed already.');
+    }
+    node.__claimed = true;
+    ngDevMode.hydratedNodes++;
+}
+function isRNodeClaimedForHydration(node) {
+    return !!node.__claimed;
 }
 
 /**
@@ -9015,7 +9056,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-fc51009');
+const VERSION = new Version('16.0.0-next.1+sha-e489304');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14158,6 +14199,54 @@ function ɵɵreference(index) {
 }
 
 /**
+ * Verifies whether a given node matches an expected criteria,
+ * based on internal data structure state.
+ */
+function validateMatchingNode(node, nodeType, tagName, lView, tNode) {
+    if (node.nodeType !== nodeType ||
+        (node.nodeType === Node.ELEMENT_NODE &&
+            node.tagName.toLowerCase() !== (tagName === null || tagName === void 0 ? void 0 : tagName.toLowerCase()))) {
+        // TODO: improve error message and use RuntimeError instead.
+        throw new Error(`Unexpected node found during hydration.`);
+    }
+}
+
+/**
+ * Locate a node in DOM tree that corresponds to a given TNode.
+ *
+ * @param hydrationInfo The hydration annotation data
+ * @param tView the current tView
+ * @param lView the current lView
+ * @param tNode the current tNode
+ * @returns an RNode that represents a given tNode
+ */
+function locateNextRNode(hydrationInfo, tView, lView, tNode) {
+    var _a;
+    let native = null;
+    if (tView.firstChild === tNode) {
+        // We create a first node in this view, so we use a reference
+        // to the first child in this DOM segment.
+        native = hydrationInfo.firstChild;
+    }
+    else {
+        // Locate a node based on a previous sibling or a parent node.
+        const previousTNodeParent = tNode.prev === null;
+        const previousTNode = (_a = tNode.prev) !== null && _a !== void 0 ? _a : tNode.parent;
+        ngDevMode &&
+            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
+                'to the previous node or a parent node.');
+        const previousRElement = getNativeByTNode(previousTNode, lView);
+        if (previousTNodeParent) {
+            native = previousRElement.firstChild;
+        }
+        else {
+            native = previousRElement.nextSibling;
+        }
+    }
+    return native;
+}
+
+/**
  * Update a property on a selected element.
  *
  * Operates on the element selected by index via the {@link select} instruction.
@@ -14241,14 +14330,15 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     const tNode = tView.firstCreatePass ?
         elementStartFirstCreatePass(adjustedIndex, tView, lView, name, attrsIndex, localRefsIndex) :
         tView.data[adjustedIndex];
-    const native = lView[adjustedIndex] = createElementNode(renderer, name, getNamespace$1());
+    const native = _locateOrCreateElementNode(tView, lView, tNode, renderer, name);
+    lView[adjustedIndex] = native;
     const hasDirectives = isDirectiveHost(tNode);
     if (ngDevMode && tView.firstCreatePass) {
         validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
     }
     setCurrentTNode(tNode, true);
     setupStaticAttributes(renderer, native, tNode);
-    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
+    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */ && wasLastNodeCreated()) {
         // In the i18n case, the translation may have removed this element, so only add it if it is not
         // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
         appendChild(tView, lView, native, tNode);
@@ -14319,6 +14409,32 @@ function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
     ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
     ɵɵelementEnd();
     return ɵɵelement;
+}
+let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name) => {
+    lastNodeWasCreated(true);
+    return createElementNode(renderer, name, getNamespace$1());
+};
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode of element nodes.
+ */
+function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo;
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createElementNode(renderer, name, getNamespace$1());
+    }
+    // Hydration mode, looking up an existing element in DOM.
+    const native = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode &&
+        validateMatchingNode(native, Node.ELEMENT_NODE, name, lView, tNode);
+    ngDevMode && markRNodeAsClaimedByHydration(native);
+    return native;
+}
+function enableLocateOrCreateElementNodeImpl() {
+    _locateOrCreateElementNode = locateOrCreateElementNodeImpl;
 }
 
 function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) {
@@ -16764,10 +16880,38 @@ function ɵɵtext(index, value = '') {
     const tNode = tView.firstCreatePass ?
         getOrCreateTNode(tView, adjustedIndex, 1 /* TNodeType.Text */, value, null) :
         tView.data[adjustedIndex];
-    const textNative = lView[adjustedIndex] = createTextNode(lView[RENDERER], value);
-    appendChild(tView, lView, textNative, tNode);
+    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value);
+    lView[adjustedIndex] = textNative;
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, textNative, tNode);
+    }
     // Text nodes are self closing.
     setCurrentTNode(tNode, false);
+}
+let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
+    lastNodeWasCreated(true);
+    return createTextNode(lView[RENDERER], value);
+};
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode of text nodes.
+ */
+function locateOrCreateTextNodeImpl(tView, lView, tNode, value) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo;
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createTextNode(lView[RENDERER], value);
+    }
+    // Hydration mode, looking up an existing element in DOM.
+    const textNative = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateMatchingNode(textNative, Node.TEXT_NODE, null, lView, tNode);
+    ngDevMode && markRNodeAsClaimedByHydration(textNative);
+    return textNative;
+}
+function enableLocateOrCreateTextNodeImpl() {
+    _locateOrCreateTextNode = locateOrCreateTextNodeImpl;
 }
 
 /**
