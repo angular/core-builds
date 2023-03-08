@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-5944f5d
+ * @license Angular v16.0.0-next.1+sha-c241f63
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10664,17 +10664,6 @@ export declare function ɵisNgModule<T>(value: Type<T>): value is Type<T> & {
 };
 
 /**
- * Determine if the argument is an Observable
- *
- * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
- * types need additional methods, such as `lift()`. But it is adequate for our
- * needs since within the Angular framework code we only ever need to use the
- * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
- * into `Observable` as needed.
- */
-export declare const ɵisObservable: (obj: any | Observable<any>) => obj is Observable<any>;
-
-/**
  * Determine if the argument is shaped like a Promise
  */
 export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
@@ -10682,7 +10671,7 @@ export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
 /**
  * Determine if the argument is a Subscribable
  */
-export declare function ɵisSubscribable(obj: any | Subscribable<any>): obj is Subscribable<any>;
+export declare function ɵisSubscribable<T>(obj: any | Subscribable<T>): obj is Subscribable<T>;
 
 /**
  * The internal view context which is specific to a given DOM element, directive or

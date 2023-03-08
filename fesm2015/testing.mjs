@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-5944f5d
+ * @license Angular v16.0.0-next.1+sha-c241f63
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9108,7 +9108,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-5944f5d');
+const VERSION = new Version('16.0.0-next.1+sha-c241f63');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14737,16 +14737,6 @@ function isPromise(obj) {
 function isSubscribable(obj) {
     return !!obj && typeof obj.subscribe === 'function';
 }
-/**
- * Determine if the argument is an Observable
- *
- * Strictly this tests that the `obj` is `Subscribable`, since `Observable`
- * types need additional methods, such as `lift()`. But it is adequate for our
- * needs since within the Angular framework code we only ever need to use the
- * `subscribe()` method, and RxJS has mechanisms to wrap `Subscribable` objects
- * into `Observable` as needed.
- */
-const isObservable = isSubscribable;
 
 /**
  * Adds an event listener to the current node.
@@ -14909,7 +14899,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
                 const minifiedName = props[i + 1];
                 const directiveInstance = lView[index];
                 const output = directiveInstance[minifiedName];
-                if (ngDevMode && !isObservable(output)) {
+                if (ngDevMode && !isSubscribable(output)) {
                     throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
                 }
                 const subscription = output.subscribe(listenerFn);
