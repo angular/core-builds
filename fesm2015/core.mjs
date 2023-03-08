@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-984d0f4
+ * @license Angular v16.0.0-next.1+sha-5944f5d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1751,6 +1751,7 @@ function storeLViewOnDestroy(lView, onDestroyCallback) {
 const instructionState = {
     lFrame: createLFrame(null),
     bindingsEnabled: true,
+    skipHydrationRootTNode: null,
 };
 /**
  * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
@@ -1782,6 +1783,21 @@ function getBindingsEnabled() {
     return instructionState.bindingsEnabled;
 }
 /**
+ * Returns true if currently inside a skip hydration block.
+ * @returns boolean
+ */
+function isInSkipHydrationBlock() {
+    return instructionState.skipHydrationRootTNode !== null;
+}
+/**
+ * Returns true if this is the root TNode of the skip hydration block.
+ * @param tNode the current TNode
+ * @returns boolean
+ */
+function isSkipHydrationRootTNode(tNode) {
+    return instructionState.skipHydrationRootTNode === tNode;
+}
+/**
  * Enables directive matching on elements.
  *
  *  * Example:
@@ -1804,6 +1820,13 @@ function ɵɵenableBindings() {
     instructionState.bindingsEnabled = true;
 }
 /**
+ * Sets a flag to specify that the TNode is in a skip hydration block.
+ * @param tNode the current TNode
+ */
+function enterSkipHydrationBlock(tNode) {
+    instructionState.skipHydrationRootTNode = tNode;
+}
+/**
  * Disables directive matching on element.
  *
  *  * Example:
@@ -1824,6 +1847,12 @@ function ɵɵenableBindings() {
  */
 function ɵɵdisableBindings() {
     instructionState.bindingsEnabled = false;
+}
+/**
+ * Clears the root skip hydration node when leaving a skip hydration block.
+ */
+function leaveSkipHydrationBlock() {
+    instructionState.skipHydrationRootTNode = null;
 }
 /**
  * Return the current `LView`.
@@ -6289,6 +6318,17 @@ function nativeRemoveNode(renderer, rNode, isHostElement) {
     }
 }
 /**
+ * Removes the contents of a given RElement using a given renderer.
+ *
+ * @param renderer A renderer to be used
+ * @param rElement the native RElement to be cleared
+ */
+function clearElementContents(renderer, rElement) {
+    while (rElement.firstChild) {
+        nativeRemoveChild(renderer, rElement, rElement.firstChild, false);
+    }
+}
+/**
  * Performs the operation of `action` on the node. Typically this involves inserting or removing
  * nodes on the LView or projection boundary.
  */
@@ -8695,7 +8735,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-984d0f4');
+const VERSION = new Version('16.0.0-next.1+sha-5944f5d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13975,6 +14015,33 @@ function siblingAfter(skip, from) {
 }
 
 /**
+ * The name of an attribute that can be added to the hydration boundary node
+ * (component host node) to disable hydration for the content within that boundary.
+ */
+const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
+/**
+ * Helper function to check if a given node has the 'ngSkipHydration' attribute
+ */
+function hasNgSkipHydrationAttr(tNode) {
+    const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
+    const attrs = tNode.mergedAttrs;
+    if (attrs === null)
+        return false;
+    // only ever look at the attribute name and skip the values
+    for (let i = 0; i < attrs.length; i += 2) {
+        const value = attrs[i];
+        // This is a marker, which means that the static attributes section is over,
+        // so we can exit early.
+        if (typeof value === 'number')
+            return false;
+        if (typeof value === 'string' && value.toLowerCase() === SKIP_HYDRATION_ATTR_NAME_LOWER_CASE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Update a property on a selected element.
  *
  * Operates on the element selected by index via the {@link select} instruction.
@@ -14106,6 +14173,9 @@ function ɵɵelementEnd() {
     }
     const tNode = currentTNode;
     ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */);
+    if (isSkipHydrationRootTNode(tNode)) {
+        leaveSkipHydrationBlock();
+    }
     decreaseElementDepthCount();
     const tView = getTView();
     if (tView.firstCreatePass) {
@@ -14148,7 +14218,7 @@ let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name) => {
  */
 function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo;
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock();
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -14159,6 +14229,14 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name) {
     ngDevMode &&
         validateMatchingNode(native, Node.ELEMENT_NODE, name, lView, tNode);
     ngDevMode && markRNodeAsClaimedByHydration(native);
+    // Checks if the skip hydration attribute is present during hydration so we know to
+    // skip attempting to hydrate this block.
+    if (hydrationInfo && hasNgSkipHydrationAttr(tNode)) {
+        enterSkipHydrationBlock(tNode);
+        // Since this isn't hydratable, we need to empty the node
+        // so there's no duplicate content after render
+        clearElementContents(renderer, native);
+    }
     return native;
 }
 function enableLocateOrCreateElementNodeImpl() {
@@ -14278,7 +14356,7 @@ let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
 function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     let comment;
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo;
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock();
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -16668,7 +16746,7 @@ let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
  */
 function locateOrCreateTextNodeImpl(tView, lView, tNode, value) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo;
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock();
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -27923,7 +28001,9 @@ function serializeLView(lView, context) {
         else if (Array.isArray(lView[i])) {
             // This is a component, annotate the host node with an `ngh` attribute.
             const targetNode = unwrapRNode(lView[i][HOST]);
-            annotateHostElementForHydration(targetNode, lView[i], context);
+            if (!targetNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
+                annotateHostElementForHydration(targetNode, lView[i], context);
+            }
         }
         else {
             // <ng-container> case
