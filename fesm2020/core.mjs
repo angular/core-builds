@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-fdf6197
+ * @license Angular v16.0.0-next.1+sha-8e0a087
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8398,6 +8398,9 @@ function retrieveTransferredState(doc, appId) {
     return initialState;
 }
 
+/* Represents a key in NghDom that holds information about <ng-container>s. */
+const ELEMENT_CONTAINERS = 'e';
+
 /**
  * The name of the key used in the TransferState collection,
  * where hydration information is located.
@@ -8508,6 +8511,13 @@ function markRNodeAsClaimedByHydration(node, checkIfAlreadyClaimed = true) {
 }
 function isRNodeClaimedForHydration(node) {
     return !!node.__claimed;
+}
+function storeNgContainerInfo(hydrationInfo, index, firstChild) {
+    hydrationInfo.ngContainers ?? (hydrationInfo.ngContainers = {});
+    hydrationInfo.ngContainers[index] = { firstChild };
+}
+function getNgContainerSize(hydrationInfo, index) {
+    return hydrationInfo.data[ELEMENT_CONTAINERS]?.[index] ?? null;
 }
 
 /**
@@ -8689,7 +8699,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.1+sha-fdf6197');
+const VERSION = new Version('16.0.0-next.1+sha-8e0a087');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13889,7 +13899,29 @@ function validateMatchingNode(node, nodeType, tagName, lView, tNode) {
         throw new Error(`Unexpected node found during hydration.`);
     }
 }
+/**
+ * Verifies whether next sibling node exists.
+ */
+function validateSiblingNodeExists(node) {
+    if (!node.nextSibling) {
+        // TODO: improve error message and use RuntimeError instead.
+        throw new Error(`Unexpected state: insufficient number of sibling nodes.`);
+    }
+}
 
+/** Whether current TNode is a first node in an <ng-container>. */
+function isFirstElementInNgContainer(tNode) {
+    return !tNode.prev && tNode.parent?.type === 8 /* TNodeType.ElementContainer */;
+}
+/** Returns first element from a DOM segment that corresponds to this <ng-container>. */
+function getDehydratedNgContainer(hydrationInfo, tContainerNode) {
+    const noOffsetIndex = tContainerNode.index - HEADER_OFFSET;
+    const ngContainer = hydrationInfo.ngContainers?.[noOffsetIndex];
+    ngDevMode &&
+        assertDefined(ngContainer, 'Unexpected state: no hydration info available for a given TNode, ' +
+            'which represents an element container.');
+    return ngContainer;
+}
 /**
  * Locate a node in DOM tree that corresponds to a given TNode.
  *
@@ -13909,19 +13941,36 @@ function locateNextRNode(hydrationInfo, tView, lView, tNode) {
     else {
         // Locate a node based on a previous sibling or a parent node.
         const previousTNodeParent = tNode.prev === null;
-        const previousTNode = tNode.prev ?? tNode.parent;
+        const previousTNode = (tNode.prev ?? tNode.parent);
         ngDevMode &&
             assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
                 'to the previous node or a parent node.');
         const previousRElement = getNativeByTNode(previousTNode, lView);
-        if (previousTNodeParent) {
-            native = previousRElement.firstChild;
+        if (isFirstElementInNgContainer(tNode)) {
+            const ngContainer = getDehydratedNgContainer(hydrationInfo, tNode.parent);
+            native = ngContainer.firstChild ?? null;
         }
         else {
-            native = previousRElement.nextSibling;
+            if (previousTNodeParent) {
+                native = previousRElement.firstChild;
+            }
+            else {
+                native = previousRElement.nextSibling;
+            }
         }
     }
     return native;
+}
+/**
+ * Skips over a specified number of nodes and returns the next sibling node after that.
+ */
+function siblingAfter(skip, from) {
+    let currentNode = from;
+    for (let i = 0; i < skip; i++) {
+        ngDevMode && validateSiblingNodeExists(currentNode);
+        currentNode = currentNode.nextSibling;
+    }
+    return currentNode;
 }
 
 /**
@@ -14159,10 +14208,12 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
         tView.data[adjustedIndex];
     setCurrentTNode(tNode, true);
     ngDevMode && ngDevMode.rendererCreateComment++;
-    const native = lView[adjustedIndex] =
-        lView[RENDERER].createComment(ngDevMode ? 'ng-container' : '');
-    appendChild(tView, lView, native, tNode);
-    attachPatchData(native, lView);
+    const comment = _locateOrCreateElementContainerNode(tView, lView, tNode, index);
+    lView[adjustedIndex] = comment;
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, comment, tNode);
+    }
+    attachPatchData(comment, lView);
     if (isDirectiveHost(tNode)) {
         createDirectivesInstances(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
@@ -14213,6 +14264,46 @@ function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
     ɵɵelementContainerStart(index, attrsIndex, localRefsIndex);
     ɵɵelementContainerEnd();
     return ɵɵelementContainer;
+}
+let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
+    lastNodeWasCreated(true);
+    return createCommentNode(lView[RENDERER], ngDevMode ? 'ng-container' : '');
+};
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode of comment nodes that
+ * represent <ng-container>'s anchor.
+ */
+function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
+    let comment;
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo;
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createCommentNode(lView[RENDERER], ngDevMode ? 'ng-container' : '');
+    }
+    // Hydration mode, looking up existing elements in DOM.
+    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    const ngContainerSize = getNgContainerSize(hydrationInfo, index);
+    ngDevMode &&
+        assertNumber(ngContainerSize, 'Unexpected state: hydrating an <ng-container>, ' +
+            'but no hydration info is available.');
+    if (ngContainerSize > 0) {
+        storeNgContainerInfo(hydrationInfo, index, currentRNode);
+        comment = siblingAfter(ngContainerSize, currentRNode);
+    }
+    else {
+        // If <ng-container> has no nodes,
+        // the current node is an anchor (comment) node.
+        comment = currentRNode;
+    }
+    ngDevMode && validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
+    ngDevMode && markRNodeAsClaimedByHydration(comment);
+    return comment;
+}
+function enableLocateOrCreateElementContainerNodeImpl() {
+    _locateOrCreateElementContainerNode = locateOrCreateElementContainerNode;
 }
 
 /**
@@ -27747,6 +27838,15 @@ class SerializedViewCollection {
     }
 }
 /**
+ * Computes the number of root nodes in a given view
+ * (or child nodes in a given container if a tNode is provided).
+ */
+function calcNumRootNodes(tView, lView, tNode) {
+    const rootNodes = [];
+    collectNativeNodes(tView, lView, tNode, rootNodes);
+    return rootNodes.length;
+}
+/**
  * Annotates all components bootstrapped in a given ApplicationRef
  * with info needed for hydration.
  *
@@ -27791,6 +27891,7 @@ function serializeLView(lView, context) {
     // Iterate over DOM element references in an LView.
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         const tNode = tView.data[i];
+        const noOffsetIndex = i - HEADER_OFFSET;
         // Local refs (e.g. <div #localRef>) take up an extra slot in LViews
         // to store the same element. In this case, there is no information in
         // a corresponding slot in TNode data structure. If that's the case, just
@@ -27806,6 +27907,16 @@ function serializeLView(lView, context) {
             // This is a component, annotate the host node with an `ngh` attribute.
             const targetNode = unwrapRNode(lView[i][HOST]);
             annotateHostElementForHydration(targetNode, lView[i], context);
+        }
+        else {
+            // <ng-container> case
+            if (tNode.type & 8 /* TNodeType.ElementContainer */) {
+                // An <ng-container> is represented by the number of
+                // top-level nodes. This information is needed to skip over
+                // those nodes to reach a corresponding anchor node (comment node).
+                ngh[ELEMENT_CONTAINERS] ?? (ngh[ELEMENT_CONTAINERS] = {});
+                ngh[ELEMENT_CONTAINERS][noOffsetIndex] = calcNumRootNodes(tView, lView, tNode.child);
+            }
         }
     }
     return ngh;
@@ -27846,6 +27957,7 @@ function enableHydrationRuntimeSupport() {
         enableRetrieveHydrationInfoImpl();
         enableLocateOrCreateElementNodeImpl();
         enableLocateOrCreateTextNodeImpl();
+        enableLocateOrCreateElementContainerNodeImpl();
     }
 }
 /**

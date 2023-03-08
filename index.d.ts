@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.1+sha-fdf6197
+ * @license Angular v16.0.0-next.1+sha-8e0a087
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2185,6 +2185,19 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 export declare const defineInjectable: typeof ɵɵdefineInjectable;
 
 /**
+ * Represents a hydration-related element container structure
+ * at runtime, which includes a reference to a first node in
+ * a DOM segment that corresponds to a given element container.
+ */
+declare interface DehydratedElementContainer {
+    /**
+     * A reference to the first child in a DOM segment associated
+     * with a first child in a given <ng-container>.
+     */
+    firstChild: RNode | null;
+}
+
+/**
  * An object that contains hydration-related information serialized
  * on the server, as well as the necessary references to segments of
  * the DOM, to facilitate the hydration process for a given hydration
@@ -2200,6 +2213,15 @@ declare interface DehydratedView {
      * with a given hydration boundary.
      */
     firstChild: RNode | null;
+    /**
+     * Collection of <ng-container>s in a given view,
+     * used as a set of pointers to first children in each
+     * <ng-container>, so that those pointers are reused by
+     * subsequent instructions.
+     */
+    ngContainers?: {
+        [index: number]: DehydratedElementContainer;
+    };
 }
 
 declare type DependencyTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | PipeType<any> | Type<any>)[];
@@ -2718,6 +2740,8 @@ export declare interface Effect {
  * @developerPreview
  */
 export declare function effect(effectFn: () => void): Effect;
+
+declare const ELEMENT_CONTAINERS = "e";
 
 /**
  * Marks that the next string is an element name.
@@ -7564,11 +7588,26 @@ export declare interface SelfDecorator {
 }
 
 /**
+ * Represents element containers within this view, stored as key-value pairs
+ * where key is an index of a container in an LView (also used in the
+ * `elementContainerStart` instruction), the value is the number of root nodes
+ * in this container. This information is needed to locate an anchor comment
+ * node that goes after all container nodes.
+ */
+declare interface SerializedElementContainers {
+    [key: number]: number;
+}
+
+/**
  * Serialized data structure that contains relevant hydration
  * annotation information that describes a given hydration boundary
  * (e.g. a component).
  */
 declare interface SerializedView {
+    /**
+     * Serialized information about <ng-container>s.
+     */
+    [ELEMENT_CONTAINERS]?: SerializedElementContainers;
 }
 
 /**
