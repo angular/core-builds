@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-0b71b0a
+ * @license Angular v16.0.0-next.2+sha-86fc4d3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2197,8 +2197,640 @@ const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafe
  */
 const NG_ENV_ID = getClosureSafeProperty({ __NG_ENV_ID__: getClosureSafeProperty });
 
-/** Counter used to generate unique IDs for component definitions. */
-let componentDefCount = 0;
+/**
+ * Returns an index of `classToSearch` in `className` taking token boundaries into account.
+ *
+ * `classIndexOf('AB A', 'A', 0)` will be 3 (not 0 since `AB!==A`)
+ *
+ * @param className A string containing classes (whitespace separated)
+ * @param classToSearch A class name to locate
+ * @param startingIndex Starting location of search
+ * @returns an index of the located class (or -1 if not found)
+ */
+function classIndexOf(className, classToSearch, startingIndex) {
+    ngDevMode && assertNotEqual(classToSearch, '', 'can not look for "" string.');
+    let end = className.length;
+    while (true) {
+        const foundIndex = className.indexOf(classToSearch, startingIndex);
+        if (foundIndex === -1)
+            return foundIndex;
+        if (foundIndex === 0 || className.charCodeAt(foundIndex - 1) <= 32 /* CharCode.SPACE */) {
+            // Ensure that it has leading whitespace
+            const length = classToSearch.length;
+            if (foundIndex + length === end ||
+                className.charCodeAt(foundIndex + length) <= 32 /* CharCode.SPACE */) {
+                // Ensure that it has trailing whitespace
+                return foundIndex;
+            }
+        }
+        // False positive, keep searching from where we left off.
+        startingIndex = foundIndex + 1;
+    }
+}
+
+/**
+ * Assigns all attribute values to the provided element via the inferred renderer.
+ *
+ * This function accepts two forms of attribute entries:
+ *
+ * default: (key, value):
+ *  attrs = [key1, value1, key2, value2]
+ *
+ * namespaced: (NAMESPACE_MARKER, uri, name, value)
+ *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+ *
+ * The `attrs` array can contain a mix of both the default and namespaced entries.
+ * The "default" values are set without a marker, but if the function comes across
+ * a marker value then it will attempt to set a namespaced value. If the marker is
+ * not of a namespaced value then the function will quit and return the index value
+ * where it stopped during the iteration of the attrs array.
+ *
+ * See [AttributeMarker] to understand what the namespace marker value is.
+ *
+ * Note that this instruction does not support assigning style and class values to
+ * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+ * are applied to an element.
+ * @param renderer The renderer to be used
+ * @param native The element that the attributes will be assigned to
+ * @param attrs The attribute array of values that will be assigned to the element
+ * @returns the index value that was last accessed in the attributes array
+ */
+function setUpAttributes(renderer, native, attrs) {
+    let i = 0;
+    while (i < attrs.length) {
+        const value = attrs[i];
+        if (typeof value === 'number') {
+            // only namespaces are supported. Other value types (such as style/class
+            // entries) are not supported in this function.
+            if (value !== 0 /* AttributeMarker.NamespaceURI */) {
+                break;
+            }
+            // we just landed on the marker value ... therefore
+            // we should skip to the next entry
+            i++;
+            const namespaceURI = attrs[i++];
+            const attrName = attrs[i++];
+            const attrVal = attrs[i++];
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            renderer.setAttribute(native, attrName, attrVal, namespaceURI);
+        }
+        else {
+            // attrName is string;
+            const attrName = value;
+            const attrVal = attrs[++i];
+            // Standard attributes
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            if (isAnimationProp(attrName)) {
+                renderer.setProperty(native, attrName, attrVal);
+            }
+            else {
+                renderer.setAttribute(native, attrName, attrVal);
+            }
+            i++;
+        }
+    }
+    // another piece of code may iterate over the same attributes array. Therefore
+    // it may be helpful to return the exact spot where the attributes array exited
+    // whether by running into an unsupported marker or if all the static values were
+    // iterated over.
+    return i;
+}
+/**
+ * Test whether the given value is a marker that indicates that the following
+ * attribute values in a `TAttributes` array are only the names of attributes,
+ * and not name-value pairs.
+ * @param marker The attribute marker to test.
+ * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
+ */
+function isNameOnlyAttributeMarker(marker) {
+    return marker === 3 /* AttributeMarker.Bindings */ || marker === 4 /* AttributeMarker.Template */ ||
+        marker === 6 /* AttributeMarker.I18n */;
+}
+function isAnimationProp(name) {
+    // Perf note: accessing charCodeAt to check for the first character of a string is faster as
+    // compared to accessing a character at index 0 (ex. name[0]). The main reason for this is that
+    // charCodeAt doesn't allocate memory to return a substring.
+    return name.charCodeAt(0) === 64 /* CharCode.AT_SIGN */;
+}
+/**
+ * Merges `src` `TAttributes` into `dst` `TAttributes` removing any duplicates in the process.
+ *
+ * This merge function keeps the order of attrs same.
+ *
+ * @param dst Location of where the merged `TAttributes` should end up.
+ * @param src `TAttributes` which should be appended to `dst`
+ */
+function mergeHostAttrs(dst, src) {
+    if (src === null || src.length === 0) {
+        // do nothing
+    }
+    else if (dst === null || dst.length === 0) {
+        // We have source, but dst is empty, just make a copy.
+        dst = src.slice();
+    }
+    else {
+        let srcMarker = -1 /* AttributeMarker.ImplicitAttributes */;
+        for (let i = 0; i < src.length; i++) {
+            const item = src[i];
+            if (typeof item === 'number') {
+                srcMarker = item;
+            }
+            else {
+                if (srcMarker === 0 /* AttributeMarker.NamespaceURI */) {
+                    // Case where we need to consume `key1`, `key2`, `value` items.
+                }
+                else if (srcMarker === -1 /* AttributeMarker.ImplicitAttributes */ ||
+                    srcMarker === 2 /* AttributeMarker.Styles */) {
+                    // Case where we have to consume `key1` and `value` only.
+                    mergeHostAttribute(dst, srcMarker, item, null, src[++i]);
+                }
+                else {
+                    // Case where we have to consume `key1` only.
+                    mergeHostAttribute(dst, srcMarker, item, null, null);
+                }
+            }
+        }
+    }
+    return dst;
+}
+/**
+ * Append `key`/`value` to existing `TAttributes` taking region marker and duplicates into account.
+ *
+ * @param dst `TAttributes` to append to.
+ * @param marker Region where the `key`/`value` should be added.
+ * @param key1 Key to add to `TAttributes`
+ * @param key2 Key to add to `TAttributes` (in case of `AttributeMarker.NamespaceURI`)
+ * @param value Value to add or to overwrite to `TAttributes` Only used if `marker` is not Class.
+ */
+function mergeHostAttribute(dst, marker, key1, key2, value) {
+    let i = 0;
+    // Assume that new markers will be inserted at the end.
+    let markerInsertPosition = dst.length;
+    // scan until correct type.
+    if (marker === -1 /* AttributeMarker.ImplicitAttributes */) {
+        markerInsertPosition = -1;
+    }
+    else {
+        while (i < dst.length) {
+            const dstValue = dst[i++];
+            if (typeof dstValue === 'number') {
+                if (dstValue === marker) {
+                    markerInsertPosition = -1;
+                    break;
+                }
+                else if (dstValue > marker) {
+                    // We need to save this as we want the markers to be inserted in specific order.
+                    markerInsertPosition = i - 1;
+                    break;
+                }
+            }
+        }
+    }
+    // search until you find place of insertion
+    while (i < dst.length) {
+        const item = dst[i];
+        if (typeof item === 'number') {
+            // since `i` started as the index after the marker, we did not find it if we are at the next
+            // marker
+            break;
+        }
+        else if (item === key1) {
+            // We already have same token
+            if (key2 === null) {
+                if (value !== null) {
+                    dst[i + 1] = value;
+                }
+                return;
+            }
+            else if (key2 === dst[i + 1]) {
+                dst[i + 2] = value;
+                return;
+            }
+        }
+        // Increment counter.
+        i++;
+        if (key2 !== null)
+            i++;
+        if (value !== null)
+            i++;
+    }
+    // insert at location.
+    if (markerInsertPosition !== -1) {
+        dst.splice(markerInsertPosition, 0, marker);
+        i = markerInsertPosition + 1;
+    }
+    dst.splice(i++, 0, key1);
+    if (key2 !== null) {
+        dst.splice(i++, 0, key2);
+    }
+    if (value !== null) {
+        dst.splice(i++, 0, value);
+    }
+}
+
+const NG_TEMPLATE_SELECTOR = 'ng-template';
+/**
+ * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
+ *
+ * @param attrs `TAttributes` to search through.
+ * @param cssClassToMatch class to match (lowercase)
+ * @param isProjectionMode Whether or not class matching should look into the attribute `class` in
+ *    addition to the `AttributeMarker.Classes`.
+ */
+function isCssClassMatching(attrs, cssClassToMatch, isProjectionMode) {
+    // TODO(misko): The fact that this function needs to know about `isProjectionMode` seems suspect.
+    // It is strange to me that sometimes the class information comes in form of `class` attribute
+    // and sometimes in form of `AttributeMarker.Classes`. Some investigation is needed to determine
+    // if that is the right behavior.
+    ngDevMode &&
+        assertEqual(cssClassToMatch, cssClassToMatch.toLowerCase(), 'Class name expected to be lowercase.');
+    let i = 0;
+    while (i < attrs.length) {
+        let item = attrs[i++];
+        if (isProjectionMode && item === 'class') {
+            item = attrs[i];
+            if (classIndexOf(item.toLowerCase(), cssClassToMatch, 0) !== -1) {
+                return true;
+            }
+        }
+        else if (item === 1 /* AttributeMarker.Classes */) {
+            // We found the classes section. Start searching for the class.
+            while (i < attrs.length && typeof (item = attrs[i++]) == 'string') {
+                // while we have strings
+                if (item.toLowerCase() === cssClassToMatch)
+                    return true;
+            }
+            return false;
+        }
+    }
+    return false;
+}
+/**
+ * Checks whether the `tNode` represents an inline template (e.g. `*ngFor`).
+ *
+ * @param tNode current TNode
+ */
+function isInlineTemplate(tNode) {
+    return tNode.type === 4 /* TNodeType.Container */ && tNode.value !== NG_TEMPLATE_SELECTOR;
+}
+/**
+ * Function that checks whether a given tNode matches tag-based selector and has a valid type.
+ *
+ * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
+ * directive matching mode:
+ * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
+ * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
+ * tag name was extracted from * syntax so we would match the same directive twice);
+ * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
+ * (applicable to TNodeType.Container only).
+ */
+function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
+    const tagNameToCompare = tNode.type === 4 /* TNodeType.Container */ && !isProjectionMode ? NG_TEMPLATE_SELECTOR : tNode.value;
+    return currentSelector === tagNameToCompare;
+}
+/**
+ * A utility function to match an Ivy node static data against a simple CSS selector
+ *
+ * @param node static data of the node to match
+ * @param selector The selector to try matching against the node.
+ * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
+ * directive matching.
+ * @returns true if node matches the selector.
+ */
+function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
+    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
+    let mode = 4 /* SelectorFlags.ELEMENT */;
+    const nodeAttrs = tNode.attrs || [];
+    // Find the index of first attribute that has no value, only a name.
+    const nameOnlyMarkerIdx = getNameOnlyMarkerIndex(nodeAttrs);
+    // When processing ":not" selectors, we skip to the next ":not" if the
+    // current one doesn't match
+    let skipToNextSelector = false;
+    for (let i = 0; i < selector.length; i++) {
+        const current = selector[i];
+        if (typeof current === 'number') {
+            // If we finish processing a :not selector and it hasn't failed, return false
+            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
+                return false;
+            }
+            // If we are skipping to the next :not() and this mode flag is positive,
+            // it's a part of the current :not() selector, and we should keep skipping
+            if (skipToNextSelector && isPositive(current))
+                continue;
+            skipToNextSelector = false;
+            mode = current | (mode & 1 /* SelectorFlags.NOT */);
+            continue;
+        }
+        if (skipToNextSelector)
+            continue;
+        if (mode & 4 /* SelectorFlags.ELEMENT */) {
+            mode = 2 /* SelectorFlags.ATTRIBUTE */ | mode & 1 /* SelectorFlags.NOT */;
+            if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
+                current === '' && selector.length === 1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+            }
+        }
+        else {
+            const selectorAttrValue = mode & 8 /* SelectorFlags.CLASS */ ? current : selector[++i];
+            // special case for matching against classes when a tNode has been instantiated with
+            // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
+            if ((mode & 8 /* SelectorFlags.CLASS */) && tNode.attrs !== null) {
+                if (!isCssClassMatching(tNode.attrs, selectorAttrValue, isProjectionMode)) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+                continue;
+            }
+            const attrName = (mode & 8 /* SelectorFlags.CLASS */) ? 'class' : current;
+            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
+            if (attrIndexInNode === -1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+                continue;
+            }
+            if (selectorAttrValue !== '') {
+                let nodeAttrValue;
+                if (attrIndexInNode > nameOnlyMarkerIdx) {
+                    nodeAttrValue = '';
+                }
+                else {
+                    ngDevMode &&
+                        assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* AttributeMarker.NamespaceURI */, 'We do not match directives on namespaced attributes');
+                    // we lowercase the attribute value to be able to match
+                    // selectors without case-sensitivity
+                    // (selectors are already in lowercase when generated)
+                    nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
+                }
+                const compareAgainstClassName = mode & 8 /* SelectorFlags.CLASS */ ? nodeAttrValue : null;
+                if (compareAgainstClassName &&
+                    classIndexOf(compareAgainstClassName, selectorAttrValue, 0) !== -1 ||
+                    mode & 2 /* SelectorFlags.ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+            }
+        }
+    }
+    return isPositive(mode) || skipToNextSelector;
+}
+function isPositive(mode) {
+    return (mode & 1 /* SelectorFlags.NOT */) === 0;
+}
+/**
+ * Examines the attribute's definition array for a node to find the index of the
+ * attribute that matches the given `name`.
+ *
+ * NOTE: This will not match namespaced attributes.
+ *
+ * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
+ * The following table summarizes which types of attributes we attempt to match:
+ *
+ * ===========================================================================================================
+ * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
+ * Attributes
+ * ===========================================================================================================
+ * Inline + Projection     | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Inline + Directive      | NO                | NO                  | YES                 | NO
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Projection | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Directive  | YES               | YES                 | NO                  | YES
+ * ===========================================================================================================
+ *
+ * @param name the name of the attribute to find
+ * @param attrs the attribute array to examine
+ * @param isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
+ * rather than a manually expanded template node (e.g `<ng-template>`).
+ * @param isProjectionMode true if we are matching against content projection otherwise we are
+ * matching against directives.
+ */
+function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
+    if (attrs === null)
+        return -1;
+    let i = 0;
+    if (isProjectionMode || !isInlineTemplate) {
+        let bindingsMode = false;
+        while (i < attrs.length) {
+            const maybeAttrName = attrs[i];
+            if (maybeAttrName === name) {
+                return i;
+            }
+            else if (maybeAttrName === 3 /* AttributeMarker.Bindings */ || maybeAttrName === 6 /* AttributeMarker.I18n */) {
+                bindingsMode = true;
+            }
+            else if (maybeAttrName === 1 /* AttributeMarker.Classes */ || maybeAttrName === 2 /* AttributeMarker.Styles */) {
+                let value = attrs[++i];
+                // We should skip classes here because we have a separate mechanism for
+                // matching classes in projection mode.
+                while (typeof value === 'string') {
+                    value = attrs[++i];
+                }
+                continue;
+            }
+            else if (maybeAttrName === 4 /* AttributeMarker.Template */) {
+                // We do not care about Template attributes in this scenario.
+                break;
+            }
+            else if (maybeAttrName === 0 /* AttributeMarker.NamespaceURI */) {
+                // Skip the whole namespaced attribute and value. This is by design.
+                i += 4;
+                continue;
+            }
+            // In binding mode there are only names, rather than name-value pairs.
+            i += bindingsMode ? 1 : 2;
+        }
+        // We did not match the attribute
+        return -1;
+    }
+    else {
+        return matchTemplateAttribute(attrs, name);
+    }
+}
+function isNodeMatchingSelectorList(tNode, selector, isProjectionMode = false) {
+    for (let i = 0; i < selector.length; i++) {
+        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
+            return true;
+        }
+    }
+    return false;
+}
+function getProjectAsAttrValue(tNode) {
+    const nodeAttrs = tNode.attrs;
+    if (nodeAttrs != null) {
+        const ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* AttributeMarker.ProjectAs */);
+        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
+        // (attribute names are stored at even indexes)
+        if ((ngProjectAsAttrIdx & 1) === 0) {
+            return nodeAttrs[ngProjectAsAttrIdx + 1];
+        }
+    }
+    return null;
+}
+function getNameOnlyMarkerIndex(nodeAttrs) {
+    for (let i = 0; i < nodeAttrs.length; i++) {
+        const nodeAttr = nodeAttrs[i];
+        if (isNameOnlyAttributeMarker(nodeAttr)) {
+            return i;
+        }
+    }
+    return nodeAttrs.length;
+}
+function matchTemplateAttribute(attrs, name) {
+    let i = attrs.indexOf(4 /* AttributeMarker.Template */);
+    if (i > -1) {
+        i++;
+        while (i < attrs.length) {
+            const attr = attrs[i];
+            // Return in case we checked all template attrs and are switching to the next section in the
+            // attrs array (that starts with a number that represents an attribute marker).
+            if (typeof attr === 'number')
+                return -1;
+            if (attr === name)
+                return i;
+            i++;
+        }
+    }
+    return -1;
+}
+/**
+ * Checks whether a selector is inside a CssSelectorList
+ * @param selector Selector to be checked.
+ * @param list List in which to look for the selector.
+ */
+function isSelectorInSelectorList(selector, list) {
+    selectorListLoop: for (let i = 0; i < list.length; i++) {
+        const currentSelectorInList = list[i];
+        if (selector.length !== currentSelectorInList.length) {
+            continue;
+        }
+        for (let j = 0; j < selector.length; j++) {
+            if (selector[j] !== currentSelectorInList[j]) {
+                continue selectorListLoop;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+function maybeWrapInNotSelector(isNegativeMode, chunk) {
+    return isNegativeMode ? ':not(' + chunk.trim() + ')' : chunk;
+}
+function stringifyCSSSelector(selector) {
+    let result = selector[0];
+    let i = 1;
+    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
+    let currentChunk = '';
+    let isNegativeMode = false;
+    while (i < selector.length) {
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode & 2 /* SelectorFlags.ATTRIBUTE */) {
+                const attrValue = selector[++i];
+                currentChunk +=
+                    '[' + valueOrMarker + (attrValue.length > 0 ? '="' + attrValue + '"' : '') + ']';
+            }
+            else if (mode & 8 /* SelectorFlags.CLASS */) {
+                currentChunk += '.' + valueOrMarker;
+            }
+            else if (mode & 4 /* SelectorFlags.ELEMENT */) {
+                currentChunk += ' ' + valueOrMarker;
+            }
+        }
+        else {
+            //
+            // Append current chunk to the final result in case we come across SelectorFlag, which
+            // indicates that the previous section of a selector is over. We need to accumulate content
+            // between flags to make sure we wrap the chunk later in :not() selector if needed, e.g.
+            // ```
+            //  ['', Flags.CLASS, '.classA', Flags.CLASS | Flags.NOT, '.classB', '.classC']
+            // ```
+            // should be transformed to `.classA :not(.classB .classC)`.
+            //
+            // Note: for negative selector part, we accumulate content between flags until we find the
+            // next negative flag. This is needed to support a case where `:not()` rule contains more than
+            // one chunk, e.g. the following selector:
+            // ```
+            //  ['', Flags.ELEMENT | Flags.NOT, 'p', Flags.CLASS, 'foo', Flags.CLASS | Flags.NOT, 'bar']
+            // ```
+            // should be stringified to `:not(p.foo) :not(.bar)`
+            //
+            if (currentChunk !== '' && !isPositive(valueOrMarker)) {
+                result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+                currentChunk = '';
+            }
+            mode = valueOrMarker;
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector.
+            isNegativeMode = isNegativeMode || !isPositive(mode);
+        }
+        i++;
+    }
+    if (currentChunk !== '') {
+        result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+    }
+    return result;
+}
+/**
+ * Generates string representation of CSS selector in parsed form.
+ *
+ * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
+ * additional parsing at runtime (for example, for directive matching). However in some cases (for
+ * example, while bootstrapping a component), a string version of the selector is required to query
+ * for the host element on the page. This function takes the parsed form of a selector and returns
+ * its string representation.
+ *
+ * @param selectorList selector in parsed form
+ * @returns string representation of a given selector
+ */
+function stringifyCSSSelectorList(selectorList) {
+    return selectorList.map(stringifyCSSSelector).join(',');
+}
+/**
+ * Extracts attributes and classes information from a given CSS selector.
+ *
+ * This function is used while creating a component dynamically. In this case, the host element
+ * (that is created dynamically) should contain attributes and classes specified in component's CSS
+ * selector.
+ *
+ * @param selector CSS selector in parsed form (in a form of array)
+ * @returns object with `attrs` and `classes` fields that contain extracted information
+ */
+function extractAttrsAndClassesFromSelector(selector) {
+    const attrs = [];
+    const classes = [];
+    let i = 1;
+    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
+    while (i < selector.length) {
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode === 2 /* SelectorFlags.ATTRIBUTE */) {
+                if (valueOrMarker !== '') {
+                    attrs.push(valueOrMarker, selector[++i]);
+                }
+            }
+            else if (mode === 8 /* SelectorFlags.CLASS */) {
+                classes.push(valueOrMarker);
+            }
+        }
+        else {
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector. Since attributes and classes are
+            // extracted only for "positive" part of the selector, we can stop here.
+            if (!isPositive(mode))
+                break;
+            mode = valueOrMarker;
+        }
+        i++;
+    }
+    return { attrs, classes };
+}
+
 /**
  * Create a component definition object.
  *
@@ -2235,16 +2867,18 @@ function ɵɵdefineComponent(componentDefinition) {
             getStandaloneInjector: null,
             data: componentDefinition.data || {},
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
-            id: `c${componentDefCount++}`,
             styles: componentDefinition.styles || EMPTY_ARRAY,
             _: null,
             schemas: componentDefinition.schemas || null,
             tView: null,
+            id: '',
         };
+        def.id = getComponentId(def);
         initFeatures(def);
         const dependencies = componentDefinition.dependencies;
         def.directiveDefs = extractDefListOrFactory(dependencies, /* pipeDef */ false);
         def.pipeDefs = extractDefListOrFactory(dependencies, /* pipeDef */ true);
+        def.id = getComponentId(def);
         return def;
     });
 }
@@ -2495,6 +3129,64 @@ function extractDefListOrFactory(dependencies, pipeDef) {
     return () => (typeof dependencies === 'function' ? dependencies() : dependencies)
         .map(dep => defExtractor(dep))
         .filter(nonNull);
+}
+/**
+ * A map that contains the generated component IDs and type.
+ */
+const GENERATED_COMP_IDS = new Map();
+/**
+ * A method can returns a component ID from the component definition using a variant of DJB2 hash
+ * algorithm.
+ */
+function getComponentId(componentDef) {
+    let hash = 0;
+    // We cannot rely solely on the component selector as the same selector can be used in different
+    // modules.
+    //
+    // `componentDef.style` is not used, due to it causing inconsistencies. Ex: when server
+    // component styles has no sourcemaps and browsers do.
+    //
+    // Example:
+    // https://github.com/angular/components/blob/d9f82c8f95309e77a6d82fd574c65871e91354c2/src/material/core/option/option.ts#L248
+    // https://github.com/angular/components/blob/285f46dc2b4c5b127d356cb7c4714b221f03ce50/src/material/legacy-core/option/option.ts#L32
+    const hashSelectors = [
+        componentDef.selectors,
+        componentDef.ngContentSelectors,
+        componentDef.hostVars,
+        componentDef.hostAttrs,
+        componentDef.consts,
+        componentDef.vars,
+        componentDef.decls,
+        componentDef.encapsulation,
+        componentDef.standalone,
+        // We cannot use 'componentDef.type.name' as the name of the symbol will change and will not
+        // match in the server and browser bundles.
+        Object.getOwnPropertyNames(componentDef.type.prototype),
+        !!componentDef.contentQueries,
+        !!componentDef.viewQuery,
+    ].join('|');
+    for (const char of hashSelectors) {
+        hash = Math.imul(31, hash) + char.charCodeAt(0) << 0;
+    }
+    // Force positive number hash.
+    // 2147483647 = equivalent of Integer.MAX_VALUE.
+    hash += 2147483647 + 1;
+    const compId = 'c' + hash;
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        if (GENERATED_COMP_IDS.has(compId)) {
+            const previousCompDefType = GENERATED_COMP_IDS.get(compId);
+            if (previousCompDefType !== componentDef.type) {
+                // TODO: use `formatRuntimeError` to have an error code and we can later on create an error
+                // guide to explain this further.
+                console.warn(`Component ID generation collision detected. Components '${previousCompDefType.name}' and '${componentDef.type.name}' with selector '${stringifyCSSSelectorList(componentDef
+                    .selectors)}' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID.`);
+            }
+        }
+        else {
+            GENERATED_COMP_IDS.set(compId, componentDef.type);
+        }
+    }
+    return compId;
 }
 
 // Below are constants for LView indices to help us look up LView members
@@ -3998,206 +4690,6 @@ function assertPureTNodeType(type) {
         type === 16 /* TNodeType.Projection */ || //
         type === 64 /* TNodeType.Placeholder */)) {
         throwError(`Expected TNodeType to have only a single type selected, but got ${toTNodeTypeAsString(type)}.`);
-    }
-}
-
-/**
- * Assigns all attribute values to the provided element via the inferred renderer.
- *
- * This function accepts two forms of attribute entries:
- *
- * default: (key, value):
- *  attrs = [key1, value1, key2, value2]
- *
- * namespaced: (NAMESPACE_MARKER, uri, name, value)
- *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
- *
- * The `attrs` array can contain a mix of both the default and namespaced entries.
- * The "default" values are set without a marker, but if the function comes across
- * a marker value then it will attempt to set a namespaced value. If the marker is
- * not of a namespaced value then the function will quit and return the index value
- * where it stopped during the iteration of the attrs array.
- *
- * See [AttributeMarker] to understand what the namespace marker value is.
- *
- * Note that this instruction does not support assigning style and class values to
- * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
- * are applied to an element.
- * @param renderer The renderer to be used
- * @param native The element that the attributes will be assigned to
- * @param attrs The attribute array of values that will be assigned to the element
- * @returns the index value that was last accessed in the attributes array
- */
-function setUpAttributes(renderer, native, attrs) {
-    let i = 0;
-    while (i < attrs.length) {
-        const value = attrs[i];
-        if (typeof value === 'number') {
-            // only namespaces are supported. Other value types (such as style/class
-            // entries) are not supported in this function.
-            if (value !== 0 /* AttributeMarker.NamespaceURI */) {
-                break;
-            }
-            // we just landed on the marker value ... therefore
-            // we should skip to the next entry
-            i++;
-            const namespaceURI = attrs[i++];
-            const attrName = attrs[i++];
-            const attrVal = attrs[i++];
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            renderer.setAttribute(native, attrName, attrVal, namespaceURI);
-        }
-        else {
-            // attrName is string;
-            const attrName = value;
-            const attrVal = attrs[++i];
-            // Standard attributes
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            if (isAnimationProp(attrName)) {
-                renderer.setProperty(native, attrName, attrVal);
-            }
-            else {
-                renderer.setAttribute(native, attrName, attrVal);
-            }
-            i++;
-        }
-    }
-    // another piece of code may iterate over the same attributes array. Therefore
-    // it may be helpful to return the exact spot where the attributes array exited
-    // whether by running into an unsupported marker or if all the static values were
-    // iterated over.
-    return i;
-}
-/**
- * Test whether the given value is a marker that indicates that the following
- * attribute values in a `TAttributes` array are only the names of attributes,
- * and not name-value pairs.
- * @param marker The attribute marker to test.
- * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
- */
-function isNameOnlyAttributeMarker(marker) {
-    return marker === 3 /* AttributeMarker.Bindings */ || marker === 4 /* AttributeMarker.Template */ ||
-        marker === 6 /* AttributeMarker.I18n */;
-}
-function isAnimationProp(name) {
-    // Perf note: accessing charCodeAt to check for the first character of a string is faster as
-    // compared to accessing a character at index 0 (ex. name[0]). The main reason for this is that
-    // charCodeAt doesn't allocate memory to return a substring.
-    return name.charCodeAt(0) === 64 /* CharCode.AT_SIGN */;
-}
-/**
- * Merges `src` `TAttributes` into `dst` `TAttributes` removing any duplicates in the process.
- *
- * This merge function keeps the order of attrs same.
- *
- * @param dst Location of where the merged `TAttributes` should end up.
- * @param src `TAttributes` which should be appended to `dst`
- */
-function mergeHostAttrs(dst, src) {
-    if (src === null || src.length === 0) {
-        // do nothing
-    }
-    else if (dst === null || dst.length === 0) {
-        // We have source, but dst is empty, just make a copy.
-        dst = src.slice();
-    }
-    else {
-        let srcMarker = -1 /* AttributeMarker.ImplicitAttributes */;
-        for (let i = 0; i < src.length; i++) {
-            const item = src[i];
-            if (typeof item === 'number') {
-                srcMarker = item;
-            }
-            else {
-                if (srcMarker === 0 /* AttributeMarker.NamespaceURI */) {
-                    // Case where we need to consume `key1`, `key2`, `value` items.
-                }
-                else if (srcMarker === -1 /* AttributeMarker.ImplicitAttributes */ ||
-                    srcMarker === 2 /* AttributeMarker.Styles */) {
-                    // Case where we have to consume `key1` and `value` only.
-                    mergeHostAttribute(dst, srcMarker, item, null, src[++i]);
-                }
-                else {
-                    // Case where we have to consume `key1` only.
-                    mergeHostAttribute(dst, srcMarker, item, null, null);
-                }
-            }
-        }
-    }
-    return dst;
-}
-/**
- * Append `key`/`value` to existing `TAttributes` taking region marker and duplicates into account.
- *
- * @param dst `TAttributes` to append to.
- * @param marker Region where the `key`/`value` should be added.
- * @param key1 Key to add to `TAttributes`
- * @param key2 Key to add to `TAttributes` (in case of `AttributeMarker.NamespaceURI`)
- * @param value Value to add or to overwrite to `TAttributes` Only used if `marker` is not Class.
- */
-function mergeHostAttribute(dst, marker, key1, key2, value) {
-    let i = 0;
-    // Assume that new markers will be inserted at the end.
-    let markerInsertPosition = dst.length;
-    // scan until correct type.
-    if (marker === -1 /* AttributeMarker.ImplicitAttributes */) {
-        markerInsertPosition = -1;
-    }
-    else {
-        while (i < dst.length) {
-            const dstValue = dst[i++];
-            if (typeof dstValue === 'number') {
-                if (dstValue === marker) {
-                    markerInsertPosition = -1;
-                    break;
-                }
-                else if (dstValue > marker) {
-                    // We need to save this as we want the markers to be inserted in specific order.
-                    markerInsertPosition = i - 1;
-                    break;
-                }
-            }
-        }
-    }
-    // search until you find place of insertion
-    while (i < dst.length) {
-        const item = dst[i];
-        if (typeof item === 'number') {
-            // since `i` started as the index after the marker, we did not find it if we are at the next
-            // marker
-            break;
-        }
-        else if (item === key1) {
-            // We already have same token
-            if (key2 === null) {
-                if (value !== null) {
-                    dst[i + 1] = value;
-                }
-                return;
-            }
-            else if (key2 === dst[i + 1]) {
-                dst[i + 2] = value;
-                return;
-            }
-        }
-        // Increment counter.
-        i++;
-        if (key2 !== null)
-            i++;
-        if (value !== null)
-            i++;
-    }
-    // insert at location.
-    if (markerInsertPosition !== -1) {
-        dst.splice(markerInsertPosition, 0, marker);
-        i = markerInsertPosition + 1;
-    }
-    dst.splice(i++, 0, key1);
-    if (key2 !== null) {
-        dst.splice(i++, 0, key2);
-    }
-    if (value !== null) {
-        dst.splice(i++, 0, value);
     }
 }
 
@@ -9108,7 +9600,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-0b71b0a');
+const VERSION = new Version('16.0.0-next.2+sha-86fc4d3');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9309,440 +9801,6 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
         }
     }
     return { propName: undefined, oldValue, newValue };
-}
-
-/**
- * Returns an index of `classToSearch` in `className` taking token boundaries into account.
- *
- * `classIndexOf('AB A', 'A', 0)` will be 3 (not 0 since `AB!==A`)
- *
- * @param className A string containing classes (whitespace separated)
- * @param classToSearch A class name to locate
- * @param startingIndex Starting location of search
- * @returns an index of the located class (or -1 if not found)
- */
-function classIndexOf(className, classToSearch, startingIndex) {
-    ngDevMode && assertNotEqual(classToSearch, '', 'can not look for "" string.');
-    let end = className.length;
-    while (true) {
-        const foundIndex = className.indexOf(classToSearch, startingIndex);
-        if (foundIndex === -1)
-            return foundIndex;
-        if (foundIndex === 0 || className.charCodeAt(foundIndex - 1) <= 32 /* CharCode.SPACE */) {
-            // Ensure that it has leading whitespace
-            const length = classToSearch.length;
-            if (foundIndex + length === end ||
-                className.charCodeAt(foundIndex + length) <= 32 /* CharCode.SPACE */) {
-                // Ensure that it has trailing whitespace
-                return foundIndex;
-            }
-        }
-        // False positive, keep searching from where we left off.
-        startingIndex = foundIndex + 1;
-    }
-}
-
-const NG_TEMPLATE_SELECTOR = 'ng-template';
-/**
- * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
- *
- * @param attrs `TAttributes` to search through.
- * @param cssClassToMatch class to match (lowercase)
- * @param isProjectionMode Whether or not class matching should look into the attribute `class` in
- *    addition to the `AttributeMarker.Classes`.
- */
-function isCssClassMatching(attrs, cssClassToMatch, isProjectionMode) {
-    // TODO(misko): The fact that this function needs to know about `isProjectionMode` seems suspect.
-    // It is strange to me that sometimes the class information comes in form of `class` attribute
-    // and sometimes in form of `AttributeMarker.Classes`. Some investigation is needed to determine
-    // if that is the right behavior.
-    ngDevMode &&
-        assertEqual(cssClassToMatch, cssClassToMatch.toLowerCase(), 'Class name expected to be lowercase.');
-    let i = 0;
-    while (i < attrs.length) {
-        let item = attrs[i++];
-        if (isProjectionMode && item === 'class') {
-            item = attrs[i];
-            if (classIndexOf(item.toLowerCase(), cssClassToMatch, 0) !== -1) {
-                return true;
-            }
-        }
-        else if (item === 1 /* AttributeMarker.Classes */) {
-            // We found the classes section. Start searching for the class.
-            while (i < attrs.length && typeof (item = attrs[i++]) == 'string') {
-                // while we have strings
-                if (item.toLowerCase() === cssClassToMatch)
-                    return true;
-            }
-            return false;
-        }
-    }
-    return false;
-}
-/**
- * Checks whether the `tNode` represents an inline template (e.g. `*ngFor`).
- *
- * @param tNode current TNode
- */
-function isInlineTemplate(tNode) {
-    return tNode.type === 4 /* TNodeType.Container */ && tNode.value !== NG_TEMPLATE_SELECTOR;
-}
-/**
- * Function that checks whether a given tNode matches tag-based selector and has a valid type.
- *
- * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
- * directive matching mode:
- * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
- * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
- * tag name was extracted from * syntax so we would match the same directive twice);
- * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
- * (applicable to TNodeType.Container only).
- */
-function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    const tagNameToCompare = tNode.type === 4 /* TNodeType.Container */ && !isProjectionMode ? NG_TEMPLATE_SELECTOR : tNode.value;
-    return currentSelector === tagNameToCompare;
-}
-/**
- * A utility function to match an Ivy node static data against a simple CSS selector
- *
- * @param node static data of the node to match
- * @param selector The selector to try matching against the node.
- * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
- * directive matching.
- * @returns true if node matches the selector.
- */
-function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
-    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
-    let mode = 4 /* SelectorFlags.ELEMENT */;
-    const nodeAttrs = tNode.attrs || [];
-    // Find the index of first attribute that has no value, only a name.
-    const nameOnlyMarkerIdx = getNameOnlyMarkerIndex(nodeAttrs);
-    // When processing ":not" selectors, we skip to the next ":not" if the
-    // current one doesn't match
-    let skipToNextSelector = false;
-    for (let i = 0; i < selector.length; i++) {
-        const current = selector[i];
-        if (typeof current === 'number') {
-            // If we finish processing a :not selector and it hasn't failed, return false
-            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
-                return false;
-            }
-            // If we are skipping to the next :not() and this mode flag is positive,
-            // it's a part of the current :not() selector, and we should keep skipping
-            if (skipToNextSelector && isPositive(current))
-                continue;
-            skipToNextSelector = false;
-            mode = current | (mode & 1 /* SelectorFlags.NOT */);
-            continue;
-        }
-        if (skipToNextSelector)
-            continue;
-        if (mode & 4 /* SelectorFlags.ELEMENT */) {
-            mode = 2 /* SelectorFlags.ATTRIBUTE */ | mode & 1 /* SelectorFlags.NOT */;
-            if (current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode) ||
-                current === '' && selector.length === 1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-            }
-        }
-        else {
-            const selectorAttrValue = mode & 8 /* SelectorFlags.CLASS */ ? current : selector[++i];
-            // special case for matching against classes when a tNode has been instantiated with
-            // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
-            if ((mode & 8 /* SelectorFlags.CLASS */) && tNode.attrs !== null) {
-                if (!isCssClassMatching(tNode.attrs, selectorAttrValue, isProjectionMode)) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-                continue;
-            }
-            const attrName = (mode & 8 /* SelectorFlags.CLASS */) ? 'class' : current;
-            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
-            if (attrIndexInNode === -1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-                continue;
-            }
-            if (selectorAttrValue !== '') {
-                let nodeAttrValue;
-                if (attrIndexInNode > nameOnlyMarkerIdx) {
-                    nodeAttrValue = '';
-                }
-                else {
-                    ngDevMode &&
-                        assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* AttributeMarker.NamespaceURI */, 'We do not match directives on namespaced attributes');
-                    // we lowercase the attribute value to be able to match
-                    // selectors without case-sensitivity
-                    // (selectors are already in lowercase when generated)
-                    nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
-                }
-                const compareAgainstClassName = mode & 8 /* SelectorFlags.CLASS */ ? nodeAttrValue : null;
-                if (compareAgainstClassName &&
-                    classIndexOf(compareAgainstClassName, selectorAttrValue, 0) !== -1 ||
-                    mode & 2 /* SelectorFlags.ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-            }
-        }
-    }
-    return isPositive(mode) || skipToNextSelector;
-}
-function isPositive(mode) {
-    return (mode & 1 /* SelectorFlags.NOT */) === 0;
-}
-/**
- * Examines the attribute's definition array for a node to find the index of the
- * attribute that matches the given `name`.
- *
- * NOTE: This will not match namespaced attributes.
- *
- * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
- * The following table summarizes which types of attributes we attempt to match:
- *
- * ===========================================================================================================
- * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
- * Attributes
- * ===========================================================================================================
- * Inline + Projection     | YES               | YES                 | NO                  | YES
- * -----------------------------------------------------------------------------------------------------------
- * Inline + Directive      | NO                | NO                  | YES                 | NO
- * -----------------------------------------------------------------------------------------------------------
- * Non-inline + Projection | YES               | YES                 | NO                  | YES
- * -----------------------------------------------------------------------------------------------------------
- * Non-inline + Directive  | YES               | YES                 | NO                  | YES
- * ===========================================================================================================
- *
- * @param name the name of the attribute to find
- * @param attrs the attribute array to examine
- * @param isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
- * rather than a manually expanded template node (e.g `<ng-template>`).
- * @param isProjectionMode true if we are matching against content projection otherwise we are
- * matching against directives.
- */
-function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
-    if (attrs === null)
-        return -1;
-    let i = 0;
-    if (isProjectionMode || !isInlineTemplate) {
-        let bindingsMode = false;
-        while (i < attrs.length) {
-            const maybeAttrName = attrs[i];
-            if (maybeAttrName === name) {
-                return i;
-            }
-            else if (maybeAttrName === 3 /* AttributeMarker.Bindings */ || maybeAttrName === 6 /* AttributeMarker.I18n */) {
-                bindingsMode = true;
-            }
-            else if (maybeAttrName === 1 /* AttributeMarker.Classes */ || maybeAttrName === 2 /* AttributeMarker.Styles */) {
-                let value = attrs[++i];
-                // We should skip classes here because we have a separate mechanism for
-                // matching classes in projection mode.
-                while (typeof value === 'string') {
-                    value = attrs[++i];
-                }
-                continue;
-            }
-            else if (maybeAttrName === 4 /* AttributeMarker.Template */) {
-                // We do not care about Template attributes in this scenario.
-                break;
-            }
-            else if (maybeAttrName === 0 /* AttributeMarker.NamespaceURI */) {
-                // Skip the whole namespaced attribute and value. This is by design.
-                i += 4;
-                continue;
-            }
-            // In binding mode there are only names, rather than name-value pairs.
-            i += bindingsMode ? 1 : 2;
-        }
-        // We did not match the attribute
-        return -1;
-    }
-    else {
-        return matchTemplateAttribute(attrs, name);
-    }
-}
-function isNodeMatchingSelectorList(tNode, selector, isProjectionMode = false) {
-    for (let i = 0; i < selector.length; i++) {
-        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
-            return true;
-        }
-    }
-    return false;
-}
-function getProjectAsAttrValue(tNode) {
-    const nodeAttrs = tNode.attrs;
-    if (nodeAttrs != null) {
-        const ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* AttributeMarker.ProjectAs */);
-        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
-        // (attribute names are stored at even indexes)
-        if ((ngProjectAsAttrIdx & 1) === 0) {
-            return nodeAttrs[ngProjectAsAttrIdx + 1];
-        }
-    }
-    return null;
-}
-function getNameOnlyMarkerIndex(nodeAttrs) {
-    for (let i = 0; i < nodeAttrs.length; i++) {
-        const nodeAttr = nodeAttrs[i];
-        if (isNameOnlyAttributeMarker(nodeAttr)) {
-            return i;
-        }
-    }
-    return nodeAttrs.length;
-}
-function matchTemplateAttribute(attrs, name) {
-    let i = attrs.indexOf(4 /* AttributeMarker.Template */);
-    if (i > -1) {
-        i++;
-        while (i < attrs.length) {
-            const attr = attrs[i];
-            // Return in case we checked all template attrs and are switching to the next section in the
-            // attrs array (that starts with a number that represents an attribute marker).
-            if (typeof attr === 'number')
-                return -1;
-            if (attr === name)
-                return i;
-            i++;
-        }
-    }
-    return -1;
-}
-/**
- * Checks whether a selector is inside a CssSelectorList
- * @param selector Selector to be checked.
- * @param list List in which to look for the selector.
- */
-function isSelectorInSelectorList(selector, list) {
-    selectorListLoop: for (let i = 0; i < list.length; i++) {
-        const currentSelectorInList = list[i];
-        if (selector.length !== currentSelectorInList.length) {
-            continue;
-        }
-        for (let j = 0; j < selector.length; j++) {
-            if (selector[j] !== currentSelectorInList[j]) {
-                continue selectorListLoop;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-function maybeWrapInNotSelector(isNegativeMode, chunk) {
-    return isNegativeMode ? ':not(' + chunk.trim() + ')' : chunk;
-}
-function stringifyCSSSelector(selector) {
-    let result = selector[0];
-    let i = 1;
-    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
-    let currentChunk = '';
-    let isNegativeMode = false;
-    while (i < selector.length) {
-        let valueOrMarker = selector[i];
-        if (typeof valueOrMarker === 'string') {
-            if (mode & 2 /* SelectorFlags.ATTRIBUTE */) {
-                const attrValue = selector[++i];
-                currentChunk +=
-                    '[' + valueOrMarker + (attrValue.length > 0 ? '="' + attrValue + '"' : '') + ']';
-            }
-            else if (mode & 8 /* SelectorFlags.CLASS */) {
-                currentChunk += '.' + valueOrMarker;
-            }
-            else if (mode & 4 /* SelectorFlags.ELEMENT */) {
-                currentChunk += ' ' + valueOrMarker;
-            }
-        }
-        else {
-            //
-            // Append current chunk to the final result in case we come across SelectorFlag, which
-            // indicates that the previous section of a selector is over. We need to accumulate content
-            // between flags to make sure we wrap the chunk later in :not() selector if needed, e.g.
-            // ```
-            //  ['', Flags.CLASS, '.classA', Flags.CLASS | Flags.NOT, '.classB', '.classC']
-            // ```
-            // should be transformed to `.classA :not(.classB .classC)`.
-            //
-            // Note: for negative selector part, we accumulate content between flags until we find the
-            // next negative flag. This is needed to support a case where `:not()` rule contains more than
-            // one chunk, e.g. the following selector:
-            // ```
-            //  ['', Flags.ELEMENT | Flags.NOT, 'p', Flags.CLASS, 'foo', Flags.CLASS | Flags.NOT, 'bar']
-            // ```
-            // should be stringified to `:not(p.foo) :not(.bar)`
-            //
-            if (currentChunk !== '' && !isPositive(valueOrMarker)) {
-                result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
-                currentChunk = '';
-            }
-            mode = valueOrMarker;
-            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
-            // mode is maintained for remaining chunks of a selector.
-            isNegativeMode = isNegativeMode || !isPositive(mode);
-        }
-        i++;
-    }
-    if (currentChunk !== '') {
-        result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
-    }
-    return result;
-}
-/**
- * Generates string representation of CSS selector in parsed form.
- *
- * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
- * additional parsing at runtime (for example, for directive matching). However in some cases (for
- * example, while bootstrapping a component), a string version of the selector is required to query
- * for the host element on the page. This function takes the parsed form of a selector and returns
- * its string representation.
- *
- * @param selectorList selector in parsed form
- * @returns string representation of a given selector
- */
-function stringifyCSSSelectorList(selectorList) {
-    return selectorList.map(stringifyCSSSelector).join(',');
-}
-/**
- * Extracts attributes and classes information from a given CSS selector.
- *
- * This function is used while creating a component dynamically. In this case, the host element
- * (that is created dynamically) should contain attributes and classes specified in component's CSS
- * selector.
- *
- * @param selector CSS selector in parsed form (in a form of array)
- * @returns object with `attrs` and `classes` fields that contain extracted information
- */
-function extractAttrsAndClassesFromSelector(selector) {
-    const attrs = [];
-    const classes = [];
-    let i = 1;
-    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
-    while (i < selector.length) {
-        let valueOrMarker = selector[i];
-        if (typeof valueOrMarker === 'string') {
-            if (mode === 2 /* SelectorFlags.ATTRIBUTE */) {
-                if (valueOrMarker !== '') {
-                    attrs.push(valueOrMarker, selector[++i]);
-                }
-            }
-            else if (mode === 8 /* SelectorFlags.CLASS */) {
-                classes.push(valueOrMarker);
-            }
-        }
-        else {
-            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
-            // mode is maintained for remaining chunks of a selector. Since attributes and classes are
-            // extracted only for "positive" part of the selector, we can stop here.
-            if (!isPositive(mode))
-                break;
-            mode = valueOrMarker;
-        }
-        i++;
-    }
-    return { attrs, classes };
 }
 
 /** A special value which designates that a value has not changed. */
@@ -23377,6 +23435,7 @@ function resetCompiledComponents() {
     ownerNgModule = new WeakMap();
     verifiedNgModule = new WeakMap();
     moduleQueue.length = 0;
+    GENERATED_COMP_IDS.clear();
 }
 /**
  * Computes the combined declarations of explicit declarations, as well as declarations inherited by
