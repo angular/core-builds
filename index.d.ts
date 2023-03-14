@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-5a2b622
+ * @license Angular v16.0.0-next.2+sha-4e098fa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -319,7 +319,6 @@ export declare class ApplicationModule {
  * A reference to an Angular application running on a page.
  *
  * @usageNotes
- *
  * {@a is-stable-examples}
  * ### isStable examples and caveats
  *
@@ -409,14 +408,10 @@ export declare class ApplicationModule {
  * @publicApi
  */
 export declare class ApplicationRef {
-    private _zone;
-    private _injector;
-    private _exceptionHandler;
     private _runningTick;
-    private _stable;
-    private _onMicrotaskEmptySubscription;
     private _destroyed;
     private _destroyListeners;
+    private readonly internalErrorHandler;
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -432,10 +427,9 @@ export declare class ApplicationRef {
     readonly components: ComponentRef<any>[];
     /**
      * Returns an Observable that indicates when the application is stable or unstable.
-     *
-     * @see  [Usage notes](#is-stable-examples) for examples and caveats when using this API.
      */
     readonly isStable: Observable<boolean>;
+    private readonly _injector;
     /**
      * The `EnvironmentInjector` used to create this application.
      */
@@ -7692,7 +7686,7 @@ declare const enum RuntimeErrorCode {
     HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = 401,
-    ERROR_HANDLER_NOT_FOUND = 402,
+    MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
     BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
     PLATFORM_ALREADY_DESTROYED = 404,
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
@@ -11132,9 +11126,9 @@ export declare const ɵNO_CHANGE: ɵNO_CHANGE;
  * to framework to perform rendering.
  */
 export declare class ɵNoopNgZone implements NgZone {
-    readonly hasPendingMicrotasks: boolean;
-    readonly hasPendingMacrotasks: boolean;
-    readonly isStable: boolean;
+    readonly hasPendingMicrotasks = false;
+    readonly hasPendingMacrotasks = false;
+    readonly isStable = true;
     readonly onUnstable: EventEmitter<any>;
     readonly onMicrotaskEmpty: EventEmitter<any>;
     readonly onStable: EventEmitter<any>;
@@ -11305,6 +11299,8 @@ export declare const enum ɵProfilerEvent {
  */
 export declare function ɵprovideHydrationSupport(): EnvironmentProviders;
 
+export declare function ɵprovideNgZoneChangeDetection(ngZone: NgZone): StaticProvider[];
+
 /**
  * Publishes a collection of default debug tools onto`window.ng`.
  *
@@ -11402,7 +11398,7 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
     instance: T;
     destroyCbs: (() => void)[] | null;
     readonly componentFactoryResolver: ComponentFactoryResolver_2;
-    constructor(ngModuleType: Type<T>, _parent: Injector | null);
+    constructor(ngModuleType: Type<T>, _parent: Injector | null, additionalProviders: StaticProvider[]);
     get injector(): EnvironmentInjector;
     destroy(): void;
     onDestroy(callback: () => void): void;

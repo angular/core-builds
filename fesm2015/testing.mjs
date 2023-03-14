@@ -1,10 +1,10 @@
 /**
- * @license Angular v16.0.0-next.2+sha-5a2b622
+ * @license Angular v16.0.0-next.2+sha-4e098fa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, ɵprovideNgZoneChangeDetection, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
@@ -9593,7 +9593,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-5a2b622');
+const VERSION = new Version('16.0.0-next.2+sha-4e098fa');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20780,7 +20780,7 @@ class NgModuleFactory$1 {
  * @publicApi
  */
 function createNgModule(ngModule, parentInjector) {
-    return new NgModuleRef(ngModule, parentInjector !== null && parentInjector !== void 0 ? parentInjector : null);
+    return new NgModuleRef(ngModule, parentInjector !== null && parentInjector !== void 0 ? parentInjector : null, []);
 }
 /**
  * The `createNgModule` function alias for backwards-compatibility.
@@ -20790,7 +20790,7 @@ function createNgModule(ngModule, parentInjector) {
  */
 const createNgModuleRef = createNgModule;
 class NgModuleRef extends NgModuleRef$1 {
-    constructor(ngModuleType, _parent) {
+    constructor(ngModuleType, _parent, additionalProviders) {
         super();
         this._parent = _parent;
         // tslint:disable-next-line:require-internal-with-underscore
@@ -20811,7 +20811,8 @@ class NgModuleRef extends NgModuleRef$1 {
             { provide: NgModuleRef$1, useValue: this }, {
                 provide: ComponentFactoryResolver$1,
                 useValue: this.componentFactoryResolver
-            }
+            },
+            ...additionalProviders
         ], stringify(ngModuleType), new Set(['environment']));
         // We need to resolve the injector types separately from the injector creation, because
         // the module might be trying to use this ref in its constructor for DI which will cause a
@@ -20840,8 +20841,11 @@ class NgModuleFactory extends NgModuleFactory$1 {
         this.moduleType = moduleType;
     }
     create(parentInjector) {
-        return new NgModuleRef(this.moduleType, parentInjector);
+        return new NgModuleRef(this.moduleType, parentInjector, []);
     }
+}
+function createNgModuleRefWithProviders(moduleType, parentInjector, additionalProviders) {
+    return new NgModuleRef(moduleType, parentInjector, additionalProviders);
 }
 class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
     constructor(providers, parent, source) {
@@ -24025,7 +24029,7 @@ class TestBedCompiler {
         // every component.
         this.componentToModuleScope.clear();
         const parentInjector = this.platform.injector;
-        this.testModuleRef = new ɵRender3NgModuleRef(this.testModuleType, parentInjector);
+        this.testModuleRef = new ɵRender3NgModuleRef(this.testModuleType, parentInjector, []);
         // ApplicationInitStatus.runInitializers() is marked @internal to core.
         // Cast it to any before accessing it.
         this.testModuleRef.injector.get(ApplicationInitStatus).runInitializers();
@@ -24453,7 +24457,7 @@ class TestBedCompiler {
         });
         const ngZone = new NgZone({ enableLongStackTrace: true });
         const providers = [
-            { provide: NgZone, useValue: ngZone },
+            ɵprovideNgZoneChangeDetection(ngZone),
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
             ...this.providers,
             ...this.providerOverrides,
