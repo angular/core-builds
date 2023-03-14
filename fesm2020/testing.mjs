@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-056d680
+ * @license Angular v16.0.0-next.2+sha-0814f20
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2873,7 +2873,6 @@ function ɵɵdefineComponent(componentDefinition) {
             tView: null,
             id: '',
         };
-        def.id = getComponentId(def);
         initFeatures(def);
         const dependencies = componentDefinition.dependencies;
         def.directiveDefs = extractDefListOrFactory(dependencies, /* pipeDef */ false);
@@ -9600,7 +9599,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-056d680');
+const VERSION = new Version('16.0.0-next.2+sha-0814f20');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9857,6 +9856,33 @@ function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
     // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
     // will be altered by the time we leave the `ɵɵadvance` instruction.
     setSelectedIndex(index);
+}
+
+/**
+ * Runs the given function in the context of the given `Injector`.
+ *
+ * Within the function's stack frame, `inject` can be used to inject dependencies from the given
+ * `Injector`. Note that `inject` is only usable synchronously, and cannot be used in any
+ * asynchronous callbacks or after any `await` points.
+ *
+ * @param injector the injector which will satisfy calls to `inject` while `fn` is executing
+ * @param fn the closure to be run in the context of `injector`
+ * @returns the return value of the function, if any
+ * @publicApi
+ */
+function runInInjectionContext(injector, fn) {
+    if (injector instanceof R3Injector) {
+        injector.assertNotDestroyed();
+    }
+    const prevInjector = setCurrentInjector(injector);
+    const previousInjectImplementation = setInjectImplementation(undefined);
+    try {
+        return fn();
+    }
+    finally {
+        setCurrentInjector(prevInjector);
+        setInjectImplementation(previousInjectImplementation);
+    }
 }
 
 /**

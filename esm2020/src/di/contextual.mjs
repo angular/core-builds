@@ -1,0 +1,37 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { setCurrentInjector } from './injector_compatibility';
+import { setInjectImplementation } from './inject_switch';
+import { R3Injector } from './r3_injector';
+/**
+ * Runs the given function in the context of the given `Injector`.
+ *
+ * Within the function's stack frame, `inject` can be used to inject dependencies from the given
+ * `Injector`. Note that `inject` is only usable synchronously, and cannot be used in any
+ * asynchronous callbacks or after any `await` points.
+ *
+ * @param injector the injector which will satisfy calls to `inject` while `fn` is executing
+ * @param fn the closure to be run in the context of `injector`
+ * @returns the return value of the function, if any
+ * @publicApi
+ */
+export function runInInjectionContext(injector, fn) {
+    if (injector instanceof R3Injector) {
+        injector.assertNotDestroyed();
+    }
+    const prevInjector = setCurrentInjector(injector);
+    const previousInjectImplementation = setInjectImplementation(undefined);
+    try {
+        return fn();
+    }
+    finally {
+        setCurrentInjector(prevInjector);
+        setInjectImplementation(previousInjectImplementation);
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29udGV4dHVhbC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc3JjL2RpL2NvbnRleHR1YWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7OztHQU1HO0FBR0gsT0FBTyxFQUFDLGtCQUFrQixFQUFDLE1BQU0sMEJBQTBCLENBQUM7QUFDNUQsT0FBTyxFQUFDLHVCQUF1QixFQUFDLE1BQU0saUJBQWlCLENBQUM7QUFDeEQsT0FBTyxFQUFDLFVBQVUsRUFBQyxNQUFNLGVBQWUsQ0FBQztBQUV6Qzs7Ozs7Ozs7Ozs7R0FXRztBQUNILE1BQU0sVUFBVSxxQkFBcUIsQ0FBVSxRQUFrQixFQUFFLEVBQWlCO0lBQ2xGLElBQUksUUFBUSxZQUFZLFVBQVUsRUFBRTtRQUNsQyxRQUFRLENBQUMsa0JBQWtCLEVBQUUsQ0FBQztLQUMvQjtJQUVELE1BQU0sWUFBWSxHQUFHLGtCQUFrQixDQUFDLFFBQVEsQ0FBQyxDQUFDO0lBQ2xELE1BQU0sNEJBQTRCLEdBQUcsdUJBQXVCLENBQUMsU0FBUyxDQUFDLENBQUM7SUFDeEUsSUFBSTtRQUNGLE9BQU8sRUFBRSxFQUFFLENBQUM7S0FDYjtZQUFTO1FBQ1Isa0JBQWtCLENBQUMsWUFBWSxDQUFDLENBQUM7UUFDakMsdUJBQXVCLENBQUMsNEJBQTRCLENBQUMsQ0FBQztLQUN2RDtBQUNILENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIExMQyBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuaW1wb3J0IHR5cGUge0luamVjdG9yfSBmcm9tICcuL2luamVjdG9yJztcbmltcG9ydCB7c2V0Q3VycmVudEluamVjdG9yfSBmcm9tICcuL2luamVjdG9yX2NvbXBhdGliaWxpdHknO1xuaW1wb3J0IHtzZXRJbmplY3RJbXBsZW1lbnRhdGlvbn0gZnJvbSAnLi9pbmplY3Rfc3dpdGNoJztcbmltcG9ydCB7UjNJbmplY3Rvcn0gZnJvbSAnLi9yM19pbmplY3Rvcic7XG5cbi8qKlxuICogUnVucyB0aGUgZ2l2ZW4gZnVuY3Rpb24gaW4gdGhlIGNvbnRleHQgb2YgdGhlIGdpdmVuIGBJbmplY3RvcmAuXG4gKlxuICogV2l0aGluIHRoZSBmdW5jdGlvbidzIHN0YWNrIGZyYW1lLCBgaW5qZWN0YCBjYW4gYmUgdXNlZCB0byBpbmplY3QgZGVwZW5kZW5jaWVzIGZyb20gdGhlIGdpdmVuXG4gKiBgSW5qZWN0b3JgLiBOb3RlIHRoYXQgYGluamVjdGAgaXMgb25seSB1c2FibGUgc3luY2hyb25vdXNseSwgYW5kIGNhbm5vdCBiZSB1c2VkIGluIGFueVxuICogYXN5bmNocm9ub3VzIGNhbGxiYWNrcyBvciBhZnRlciBhbnkgYGF3YWl0YCBwb2ludHMuXG4gKlxuICogQHBhcmFtIGluamVjdG9yIHRoZSBpbmplY3RvciB3aGljaCB3aWxsIHNhdGlzZnkgY2FsbHMgdG8gYGluamVjdGAgd2hpbGUgYGZuYCBpcyBleGVjdXRpbmdcbiAqIEBwYXJhbSBmbiB0aGUgY2xvc3VyZSB0byBiZSBydW4gaW4gdGhlIGNvbnRleHQgb2YgYGluamVjdG9yYFxuICogQHJldHVybnMgdGhlIHJldHVybiB2YWx1ZSBvZiB0aGUgZnVuY3Rpb24sIGlmIGFueVxuICogQHB1YmxpY0FwaVxuICovXG5leHBvcnQgZnVuY3Rpb24gcnVuSW5JbmplY3Rpb25Db250ZXh0PFJldHVyblQ+KGluamVjdG9yOiBJbmplY3RvciwgZm46ICgpID0+IFJldHVyblQpOiBSZXR1cm5UIHtcbiAgaWYgKGluamVjdG9yIGluc3RhbmNlb2YgUjNJbmplY3Rvcikge1xuICAgIGluamVjdG9yLmFzc2VydE5vdERlc3Ryb3llZCgpO1xuICB9XG5cbiAgY29uc3QgcHJldkluamVjdG9yID0gc2V0Q3VycmVudEluamVjdG9yKGluamVjdG9yKTtcbiAgY29uc3QgcHJldmlvdXNJbmplY3RJbXBsZW1lbnRhdGlvbiA9IHNldEluamVjdEltcGxlbWVudGF0aW9uKHVuZGVmaW5lZCk7XG4gIHRyeSB7XG4gICAgcmV0dXJuIGZuKCk7XG4gIH0gZmluYWxseSB7XG4gICAgc2V0Q3VycmVudEluamVjdG9yKHByZXZJbmplY3Rvcik7XG4gICAgc2V0SW5qZWN0SW1wbGVtZW50YXRpb24ocHJldmlvdXNJbmplY3RJbXBsZW1lbnRhdGlvbik7XG4gIH1cbn1cbiJdfQ==

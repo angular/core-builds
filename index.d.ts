@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-056d680
+ * @license Angular v16.0.0-next.2+sha-0814f20
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3152,6 +3152,7 @@ export declare abstract class EnvironmentInjector implements Injector {
      *
      * @param fn the closure to be run in the context of this injector
      * @returns the return value of the function, if any
+     * @deprecated use the standalone function `runInInjectionContext` instead
      */
     abstract runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     abstract destroy(): void;
@@ -6863,7 +6864,7 @@ declare class R3Injector extends EnvironmentInjector {
     runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags | InjectOptions): T;
     toString(): string;
-    private assertNotDestroyed;
+    assertNotDestroyed(): void;
     /**
      * Process a `SingleProvider` and add it.
      */
@@ -7647,6 +7648,20 @@ declare interface RNode {
 declare interface RText extends RNode {
     textContent: string | null;
 }
+
+/**
+ * Runs the given function in the context of the given `Injector`.
+ *
+ * Within the function's stack frame, `inject` can be used to inject dependencies from the given
+ * `Injector`. Note that `inject` is only usable synchronously, and cannot be used in any
+ * asynchronous callbacks or after any `await` points.
+ *
+ * @param injector the injector which will satisfy calls to `inject` while `fn` is executing
+ * @param fn the closure to be run in the context of `injector`
+ * @returns the return value of the function, if any
+ * @publicApi
+ */
+export declare function runInInjectionContext<ReturnT>(injector: Injector, fn: () => ReturnT): ReturnT;
 
 
 /**
