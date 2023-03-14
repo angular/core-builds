@@ -4055,27 +4055,27 @@ function asLiteral(value) {
   }
   return literal(value, INFERRED_TYPE);
 }
-function conditionallyCreateMapObjectLiteral(keys, keepDeclared) {
-  if (Object.getOwnPropertyNames(keys).length > 0) {
-    return mapToExpression(keys, keepDeclared);
+function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
+  const keys = Object.getOwnPropertyNames(map);
+  if (keys.length === 0) {
+    return null;
   }
-  return null;
-}
-function mapToExpression(map, keepDeclared) {
-  return literalMap(Object.getOwnPropertyNames(map).map((key) => {
+  return literalMap(keys.map((key) => {
     const value = map[key];
     let declaredName;
     let publicName;
     let minifiedName;
     let needsDeclaredName;
-    if (Array.isArray(value)) {
-      [publicName, declaredName] = value;
+    if (typeof value === "string") {
+      declaredName = key;
       minifiedName = key;
-      needsDeclaredName = publicName !== declaredName;
-    } else {
-      minifiedName = declaredName = key;
       publicName = value;
       needsDeclaredName = false;
+    } else {
+      minifiedName = key;
+      declaredName = value.classPropertyName;
+      publicName = value.bindingPropertyName;
+      needsDeclaredName = publicName !== declaredName;
     }
     return {
       key: minifiedName,
@@ -15123,8 +15123,8 @@ function baseDirectiveFields(meta, constantPool, bindingParser) {
     definitionMap.set("viewQuery", createViewQueriesFunction(meta.viewQueries, constantPool, meta.name));
   }
   definitionMap.set("hostBindings", createHostBindingsFunction(meta.host, meta.typeSourceSpan, bindingParser, constantPool, meta.selector || "", meta.name, definitionMap));
-  definitionMap.set("inputs", conditionallyCreateMapObjectLiteral(meta.inputs, true));
-  definitionMap.set("outputs", conditionallyCreateMapObjectLiteral(meta.outputs));
+  definitionMap.set("inputs", conditionallyCreateDirectiveBindingLiteral(meta.inputs, true));
+  definitionMap.set("outputs", conditionallyCreateDirectiveBindingLiteral(meta.outputs));
   if (meta.exportAs !== null) {
     definitionMap.set("exportAs", literalArr(meta.exportAs.map((e) => literal(e))));
   }
@@ -15320,10 +15320,15 @@ function createBaseDirectiveTypeParams(meta) {
     typeWithParameters(meta.type.type, meta.typeArgumentCount),
     selectorForType !== null ? stringAsType(selectorForType) : NONE_TYPE,
     meta.exportAs !== null ? stringArrayAsType(meta.exportAs) : NONE_TYPE,
-    expressionType(stringMapAsLiteralExpression(meta.inputs)),
+    expressionType(getInputsTypeExpression(meta)),
     expressionType(stringMapAsLiteralExpression(meta.outputs)),
     stringArrayAsType(meta.queries.map((q) => q.propertyName))
   ];
+}
+function getInputsTypeExpression(meta) {
+  return literalMap(Object.keys(meta.inputs).map((key) => {
+    return { key, value: literal(meta.inputs[key].bindingPropertyName), quoted: true };
+  }));
 }
 function createDirectiveType(meta) {
   const typeParams = createBaseDirectiveTypeParams(meta);
@@ -15834,8 +15839,8 @@ function convertQueryPredicate(predicate) {
   return Array.isArray(predicate) ? predicate : createMayBeForwardRefExpression(new WrappedNodeExpr(predicate), 1);
 }
 function convertDirectiveFacadeToMetadata(facade) {
-  const inputsFromMetadata = parseInputOutputs(facade.inputs || []);
-  const outputsFromMetadata = parseInputOutputs(facade.outputs || []);
+  const inputsFromMetadata = parseInputsArray(facade.inputs || []);
+  const outputsFromMetadata = parseMappingStringArray(facade.outputs || []);
   const propMetadata = facade.propMetadata;
   const inputsFromType = {};
   const outputsFromType = {};
@@ -15843,7 +15848,10 @@ function convertDirectiveFacadeToMetadata(facade) {
     if (propMetadata.hasOwnProperty(field)) {
       propMetadata[field].forEach((ann) => {
         if (isInput(ann)) {
-          inputsFromType[field] = ann.bindingPropertyName ? [ann.bindingPropertyName, field] : field;
+          inputsFromType[field] = {
+            bindingPropertyName: ann.bindingPropertyName || field,
+            classPropertyName: field
+          };
         } else if (isOutput(ann)) {
           outputsFromType[field] = ann.bindingPropertyName || field;
         }
@@ -15867,26 +15875,26 @@ function convertDirectiveFacadeToMetadata(facade) {
   });
 }
 function convertDeclareDirectiveFacadeToMetadata(declaration, typeSourceSpan) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+  var _a, _b, _c, _d, _e, _f, _g, _h;
   return {
     name: declaration.type.name,
     type: wrapReference(declaration.type),
     typeSourceSpan,
     internalType: new WrappedNodeExpr(declaration.type),
     selector: (_a = declaration.selector) != null ? _a : null,
-    inputs: (_b = declaration.inputs) != null ? _b : {},
-    outputs: (_c = declaration.outputs) != null ? _c : {},
+    inputs: declaration.inputs ? inputsMappingToInputMetadata(declaration.inputs) : {},
+    outputs: (_b = declaration.outputs) != null ? _b : {},
     host: convertHostDeclarationToMetadata(declaration.host),
-    queries: ((_d = declaration.queries) != null ? _d : []).map(convertQueryDeclarationToMetadata),
-    viewQueries: ((_e = declaration.viewQueries) != null ? _e : []).map(convertQueryDeclarationToMetadata),
+    queries: ((_c = declaration.queries) != null ? _c : []).map(convertQueryDeclarationToMetadata),
+    viewQueries: ((_d = declaration.viewQueries) != null ? _d : []).map(convertQueryDeclarationToMetadata),
     providers: declaration.providers !== void 0 ? new WrappedNodeExpr(declaration.providers) : null,
-    exportAs: (_f = declaration.exportAs) != null ? _f : null,
-    usesInheritance: (_g = declaration.usesInheritance) != null ? _g : false,
-    lifecycle: { usesOnChanges: (_h = declaration.usesOnChanges) != null ? _h : false },
+    exportAs: (_e = declaration.exportAs) != null ? _e : null,
+    usesInheritance: (_f = declaration.usesInheritance) != null ? _f : false,
+    lifecycle: { usesOnChanges: (_g = declaration.usesOnChanges) != null ? _g : false },
     deps: null,
     typeArgumentCount: 0,
     fullInheritance: false,
-    isStandalone: (_i = declaration.isStandalone) != null ? _i : false,
+    isStandalone: (_h = declaration.isStandalone) != null ? _h : false,
     hostDirectives: convertHostDirectivesToMetadata(declaration)
   };
 }
@@ -15914,8 +15922,8 @@ function convertHostDirectivesToMetadata(metadata) {
       } : {
         directive: wrapReference(hostDirective.directive),
         isForwardReference: false,
-        inputs: hostDirective.inputs ? parseInputOutputs(hostDirective.inputs) : null,
-        outputs: hostDirective.outputs ? parseInputOutputs(hostDirective.outputs) : null
+        inputs: hostDirective.inputs ? parseMappingStringArray(hostDirective.inputs) : null,
+        outputs: hostDirective.outputs ? parseMappingStringArray(hostDirective.outputs) : null
       };
     });
   }
@@ -16076,12 +16084,37 @@ function isInput(value) {
 function isOutput(value) {
   return value.ngMetadataName === "Output";
 }
-function parseInputOutputs(values) {
+function inputsMappingToInputMetadata(inputs) {
+  return Object.keys(inputs).reduce((result, key) => {
+    const value = inputs[key];
+    result[key] = typeof value === "string" ? { bindingPropertyName: value, classPropertyName: value } : { bindingPropertyName: value[0], classPropertyName: value[1] };
+    return result;
+  }, {});
+}
+function parseInputsArray(values) {
   return values.reduce((results, value) => {
-    const [field, property] = value.split(":", 2).map((str) => str.trim());
-    results[field] = property || field;
+    if (typeof value === "string") {
+      const [bindingPropertyName, classPropertyName] = parseMappingString(value);
+      results[classPropertyName] = { bindingPropertyName, classPropertyName };
+    } else {
+      results[value.name] = {
+        bindingPropertyName: value.alias || value.name,
+        classPropertyName: value.name
+      };
+    }
     return results;
   }, {});
+}
+function parseMappingStringArray(values) {
+  return values.reduce((results, value) => {
+    const [publicName, fieldName] = parseMappingString(value);
+    results[fieldName] = publicName;
+    return results;
+  }, {});
+}
+function parseMappingString(value) {
+  const [fieldName, bindingPropertyName] = value.split(":", 2).map((str) => str.trim());
+  return [bindingPropertyName != null ? bindingPropertyName : fieldName, fieldName];
 }
 function convertDeclarePipeFacadeToMetadata(declaration) {
   var _a, _b;
@@ -16111,7 +16144,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.0.0-next.2+sha-0814f20");
+var VERSION2 = new Version("16.0.0-next.2+sha-be97c87");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17426,7 +17459,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17495,7 +17528,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17503,8 +17536,8 @@ function createDirectiveDefinitionMap(meta) {
   if (meta.selector !== null) {
     definitionMap.set("selector", literal(meta.selector));
   }
-  definitionMap.set("inputs", conditionallyCreateMapObjectLiteral(meta.inputs, true));
-  definitionMap.set("outputs", conditionallyCreateMapObjectLiteral(meta.outputs));
+  definitionMap.set("inputs", conditionallyCreateDirectiveBindingLiteral(meta.inputs, true));
+  definitionMap.set("outputs", conditionallyCreateDirectiveBindingLiteral(meta.outputs));
   definitionMap.set("host", compileHostMetadata(meta.host));
   definitionMap.set("providers", meta.providers);
   if (meta.queries.length > 0) {
@@ -17677,7 +17710,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17700,7 +17733,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17738,7 +17771,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17759,7 +17792,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17794,7 +17827,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-0814f20"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-be97c87"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17811,7 +17844,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.0.0-next.2+sha-0814f20");
+var VERSION3 = new Version("16.0.0-next.2+sha-be97c87");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -19792,8 +19825,14 @@ var ClassPropertyMapping = class {
     const forwardMap = /* @__PURE__ */ new Map();
     for (const classPropertyName of Object.keys(obj)) {
       const value = obj[classPropertyName];
-      const bindingPropertyName = Array.isArray(value) ? value[0] : value;
-      const inputOrOutput = { classPropertyName, bindingPropertyName };
+      let inputOrOutput;
+      if (typeof value === "string") {
+        inputOrOutput = { classPropertyName, bindingPropertyName: value };
+      } else if (Array.isArray(value)) {
+        inputOrOutput = { classPropertyName, bindingPropertyName: value[0] };
+      } else {
+        inputOrOutput = value;
+      }
       forwardMap.set(classPropertyName, inputOrOutput);
     }
     return new ClassPropertyMapping(forwardMap);
@@ -19830,17 +19869,13 @@ var ClassPropertyMapping = class {
   toJointMappedObject() {
     const obj = {};
     for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
-      if (inputOrOutput.bindingPropertyName === classPropertyName) {
-        obj[classPropertyName] = inputOrOutput.bindingPropertyName;
-      } else {
-        obj[classPropertyName] = [inputOrOutput.bindingPropertyName, classPropertyName];
-      }
+      obj[classPropertyName] = inputOrOutput;
     }
     return obj;
   }
   *[Symbol.iterator]() {
-    for (const [classPropertyName, inputOrOutput] of this.forwardMap.entries()) {
-      yield [classPropertyName, inputOrOutput.bindingPropertyName];
+    for (const inputOrOutput of this.forwardMap.values()) {
+      yield inputOrOutput;
     }
   }
 };
@@ -20080,7 +20115,7 @@ var DtsMetadataReader = class {
       return param.typeValueReference.kind === 1 && param.typeValueReference.moduleName === "@angular/core" && param.typeValueReference.importedName === "TemplateRef";
     });
     const isStandalone = def.type.typeArguments.length > 7 && ((_a = readBooleanType(def.type.typeArguments[7])) != null ? _a : false);
-    const inputs = ClassPropertyMapping.fromMappedObject(readMapType(def.type.typeArguments[3], readStringType));
+    const inputs = ClassPropertyMapping.fromMappedObject(readInputsType(def.type.typeArguments[3]));
     const outputs = ClassPropertyMapping.fromMappedObject(readMapType(def.type.typeArguments[4], readStringType));
     const hostDirectives = def.type.typeArguments.length > 8 ? readHostDirectivesType(this.checker, def.type.typeArguments[8], ref.bestGuessOwningModule) : null;
     return __spreadProps(__spreadValues({
@@ -20130,6 +20165,25 @@ var DtsMetadataReader = class {
     };
   }
 };
+function readInputsType(type) {
+  const inputsMap = {};
+  if (import_typescript22.default.isTypeLiteralNode(type)) {
+    for (const member of type.members) {
+      if (!import_typescript22.default.isPropertySignature(member) || member.type === void 0 || member.name === void 0 || !import_typescript22.default.isStringLiteral(member.name) && !import_typescript22.default.isIdentifier(member.name)) {
+        continue;
+      }
+      const stringValue = readStringType(member.type);
+      if (stringValue != null) {
+        inputsMap[member.name.text] = {
+          bindingPropertyName: stringValue,
+          classPropertyName: member.name.text,
+          required: false
+        };
+      }
+    }
+  }
+  return inputsMap;
+}
 function readBaseClass2(clazz, checker, reflector) {
   if (!isNamedClassDeclaration(clazz)) {
     return reflector.hasBaseClass(clazz) ? "dynamic" : null;
@@ -20381,13 +20435,13 @@ var HostDirectivesResolver = class {
       }
       results.push(__spreadProps(__spreadValues({}, hostMeta), {
         matchSource: MatchSource.HostDirective,
-        inputs: this.filterMappings(hostMeta.inputs, current.inputs),
-        outputs: this.filterMappings(hostMeta.outputs, current.outputs)
+        inputs: ClassPropertyMapping.fromMappedObject(this.filterMappings(hostMeta.inputs, current.inputs, resolveInput)),
+        outputs: ClassPropertyMapping.fromMappedObject(this.filterMappings(hostMeta.outputs, current.outputs, resolveOutput))
       }));
     }
     return results;
   }
-  filterMappings(source, allowedProperties) {
+  filterMappings(source, allowedProperties, valueResolver) {
     const result = {};
     if (allowedProperties !== null) {
       for (const publicName in allowedProperties) {
@@ -20395,15 +20449,21 @@ var HostDirectivesResolver = class {
           const bindings = source.getByBindingPropertyName(publicName);
           if (bindings !== null) {
             for (const binding of bindings) {
-              result[binding.classPropertyName] = allowedProperties[publicName];
+              result[binding.classPropertyName] = valueResolver(allowedProperties[publicName], binding.classPropertyName);
             }
           }
         }
       }
     }
-    return ClassPropertyMapping.fromMappedObject(result);
+    return result;
   }
 };
+function resolveInput(bindingName, classPropertyName) {
+  return { bindingPropertyName: bindingName, classPropertyName, required: false };
+}
+function resolveOutput(bindingName) {
+  return bindingName;
+}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/partial_evaluator/src/diagnostics.mjs
 var import_typescript24 = __toESM(require("typescript"), 1);
@@ -24432,10 +24492,12 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const members = reflector.getMembersOfClass(clazz);
   const decoratedElements = members.filter((member) => !member.isStatic && member.decorators !== null);
   const coreModule = isCore ? void 0 : "@angular/core";
-  const inputsFromMeta = parseFieldToPropertyMapping(directive, "inputs", evaluator);
-  const inputsFromFields = parseDecoratedFields(filterToMembersWithDecorator(decoratedElements, "Input", coreModule), evaluator, resolveInput);
-  const outputsFromMeta = parseFieldToPropertyMapping(directive, "outputs", evaluator);
-  const outputsFromFields = parseDecoratedFields(filterToMembersWithDecorator(decoratedElements, "Output", coreModule), evaluator, resolveOutput);
+  const inputsFromMeta = parseInputsArray2(directive, evaluator);
+  const inputsFromFields = parseInputFields(filterToMembersWithDecorator(decoratedElements, "Input", coreModule), evaluator);
+  const inputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, inputsFromMeta), inputsFromFields));
+  const outputsFromMeta = parseOutputsArray(directive, evaluator);
+  const outputsFromFields = parseOutputFields(filterToMembersWithDecorator(decoratedElements, "Output", coreModule), evaluator);
+  const outputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, outputsFromMeta), outputsFromFields));
   const contentChildFromFields = queriesFromFields(filterToMembersWithDecorator(decoratedElements, "ContentChild", coreModule), reflector, evaluator);
   const contentChildrenFromFields = queriesFromFields(filterToMembersWithDecorator(decoratedElements, "ContentChildren", coreModule), reflector, evaluator);
   const queries = [...contentChildFromFields, ...contentChildrenFromFields];
@@ -24487,8 +24549,6 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const sourceFile = clazz.getSourceFile();
   const type = wrapTypeReference(reflector, clazz);
   const internalType = new WrappedNodeExpr(reflector.getInternalNameOfClass(clazz));
-  const inputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, inputsFromMeta), inputsFromFields));
-  const outputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, outputsFromMeta), outputsFromFields));
   const rawHostDirectives = directive.get("hostDirectives") || null;
   const hostDirectives = rawHostDirectives === null ? null : extractHostDirectives(rawHostDirectives, evaluator);
   const metadata = {
@@ -24668,7 +24728,7 @@ function extractQueriesFromDecorator(queryData, reflector, evaluator, isCore) {
   });
   return { content, view };
 }
-function parseFieldArrayValue(directive, field, evaluator) {
+function parseFieldStringArrayValue(directive, field, evaluator) {
   if (!directive.has(field)) {
     return null;
   }
@@ -24708,44 +24768,80 @@ function queriesFromFields(fields, reflector, evaluator) {
 function isPropertyTypeMember(member) {
   return member.kind === ClassMemberKind.Getter || member.kind === ClassMemberKind.Setter || member.kind === ClassMemberKind.Property;
 }
-function parseFieldToPropertyMapping(directive, field, evaluator) {
-  const metaValues = parseFieldArrayValue(directive, field, evaluator);
-  return metaValues ? parseInputOutputMappingArray(metaValues) : EMPTY_OBJECT;
-}
-function parseInputOutputMappingArray(values) {
+function parseMappingStringArray2(values) {
   return values.reduce((results, value) => {
     if (typeof value !== "string") {
       throw new Error("Mapping value must be a string");
     }
-    const [field, property] = value.split(":", 2).map((str) => str.trim());
-    results[field] = property || field;
+    const [bindingPropertyName, fieldName] = parseMappingString2(value);
+    results[fieldName] = bindingPropertyName;
     return results;
   }, {});
 }
-function parseDecoratedFields(fields, evaluator, mapValueResolver) {
-  return fields.reduce((results, field) => {
+function parseMappingString2(value) {
+  const [fieldName, bindingPropertyName] = value.split(":", 2).map((str) => str.trim());
+  return [bindingPropertyName != null ? bindingPropertyName : fieldName, fieldName];
+}
+function parseDecoratedFields(fields, evaluator, callback) {
+  for (const field of fields) {
     const fieldName = field.member.name;
-    field.decorators.forEach((decorator) => {
-      if (decorator.args == null || decorator.args.length === 0) {
-        results[fieldName] = fieldName;
-      } else if (decorator.args.length === 1) {
-        const property = evaluator.evaluate(decorator.args[0]);
-        if (typeof property !== "string") {
-          throw createValueHasWrongTypeError(Decorator.nodeForError(decorator), property, `@${decorator.name} decorator argument must resolve to a string`);
-        }
-        results[fieldName] = mapValueResolver(property, fieldName);
-      } else {
+    for (const decorator of field.decorators) {
+      if (decorator.args != null && decorator.args.length > 1) {
         throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARITY_WRONG, Decorator.nodeForError(decorator), `@${decorator.name} can have at most one argument, got ${decorator.args.length} argument(s)`);
       }
-    });
-    return results;
-  }, {});
+      const value = decorator.args != null && decorator.args.length > 0 ? evaluator.evaluate(decorator.args[0]) : null;
+      callback(fieldName, value, decorator);
+    }
+  }
 }
-function resolveInput(publicName, internalName) {
-  return [publicName, internalName];
+function parseInputsArray2(decoratorMetadata, evaluator) {
+  const inputsField = decoratorMetadata.get("inputs");
+  if (inputsField === void 0) {
+    return {};
+  }
+  const inputs = {};
+  const inputsArray = evaluator.evaluate(inputsField);
+  if (!Array.isArray(inputsArray)) {
+    throw createValueHasWrongTypeError(inputsField, inputsArray, `Failed to resolve @Directive.inputs to a string array`);
+  }
+  for (const value of inputsArray) {
+    if (typeof value === "string") {
+      const [bindingPropertyName, fieldName] = parseMappingString2(value);
+      inputs[fieldName] = { bindingPropertyName, classPropertyName: fieldName, required: false };
+    } else {
+      throw createValueHasWrongTypeError(inputsField, value, `Failed to resolve @Directive.inputs to a string array`);
+    }
+  }
+  return inputs;
 }
-function resolveOutput(publicName, internalName) {
-  return publicName;
+function parseInputFields(inputMembers, evaluator) {
+  const inputs = {};
+  parseDecoratedFields(inputMembers, evaluator, (classPropertyName, options, decorator) => {
+    let bindingPropertyName;
+    if (options === null) {
+      bindingPropertyName = classPropertyName;
+    } else if (typeof options === "string") {
+      bindingPropertyName = options;
+    } else {
+      throw createValueHasWrongTypeError(Decorator.nodeForError(decorator), options, `@${decorator.name} decorator argument must resolve to a string`);
+    }
+    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required: false };
+  });
+  return inputs;
+}
+function parseOutputsArray(directive, evaluator) {
+  const metaValues = parseFieldStringArrayValue(directive, "outputs", evaluator);
+  return metaValues ? parseMappingStringArray2(metaValues) : EMPTY_OBJECT;
+}
+function parseOutputFields(outputMembers, evaluator) {
+  const outputs = {};
+  parseDecoratedFields(outputMembers, evaluator, (fieldName, bindingPropertyName, decorator) => {
+    if (bindingPropertyName != null && typeof bindingPropertyName !== "string") {
+      throw createValueHasWrongTypeError(Decorator.nodeForError(decorator), bindingPropertyName, `@${decorator.name} decorator argument must resolve to a string`);
+    }
+    outputs[fieldName] = bindingPropertyName != null ? bindingPropertyName : fieldName;
+  });
+  return outputs;
 }
 function evaluateHostExpressionBindings(hostExpr, evaluator) {
   const hostMetaMap = evaluator.evaluate(hostExpr);
@@ -24806,7 +24902,7 @@ function parseHostDirectivesMapping(field, resolvedValue, classReference, source
     const nameForErrors = `@Directive.hostDirectives.${classReference.name.text}.${field}`;
     const rawInputs = resolvedValue.get(field);
     if (isStringArrayOrDie(rawInputs, nameForErrors, sourceExpression)) {
-      return parseInputOutputMappingArray(rawInputs);
+      return parseMappingStringArray2(rawInputs);
     }
   }
   return null;
@@ -24845,7 +24941,7 @@ var DirectiveSymbol = class extends SemanticSymbol {
     if (!(previousSymbol instanceof DirectiveSymbol)) {
       return true;
     }
-    if (!isArrayEqual(Array.from(this.inputs), Array.from(previousSymbol.inputs), isInputMappingEqual) || !isArrayEqual(Array.from(this.outputs), Array.from(previousSymbol.outputs), isInputMappingEqual)) {
+    if (!isArrayEqual(Array.from(this.inputs), Array.from(previousSymbol.inputs), isInputMappingEqual) || !isArrayEqual(Array.from(this.outputs), Array.from(previousSymbol.outputs), isInputOrOutputEqual)) {
       return true;
     }
     if (!areTypeParametersEqual(this.typeParameters, previousSymbol.typeParameters)) {
@@ -24861,7 +24957,10 @@ var DirectiveSymbol = class extends SemanticSymbol {
   }
 };
 function isInputMappingEqual(current, previous) {
-  return current[0] === previous[0] && current[1] === previous[1];
+  return isInputOrOutputEqual(current, previous) && current.required === previous.required;
+}
+function isInputOrOutputEqual(current, previous) {
+  return current.classPropertyName === previous.classPropertyName && current.bindingPropertyName === previous.bindingPropertyName;
 }
 function isTypeCheckMetaEqual(current, previous) {
   if (current.hasNgTemplateContextGuard !== previous.hasNgTemplateContextGuard) {
@@ -26154,7 +26253,7 @@ var ComponentDecoratorHandler = class {
     const componentStyleUrls = extractComponentStyleUrls(this.evaluator, component);
     let inlineStyles;
     if (component.has("styles")) {
-      const litStyles = parseFieldArrayValue(component, "styles", this.evaluator);
+      const litStyles = parseFieldStringArrayValue(component, "styles", this.evaluator);
       if (litStyles === null) {
         this.preanalyzeStylesCache.set(node, null);
       } else {
@@ -26313,7 +26412,7 @@ var ComponentDecoratorHandler = class {
         throw new Error("Inline resource processing requires asynchronous preanalyze.");
       }
       if (component.has("styles")) {
-        const litStyles = parseFieldArrayValue(component, "styles", this.evaluator);
+        const litStyles = parseFieldStringArrayValue(component, "styles", this.evaluator);
         if (litStyles !== null) {
           inlineStyles = [...litStyles];
           styles.push(...litStyles);
@@ -30553,9 +30652,9 @@ var TcbDirectiveCtorOp = class extends TcbOp {
         });
       }
     }
-    for (const [fieldName] of this.dir.inputs) {
-      if (!genericInputs.has(fieldName)) {
-        genericInputs.set(fieldName, { type: "unset", field: fieldName });
+    for (const { classPropertyName } of this.dir.inputs) {
+      if (!genericInputs.has(classPropertyName)) {
+        genericInputs.set(classPropertyName, { type: "unset", field: classPropertyName });
       }
     }
     const typeCtor = tcbCallTypeCtor(this.dir, this.tcb, Array.from(genericInputs.values()));
