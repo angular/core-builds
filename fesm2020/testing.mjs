@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-4e098fa
+ * @license Angular v16.0.0-next.2+sha-3d2351c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2873,7 +2873,6 @@ function ɵɵdefineComponent(componentDefinition) {
             tView: null,
             id: '',
         };
-        def.id = getComponentId(def);
         initFeatures(def);
         const dependencies = componentDefinition.dependencies;
         def.directiveDefs = extractDefListOrFactory(dependencies, /* pipeDef */ false);
@@ -9600,7 +9599,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-4e098fa');
+const VERSION = new Version('16.0.0-next.2+sha-3d2351c');
 
 // This default value is when checking the hierarchy for a token.
 //

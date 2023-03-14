@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-4e098fa
+ * @license Angular v16.0.0-next.2+sha-3d2351c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1595,7 +1595,6 @@ function ɵɵdefineComponent(componentDefinition) {
         (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
         const baseDef = getNgDirectiveDef(componentDefinition);
         const def = Object.assign(Object.assign({}, baseDef), { decls: componentDefinition.decls, vars: componentDefinition.vars, template: componentDefinition.template, consts: componentDefinition.consts || null, ngContentSelectors: componentDefinition.ngContentSelectors, onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush, directiveDefs: null, pipeDefs: null, dependencies: baseDef.standalone && componentDefinition.dependencies || null, getStandaloneInjector: null, data: componentDefinition.data || {}, encapsulation: componentDefinition.encapsulation || ViewEncapsulation$1.Emulated, styles: componentDefinition.styles || EMPTY_ARRAY, _: null, schemas: componentDefinition.schemas || null, tView: null, id: '' });
-        def.id = getComponentId(def);
         initFeatures(def);
         const dependencies = componentDefinition.dependencies;
         def.directiveDefs = extractDefListOrFactory(dependencies, /* pipeDef */ false);
@@ -9220,7 +9219,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-4e098fa');
+const VERSION = new Version('16.0.0-next.2+sha-3d2351c');
 
 // This default value is when checking the hierarchy for a token.
 //
