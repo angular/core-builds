@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-250f602
+ * @license Angular v16.0.0-next.2+sha-92e41e9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9376,7 +9376,7 @@ function retrieveHydrationInfoImpl(rNode, injector) {
     return dehydratedView;
 }
 /**
- * Sets the implementation for the `retrieveNghInfo` function.
+ * Sets the implementation for the `retrieveHydrationInfo` function.
  */
 function enableRetrieveHydrationInfoImpl() {
     _retrieveHydrationInfoImpl = retrieveHydrationInfoImpl;
@@ -9407,6 +9407,46 @@ function getComponentLViewForHydration(viewRef) {
         lView = lView[HEADER_OFFSET];
     }
     return lView;
+}
+function getTextNodeContent(node) {
+    return node.textContent?.replace(/\s/gm, '');
+}
+/**
+ * Restores text nodes and separators into the DOM that were lost during SSR
+ * serialization. The hydration process replaces empty text nodes and text
+ * nodes that are immediately adjacent to other text nodes with comment nodes
+ * that this method filters on to restore those missing nodes that the
+ * hydration process is expecting to be present.
+ *
+ * @param node The app's root HTML Element
+ */
+function processTextNodeMarkersBeforeHydration(node) {
+    const doc = getDocument();
+    const commentNodesIterator = doc.createNodeIterator(node, NodeFilter.SHOW_COMMENT, {
+        acceptNode(node) {
+            const content = getTextNodeContent(node);
+            const isTextNodeMarker = content === "ngetn" /* TextNodeMarker.EmptyNode */ || content === "ngtns" /* TextNodeMarker.Separator */;
+            return isTextNodeMarker ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+    });
+    let currentNode;
+    // We cannot modify the DOM while using the commentIterator,
+    // because it throws off the iterator state.
+    // So we collect all marker nodes first and then follow up with
+    // applying the changes to the DOM: either inserting an empty node
+    // or just removing the marker if it was used as a separator.
+    const nodes = [];
+    while (currentNode = commentNodesIterator.nextNode()) {
+        nodes.push(currentNode);
+    }
+    for (const node of nodes) {
+        if (node.textContent === "ngetn" /* TextNodeMarker.EmptyNode */) {
+            node.replaceWith(doc.createTextNode(''));
+        }
+        else {
+            node.remove();
+        }
+    }
 }
 /**
  * Marks a node as "claimed" by hydration process.
@@ -9648,7 +9688,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-250f602');
+const VERSION = new Version('16.0.0-next.2+sha-92e41e9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11449,23 +11489,58 @@ function createViewBlueprint(bindingStartIndex, initialViewLength) {
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
  *
- * @param rendererFactory Factory function to create renderer instance.
+ * @param renderer the renderer used to locate the element.
  * @param elementOrSelector Render element or CSS selector to locate the element.
  * @param encapsulation View Encapsulation defined for component that requests host element.
  * @param injector Root view injector instance.
  */
 function locateHostElement(renderer, elementOrSelector, encapsulation, injector) {
     // Note: we use default value for the `PRESERVE_HOST_CONTENT` here even though it's a
-    // tree-shakable one (providedIn:'root'). This code path can be triggered during dynamic component
-    // creation (after calling ViewContainerRef.createComponent) when an injector instance can be
-    // provided. The injector instance might be disconnected from the main DI tree, thus the
-    // `PRESERVE_HOST_CONTENT` woild not be able to instantiate. In this case, the default value will
-    // be used.
+    // tree-shakable one (providedIn:'root'). This code path can be triggered during dynamic
+    // component creation (after calling ViewContainerRef.createComponent) when an injector
+    // instance can be provided. The injector instance might be disconnected from the main DI
+    // tree, thus the `PRESERVE_HOST_CONTENT` woild not be able to instantiate. In this case, the
+    // default value will be used.
     const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
     // When using native Shadow DOM, do not clear host element to allow native slot
     // projection.
     const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom;
-    return renderer.selectRootElement(elementOrSelector, preserveContent);
+    const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
+    applyRootElementTransform(rootElement);
+    return rootElement;
+}
+/**
+ * Applies any root element transformations that are needed. If hydration is enabled,
+ * this will process corrupted text nodes.
+ *
+ * @param rootElement the app root HTML Element
+ */
+function applyRootElementTransform(rootElement) {
+    _applyRootElementTransformImpl(rootElement);
+}
+/**
+ * Reference to a function that applies transformations to the root HTML element
+ * of an app. When hydration is enabled, this processes any corrupt text nodes
+ * so they are properly hydratable on the client.
+ *
+ * @param rootElement the app root HTML Element
+ */
+let _applyRootElementTransformImpl = (rootElement) => null;
+/**
+ * Processes text node markers before hydration begins. This replaces any special comment
+ * nodes that were added prior to serialization are swapped out to restore proper text
+ * nodes before hydration.
+ *
+ * @param rootElement the app root HTML Element
+ */
+function applyRootElementTransformImpl(rootElement) {
+    processTextNodeMarkersBeforeHydration(rootElement);
+}
+/**
+ * Sets the implementation for the `applyRootElementTransform` function.
+ */
+function enableApplyRootElementTransformImpl() {
+    _applyRootElementTransformImpl = applyRootElementTransformImpl;
 }
 /**
  * Saves context for this cleanup function in LView.cleanupInstances.
@@ -11477,9 +11552,9 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
 function storeCleanupWithContext(tView, lView, context, cleanupFn) {
     const lCleanup = getOrCreateLViewCleanup(lView);
     // Historically the `storeCleanupWithContext` was used to register both framework-level and
-    // user-defined cleanup callbacks, but over time those two types of cleanups were separated. This
-    // dev mode checks assures that user-level cleanup callbacks are _not_ stored in data structures
-    // reserved for framework-specific hooks.
+    // user-defined cleanup callbacks, but over time those two types of cleanups were separated.
+    // This dev mode checks assures that user-level cleanup callbacks are _not_ stored in data
+    // structures reserved for framework-specific hooks.
     ngDevMode &&
         assertDefined(context, 'Cleanup context is mandatory when registering framework-level destroy hooks');
     lCleanup.push(context);
