@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-ed110a0
+ * @license Angular v16.0.0-next.2+sha-2d7f48c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1643,6 +1643,8 @@ declare type ConsumerId = number & {
     __consumer: true;
 };
 
+declare const CONTAINERS = "c";
+
 /**
  * Type of the ContentChild metadata.
  *
@@ -2273,17 +2275,17 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
  */
 export declare const defineInjectable: typeof ɵɵdefineInjectable;
 
+declare const DEHYDRATED_VIEWS = 10;
+
 /**
- * Represents a hydration-related element container structure
- * at runtime, which includes a reference to a first node in
- * a DOM segment that corresponds to a given element container.
+ * An object that contains hydration-related information serialized
+ * on the server, as well as the necessary references to segments of
+ * the DOM, to facilitate the hydration process for a given view
+ * inside a view container (either an embedded view or a view created
+ * for a component).
  */
-declare interface DehydratedElementContainer {
-    /**
-     * A reference to the first child in a DOM segment associated
-     * with a first child in a given <ng-container>.
-     */
-    firstChild: RNode | null;
+declare interface DehydratedContainerView extends DehydratedView {
+    data: Readonly<SerializedContainerView>;
 }
 
 /**
@@ -2303,13 +2305,11 @@ declare interface DehydratedView {
      */
     firstChild: RNode | null;
     /**
-     * Collection of <ng-container>s in a given view,
-     * used as a set of pointers to first children in each
-     * <ng-container>, so that those pointers are reused by
-     * subsequent instructions.
+     * Stores references to first nodes in DOM segments that
+     * represent either an <ng-container> or a view container.
      */
-    ngContainers?: {
-        [index: number]: DehydratedElementContainer;
+    segmentHeads?: {
+        [index: number]: RNode | null;
     };
 }
 
@@ -2396,13 +2396,19 @@ export declare interface Directive {
      * Enumerates the set of data-bound input properties for a directive
      *
      * Angular automatically updates input properties during change detection.
-     * The `inputs` property defines a set of `directiveProperty` to `bindingProperty`
-     * configuration:
+     * The `inputs` property accepts either strings or object literals that configure the directive
+     * properties that should be exposed as inputs.
      *
-     * - `directiveProperty` specifies the component property where the value is written.
-     * - `bindingProperty` specifies the DOM property where the value is read from.
+     * When an object literal is passed in, the `name` property indicates which property on the
+     * class the input should write to, while the `alias` determines the name under
+     * which the input will be available in template bindings. The `required` property indicates that
+     * the input is required which will trigger a compile-time error if it isn't passed in when the
+     * directive is used.
      *
-     * When `bindingProperty` is not provided, it is assumed to be equal to `directiveProperty`.
+     * When a string is passed into the `inputs` array, it can have a format of `'name'` or
+     * `'name: alias'` where `name` is the property on the class that the directive should write
+     * to, while the `alias` determines the name under which the input will be available in
+     * template bindings. String-based input definitions are assumed to be optional.
      *
      * @usageNotes
      *
@@ -2411,7 +2417,7 @@ export declare interface Directive {
      * ```typescript
      * @Component({
      *   selector: 'bank-account',
-     *   inputs: ['bankName', 'id: account-id'],
+     *   inputs: ['bankName', {name: 'id', alias: 'account-id'}],
      *   template: `
      *     Bank Name: {{bankName}}
      *     Account Id: {{id}}
@@ -2424,18 +2430,22 @@ export declare interface Directive {
      * ```
      *
      */
-    inputs?: string[];
+    inputs?: ({
+        name: string;
+        alias?: string;
+        required?: boolean;
+    } | string)[];
     /**
      * Enumerates the set of event-bound output properties.
      *
      * When an output property emits an event, an event handler attached to that event
      * in the template is invoked.
      *
-     * The `outputs` property defines a set of `directiveProperty` to `bindingProperty`
+     * The `outputs` property defines a set of `directiveProperty` to `alias`
      * configuration:
      *
      * - `directiveProperty` specifies the component property that emits events.
-     * - `bindingProperty` specifies the DOM property the event handler is attached to.
+     * - `alias` specifies the DOM property the event handler is attached to.
      *
      * @usageNotes
      *
@@ -2965,6 +2975,10 @@ export declare interface Effect {
  */
 export declare function effect(effectFn: () => void): Effect;
 
+/**
+ * Keys within serialized view data structure to represent various
+ * parts. See the `SerializedView` interface below for additional information.
+ */
 declare const ELEMENT_CONTAINERS = "e";
 
 /**
@@ -4585,7 +4599,11 @@ export declare interface Input {
     /**
      * The name of the DOM property to which the input property is bound.
      */
-    bindingPropertyName?: string;
+    alias?: string;
+    /**
+     * Whether the input is required for the directive to function.
+     */
+    required?: boolean;
 }
 
 /**
@@ -4643,8 +4661,8 @@ export declare interface InputDecorator {
      *
      * @see [Input and Output properties](guide/inputs-outputs)
      */
-    (bindingPropertyName?: string): any;
-    new (bindingPropertyName?: string): any;
+    (arg?: string | Input): any;
+    new (arg?: string | Input): any;
 }
 
 /**
@@ -5033,7 +5051,7 @@ declare interface LContainer extends Array<any> {
      */
     [T_HOST]: TNode;
     /** The comment element that serves as an anchor for this LContainer. */
-    readonly [NATIVE]: RComment;
+    [NATIVE]: RComment;
     /**
      * Array of `ViewRef`s used by any `ViewContainerRef`s that point to this container.
      *
@@ -5043,6 +5061,17 @@ declare interface LContainer extends Array<any> {
      * doing so creates circular dependency.
      */
     [VIEW_REFS]: unknown[] | null;
+    /**
+     * Array of dehydrated views within this container.
+     *
+     * This information is used during the hydration process on the client.
+     * The hydration logic tries to find a matching dehydrated view, "claim" it
+     * and use this information to do further matching. After that, this "claimed"
+     * view is removed from the list. The remaining "unclaimed" views are
+     * "garbage-collected" later on, i.e. removed from the DOM once the hydration
+     * logic finishes.
+     */
+    [DEHYDRATED_VIEWS]: DehydratedContainerView[] | null;
 }
 
 /**
@@ -5962,6 +5991,8 @@ export declare class NgZone {
  */
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 
+declare const NUM_ROOT_NODES = "r";
+
 declare const ON_DESTROY_HOOKS = 22;
 
 /**
@@ -6100,7 +6131,7 @@ export declare interface Output {
     /**
      * The name of the DOM property to which the output property is bound.
      */
-    bindingPropertyName?: string;
+    alias?: string;
 }
 
 /**
@@ -6131,8 +6162,8 @@ export declare interface OutputDecorator {
      * @see [Input and Output properties](guide/inputs-outputs)
      *
      */
-    (bindingPropertyName?: string): any;
-    new (bindingPropertyName?: string): any;
+    (alias?: string): any;
+    new (alias?: string): any;
 }
 
 /**
@@ -7833,6 +7864,28 @@ export declare interface SelfDecorator {
 }
 
 /**
+ * Serialized data structure that contains relevant hydration
+ * annotation information about a view that is a part of a
+ * ViewContainer collection.
+ */
+declare interface SerializedContainerView extends SerializedView {
+    /**
+     * Unique id that represents a TView that was used to create
+     * a given instance of a view:
+     *  - TViewType.Embedded: a unique id generated during serialization on the server
+     *  - TViewType.Component: an id generated based on component properties
+     *                        (see `getComponentId` function for details)
+     */
+    [TEMPLATE_ID]: string;
+    /**
+     * Number of root nodes that belong to this view.
+     * This information is needed to effectively traverse the DOM tree
+     * and identify segments that belong to different views.
+     */
+    [NUM_ROOT_NODES]: number;
+}
+
+/**
  * Represents element containers within this view, stored as key-value pairs
  * where key is an index of a container in an LView (also used in the
  * `elementContainerStart` instruction), the value is the number of root nodes
@@ -7853,6 +7906,20 @@ declare interface SerializedView {
      * Serialized information about <ng-container>s.
      */
     [ELEMENT_CONTAINERS]?: SerializedElementContainers;
+    /**
+     * Serialized information about templates.
+     * Key-value pairs where a key is an index of the corresponding
+     * `template` instruction and the value is a unique id that can
+     * be used during hydration to identify that template.
+     */
+    [TEMPLATES]?: Record<number, string>;
+    /**
+     * Serialized information about view containers.
+     * Key-value pairs where a key is an index of the corresponding
+     * LContainer entry within an LView, and the value is a list
+     * of serialized information about views within this container.
+     */
+    [CONTAINERS]?: Record<number, SerializedContainerView[]>;
 }
 
 /**
@@ -8167,6 +8234,8 @@ declare interface TElementNode extends TNode {
     value: string;
 }
 
+declare const TEMPLATE_ID = "i";
+
 /**
  * Represents an embedded template that can be used to instantiate embedded views.
  * To instantiate embedded views based on a template, use the `ViewContainerRef`
@@ -8207,6 +8276,8 @@ export declare abstract class TemplateRef<C> {
      */
     abstract createEmbeddedView(context: C, injector?: Injector): EmbeddedViewRef<C>;
 }
+
+declare const TEMPLATES = "t";
 
 /**
  * The Testability service provides testing hooks that can be accessed from
@@ -9522,6 +9593,13 @@ declare interface TView {
      * view. This means that the view is likely corrupted and we should try to recover it.
      */
     incompleteFirstPass: boolean;
+    /**
+     * Unique id of this TView for hydration purposes:
+     * - TViewType.Embedded: a unique id generated during serialization on the server
+     * - TViewType.Component: an id generated based on component properties
+     *                        (see `getComponentId` function for details)
+     */
+    ssrId: string | null;
 }
 
 /**
@@ -12576,7 +12654,10 @@ export declare function ɵɵclassProp(className: string, value: boolean | undefi
  * @publicApi
  */
 export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
-    [key: string]: string;
+    [key: string]: string | {
+        alias: string | null;
+        required: boolean;
+    };
 }, OutputMap extends {
     [key: string]: string;
 }, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never> = unknown;
@@ -12751,7 +12832,10 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
  * @publicApi
  */
 export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
-    [key: string]: string;
+    [key: string]: string | {
+        alias: string | null;
+        required: boolean;
+    };
 }, OutputMap extends {
     [key: string]: string;
 }, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never> = unknown;
