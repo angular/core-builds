@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-64067a1
+ * @license Angular v16.0.0-next.2+sha-cf98777
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9091,35 +9091,41 @@ function forEachSingleProvider(providers, fn) {
 }
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
+ * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
  *
- * BY default, the value is randomly generated and assigned to the application by Angular.
- * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
- * the root {@link Injector} that uses this token.
+ * The token is needed in cases when multiple applications are bootstrapped on a page
+ * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
+ * have different `APP_ID` value setup. For example:
+ *
+ * ```
+ * bootstrapApplication(ComponentA, {
+ *   providers: [
+ *     { provide: APP_ID, useValue: 'app-a' },
+ *     // ... other providers ...
+ *   ]
+ * });
+ *
+ * bootstrapApplication(ComponentB, {
+ *   providers: [
+ *     { provide: APP_ID, useValue: 'app-b' },
+ *     // ... other providers ...
+ *   ]
+ * });
+ * ```
+ *
+ * By default, when there is only one application bootstrapped, you don't need to provide the
+ * `APP_ID` token (the `ng` will be used as an app ID).
  *
  * @publicApi
  */
 const APP_ID = new InjectionToken('AppId', {
     providedIn: 'root',
-    factory: _appIdRandomProviderFactory,
+    factory: () => DEFAULT_APP_ID,
 });
-function _appIdRandomProviderFactory() {
-    return `${_randomChar()}${_randomChar()}${_randomChar()}`;
-}
-/**
- * Providers that generate a random `APP_ID_TOKEN`.
- * @publicApi
- */
-const APP_ID_RANDOM_PROVIDER = {
-    provide: APP_ID,
-    useFactory: _appIdRandomProviderFactory,
-    deps: [],
-};
-function _randomChar() {
-    return String.fromCharCode(97 + Math.floor(Math.random() * 25));
-}
+/** Default value of the `APP_ID` token. */
+const DEFAULT_APP_ID = 'ng';
 /**
  * A function that is executed when a platform is initialized.
  * @publicApi
@@ -9638,7 +9644,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.2+sha-64067a1');
+const VERSION = new Version('16.0.0-next.2+sha-cf98777');
 
 // This default value is when checking the hierarchy for a token.
 //

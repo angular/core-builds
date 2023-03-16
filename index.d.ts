@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.2+sha-64067a1
+ * @license Angular v16.0.0-next.2+sha-cf98777
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -187,13 +187,32 @@ export declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "B
 export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: ComponentRef<any>) => void)[]>;
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") representing a unique string ID, used
+ * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
  *
- * BY default, the value is randomly generated and assigned to the application by Angular.
- * To provide a custom ID value, use a DI provider <!-- TODO: provider --> to configure
- * the root {@link Injector} that uses this token.
+ * The token is needed in cases when multiple applications are bootstrapped on a page
+ * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
+ * have different `APP_ID` value setup. For example:
+ *
+ * ```
+ * bootstrapApplication(ComponentA, {
+ *   providers: [
+ *     { provide: APP_ID, useValue: 'app-a' },
+ *     // ... other providers ...
+ *   ]
+ * });
+ *
+ * bootstrapApplication(ComponentB, {
+ *   providers: [
+ *     { provide: APP_ID, useValue: 'app-b' },
+ *     // ... other providers ...
+ *   ]
+ * });
+ * ```
+ *
+ * By default, when there is only one application bootstrapped, you don't need to provide the
+ * `APP_ID` token (the `ng` will be used as an app ID).
  *
  * @publicApi
  */
@@ -270,8 +289,6 @@ export declare const APP_ID: InjectionToken<string>;
  * @publicApi
  */
 export declare const APP_INITIALIZER: InjectionToken<readonly (() => Observable<unknown> | Promise<unknown> | void)[]>;
-
-declare function _appIdRandomProviderFactory(): string;
 
 /**
  * Set of config options available during the application bootstrap operation.
@@ -10228,16 +10245,6 @@ export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBy
  * @param doc A reference to the current Document instance.
  */
 export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): void;
-
-/**
- * Providers that generate a random `APP_ID_TOKEN`.
- * @publicApi
- */
-export declare const ɵAPP_ID_RANDOM_PROVIDER: {
-    provide: InjectionToken<string>;
-    useFactory: typeof _appIdRandomProviderFactory;
-    deps: any[];
-};
 
 /**
  * A set of marker values to be used in the attributes arrays. These markers indicate that some
