@@ -15327,15 +15327,7 @@ function createBaseDirectiveTypeParams(meta) {
 }
 function getInputsTypeExpression(meta) {
   return literalMap(Object.keys(meta.inputs).map((key) => {
-    const value = meta.inputs[key];
-    return {
-      key,
-      value: literalMap([
-        { key: "alias", value: literal(value.bindingPropertyName), quoted: true },
-        { key: "required", value: literal(value.required), quoted: true }
-      ]),
-      quoted: true
-    };
+    return { key, value: literal(meta.inputs[key].bindingPropertyName), quoted: true };
   }));
 }
 function createDirectiveType(meta) {
@@ -15857,12 +15849,11 @@ function convertDirectiveFacadeToMetadata(facade) {
       propMetadata[field].forEach((ann) => {
         if (isInput(ann)) {
           inputsFromType[field] = {
-            bindingPropertyName: ann.alias || field,
-            classPropertyName: field,
-            required: ann.required || false
+            bindingPropertyName: ann.bindingPropertyName || field,
+            classPropertyName: field
           };
         } else if (isOutput(ann)) {
-          outputsFromType[field] = ann.alias || field;
+          outputsFromType[field] = ann.bindingPropertyName || field;
         }
       });
     }
@@ -16096,7 +16087,7 @@ function isOutput(value) {
 function inputsMappingToInputMetadata(inputs) {
   return Object.keys(inputs).reduce((result, key) => {
     const value = inputs[key];
-    result[key] = typeof value === "string" ? { bindingPropertyName: value, classPropertyName: value, required: false } : { bindingPropertyName: value[0], classPropertyName: value[1], required: false };
+    result[key] = typeof value === "string" ? { bindingPropertyName: value, classPropertyName: value } : { bindingPropertyName: value[0], classPropertyName: value[1] };
     return result;
   }, {});
 }
@@ -16104,12 +16095,11 @@ function parseInputsArray(values) {
   return values.reduce((results, value) => {
     if (typeof value === "string") {
       const [bindingPropertyName, classPropertyName] = parseMappingString(value);
-      results[classPropertyName] = { bindingPropertyName, classPropertyName, required: false };
+      results[classPropertyName] = { bindingPropertyName, classPropertyName };
     } else {
       results[value.name] = {
         bindingPropertyName: value.alias || value.name,
-        classPropertyName: value.name,
-        required: value.required || false
+        classPropertyName: value.name
       };
     }
     return results;
@@ -16117,8 +16107,8 @@ function parseInputsArray(values) {
 }
 function parseMappingStringArray(values) {
   return values.reduce((results, value) => {
-    const [alias, fieldName] = parseMappingString(value);
-    results[fieldName] = alias;
+    const [publicName, fieldName] = parseMappingString(value);
+    results[fieldName] = publicName;
     return results;
   }, {});
 }
@@ -16154,7 +16144,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.0.0-next.2+sha-92e41e9");
+var VERSION2 = new Version("16.0.0-next.2+sha-e8ed065");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17469,7 +17459,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17538,7 +17528,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17720,7 +17710,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17743,7 +17733,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17781,7 +17771,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17802,7 +17792,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17837,7 +17827,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.0.0-next.2+sha-92e41e9"));
+  definitionMap.set("version", literal("16.0.0-next.2+sha-e8ed065"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17854,7 +17844,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.0.0-next.2+sha-92e41e9");
+var VERSION3 = new Version("16.0.0-next.2+sha-e8ed065");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -18009,7 +17999,6 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["INJECTABLE_INHERITS_INVALID_CONSTRUCTOR"] = 2016] = "INJECTABLE_INHERITS_INVALID_CONSTRUCTOR";
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_UNDEFINED_BINDING"] = 2017] = "HOST_DIRECTIVE_UNDEFINED_BINDING";
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_CONFLICTING_ALIAS"] = 2018] = "HOST_DIRECTIVE_CONFLICTING_ALIAS";
-  ErrorCode2[ErrorCode2["HOST_DIRECTIVE_MISSING_REQUIRED_BINDING"] = 2019] = "HOST_DIRECTIVE_MISSING_REQUIRED_BINDING";
   ErrorCode2[ErrorCode2["SYMBOL_NOT_EXPORTED"] = 3001] = "SYMBOL_NOT_EXPORTED";
   ErrorCode2[ErrorCode2["IMPORT_CYCLE_DETECTED"] = 3003] = "IMPORT_CYCLE_DETECTED";
   ErrorCode2[ErrorCode2["IMPORT_GENERATION_FAILURE"] = 3004] = "IMPORT_GENERATION_FAILURE";
@@ -18038,7 +18027,6 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["WRITE_TO_READ_ONLY_VARIABLE"] = 8005] = "WRITE_TO_READ_ONLY_VARIABLE";
   ErrorCode2[ErrorCode2["DUPLICATE_VARIABLE_DECLARATION"] = 8006] = "DUPLICATE_VARIABLE_DECLARATION";
   ErrorCode2[ErrorCode2["SPLIT_TWO_WAY_BINDING"] = 8007] = "SPLIT_TWO_WAY_BINDING";
-  ErrorCode2[ErrorCode2["MISSING_REQUIRED_INPUTS"] = 8008] = "MISSING_REQUIRED_INPUTS";
   ErrorCode2[ErrorCode2["INVALID_BANANA_IN_BOX"] = 8101] = "INVALID_BANANA_IN_BOX";
   ErrorCode2[ErrorCode2["NULLISH_COALESCING_NOT_NULLABLE"] = 8102] = "NULLISH_COALESCING_NOT_NULLABLE";
   ErrorCode2[ErrorCode2["MISSING_CONTROL_FLOW_DIRECTIVE"] = 8103] = "MISSING_CONTROL_FLOW_DIRECTIVE";
@@ -20191,16 +20179,6 @@ function readInputsType(type) {
           classPropertyName: member.name.text,
           required: false
         };
-      } else {
-        const config = readMapType(member.type, (innerValue) => {
-          var _a;
-          return (_a = readStringType(innerValue)) != null ? _a : readBooleanType(innerValue);
-        });
-        inputsMap[member.name.text] = {
-          classPropertyName: member.name.text,
-          bindingPropertyName: config.alias,
-          required: config.required
-        };
       }
     }
   }
@@ -20471,7 +20449,7 @@ var HostDirectivesResolver = class {
           const bindings = source.getByBindingPropertyName(publicName);
           if (bindings !== null) {
             for (const binding of bindings) {
-              result[binding.classPropertyName] = valueResolver(allowedProperties[publicName], binding);
+              result[binding.classPropertyName] = valueResolver(allowedProperties[publicName], binding.classPropertyName);
             }
           }
         }
@@ -20480,12 +20458,8 @@ var HostDirectivesResolver = class {
     return result;
   }
 };
-function resolveInput(bindingName, binding) {
-  return {
-    bindingPropertyName: bindingName,
-    classPropertyName: binding.classPropertyName,
-    required: binding.required
-  };
+function resolveInput(bindingName, classPropertyName) {
+  return { bindingPropertyName: bindingName, classPropertyName, required: false };
 }
 function resolveOutput(bindingName) {
   return bindingName;
@@ -21607,28 +21581,19 @@ function validateHostDirectives(origin, hostDirectives, metaReader) {
     if (hostMeta.isComponent) {
       diagnostics.push(makeDiagnostic(ErrorCode.HOST_DIRECTIVE_COMPONENT, current.directive.getOriginForDiagnostics(origin), `Host directive ${hostMeta.name} cannot be a component`));
     }
-    const requiredInputNames = Array.from(hostMeta.inputs).filter((input) => input.required).map((input) => input.classPropertyName);
-    validateHostDirectiveMappings("input", current, hostMeta, origin, diagnostics, requiredInputNames.length > 0 ? new Set(requiredInputNames) : null);
-    validateHostDirectiveMappings("output", current, hostMeta, origin, diagnostics, null);
+    validateHostDirectiveMappings("input", current, hostMeta, origin, diagnostics);
+    validateHostDirectiveMappings("output", current, hostMeta, origin, diagnostics);
   }
   return diagnostics;
 }
-function validateHostDirectiveMappings(bindingType, hostDirectiveMeta, meta, origin, diagnostics, requiredBindings) {
+function validateHostDirectiveMappings(bindingType, hostDirectiveMeta, meta, origin, diagnostics) {
   const className = meta.name;
   const hostDirectiveMappings = bindingType === "input" ? hostDirectiveMeta.inputs : hostDirectiveMeta.outputs;
   const existingBindings = bindingType === "input" ? meta.inputs : meta.outputs;
-  const exposedRequiredBindings = /* @__PURE__ */ new Set();
   for (const publicName in hostDirectiveMappings) {
     if (hostDirectiveMappings.hasOwnProperty(publicName)) {
-      const bindings = existingBindings.getByBindingPropertyName(publicName);
-      if (bindings === null) {
+      if (!existingBindings.hasBindingPropertyName(publicName)) {
         diagnostics.push(makeDiagnostic(ErrorCode.HOST_DIRECTIVE_UNDEFINED_BINDING, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`));
-      } else if (requiredBindings !== null) {
-        for (const field of bindings) {
-          if (requiredBindings.has(field.classPropertyName)) {
-            exposedRequiredBindings.add(field.classPropertyName);
-          }
-        }
       }
       const remappedPublicName = hostDirectiveMappings[publicName];
       const bindingsForPublicName = existingBindings.getByBindingPropertyName(remappedPublicName);
@@ -21640,18 +21605,6 @@ function validateHostDirectiveMappings(bindingType, hostDirectiveMeta, meta, ori
         }
       }
     }
-  }
-  if (requiredBindings !== null && requiredBindings.size !== exposedRequiredBindings.size) {
-    const missingBindings = [];
-    for (const publicName of requiredBindings) {
-      if (!exposedRequiredBindings.has(publicName)) {
-        const name = existingBindings.getByClassPropertyName(publicName);
-        if (name) {
-          missingBindings.push(`'${name.bindingPropertyName}'`);
-        }
-      }
-    }
-    diagnostics.push(makeDiagnostic(ErrorCode.HOST_DIRECTIVE_MISSING_REQUIRED_BINDING, hostDirectiveMeta.directive.getOriginForDiagnostics(origin), `Required ${bindingType}${missingBindings.length === 1 ? "" : "s"} ${missingBindings.join(", ")} from host directive ${className} must be exposed.`));
   }
 }
 function getUndecoratedClassWithAngularFeaturesDiagnostic(node) {
@@ -24849,27 +24802,14 @@ function parseInputsArray2(decoratorMetadata, evaluator) {
   const inputs = {};
   const inputsArray = evaluator.evaluate(inputsField);
   if (!Array.isArray(inputsArray)) {
-    throw createValueHasWrongTypeError(inputsField, inputsArray, `Failed to resolve @Directive.inputs to an array`);
+    throw createValueHasWrongTypeError(inputsField, inputsArray, `Failed to resolve @Directive.inputs to a string array`);
   }
-  for (let i = 0; i < inputsArray.length; i++) {
-    const value = inputsArray[i];
+  for (const value of inputsArray) {
     if (typeof value === "string") {
-      const [bindingPropertyName, classPropertyName] = parseMappingString2(value);
-      inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required: false };
-    } else if (value instanceof Map) {
-      const name = value.get("name");
-      const alias = value.get("alias");
-      const required = value.get("required");
-      if (typeof name !== "string") {
-        throw createValueHasWrongTypeError(inputsField, name, `Value at position ${i} of @Directive.inputs array must have a "name" property`);
-      }
-      inputs[name] = {
-        classPropertyName: name,
-        bindingPropertyName: typeof alias === "string" ? alias : name,
-        required: required === true
-      };
+      const [bindingPropertyName, fieldName] = parseMappingString2(value);
+      inputs[fieldName] = { bindingPropertyName, classPropertyName: fieldName, required: false };
     } else {
-      throw createValueHasWrongTypeError(inputsField, value, `@Directive.inputs array can only contain strings or object literals`);
+      throw createValueHasWrongTypeError(inputsField, value, `Failed to resolve @Directive.inputs to a string array`);
     }
   }
   return inputs;
@@ -24878,19 +24818,14 @@ function parseInputFields(inputMembers, evaluator) {
   const inputs = {};
   parseDecoratedFields(inputMembers, evaluator, (classPropertyName, options, decorator) => {
     let bindingPropertyName;
-    let required = false;
     if (options === null) {
       bindingPropertyName = classPropertyName;
     } else if (typeof options === "string") {
       bindingPropertyName = options;
-    } else if (options instanceof Map) {
-      const aliasInConfig = options.get("alias");
-      bindingPropertyName = typeof aliasInConfig === "string" ? aliasInConfig : classPropertyName;
-      required = options.get("required") === true;
     } else {
-      throw createValueHasWrongTypeError(Decorator.nodeForError(decorator), options, `@${decorator.name} decorator argument must resolve to a string or an object literal`);
+      throw createValueHasWrongTypeError(Decorator.nodeForError(decorator), options, `@${decorator.name} decorator argument must resolve to a string`);
     }
-    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required };
+    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required: false };
   });
   return inputs;
 }
@@ -25022,7 +24957,7 @@ var DirectiveSymbol = class extends SemanticSymbol {
   }
 };
 function isInputMappingEqual(current, previous) {
-  return isInputOrOutputEqual(current, previous);
+  return isInputOrOutputEqual(current, previous) && current.required === previous.required;
 }
 function isInputOrOutputEqual(current, previous) {
   return current.classPropertyName === previous.classPropertyName && current.bindingPropertyName === previous.bindingPropertyName;
@@ -29969,10 +29904,6 @@ Consider enabling the 'strictTemplates' option in your tsconfig.json for better 
     }
     this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, input.keySpan, import_typescript77.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.SPLIT_TWO_WAY_BINDING), errorMsg, relatedMessages));
   }
-  missingRequiredInputs(templateId, element, directiveName, isComponent, inputAliases) {
-    const message = `Required input${inputAliases.length === 1 ? "" : "s"} ${inputAliases.map((n) => `'${n}'`).join(", ")} from ${isComponent ? "component" : "directive"} ${directiveName} must be specified.`;
-    this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), element.startSourceSpan, import_typescript77.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.MISSING_REQUIRED_INPUTS), message));
-  }
 };
 function makeInlineDiagnostic(templateId, code, node, messageText, relatedInformation) {
   return __spreadProps(__spreadValues({}, makeDiagnostic(code, node, messageText, relatedInformation)), {
@@ -30703,17 +30634,22 @@ var TcbDirectiveCtorOp = class extends TcbOp {
     addExpressionIdentifier(id, ExpressionIdentifier.DIRECTIVE);
     addParseSpanInfo(id, this.node.startSourceSpan || this.node.sourceSpan);
     const genericInputs = /* @__PURE__ */ new Map();
-    const boundAttrs = getBoundAttributes(this.dir, this.node);
-    for (const attr of boundAttrs) {
-      if (!this.tcb.env.config.checkTypeOfAttributes && attr.attribute instanceof TextAttribute) {
+    const inputs = getBoundInputs(this.dir, this.node, this.tcb);
+    for (const input of inputs) {
+      if (!this.tcb.env.config.checkTypeOfAttributes && input.attribute instanceof TextAttribute) {
         continue;
       }
-      for (const { fieldName } of attr.inputs) {
+      for (const fieldName of input.fieldNames) {
         if (genericInputs.has(fieldName)) {
           continue;
         }
-        const expression = translateInput(attr.attribute, this.tcb, this.scope);
-        genericInputs.set(fieldName, { type: "binding", field: fieldName, expression, sourceSpan: attr.attribute.sourceSpan });
+        const expression = translateInput(input.attribute, this.tcb, this.scope);
+        genericInputs.set(fieldName, {
+          type: "binding",
+          field: fieldName,
+          expression,
+          sourceSpan: input.attribute.sourceSpan
+        });
       }
     }
     for (const { classPropertyName } of this.dir.inputs) {
@@ -30743,16 +30679,12 @@ var TcbDirectiveInputsOp = class extends TcbOp {
   }
   execute() {
     let dirId = null;
-    const boundAttrs = getBoundAttributes(this.dir, this.node);
-    const seenRequiredInputs = /* @__PURE__ */ new Set();
-    for (const attr of boundAttrs) {
-      const expr = widenBinding(translateInput(attr.attribute, this.tcb, this.scope), this.tcb);
+    const inputs = getBoundInputs(this.dir, this.node, this.tcb);
+    for (const input of inputs) {
+      const expr = widenBinding(translateInput(input.attribute, this.tcb, this.scope), this.tcb);
       let assignment = wrapForDiagnostics(expr);
-      for (const { fieldName, required } of attr.inputs) {
+      for (const fieldName of input.fieldNames) {
         let target;
-        if (required) {
-          seenRequiredInputs.add(fieldName);
-        }
         if (this.dir.coercedInputFields.has(fieldName)) {
           const dirTypeRef = this.tcb.env.referenceType(this.dir.ref);
           if (!import_typescript81.default.isTypeReferenceNode(dirTypeRef)) {
@@ -30783,30 +30715,18 @@ var TcbDirectiveInputsOp = class extends TcbOp {
           }
           target = this.dir.stringLiteralInputFields.has(fieldName) ? import_typescript81.default.factory.createElementAccessExpression(dirId, import_typescript81.default.factory.createStringLiteral(fieldName)) : import_typescript81.default.factory.createPropertyAccessExpression(dirId, import_typescript81.default.factory.createIdentifier(fieldName));
         }
-        if (attr.attribute.keySpan !== void 0) {
-          addParseSpanInfo(target, attr.attribute.keySpan);
+        if (input.attribute.keySpan !== void 0) {
+          addParseSpanInfo(target, input.attribute.keySpan);
         }
         assignment = import_typescript81.default.factory.createBinaryExpression(target, import_typescript81.default.SyntaxKind.EqualsToken, assignment);
       }
-      addParseSpanInfo(assignment, attr.attribute.sourceSpan);
-      if (!this.tcb.env.config.checkTypeOfAttributes && attr.attribute instanceof TextAttribute) {
+      addParseSpanInfo(assignment, input.attribute.sourceSpan);
+      if (!this.tcb.env.config.checkTypeOfAttributes && input.attribute instanceof TextAttribute) {
         markIgnoreDiagnostics(assignment);
       }
       this.scope.addStatement(import_typescript81.default.factory.createExpressionStatement(assignment));
     }
-    this.checkRequiredInputs(seenRequiredInputs);
     return null;
-  }
-  checkRequiredInputs(seenRequiredInputs) {
-    const missing = [];
-    for (const input of this.dir.inputs) {
-      if (input.required && !seenRequiredInputs.has(input.classPropertyName)) {
-        missing.push(input.bindingPropertyName);
-      }
-    }
-    if (missing.length > 0) {
-      this.tcb.oobRecorder.missingRequiredInputs(this.tcb.id, this.node, this.dir.name, this.dir.isComponent, missing);
-    }
   }
 };
 var TcbDirectiveCtorCircularFallbackOp = class extends TcbOp {
@@ -31406,19 +31326,18 @@ function tcbCallTypeCtor(dir, tcb, inputs) {
     [import_typescript81.default.factory.createObjectLiteralExpression(members)]
   );
 }
-function getBoundAttributes(directive, node) {
+function getBoundInputs(directive, node, tcb) {
   const boundInputs = [];
   const processAttribute = (attr) => {
     if (attr instanceof BoundAttribute && attr.type !== 0) {
       return;
     }
     const inputs = directive.inputs.getByBindingPropertyName(attr.name);
-    if (inputs !== null) {
-      boundInputs.push({
-        attribute: attr,
-        inputs: inputs.map((input) => ({ fieldName: input.classPropertyName, required: input.required }))
-      });
+    if (inputs === null) {
+      return;
     }
+    const fieldNames = inputs.map((input) => input.classPropertyName);
+    boundInputs.push({ attribute: attr, fieldNames });
   };
   node.inputs.forEach(processAttribute);
   node.attributes.forEach(processAttribute);
