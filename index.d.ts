@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-c934a8e
+ * @license Angular v16.0.0-next.3+sha-8d99ad0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2422,19 +2422,13 @@ export declare interface Directive {
      * Enumerates the set of data-bound input properties for a directive
      *
      * Angular automatically updates input properties during change detection.
-     * The `inputs` property accepts either strings or object literals that configure the directive
-     * properties that should be exposed as inputs.
+     * The `inputs` property defines a set of `directiveProperty` to `bindingProperty`
+     * configuration:
      *
-     * When an object literal is passed in, the `name` property indicates which property on the
-     * class the input should write to, while the `alias` determines the name under
-     * which the input will be available in template bindings. The `required` property indicates that
-     * the input is required which will trigger a compile-time error if it isn't passed in when the
-     * directive is used.
+     * - `directiveProperty` specifies the component property where the value is written.
+     * - `bindingProperty` specifies the DOM property where the value is read from.
      *
-     * When a string is passed into the `inputs` array, it can have a format of `'name'` or
-     * `'name: alias'` where `name` is the property on the class that the directive should write
-     * to, while the `alias` determines the name under which the input will be available in
-     * template bindings. String-based input definitions are assumed to be optional.
+     * When `bindingProperty` is not provided, it is assumed to be equal to `directiveProperty`.
      *
      * @usageNotes
      *
@@ -2443,7 +2437,7 @@ export declare interface Directive {
      * ```typescript
      * @Component({
      *   selector: 'bank-account',
-     *   inputs: ['bankName', {name: 'id', alias: 'account-id'}],
+     *   inputs: ['bankName', 'id: account-id'],
      *   template: `
      *     Bank Name: {{bankName}}
      *     Account Id: {{id}}
@@ -2456,22 +2450,18 @@ export declare interface Directive {
      * ```
      *
      */
-    inputs?: ({
-        name: string;
-        alias?: string;
-        required?: boolean;
-    } | string)[];
+    inputs?: string[];
     /**
      * Enumerates the set of event-bound output properties.
      *
      * When an output property emits an event, an event handler attached to that event
      * in the template is invoked.
      *
-     * The `outputs` property defines a set of `directiveProperty` to `alias`
+     * The `outputs` property defines a set of `directiveProperty` to `bindingProperty`
      * configuration:
      *
      * - `directiveProperty` specifies the component property that emits events.
-     * - `alias` specifies the DOM property the event handler is attached to.
+     * - `bindingProperty` specifies the DOM property the event handler is attached to.
      *
      * @usageNotes
      *
@@ -4625,11 +4615,7 @@ export declare interface Input {
     /**
      * The name of the DOM property to which the input property is bound.
      */
-    alias?: string;
-    /**
-     * Whether the input is required for the directive to function.
-     */
-    required?: boolean;
+    bindingPropertyName?: string;
 }
 
 /**
@@ -4687,8 +4673,8 @@ export declare interface InputDecorator {
      *
      * @see [Input and Output properties](guide/inputs-outputs)
      */
-    (arg?: string | Input): any;
-    new (arg?: string | Input): any;
+    (bindingPropertyName?: string): any;
+    new (bindingPropertyName?: string): any;
 }
 
 /**
@@ -6157,7 +6143,7 @@ export declare interface Output {
     /**
      * The name of the DOM property to which the output property is bound.
      */
-    alias?: string;
+    bindingPropertyName?: string;
 }
 
 /**
@@ -6188,8 +6174,8 @@ export declare interface OutputDecorator {
      * @see [Input and Output properties](guide/inputs-outputs)
      *
      */
-    (alias?: string): any;
-    new (alias?: string): any;
+    (bindingPropertyName?: string): any;
+    new (bindingPropertyName?: string): any;
 }
 
 /**
@@ -12670,10 +12656,7 @@ export declare function ɵɵclassProp(className: string, value: boolean | undefi
  * @publicApi
  */
 export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportAs extends string[], InputMap extends {
-    [key: string]: string | {
-        alias: string | null;
-        required: boolean;
-    };
+    [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
 }, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never> = unknown;
@@ -12848,10 +12831,7 @@ export declare function ɵɵdefinePipe<T>(pipeDef: {
  * @publicApi
  */
 export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportAs extends string[], InputMap extends {
-    [key: string]: string | {
-        alias: string | null;
-        required: boolean;
-    };
+    [key: string]: string;
 }, OutputMap extends {
     [key: string]: string;
 }, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never> = unknown;
