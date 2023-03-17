@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-13dd614
+ * @license Angular v16.0.0-next.3+sha-17e9862
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1973,6 +1973,15 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  * @publicApi
  */
 export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
+
+/**
+ * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
+ * Angular will apply when inserting inline styles. If not provided, Angular will look up its value
+ * from the `ngCspNonce` attribute of the application root node.
+ *
+ * @publicApi
+ */
+export declare const CSP_NONCE: InjectionToken<string | null>;
 
 
 /**

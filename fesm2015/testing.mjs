@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-13dd614
+ * @license Angular v16.0.0-next.3+sha-17e9862
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9154,6 +9154,38 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * @publicApi
  */
 const ANIMATION_MODULE_TYPE = new InjectionToken('AnimationModuleType');
+// TODO(crisbeto): link to CSP guide here.
+/**
+ * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
+ * Angular will apply when inserting inline styles. If not provided, Angular will look up its value
+ * from the `ngCspNonce` attribute of the application root node.
+ *
+ * @publicApi
+ */
+const CSP_NONCE = new InjectionToken('CSP nonce', {
+    providedIn: 'root',
+    factory: () => {
+        var _a;
+        // Ideally we wouldn't have to use `querySelector` here since we know that the nonce will be on
+        // the root node, but because the token value is used in renderers, it has to be available
+        // *very* early in the bootstrapping process. This should be a fairly shallow search, because
+        // the app won't have been added to the DOM yet. Some approaches that were considered:
+        // 1. Find the root node through `ApplicationRef.components[i].location` - normally this would
+        // be enough for our purposes, but the token is injected very early so the `components` array
+        // isn't populated yet.
+        // 2. Find the root `LView` through the current `LView` - renderers are a prerequisite to
+        // creating the `LView`. This means that no `LView` will have been entered when this factory is
+        // invoked for the root component.
+        // 3. Have the token factory return `() => string` which is invoked when a nonce is requested -
+        // the slightly later execution does allow us to get an `LView` reference, but the fact that
+        // it is a function means that it could be executed at *any* time (including immediately) which
+        // may lead to weird bugs.
+        // 4. Have the `ComponentFactory` read the attribute and provide it to the injector under the
+        // hood - has the same problem as #1 and #2 in that the renderer is used to query for the root
+        // node and the nonce value needs to be available when the renderer is created.
+        return ((_a = getDocument().body.querySelector('[ngCspNonce]')) === null || _a === void 0 ? void 0 : _a.getAttribute('ngCspNonce')) || null;
+    },
+});
 
 function escapeTransferStateContent(text) {
     const escapedText = {
@@ -9685,7 +9717,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-13dd614');
+const VERSION = new Version('16.0.0-next.3+sha-17e9862');
 
 // This default value is when checking the hierarchy for a token.
 //
