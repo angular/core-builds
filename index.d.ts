@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-897a9e5
+ * @license Angular v16.0.0-next.3+sha-84a2ad7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10213,8 +10213,6 @@ declare interface WeakRef<T extends object> {
     deref(): T | undefined;
 }
 
-declare const WeakRef: WeakRefCtor;
-
 declare interface WeakRefCtor {
     new <T extends object>(value: T): WeakRef<T>;
 }
@@ -11642,6 +11640,11 @@ export declare interface ɵSafeValue {
  * Angular's current API.
  */
 export declare function ɵsetAllowDuplicateNgModuleIdsForTest(allowDuplicates: boolean): void;
+
+/**
+ * Use an alternate implementation of `WeakRef` if a platform implementation isn't available.
+ */
+export declare function ɵsetAlternateWeakRefImpl(impl: WeakRefCtor): void;
 
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
