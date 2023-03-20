@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.3+sha-868dcab
+ * @license Angular v15.2.3+sha-bae6b5c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8705,7 +8705,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.3+sha-868dcab');
+const VERSION = new Version('15.2.3+sha-bae6b5c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23571,10 +23571,11 @@ class TestBedCompiler {
         }
     }
     queueTypesFromModulesArray(arr) {
-        // Because we may encounter the same NgModule while processing the imports and exports of an
-        // NgModule tree, we cache them in this set so we can skip ones that have already been seen
-        // encountered. In some test setups, this caching resulted in 10X runtime improvement.
-        const processedNgModuleDefs = new Set();
+        // Because we may encounter the same NgModule or a standalone Component while processing
+        // the dependencies of an NgModule or a standalone Component, we cache them in this set so we
+        // can skip ones that have already been seen encountered. In some test setups, this caching
+        // resulted in 10X runtime improvement.
+        const processedDefs = new Set();
         const queueTypesFromModulesArrayRecur = (arr) => {
             for (const value of arr) {
                 if (Array.isArray(value)) {
@@ -23582,10 +23583,10 @@ class TestBedCompiler {
                 }
                 else if (hasNgModuleDef(value)) {
                     const def = value.ɵmod;
-                    if (processedNgModuleDefs.has(def)) {
+                    if (processedDefs.has(def)) {
                         continue;
                     }
-                    processedNgModuleDefs.add(def);
+                    processedDefs.add(def);
                     // Look through declarations, imports, and exports, and queue
                     // everything found there.
                     this.queueTypeArray(maybeUnwrapFn(def.declarations), value);
@@ -23598,6 +23599,10 @@ class TestBedCompiler {
                 else if (isStandaloneComponent(value)) {
                     this.queueType(value, null);
                     const def = getComponentDef(value);
+                    if (processedDefs.has(def)) {
+                        continue;
+                    }
+                    processedDefs.add(def);
                     const dependencies = maybeUnwrapFn(def.dependencies ?? []);
                     dependencies.forEach((dependency) => {
                         // Note: in AOT, the `dependencies` might also contain regular
