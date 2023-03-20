@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-8f539c1
+ * @license Angular v16.0.0-next.3+sha-897a9e5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2446,12 +2446,19 @@ function isCssClassMatching(attrs, cssClassToMatch, isProjectionMode) {
     ngDevMode &&
         assertEqual(cssClassToMatch, cssClassToMatch.toLowerCase(), 'Class name expected to be lowercase.');
     let i = 0;
+    // Indicates whether we are processing value from the implicit
+    // attribute section (i.e. before the first marker in the array).
+    let isImplicitAttrsSection = true;
     while (i < attrs.length) {
         let item = attrs[i++];
-        if (isProjectionMode && item === 'class') {
-            item = attrs[i];
-            if (classIndexOf(item.toLowerCase(), cssClassToMatch, 0) !== -1) {
-                return true;
+        if (typeof item === 'string' && isImplicitAttrsSection) {
+            const value = attrs[i++];
+            if (isProjectionMode && item === 'class') {
+                // We found a `class` attribute in the implicit attribute section,
+                // check if it matches the value of the `cssClassToMatch` argument.
+                if (classIndexOf(value.toLowerCase(), cssClassToMatch, 0) !== -1) {
+                    return true;
+                }
             }
         }
         else if (item === 1 /* AttributeMarker.Classes */) {
@@ -2462,6 +2469,11 @@ function isCssClassMatching(attrs, cssClassToMatch, isProjectionMode) {
                     return true;
             }
             return false;
+        }
+        else if (typeof item === 'number') {
+            // We've came across a first marker, which indicates
+            // that the implicit attribute section is over.
+            isImplicitAttrsSection = false;
         }
     }
     return false;
@@ -9719,7 +9731,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-8f539c1');
+const VERSION = new Version('16.0.0-next.3+sha-897a9e5');
 
 // This default value is when checking the hierarchy for a token.
 //
