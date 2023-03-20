@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-2303458
+ * @license Angular v16.0.0-next.3+sha-d5946bd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9361,7 +9361,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-2303458');
+const VERSION = new Version('16.0.0-next.3+sha-d5946bd');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24307,12 +24307,17 @@ const Pipe = makeDecorator('Pipe', (p) => ({ pure: true, ...p }), undefined, und
  * @Annotation
  * @publicApi
  */
-const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }));
+const Input = makePropDecorator('Input', (arg) => {
+    if (!arg) {
+        return {};
+    }
+    return typeof arg === 'string' ? { alias: arg } : arg;
+});
 /**
  * @Annotation
  * @publicApi
  */
-const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }));
+const Output = makePropDecorator('Output', (alias) => ({ alias }));
 /**
  * @Annotation
  * @publicApi
