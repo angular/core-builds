@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-3ef5d87
+ * @license Angular v16.0.0-next.3+sha-a0c289c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9383,6 +9383,7 @@ var NodeNavigationStep;
 const ELEMENT_CONTAINERS = 'e';
 const TEMPLATES = 't';
 const CONTAINERS = 'c';
+const MULTIPLIER = 'x';
 const NUM_ROOT_NODES = 'r';
 const TEMPLATE_ID = 'i'; // as it's also an "id"
 const NODES = 'n';
@@ -9578,11 +9579,11 @@ function getSerializedContainerViews(hydrationInfo, index) {
  * by calculating the sum of root nodes in all dehydrated views in this container.
  */
 function calcSerializedContainerSize(hydrationInfo, index) {
-    var _a;
+    var _a, _b;
     const views = (_a = getSerializedContainerViews(hydrationInfo, index)) !== null && _a !== void 0 ? _a : [];
     let numNodes = 0;
     for (let view of views) {
-        numNodes += view[NUM_ROOT_NODES];
+        numNodes += view[NUM_ROOT_NODES] * ((_b = view[MULTIPLIER]) !== null && _b !== void 0 ? _b : 1);
     }
     return numNodes;
 }
@@ -9766,7 +9767,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-3ef5d87');
+const VERSION = new Version('16.0.0-next.3+sha-a0c289c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22862,22 +22863,27 @@ function cleanupDehydratedViews(appRef) {
  * dehydrated views.
  */
 function locateDehydratedViewsInContainer(currentRNode, serializedViews) {
+    var _a;
     const dehydratedViews = [];
     for (const serializedView of serializedViews) {
-        const view = {
-            data: serializedView,
-            firstChild: null,
-        };
-        if (serializedView[NUM_ROOT_NODES] > 0) {
-            // Keep reference to the first node in this view,
-            // so it can be accessed while invoking template instructions.
-            view.firstChild = currentRNode;
-            // Move over to the next node after this view, which can
-            // either be a first node of the next view or an anchor comment
-            // node after the last view in a container.
-            currentRNode = siblingAfter(serializedView[NUM_ROOT_NODES], currentRNode);
+        // Repeats a view multiple times as needed, based on the serialized information
+        // (for example, for *ngFor-produced views).
+        for (let i = 0; i < ((_a = serializedView[MULTIPLIER]) !== null && _a !== void 0 ? _a : 1); i++) {
+            const view = {
+                data: serializedView,
+                firstChild: null,
+            };
+            if (serializedView[NUM_ROOT_NODES] > 0) {
+                // Keep reference to the first node in this view,
+                // so it can be accessed while invoking template instructions.
+                view.firstChild = currentRNode;
+                // Move over to the next node after this view, which can
+                // either be a first node of the next view or an anchor comment
+                // node after the last view in a container.
+                currentRNode = siblingAfter(serializedView[NUM_ROOT_NODES], currentRNode);
+            }
+            dehydratedViews.push(view);
         }
-        dehydratedViews.push(view);
     }
     return [currentRNode, dehydratedViews];
 }

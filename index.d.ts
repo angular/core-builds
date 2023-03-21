@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-3ef5d87
+ * @license Angular v16.0.0-next.3+sha-a0c289c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5469,6 +5469,8 @@ export declare interface ModuleWithProviders<T> {
 
 declare const MOVED_VIEWS = 9;
 
+declare const MULTIPLIER = "x";
+
 declare type Mutable<T extends {
     [x: string]: any;
 }, K extends string> = {
@@ -7752,6 +7754,12 @@ declare interface SerializedContainerView extends SerializedView {
      * and identify segments that belong to different views.
      */
     [NUM_ROOT_NODES]: number;
+    /**
+     * Number of times this view is repeated.
+     * This is used to avoid serializing and sending the same hydration
+     * information about similar views (for example, produced by *ngFor).
+     */
+    [MULTIPLIER]?: number;
 }
 
 /**
