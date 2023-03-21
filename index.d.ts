@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-6287153
+ * @license Angular v16.0.0-next.3+sha-83f53ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -811,6 +811,9 @@ export declare abstract class ChangeDetectorRef {
      *
      */
     abstract reattach(): void;
+}
+
+declare interface ChangeDetectorRefInterface extends ChangeDetectorRef {
 }
 
 declare const CHILD_HEAD = 13;
@@ -10022,9 +10025,6 @@ declare enum ViewEncapsulation_2 {
     ShadowDom = 3
 }
 
-declare interface viewEngine_ChangeDetectorRef_interface extends ChangeDetectorRef {
-}
-
 /**
  * Definition of what a view queries function should look like.
  */
@@ -11660,7 +11660,7 @@ export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 
 export declare function ɵunwrapSafeValue<T>(value: T): T;
 
-export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef, viewEngine_ChangeDetectorRef_interface {
+export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef, ChangeDetectorRefInterface {
     /**
      * This represents the `LView` associated with the point where `ChangeDetectorRef` was
      * requested.
