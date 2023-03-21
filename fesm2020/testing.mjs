@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-ced2376
+ * @license Angular v16.0.0-next.3+sha-3ef5d87
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,7 @@
 import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, ɵprovideNgZoneChangeDetection, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -1638,6 +1639,7 @@ function ngDevModeResetPerfCounters() {
         hydratedNodes: 0,
         hydratedComponents: 0,
         dehydratedViewsRemoved: 0,
+        dehydratedViewsCleanupRuns: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
@@ -9766,7 +9768,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-ced2376');
+const VERSION = new Version('16.0.0-next.3+sha-3ef5d87');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14907,11 +14909,8 @@ function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     // Hydration mode, looking up existing elements in DOM.
     const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
     ngDevMode && validateNodeExists(currentRNode);
+    setSegmentHead(hydrationInfo, index, currentRNode);
     const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
-    // If this container is non-empty, store the first node as a segment head,
-    // otherwise, this node is an anchor and segment head doesn't exist (thus `null`).
-    const segmentHead = viewContainerSize > 0 ? currentRNode : null;
-    setSegmentHead(hydrationInfo, index, segmentHead);
     const comment = siblingAfter(viewContainerSize, currentRNode);
     if (ngDevMode) {
         validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
@@ -15328,10 +15327,7 @@ function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     ngDevMode &&
         assertNumber(ngContainerSize, 'Unexpected state: hydrating an <ng-container>, ' +
             'but no hydration info is available.');
-    // If this container is non-empty, store the first node as a segment head,
-    // otherwise, this node is an anchor and segment head doesn't exist (thus `null`).
-    const segmentHead = ngContainerSize > 0 ? currentRNode : null;
-    setSegmentHead(hydrationInfo, index, segmentHead);
+    setSegmentHead(hydrationInfo, index, currentRNode);
     comment = siblingAfter(ngContainerSize, currentRNode);
     if (ngDevMode) {
         validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
@@ -22804,6 +22800,54 @@ function removeDehydratedView(dehydratedView, renderer) {
             nodesRemoved++;
         }
     }
+}
+/**
+ * Walks over all views within this LContainer invokes dehydrated views
+ * cleanup function for each one.
+ */
+function cleanupLContainer(lContainer) {
+    removeDehydratedViews(lContainer);
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        cleanupLView(lContainer[i]);
+    }
+}
+/**
+ * Walks over `LContainer`s and components registered within
+ * this LView and invokes dehydrated views cleanup function for each one.
+ */
+function cleanupLView(lView) {
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            cleanupLContainer(lContainer);
+        }
+        else if (Array.isArray(lView[i])) {
+            // This is a component, enter the `cleanupLView` recursively.
+            cleanupLView(lView[i]);
+        }
+    }
+}
+/**
+ * Walks over all views registered within the ApplicationRef and removes
+ * all dehydrated views from all `LContainer`s along the way.
+ */
+function cleanupDehydratedViews(appRef) {
+    // Wait once an app becomes stable and cleanup all views that
+    // were not claimed during the application bootstrap process.
+    // The timing is similar to when we kick off serialization on the server.
+    return appRef.isStable.pipe(first((isStable) => isStable)).toPromise().then(() => {
+        const viewRefs = appRef._views;
+        for (const viewRef of viewRefs) {
+            const lView = getComponentLViewForHydration(viewRef);
+            // An `lView` might be `null` if a `ViewRef` represents
+            // an embedded view (not a component view).
+            if (lView !== null && lView[HOST] !== null) {
+                cleanupLView(lView);
+                ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
+            }
+        }
+    });
 }
 
 /**
