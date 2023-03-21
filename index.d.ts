@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-24b3e8f
+ * @license Angular v16.0.0-next.3+sha-d1617c4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2303,12 +2303,27 @@ export declare function destroyPlatform(): void;
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
  * is injected in a component or directive, the callbacks run when that component or
  * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ *
+ * @publicApi
  */
 export declare abstract class DestroyRef {
     /**
-     * Registers a destroy callback in a given lifecycle scope.
+     * Registers a destroy callback in a given lifecycle scope.  Returns a cleanup function that can
+     * be invoked to unregister the callback.
+     *
+     * @usageNotes
+     * ### Example
+     * ```typescript
+     * const destroyRef = inject(DestroyRef);
+     *
+     * // register a destroy callback
+     * const unregisterFn = destroyRef.onDestroy(() => doSomethingOnDestroy());
+     *
+     * // stop the destroy callback from executing if needed
+     * unregisterFn();
+     * ```
      */
-    abstract onDestroy(callback: () => void): void;
+    abstract onDestroy(callback: () => void): () => void;
 }
 
 /**
@@ -6742,7 +6757,7 @@ declare class R3Injector extends EnvironmentInjector {
      * hook was found.
      */
     destroy(): void;
-    onDestroy(callback: () => void): void;
+    onDestroy(callback: () => void): () => void;
     runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
     get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags | InjectOptions): T;
     toString(): string;
@@ -6753,6 +6768,7 @@ declare class R3Injector extends EnvironmentInjector {
     private processProvider;
     private hydrate;
     private injectableDefInScope;
+    private removeOnDestroy;
 }
 
 declare interface RComment extends RNode {

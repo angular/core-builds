@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-24b3e8f
+ * @license Angular v16.0.0-next.3+sha-d1617c4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3721,6 +3721,17 @@ function storeLViewOnDestroy(lView, onDestroyCallback) {
         lView[ON_DESTROY_HOOKS] = [];
     }
     lView[ON_DESTROY_HOOKS].push(onDestroyCallback);
+}
+/**
+ * Removes previously registered LView-specific destroy callback.
+ */
+function removeLViewOnDestroy(lView, onDestroyCallback) {
+    if (lView[ON_DESTROY_HOOKS] === null)
+        return;
+    const destroyCBIdx = lView[ON_DESTROY_HOOKS].indexOf(onDestroyCallback);
+    if (destroyCBIdx !== -1) {
+        lView[ON_DESTROY_HOOKS].splice(destroyCBIdx, 1);
+    }
 }
 
 const instructionState = {
@@ -8817,6 +8828,7 @@ class R3Injector extends EnvironmentInjector {
     }
     onDestroy(callback) {
         this._onDestroyHooks.push(callback);
+        return () => this.removeOnDestroy(callback);
     }
     runInContext(fn) {
         this.assertNotDestroyed();
@@ -8989,6 +9001,12 @@ class R3Injector extends EnvironmentInjector {
         }
         else {
             return this.injectorDefTypes.has(providedIn);
+        }
+    }
+    removeOnDestroy(callback) {
+        const destroyCBIdx = this._onDestroyHooks.indexOf(callback);
+        if (destroyCBIdx !== -1) {
+            this._onDestroyHooks.splice(destroyCBIdx, 1);
         }
     }
 }
@@ -9731,7 +9749,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-24b3e8f');
+const VERSION = new Version('16.0.0-next.3+sha-d1617c4');
 
 // This default value is when checking the hierarchy for a token.
 //
