@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-a94b66f
+ * @license Angular v16.0.0-next.3+sha-504bd99
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9769,7 +9769,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-a94b66f');
+const VERSION = new Version('16.0.0-next.3+sha-504bd99');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14511,6 +14511,13 @@ function invalidSkipHydrationHost() {
     return new Error('The `ngSkipHydration` flag is applied on a node ' +
         'that doesn\'t act as a component host. Hydration can be ' +
         'skipped only on per-component basis.');
+}
+function notYetSupportedI18nBlockError() {
+    // TODO: improve error message and use RuntimeError instead.
+    return new Error('Hydration for nodes marked with `i18n` is not yet supported. ' +
+        'You can opt-out a component that uses `i18n` in a template using ' +
+        'the `ngSkipHydration` attribute or fall back to the previous ' +
+        'hydration logic (which re-creates the application structure).');
 }
 
 /**
