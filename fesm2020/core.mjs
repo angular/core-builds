@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-e2d3da5
+ * @license Angular v16.0.0-next.3+sha-66f8ed1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9373,7 +9373,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-e2d3da5');
+const VERSION = new Version('16.0.0-next.3+sha-66f8ed1');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29218,8 +29218,6 @@ function effect(effectFn) {
     // Effects start dirty.
     watch.notify();
     return {
-        consumer: watch,
-        schedule: watch.notify.bind(watch),
         destroy: () => {
             queuedWatches.delete(watch);
             globalWatches.delete(watch);

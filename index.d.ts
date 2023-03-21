@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-e2d3da5
+ * @license Angular v16.0.0-next.3+sha-66f8ed1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1588,78 +1588,6 @@ export declare interface ConstructorSansProvider {
     deps?: any[];
 }
 
-/**
- * Represents a reader that can depend on reactive values (`Producer`s) and receive
- * notifications when those values change.
- *
- * `Consumer`s do not wrap the reads they consume themselves, but rather can be set
- * as the active reader via `setActiveConsumer`.
- *
- * The set of dependencies of a `Consumer` is dynamic. Implementers expose a
- * monotonically increasing `trackingVersion` counter, which increments whenever
- * the `Consumer` is about to re-run any reactive reads it needs and establish a
- * new set of dependencies as a result.
- *
- * `Producer`s store the last `trackingVersion` they've seen from `Consumer`s which
- * have read them. This allows a `Producer` to identify whether its record of the
- * dependency is current or stale, by comparing the `Consumer`'s `trackingVersion`
- * to the version at which the dependency was established.
- */
-declare interface Consumer {
-    /**
-     * Numeric identifier of this `Producer`.
-     *
-     * May also be used to satisfy the interface for `Producer`.
-     */
-    readonly id: ConsumerId;
-    /**
-     * A `WeakRef` to this `Consumer` instance.
-     *
-     * An implementer provides this as a cached value to avoid the need to instantiate
-     * multiple `WeakRef` instances for the same `Consumer`.
-     *
-     * May also be used to satisfy the interface for `Producer`.
-     */
-    readonly ref: WeakRef<Consumer>;
-    /**
-     * A map of `Edge`s to `Producer` dependencies, keyed by the `ProducerId`.
-     *
-     * Used to poll `Producer`s to determine if the `Consumer` has really updated
-     * or not.
-     */
-    readonly producers: Map<ProducerId, Edge>;
-    /**
-     * Monotonically increasing counter representing a version of this `Consumer`'s
-     * dependencies.
-     */
-    readonly trackingVersion: number;
-    /**
-     * Called when a `Producer` dependency of this `Consumer` indicates it may
-     * have a new value.
-     *
-     * Notification alone does not mean the `Producer` has definitely produced a
-     * semantically different value, only that it _may_ have changed. Before a
-     * `Consumer` re-runs any computations or side effects, it should use the
-     * `consumerPollValueStatus` method to poll the `Producer`s on which it depends
-     * and determine if any of them have actually updated.
-     */
-    notify(): void;
-}
-
-/**
- * Identifier for a `Consumer`, which is a branded `number`.
- *
- * Note that `ProducerId` and `ConsumerId` are assigned from the same sequence, so the same `number`
- * will never be used for both.
- *
- * Branding provides additional type safety by ensuring that `ProducerId` and `ConsumerId` are
- * mutually unassignable without a cast. Since several `Map`s are keyed by these IDs, this prevents
- * `ConsumerId`s from being inadvertently used to look up `Producer`s or vice versa.
- */
-declare type ConsumerId = number & {
-    __consumer: true;
-};
-
 declare const CONTAINERS = "c";
 
 /**
@@ -2947,59 +2875,24 @@ export declare interface DoCheck {
 }
 
 /**
- * A bidirectional edge in the producer-consumer dependency graph.
- */
-declare interface Edge {
-    /**
-     * Weakly held reference to the `Consumer` side of this edge.
-     */
-    readonly consumerRef: WeakRef<Consumer>;
-    /**
-     * Weakly held reference to the `Producer` side of this edge.
-     */
-    readonly producerRef: WeakRef<Producer>;
-    /**
-     * `trackingVersion` of the `Consumer` at which this dependency edge was last observed.
-     *
-     * If this doesn't match the `Consumer`'s current `trackingVersion`, then this dependency record
-     * is stale, and needs to be cleaned up.
-     */
-    atTrackingVersion: number;
-    /**
-     * `valueVersion` of the `Producer` at the time this dependency was last accessed.
-     *
-     * This is used by `consumerPollValueStatus` to determine whether a `Consumer`'s dependencies have
-     * semantically changed.
-     */
-    seenValueVersion: number;
-}
-
-/**
- * A global reactive effect, which can be manually scheduled or destroyed.
- *
- * @developerPreview
- */
-export declare interface Effect {
-    /**
-     * Schedule the effect for manual execution, if it's not already.
-     */
-    schedule(): void;
-    /**
-     * Shut down the effect, removing it from any upcoming scheduled executions.
-     */
-    destroy(): void;
-    /**
-     * Direct access to the effect's `Consumer` for advanced use cases.
-     */
-    readonly consumer: Consumer;
-}
-
-/**
  * Create a global `Effect` for the given reactive function.
  *
  * @developerPreview
  */
-export declare function effect(effectFn: () => void): Effect;
+export declare function effect(effectFn: () => void): EffectRef;
+
+
+/**
+ * A global reactive effect, which can be manually destroyed.
+ *
+ * @developerPreview
+ */
+export declare interface EffectRef {
+    /**
+     * Shut down the effect, removing it from any upcoming scheduled executions.
+     */
+    destroy(): void;
+}
 
 /**
  * Keys within serialized view data structure to represent various
@@ -6450,74 +6343,6 @@ declare const enum PreOrderHookFlags {
  * overrides).
  */
 declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
-
-/**
- * Represents a value that can be read reactively, and can notify readers (`Consumer`s)
- * when it changes.
- *
- * Producers maintain a weak reference to any `Consumer`s which may depend on the
- * producer's value.
- *
- * Implementers of `Producer` expose a monotonic `valueVersion` counter, and are responsible
- * for incrementing this version when their value semantically changes. Some Producers may
- * produce this value lazily and thus at times need to be polled for potential updates to
- * their value (and by extension their `valueVersion`). This is accomplished via the
- * `checkForChangedValue` method for Producers, which should perform whatever calculations
- * are necessary to ensure `valueVersion` is up to date.
- *
- * `Producer`s support two operations:
- *   * `producerNotifyConsumers`
- *   * `producerAccessed`
- */
-declare interface Producer {
-    /**
-     * Numeric identifier of this `Producer`.
-     *
-     * May also be used to satisfy the interface for `Consumer`.
-     */
-    readonly id: ProducerId;
-    /**
-     * A `WeakRef` to this `Producer` instance.
-     *
-     * An implementer provides this as a cached value to avoid the need to instantiate
-     * multiple `WeakRef` instances for the same `Producer`.
-     *
-     * May also be used to satisfy the interface for `Consumer`.
-     */
-    readonly ref: WeakRef<Producer>;
-    /**
-     * A map of dependency `Edge`s to `Consumer`s, keyed by the `ConsumerId`.
-     *
-     * Used when the produced value changes to notify interested `Consumer`s.
-     */
-    readonly consumers: Map<ConsumerId, Edge>;
-    /**
-     * Monotonically increasing counter which increases when the value of this `Producer`
-     * semantically changes.
-     */
-    readonly valueVersion: number;
-    /**
-     * Ensure that `valueVersion` is up to date for the `Producer`'s value.
-     *
-     * Some `Producer`s may produce values lazily, and thus require polling before their
-     * `valueVersion` can be compared with the version captured during a previous read.
-     */
-    checkForChangedValue(): void;
-}
-
-/**
- * Identifier for a `Producer`, which is a branded `number`.
- *
- * Note that `ProducerId` and `ConsumerId` are assigned from the same sequence, so the same `number`
- * will never be used for both.
- *
- * Branding provides additional type safety by ensuring that `ProducerId` and `ConsumerId` are
- * mutually unassignable without a cast. Since several `Map`s are keyed by these IDs, this prevents
- * `ProducerId`s from being inadvertently used to look up `Consumer`s or vice versa.
- */
-declare type ProducerId = number & {
-    __producer: true;
-};
 
 /**
  * List of slots for a projection. A slot can be either based on a parsed CSS selector
