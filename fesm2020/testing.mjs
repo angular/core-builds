@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-6ad4b91
+ * @license Angular v16.0.0-next.3+sha-7885f35
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3308,6 +3308,9 @@ function isComponentDef(def) {
 }
 function isRootView(target) {
     return (target[FLAGS] & 256 /* LViewFlags.IsRoot */) !== 0;
+}
+function isProjectionTNode(tNode) {
+    return (tNode.type & 16 /* TNodeType.Projection */) === 16 /* TNodeType.Projection */;
 }
 
 // [Assert functions do not constraint type when they are guarded by a truthy
@@ -9349,6 +9352,19 @@ function retrieveTransferredState(doc, appId) {
     return initialState;
 }
 
+/** Encodes that the node lookup should start from the host node of this component. */
+const REFERENCE_NODE_HOST = 'h';
+/** Encodes that the node lookup should start from the document body node. */
+const REFERENCE_NODE_BODY = 'b';
+/**
+ * Describes navigation steps that the runtime logic need to perform,
+ * starting from a given (known) element.
+ */
+var NodeNavigationStep;
+(function (NodeNavigationStep) {
+    NodeNavigationStep["FirstChild"] = "f";
+    NodeNavigationStep["NextSibling"] = "n";
+})(NodeNavigationStep || (NodeNavigationStep = {}));
 /**
  * Keys within serialized view data structure to represent various
  * parts. See the `SerializedView` interface below for additional information.
@@ -9358,6 +9374,7 @@ const TEMPLATES = 't';
 const CONTAINERS = 'c';
 const NUM_ROOT_NODES = 'r';
 const TEMPLATE_ID = 'i'; // as it's also an "id"
+const NODES = 'n';
 
 /**
  * The name of the key used in the TransferState collection,
@@ -9731,7 +9748,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-6ad4b91');
+const VERSION = new Version('16.0.0-next.3+sha-7885f35');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14452,10 +14469,91 @@ function validateNodeExists(node) {
         throw new Error(`Hydration expected an element to be present at this location.`);
     }
 }
+function nodeNotFoundError(lView, tNode) {
+    // TODO: improve error message and use RuntimeError instead.
+    return new Error('During serialization, Angular was unable to find an element in the DOM');
+}
+function nodeNotFoundAtPathError(host, path) {
+    // TODO: improve error message and use RuntimeError instead.
+    return new Error('During hydration Angular was unable to locate a node');
+}
+function unsupportedProjectionOfDomNodes() {
+    // TODO: improve error message and use RuntimeError instead.
+    return new Error('During serialization, Angular detected DOM nodes ' +
+        'that were created outside of Angular context and provided as projectable nodes ' +
+        '(likely via `ViewContainerRef.createComponent` or `createComponent` APIs). ' +
+        'Hydration is not supported for such cases, consider refactoring the code to avoid ' +
+        'this pattern or using `ngSkipHydration` on the host element of the component.');
+}
+
+/**
+ * Regexp that extracts a reference node information from the compressed node location.
+ * The reference node is represented as either:
+ *  - a number which points to an LView slot
+ *  - the `b` char which indicates that the lookup should start from the `document.body`
+ *  - the `h` char to start lookup from the component host node (`lView[HOST]`)
+ */
+const REF_EXTRACTOR_REGEXP = new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
+/**
+ * Helper function that takes a reference node location and a set of navigation steps
+ * (from the reference node) to a target node and outputs a string that represents
+ * a location.
+ *
+ * For example, given: referenceNode = 'b' (body) and path = ['firstChild', 'firstChild',
+ * 'nextSibling'], the function returns: `bf2n`.
+ */
+function compressNodeLocation(referenceNode, path) {
+    const result = [referenceNode];
+    for (const segment of path) {
+        const lastIdx = result.length - 1;
+        if (lastIdx > 0 && result[lastIdx - 1] === segment) {
+            // An empty string in a count slot represents 1 occurrence of an instruction.
+            const value = (result[lastIdx] || 1);
+            result[lastIdx] = value + 1;
+        }
+        else {
+            // Adding a new segment to the path.
+            // Using an empty string in a counter field to avoid encoding `1`s
+            // into the path, since they are implicit (e.g. `f1n1` vs `fn`), so
+            // it's enough to have a single char in this case.
+            result.push(segment, '');
+        }
+    }
+    return result.join('');
+}
+/**
+ * Helper function that reverts the `compressNodeLocation` and transforms a given
+ * string into an array where at 0th position there is a reference node info and
+ * after that it contains information (in pairs) about a navigation step and the
+ * number of repetitions.
+ *
+ * For example, the path like 'bf2n' will be transformed to:
+ * ['b', 'firstChild', 2, 'nextSibling', 1].
+ *
+ * This information is later consumed by the code that navigates the DOM to find
+ * a given node by its location.
+ */
+function decompressNodeLocation(path) {
+    const matches = path.match(REF_EXTRACTOR_REGEXP);
+    const [_, refNodeId, refNodeName, rest] = matches;
+    // If a reference node is represented by an index, transform it to a number.
+    const ref = refNodeId ? parseInt(refNodeId, 10) : refNodeName;
+    const steps = [];
+    // Match all segments in a path.
+    for (const [_, step, count] of rest.matchAll(/(f|n)(\d*)/g)) {
+        const repeat = parseInt(count, 10) || 1;
+        steps.push(step, repeat);
+    }
+    return [ref, ...steps];
+}
 
 /** Whether current TNode is a first node in an <ng-container>. */
 function isFirstElementInNgContainer(tNode) {
     return !tNode.prev && tNode.parent?.type === 8 /* TNodeType.ElementContainer */;
+}
+/** Returns an instruction index (subtracting HEADER_OFFSET). */
+function getNoOffsetIndex(tNode) {
+    return tNode.index - HEADER_OFFSET;
 }
 /**
  * Locate a node in DOM tree that corresponds to a given TNode.
@@ -14468,7 +14566,13 @@ function isFirstElementInNgContainer(tNode) {
  */
 function locateNextRNode(hydrationInfo, tView, lView, tNode) {
     let native = null;
-    if (tView.firstChild === tNode) {
+    const noOffsetIndex = getNoOffsetIndex(tNode);
+    const nodes = hydrationInfo.data[NODES];
+    if (nodes?.[noOffsetIndex]) {
+        // We know the exact location of the node.
+        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
+    }
+    else if (tView.firstChild === tNode) {
         // We create a first node in this view, so we use a reference
         // to the first child in this DOM segment.
         native = hydrationInfo.firstChild;
@@ -14481,7 +14585,7 @@ function locateNextRNode(hydrationInfo, tView, lView, tNode) {
             assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
                 'to the previous node or a parent node.');
         if (isFirstElementInNgContainer(tNode)) {
-            const noOffsetParentIndex = tNode.parent.index - HEADER_OFFSET;
+            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
             native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
         }
         else {
@@ -14495,7 +14599,7 @@ function locateNextRNode(hydrationInfo, tView, lView, tNode) {
                 // represented in the DOM as `<div></div>...<!--container-->`.
                 // In this case, there are nodes *after* this element and we need to skip
                 // all of them to reach an element that we are looking for.
-                const noOffsetPrevSiblingIndex = previousTNode.index - HEADER_OFFSET;
+                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
                 const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
                 if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
                     const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
@@ -14522,6 +14626,183 @@ function siblingAfter(skip, from) {
         currentNode = currentNode.nextSibling;
     }
     return currentNode;
+}
+/**
+ * Helper function to produce a string representation of the navigation steps
+ * (in terms of `nextSibling` and `firstChild` navigations). Used in error
+ * messages in dev mode.
+ */
+function stringifyNavigationInstructions(instructions) {
+    const container = [];
+    let i = 0;
+    while (i < instructions.length) {
+        const step = instructions[i++];
+        const repeat = instructions[i++];
+        for (let r = 0; r < repeat; r++) {
+            container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
+        }
+    }
+    return container.join('.');
+}
+/**
+ * Helper function that navigates from a starting point node (the `from` node)
+ * using provided set of navigation instructions (within `path` argument).
+ */
+function navigateToNode(from, instructions) {
+    let node = from;
+    let i = 0;
+    while (i < instructions.length) {
+        const step = instructions[i++];
+        const repeat = instructions[i++];
+        for (let r = 0; r < repeat; r++) {
+            if (ngDevMode && !node) {
+                throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
+            }
+            switch (step) {
+                case NodeNavigationStep.FirstChild:
+                    node = node.firstChild;
+                    break;
+                case NodeNavigationStep.NextSibling:
+                    node = node.nextSibling;
+                    break;
+            }
+        }
+    }
+    if (ngDevMode && !node) {
+        throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
+    }
+    return node;
+}
+/**
+ * Locates an RNode given a set of navigation instructions (which also contains
+ * a starting point node info).
+ */
+function locateRNodeByPath(path, lView) {
+    const [referenceNode, ...navigationInstructions] = decompressNodeLocation(path);
+    let ref;
+    if (referenceNode === REFERENCE_NODE_HOST) {
+        ref = lView[0];
+    }
+    else if (referenceNode === REFERENCE_NODE_BODY) {
+        ref = ɵɵresolveBody(lView[0]);
+    }
+    else {
+        const parentElementId = Number(referenceNode);
+        ref = unwrapRNode(lView[parentElementId + HEADER_OFFSET]);
+    }
+    return navigateToNode(ref, navigationInstructions);
+}
+/**
+ * Generate a list of DOM navigation operations to get from node `start` to node `finish`.
+ *
+ * Note: assumes that node `start` occurs before node `finish` in an in-order traversal of the DOM
+ * tree. That is, we should be able to get from `start` to `finish` purely by using `.firstChild`
+ * and `.nextSibling` operations.
+ */
+function navigateBetween(start, finish) {
+    if (start === finish) {
+        return [];
+    }
+    else if (start.parentElement == null || finish.parentElement == null) {
+        return null;
+    }
+    else if (start.parentElement === finish.parentElement) {
+        return navigateBetweenSiblings(start, finish);
+    }
+    else {
+        // `finish` is a child of its parent, so the parent will always have a child.
+        const parent = finish.parentElement;
+        const parentPath = navigateBetween(start, parent);
+        const childPath = navigateBetween(parent.firstChild, finish);
+        if (!parentPath || !childPath)
+            return null;
+        return [
+            // First navigate to `finish`'s parent
+            ...parentPath,
+            // Then to its first child.
+            NodeNavigationStep.FirstChild,
+            // And finally from that node to `finish` (maybe a no-op if we're already there).
+            ...childPath,
+        ];
+    }
+}
+/**
+ * Calculates a path between 2 sibling nodes (generates a number of `NextSibling` navigations).
+ */
+function navigateBetweenSiblings(start, finish) {
+    const nav = [];
+    let node = null;
+    for (node = start; node != null && node !== finish; node = node.nextSibling) {
+        nav.push(NodeNavigationStep.NextSibling);
+    }
+    return node === null ? [] : nav;
+}
+/**
+ * Calculates a path between 2 nodes in terms of `nextSibling` and `firstChild`
+ * navigations:
+ * - the `from` node is a known node, used as an starting point for the lookup
+ *   (the `fromNodeName` argument is a string representation of the node).
+ * - the `to` node is a node that the runtime logic would be looking up,
+ *   using the path generated by this function.
+ */
+function calcPathBetween(from, to, fromNodeName) {
+    const path = navigateBetween(from, to);
+    return path === null ? null : compressNodeLocation(fromNodeName, path);
+}
+/**
+ * Invoked at serialization time (on the server) when a set of navigation
+ * instructions needs to be generated for a TNode.
+ */
+function calcPathForNode(tNode, lView) {
+    const parentTNode = tNode.parent;
+    let parentIndex;
+    let parentRNode;
+    let referenceNodeName;
+    if (parentTNode === null) {
+        // No parent TNode - use host element as a reference node.
+        parentIndex = referenceNodeName = REFERENCE_NODE_HOST;
+        parentRNode = lView[HOST];
+    }
+    else {
+        // Use parent TNode as a reference node.
+        parentIndex = parentTNode.index;
+        parentRNode = unwrapRNode(lView[parentIndex]);
+        referenceNodeName = renderStringify(parentIndex - HEADER_OFFSET);
+    }
+    let rNode = unwrapRNode(lView[tNode.index]);
+    if (tNode.type & 12 /* TNodeType.AnyContainer */) {
+        // For <ng-container> nodes, instead of serializing a reference
+        // to the anchor comment node, serialize a location of the first
+        // DOM element. Paired with the container size (serialized as a part
+        // of `ngh.containers`), it should give enough information for runtime
+        // to hydrate nodes in this container.
+        const firstRNode = getFirstNativeNode(lView, tNode);
+        // If container is not empty, use a reference to the first element,
+        // otherwise, rNode would point to an anchor comment node.
+        if (firstRNode) {
+            rNode = firstRNode;
+        }
+    }
+    let path = calcPathBetween(parentRNode, rNode, referenceNodeName);
+    if (path === null && parentRNode !== rNode) {
+        // Searching for a path between elements within a host node failed.
+        // Trying to find a path to an element starting from the `document.body` instead.
+        //
+        // Important note: this type of reference is relatively unstable, since Angular
+        // may not be able to control parts of the page that the runtime logic navigates
+        // through. This is mostly needed to cover "portals" use-case (like menus, dialog boxes,
+        // etc), where nodes are content-projected (including direct DOM manipulations) outside
+        // of the host node. The better solution is to provide APIs to work with "portals",
+        // at which point this code path would not be needed.
+        const body = parentRNode.ownerDocument.body;
+        path = calcPathBetween(body, rNode, REFERENCE_NODE_BODY);
+        if (path === null) {
+            // If the path is still empty, it's likely that this node is detached and
+            // won't be found during hydration.
+            throw nodeNotFoundError(lView, tNode);
+        }
+    }
+    return path;
 }
 
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
@@ -15414,7 +15695,10 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
         tProjectionNode.projection = selectorIndex;
     // `<ng-content>` has no content
     setCurrentTNodeAsNotParent();
-    if ((tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    if (isNodeCreationMode &&
+        (tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(tView, lView, tProjectionNode);
     }
