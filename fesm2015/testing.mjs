@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-a0c289c
+ * @license Angular v16.0.0-next.3+sha-a94b66f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9767,7 +9767,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-a0c289c');
+const VERSION = new Version('16.0.0-next.3+sha-a94b66f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14506,6 +14506,12 @@ function unsupportedProjectionOfDomNodes() {
         'Hydration is not supported for such cases, consider refactoring the code to avoid ' +
         'this pattern or using `ngSkipHydration` on the host element of the component.');
 }
+function invalidSkipHydrationHost() {
+    // TODO: improve error message and use RuntimeError instead.
+    return new Error('The `ngSkipHydration` flag is applied on a node ' +
+        'that doesn\'t act as a component host. Hydration can be ' +
+        'skipped only on per-component basis.');
+}
 
 /**
  * Regexp that extracts a reference node information from the compressed node location.
@@ -15194,10 +15200,17 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, inde
     // Checks if the skip hydration attribute is present during hydration so we know to
     // skip attempting to hydrate this block.
     if (hydrationInfo && hasNgSkipHydrationAttr(tNode)) {
-        enterSkipHydrationBlock(tNode);
-        // Since this isn't hydratable, we need to empty the node
-        // so there's no duplicate content after render
-        clearElementContents(renderer, native);
+        if (isComponentHost(tNode)) {
+            enterSkipHydrationBlock(tNode);
+            // Since this isn't hydratable, we need to empty the node
+            // so there's no duplicate content after render
+            clearElementContents(renderer, native);
+        }
+        else if (ngDevMode) {
+            // If this is not a component host, throw an error.
+            // Hydration can be skipped on per-component basis only.
+            throw invalidSkipHydrationHost();
+        }
     }
     return native;
 }
