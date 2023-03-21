@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-d1617c4
+ * @license Angular v16.0.0-next.3+sha-ced2376
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5925,6 +5925,8 @@ export declare class NgZone {
  */
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 
+declare const NODES = "n";
+
 declare const NUM_ROOT_NODES = "r";
 
 declare const ON_DESTROY_HOOKS = 22;
@@ -7787,6 +7789,13 @@ declare interface SerializedView {
      * of serialized information about views within this container.
      */
     [CONTAINERS]?: Record<number, SerializedContainerView[]>;
+    /**
+     * Serialized information about nodes in a template.
+     * Key-value pairs where a key is an index of the corresponding
+     * DOM node in an LView and the value is a path that describes
+     * the location of this node (as a set of navigation instructions).
+     */
+    [NODES]?: Record<number, string>;
 }
 
 /**
