@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "16.0.0-next.4+sha-132c00c",
+  "version": "16.0.0-next.4+sha-07cbaa3",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -16,15 +16,19 @@
     },
     ".": {
       "types": "./index.d.ts",
-      "esm2022": "./esm2022/core.mjs",
-      "esm": "./esm2022/core.mjs",
-      "default": "./fesm2022/core.mjs"
+      "esm2020": "./esm2020/core.mjs",
+      "es2020": "./fesm2020/core.mjs",
+      "es2015": "./fesm2015/core.mjs",
+      "node": "./fesm2015/core.mjs",
+      "default": "./fesm2020/core.mjs"
     },
     "./testing": {
       "types": "./testing/index.d.ts",
-      "esm2022": "./esm2022/testing/testing.mjs",
-      "esm": "./esm2022/testing/testing.mjs",
-      "default": "./fesm2022/testing.mjs"
+      "esm2020": "./esm2020/testing/testing.mjs",
+      "es2020": "./fesm2020/testing.mjs",
+      "es2015": "./fesm2015/testing.mjs",
+      "node": "./fesm2015/testing.mjs",
+      "default": "./fesm2020/testing.mjs"
     }
   },
   "dependencies": {
@@ -62,7 +66,11 @@
   },
   "schematics": "./schematics/collection.json",
   "sideEffects": false,
-  "module": "./fesm2022/core.mjs",
+  "fesm2020": "./fesm2020/core.mjs",
+  "fesm2015": "./fesm2015/core.mjs",
+  "esm2020": "./esm2020/core.mjs",
   "typings": "./index.d.ts",
+  "module": "./fesm2015/core.mjs",
+  "es2020": "./fesm2020/core.mjs",
   "type": "module"
 }
