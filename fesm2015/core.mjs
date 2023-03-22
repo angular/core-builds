@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-ff9d3b0
+ * @license Angular v16.0.0-next.3+sha-8ea1fb7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9013,6 +9013,7 @@ const MULTIPLIER = 'x';
 const NUM_ROOT_NODES = 'r';
 const TEMPLATE_ID = 'i'; // as it's also an "id"
 const NODES = 'n';
+const DISCONNECTED_NODES = 'd';
 
 /**
  * The name of the key used in the TransferState collection,
@@ -9213,6 +9214,20 @@ function calcSerializedContainerSize(hydrationInfo, index) {
     }
     return numNodes;
 }
+/**
+ * Checks whether a node is annotated as "disconnected", i.e. not present
+ * in the DOM at serialization time. We should not attempt hydration for
+ * such nodes and instead, use a regular "creation mode".
+ */
+function isDisconnectedNode(hydrationInfo, index) {
+    var _a;
+    // Check if we are processing disconnected info for the first time.
+    if (typeof hydrationInfo.disconnectedNodes === 'undefined') {
+        const nodeIds = hydrationInfo.data[DISCONNECTED_NODES];
+        hydrationInfo.disconnectedNodes = nodeIds ? (new Set(nodeIds)) : null;
+    }
+    return !!((_a = hydrationInfo.disconnectedNodes) === null || _a === void 0 ? void 0 : _a.has(index));
+}
 
 /**
  * Represents a component created by a `ComponentFactory`.
@@ -9393,7 +9408,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-ff9d3b0');
+const VERSION = new Version('16.0.0-next.3+sha-8ea1fb7');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14591,7 +14606,7 @@ function createContainerAnchorImpl(tView, lView, tNode, index) {
  */
 function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -14857,7 +14872,7 @@ let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) =>
  */
 function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -17373,7 +17388,7 @@ function ɵɵtext(index, value = '') {
     const tNode = tView.firstCreatePass ?
         getOrCreateTNode(tView, adjustedIndex, 1 /* TNodeType.Text */, value, null) :
         tView.data[adjustedIndex];
-    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value);
+    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value, index);
     lView[adjustedIndex] = textNative;
     if (wasLastNodeCreated()) {
         appendChild(tView, lView, textNative, tNode);
@@ -17381,7 +17396,7 @@ function ɵɵtext(index, value = '') {
     // Text nodes are self closing.
     setCurrentTNode(tNode, false);
 }
-let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
+let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
     lastNodeWasCreated(true);
     return createTextNode(lView[RENDERER], value);
 };
@@ -17389,9 +17404,9 @@ let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
  * Enables hydration code path (to lookup existing elements in DOM)
  * in addition to the regular creation mode of text nodes.
  */
-function locateOrCreateTextNodeImpl(tView, lView, tNode, value) {
+function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -22961,15 +22976,16 @@ function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
     if (lContainer[NATIVE] && lContainer[DEHYDRATED_VIEWS])
         return;
     const hydrationInfo = hostLView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(hostTNode);
+    const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(hostTNode) ||
+        isDisconnectedNode(hydrationInfo, noOffsetIndex);
     // Regular creation mode.
     if (isNodeCreationMode) {
         return createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
     }
     // Hydration mode, looking up an anchor node and dehydrated views in DOM.
-    const index = hostTNode.index - HEADER_OFFSET;
-    const currentRNode = getSegmentHead(hydrationInfo, index);
-    const serializedViews = (_a = hydrationInfo.data[CONTAINERS]) === null || _a === void 0 ? void 0 : _a[index];
+    const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
+    const serializedViews = (_a = hydrationInfo.data[CONTAINERS]) === null || _a === void 0 ? void 0 : _a[noOffsetIndex];
     ngDevMode &&
         assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' +
             'which represents a view container.');
@@ -29052,7 +29068,7 @@ function isTI18nNode(obj) {
  * @returns the `SerializedView` object containing the data to be added to the host node
  */
 function serializeLView(lView, context) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     const ngh = {};
     const tView = lView[TVIEW];
     // Iterate over DOM element references in an LView.
@@ -29064,6 +29080,23 @@ function serializeLView(lView, context) {
         // a corresponding slot in TNode data structure. If that's the case, just
         // skip this slot and move to the next one.
         if (!tNode) {
+            continue;
+        }
+        // Check if a native node that represents a given TNode is disconnected from the DOM tree.
+        // Such nodes must be excluded from the hydration (since the hydration won't be able to
+        // find them), so the TNode ids are collected and used at runtime to skip the hydration.
+        //
+        // This situation may happen during the content projection, when some nodes don't make it
+        // into one of the content projection slots (for example, when there is no default
+        // <ng-content /> slot in projector component's template).
+        //
+        // Note: we leverage the fact that we have this information available in the DOM emulation
+        // layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
+        // only use internal data structures and state to compute this information.
+        if (!(tNode.type & 16 /* TNodeType.Projection */) && !!lView[i] &&
+            !unwrapRNode(lView[i]).isConnected) {
+            (_a = ngh[DISCONNECTED_NODES]) !== null && _a !== void 0 ? _a : (ngh[DISCONNECTED_NODES] = []);
+            ngh[DISCONNECTED_NODES].push(noOffsetIndex);
             continue;
         }
         if (Array.isArray(tNode.projection)) {
@@ -29098,7 +29131,7 @@ function serializeLView(lView, context) {
             // Serialize information about a template.
             const embeddedTView = tNode.tView;
             if (embeddedTView !== null) {
-                (_a = ngh[TEMPLATES]) !== null && _a !== void 0 ? _a : (ngh[TEMPLATES] = {});
+                (_b = ngh[TEMPLATES]) !== null && _b !== void 0 ? _b : (ngh[TEMPLATES] = {});
                 ngh[TEMPLATES][noOffsetIndex] = getSsrId(embeddedTView);
             }
             // Serialize views within this LContainer.
@@ -29113,7 +29146,7 @@ function serializeLView(lView, context) {
                     annotateHostElementForHydration(targetNode, hostNode, context);
                 }
             }
-            (_b = ngh[CONTAINERS]) !== null && _b !== void 0 ? _b : (ngh[CONTAINERS] = {});
+            (_c = ngh[CONTAINERS]) !== null && _c !== void 0 ? _c : (ngh[CONTAINERS] = {});
             ngh[CONTAINERS][noOffsetIndex] = serializeLContainer(lView[i], context);
         }
         else if (Array.isArray(lView[i])) {
@@ -29136,7 +29169,7 @@ function serializeLView(lView, context) {
                 // An <ng-container> is represented by the number of
                 // top-level nodes. This information is needed to skip over
                 // those nodes to reach a corresponding anchor node (comment node).
-                (_c = ngh[ELEMENT_CONTAINERS]) !== null && _c !== void 0 ? _c : (ngh[ELEMENT_CONTAINERS] = {});
+                (_d = ngh[ELEMENT_CONTAINERS]) !== null && _d !== void 0 ? _d : (ngh[ELEMENT_CONTAINERS] = {});
                 ngh[ELEMENT_CONTAINERS][noOffsetIndex] = calcNumRootNodes(tView, lView, tNode.child);
             }
             else if (tNode.type & 16 /* TNodeType.Projection */) {
@@ -29182,10 +29215,10 @@ function serializeLView(lView, context) {
                 //     live DOM has exactly the same state as it was before serialization.
                 if (tNode.type & 1 /* TNodeType.Text */) {
                     const rNode = unwrapRNode(lView[i]);
-                    if (((_d = rNode.textContent) === null || _d === void 0 ? void 0 : _d.replace(/\s/gm, '')) === '') {
+                    if (((_e = rNode.textContent) === null || _e === void 0 ? void 0 : _e.replace(/\s/gm, '')) === '') {
                         context.corruptedTextNodes.set(rNode, "ngetn" /* TextNodeMarker.EmptyNode */);
                     }
-                    else if (((_e = rNode.nextSibling) === null || _e === void 0 ? void 0 : _e.nodeType) === Node.TEXT_NODE) {
+                    else if (((_f = rNode.nextSibling) === null || _f === void 0 ? void 0 : _f.nodeType) === Node.TEXT_NODE) {
                         context.corruptedTextNodes.set(rNode, "ngtns" /* TextNodeMarker.Separator */);
                     }
                 }
@@ -30120,5 +30153,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, mergeApplicationConfig, platformCore, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_FEATURE_ENABLED as ɵIS_HYDRATION_FEATURE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TransferState as ɵTransferState, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, escapeTransferStateContent as ɵescapeTransferStateContent, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getComponentDef as ɵgetComponentDef, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, makeDecorator as ɵmakeDecorator, makeStateKey as ɵmakeStateKey, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, provideHydrationSupport as ɵprovideHydrationSupport, provideNgZoneChangeDetection as ɵprovideNgZoneChangeDetection, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unescapeTransferStateContent as ɵunescapeTransferStateContent, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANALYZE_FOR_ENTRY_COMPONENTS, ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, mergeApplicationConfig, platformCore, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_FEATURE_ENABLED as ɵIS_HYDRATION_FEATURE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TransferState as ɵTransferState, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, escapeTransferStateContent as ɵescapeTransferStateContent, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, makeDecorator as ɵmakeDecorator, makeStateKey as ɵmakeStateKey, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, provideHydrationSupport as ɵprovideHydrationSupport, provideNgZoneChangeDetection as ɵprovideNgZoneChangeDetection, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unescapeTransferStateContent as ɵunescapeTransferStateContent, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map

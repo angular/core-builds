@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-ff9d3b0
+ * @license Angular v16.0.0-next.3+sha-8ea1fb7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9396,6 +9396,7 @@ const MULTIPLIER = 'x';
 const NUM_ROOT_NODES = 'r';
 const TEMPLATE_ID = 'i'; // as it's also an "id"
 const NODES = 'n';
+const DISCONNECTED_NODES = 'd';
 
 /**
  * The name of the key used in the TransferState collection,
@@ -9589,6 +9590,19 @@ function calcSerializedContainerSize(hydrationInfo, index) {
     }
     return numNodes;
 }
+/**
+ * Checks whether a node is annotated as "disconnected", i.e. not present
+ * in the DOM at serialization time. We should not attempt hydration for
+ * such nodes and instead, use a regular "creation mode".
+ */
+function isDisconnectedNode(hydrationInfo, index) {
+    // Check if we are processing disconnected info for the first time.
+    if (typeof hydrationInfo.disconnectedNodes === 'undefined') {
+        const nodeIds = hydrationInfo.data[DISCONNECTED_NODES];
+        hydrationInfo.disconnectedNodes = nodeIds ? (new Set(nodeIds)) : null;
+    }
+    return !!hydrationInfo.disconnectedNodes?.has(index);
+}
 
 /**
  * Represents a component created by a `ComponentFactory`.
@@ -9769,7 +9783,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.3+sha-ff9d3b0');
+const VERSION = new Version('16.0.0-next.3+sha-8ea1fb7');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14914,7 +14928,7 @@ function createContainerAnchorImpl(tView, lView, tNode, index) {
  */
 function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -15180,7 +15194,7 @@ let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) =>
  */
 function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -17696,7 +17710,7 @@ function ɵɵtext(index, value = '') {
     const tNode = tView.firstCreatePass ?
         getOrCreateTNode(tView, adjustedIndex, 1 /* TNodeType.Text */, value, null) :
         tView.data[adjustedIndex];
-    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value);
+    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value, index);
     lView[adjustedIndex] = textNative;
     if (wasLastNodeCreated()) {
         appendChild(tView, lView, textNative, tNode);
@@ -17704,7 +17718,7 @@ function ɵɵtext(index, value = '') {
     // Text nodes are self closing.
     setCurrentTNode(tNode, false);
 }
-let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
+let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
     lastNodeWasCreated(true);
     return createTextNode(lView[RENDERER], value);
 };
@@ -17712,9 +17726,9 @@ let _locateOrCreateTextNode = (tView, lView, tNode, value) => {
  * Enables hydration code path (to lookup existing elements in DOM)
  * in addition to the regular creation mode of text nodes.
  */
-function locateOrCreateTextNodeImpl(tView, lView, tNode, value) {
+function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -23277,15 +23291,16 @@ function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
     if (lContainer[NATIVE] && lContainer[DEHYDRATED_VIEWS])
         return;
     const hydrationInfo = hostLView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(hostTNode);
+    const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(hostTNode) ||
+        isDisconnectedNode(hydrationInfo, noOffsetIndex);
     // Regular creation mode.
     if (isNodeCreationMode) {
         return createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
     }
     // Hydration mode, looking up an anchor node and dehydrated views in DOM.
-    const index = hostTNode.index - HEADER_OFFSET;
-    const currentRNode = getSegmentHead(hydrationInfo, index);
-    const serializedViews = hydrationInfo.data[CONTAINERS]?.[index];
+    const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
+    const serializedViews = hydrationInfo.data[CONTAINERS]?.[noOffsetIndex];
     ngDevMode &&
         assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' +
             'which represents a view container.');

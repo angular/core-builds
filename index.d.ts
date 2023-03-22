@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.3+sha-ff9d3b0
+ * @license Angular v16.0.0-next.3+sha-8ea1fb7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2268,6 +2268,18 @@ declare interface DehydratedView {
     segmentHeads?: {
         [index: number]: RNode | null;
     };
+    /**
+     * An instance of a Set that represents nodes disconnected from
+     * the DOM tree at the serialization time, but otherwise present
+     * in the internal data structures.
+     *
+     * The Set is based on the `SerializedView[DISCONNECTED_NODES]` data
+     * and is needed to have constant-time lookups.
+     *
+     * If the value is `null`, it means that there were no disconnected
+     * nodes detected in this view at serialization time.
+     */
+    disconnectedNodes?: Set<number> | null;
 }
 
 declare type DependencyTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | PipeType<any> | Type<any>)[];
@@ -2826,6 +2838,8 @@ declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
  * The function is necessary to be able to support forward declarations.
  */
 declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
+
+declare const DISCONNECTED_NODES = "d";
 
 /**
  * @description
@@ -7807,6 +7821,15 @@ declare interface SerializedView {
      * the location of this node (as a set of navigation instructions).
      */
     [NODES]?: Record<number, string>;
+    /**
+     * A list of ids which represents a set of nodes disconnected
+     * from the DOM tree at the serialization time, but otherwise
+     * present in the internal data structures.
+     *
+     * This information is used to avoid triggering the hydration
+     * logic for such nodes and instead use a regular "creation mode".
+     */
+    [DISCONNECTED_NODES]?: number[];
 }
 
 /**
@@ -10692,13 +10715,6 @@ export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
  * See additional info on the `message` argument type in the `RuntimeError` class description.
  */
 export declare function ɵformatRuntimeError<T extends number = RuntimeErrorCode>(code: T, message: null | false | string): string;
-
-/**
- * The following getter methods retrieve the definition from the type. Currently the retrieval
- * honors inheritance, but in the future we may change the rule to require that definitions are
- * explicit. This would require some sort of migration strategy.
- */
-export declare function ɵgetComponentDef<T>(type: any): ɵComponentDef<T> | null;
 
 /**
  * Retrieves directive instances associated with a given DOM node. Does not include
