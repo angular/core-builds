@@ -1,0 +1,121 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { Injectable } from '../di/injectable';
+import { InjectionToken } from '../di/injection_token';
+import { ComponentFactory as ComponentFactoryR3 } from '../render3/component_ref';
+import { getComponentDef, getNgModuleDef } from '../render3/definition';
+import { NgModuleFactory as NgModuleFactoryR3 } from '../render3/ng_module_ref';
+import { maybeUnwrapFn } from '../render3/util/misc_utils';
+import * as i0 from "../r3_symbols";
+/**
+ * Combination of NgModuleFactory and ComponentFactories.
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
+ */
+export class ModuleWithComponentFactories {
+    constructor(ngModuleFactory, componentFactories) {
+        this.ngModuleFactory = ngModuleFactory;
+        this.componentFactories = componentFactories;
+    }
+}
+/**
+ * Low-level service for running the angular compiler during runtime
+ * to create {@link ComponentFactory}s, which
+ * can later be used to create and render a Component instance.
+ *
+ * Each `@NgModule` provides an own `Compiler` to its injector,
+ * that will use the directives/pipes of the ng module for compilation
+ * of components.
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
+ */
+class Compiler {
+    /**
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents` have to be inlined.
+     */
+    compileModuleSync(moduleType) {
+        return new NgModuleFactoryR3(moduleType);
+    }
+    /**
+     * Compiles the given NgModule and all of its components
+     */
+    compileModuleAsync(moduleType) {
+        return Promise.resolve(this.compileModuleSync(moduleType));
+    }
+    /**
+     * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsSync(moduleType) {
+        const ngModuleFactory = this.compileModuleSync(moduleType);
+        const moduleDef = getNgModuleDef(moduleType);
+        const componentFactories = maybeUnwrapFn(moduleDef.declarations)
+            .reduce((factories, declaration) => {
+            const componentDef = getComponentDef(declaration);
+            componentDef && factories.push(new ComponentFactoryR3(componentDef));
+            return factories;
+        }, []);
+        return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
+    }
+    /**
+     * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsAsync(moduleType) {
+        return Promise.resolve(this.compileModuleAndAllComponentsSync(moduleType));
+    }
+    /**
+     * Clears all caches.
+     */
+    clearCache() { }
+    /**
+     * Clears the cache for the given component/ngModule.
+     */
+    clearCacheFor(type) { }
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     */
+    getModuleId(moduleType) {
+        return undefined;
+    }
+    static { this.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ i0.ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' }); }
+}
+export { Compiler };
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && i0.setClassMetadata(Compiler, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
+/**
+ * Token to provide CompilerOptions in the platform injector.
+ *
+ * @publicApi
+ */
+export const COMPILER_OPTIONS = new InjectionToken('compilerOptions');
+/**
+ * A factory for creating a Compiler
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
+ */
+export class CompilerFactory {
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29tcGlsZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9saW5rZXIvY29tcGlsZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7OztHQU1HO0FBRUgsT0FBTyxFQUFDLFVBQVUsRUFBQyxNQUFNLGtCQUFrQixDQUFDO0FBQzVDLE9BQU8sRUFBQyxjQUFjLEVBQUMsTUFBTSx1QkFBdUIsQ0FBQztBQUtyRCxPQUFPLEVBQUMsZ0JBQWdCLElBQUksa0JBQWtCLEVBQUMsTUFBTSwwQkFBMEIsQ0FBQztBQUNoRixPQUFPLEVBQUMsZUFBZSxFQUFFLGNBQWMsRUFBQyxNQUFNLHVCQUF1QixDQUFDO0FBQ3RFLE9BQU8sRUFBQyxlQUFlLElBQUksaUJBQWlCLEVBQUMsTUFBTSwwQkFBMEIsQ0FBQztBQUM5RSxPQUFPLEVBQUMsYUFBYSxFQUFDLE1BQU0sNEJBQTRCLENBQUM7O0FBS3pEOzs7Ozs7Ozs7R0FTRztBQUNILE1BQU0sT0FBTyw0QkFBNEI7SUFDdkMsWUFDVyxlQUFtQyxFQUNuQyxrQkFBMkM7UUFEM0Msb0JBQWUsR0FBZixlQUFlLENBQW9CO1FBQ25DLHVCQUFrQixHQUFsQixrQkFBa0IsQ0FBeUI7SUFBRyxDQUFDO0NBQzNEO0FBRUQ7Ozs7Ozs7Ozs7Ozs7OztHQWVHO0FBQ0gsTUFDYSxRQUFRO0lBQ25COzs7T0FHRztJQUNILGlCQUFpQixDQUFJLFVBQW1CO1FBQ3RDLE9BQU8sSUFBSSxpQkFBaUIsQ0FBQyxVQUFVLENBQUMsQ0FBQztJQUMzQyxDQUFDO0lBRUQ7O09BRUc7SUFDSCxrQkFBa0IsQ0FBSSxVQUFtQjtRQUN2QyxPQUFPLE9BQU8sQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLGlCQUFpQixDQUFDLFVBQVUsQ0FBQyxDQUFDLENBQUM7SUFDN0QsQ0FBQztJQUVEOztPQUVHO0lBQ0gsaUNBQWlDLENBQUksVUFBbUI7UUFDdEQsTUFBTSxlQUFlLEdBQUcsSUFBSSxDQUFDLGlCQUFpQixDQUFDLFVBQVUsQ0FBQyxDQUFDO1FBQzNELE1BQU0sU0FBUyxHQUFHLGNBQWMsQ0FBQyxVQUFVLENBQUUsQ0FBQztRQUM5QyxNQUFNLGtCQUFrQixHQUNwQixhQUFhLENBQUMsU0FBUyxDQUFDLFlBQVksQ0FBQzthQUNoQyxNQUFNLENBQUMsQ0FBQyxTQUFrQyxFQUFFLFdBQXNCLEVBQUUsRUFBRTtZQUNyRSxNQUFNLFlBQVksR0FBRyxlQUFlLENBQUMsV0FBVyxDQUFDLENBQUM7WUFDbEQsWUFBWSxJQUFJLFNBQVMsQ0FBQyxJQUFJLENBQUMsSUFBSSxrQkFBa0IsQ0FBQyxZQUFZLENBQUMsQ0FBQyxDQUFDO1lBQ3JFLE9BQU8sU0FBUyxDQUFDO1FBQ25CLENBQUMsRUFBRSxFQUE2QixDQUFDLENBQUM7UUFDMUMsT0FBTyxJQUFJLDRCQUE0QixDQUFDLGVBQWUsRUFBRSxrQkFBa0IsQ0FBQyxDQUFDO0lBQy9FLENBQUM7SUFFRDs7T0FFRztJQUNILGtDQUFrQyxDQUFJLFVBQW1CO1FBRXZELE9BQU8sT0FBTyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsaUNBQWlDLENBQUMsVUFBVSxDQUFDLENBQUMsQ0FBQztJQUM3RSxDQUFDO0lBRUQ7O09BRUc7SUFDSCxVQUFVLEtBQVUsQ0FBQztJQUVyQjs7T0FFRztJQUNILGFBQWEsQ0FBQyxJQUFlLElBQUcsQ0FBQztJQUVqQzs7T0FFRztJQUNILFdBQVcsQ0FBQyxVQUFxQjtRQUMvQixPQUFPLFNBQVMsQ0FBQztJQUNuQixDQUFDO3lFQXZEVSxRQUFRO3VFQUFSLFFBQVEsV0FBUixRQUFRLG1CQURJLE1BQU07O1NBQ2xCLFFBQVE7c0ZBQVIsUUFBUTtjQURwQixVQUFVO2VBQUMsRUFBQyxVQUFVLEVBQUUsTUFBTSxFQUFDOztBQWlGaEM7Ozs7R0FJRztBQUNILE1BQU0sQ0FBQyxNQUFNLGdCQUFnQixHQUFHLElBQUksY0FBYyxDQUFvQixpQkFBaUIsQ0FBQyxDQUFDO0FBRXpGOzs7Ozs7Ozs7R0FTRztBQUNILE1BQU0sT0FBZ0IsZUFBZTtDQUVwQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgTExDIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5pbXBvcnQge0luamVjdGFibGV9IGZyb20gJy4uL2RpL2luamVjdGFibGUnO1xuaW1wb3J0IHtJbmplY3Rpb25Ub2tlbn0gZnJvbSAnLi4vZGkvaW5qZWN0aW9uX3Rva2VuJztcbmltcG9ydCB7U3RhdGljUHJvdmlkZXJ9IGZyb20gJy4uL2RpL2ludGVyZmFjZS9wcm92aWRlcic7XG5pbXBvcnQge01pc3NpbmdUcmFuc2xhdGlvblN0cmF0ZWd5fSBmcm9tICcuLi9pMThuL3Rva2Vucyc7XG5pbXBvcnQge1R5cGV9IGZyb20gJy4uL2ludGVyZmFjZS90eXBlJztcbmltcG9ydCB7Vmlld0VuY2Fwc3VsYXRpb259IGZyb20gJy4uL21ldGFkYXRhL3ZpZXcnO1xuaW1wb3J0IHtDb21wb25lbnRGYWN0b3J5IGFzIENvbXBvbmVudEZhY3RvcnlSM30gZnJvbSAnLi4vcmVuZGVyMy9jb21wb25lbnRfcmVmJztcbmltcG9ydCB7Z2V0Q29tcG9uZW50RGVmLCBnZXROZ01vZHVsZURlZn0gZnJvbSAnLi4vcmVuZGVyMy9kZWZpbml0aW9uJztcbmltcG9ydCB7TmdNb2R1bGVGYWN0b3J5IGFzIE5nTW9kdWxlRmFjdG9yeVIzfSBmcm9tICcuLi9yZW5kZXIzL25nX21vZHVsZV9yZWYnO1xuaW1wb3J0IHttYXliZVVud3JhcEZufSBmcm9tICcuLi9yZW5kZXIzL3V0aWwvbWlzY191dGlscyc7XG5cbmltcG9ydCB7Q29tcG9uZW50RmFjdG9yeX0gZnJvbSAnLi9jb21wb25lbnRfZmFjdG9yeSc7XG5pbXBvcnQge05nTW9kdWxlRmFjdG9yeX0gZnJvbSAnLi9uZ19tb2R1bGVfZmFjdG9yeSc7XG5cbi8qKlxuICogQ29tYmluYXRpb24gb2YgTmdNb2R1bGVGYWN0b3J5IGFuZCBDb21wb25lbnRGYWN0b3JpZXMuXG4gKlxuICogQHB1YmxpY0FwaVxuICpcbiAqIEBkZXByZWNhdGVkXG4gKiBJdnkgSklUIG1vZGUgZG9lc24ndCByZXF1aXJlIGFjY2Vzc2luZyB0aGlzIHN5bWJvbC5cbiAqIFNlZSBbSklUIEFQSSBjaGFuZ2VzIGR1ZSB0byBWaWV3RW5naW5lIGRlcHJlY2F0aW9uXShndWlkZS9kZXByZWNhdGlvbnMjaml0LWFwaS1jaGFuZ2VzKSBmb3JcbiAqIGFkZGl0aW9uYWwgY29udGV4dC5cbiAqL1xuZXhwb3J0IGNsYXNzIE1vZHVsZVdpdGhDb21wb25lbnRGYWN0b3JpZXM8VD4ge1xuICBjb25zdHJ1Y3RvcihcbiAgICAgIHB1YmxpYyBuZ01vZHVsZUZhY3Rvcnk6IE5nTW9kdWxlRmFjdG9yeTxUPixcbiAgICAgIHB1YmxpYyBjb21wb25lbnRGYWN0b3JpZXM6IENvbXBvbmVudEZhY3Rvcnk8YW55PltdKSB7fVxufVxuXG4vKipcbiAqIExvdy1sZXZlbCBzZXJ2aWNlIGZvciBydW5uaW5nIHRoZSBhbmd1bGFyIGNvbXBpbGVyIGR1cmluZyBydW50aW1lXG4gKiB0byBjcmVhdGUge0BsaW5rIENvbXBvbmVudEZhY3Rvcnl9cywgd2hpY2hcbiAqIGNhbiBsYXRlciBiZSB1c2VkIHRvIGNyZWF0ZSBhbmQgcmVuZGVyIGEgQ29tcG9uZW50IGluc3RhbmNlLlxuICpcbiAqIEVhY2ggYEBOZ01vZHVsZWAgcHJvdmlkZXMgYW4gb3duIGBDb21waWxlcmAgdG8gaXRzIGluamVjdG9yLFxuICogdGhhdCB3aWxsIHVzZSB0aGUgZGlyZWN0aXZlcy9waXBlcyBvZiB0aGUgbmcgbW9kdWxlIGZvciBjb21waWxhdGlvblxuICogb2YgY29tcG9uZW50cy5cbiAqXG4gKiBAcHVibGljQXBpXG4gKlxuICogQGRlcHJlY2F0ZWRcbiAqIEl2eSBKSVQgbW9kZSBkb2Vzbid0IHJlcXVpcmUgYWNjZXNzaW5nIHRoaXMgc3ltYm9sLlxuICogU2VlIFtKSVQgQVBJIGNoYW5nZXMgZHVlIHRvIFZpZXdFbmdpbmUgZGVwcmVjYXRpb25dKGd1aWRlL2RlcHJlY2F0aW9ucyNqaXQtYXBpLWNoYW5nZXMpIGZvclxuICogYWRkaXRpb25hbCBjb250ZXh0LlxuICovXG5ASW5qZWN0YWJsZSh7cHJvdmlkZWRJbjogJ3Jvb3QnfSlcbmV4cG9ydCBjbGFzcyBDb21waWxlciB7XG4gIC8qKlxuICAgKiBDb21waWxlcyB0aGUgZ2l2ZW4gTmdNb2R1bGUgYW5kIGFsbCBvZiBpdHMgY29tcG9uZW50cy4gQWxsIHRlbXBsYXRlcyBvZiB0aGUgY29tcG9uZW50cyBsaXN0ZWRcbiAgICogaW4gYGVudHJ5Q29tcG9uZW50c2AgaGF2ZSB0byBiZSBpbmxpbmVkLlxuICAgKi9cbiAgY29tcGlsZU1vZHVsZVN5bmM8VD4obW9kdWxlVHlwZTogVHlwZTxUPik6IE5nTW9kdWxlRmFjdG9yeTxUPiB7XG4gICAgcmV0dXJuIG5ldyBOZ01vZHVsZUZhY3RvcnlSMyhtb2R1bGVUeXBlKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBDb21waWxlcyB0aGUgZ2l2ZW4gTmdNb2R1bGUgYW5kIGFsbCBvZiBpdHMgY29tcG9uZW50c1xuICAgKi9cbiAgY29tcGlsZU1vZHVsZUFzeW5jPFQ+KG1vZHVsZVR5cGU6IFR5cGU8VD4pOiBQcm9taXNlPE5nTW9kdWxlRmFjdG9yeTxUPj4ge1xuICAgIHJldHVybiBQcm9taXNlLnJlc29sdmUodGhpcy5jb21waWxlTW9kdWxlU3luYyhtb2R1bGVUeXBlKSk7XG4gIH1cblxuICAvKipcbiAgICogU2FtZSBhcyB7QGxpbmsgI2NvbXBpbGVNb2R1bGVTeW5jfSBidXQgYWxzbyBjcmVhdGVzIENvbXBvbmVudEZhY3RvcmllcyBmb3IgYWxsIGNvbXBvbmVudHMuXG4gICAqL1xuICBjb21waWxlTW9kdWxlQW5kQWxsQ29tcG9uZW50c1N5bmM8VD4obW9kdWxlVHlwZTogVHlwZTxUPik6IE1vZHVsZVdpdGhDb21wb25lbnRGYWN0b3JpZXM8VD4ge1xuICAgIGNvbnN0IG5nTW9kdWxlRmFjdG9yeSA9IHRoaXMuY29tcGlsZU1vZHVsZVN5bmMobW9kdWxlVHlwZSk7XG4gICAgY29uc3QgbW9kdWxlRGVmID0gZ2V0TmdNb2R1bGVEZWYobW9kdWxlVHlwZSkhO1xuICAgIGNvbnN0IGNvbXBvbmVudEZhY3RvcmllcyA9XG4gICAgICAgIG1heWJlVW53cmFwRm4obW9kdWxlRGVmLmRlY2xhcmF0aW9ucylcbiAgICAgICAgICAgIC5yZWR1Y2UoKGZhY3RvcmllczogQ29tcG9uZW50RmFjdG9yeTxhbnk+W10sIGRlY2xhcmF0aW9uOiBUeXBlPGFueT4pID0+IHtcbiAgICAgICAgICAgICAgY29uc3QgY29tcG9uZW50RGVmID0gZ2V0Q29tcG9uZW50RGVmKGRlY2xhcmF0aW9uKTtcbiAgICAgICAgICAgICAgY29tcG9uZW50RGVmICYmIGZhY3Rvcmllcy5wdXNoKG5ldyBDb21wb25lbnRGYWN0b3J5UjMoY29tcG9uZW50RGVmKSk7XG4gICAgICAgICAgICAgIHJldHVybiBmYWN0b3JpZXM7XG4gICAgICAgICAgICB9LCBbXSBhcyBDb21wb25lbnRGYWN0b3J5PGFueT5bXSk7XG4gICAgcmV0dXJuIG5ldyBNb2R1bGVXaXRoQ29tcG9uZW50RmFjdG9yaWVzKG5nTW9kdWxlRmFjdG9yeSwgY29tcG9uZW50RmFjdG9yaWVzKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBTYW1lIGFzIHtAbGluayAjY29tcGlsZU1vZHVsZUFzeW5jfSBidXQgYWxzbyBjcmVhdGVzIENvbXBvbmVudEZhY3RvcmllcyBmb3IgYWxsIGNvbXBvbmVudHMuXG4gICAqL1xuICBjb21waWxlTW9kdWxlQW5kQWxsQ29tcG9uZW50c0FzeW5jPFQ+KG1vZHVsZVR5cGU6IFR5cGU8VD4pOlxuICAgICAgUHJvbWlzZTxNb2R1bGVXaXRoQ29tcG9uZW50RmFjdG9yaWVzPFQ+PiB7XG4gICAgcmV0dXJuIFByb21pc2UucmVzb2x2ZSh0aGlzLmNvbXBpbGVNb2R1bGVBbmRBbGxDb21wb25lbnRzU3luYyhtb2R1bGVUeXBlKSk7XG4gIH1cblxuICAvKipcbiAgICogQ2xlYXJzIGFsbCBjYWNoZXMuXG4gICAqL1xuICBjbGVhckNhY2hlKCk6IHZvaWQge31cblxuICAvKipcbiAgICogQ2xlYXJzIHRoZSBjYWNoZSBmb3IgdGhlIGdpdmVuIGNvbXBvbmVudC9uZ01vZHVsZS5cbiAgICovXG4gIGNsZWFyQ2FjaGVGb3IodHlwZTogVHlwZTxhbnk+KSB7fVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBpZCBmb3IgYSBnaXZlbiBOZ01vZHVsZSwgaWYgb25lIGlzIGRlZmluZWQgYW5kIGtub3duIHRvIHRoZSBjb21waWxlci5cbiAgICovXG4gIGdldE1vZHVsZUlkKG1vZHVsZVR5cGU6IFR5cGU8YW55Pik6IHN0cmluZ3x1bmRlZmluZWQge1xuICAgIHJldHVybiB1bmRlZmluZWQ7XG4gIH1cbn1cblxuLyoqXG4gKiBPcHRpb25zIGZvciBjcmVhdGluZyBhIGNvbXBpbGVyLlxuICpcbiAqIE5vdGU6IHRoZSBgdXNlSml0YCBhbmQgYG1pc3NpbmdUcmFuc2xhdGlvbmAgY29uZmlnIG9wdGlvbnMgYXJlIG5vdCB1c2VkIGluIEl2eSwgcGFzc2luZyB0aGVtIGhhc1xuICogbm8gZWZmZWN0LiBUaG9zZSBjb25maWcgb3B0aW9ucyBhcmUgZGVwcmVjYXRlZCBzaW5jZSB2MTMuXG4gKlxuICogQHB1YmxpY0FwaVxuICovXG5leHBvcnQgdHlwZSBDb21waWxlck9wdGlvbnMgPSB7XG4gIC8qKlxuICAgKiBAZGVwcmVjYXRlZCBub3QgdXNlZCBhdCBhbGwgaW4gSXZ5LCBwcm92aWRpbmcgdGhpcyBjb25maWcgb3B0aW9uIGhhcyBubyBlZmZlY3QuXG4gICAqL1xuICB1c2VKaXQ/OiBib29sZWFuLFxuICBkZWZhdWx0RW5jYXBzdWxhdGlvbj86IFZpZXdFbmNhcHN1bGF0aW9uLFxuICBwcm92aWRlcnM/OiBTdGF0aWNQcm92aWRlcltdLFxuICAvKipcbiAgICogQGRlcHJlY2F0ZWQgbm90IHVzZWQgYXQgYWxsIGluIEl2eSwgcHJvdmlkaW5nIHRoaXMgY29uZmlnIG9wdGlvbiBoYXMgbm8gZWZmZWN0LlxuICAgKi9cbiAgbWlzc2luZ1RyYW5zbGF0aW9uPzogTWlzc2luZ1RyYW5zbGF0aW9uU3RyYXRlZ3ksXG4gIHByZXNlcnZlV2hpdGVzcGFjZXM/OiBib29sZWFuLFxufTtcblxuLyoqXG4gKiBUb2tlbiB0byBwcm92aWRlIENvbXBpbGVyT3B0aW9ucyBpbiB0aGUgcGxhdGZvcm0gaW5qZWN0b3IuXG4gKlxuICogQHB1YmxpY0FwaVxuICovXG5leHBvcnQgY29uc3QgQ09NUElMRVJfT1BUSU9OUyA9IG5ldyBJbmplY3Rpb25Ub2tlbjxDb21waWxlck9wdGlvbnNbXT4oJ2NvbXBpbGVyT3B0aW9ucycpO1xuXG4vKipcbiAqIEEgZmFjdG9yeSBmb3IgY3JlYXRpbmcgYSBDb21waWxlclxuICpcbiAqIEBwdWJsaWNBcGlcbiAqXG4gKiBAZGVwcmVjYXRlZFxuICogSXZ5IEpJVCBtb2RlIGRvZXNuJ3QgcmVxdWlyZSBhY2Nlc3NpbmcgdGhpcyBzeW1ib2wuXG4gKiBTZWUgW0pJVCBBUEkgY2hhbmdlcyBkdWUgdG8gVmlld0VuZ2luZSBkZXByZWNhdGlvbl0oZ3VpZGUvZGVwcmVjYXRpb25zI2ppdC1hcGktY2hhbmdlcykgZm9yXG4gKiBhZGRpdGlvbmFsIGNvbnRleHQuXG4gKi9cbmV4cG9ydCBhYnN0cmFjdCBjbGFzcyBDb21waWxlckZhY3Rvcnkge1xuICBhYnN0cmFjdCBjcmVhdGVDb21waWxlcihvcHRpb25zPzogQ29tcGlsZXJPcHRpb25zW10pOiBDb21waWxlcjtcbn1cbiJdfQ==
