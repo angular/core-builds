@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-6161c50
+ * @license Angular v16.0.0-next.4+sha-585e34b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9629,7 +9629,7 @@ class ComponentFactory$1 {
 }
 
 function noComponentFactoryError(component) {
-    const error = Error(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
+    const error = Error(`No component factory found for ${stringify(component)}.`);
     error[ERROR_COMPONENT] = component;
     return error;
 }
@@ -9783,7 +9783,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-6161c50');
+const VERSION = new Version('16.0.0-next.4+sha-585e34b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24454,7 +24454,6 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
     ];
     exports.forEach(verifyExportsAreDeclaredOrReExported);
     declarations.forEach(decl => verifyDeclarationIsUnique(decl, allowDuplicateDeclarationsInRoot));
-    declarations.forEach(verifyComponentEntryComponentsIsPartOfNgModule);
     const ngModule = getAnnotation(moduleType, 'NgModule');
     if (ngModule) {
         ngModule.imports &&
@@ -24464,8 +24463,6 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
             });
         ngModule.bootstrap && deepForEach(ngModule.bootstrap, verifyCorrectBootstrapType);
         ngModule.bootstrap && deepForEach(ngModule.bootstrap, verifyComponentIsPartOfNgModule);
-        ngModule.entryComponents &&
-            deepForEach(ngModule.entryComponents, verifyComponentIsPartOfNgModule);
     }
     // Throw Error if any errors were detected.
     if (errors.length) {
@@ -24541,16 +24538,6 @@ function verifySemanticsOfNgModuleDef(moduleType, allowDuplicateDeclarationsInRo
             errors.push(`The \`${stringifyForError(type)}\` class is a standalone component, which can ` +
                 `not be used in the \`@NgModule.bootstrap\` array. Use the \`bootstrapApplication\` ` +
                 `function for bootstrap instead.`);
-        }
-    }
-    function verifyComponentEntryComponentsIsPartOfNgModule(type) {
-        type = resolveForwardRef(type);
-        if (getComponentDef$1(type)) {
-            // We know we are component
-            const component = getAnnotation(type, 'Component');
-            if (component && component.entryComponents) {
-                deepForEach(component.entryComponents, verifyComponentIsPartOfNgModule);
-            }
         }
     }
     function verifySemanticsOfNgModuleImport(type, importingModule) {

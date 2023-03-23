@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-6161c50
+ * @license Angular v16.0.0-next.4+sha-585e34b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -127,45 +127,6 @@ export declare interface AfterViewInit {
      */
     ngAfterViewInit(): void;
 }
-
-/**
- * A DI token that you can use to create a virtual [provider](guide/glossary#provider)
- * that will populate the `entryComponents` field of components and NgModules
- * based on its `useValue` property value.
- * All components that are referenced in the `useValue` value (either directly
- * or in a nested array or map) are added to the `entryComponents` property.
- *
- * @usageNotes
- *
- * The following example shows how the router can populate the `entryComponents`
- * field of an NgModule based on a router configuration that refers
- * to components.
- *
- * ```typescript
- * // helper function inside the router
- * function provideRoutes(routes) {
- *   return [
- *     {provide: ROUTES, useValue: routes},
- *     {provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: routes, multi: true}
- *   ];
- * }
- *
- * // user code
- * let routes = [
- *   {path: '/root', component: RootComp},
- *   {path: '/teams', component: TeamsComp}
- * ];
- *
- * @NgModule({
- *   providers: [provideRoutes(routes)]
- * })
- * class ModuleWithRoutes {}
- * ```
- *
- * @publicApi
- * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
- */
-export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") that indicates which animations
@@ -885,8 +846,8 @@ declare const CLEANUP = 7;
  */
 export declare class Compiler {
     /**
-     * Compiles the given NgModule and all of its components. All templates of the components listed
-     * in `entryComponents` have to be inlined.
+     * Compiles the given NgModule and all of its components. All templates of the components
+     * have to be inlined.
      */
     compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T>;
     /**
@@ -1039,14 +1000,6 @@ export declare interface Component extends Directive {
      * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
      */
     interpolation?: [string, string];
-    /**
-     * A set of components that should be compiled along with
-     * this component. For each component listed here,
-     * Angular creates a {@link ComponentFactory} and stores it in the
-     * {@link ComponentFactoryResolver}.
-     * @deprecated Since 9.0.0. With Ivy, this property is no longer necessary.
-     */
-    entryComponents?: Array<Type<any> | any[]>;
     /**
      * True to preserve or false to remove potentially superfluous whitespace characters
      * from the compiled template. Whitespace characters are those matching the `\s`
@@ -2848,7 +2801,7 @@ declare const DISCONNECTED_NODES = "d";
  *
  * Reference to the current application is provided as a parameter.
  *
- * See ["Bootstrapping"](guide/bootstrapping) and ["Entry components"](guide/entry-components).
+ * See ["Bootstrapping"](guide/bootstrapping).
  *
  * @usageNotes
  * The example below uses `ApplicationRef.bootstrap()` to render the
@@ -5646,28 +5599,7 @@ export declare interface NgModule {
      */
     exports?: Array<Type<any> | any[]>;
     /**
-     * The set of components to compile when this NgModule is defined,
-     * so that they can be dynamically loaded into the view.
-     *
-     * For each component listed here, Angular creates a `ComponentFactory`
-     * and stores it in the `ComponentFactoryResolver`.
-     *
-     * Angular automatically adds components in the module's bootstrap
-     * and route definitions into the `entryComponents` list. Use this
-     * option to add components that are bootstrapped
-     * using one of the imperative techniques, such as `ViewContainerRef.createComponent()`.
-     *
-     * @see [Entry Components](guide/entry-components)
-     * @deprecated
-     * Since 9.0.0. With Ivy, this property is no longer necessary.
-     * (You may need to keep these if building a library that will be consumed by a View Engine
-     * application.)
-     */
-    entryComponents?: Array<Type<any> | any[]>;
-    /**
-     * The set of components that are bootstrapped when
-     * this module is bootstrapped. The components listed here
-     * are automatically added to `entryComponents`.
+     * The set of components that are bootstrapped when this module is bootstrapped.
      */
     bootstrap?: Array<Type<any> | any[]>;
     /**
