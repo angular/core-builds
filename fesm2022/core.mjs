@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-03d1d00
+ * @license Angular v16.0.0-next.4+sha-f1d3be3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9386,7 +9386,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-03d1d00');
+const VERSION = new Version('16.0.0-next.4+sha-f1d3be3');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29340,7 +29340,7 @@ function serializeLView(lView, context) {
         // layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
         // only use internal data structures and state to compute this information.
         if (!(tNode.type & 16 /* TNodeType.Projection */) && !!lView[i] &&
-            !unwrapRNode(lView[i]).isConnected) {
+            !unwrapRNode(lView[i]).isConnected && isContentProjectedNode(tNode)) {
             ngh[DISCONNECTED_NODES] ??= [];
             ngh[DISCONNECTED_NODES].push(noOffsetIndex);
             continue;
@@ -29511,6 +29511,22 @@ function insertCorruptedTextNodeMarkers(corruptedTextNodes, doc) {
     for (const [textNode, marker] of corruptedTextNodes) {
         textNode.after(doc.createComment(marker));
     }
+}
+/**
+ * Detects whether a given TNode represents a node that
+ * is being content projected.
+ */
+function isContentProjectedNode(tNode) {
+    let currentTNode = tNode;
+    while (currentTNode != null) {
+        // If we come across a component host node in parent nodes -
+        // this TNode is in the content projection section.
+        if (isComponentHost(currentTNode)) {
+            return true;
+        }
+        currentTNode = currentTNode.parent;
+    }
+    return false;
 }
 
 /**
