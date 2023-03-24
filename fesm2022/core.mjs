@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-6db2fed
+ * @license Angular v16.0.0-next.4+sha-22a6412
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9386,7 +9386,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-6db2fed');
+const VERSION = new Version('16.0.0-next.4+sha-22a6412');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27242,7 +27242,8 @@ function provideNgZoneChangeDetection(ngZone) {
                 const ngZoneChangeDetectionScheduler = inject(NgZoneChangeDetectionScheduler, { optional: true });
                 if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
                     ngZoneChangeDetectionScheduler === null) {
-                    throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No NgZoneChangeDetectionScheduler found in the Dependency Injection tree.');
+                    throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, `A required Injectable was not found in the dependency injection tree. ` +
+                        'If you are bootstrapping an NgModule, make sure that the `BrowserModule` is imported.');
                 }
                 return () => ngZoneChangeDetectionScheduler.initialize();
             },
