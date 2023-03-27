@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-f2dd3bd
+ * @license Angular v16.0.0-next.4+sha-22688b8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9202,7 +9202,7 @@ function calcSerializedContainerSize(hydrationInfo, index) {
  * in the DOM at serialization time. We should not attempt hydration for
  * such nodes and instead, use a regular "creation mode".
  */
-function isDisconnectedNode(hydrationInfo, index) {
+function isDisconnectedNode$1(hydrationInfo, index) {
     // Check if we are processing disconnected info for the first time.
     if (typeof hydrationInfo.disconnectedNodes === 'undefined') {
         const nodeIds = hydrationInfo.data[DISCONNECTED_NODES];
@@ -9390,7 +9390,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-f2dd3bd');
+const VERSION = new Version('16.0.0-next.4+sha-22688b8');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15103,7 +15103,7 @@ function createContainerAnchorImpl(tView, lView, tNode, index) {
  */
 function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -15369,7 +15369,7 @@ let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) =>
  */
 function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -17903,7 +17903,7 @@ let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
  */
 function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -23468,7 +23468,7 @@ function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
     const hydrationInfo = hostLView[HYDRATION];
     const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
     const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(hostTNode) ||
-        isDisconnectedNode(hydrationInfo, noOffsetIndex);
+        isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
     // Regular creation mode.
     if (isNodeCreationMode) {
         return createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
@@ -29513,6 +29513,18 @@ function appendSerializedNodePath(ngh, tNode, lView) {
     ngh[NODES][noOffsetIndex] = calcPathForNode(tNode, lView);
 }
 /**
+ * Helper function to append information about a disconnected node.
+ * This info is needed at runtime to avoid DOM lookups for this element
+ * and instead, the element would be created from scratch.
+ */
+function appendDisconnectedNodeIndex(ngh, tNode) {
+    const noOffsetIndex = tNode.index - HEADER_OFFSET;
+    ngh[DISCONNECTED_NODES] ??= [];
+    if (!ngh[DISCONNECTED_NODES].includes(noOffsetIndex)) {
+        ngh[DISCONNECTED_NODES].push(noOffsetIndex);
+    }
+}
+/**
  * There is no special TNode type for an i18n block, so we verify
  * whether the structure that we store at the `TView.data[idx]` position
  * has the `TI18n` shape.
@@ -29551,14 +29563,8 @@ function serializeLView(lView, context) {
         // This situation may happen during the content projection, when some nodes don't make it
         // into one of the content projection slots (for example, when there is no default
         // <ng-content /> slot in projector component's template).
-        //
-        // Note: we leverage the fact that we have this information available in the DOM emulation
-        // layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
-        // only use internal data structures and state to compute this information.
-        if (!(tNode.type & 16 /* TNodeType.Projection */) && !!lView[i] &&
-            !unwrapRNode(lView[i]).isConnected && isContentProjectedNode(tNode)) {
-            ngh[DISCONNECTED_NODES] ??= [];
-            ngh[DISCONNECTED_NODES].push(noOffsetIndex);
+        if (isDisconnectedNode(tNode, lView) && isContentProjectedNode(tNode)) {
+            appendDisconnectedNodeIndex(ngh, tNode);
             continue;
         }
         if (Array.isArray(tNode.projection)) {
@@ -29573,7 +29579,16 @@ function serializeLView(lView, context) {
                     // a parent lView, which contains those nodes.
                     if (!isProjectionTNode(projectionHeadTNode) &&
                         !isInSkipHydrationBlock(projectionHeadTNode)) {
-                        appendSerializedNodePath(ngh, projectionHeadTNode, lView);
+                        if (isDisconnectedNode(projectionHeadTNode, lView)) {
+                            // Check whether this node is connected, since we may have a TNode
+                            // in the data structure as a projection segment head, but the
+                            // content projection slot might be disabled (e.g.
+                            // <ng-content *ngIf="false" />).
+                            appendDisconnectedNodeIndex(ngh, projectionHeadTNode);
+                        }
+                        else {
+                            appendSerializedNodePath(ngh, projectionHeadTNode, lView);
+                        }
                     }
                 }
                 else {
@@ -29743,6 +29758,17 @@ function isContentProjectedNode(tNode) {
         currentTNode = currentTNode.parent;
     }
     return false;
+}
+/**
+ * Check whether a given node exists, but is disconnected from the DOM.
+ *
+ * Note: we leverage the fact that we have this information available in the DOM emulation
+ * layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
+ * only use internal data structures and state to compute this information.
+ */
+function isDisconnectedNode(tNode, lView) {
+    return !(tNode.type & 16 /* TNodeType.Projection */) && !!lView[tNode.index] &&
+        !unwrapRNode(lView[tNode.index]).isConnected;
 }
 
 /**
