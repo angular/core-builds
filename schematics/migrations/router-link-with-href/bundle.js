@@ -225,19 +225,26 @@ function getImportOfIdentifier(typeChecker, node) {
 }
 function getImportSpecifier(sourceFile, moduleName, specifierName) {
   var _a;
+  return (_a = getImportSpecifiers(sourceFile, moduleName, [specifierName])[0]) != null ? _a : null;
+}
+function getImportSpecifiers(sourceFile, moduleName, specifierNames) {
+  var _a;
+  const matches = [];
   for (const node of sourceFile.statements) {
     if (import_typescript3.default.isImportDeclaration(node) && import_typescript3.default.isStringLiteral(node.moduleSpecifier)) {
       const isMatch = typeof moduleName === "string" ? node.moduleSpecifier.text === moduleName : moduleName.test(node.moduleSpecifier.text);
       const namedBindings = (_a = node.importClause) == null ? void 0 : _a.namedBindings;
       if (isMatch && namedBindings && import_typescript3.default.isNamedImports(namedBindings)) {
-        const match = findImportSpecifier(namedBindings.elements, specifierName);
-        if (match) {
-          return match;
+        for (const specifierName of specifierNames) {
+          const match = findImportSpecifier(namedBindings.elements, specifierName);
+          if (match) {
+            matches.push(match);
+          }
         }
       }
     }
   }
-  return null;
+  return matches;
 }
 function removeSymbolFromNamedImports(node, symbol) {
   return import_typescript3.default.factory.updateNamedImports(node, [
@@ -275,7 +282,7 @@ function migrateFile(sourceFile, typeChecker, rewrite) {
   let rewrites = findUsages(sourceFile, typeChecker);
   const routerLinkSpec = getImportSpecifier(sourceFile, routerModule, routerLink);
   if (routerLinkSpec) {
-    const routerLinkNamedImports = routerLinkWithHrefSpec ? closestNode(routerLinkWithHrefSpec, import_typescript5.default.isNamedImports) : null;
+    const routerLinkNamedImports = closestNode(routerLinkWithHrefSpec, import_typescript5.default.isNamedImports);
     if (routerLinkNamedImports !== null) {
       const rewrittenNamedImports = removeSymbolFromNamedImports(routerLinkNamedImports, routerLinkWithHrefSpec);
       const printer = import_typescript5.default.createPrinter();
