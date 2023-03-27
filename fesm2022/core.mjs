@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-1d63183
+ * @license Angular v16.0.0-next.4+sha-9b65b84
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1971,6 +1971,8 @@ const ID = 20;
 const EMBEDDED_VIEW_INJECTOR = 21;
 const ON_DESTROY_HOOKS = 22;
 const HYDRATION = 23;
+const REACTIVE_TEMPLATE_CONSUMER = 24;
+const REACTIVE_HOST_BINDING_CONSUMER = 25;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -1978,7 +1980,7 @@ const HYDRATION = 23;
  * instruction index into `LView` index. All other indexes should be in the `LView` index space and
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
-const HEADER_OFFSET = 24;
+const HEADER_OFFSET = 26;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$4 = 1;
@@ -6342,6 +6344,8 @@ function detachView(lContainer, removeIndex) {
 function destroyLView(tView, lView) {
     if (!(lView[FLAGS] & 128 /* LViewFlags.Destroyed */)) {
         const renderer = lView[RENDERER];
+        lView[REACTIVE_TEMPLATE_CONSUMER]?.destroy();
+        lView[REACTIVE_HOST_BINDING_CONSUMER]?.destroy();
         if (renderer.destroyNode) {
             applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
         }
@@ -9386,7 +9390,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-1d63183');
+const VERSION = new Version('16.0.0-next.4+sha-9b65b84');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9467,11 +9471,11 @@ class ErrorHandler {
     }
 }
 
-const NG_DEV_MODE = typeof ngDevMode === 'undefined' || !!ngDevMode;
+const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
 /**
  * Internal token that specifies whether hydration is enabled.
  */
-const IS_HYDRATION_FEATURE_ENABLED = new InjectionToken(NG_DEV_MODE ? 'IS_HYDRATION_FEATURE_ENABLED' : '');
+const IS_HYDRATION_FEATURE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_FEATURE_ENABLED' : '');
 // By default (in client rendering mode), we remove all the contents
 // of the host element and render an application after that.
 const PRESERVE_HOST_CONTENT_DEFAULT = false;
@@ -9479,7 +9483,7 @@ const PRESERVE_HOST_CONTENT_DEFAULT = false;
  * Internal token that indicates whether host element content should be
  * retained during the bootstrap.
  */
-const PRESERVE_HOST_CONTENT = new InjectionToken(NG_DEV_MODE ? 'PRESERVE_HOST_CONTENT' : '', {
+const PRESERVE_HOST_CONTENT = new InjectionToken(NG_DEV_MODE$1 ? 'PRESERVE_HOST_CONTENT' : '', {
     providedIn: 'root',
     factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
 });
@@ -9635,6 +9639,233 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
         }
     }
     return { propName: undefined, oldValue, newValue };
+}
+
+// `WeakRef` is not always defined in every TS environment where Angular is compiled. Instead,
+// read it off of the global context if available.
+// tslint:disable-next-line: no-toplevel-property-access
+let WeakRefImpl = _global['WeakRef'];
+function newWeakRef(value) {
+    if (typeof ngDevMode !== 'undefined' && ngDevMode && WeakRefImpl === undefined) {
+        throw new Error(`Angular requires a browser which supports the 'WeakRef' API`);
+    }
+    return new WeakRefImpl(value);
+}
+/**
+ * Use an alternate implementation of `WeakRef` if a platform implementation isn't available.
+ */
+function setAlternateWeakRefImpl(impl) {
+    if (!WeakRefImpl) {
+        WeakRefImpl = impl;
+    }
+}
+
+/**
+ * Tracks the currently active reactive context (or `null` if there is no active
+ * context).
+ */
+let activeConsumer = null;
+/**
+ * Counter tracking the next `ProducerId` or `ConsumerId`.
+ */
+let _nextReactiveId = 0;
+/**
+ * Get a new `ProducerId` or `ConsumerId`, allocated from the global sequence.
+ *
+ * The value returned is a type intersection of both branded types, and thus can be assigned to
+ * either.
+ */
+function nextReactiveId() {
+    return _nextReactiveId++;
+}
+/**
+ * Set `consumer` as the active reactive context, and return the previous `Consumer`
+ * (if any) for later restoration.
+ */
+function setActiveConsumer(consumer) {
+    const prevConsumer = activeConsumer;
+    activeConsumer = consumer;
+    return prevConsumer;
+}
+/**
+ * Notify all `Consumer`s of the given `Producer` that its value may have changed.
+ */
+function producerNotifyConsumers(producer) {
+    for (const [consumerId, edge] of producer.consumers) {
+        const consumer = edge.consumerRef.deref();
+        if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
+            producer.consumers.delete(consumerId);
+            consumer?.producers.delete(producer.id);
+            continue;
+        }
+        consumer.notify();
+    }
+}
+/**
+ * Record a dependency on the given `Producer` by the current reactive `Consumer` if
+ * one is present.
+ */
+function producerAccessed(producer) {
+    if (activeConsumer === null) {
+        return;
+    }
+    // Either create or update the dependency `Edge` in both directions.
+    let edge = activeConsumer.producers.get(producer.id);
+    if (edge === undefined) {
+        edge = {
+            consumerRef: activeConsumer.ref,
+            producerRef: producer.ref,
+            seenValueVersion: producer.valueVersion,
+            atTrackingVersion: activeConsumer.trackingVersion,
+        };
+        activeConsumer.producers.set(producer.id, edge);
+        producer.consumers.set(activeConsumer.id, edge);
+    }
+    else {
+        edge.seenValueVersion = producer.valueVersion;
+        edge.atTrackingVersion = activeConsumer.trackingVersion;
+    }
+}
+/**
+ * Checks if a `Producer` has a current value which is different than the value
+ * last seen at a specific version by a `Consumer` which recorded a dependency on
+ * this `Producer`.
+ */
+function producerPollStatus(producer, lastSeenValueVersion) {
+    // `producer.valueVersion` may be stale, but a mismatch still means that the value
+    // last seen by the `Consumer` is also stale.
+    if (producer.valueVersion !== lastSeenValueVersion) {
+        return true;
+    }
+    // Trigger the `Producer` to update its `valueVersion` if necessary.
+    producer.checkForChangedValue();
+    // At this point, we can trust `producer.valueVersion`.
+    return producer.valueVersion !== lastSeenValueVersion;
+}
+/**
+ * A abstract implementation of `Consumer` that allows implementations to share much of the
+ * necessary boilerplate.
+ */
+class BaseConsumer {
+    constructor() {
+        this.id = nextReactiveId();
+        this.ref = newWeakRef(this);
+        this.producers = new Map();
+        this.trackingVersion = 0;
+    }
+}
+/**
+ * Function called to check the stale status of dependencies (producers) for a given consumer. This
+ * is a verification step before refreshing a given consumer: if none of the the dependencies
+ * reports a semantically new value, then the `Consumer` has not observed a real dependency change
+ * (even though it may have been notified of one).
+ */
+function consumerPollValueStatus(consumer) {
+    for (const [producerId, edge] of consumer.producers) {
+        const producer = edge.producerRef.deref();
+        if (producer === undefined || edge.atTrackingVersion !== consumer.trackingVersion) {
+            // This dependency edge is stale, so remove it.
+            consumer.producers.delete(producerId);
+            producer?.consumers.delete(consumer.id);
+            continue;
+        }
+        if (producerPollStatus(producer, edge.seenValueVersion)) {
+            // One of the dependencies reports a real value change.
+            return true;
+        }
+    }
+    // No dependency reported a real value change, so the `Consumer` has also not been
+    // impacted.
+    return false;
+}
+
+/**
+ * Marks current view and all ancestors dirty.
+ *
+ * Returns the root view because it is found as a byproduct of marking the view tree
+ * dirty, and can be used by methods that consume markViewDirty() to easily schedule
+ * change detection. Otherwise, such methods would need to traverse up the view tree
+ * an additional time to get the root view and schedule a tick on it.
+ *
+ * @param lView The starting LView to mark dirty
+ * @returns the root LView
+ */
+function markViewDirty(lView) {
+    while (lView) {
+        lView[FLAGS] |= 32 /* LViewFlags.Dirty */;
+        const parent = getLViewParent(lView);
+        // Stop traversing up as soon as you find a root view that wasn't attached to any container
+        if (isRootView(lView) && !parent) {
+            return lView;
+        }
+        // continue otherwise
+        lView = parent;
+    }
+    return null;
+}
+
+const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
+class ReactiveLViewConsumer extends BaseConsumer {
+    constructor() {
+        super(...arguments);
+        this._lView = null;
+    }
+    set lView(lView) {
+        NG_DEV_MODE && assertEqual(this._lView, null, 'Consumer already associated with a view.');
+        this._lView = lView;
+    }
+    notify() {
+        NG_DEV_MODE &&
+            assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
+        markViewDirty(this._lView);
+    }
+    runInContext(fn, rf, ctx) {
+        const prevConsumer = setActiveConsumer(this);
+        this.trackingVersion++;
+        try {
+            fn(rf, ctx);
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+    }
+    destroy() {
+        // Incrementing the version means that every producer which tries to update this consumer will
+        // consider its record stale, and not notify.
+        this.trackingVersion++;
+    }
+}
+let currentConsumer = null;
+function getOrCreateCurrentLViewConsumer() {
+    currentConsumer ??= new ReactiveLViewConsumer();
+    return currentConsumer;
+}
+/**
+ * Create a new template consumer pointing at the specified LView.
+ * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
+ * case, the LView will be updated.
+ */
+function getReactiveLViewConsumer(lView, slot) {
+    return lView[slot] ?? getOrCreateCurrentLViewConsumer();
+}
+/**
+ * Assigns the `currentTemplateContext` to its LView's `REACTIVE_CONSUMER` slot if there are tracked
+ * producers.
+ *
+ * The presence of producers means that a signal was read while the consumer was the active
+ * consumer.
+ *
+ * If no producers are present, we do not assign the current template context. This also means we
+ * can just reuse the template context for the next LView.
+ */
+function commitLViewConsumerIfHasProducers(lView, slot) {
+    const consumer = getOrCreateCurrentLViewConsumer();
+    if (consumer.producers.size === 0) {
+        return;
+    }
+    lView[slot] = currentConsumer;
+    consumer.lView = lView;
+    currentConsumer = new ReactiveLViewConsumer();
 }
 
 /** A special value which designates that a value has not changed. */
@@ -10723,6 +10954,7 @@ function processHostBindingOpCodes(tView, lView) {
     const hostBindingOpCodes = tView.hostBindingOpCodes;
     if (hostBindingOpCodes === null)
         return;
+    const consumer = getReactiveLViewConsumer(lView, REACTIVE_HOST_BINDING_CONSUMER);
     try {
         for (let i = 0; i < hostBindingOpCodes.length; i++) {
             const opCode = hostBindingOpCodes[i];
@@ -10737,11 +10969,13 @@ function processHostBindingOpCodes(tView, lView) {
                 const hostBindingFn = hostBindingOpCodes[++i];
                 setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
                 const context = lView[directiveIdx];
-                hostBindingFn(2 /* RenderFlags.Update */, context);
+                consumer.runInContext(hostBindingFn, 2 /* RenderFlags.Update */, context);
             }
         }
     }
     finally {
+        lView[REACTIVE_HOST_BINDING_CONSUMER] === null &&
+            commitLViewConsumerIfHasProducers(lView, REACTIVE_HOST_BINDING_CONSUMER);
         setSelectedIndex(-1);
     }
 }
@@ -10797,6 +11031,7 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     lView[ID] = getUniqueLViewId();
     lView[HYDRATION] = hydrationInfo;
     lView[EMBEDDED_VIEW_INJECTOR] = embeddedViewInjector;
+    lView[REACTIVE_TEMPLATE_CONSUMER] = null;
     ngDevMode &&
         assertEqual(tView.type == 2 /* TViewType.Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
     lView[DECLARATION_COMPONENT_VIEW] =
@@ -11081,6 +11316,7 @@ function refreshView(tView, lView, templateFn, context) {
     }
 }
 function executeTemplate(tView, lView, templateFn, rf, context) {
+    const consumer = getReactiveLViewConsumer(lView, REACTIVE_TEMPLATE_CONSUMER);
     const prevSelectedIndex = getSelectedIndex();
     const isUpdatePhase = rf & 2 /* RenderFlags.Update */;
     try {
@@ -11092,9 +11328,12 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         }
         const preHookType = isUpdatePhase ? 2 /* ProfilerEvent.TemplateUpdateStart */ : 0 /* ProfilerEvent.TemplateCreateStart */;
         profiler(preHookType, context);
-        templateFn(rf, context);
+        consumer.runInContext(templateFn, rf, context);
     }
     finally {
+        if (lView[REACTIVE_TEMPLATE_CONSUMER] === null) {
+            commitLViewConsumerIfHasProducers(lView, REACTIVE_TEMPLATE_CONSUMER);
+        }
         setSelectedIndex(prevSelectedIndex);
         const postHookType = isUpdatePhase ? 3 /* ProfilerEvent.TemplateUpdateEnd */ : 1 /* ProfilerEvent.TemplateCreateEnd */;
         profiler(postHookType, context);
@@ -12198,30 +12437,6 @@ function addToViewTree(lView, lViewOrLContainer) {
 ///////////////////////////////
 //// Change detection
 ///////////////////////////////
-/**
- * Marks current view and all ancestors dirty.
- *
- * Returns the root view because it is found as a byproduct of marking the view tree
- * dirty, and can be used by methods that consume markViewDirty() to easily schedule
- * change detection. Otherwise, such methods would need to traverse up the view tree
- * an additional time to get the root view and schedule a tick on it.
- *
- * @param lView The starting LView to mark dirty
- * @returns the root LView
- */
-function markViewDirty(lView) {
-    while (lView) {
-        lView[FLAGS] |= 32 /* LViewFlags.Dirty */;
-        const parent = getLViewParent(lView);
-        // Stop traversing up as soon as you find a root view that wasn't attached to any container
-        if (isRootView(lView) && !parent) {
-            return lView;
-        }
-        // continue otherwise
-        lView = parent;
-    }
-    return null;
-}
 function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
     const rendererFactory = lView[RENDERER_FACTORY];
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
@@ -29690,132 +29905,6 @@ function defaultEquals(a, b) {
 }
 
 /**
- * Tracks the currently active reactive context (or `null` if there is no active
- * context).
- */
-let activeConsumer = null;
-/**
- * Counter tracking the next `ProducerId` or `ConsumerId`.
- */
-let _nextReactiveId = 0;
-/**
- * Get a new `ProducerId` or `ConsumerId`, allocated from the global sequence.
- *
- * The value returned is a type intersection of both branded types, and thus can be assigned to
- * either.
- */
-function nextReactiveId() {
-    return _nextReactiveId++;
-}
-/**
- * Set `consumer` as the active reactive context, and return the previous `Consumer`
- * (if any) for later restoration.
- */
-function setActiveConsumer(consumer) {
-    const prevConsumer = activeConsumer;
-    activeConsumer = consumer;
-    return prevConsumer;
-}
-/**
- * Notify all `Consumer`s of the given `Producer` that its value may have changed.
- */
-function producerNotifyConsumers(producer) {
-    for (const [consumerId, edge] of producer.consumers) {
-        const consumer = edge.consumerRef.deref();
-        if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
-            producer.consumers.delete(consumerId);
-            consumer?.producers.delete(producer.id);
-            continue;
-        }
-        consumer.notify();
-    }
-}
-/**
- * Record a dependency on the given `Producer` by the current reactive `Consumer` if
- * one is present.
- */
-function producerAccessed(producer) {
-    if (activeConsumer === null) {
-        return;
-    }
-    // Either create or update the dependency `Edge` in both directions.
-    let edge = activeConsumer.producers.get(producer.id);
-    if (edge === undefined) {
-        edge = {
-            consumerRef: activeConsumer.ref,
-            producerRef: producer.ref,
-            seenValueVersion: producer.valueVersion,
-            atTrackingVersion: activeConsumer.trackingVersion,
-        };
-        activeConsumer.producers.set(producer.id, edge);
-        producer.consumers.set(activeConsumer.id, edge);
-    }
-    else {
-        edge.seenValueVersion = producer.valueVersion;
-        edge.atTrackingVersion = activeConsumer.trackingVersion;
-    }
-}
-/**
- * Checks if a `Producer` has a current value which is different than the value
- * last seen at a specific version by a `Consumer` which recorded a dependency on
- * this `Producer`.
- */
-function producerPollStatus(producer, lastSeenValueVersion) {
-    // `producer.valueVersion` may be stale, but a mismatch still means that the value
-    // last seen by the `Consumer` is also stale.
-    if (producer.valueVersion !== lastSeenValueVersion) {
-        return true;
-    }
-    // Trigger the `Producer` to update its `valueVersion` if necessary.
-    producer.checkForChangedValue();
-    // At this point, we can trust `producer.valueVersion`.
-    return producer.valueVersion !== lastSeenValueVersion;
-}
-/**
- * Function called to check the stale status of dependencies (producers) for a given consumer. This
- * is a verification step before refreshing a given consumer: if none of the the dependencies
- * reports a semantically new value, then the `Consumer` has not observed a real dependency change
- * (even though it may have been notified of one).
- */
-function consumerPollValueStatus(consumer) {
-    for (const [producerId, edge] of consumer.producers) {
-        const producer = edge.producerRef.deref();
-        if (producer === undefined || edge.atTrackingVersion !== consumer.trackingVersion) {
-            // This dependency edge is stale, so remove it.
-            consumer.producers.delete(producerId);
-            producer?.consumers.delete(consumer.id);
-            continue;
-        }
-        if (producerPollStatus(producer, edge.seenValueVersion)) {
-            // One of the dependencies reports a real value change.
-            return true;
-        }
-    }
-    // No dependency reported a real value change, so the `Consumer` has also not been
-    // impacted.
-    return false;
-}
-
-// `WeakRef` is not always defined in every TS environment where Angular is compiled. Instead,
-// read it off of the global context if available.
-// tslint:disable-next-line: no-toplevel-property-access
-let WeakRefImpl = _global['WeakRef'];
-function newWeakRef(value) {
-    if (typeof ngDevMode !== 'undefined' && ngDevMode && WeakRefImpl === undefined) {
-        throw new Error(`Angular requires a browser which supports the 'WeakRef' API`);
-    }
-    return new WeakRefImpl(value);
-}
-/**
- * Use an alternate implementation of `WeakRef` if a platform implementation isn't available.
- */
-function setAlternateWeakRefImpl(impl) {
-    if (!WeakRefImpl) {
-        WeakRefImpl = impl;
-    }
-}
-
-/**
  * Create a computed `Signal` which derives a reactive value from an expression.
  *
  * @developerPreview
@@ -29954,14 +30043,11 @@ class ComputedImpl {
  * `Watch` doesn't run reactive expressions itself, but relies on a consumer-
  * provided scheduling operation to coordinate calling `Watch.run()`.
  */
-class Watch {
+class Watch extends BaseConsumer {
     constructor(watch, schedule) {
+        super();
         this.watch = watch;
         this.schedule = schedule;
-        this.id = nextReactiveId();
-        this.ref = newWeakRef(this);
-        this.producers = new Map();
-        this.trackingVersion = 0;
         this.dirty = false;
     }
     notify() {

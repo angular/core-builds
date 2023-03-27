@@ -1,0 +1,74 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { BaseConsumer, setActiveConsumer } from '../signals/src/graph';
+import { assertDefined, assertEqual } from '../util/assert';
+import { markViewDirty } from './instructions/mark_view_dirty';
+const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
+export class ReactiveLViewConsumer extends BaseConsumer {
+    constructor() {
+        super(...arguments);
+        this._lView = null;
+    }
+    set lView(lView) {
+        NG_DEV_MODE && assertEqual(this._lView, null, 'Consumer already associated with a view.');
+        this._lView = lView;
+    }
+    notify() {
+        NG_DEV_MODE &&
+            assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
+        markViewDirty(this._lView);
+    }
+    runInContext(fn, rf, ctx) {
+        const prevConsumer = setActiveConsumer(this);
+        this.trackingVersion++;
+        try {
+            fn(rf, ctx);
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+    }
+    destroy() {
+        // Incrementing the version means that every producer which tries to update this consumer will
+        // consider its record stale, and not notify.
+        this.trackingVersion++;
+    }
+}
+let currentConsumer = null;
+function getOrCreateCurrentLViewConsumer() {
+    currentConsumer ??= new ReactiveLViewConsumer();
+    return currentConsumer;
+}
+/**
+ * Create a new template consumer pointing at the specified LView.
+ * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
+ * case, the LView will be updated.
+ */
+export function getReactiveLViewConsumer(lView, slot) {
+    return lView[slot] ?? getOrCreateCurrentLViewConsumer();
+}
+/**
+ * Assigns the `currentTemplateContext` to its LView's `REACTIVE_CONSUMER` slot if there are tracked
+ * producers.
+ *
+ * The presence of producers means that a signal was read while the consumer was the active
+ * consumer.
+ *
+ * If no producers are present, we do not assign the current template context. This also means we
+ * can just reuse the template context for the next LView.
+ */
+export function commitLViewConsumerIfHasProducers(lView, slot) {
+    const consumer = getOrCreateCurrentLViewConsumer();
+    if (consumer.producers.size === 0) {
+        return;
+    }
+    lView[slot] = currentConsumer;
+    consumer.lView = lView;
+    currentConsumer = new ReactiveLViewConsumer();
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVhY3RpdmVfbHZpZXdfY29uc3VtZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL3JlYWN0aXZlX2x2aWV3X2NvbnN1bWVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILE9BQU8sRUFBQyxZQUFZLEVBQUUsaUJBQWlCLEVBQUMsTUFBTSxzQkFBc0IsQ0FBQztBQUNyRSxPQUFPLEVBQUMsYUFBYSxFQUFFLFdBQVcsRUFBQyxNQUFNLGdCQUFnQixDQUFDO0FBRTFELE9BQU8sRUFBQyxhQUFhLEVBQUMsTUFBTSxnQ0FBZ0MsQ0FBQztBQUk3RCxNQUFNLFdBQVcsR0FBRyxPQUFPLFNBQVMsS0FBSyxXQUFXLElBQUksU0FBUyxDQUFDO0FBRWxFLE1BQU0sT0FBTyxxQkFBc0IsU0FBUSxZQUFZO0lBQXZEOztRQUNVLFdBQU0sR0FBZSxJQUFJLENBQUM7SUFnQ3BDLENBQUM7SUE5QkMsSUFBSSxLQUFLLENBQUMsS0FBWTtRQUNwQixXQUFXLElBQUksV0FBVyxDQUFDLElBQUksQ0FBQyxNQUFNLEVBQUUsSUFBSSxFQUFFLDBDQUEwQyxDQUFDLENBQUM7UUFDMUYsSUFBSSxDQUFDLE1BQU0sR0FBRyxLQUFLLENBQUM7SUFDdEIsQ0FBQztJQUVRLE1BQU07UUFDYixXQUFXO1lBQ1AsYUFBYSxDQUNULElBQUksQ0FBQyxNQUFNLEVBQ1gsNkVBQTZFLENBQUMsQ0FBQztRQUN2RixhQUFhLENBQUMsSUFBSSxDQUFDLE1BQU8sQ0FBQyxDQUFDO0lBQzlCLENBQUM7SUFFRCxZQUFZLENBQ1IsRUFBNEQsRUFBRSxFQUFlLEVBQzdFLEdBQVk7UUFDZCxNQUFNLFlBQVksR0FBRyxpQkFBaUIsQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUM3QyxJQUFJLENBQUMsZUFBZSxFQUFFLENBQUM7UUFDdkIsSUFBSTtZQUNGLEVBQUUsQ0FBQyxFQUFFLEVBQUUsR0FBRyxDQUFDLENBQUM7U0FDYjtnQkFBUztZQUNSLGlCQUFpQixDQUFDLFlBQVksQ0FBQyxDQUFDO1NBQ2pDO0lBQ0gsQ0FBQztJQUVELE9BQU87UUFDTCw4RkFBOEY7UUFDOUYsNkNBQTZDO1FBQzdDLElBQUksQ0FBQyxlQUFlLEVBQUUsQ0FBQztJQUN6QixDQUFDO0NBQ0Y7QUFFRCxJQUFJLGVBQWUsR0FBK0IsSUFBSSxDQUFDO0FBRXZELFNBQVMsK0JBQStCO0lBQ3RDLGVBQWUsS0FBSyxJQUFJLHFCQUFxQixFQUFFLENBQUM7SUFDaEQsT0FBTyxlQUFlLENBQUM7QUFDekIsQ0FBQztBQUVEOzs7O0dBSUc7QUFDSCxNQUFNLFVBQVUsd0JBQXdCLENBQ3BDLEtBQVksRUFBRSxJQUE2RTtJQUU3RixPQUFPLEtBQUssQ0FBQyxJQUFJLENBQUMsSUFBSSwrQkFBK0IsRUFBRSxDQUFDO0FBQzFELENBQUM7QUFFRDs7Ozs7Ozs7O0dBU0c7QUFDSCxNQUFNLFVBQVUsaUNBQWlDLENBQzdDLEtBQVksRUFDWixJQUE2RTtJQUMvRSxNQUFNLFFBQVEsR0FBRywrQkFBK0IsRUFBRSxDQUFDO0lBQ25ELElBQUksUUFBUSxDQUFDLFNBQVMsQ0FBQyxJQUFJLEtBQUssQ0FBQyxFQUFFO1FBQ2pDLE9BQU87S0FDUjtJQUVELEtBQUssQ0FBQyxJQUFJLENBQUMsR0FBRyxlQUFlLENBQUM7SUFDOUIsUUFBUSxDQUFDLEtBQUssR0FBRyxLQUFLLENBQUM7SUFDdkIsZUFBZSxHQUFHLElBQUkscUJBQXFCLEVBQUUsQ0FBQztBQUNoRCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBMTEMgQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7QmFzZUNvbnN1bWVyLCBzZXRBY3RpdmVDb25zdW1lcn0gZnJvbSAnLi4vc2lnbmFscy9zcmMvZ3JhcGgnO1xuaW1wb3J0IHthc3NlcnREZWZpbmVkLCBhc3NlcnRFcXVhbH0gZnJvbSAnLi4vdXRpbC9hc3NlcnQnO1xuXG5pbXBvcnQge21hcmtWaWV3RGlydHl9IGZyb20gJy4vaW5zdHJ1Y3Rpb25zL21hcmtfdmlld19kaXJ0eSc7XG5pbXBvcnQge0NvbXBvbmVudFRlbXBsYXRlLCBIb3N0QmluZGluZ3NGdW5jdGlvbiwgUmVuZGVyRmxhZ3N9IGZyb20gJy4vaW50ZXJmYWNlcy9kZWZpbml0aW9uJztcbmltcG9ydCB7TFZpZXcsIFJFQUNUSVZFX0hPU1RfQklORElOR19DT05TVU1FUiwgUkVBQ1RJVkVfVEVNUExBVEVfQ09OU1VNRVJ9IGZyb20gJy4vaW50ZXJmYWNlcy92aWV3JztcblxuY29uc3QgTkdfREVWX01PREUgPSB0eXBlb2YgbmdEZXZNb2RlID09PSAndW5kZWZpbmVkJyB8fCBuZ0Rldk1vZGU7XG5cbmV4cG9ydCBjbGFzcyBSZWFjdGl2ZUxWaWV3Q29uc3VtZXIgZXh0ZW5kcyBCYXNlQ29uc3VtZXIge1xuICBwcml2YXRlIF9sVmlldzogTFZpZXd8bnVsbCA9IG51bGw7XG5cbiAgc2V0IGxWaWV3KGxWaWV3OiBMVmlldykge1xuICAgIE5HX0RFVl9NT0RFICYmIGFzc2VydEVxdWFsKHRoaXMuX2xWaWV3LCBudWxsLCAnQ29uc3VtZXIgYWxyZWFkeSBhc3NvY2lhdGVkIHdpdGggYSB2aWV3LicpO1xuICAgIHRoaXMuX2xWaWV3ID0gbFZpZXc7XG4gIH1cblxuICBvdmVycmlkZSBub3RpZnkoKSB7XG4gICAgTkdfREVWX01PREUgJiZcbiAgICAgICAgYXNzZXJ0RGVmaW5lZChcbiAgICAgICAgICAgIHRoaXMuX2xWaWV3LFxuICAgICAgICAgICAgJ1VwZGF0aW5nIGEgc2lnbmFsIGR1cmluZyB0ZW1wbGF0ZSBvciBob3N0IGJpbmRpbmcgZXhlY3V0aW9uIGlzIG5vdCBhbGxvd2VkLicpO1xuICAgIG1hcmtWaWV3RGlydHkodGhpcy5fbFZpZXchKTtcbiAgfVxuXG4gIHJ1bkluQ29udGV4dChcbiAgICAgIGZuOiBIb3N0QmluZGluZ3NGdW5jdGlvbjx1bmtub3duPnxDb21wb25lbnRUZW1wbGF0ZTx1bmtub3duPiwgcmY6IFJlbmRlckZsYWdzLFxuICAgICAgY3R4OiB1bmtub3duKTogdm9pZCB7XG4gICAgY29uc3QgcHJldkNvbnN1bWVyID0gc2V0QWN0aXZlQ29uc3VtZXIodGhpcyk7XG4gICAgdGhpcy50cmFja2luZ1ZlcnNpb24rKztcbiAgICB0cnkge1xuICAgICAgZm4ocmYsIGN0eCk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldEFjdGl2ZUNvbnN1bWVyKHByZXZDb25zdW1lcik7XG4gICAgfVxuICB9XG5cbiAgZGVzdHJveSgpOiB2b2lkIHtcbiAgICAvLyBJbmNyZW1lbnRpbmcgdGhlIHZlcnNpb24gbWVhbnMgdGhhdCBldmVyeSBwcm9kdWNlciB3aGljaCB0cmllcyB0byB1cGRhdGUgdGhpcyBjb25zdW1lciB3aWxsXG4gICAgLy8gY29uc2lkZXIgaXRzIHJlY29yZCBzdGFsZSwgYW5kIG5vdCBub3RpZnkuXG4gICAgdGhpcy50cmFja2luZ1ZlcnNpb24rKztcbiAgfVxufVxuXG5sZXQgY3VycmVudENvbnN1bWVyOiBSZWFjdGl2ZUxWaWV3Q29uc3VtZXJ8bnVsbCA9IG51bGw7XG5cbmZ1bmN0aW9uIGdldE9yQ3JlYXRlQ3VycmVudExWaWV3Q29uc3VtZXIoKSB7XG4gIGN1cnJlbnRDb25zdW1lciA/Pz0gbmV3IFJlYWN0aXZlTFZpZXdDb25zdW1lcigpO1xuICByZXR1cm4gY3VycmVudENvbnN1bWVyO1xufVxuXG4vKipcbiAqIENyZWF0ZSBhIG5ldyB0ZW1wbGF0ZSBjb25zdW1lciBwb2ludGluZyBhdCB0aGUgc3BlY2lmaWVkIExWaWV3LlxuICogU29tZXRpbWVzLCBhIHByZXZpb3VzbHkgY3JlYXRlZCBjb25zdW1lciBtYXkgYmUgcmV1c2VkLCBpbiBvcmRlciB0byBzYXZlIG9uIGFsbG9jYXRpb25zLiBJbiB0aGF0XG4gKiBjYXNlLCB0aGUgTFZpZXcgd2lsbCBiZSB1cGRhdGVkLlxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0UmVhY3RpdmVMVmlld0NvbnN1bWVyKFxuICAgIGxWaWV3OiBMVmlldywgc2xvdDogdHlwZW9mIFJFQUNUSVZFX1RFTVBMQVRFX0NPTlNVTUVSfHR5cGVvZiBSRUFDVElWRV9IT1NUX0JJTkRJTkdfQ09OU1VNRVIpOlxuICAgIFJlYWN0aXZlTFZpZXdDb25zdW1lciB7XG4gIHJldHVybiBsVmlld1tzbG90XSA/PyBnZXRPckNyZWF0ZUN1cnJlbnRMVmlld0NvbnN1bWVyKCk7XG59XG5cbi8qKlxuICogQXNzaWducyB0aGUgYGN1cnJlbnRUZW1wbGF0ZUNvbnRleHRgIHRvIGl0cyBMVmlldydzIGBSRUFDVElWRV9DT05TVU1FUmAgc2xvdCBpZiB0aGVyZSBhcmUgdHJhY2tlZFxuICogcHJvZHVjZXJzLlxuICpcbiAqIFRoZSBwcmVzZW5jZSBvZiBwcm9kdWNlcnMgbWVhbnMgdGhhdCBhIHNpZ25hbCB3YXMgcmVhZCB3aGlsZSB0aGUgY29uc3VtZXIgd2FzIHRoZSBhY3RpdmVcbiAqIGNvbnN1bWVyLlxuICpcbiAqIElmIG5vIHByb2R1Y2VycyBhcmUgcHJlc2VudCwgd2UgZG8gbm90IGFzc2lnbiB0aGUgY3VycmVudCB0ZW1wbGF0ZSBjb250ZXh0LiBUaGlzIGFsc28gbWVhbnMgd2VcbiAqIGNhbiBqdXN0IHJldXNlIHRoZSB0ZW1wbGF0ZSBjb250ZXh0IGZvciB0aGUgbmV4dCBMVmlldy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGNvbW1pdExWaWV3Q29uc3VtZXJJZkhhc1Byb2R1Y2VycyhcbiAgICBsVmlldzogTFZpZXcsXG4gICAgc2xvdDogdHlwZW9mIFJFQUNUSVZFX1RFTVBMQVRFX0NPTlNVTUVSfHR5cGVvZiBSRUFDVElWRV9IT1NUX0JJTkRJTkdfQ09OU1VNRVIpOiB2b2lkIHtcbiAgY29uc3QgY29uc3VtZXIgPSBnZXRPckNyZWF0ZUN1cnJlbnRMVmlld0NvbnN1bWVyKCk7XG4gIGlmIChjb25zdW1lci5wcm9kdWNlcnMuc2l6ZSA9PT0gMCkge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGxWaWV3W3Nsb3RdID0gY3VycmVudENvbnN1bWVyO1xuICBjb25zdW1lci5sVmlldyA9IGxWaWV3O1xuICBjdXJyZW50Q29uc3VtZXIgPSBuZXcgUmVhY3RpdmVMVmlld0NvbnN1bWVyKCk7XG59XG4iXX0=
