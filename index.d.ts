@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-465c20c
+ * @license Angular v16.0.0-next.4+sha-be23b7c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11511,6 +11511,7 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
     hostView: ɵViewRef<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
+    private previousInputValues;
     constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
     setInput(name: string, value: unknown): void;
     get injector(): Injector;

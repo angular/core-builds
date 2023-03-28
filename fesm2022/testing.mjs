@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-465c20c
+ * @license Angular v16.0.0-next.4+sha-be23b7c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9787,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-465c20c');
+const VERSION = new Version('16.0.0-next.4+sha-be23b7c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13466,6 +13466,7 @@ class ComponentRef extends ComponentRef$1 {
         this.location = location;
         this._rootLView = _rootLView;
         this._tNode = _tNode;
+        this.previousInputValues = null;
         this.instance = instance;
         this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
         this.componentType = componentType;
@@ -13474,8 +13475,16 @@ class ComponentRef extends ComponentRef$1 {
         const inputData = this._tNode.inputs;
         let dataValue;
         if (inputData !== null && (dataValue = inputData[name])) {
+            this.previousInputValues ??= new Map();
+            // Do not set the input if it is the same as the last value
+            // This behavior matches `bindingUpdated` when binding inputs in templates.
+            if (this.previousInputValues.has(name) &&
+                Object.is(this.previousInputValues.get(name), value)) {
+                return;
+            }
             const lView = this._rootLView;
             setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
+            this.previousInputValues.set(name, value);
             markDirtyIfOnPush(lView, this._tNode.index);
         }
         else {
