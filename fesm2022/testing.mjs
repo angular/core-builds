@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-1600687
+ * @license Angular v16.0.0-next.4+sha-478c5ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9787,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-1600687');
+const VERSION = new Version('16.0.0-next.4+sha-478c5ac');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23403,11 +23403,13 @@ function cleanupLView(lView) {
  * Walks over all views registered within the ApplicationRef and removes
  * all dehydrated views from all `LContainer`s along the way.
  */
-function cleanupDehydratedViews(appRef) {
+function cleanupDehydratedViews(appRef, pendingTasks) {
     // Wait once an app becomes stable and cleanup all views that
     // were not claimed during the application bootstrap process.
     // The timing is similar to when we kick off serialization on the server.
-    return appRef.isStable.pipe(first((isStable) => isStable)).toPromise().then(() => {
+    const isStablePromise = appRef.isStable.pipe(first((isStable) => isStable)).toPromise();
+    const pendingTasksPromise = pendingTasks.whenAllTasksComplete;
+    return Promise.allSettled([isStablePromise, pendingTasksPromise]).then(() => {
         const viewRefs = appRef._views;
         for (const viewRef of viewRefs) {
             const lView = getComponentLViewForHydration(viewRef);

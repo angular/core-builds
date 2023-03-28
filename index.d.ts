@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-1600687
+ * @license Angular v16.0.0-next.4+sha-478c5ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10967,6 +10967,31 @@ export declare function ɵgetUnknownPropertyStrictMode(): boolean;
 
 
 export declare const ɵglobal: any;
+
+/**
+ * *Internal* service that keeps track of pending tasks happening in the system
+ * during the initial rendering. No tasks are tracked after an initial
+ * rendering.
+ *
+ * This information is needed to make sure that the serialization on the server
+ * is delayed until all tasks in the queue (such as an initial navigation or a
+ * pending HTTP request) are completed.
+ */
+export declare class ɵInitialRenderPendingTasks implements OnDestroy {
+    private taskId;
+    private collection;
+    private ngZone;
+    private resolve;
+    private promise;
+    get whenAllTasksComplete(): Promise<void>;
+    completed: boolean;
+    constructor();
+    add(): number;
+    remove(taskId: number): void;
+    ngOnDestroy(): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵInitialRenderPendingTasks, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ɵInitialRenderPendingTasks>;
+}
 
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDetectorRef;
