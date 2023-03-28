@@ -7073,7 +7073,6 @@ function parse(value) {
   let valueStart = 0;
   let propStart = 0;
   let currentProp = null;
-  let valueHasQuotes = false;
   while (i < value.length) {
     const token = value.charCodeAt(i++);
     switch (token) {
@@ -7084,7 +7083,6 @@ function parse(value) {
         parenDepth--;
         break;
       case 39:
-        valueHasQuotes = valueHasQuotes || valueStart > 0;
         if (quote === 0) {
           quote = 39;
         } else if (quote === 39 && value.charCodeAt(i - 1) !== 92) {
@@ -7092,7 +7090,6 @@ function parse(value) {
         }
         break;
       case 34:
-        valueHasQuotes = valueHasQuotes || valueStart > 0;
         if (quote === 0) {
           quote = 34;
         } else if (quote === 34 && value.charCodeAt(i - 1) !== 92) {
@@ -7108,31 +7105,19 @@ function parse(value) {
       case 59:
         if (currentProp && valueStart > 0 && parenDepth === 0 && quote === 0) {
           const styleVal = value.substring(valueStart, i - 1).trim();
-          styles.push(currentProp, valueHasQuotes ? stripUnnecessaryQuotes(styleVal) : styleVal);
+          styles.push(currentProp, styleVal);
           propStart = i;
           valueStart = 0;
           currentProp = null;
-          valueHasQuotes = false;
         }
         break;
     }
   }
   if (currentProp && valueStart) {
     const styleVal = value.slice(valueStart).trim();
-    styles.push(currentProp, valueHasQuotes ? stripUnnecessaryQuotes(styleVal) : styleVal);
+    styles.push(currentProp, styleVal);
   }
   return styles;
-}
-function stripUnnecessaryQuotes(value) {
-  const qS = value.charCodeAt(0);
-  const qE = value.charCodeAt(value.length - 1);
-  if (qS == qE && (qS == 39 || qS == 34)) {
-    const tempValue = value.substring(1, value.length - 1);
-    if (tempValue.indexOf("'") == -1 && tempValue.indexOf('"') == -1) {
-      value = tempValue;
-    }
-  }
-  return value;
 }
 function hyphenate(value) {
   return value.replace(/[a-z][A-Z]/g, (v) => {
@@ -16512,7 +16497,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.0.0-next.4+sha-74adf81");
+var VERSION2 = new Version("16.0.0-next.4+sha-1829542");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17827,7 +17812,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17896,7 +17881,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -18078,7 +18063,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -18101,7 +18086,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -18139,7 +18124,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -18160,7 +18145,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -18195,7 +18180,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.0.0-next.4+sha-74adf81"));
+  definitionMap.set("version", literal("16.0.0-next.4+sha-1829542"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -18212,7 +18197,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.0.0-next.4+sha-74adf81");
+var VERSION3 = new Version("16.0.0-next.4+sha-1829542");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;

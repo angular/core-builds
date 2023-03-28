@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-74adf81
+ * @license Angular v16.0.0-next.4+sha-1829542
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9787,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-74adf81');
+const VERSION = new Version('16.0.0-next.4+sha-1829542');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -18192,8 +18192,11 @@ function isStylingValuePresent(value) {
  * @param suffix
  */
 function normalizeSuffix(value, suffix) {
-    if (value == null /** || value === undefined */) {
+    if (value == null || value === '') {
         // do nothing
+        // Do not add the suffix if the value is going to be empty.
+        // As it produce invalid CSS, which the browsers will automatically omit but Domino will not.
+        // Example: `"left": "px;"` instead of `"left": ""`.
     }
     else if (typeof suffix === 'string') {
         value = value + suffix;
