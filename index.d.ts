@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-84a0fa3
+ * @license Angular v16.0.0-next.4+sha-ef149de
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -534,6 +534,15 @@ export declare class ApplicationRef {
 export declare function asNativeElements(debugEls: DebugElement[]): any;
 
 /**
+ * Asserts that the current stack frame is within an injection context and has access to `inject`.
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+export declare function assertInInjectionContext(debugFn: Function): void;
+
+/**
  * Checks that there is currently a platform that contains the given token as a provider.
  *
  * @publicApi
@@ -590,22 +599,6 @@ export declare interface AttributeDecorator {
      */
     (name: string): any;
     new (name: string): Attribute;
-}
-
-/**
- * A abstract implementation of `Consumer` that allows implementations to share much of the
- * necessary boilerplate.
- */
-declare abstract class BaseConsumer implements Consumer {
-    readonly id: number & {
-        __producer: true;
-    } & {
-        __consumer: true;
-    };
-    readonly ref: WeakRef<this>;
-    readonly producers: Map<ProducerId, Edge>;
-    trackingVersion: number;
-    abstract notify(): void;
 }
 
 /**
@@ -1511,7 +1504,7 @@ declare type ComponentTemplate<T> = {
  *
  * @developerPreview
  */
-export declare function computed<T>(computation: () => T, equal?: ValueEqualityFn<T>): Signal<T>;
+export declare function computed<T>(computation: () => T, options?: CreateComputedOptions<T>): Signal<T>;
 
 /**
  * Configures the `Injector` to return an instance of a token.
@@ -1560,78 +1553,6 @@ export declare interface ConstructorSansProvider {
      */
     deps?: any[];
 }
-
-/**
- * Represents a reader that can depend on reactive values (`Producer`s) and receive
- * notifications when those values change.
- *
- * `Consumer`s do not wrap the reads they consume themselves, but rather can be set
- * as the active reader via `setActiveConsumer`.
- *
- * The set of dependencies of a `Consumer` is dynamic. Implementers expose a
- * monotonically increasing `trackingVersion` counter, which increments whenever
- * the `Consumer` is about to re-run any reactive reads it needs and establish a
- * new set of dependencies as a result.
- *
- * `Producer`s store the last `trackingVersion` they've seen from `Consumer`s which
- * have read them. This allows a `Producer` to identify whether its record of the
- * dependency is current or stale, by comparing the `Consumer`'s `trackingVersion`
- * to the version at which the dependency was established.
- */
-declare interface Consumer {
-    /**
-     * Numeric identifier of this `Producer`.
-     *
-     * May also be used to satisfy the interface for `Producer`.
-     */
-    readonly id: ConsumerId;
-    /**
-     * A `WeakRef` to this `Consumer` instance.
-     *
-     * An implementer provides this as a cached value to avoid the need to instantiate
-     * multiple `WeakRef` instances for the same `Consumer`.
-     *
-     * May also be used to satisfy the interface for `Producer`.
-     */
-    readonly ref: WeakRef<Consumer>;
-    /**
-     * A map of `Edge`s to `Producer` dependencies, keyed by the `ProducerId`.
-     *
-     * Used to poll `Producer`s to determine if the `Consumer` has really updated
-     * or not.
-     */
-    readonly producers: Map<ProducerId, Edge>;
-    /**
-     * Monotonically increasing counter representing a version of this `Consumer`'s
-     * dependencies.
-     */
-    readonly trackingVersion: number;
-    /**
-     * Called when a `Producer` dependency of this `Consumer` indicates it may
-     * have a new value.
-     *
-     * Notification alone does not mean the `Producer` has definitely produced a
-     * semantically different value, only that it _may_ have changed. Before a
-     * `Consumer` re-runs any computations or side effects, it should use the
-     * `consumerPollValueStatus` method to poll the `Producer`s on which it depends
-     * and determine if any of them have actually updated.
-     */
-    notify(): void;
-}
-
-/**
- * Identifier for a `Consumer`, which is a branded `number`.
- *
- * Note that `ProducerId` and `ConsumerId` are assigned from the same sequence, so the same `number`
- * will never be used for both.
- *
- * Branding provides additional type safety by ensuring that `ProducerId` and `ConsumerId` are
- * mutually unassignable without a cast. Since several `Map`s are keyed by these IDs, this prevents
- * `ConsumerId`s from being inadvertently used to look up `Producer`s or vice versa.
- */
-declare type ConsumerId = number & {
-    __consumer: true;
-};
 
 declare const CONTAINERS = "c";
 
@@ -1892,6 +1813,39 @@ export declare function createComponent<C>(component: Type<C>, options: {
 }): ComponentRef<C>;
 
 /**
+ * Options passed to the `computed` creation function.
+ *
+ * @developerPreview
+ */
+export declare interface CreateComputedOptions<T> {
+    /**
+     * A comparison function which defines equality for computed values.
+     */
+    equal?: ValueEqualityFn<T>;
+}
+
+/**
+ * Options passed to the `effect` function.
+ *
+ * @developerPreview
+ */
+export declare interface CreateEffectOptions {
+    /**
+     * The `Injector` in which to create the effect.
+     *
+     * If this is not provided, the current injection context will be used instead (via `inject`).
+     */
+    injector?: Injector;
+    /**
+     * Whether the `effect` should require manual cleanup.
+     *
+     * If this is `false` (the default) the effect will automatically register itself to be cleaned up
+     * with the current `DestroyRef`.
+     */
+    manualCleanup?: boolean;
+}
+
+/**
  * Create a new environment injector.
  *
  * Learn more about environment injectors in
@@ -1946,6 +1900,18 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  * @publicApi
  */
 export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
+
+/**
+ * Options passed to the `signal` creation function.
+ *
+ * @developerPreview
+ */
+export declare interface CreateSignalOptions<T> {
+    /**
+     * A comparison function which defines equality for signal values.
+     */
+    equal?: ValueEqualityFn<T>;
+}
 
 /**
  * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
@@ -2190,6 +2156,18 @@ declare const DECLARATION_COMPONENT_VIEW = 16;
 declare const DECLARATION_LCONTAINER = 17;
 
 declare const DECLARATION_VIEW = 15;
+
+/**
+ * Makes `T` read-only at the property level.
+ *
+ * Objects have their properties mapped to `DeepReadonly` types and arrays are converted to
+ * `ReadonlyArray`s of `DeepReadonly` values.
+ *
+ * @developerPreview
+ */
+export declare type DeepReadonly<T> = T extends (infer R)[] ? ReadonlyArray<DeepReadonly<R>> : (T extends Function ? T : (T extends object ? {
+    readonly [P in keyof T]: DeepReadonly<T[P]>;
+} : T));
 
 /**
  * Provide this token to set the default currency code your application uses for
@@ -2949,40 +2927,11 @@ export declare interface DoCheck {
 }
 
 /**
- * A bidirectional edge in the producer-consumer dependency graph.
- */
-declare interface Edge {
-    /**
-     * Weakly held reference to the `Consumer` side of this edge.
-     */
-    readonly consumerRef: WeakRef<Consumer>;
-    /**
-     * Weakly held reference to the `Producer` side of this edge.
-     */
-    readonly producerRef: WeakRef<Producer>;
-    /**
-     * `trackingVersion` of the `Consumer` at which this dependency edge was last observed.
-     *
-     * If this doesn't match the `Consumer`'s current `trackingVersion`, then this dependency record
-     * is stale, and needs to be cleaned up.
-     */
-    atTrackingVersion: number;
-    /**
-     * `valueVersion` of the `Producer` at the time this dependency was last accessed.
-     *
-     * This is used by `consumerPollValueStatus` to determine whether a `Consumer`'s dependencies have
-     * semantically changed.
-     */
-    seenValueVersion: number;
-}
-
-/**
  * Create a global `Effect` for the given reactive function.
  *
  * @developerPreview
  */
-export declare function effect(effectFn: () => void): EffectRef;
-
+export declare function effect(effectFn: () => void, options?: CreateEffectOptions): EffectRef;
 
 /**
  * A global reactive effect, which can be manually destroyed.
@@ -6441,74 +6390,6 @@ declare const enum PreOrderHookFlags {
 declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
 
 /**
- * Represents a value that can be read reactively, and can notify readers (`Consumer`s)
- * when it changes.
- *
- * Producers maintain a weak reference to any `Consumer`s which may depend on the
- * producer's value.
- *
- * Implementers of `Producer` expose a monotonic `valueVersion` counter, and are responsible
- * for incrementing this version when their value semantically changes. Some Producers may
- * produce this value lazily and thus at times need to be polled for potential updates to
- * their value (and by extension their `valueVersion`). This is accomplished via the
- * `checkForChangedValue` method for Producers, which should perform whatever calculations
- * are necessary to ensure `valueVersion` is up to date.
- *
- * `Producer`s support two operations:
- *   * `producerNotifyConsumers`
- *   * `producerAccessed`
- */
-declare interface Producer {
-    /**
-     * Numeric identifier of this `Producer`.
-     *
-     * May also be used to satisfy the interface for `Consumer`.
-     */
-    readonly id: ProducerId;
-    /**
-     * A `WeakRef` to this `Producer` instance.
-     *
-     * An implementer provides this as a cached value to avoid the need to instantiate
-     * multiple `WeakRef` instances for the same `Producer`.
-     *
-     * May also be used to satisfy the interface for `Consumer`.
-     */
-    readonly ref: WeakRef<Producer>;
-    /**
-     * A map of dependency `Edge`s to `Consumer`s, keyed by the `ConsumerId`.
-     *
-     * Used when the produced value changes to notify interested `Consumer`s.
-     */
-    readonly consumers: Map<ConsumerId, Edge>;
-    /**
-     * Monotonically increasing counter which increases when the value of this `Producer`
-     * semantically changes.
-     */
-    readonly valueVersion: number;
-    /**
-     * Ensure that `valueVersion` is up to date for the `Producer`'s value.
-     *
-     * Some `Producer`s may produce values lazily, and thus require polling before their
-     * `valueVersion` can be compared with the version captured during a previous read.
-     */
-    checkForChangedValue(): void;
-}
-
-/**
- * Identifier for a `Producer`, which is a branded `number`.
- *
- * Note that `ProducerId` and `ConsumerId` are assigned from the same sequence, so the same `number`
- * will never be used for both.
- *
- * Branding provides additional type safety by ensuring that `ProducerId` and `ConsumerId` are
- * mutually unassignable without a cast. Since several `Map`s are keyed by these IDs, this prevents
- * `ProducerId`s from being inadvertently used to look up `Consumer`s or vice versa.
- */
-declare type ProducerId = number & {
-    __producer: true;
-};
-
-/**
  * List of slots for a projection. A slot can be either based on a parsed CSS selector
  * which will be used to determine nodes which are projected into that slot.
  *
@@ -6938,12 +6819,106 @@ declare const REACTIVE_HOST_BINDING_CONSUMER = 25;
 
 declare const REACTIVE_TEMPLATE_CONSUMER = 24;
 
-declare class ReactiveLViewConsumer extends BaseConsumer {
+declare class ReactiveLViewConsumer extends ReactiveNode {
     private _lView;
     set lView(lView: LView);
-    notify(): void;
+    protected onConsumerDependencyMayHaveChanged(): void;
+    protected onProducerUpdateValueVersion(): void;
+    get hasReadASignal(): boolean;
     runInContext(fn: HostBindingsFunction<unknown> | ComponentTemplate<unknown>, rf: ɵRenderFlags, ctx: unknown): void;
     destroy(): void;
+}
+
+/**
+ * A node in the reactive graph.
+ *
+ * Nodes can be producers of reactive values, consumers of other reactive values, or both.
+ *
+ * Producers are nodes that produce values, and can be depended upon by consumer nodes.
+ *
+ * Producers expose a monotonic `valueVersion` counter, and are responsible for incrementing this
+ * version when their value semantically changes. Some producers may produce their values lazily and
+ * thus at times need to be polled for potential updates to their value (and by extension their
+ * `valueVersion`). This is accomplished via the `onProducerUpdateValueVersion` method for
+ * implemented by producers, which should perform whatever calculations are necessary to ensure
+ * `valueVersion` is up to date.
+ *
+ * Consumers are nodes that depend on the values of producers and are notified when those values
+ * might have changed.
+ *
+ * Consumers do not wrap the reads they consume themselves, but rather can be set as the active
+ * reader via `setActiveConsumer`. Reads of producers that happen while a consumer is active will
+ * result in those producers being added as dependencies of that consumer node.
+ *
+ * The set of dependencies of a consumer is dynamic. Implementers expose a monotonically increasing
+ * `trackingVersion` counter, which increments whenever the consumer is about to re-run any reactive
+ * reads it needs and establish a new set of dependencies as a result.
+ *
+ * Producers store the last `trackingVersion` they've seen from `Consumer`s which have read them.
+ * This allows a producer to identify whether its record of the dependency is current or stale, by
+ * comparing the consumer's `trackingVersion` to the version at which the dependency was
+ * last observed.
+ */
+declare abstract class ReactiveNode {
+    private readonly id;
+    /**
+     * A cached weak reference to this node, which will be used in `ReactiveEdge`s.
+     */
+    private readonly ref;
+    /**
+     * Edges to producers on which this node depends (in its consumer capacity).
+     */
+    private readonly producers;
+    /**
+     * Edges to consumers on which this node depends (in its producer capacity).
+     */
+    private readonly consumers;
+    /**
+     * Monotonically increasing counter representing a version of this `Consumer`'s
+     * dependencies.
+     */
+    protected trackingVersion: number;
+    /**
+     * Monotonically increasing counter which increases when the value of this `Producer`
+     * semantically changes.
+     */
+    protected valueVersion: number;
+    /**
+     * Called for consumers whenever one of their dependencies notifies that it might have a new
+     * value.
+     */
+    protected abstract onConsumerDependencyMayHaveChanged(): void;
+    /**
+     * Called for producers when a dependent consumer is checking if the producer's value has actually
+     * changed.
+     */
+    protected abstract onProducerUpdateValueVersion(): void;
+    /**
+     * Polls dependencies of a consumer to determine if they have actually changed.
+     *
+     * If this returns `false`, then even though the consumer may have previously been notified of a
+     * change, the values of its dependencies have not actually changed and the consumer should not
+     * rerun any reactions.
+     */
+    protected consumerPollProducersForChange(): boolean;
+    /**
+     * Notify all consumers of this producer that its value may have changed.
+     */
+    protected producerMayHaveChanged(): void;
+    /**
+     * Mark that this producer node has been accessed in the current reactive context.
+     */
+    protected producerAccessed(): void;
+    /**
+     * Whether this consumer currently has any producers registered.
+     */
+    protected get hasProducers(): boolean;
+    /**
+     * Checks if a `Producer` has a current value which is different than the value
+     * last seen at a specific version by a `Consumer` which recorded a dependency on
+     * this `Producer`.
+     */
+    private producerPollStatus;
 }
 
 /**
@@ -7979,28 +7954,6 @@ declare interface SerializedView {
 }
 
 /**
- * A `Signal` with a value that can be mutated via a setter interface.
- *
- * @developerPreview
- */
-export declare interface SettableSignal<T> extends Signal<T> {
-    /**
-     * Directly set the signal to a new value, and notify any dependents.
-     */
-    set(value: T): void;
-    /**
-     * Update the value of the signal based on its current value, and
-     * notify any dependents.
-     */
-    update(updateFn: (value: T) => T): void;
-    /**
-     * Update the current value by mutating it in-place, and
-     * notify any dependents.
-     */
-    mutate(mutatorFn: (value: T) => void): void;
-}
-
-/**
  * Set the {@link GetTestability} implementation used by the Angular testing framework.
  * @publicApi
  */
@@ -8023,8 +7976,8 @@ declare const SIGNAL: unique symbol;
  *
  * @developerPreview
  */
-export declare type Signal<T> = (() => T) & {
-    [SIGNAL]: true;
+export declare type Signal<T> = (() => DeepReadonly<T>) & {
+    [SIGNAL]: unknown;
 };
 
 /**
@@ -8032,7 +7985,7 @@ export declare type Signal<T> = (() => T) & {
  *
  * @developerPreview
  */
-export declare function signal<T>(initialValue: T, equal?: ValueEqualityFn<T>): SettableSignal<T>;
+export declare function signal<T>(initialValue: T, options?: CreateSignalOptions<T>): WritableSignal<T>;
 
 
 /**
@@ -10242,6 +10195,28 @@ declare interface WeakRef<T extends object> {
 
 declare interface WeakRefCtor {
     new <T extends object>(value: T): WeakRef<T>;
+}
+
+/**
+ * A `Signal` with a value that can be mutated via a setter interface.
+ *
+ * @developerPreview
+ */
+export declare interface WritableSignal<T> extends Signal<T> {
+    /**
+     * Directly set the signal to a new value, and notify any dependents.
+     */
+    set(value: T): void;
+    /**
+     * Update the value of the signal based on its current value, and
+     * notify any dependents.
+     */
+    update(updateFn: (value: T) => T): void;
+    /**
+     * Update the current value by mutating it in-place, and
+     * notify any dependents.
+     */
+    mutate(mutatorFn: (value: T) => void): void;
 }
 
 /**

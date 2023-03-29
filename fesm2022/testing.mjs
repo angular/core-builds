@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-84a0fa3
+ * @license Angular v16.0.0-next.4+sha-ef149de
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1842,6 +1842,9 @@ const SOURCE = '__source';
  * - Injector instance: Use the injector for resolution.
  */
 let _currentInjector = undefined;
+function getCurrentInjector() {
+    return _currentInjector;
+}
 function setCurrentInjector(injector) {
     const former = _currentInjector;
     _currentInjector = injector;
@@ -1850,7 +1853,7 @@ function setCurrentInjector(injector) {
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
-            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`EnvironmentInjector#runInContext\`.`);
+            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -9784,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-84a0fa3');
+const VERSION = new Version('16.0.0-next.4+sha-ef149de');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10007,122 +10010,160 @@ function setAlternateWeakRefImpl(impl) {
 }
 
 /**
- * Tracks the currently active reactive context (or `null` if there is no active
- * context).
- */
-let activeConsumer = null;
-/**
  * Counter tracking the next `ProducerId` or `ConsumerId`.
  */
 let _nextReactiveId = 0;
 /**
- * Get a new `ProducerId` or `ConsumerId`, allocated from the global sequence.
- *
- * The value returned is a type intersection of both branded types, and thus can be assigned to
- * either.
+ * Tracks the currently active reactive consumer (or `null` if there is no active
+ * consumer).
  */
-function nextReactiveId() {
-    return _nextReactiveId++;
-}
-/**
- * Set `consumer` as the active reactive context, and return the previous `Consumer`
- * (if any) for later restoration.
- */
+let activeConsumer = null;
 function setActiveConsumer(consumer) {
-    const prevConsumer = activeConsumer;
+    const prev = activeConsumer;
     activeConsumer = consumer;
-    return prevConsumer;
+    return prev;
 }
 /**
- * Notify all `Consumer`s of the given `Producer` that its value may have changed.
+ * A node in the reactive graph.
+ *
+ * Nodes can be producers of reactive values, consumers of other reactive values, or both.
+ *
+ * Producers are nodes that produce values, and can be depended upon by consumer nodes.
+ *
+ * Producers expose a monotonic `valueVersion` counter, and are responsible for incrementing this
+ * version when their value semantically changes. Some producers may produce their values lazily and
+ * thus at times need to be polled for potential updates to their value (and by extension their
+ * `valueVersion`). This is accomplished via the `onProducerUpdateValueVersion` method for
+ * implemented by producers, which should perform whatever calculations are necessary to ensure
+ * `valueVersion` is up to date.
+ *
+ * Consumers are nodes that depend on the values of producers and are notified when those values
+ * might have changed.
+ *
+ * Consumers do not wrap the reads they consume themselves, but rather can be set as the active
+ * reader via `setActiveConsumer`. Reads of producers that happen while a consumer is active will
+ * result in those producers being added as dependencies of that consumer node.
+ *
+ * The set of dependencies of a consumer is dynamic. Implementers expose a monotonically increasing
+ * `trackingVersion` counter, which increments whenever the consumer is about to re-run any reactive
+ * reads it needs and establish a new set of dependencies as a result.
+ *
+ * Producers store the last `trackingVersion` they've seen from `Consumer`s which have read them.
+ * This allows a producer to identify whether its record of the dependency is current or stale, by
+ * comparing the consumer's `trackingVersion` to the version at which the dependency was
+ * last observed.
  */
-function producerNotifyConsumers(producer) {
-    for (const [consumerId, edge] of producer.consumers) {
-        const consumer = edge.consumerRef.deref();
-        if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
-            producer.consumers.delete(consumerId);
-            consumer?.producers.delete(producer.id);
-            continue;
-        }
-        consumer.notify();
-    }
-}
-/**
- * Record a dependency on the given `Producer` by the current reactive `Consumer` if
- * one is present.
- */
-function producerAccessed(producer) {
-    if (activeConsumer === null) {
-        return;
-    }
-    // Either create or update the dependency `Edge` in both directions.
-    let edge = activeConsumer.producers.get(producer.id);
-    if (edge === undefined) {
-        edge = {
-            consumerRef: activeConsumer.ref,
-            producerRef: producer.ref,
-            seenValueVersion: producer.valueVersion,
-            atTrackingVersion: activeConsumer.trackingVersion,
-        };
-        activeConsumer.producers.set(producer.id, edge);
-        producer.consumers.set(activeConsumer.id, edge);
-    }
-    else {
-        edge.seenValueVersion = producer.valueVersion;
-        edge.atTrackingVersion = activeConsumer.trackingVersion;
-    }
-}
-/**
- * Checks if a `Producer` has a current value which is different than the value
- * last seen at a specific version by a `Consumer` which recorded a dependency on
- * this `Producer`.
- */
-function producerPollStatus(producer, lastSeenValueVersion) {
-    // `producer.valueVersion` may be stale, but a mismatch still means that the value
-    // last seen by the `Consumer` is also stale.
-    if (producer.valueVersion !== lastSeenValueVersion) {
-        return true;
-    }
-    // Trigger the `Producer` to update its `valueVersion` if necessary.
-    producer.checkForChangedValue();
-    // At this point, we can trust `producer.valueVersion`.
-    return producer.valueVersion !== lastSeenValueVersion;
-}
-/**
- * A abstract implementation of `Consumer` that allows implementations to share much of the
- * necessary boilerplate.
- */
-class BaseConsumer {
+class ReactiveNode {
     constructor() {
-        this.id = nextReactiveId();
+        this.id = _nextReactiveId++;
+        /**
+         * A cached weak reference to this node, which will be used in `ReactiveEdge`s.
+         */
         this.ref = newWeakRef(this);
+        /**
+         * Edges to producers on which this node depends (in its consumer capacity).
+         */
         this.producers = new Map();
+        /**
+         * Edges to consumers on which this node depends (in its producer capacity).
+         */
+        this.consumers = new Map();
+        /**
+         * Monotonically increasing counter representing a version of this `Consumer`'s
+         * dependencies.
+         */
         this.trackingVersion = 0;
+        /**
+         * Monotonically increasing counter which increases when the value of this `Producer`
+         * semantically changes.
+         */
+        this.valueVersion = 0;
     }
-}
-/**
- * Function called to check the stale status of dependencies (producers) for a given consumer. This
- * is a verification step before refreshing a given consumer: if none of the the dependencies
- * reports a semantically new value, then the `Consumer` has not observed a real dependency change
- * (even though it may have been notified of one).
- */
-function consumerPollValueStatus(consumer) {
-    for (const [producerId, edge] of consumer.producers) {
-        const producer = edge.producerRef.deref();
-        if (producer === undefined || edge.atTrackingVersion !== consumer.trackingVersion) {
-            // This dependency edge is stale, so remove it.
-            consumer.producers.delete(producerId);
-            producer?.consumers.delete(consumer.id);
-            continue;
+    /**
+     * Polls dependencies of a consumer to determine if they have actually changed.
+     *
+     * If this returns `false`, then even though the consumer may have previously been notified of a
+     * change, the values of its dependencies have not actually changed and the consumer should not
+     * rerun any reactions.
+     */
+    consumerPollProducersForChange() {
+        for (const [producerId, edge] of this.producers) {
+            const producer = edge.producerNode.deref();
+            if (producer === undefined || edge.atTrackingVersion !== this.trackingVersion) {
+                // This dependency edge is stale, so remove it.
+                this.producers.delete(producerId);
+                producer?.consumers.delete(this.id);
+                continue;
+            }
+            if (producer.producerPollStatus(edge.seenValueVersion)) {
+                // One of the dependencies reports a real value change.
+                return true;
+            }
         }
-        if (producerPollStatus(producer, edge.seenValueVersion)) {
-            // One of the dependencies reports a real value change.
+        // No dependency reported a real value change, so the `Consumer` has also not been
+        // impacted.
+        return false;
+    }
+    /**
+     * Notify all consumers of this producer that its value may have changed.
+     */
+    producerMayHaveChanged() {
+        for (const [consumerId, edge] of this.consumers) {
+            const consumer = edge.consumerNode.deref();
+            if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
+                this.consumers.delete(consumerId);
+                consumer?.producers.delete(this.id);
+                continue;
+            }
+            consumer.onConsumerDependencyMayHaveChanged();
+        }
+    }
+    /**
+     * Mark that this producer node has been accessed in the current reactive context.
+     */
+    producerAccessed() {
+        if (activeConsumer === null) {
+            return;
+        }
+        // Either create or update the dependency `Edge` in both directions.
+        let edge = activeConsumer.producers.get(this.id);
+        if (edge === undefined) {
+            edge = {
+                consumerNode: activeConsumer.ref,
+                producerNode: this.ref,
+                seenValueVersion: this.valueVersion,
+                atTrackingVersion: activeConsumer.trackingVersion,
+            };
+            activeConsumer.producers.set(this.id, edge);
+            this.consumers.set(activeConsumer.id, edge);
+        }
+        else {
+            edge.seenValueVersion = this.valueVersion;
+            edge.atTrackingVersion = activeConsumer.trackingVersion;
+        }
+    }
+    /**
+     * Whether this consumer currently has any producers registered.
+     */
+    get hasProducers() {
+        return this.producers.size > 0;
+    }
+    /**
+     * Checks if a `Producer` has a current value which is different than the value
+     * last seen at a specific version by a `Consumer` which recorded a dependency on
+     * this `Producer`.
+     */
+    producerPollStatus(lastSeenValueVersion) {
+        // `producer.valueVersion` may be stale, but a mismatch still means that the value
+        // last seen by the `Consumer` is also stale.
+        if (this.valueVersion !== lastSeenValueVersion) {
             return true;
         }
+        // Trigger the `Producer` to update its `valueVersion` if necessary.
+        this.onProducerUpdateValueVersion();
+        // At this point, we can trust `producer.valueVersion`.
+        return this.valueVersion !== lastSeenValueVersion;
     }
-    // No dependency reported a real value change, so the `Consumer` has also not been
-    // impacted.
-    return false;
 }
 
 /**
@@ -10151,7 +10192,7 @@ function markViewDirty(lView) {
 }
 
 const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
-class ReactiveLViewConsumer extends BaseConsumer {
+class ReactiveLViewConsumer extends ReactiveNode {
     constructor() {
         super(...arguments);
         this._lView = null;
@@ -10160,10 +10201,16 @@ class ReactiveLViewConsumer extends BaseConsumer {
         NG_DEV_MODE && assertEqual(this._lView, null, 'Consumer already associated with a view.');
         this._lView = lView;
     }
-    notify() {
+    onConsumerDependencyMayHaveChanged() {
         NG_DEV_MODE &&
             assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
         markViewDirty(this._lView);
+    }
+    onProducerUpdateValueVersion() {
+        // This type doesn't implement the producer side of a `ReactiveNode`.
+    }
+    get hasReadASignal() {
+        return this.hasProducers;
     }
     runInContext(fn, rf, ctx) {
         const prevConsumer = setActiveConsumer(this);
@@ -10206,7 +10253,7 @@ function getReactiveLViewConsumer(lView, slot) {
  */
 function commitLViewConsumerIfHasProducers(lView, slot) {
     const consumer = getOrCreateCurrentLViewConsumer();
-    if (consumer.producers.size === 0) {
+    if (!consumer.hasReadASignal) {
         return;
     }
     lView[slot] = currentConsumer;
@@ -10294,6 +10341,22 @@ function runInInjectionContext(injector, fn) {
     finally {
         setCurrentInjector(prevInjector);
         setInjectImplementation(previousInjectImplementation);
+    }
+}
+/**
+ * Asserts that the current stack frame is within an injection context and has access to `inject`.
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+function assertInInjectionContext(debugFn) {
+    // Taking a `Function` instead of a string name here prevents the unminified name of the function
+    // from being retained in the bundle regardless of minification.
+    if (!getInjectImplementation() && !getCurrentInjector()) {
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
+            (debugFn.name +
+                '() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`'));
     }
 }
 

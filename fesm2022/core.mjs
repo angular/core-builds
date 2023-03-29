@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-84a0fa3
+ * @license Angular v16.0.0-next.4+sha-ef149de
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -620,6 +620,9 @@ const SOURCE = '__source';
  * - Injector instance: Use the injector for resolution.
  */
 let _currentInjector = undefined;
+function getCurrentInjector() {
+    return _currentInjector;
+}
 function setCurrentInjector(injector) {
     const former = _currentInjector;
     _currentInjector = injector;
@@ -628,7 +631,7 @@ function setCurrentInjector(injector) {
 function injectInjectorOnly(token, flags = InjectFlags.Default) {
     if (_currentInjector === undefined) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
-            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`EnvironmentInjector#runInContext\`.`);
+            `inject() must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`);
     }
     else if (_currentInjector === null) {
         return injectRootLimpMode(token, undefined, flags);
@@ -9387,7 +9390,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-84a0fa3');
+const VERSION = new Version('16.0.0-next.4+sha-ef149de');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9658,122 +9661,160 @@ function setAlternateWeakRefImpl(impl) {
 }
 
 /**
- * Tracks the currently active reactive context (or `null` if there is no active
- * context).
- */
-let activeConsumer = null;
-/**
  * Counter tracking the next `ProducerId` or `ConsumerId`.
  */
 let _nextReactiveId = 0;
 /**
- * Get a new `ProducerId` or `ConsumerId`, allocated from the global sequence.
- *
- * The value returned is a type intersection of both branded types, and thus can be assigned to
- * either.
+ * Tracks the currently active reactive consumer (or `null` if there is no active
+ * consumer).
  */
-function nextReactiveId() {
-    return _nextReactiveId++;
-}
-/**
- * Set `consumer` as the active reactive context, and return the previous `Consumer`
- * (if any) for later restoration.
- */
+let activeConsumer = null;
 function setActiveConsumer(consumer) {
-    const prevConsumer = activeConsumer;
+    const prev = activeConsumer;
     activeConsumer = consumer;
-    return prevConsumer;
+    return prev;
 }
 /**
- * Notify all `Consumer`s of the given `Producer` that its value may have changed.
+ * A node in the reactive graph.
+ *
+ * Nodes can be producers of reactive values, consumers of other reactive values, or both.
+ *
+ * Producers are nodes that produce values, and can be depended upon by consumer nodes.
+ *
+ * Producers expose a monotonic `valueVersion` counter, and are responsible for incrementing this
+ * version when their value semantically changes. Some producers may produce their values lazily and
+ * thus at times need to be polled for potential updates to their value (and by extension their
+ * `valueVersion`). This is accomplished via the `onProducerUpdateValueVersion` method for
+ * implemented by producers, which should perform whatever calculations are necessary to ensure
+ * `valueVersion` is up to date.
+ *
+ * Consumers are nodes that depend on the values of producers and are notified when those values
+ * might have changed.
+ *
+ * Consumers do not wrap the reads they consume themselves, but rather can be set as the active
+ * reader via `setActiveConsumer`. Reads of producers that happen while a consumer is active will
+ * result in those producers being added as dependencies of that consumer node.
+ *
+ * The set of dependencies of a consumer is dynamic. Implementers expose a monotonically increasing
+ * `trackingVersion` counter, which increments whenever the consumer is about to re-run any reactive
+ * reads it needs and establish a new set of dependencies as a result.
+ *
+ * Producers store the last `trackingVersion` they've seen from `Consumer`s which have read them.
+ * This allows a producer to identify whether its record of the dependency is current or stale, by
+ * comparing the consumer's `trackingVersion` to the version at which the dependency was
+ * last observed.
  */
-function producerNotifyConsumers(producer) {
-    for (const [consumerId, edge] of producer.consumers) {
-        const consumer = edge.consumerRef.deref();
-        if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
-            producer.consumers.delete(consumerId);
-            consumer?.producers.delete(producer.id);
-            continue;
-        }
-        consumer.notify();
-    }
-}
-/**
- * Record a dependency on the given `Producer` by the current reactive `Consumer` if
- * one is present.
- */
-function producerAccessed(producer) {
-    if (activeConsumer === null) {
-        return;
-    }
-    // Either create or update the dependency `Edge` in both directions.
-    let edge = activeConsumer.producers.get(producer.id);
-    if (edge === undefined) {
-        edge = {
-            consumerRef: activeConsumer.ref,
-            producerRef: producer.ref,
-            seenValueVersion: producer.valueVersion,
-            atTrackingVersion: activeConsumer.trackingVersion,
-        };
-        activeConsumer.producers.set(producer.id, edge);
-        producer.consumers.set(activeConsumer.id, edge);
-    }
-    else {
-        edge.seenValueVersion = producer.valueVersion;
-        edge.atTrackingVersion = activeConsumer.trackingVersion;
-    }
-}
-/**
- * Checks if a `Producer` has a current value which is different than the value
- * last seen at a specific version by a `Consumer` which recorded a dependency on
- * this `Producer`.
- */
-function producerPollStatus(producer, lastSeenValueVersion) {
-    // `producer.valueVersion` may be stale, but a mismatch still means that the value
-    // last seen by the `Consumer` is also stale.
-    if (producer.valueVersion !== lastSeenValueVersion) {
-        return true;
-    }
-    // Trigger the `Producer` to update its `valueVersion` if necessary.
-    producer.checkForChangedValue();
-    // At this point, we can trust `producer.valueVersion`.
-    return producer.valueVersion !== lastSeenValueVersion;
-}
-/**
- * A abstract implementation of `Consumer` that allows implementations to share much of the
- * necessary boilerplate.
- */
-class BaseConsumer {
+class ReactiveNode {
     constructor() {
-        this.id = nextReactiveId();
+        this.id = _nextReactiveId++;
+        /**
+         * A cached weak reference to this node, which will be used in `ReactiveEdge`s.
+         */
         this.ref = newWeakRef(this);
+        /**
+         * Edges to producers on which this node depends (in its consumer capacity).
+         */
         this.producers = new Map();
+        /**
+         * Edges to consumers on which this node depends (in its producer capacity).
+         */
+        this.consumers = new Map();
+        /**
+         * Monotonically increasing counter representing a version of this `Consumer`'s
+         * dependencies.
+         */
         this.trackingVersion = 0;
+        /**
+         * Monotonically increasing counter which increases when the value of this `Producer`
+         * semantically changes.
+         */
+        this.valueVersion = 0;
     }
-}
-/**
- * Function called to check the stale status of dependencies (producers) for a given consumer. This
- * is a verification step before refreshing a given consumer: if none of the the dependencies
- * reports a semantically new value, then the `Consumer` has not observed a real dependency change
- * (even though it may have been notified of one).
- */
-function consumerPollValueStatus(consumer) {
-    for (const [producerId, edge] of consumer.producers) {
-        const producer = edge.producerRef.deref();
-        if (producer === undefined || edge.atTrackingVersion !== consumer.trackingVersion) {
-            // This dependency edge is stale, so remove it.
-            consumer.producers.delete(producerId);
-            producer?.consumers.delete(consumer.id);
-            continue;
+    /**
+     * Polls dependencies of a consumer to determine if they have actually changed.
+     *
+     * If this returns `false`, then even though the consumer may have previously been notified of a
+     * change, the values of its dependencies have not actually changed and the consumer should not
+     * rerun any reactions.
+     */
+    consumerPollProducersForChange() {
+        for (const [producerId, edge] of this.producers) {
+            const producer = edge.producerNode.deref();
+            if (producer === undefined || edge.atTrackingVersion !== this.trackingVersion) {
+                // This dependency edge is stale, so remove it.
+                this.producers.delete(producerId);
+                producer?.consumers.delete(this.id);
+                continue;
+            }
+            if (producer.producerPollStatus(edge.seenValueVersion)) {
+                // One of the dependencies reports a real value change.
+                return true;
+            }
         }
-        if (producerPollStatus(producer, edge.seenValueVersion)) {
-            // One of the dependencies reports a real value change.
+        // No dependency reported a real value change, so the `Consumer` has also not been
+        // impacted.
+        return false;
+    }
+    /**
+     * Notify all consumers of this producer that its value may have changed.
+     */
+    producerMayHaveChanged() {
+        for (const [consumerId, edge] of this.consumers) {
+            const consumer = edge.consumerNode.deref();
+            if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
+                this.consumers.delete(consumerId);
+                consumer?.producers.delete(this.id);
+                continue;
+            }
+            consumer.onConsumerDependencyMayHaveChanged();
+        }
+    }
+    /**
+     * Mark that this producer node has been accessed in the current reactive context.
+     */
+    producerAccessed() {
+        if (activeConsumer === null) {
+            return;
+        }
+        // Either create or update the dependency `Edge` in both directions.
+        let edge = activeConsumer.producers.get(this.id);
+        if (edge === undefined) {
+            edge = {
+                consumerNode: activeConsumer.ref,
+                producerNode: this.ref,
+                seenValueVersion: this.valueVersion,
+                atTrackingVersion: activeConsumer.trackingVersion,
+            };
+            activeConsumer.producers.set(this.id, edge);
+            this.consumers.set(activeConsumer.id, edge);
+        }
+        else {
+            edge.seenValueVersion = this.valueVersion;
+            edge.atTrackingVersion = activeConsumer.trackingVersion;
+        }
+    }
+    /**
+     * Whether this consumer currently has any producers registered.
+     */
+    get hasProducers() {
+        return this.producers.size > 0;
+    }
+    /**
+     * Checks if a `Producer` has a current value which is different than the value
+     * last seen at a specific version by a `Consumer` which recorded a dependency on
+     * this `Producer`.
+     */
+    producerPollStatus(lastSeenValueVersion) {
+        // `producer.valueVersion` may be stale, but a mismatch still means that the value
+        // last seen by the `Consumer` is also stale.
+        if (this.valueVersion !== lastSeenValueVersion) {
             return true;
         }
+        // Trigger the `Producer` to update its `valueVersion` if necessary.
+        this.onProducerUpdateValueVersion();
+        // At this point, we can trust `producer.valueVersion`.
+        return this.valueVersion !== lastSeenValueVersion;
     }
-    // No dependency reported a real value change, so the `Consumer` has also not been
-    // impacted.
-    return false;
 }
 
 /**
@@ -9802,7 +9843,7 @@ function markViewDirty(lView) {
 }
 
 const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
-class ReactiveLViewConsumer extends BaseConsumer {
+class ReactiveLViewConsumer extends ReactiveNode {
     constructor() {
         super(...arguments);
         this._lView = null;
@@ -9811,10 +9852,16 @@ class ReactiveLViewConsumer extends BaseConsumer {
         NG_DEV_MODE && assertEqual(this._lView, null, 'Consumer already associated with a view.');
         this._lView = lView;
     }
-    notify() {
+    onConsumerDependencyMayHaveChanged() {
         NG_DEV_MODE &&
             assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
         markViewDirty(this._lView);
+    }
+    onProducerUpdateValueVersion() {
+        // This type doesn't implement the producer side of a `ReactiveNode`.
+    }
+    get hasReadASignal() {
+        return this.hasProducers;
     }
     runInContext(fn, rf, ctx) {
         const prevConsumer = setActiveConsumer(this);
@@ -9857,7 +9904,7 @@ function getReactiveLViewConsumer(lView, slot) {
  */
 function commitLViewConsumerIfHasProducers(lView, slot) {
     const consumer = getOrCreateCurrentLViewConsumer();
-    if (consumer.producers.size === 0) {
+    if (!consumer.hasReadASignal) {
         return;
     }
     lView[slot] = currentConsumer;
@@ -9945,6 +9992,22 @@ function runInInjectionContext(injector, fn) {
     finally {
         setCurrentInjector(prevInjector);
         setInjectImplementation(previousInjectImplementation);
+    }
+}
+/**
+ * Asserts that the current stack frame is within an injection context and has access to `inject`.
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+function assertInInjectionContext(debugFn) {
+    // Taking a `Function` instead of a string name here prevents the unminified name of the function
+    // from being retained in the bundle regardless of minification.
+    if (!getInjectImplementation() && !getCurrentInjector()) {
+        throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
+            (debugFn.name +
+                '() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`'));
     }
 }
 
@@ -29974,14 +30037,14 @@ const SIGNAL = Symbol('SIGNAL');
  * Checks if the given `value` function is a reactive `Signal`.
  */
 function isSignal(value) {
-    return value[SIGNAL] ?? false;
+    return value[SIGNAL] !== undefined;
 }
 /**
  * Converts `fn` into a marked signal function (where `isSignal(fn)` will be `true`), and
  * potentially add some set of extra properties (passed as an object record `extraApi`).
  */
-function createSignalFromFunction(fn, extraApi = {}) {
-    fn[SIGNAL] = true;
+function createSignalFromFunction(node, fn, extraApi = {}) {
+    fn[SIGNAL] = node;
     // Copy properties from `extraApi` to `fn` to complete the desired API of the `Signal`.
     return Object.assign(fn, extraApi);
 }
@@ -30002,15 +30065,18 @@ function defaultEquals(a, b) {
     // as objects (`typeof null === 'object'`).
     return (a === null || typeof a !== 'object') && Object.is(a, b);
 }
+// clang-format on
 
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
  *
  * @developerPreview
  */
-function computed(computation, equal = defaultEquals) {
-    const node = new ComputedImpl(computation, equal);
-    return createSignalFromFunction(node.signal.bind(node));
+function computed(computation, options) {
+    const node = new ComputedImpl(computation, options?.equal ?? defaultEquals);
+    // Casting here is required for g3, as TS inference behavior is slightly different between our
+    // version/options and g3's.
+    return createSignalFromFunction(node, node.signal.bind(node));
 }
 /**
  * A dedicated symbol used before a computed value has been calculated for the first time.
@@ -30032,10 +30098,11 @@ const ERRORED = Symbol('ERRORED');
 /**
  * A computation, which derives a value from a declarative reactive expression.
  *
- * `Computed`s are both `Producer`s and `Consumer`s of reactivity.
+ * `Computed`s are both producers and consumers of reactivity.
  */
-class ComputedImpl {
+class ComputedImpl extends ReactiveNode {
     constructor(computation, equal) {
+        super();
         this.computation = computation;
         this.equal = equal;
         /**
@@ -30057,20 +30124,25 @@ class ComputedImpl {
          * state can be resolved without recomputing the value.
          */
         this.stale = true;
-        this.id = nextReactiveId();
-        this.ref = newWeakRef(this);
-        this.producers = new Map();
-        this.consumers = new Map();
-        this.trackingVersion = 0;
-        this.valueVersion = 0;
     }
-    checkForChangedValue() {
+    onConsumerDependencyMayHaveChanged() {
+        if (this.stale) {
+            // We've already notified consumers that this value has potentially changed.
+            return;
+        }
+        // Record that the currently cached value may be stale.
+        this.stale = true;
+        // Notify any consumers about the potential change.
+        this.producerMayHaveChanged();
+    }
+    onProducerUpdateValueVersion() {
         if (!this.stale) {
             // The current value and its version are already up to date.
             return;
         }
         // The current value is stale. Check whether we need to produce a new one.
-        if (this.value !== UNSET && this.value !== COMPUTING && !consumerPollValueStatus(this)) {
+        if (this.value !== UNSET && this.value !== COMPUTING &&
+            !this.consumerPollProducersForChange()) {
             // Even though we were previously notified of a potential dependency update, all of
             // our dependencies report that they have not actually changed in value, so we can
             // resolve the stale state without needing to recompute the current value.
@@ -30113,21 +30185,11 @@ class ComputedImpl {
         this.value = newValue;
         this.valueVersion++;
     }
-    notify() {
-        if (this.stale) {
-            // We've already notified consumers that this value has potentially changed.
-            return;
-        }
-        // Record that the currently cached value may be stale.
-        this.stale = true;
-        // Notify any consumers about the potential change.
-        producerNotifyConsumers(this);
-    }
     signal() {
         // Check if the value needs updating before returning it.
-        this.checkForChangedValue();
+        this.onProducerUpdateValueVersion();
         // Record that someone looked at this signal.
-        producerAccessed(this);
+        this.producerAccessed();
         if (this.value === ERRORED) {
             throw this.error;
         }
@@ -30135,121 +30197,17 @@ class ComputedImpl {
     }
 }
 
-/**
- * Watches a reactive expression and allows it to be scheduled to re-run
- * when any dependencies notify of a change.
- *
- * `Watch` doesn't run reactive expressions itself, but relies on a consumer-
- * provided scheduling operation to coordinate calling `Watch.run()`.
- */
-class Watch extends BaseConsumer {
-    constructor(watch, schedule) {
-        super();
-        this.watch = watch;
-        this.schedule = schedule;
-        this.dirty = false;
-    }
-    notify() {
-        if (!this.dirty) {
-            this.schedule(this);
-        }
-        this.dirty = true;
-    }
-    /**
-     * Execute the reactive expression in the context of this `Watch` consumer.
-     *
-     * Should be called by the user scheduling algorithm when the provided
-     * `schedule` hook is called by `Watch`.
-     */
-    run() {
-        this.dirty = false;
-        if (this.trackingVersion !== 0 && !consumerPollValueStatus(this)) {
-            return;
-        }
-        const prevConsumer = setActiveConsumer(this);
-        this.trackingVersion++;
-        try {
-            this.watch();
-        }
-        finally {
-            setActiveConsumer(prevConsumer);
-        }
-    }
-}
-
-/**
- * Create a global `Effect` for the given reactive function.
- *
- * @developerPreview
- */
-function effect(effectFn) {
-    const watch = new Watch(effectFn, queueWatch);
-    globalWatches.add(watch);
-    // Effects start dirty.
-    watch.notify();
-    return {
-        destroy: () => {
-            queuedWatches.delete(watch);
-            globalWatches.delete(watch);
-        },
-    };
-}
-/**
- * Get a `Promise` that resolves when any scheduled effects have resolved.
- */
-function effectsDone() {
-    return watchQueuePromise?.promise ?? Promise.resolve();
-}
-/**
- * Shut down all active effects.
- */
-function resetEffects() {
-    queuedWatches.clear();
-    globalWatches.clear();
-}
-const globalWatches = new Set();
-const queuedWatches = new Set();
-let watchQueuePromise = null;
-function queueWatch(watch) {
-    if (queuedWatches.has(watch) || !globalWatches.has(watch)) {
-        return;
-    }
-    queuedWatches.add(watch);
-    if (watchQueuePromise === null) {
-        Promise.resolve().then(runWatchQueue);
-        let resolveFn;
-        const promise = new Promise((resolve) => {
-            resolveFn = resolve;
-        });
-        watchQueuePromise = {
-            promise,
-            resolveFn,
-        };
-    }
-}
-function runWatchQueue() {
-    for (const watch of queuedWatches) {
-        queuedWatches.delete(watch);
-        watch.run();
-    }
-    watchQueuePromise.resolveFn();
-    watchQueuePromise = null;
-}
-
-/**
- * Backing type for a `SettableSignal`, a mutable reactive value.
- */
-class SettableSignalImpl {
+class WritableSignalImpl extends ReactiveNode {
     constructor(value, equal) {
+        super();
         this.value = value;
         this.equal = equal;
-        this.id = nextReactiveId();
-        this.ref = newWeakRef(this);
-        this.consumers = new Map();
-        this.valueVersion = 0;
     }
-    checkForChangedValue() {
-        // Settable signals can only change when set, so there's nothing to check here.
+    onConsumerDependencyMayHaveChanged() {
+        // This never happens for writable signals as they're not consumers.
+    }
+    onProducerUpdateValueVersion() {
+        // Writable signal value versions are always up to date.
     }
     /**
      * Directly update the value of the signal to a new value, which may or may not be
@@ -30262,7 +30220,7 @@ class SettableSignalImpl {
         if (!this.equal(this.value, newValue)) {
             this.value = newValue;
             this.valueVersion++;
-            producerNotifyConsumers(this);
+            this.producerMayHaveChanged();
         }
     }
     /**
@@ -30281,10 +30239,10 @@ class SettableSignalImpl {
         // Mutate bypasses equality checks as it's by definition changing the value.
         mutator(this.value);
         this.valueVersion++;
-        producerNotifyConsumers(this);
+        this.producerMayHaveChanged();
     }
     signal() {
-        producerAccessed(this);
+        this.producerAccessed();
         return this.value;
     }
 }
@@ -30293,10 +30251,11 @@ class SettableSignalImpl {
  *
  * @developerPreview
  */
-function signal(initialValue, equal = defaultEquals) {
-    const signalNode = new SettableSignalImpl(initialValue, equal);
-    // Casting here is required for g3.
-    const signalFn = createSignalFromFunction(signalNode.signal.bind(signalNode), {
+function signal(initialValue, options) {
+    const signalNode = new WritableSignalImpl(initialValue, options?.equal ?? defaultEquals);
+    // Casting here is required for g3, as TS inference behavior is slightly different between our
+    // version/options and g3's.
+    const signalFn = createSignalFromFunction(signalNode, signalNode.signal.bind(signalNode), {
         set: signalNode.set.bind(signalNode),
         update: signalNode.update.bind(signalNode),
         mutate: signalNode.mutate.bind(signalNode),
@@ -30319,6 +30278,54 @@ function untracked(nonReactiveReadsFn) {
     }
     finally {
         setActiveConsumer(prevConsumer);
+    }
+}
+
+/**
+ * Watches a reactive expression and allows it to be scheduled to re-run
+ * when any dependencies notify of a change.
+ *
+ * `Watch` doesn't run reactive expressions itself, but relies on a consumer-
+ * provided scheduling operation to coordinate calling `Watch.run()`.
+ */
+class Watch extends ReactiveNode {
+    constructor(watch, schedule) {
+        super();
+        this.watch = watch;
+        this.schedule = schedule;
+        this.dirty = false;
+    }
+    notify() {
+        if (!this.dirty) {
+            this.schedule(this);
+        }
+        this.dirty = true;
+    }
+    onConsumerDependencyMayHaveChanged() {
+        this.notify();
+    }
+    onProducerUpdateValueVersion() {
+        // Watches are not producers.
+    }
+    /**
+     * Execute the reactive expression in the context of this `Watch` consumer.
+     *
+     * Should be called by the user scheduling algorithm when the provided
+     * `schedule` hook is called by `Watch`.
+     */
+    run() {
+        this.dirty = false;
+        if (this.trackingVersion !== 0 && !this.consumerPollProducersForChange()) {
+            return;
+        }
+        const prevConsumer = setActiveConsumer(this);
+        this.trackingVersion++;
+        try {
+            this.watch();
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
     }
 }
 
@@ -30415,6 +30422,63 @@ function ɵɵngDeclareNgModule(decl) {
 function ɵɵngDeclarePipe(decl) {
     const compiler = getCompilerFacade({ usage: 1 /* JitCompilerUsage.PartialDeclaration */, kind: 'pipe', type: decl.type });
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
+}
+
+// clang-format off
+// clang-format on
+
+const globalWatches = new Set();
+const queuedWatches = new Map();
+let watchQueuePromise = null;
+/**
+ * Create a global `Effect` for the given reactive function.
+ *
+ * @developerPreview
+ */
+function effect(effectFn, options) {
+    !options?.injector && assertInInjectionContext(effect);
+    const zone = Zone.current;
+    const watch = new Watch(effectFn, (watch) => queueWatch(watch, zone));
+    const injector = options?.injector ?? inject(Injector);
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    globalWatches.add(watch);
+    // Effects start dirty.
+    watch.notify();
+    let unregisterOnDestroy;
+    const destroy = () => {
+        unregisterOnDestroy?.();
+        queuedWatches.delete(watch);
+        globalWatches.delete(watch);
+    };
+    unregisterOnDestroy = destroyRef?.onDestroy(destroy);
+    return {
+        destroy,
+    };
+}
+function queueWatch(watch, zone) {
+    if (queuedWatches.has(watch) || !globalWatches.has(watch)) {
+        return;
+    }
+    queuedWatches.set(watch, zone);
+    if (watchQueuePromise === null) {
+        Promise.resolve().then(runWatchQueue);
+        let resolveFn;
+        const promise = new Promise((resolve) => {
+            resolveFn = resolve;
+        });
+        watchQueuePromise = {
+            promise,
+            resolveFn,
+        };
+    }
+}
+function runWatchQueue() {
+    for (const [watch, zone] of queuedWatches) {
+        queuedWatches.delete(watch);
+        zone.run(() => watch.run());
+    }
+    watchQueuePromise.resolveFn();
+    watchQueuePromise = null;
 }
 
 // clang-format off
@@ -30603,5 +30667,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertPlatform, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, mergeApplicationConfig, platformCore, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_FEATURE_ENABLED as ɵIS_HYDRATION_FEATURE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TransferState as ɵTransferState, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, escapeTransferStateContent as ɵescapeTransferStateContent, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, makeDecorator as ɵmakeDecorator, makeStateKey as ɵmakeStateKey, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, provideHydrationSupport as ɵprovideHydrationSupport, provideNgZoneChangeDetection as ɵprovideNgZoneChangeDetection, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unescapeTransferStateContent as ɵunescapeTransferStateContent, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertInInjectionContext, assertPlatform, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, mergeApplicationConfig, platformCore, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_FEATURE_ENABLED as ɵIS_HYDRATION_FEATURE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TransferState as ɵTransferState, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, coerceToBoolean as ɵcoerceToBoolean, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, escapeTransferStateContent as ɵescapeTransferStateContent, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, makeDecorator as ɵmakeDecorator, makeStateKey as ɵmakeStateKey, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, provideHydrationSupport as ɵprovideHydrationSupport, provideNgZoneChangeDetection as ɵprovideNgZoneChangeDetection, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unescapeTransferStateContent as ɵunescapeTransferStateContent, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map
