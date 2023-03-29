@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-e8e3681
+ * @license Angular v16.0.0-next.4+sha-c024574
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5447,6 +5447,22 @@ declare const enum LViewFlags {
 export declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
 
 /**
+ * Create a `StateKey<T>` that can be used to store value of type T with `TransferState`.
+ *
+ * Example:
+ *
+ * ```
+ * const COUNTER_KEY = makeStateKey<number>('counter');
+ * let value = 10;
+ *
+ * transferState.set(COUNTER_KEY, value);
+ * ```
+ *
+ * @publicApi
+ */
+export declare function makeStateKey<T = void>(key: string): StateKey<T>;
+
+/**
  * Merge multiple application configurations from left to right.
  *
  * @param configs Two or more configurations to be merged.
@@ -8067,6 +8083,25 @@ export declare interface SkipSelfDecorator {
 }
 
 /**
+ * A type-safe key to use with `TransferState`.
+ *
+ * Example:
+ *
+ * ```
+ * const COUNTER_KEY = makeStateKey<number>('counter');
+ * let value = 10;
+ *
+ * transferState.set(COUNTER_KEY, value);
+ * ```
+ *
+ * @publicApi
+ */
+export declare type StateKey<T> = string & {
+    __not_a_string: never;
+    __value_type?: T;
+};
+
+/**
  * Configures the `Injector` to return an instance of `useClass` for a token.
  * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
@@ -9162,6 +9197,55 @@ export declare interface TrackByFunction<T> {
      * @param item The item in the iterable.
      */
     <U extends T>(index: number, item: T & U): any;
+}
+
+/**
+ * A key value store that is transferred from the application on the server side to the application
+ * on the client side.
+ *
+ * The `TransferState` is available as an injectable token.
+ * On the client, just inject this token using DI and use it, it will be lazily initialized.
+ * On the server it's already included if `renderApplication` function is used. Otherwise, import
+ * the `ServerTransferStateModule` module to make the `TransferState` available.
+ *
+ * The values in the store are serialized/deserialized using JSON.stringify/JSON.parse. So only
+ * boolean, number, string, null and non-class objects will be serialized and deserialized in a
+ * non-lossy manner.
+ *
+ * @publicApi
+ */
+export declare class TransferState {
+    /** @nocollapse */
+    static ɵprov: unknown;
+    private onSerializeCallbacks;
+    /**
+     * Get the value corresponding to a key. Return `defaultValue` if key is not found.
+     */
+    get<T>(key: StateKey<T>, defaultValue: T): T;
+    /**
+     * Set the value corresponding to a key.
+     */
+    set<T>(key: StateKey<T>, value: T): void;
+    /**
+     * Remove a key from the store.
+     */
+    remove<T>(key: StateKey<T>): void;
+    /**
+     * Test whether a key exists in the store.
+     */
+    hasKey<T>(key: StateKey<T>): boolean;
+    /**
+     * Indicates whether the state is empty.
+     */
+    get isEmpty(): boolean;
+    /**
+     * Register a callback to provide the value for a key when `toJson` is called.
+     */
+    onSerialize<T>(key: StateKey<T>, callback: () => T): void;
+    /**
+     * Serialize the current state of the store to JSON.
+     */
+    toJson(): string;
 }
 
 /**
@@ -11137,22 +11221,6 @@ export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]
     (...args: any[]): (cls: any) => any;
 };
 
-/**
- * Create a `StateKey<T>` that can be used to store value of type T with `TransferState`.
- *
- * Example:
- *
- * ```
- * const COUNTER_KEY = makeStateKey<number>('counter');
- * let value = 10;
- *
- * transferState.set(COUNTER_KEY, value);
- * ```
- *
- * @publicApi
- */
-export declare function ɵmakeStateKey<T = void>(key: string): ɵStateKey<T>;
-
 
 export declare const ɵNG_COMP_DEF: string;
 
@@ -11716,25 +11784,6 @@ export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): voi
  */
 export declare function ɵsetUnknownPropertyStrictMode(shouldThrow: boolean): void;
 
-/**
- * A type-safe key to use with `TransferState`.
- *
- * Example:
- *
- * ```
- * const COUNTER_KEY = makeStateKey<number>('counter');
- * let value = 10;
- *
- * transferState.set(COUNTER_KEY, value);
- * ```
- *
- * @publicApi
- */
-export declare type ɵStateKey<T> = string & {
-    __not_a_string: never;
-    __value_type?: T;
-};
-
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
 
@@ -11756,55 +11805,6 @@ export declare const ɵTESTABILITY: InjectionToken<Testability>;
  * Internal injection token to retrieve Testability getter class instance.
  */
 export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
-
-/**
- * A key value store that is transferred from the application on the server side to the application
- * on the client side.
- *
- * The `TransferState` is available as an injectable token.
- * On the client, just inject this token using DI and use it, it will be lazily initialized.
- * On the server it's already included if `renderApplication` function is used. Otherwise, import
- * the `ServerTransferStateModule` module to make the `TransferState` available.
- *
- * The values in the store are serialized/deserialized using JSON.stringify/JSON.parse. So only
- * boolean, number, string, null and non-class objects will be serialized and deserialized in a
- * non-lossy manner.
- *
- * @publicApi
- */
-export declare class ɵTransferState {
-    /** @nocollapse */
-    static ɵprov: unknown;
-    private onSerializeCallbacks;
-    /**
-     * Get the value corresponding to a key. Return `defaultValue` if key is not found.
-     */
-    get<T>(key: ɵStateKey<T>, defaultValue: T): T;
-    /**
-     * Set the value corresponding to a key.
-     */
-    set<T>(key: ɵStateKey<T>, value: T): void;
-    /**
-     * Remove a key from the store.
-     */
-    remove<T>(key: ɵStateKey<T>): void;
-    /**
-     * Test whether a key exists in the store.
-     */
-    hasKey<T>(key: ɵStateKey<T>): boolean;
-    /**
-     * Indicates whether the state is empty.
-     */
-    get isEmpty(): boolean;
-    /**
-     * Register a callback to provide the value for a key when `toJson` is called.
-     */
-    onSerialize<T>(key: ɵStateKey<T>, callback: () => T): void;
-    /**
-     * Serialize the current state of the store to JSON.
-     */
-    toJson(): string;
-}
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
