@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-6bcdb68
+ * @license Angular v16.0.0-next.4+sha-9c5fd50
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2931,7 +2931,16 @@ export declare interface DoCheck {
  *
  * @developerPreview
  */
-export declare function effect(effectFn: () => void, options?: CreateEffectOptions): EffectRef;
+export declare function effect(effectFn: () => EffectCleanupFn | void, options?: CreateEffectOptions): EffectRef;
+
+/**
+ * An effect can, optionally, return a cleanup function. If returned, the cleanup is executed before
+ * the next effect run. The cleanup function makes it possible to "cancel" any work that the
+ * previous effect run might have started.
+ *
+ * @developerPreview
+ */
+export declare type EffectCleanupFn = () => void;
 
 /**
  * A global reactive effect, which can be manually destroyed.

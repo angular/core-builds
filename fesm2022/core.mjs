@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-6bcdb68
+ * @license Angular v16.0.0-next.4+sha-9c5fd50
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9390,7 +9390,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-6bcdb68');
+const VERSION = new Version('16.0.0-next.4+sha-9c5fd50');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -30281,6 +30281,7 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
+const NOOP_CLEANUP_FN = () => { };
 /**
  * Watches a reactive expression and allows it to be scheduled to re-run
  * when any dependencies notify of a change.
@@ -30294,6 +30295,7 @@ class Watch extends ReactiveNode {
         this.watch = watch;
         this.schedule = schedule;
         this.dirty = false;
+        this.cleanupFn = NOOP_CLEANUP_FN;
     }
     notify() {
         if (!this.dirty) {
@@ -30321,11 +30323,15 @@ class Watch extends ReactiveNode {
         const prevConsumer = setActiveConsumer(this);
         this.trackingVersion++;
         try {
-            this.watch();
+            this.cleanupFn();
+            this.cleanupFn = this.watch() ?? NOOP_CLEANUP_FN;
         }
         finally {
             setActiveConsumer(prevConsumer);
         }
+    }
+    cleanup() {
+        this.cleanupFn();
     }
 }
 
@@ -30446,6 +30452,7 @@ function effect(effectFn, options) {
     watch.notify();
     let unregisterOnDestroy;
     const destroy = () => {
+        watch.cleanup();
         unregisterOnDestroy?.();
         queuedWatches.delete(watch);
         globalWatches.delete(watch);
