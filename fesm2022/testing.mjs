@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-478c5ac
+ * @license Angular v16.0.0-next.4+sha-84a0fa3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7143,15 +7143,12 @@ function nativeRemoveNode(renderer, rNode, isHostElement) {
     }
 }
 /**
- * Removes the contents of a given RElement using a given renderer.
+ * Clears the contents of a given RElement.
  *
- * @param renderer A renderer to be used
  * @param rElement the native RElement to be cleared
  */
-function clearElementContents(renderer, rElement) {
-    while (rElement.firstChild) {
-        nativeRemoveChild(renderer, rElement, rElement.firstChild, false);
-    }
+function clearElementContents(rElement) {
+    rElement.textContent = '';
 }
 /**
  * Performs the operation of `action` on the node. Typically this involves inserting or removing
@@ -9787,7 +9784,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-478c5ac');
+const VERSION = new Version('16.0.0-next.4+sha-84a0fa3');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15215,10 +15212,9 @@ function siblingAfter(skip, from) {
  */
 function stringifyNavigationInstructions(instructions) {
     const container = [];
-    let i = 0;
-    while (i < instructions.length) {
-        const step = instructions[i++];
-        const repeat = instructions[i++];
+    for (let i = 0; i < instructions.length; i += 2) {
+        const step = instructions[i];
+        const repeat = instructions[i + 1];
         for (let r = 0; r < repeat; r++) {
             container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
         }
@@ -15231,10 +15227,9 @@ function stringifyNavigationInstructions(instructions) {
  */
 function navigateToNode(from, instructions) {
     let node = from;
-    let i = 0;
-    while (i < instructions.length) {
-        const step = instructions[i++];
-        const repeat = instructions[i++];
+    for (let i = 0; i < instructions.length; i += 2) {
+        const step = instructions[i];
+        const repeat = instructions[i + 1];
         for (let r = 0; r < repeat; r++) {
             if (ngDevMode && !node) {
                 throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
@@ -15755,7 +15750,7 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, inde
             enterSkipHydrationBlock(tNode);
             // Since this isn't hydratable, we need to empty the node
             // so there's no duplicate content after render
-            clearElementContents(renderer, native);
+            clearElementContents(native);
         }
         else if (ngDevMode) {
             // If this is not a component host, throw an error.
