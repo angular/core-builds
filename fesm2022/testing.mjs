@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.4+sha-3c7e637
+ * @license Angular v16.0.0-next.4+sha-cbe6807
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9787,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.4+sha-3c7e637');
+const VERSION = new Version('16.0.0-next.4+sha-cbe6807');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9990,23 +9990,31 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
     return { propName: undefined, oldValue, newValue };
 }
 
+/**
+ * A `WeakRef`-compatible reference that fakes the API with a strong reference
+ * internally.
+ */
+class LeakyRef {
+    constructor(ref) {
+        this.ref = ref;
+    }
+    deref() {
+        return this.ref;
+    }
+}
 // `WeakRef` is not always defined in every TS environment where Angular is compiled. Instead,
 // read it off of the global context if available.
 // tslint:disable-next-line: no-toplevel-property-access
-let WeakRefImpl = _global$1['WeakRef'];
+let WeakRefImpl = _global$1['WeakRef'] ?? LeakyRef;
 function newWeakRef(value) {
     if (typeof ngDevMode !== 'undefined' && ngDevMode && WeakRefImpl === undefined) {
         throw new Error(`Angular requires a browser which supports the 'WeakRef' API`);
     }
     return new WeakRefImpl(value);
 }
-/**
- * Use an alternate implementation of `WeakRef` if a platform implementation isn't available.
- */
 function setAlternateWeakRefImpl(impl) {
-    if (!WeakRefImpl) {
-        WeakRefImpl = impl;
-    }
+    // no-op since the alternate impl is included by default by the framework. Remove once internal
+    // migration is complete.
 }
 
 /**
