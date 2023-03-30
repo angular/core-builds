@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-d596ec0
+ * @license Angular v16.0.0-next.5+sha-3379227
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1467,7 +1467,7 @@ export declare abstract class ComponentRef<C> {
      */
     abstract get instance(): C;
     /**
-     * The [host view](guide/glossary#view-tree) defined by the template
+     * The [host view](guide/glossary#view-hierarchy) defined by the template
      * for this component instance.
      */
     abstract get hostView(): ViewRef;
@@ -3026,7 +3026,7 @@ declare const EMBEDDED_VIEW_INJECTOR = 20;
 
 /**
  * Represents an Angular [view](guide/glossary#view) in a view container.
- * An [embedded view](guide/glossary#view-tree) can be referenced from a component
+ * An [embedded view](guide/glossary#view-hierarchy) can be referenced from a component
  * other than the hosting component whose template defines it, or it can be defined
  * independently by a `TemplateRef`.
  *
@@ -10064,7 +10064,7 @@ export declare interface ViewChildrenDecorator {
  * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
  *
  * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-tree).
+ * creating a [view hierarchy](guide/glossary#view-hierarchy).
  *
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`

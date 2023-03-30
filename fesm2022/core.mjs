@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-d596ec0
+ * @license Angular v16.0.0-next.5+sha-3379227
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9389,7 +9389,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-d596ec0');
+const VERSION = new Version('16.0.0-next.5+sha-3379227');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23634,7 +23634,7 @@ function findMatchingDehydratedView(lContainer, template) {
  * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
  *
  * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-tree).
+ * creating a [view hierarchy](guide/glossary#view-hierarchy).
  *
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`
@@ -28119,7 +28119,7 @@ class ViewRef extends ChangeDetectorRef {
 }
 /**
  * Represents an Angular [view](guide/glossary#view) in a view container.
- * An [embedded view](guide/glossary#view-tree) can be referenced from a component
+ * An [embedded view](guide/glossary#view-hierarchy) can be referenced from a component
  * other than the hosting component whose template defines it, or it can be defined
  * independently by a `TemplateRef`.
  *
