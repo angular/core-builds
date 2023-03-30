@@ -1,11 +1,11 @@
 /**
- * @license Angular v16.0.0-next.5+sha-50c58ce
+ * @license Angular v16.0.0-next.5+sha-d786856
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, Observable, merge as merge$1 } from 'rxjs';
-import { first, share } from 'rxjs/operators';
+import { share, first } from 'rxjs/operators';
 
 function getClosureSafeProperty(objWithPropertyToExtract) {
     for (let key in objWithPropertyToExtract) {
@@ -559,6 +559,7 @@ function ngDevModeResetPerfCounters() {
         hydratedComponents: 0,
         dehydratedViewsRemoved: 0,
         dehydratedViewsCleanupRuns: 0,
+        componentsSkippedHydration: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
@@ -9389,7 +9390,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-50c58ce');
+const VERSION = new Version('16.0.0-next.5+sha-d786856');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15886,6 +15887,7 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, inde
             // Since this isn't hydratable, we need to empty the node
             // so there's no duplicate content after render
             clearElementContents(native);
+            ngDevMode && ngDevMode.componentsSkippedHydration++;
         }
         else if (ngDevMode) {
             // If this is not a component host, throw an error.
@@ -23533,24 +23535,17 @@ function cleanupLView(lView) {
  * Walks over all views registered within the ApplicationRef and removes
  * all dehydrated views from all `LContainer`s along the way.
  */
-function cleanupDehydratedViews(appRef, pendingTasks) {
-    // Wait once an app becomes stable and cleanup all views that
-    // were not claimed during the application bootstrap process.
-    // The timing is similar to when we kick off serialization on the server.
-    const isStablePromise = appRef.isStable.pipe(first((isStable) => isStable)).toPromise();
-    const pendingTasksPromise = pendingTasks.whenAllTasksComplete;
-    return Promise.allSettled([isStablePromise, pendingTasksPromise]).then(() => {
-        const viewRefs = appRef._views;
-        for (const viewRef of viewRefs) {
-            const lView = getComponentLViewForHydration(viewRef);
-            // An `lView` might be `null` if a `ViewRef` represents
-            // an embedded view (not a component view).
-            if (lView !== null && lView[HOST] !== null) {
-                cleanupLView(lView);
-                ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
-            }
+function cleanupDehydratedViews(appRef) {
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lView = getComponentLViewForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lView !== null && lView[HOST] !== null) {
+            cleanupLView(lView);
+            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
         }
-    });
+    }
 }
 
 /**
@@ -30331,6 +30326,25 @@ function isBrowser() {
     return inject(PLATFORM_ID) === 'browser';
 }
 /**
+ * Outputs a message with hydration stats into a console.
+ */
+function printHydrationStats(console) {
+    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
+        `and ${ngDevMode.hydratedNodes} node(s), ` +
+        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+        `Learn more at https://angular.io/guides/hydration.`;
+    // tslint:disable-next-line:no-console
+    console.log(message);
+}
+/**
+ * Returns a Promise that is resolved when an application becomes stable.
+ */
+function whenStable(appRef, pendingTasks) {
+    const isStablePromise = appRef.isStable.pipe(first((isStable) => isStable)).toPromise();
+    const pendingTasksPromise = pendingTasks.whenAllTasksComplete;
+    return Promise.allSettled([isStablePromise, pendingTasksPromise]);
+}
+/**
  * Returns a set of providers required to setup hydration support
  * for an application that is server side rendered.
  *
@@ -30405,7 +30419,19 @@ function provideHydrationSupport() {
                 if (isBrowser()) {
                     const appRef = inject(ApplicationRef);
                     const pendingTasks = inject(InitialRenderPendingTasks);
-                    return () => cleanupDehydratedViews(appRef, pendingTasks);
+                    const console = inject(Console);
+                    return () => {
+                        whenStable(appRef, pendingTasks).then(() => {
+                            // Wait until an app becomes stable and cleanup all views that
+                            // were not claimed during the application bootstrap process.
+                            // The timing is similar to when we start the serialization process
+                            // on the server.
+                            cleanupDehydratedViews(appRef);
+                            if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                printHydrationStats(console);
+                            }
+                        });
+                    };
                 }
                 return () => { }; // noop
             },

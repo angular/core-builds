@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-50c58ce
+ * @license Angular v16.0.0-next.5+sha-d786856
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,6 @@
 import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, NgZone, ɵprovideNgZoneChangeDetection, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -1640,6 +1639,7 @@ function ngDevModeResetPerfCounters() {
         hydratedComponents: 0,
         dehydratedViewsRemoved: 0,
         dehydratedViewsCleanupRuns: 0,
+        componentsSkippedHydration: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
@@ -9786,7 +9786,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-50c58ce');
+const VERSION = new Version('16.0.0-next.5+sha-d786856');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -16235,6 +16235,7 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, inde
             // Since this isn't hydratable, we need to empty the node
             // so there's no duplicate content after render
             clearElementContents(native);
+            ngDevMode && ngDevMode.componentsSkippedHydration++;
         }
         else if (ngDevMode) {
             // If this is not a component host, throw an error.
@@ -23882,24 +23883,17 @@ function cleanupLView(lView) {
  * Walks over all views registered within the ApplicationRef and removes
  * all dehydrated views from all `LContainer`s along the way.
  */
-function cleanupDehydratedViews(appRef, pendingTasks) {
-    // Wait once an app becomes stable and cleanup all views that
-    // were not claimed during the application bootstrap process.
-    // The timing is similar to when we kick off serialization on the server.
-    const isStablePromise = appRef.isStable.pipe(first((isStable) => isStable)).toPromise();
-    const pendingTasksPromise = pendingTasks.whenAllTasksComplete;
-    return Promise.allSettled([isStablePromise, pendingTasksPromise]).then(() => {
-        const viewRefs = appRef._views;
-        for (const viewRef of viewRefs) {
-            const lView = getComponentLViewForHydration(viewRef);
-            // An `lView` might be `null` if a `ViewRef` represents
-            // an embedded view (not a component view).
-            if (lView !== null && lView[HOST] !== null) {
-                cleanupLView(lView);
-                ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
-            }
+function cleanupDehydratedViews(appRef) {
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lView = getComponentLViewForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lView !== null && lView[HOST] !== null) {
+            cleanupLView(lView);
+            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
         }
-    });
+    }
 }
 
 /**
