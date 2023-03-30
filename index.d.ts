@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-f2ba192
+ * @license Angular v16.0.0-next.5+sha-06e74a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -786,9 +786,9 @@ export declare abstract class ChangeDetectorRef {
 declare interface ChangeDetectorRefInterface extends ChangeDetectorRef {
 }
 
-declare const CHILD_HEAD = 13;
+declare const CHILD_HEAD = 12;
 
-declare const CHILD_TAIL = 14;
+declare const CHILD_TAIL = 13;
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
@@ -2151,11 +2151,11 @@ export declare class DebugNode {
     get providerTokens(): any[];
 }
 
-declare const DECLARATION_COMPONENT_VIEW = 16;
+declare const DECLARATION_COMPONENT_VIEW = 15;
 
-declare const DECLARATION_LCONTAINER = 17;
+declare const DECLARATION_LCONTAINER = 16;
 
-declare const DECLARATION_VIEW = 15;
+declare const DECLARATION_VIEW = 14;
 
 /**
  * Makes `T` read-only at the property level.
@@ -2943,6 +2943,19 @@ export declare function effect(effectFn: () => EffectCleanupFn | void, options?:
 export declare type EffectCleanupFn = () => void;
 
 /**
+ * Tracks all effects registered within a given application and runs them via `flush`.
+ */
+declare class EffectManager {
+    private all;
+    private queue;
+    create(effectFn: () => void, destroyRef: DestroyRef | null): EffectRef;
+    flush(): void;
+    get isQueueEmpty(): boolean;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
+/**
  * A global reactive effect, which can be manually destroyed.
  *
  * @developerPreview
@@ -3009,7 +3022,7 @@ export declare class ElementRef<T = any> {
     constructor(nativeElement: T);
 }
 
-declare const EMBEDDED_VIEW_INJECTOR = 21;
+declare const EMBEDDED_VIEW_INJECTOR = 20;
 
 /**
  * Represents an Angular [view](guide/glossary#view) in a view container.
@@ -3090,6 +3103,8 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
  * @publicApi
  */
 export declare function enableProdMode(): void;
+
+declare const ENVIRONMENT = 10;
 
 /**
  * A multi-provider token for initialization functions that will run upon construction of an
@@ -3818,7 +3833,7 @@ export declare interface HostListenerDecorator {
     new (eventName: string, args?: string[]): any;
 }
 
-declare const HYDRATION = 23;
+declare const HYDRATION = 22;
 
 declare namespace i0 {
     export {
@@ -4041,7 +4056,7 @@ declare const enum IcuType {
     plural = 1
 }
 
-declare const ID = 20;
+declare const ID = 19;
 
 /**
  * Providers that were imported from NgModules via the `importProvidersFrom` function.
@@ -5238,12 +5253,12 @@ declare interface LView<T = unknown> extends Array<any> {
     [CONTEXT]: T;
     /** An optional Module Injector to be used as fall back after Element Injectors are consulted. */
     readonly [INJECTOR_2]: Injector | null;
-    /** Factory to be used for creating Renderer. */
-    [RENDERER_FACTORY]: RendererFactory;
+    /**
+     * Contextual data that is shared across multiple instances of `LView` in the same application.
+     */
+    [ENVIRONMENT]: LViewEnvironment;
     /** Renderer to be used for this view. */
     [RENDERER]: Renderer;
-    /** An optional custom sanitizer. */
-    [SANITIZER]: Sanitizer | null;
     /**
      * Reference to the first LView or LContainer beneath this LView in
      * the hierarchy.
@@ -5400,6 +5415,18 @@ declare interface LView<T = unknown> extends Array<any> {
      * Same as REACTIVE_TEMPLATE_CONSUMER, but for the host bindings of the LView.
      */
     [REACTIVE_HOST_BINDING_CONSUMER]: ReactiveLViewConsumer | null;
+}
+
+/**
+ * Contextual data that is shared across multiple instances of `LView` in the same application.
+ */
+declare interface LViewEnvironment {
+    /** Factory to be used for creating Renderer. */
+    rendererFactory: RendererFactory;
+    /** An optional custom sanitizer. */
+    sanitizer: Sanitizer | null;
+    /** Container for reactivity system `effect`s. */
+    effectManager: EffectManager | null;
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -5982,7 +6009,7 @@ declare const NODES = "n";
 
 declare const NUM_ROOT_NODES = "r";
 
-declare const ON_DESTROY_HOOKS = 22;
+declare const ON_DESTROY_HOOKS = 21;
 
 /**
  * @description
@@ -6391,7 +6418,7 @@ export declare interface Predicate<T> {
     (value: T): boolean;
 }
 
-declare const PREORDER_HOOK_FLAGS = 18;
+declare const PREORDER_HOOK_FLAGS = 17;
 
 /** More flags associated with an LView (saved in LView[PREORDER_HOOK_FLAGS]) */
 declare const enum PreOrderHookFlags {
@@ -6479,7 +6506,7 @@ declare interface PublicTestability {
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
 }
 
-declare const QUERIES = 19;
+declare const QUERIES = 18;
 
 /**
  * Type of the Query metadata.
@@ -6840,9 +6867,9 @@ declare interface RDomTokenList {
     remove(token: string): void;
 }
 
-declare const REACTIVE_HOST_BINDING_CONSUMER = 25;
+declare const REACTIVE_HOST_BINDING_CONSUMER = 24;
 
-declare const REACTIVE_TEMPLATE_CONSUMER = 24;
+declare const REACTIVE_TEMPLATE_CONSUMER = 23;
 
 declare class ReactiveLViewConsumer extends ReactiveNode {
     private _lView;
@@ -7504,8 +7531,6 @@ export declare abstract class Renderer2 {
     abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }
 
-declare const RENDERER_FACTORY = 10;
-
 declare interface RendererFactory {
     createRenderer(hostElement: RElement | null, rendererType: RendererType2 | null): Renderer;
     begin?(): void;
@@ -7787,8 +7812,6 @@ declare const enum RuntimeErrorCode {
     UNEXPECTED_ZONE_STATE = 909,
     UNSAFE_IFRAME_ATTRS = -910
 }
-
-declare const SANITIZER = 12;
 
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.

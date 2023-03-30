@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-f2ba192
+ * @license Angular v16.0.0-next.5+sha-06e74a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3219,23 +3219,22 @@ const T_HOST = 6;
 const CLEANUP = 7;
 const CONTEXT = 8;
 const INJECTOR$1 = 9;
-const RENDERER_FACTORY = 10;
+const ENVIRONMENT = 10;
 const RENDERER = 11;
-const SANITIZER = 12;
-const CHILD_HEAD = 13;
-const CHILD_TAIL = 14;
+const CHILD_HEAD = 12;
+const CHILD_TAIL = 13;
 // FIXME(misko): Investigate if the three declarations aren't all same thing.
-const DECLARATION_VIEW = 15;
-const DECLARATION_COMPONENT_VIEW = 16;
-const DECLARATION_LCONTAINER = 17;
-const PREORDER_HOOK_FLAGS = 18;
-const QUERIES = 19;
-const ID = 20;
-const EMBEDDED_VIEW_INJECTOR = 21;
-const ON_DESTROY_HOOKS = 22;
-const HYDRATION = 23;
-const REACTIVE_TEMPLATE_CONSUMER = 24;
-const REACTIVE_HOST_BINDING_CONSUMER = 25;
+const DECLARATION_VIEW = 14;
+const DECLARATION_COMPONENT_VIEW = 15;
+const DECLARATION_LCONTAINER = 16;
+const PREORDER_HOOK_FLAGS = 17;
+const QUERIES = 18;
+const ID = 19;
+const EMBEDDED_VIEW_INJECTOR = 20;
+const ON_DESTROY_HOOKS = 21;
+const HYDRATION = 22;
+const REACTIVE_TEMPLATE_CONSUMER = 23;
+const REACTIVE_HOST_BINDING_CONSUMER = 24;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -3243,7 +3242,7 @@ const REACTIVE_HOST_BINDING_CONSUMER = 25;
  * instruction index into `LView` index. All other indexes should be in the `LView` index space and
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
-const HEADER_OFFSET = 26;
+const HEADER_OFFSET = 25;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 const unusedValueExportToPlacateAjd$4 = 1;
@@ -8356,7 +8355,7 @@ function validateAgainstEventAttributes(name) {
 }
 function getSanitizer() {
     const lView = getLView();
-    return lView && lView[SANITIZER];
+    return lView && lView[ENVIRONMENT].sanitizer;
 }
 
 /**
@@ -9787,7 +9786,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-f2ba192');
+const VERSION = new Version('16.0.0-next.5+sha-06e74a5');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11426,7 +11425,7 @@ function renderChildComponents(hostLView, components) {
         renderComponent(hostLView, components[i]);
     }
 }
-function createLView(parentLView, tView, context, flags, host, tHostNode, rendererFactory, renderer, sanitizer, injector, embeddedViewInjector, hydrationInfo) {
+function createLView(parentLView, tView, context, flags, host, tHostNode, environment, renderer, injector, embeddedViewInjector, hydrationInfo) {
     const lView = tView.blueprint.slice();
     lView[HOST] = host;
     lView[FLAGS] = flags | 4 /* LViewFlags.CreationMode */ | 64 /* LViewFlags.Attached */ | 8 /* LViewFlags.FirstLViewPass */;
@@ -11438,11 +11437,10 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, render
     ngDevMode && tView.declTNode && parentLView && assertTNodeForLView(tView.declTNode, parentLView);
     lView[PARENT] = lView[DECLARATION_VIEW] = parentLView;
     lView[CONTEXT] = context;
-    lView[RENDERER_FACTORY] = (rendererFactory || parentLView && parentLView[RENDERER_FACTORY]);
-    ngDevMode && assertDefined(lView[RENDERER_FACTORY], 'RendererFactory is required');
+    lView[ENVIRONMENT] = (environment || parentLView && parentLView[ENVIRONMENT]);
+    ngDevMode && assertDefined(lView[ENVIRONMENT], 'LViewEnvironment is required');
     lView[RENDERER] = (renderer || parentLView && parentLView[RENDERER]);
     ngDevMode && assertDefined(lView[RENDERER], 'Renderer is required');
-    lView[SANITIZER] = sanitizer || parentLView && parentLView[SANITIZER] || null;
     lView[INJECTOR$1] = injector || parentLView && parentLView[INJECTOR$1] || null;
     lView[T_HOST] = tHostNode;
     lView[ID] = getUniqueLViewId();
@@ -11621,10 +11619,11 @@ function refreshView(tView, lView, templateFn, context) {
     const flags = lView[FLAGS];
     if ((flags & 128 /* LViewFlags.Destroyed */) === 128 /* LViewFlags.Destroyed */)
         return;
-    enterView(lView);
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
     // since they were assigned. We do not want to execute lifecycle hooks in that mode.
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
+    !isInCheckNoChangesPass && lView[ENVIRONMENT].effectManager?.flush();
+    enterView(lView);
     try {
         resetPreOrderHookFlags(lView);
         setBindingIndex(tView.bindingStartIndex);
@@ -12540,8 +12539,8 @@ function addComponentLogic(lView, hostTNode, def) {
     const tView = getOrCreateComponentTView(def);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    const rendererFactory = lView[RENDERER_FACTORY];
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, rendererFactory, rendererFactory.createRenderer(native, def), null, null, null, null));
+    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, null, rendererFactory.createRenderer(native, def), null, null, null));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
@@ -12855,7 +12854,7 @@ function addToViewTree(lView, lViewOrLContainer) {
 //// Change detection
 ///////////////////////////////
 function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
-    const rendererFactory = lView[RENDERER_FACTORY];
+    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
     // since they were assigned. We do not want to invoke renderer factory functions in that mode
     // to avoid any possible side-effects.
@@ -12874,6 +12873,9 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
     finally {
         if (!checkNoChangesMode && rendererFactory.end)
             rendererFactory.end();
+        // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
+        // other post-order hooks.
+        !checkNoChangesMode && lView[ENVIRONMENT].effectManager?.flush();
     }
 }
 function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
@@ -12994,6 +12996,411 @@ function textBindingInternal(lView, index, value) {
     const element = getNativeByIndex(index, lView);
     ngDevMode && assertDefined(element, 'native element should exist');
     updateTextNode(lView[RENDERER], element, value);
+}
+
+/**
+ * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
+ * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
+ * is injected in a component or directive, the callbacks run when that component or
+ * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ *
+ * @publicApi
+ */
+class DestroyRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectDestroyRef; }
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ENV_ID__ = (injector) => injector; }
+}
+class NodeInjectorDestroyRef extends DestroyRef {
+    constructor(_lView) {
+        super();
+        this._lView = _lView;
+    }
+    onDestroy(callback) {
+        storeLViewOnDestroy(this._lView, callback);
+        return () => removeLViewOnDestroy(this._lView, callback);
+    }
+}
+function injectDestroyRef() {
+    return new NodeInjectorDestroyRef(getLView());
+}
+
+/**
+ * Symbol used to tell `Signal`s apart from other functions.
+ *
+ * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
+ */
+const SIGNAL = Symbol('SIGNAL');
+/**
+ * Checks if the given `value` function is a reactive `Signal`.
+ */
+function isSignal(value) {
+    return value[SIGNAL] !== undefined;
+}
+/**
+ * Converts `fn` into a marked signal function (where `isSignal(fn)` will be `true`), and
+ * potentially add some set of extra properties (passed as an object record `extraApi`).
+ */
+function createSignalFromFunction(node, fn, extraApi = {}) {
+    fn[SIGNAL] = node;
+    // Copy properties from `extraApi` to `fn` to complete the desired API of the `Signal`.
+    return Object.assign(fn, extraApi);
+}
+/**
+ * The default equality function used for `signal` and `computed`, which treats objects and arrays
+ * as never equal, and all other primitive values using identity semantics.
+ *
+ * This allows signals to hold non-primitive values (arrays, objects, other collections) and still
+ * propagate change notification upon explicit mutation without identity change.
+ *
+ * @developerPreview
+ */
+function defaultEquals(a, b) {
+    // `Object.is` compares two values using identity semantics which is desired behavior for
+    // primitive values. If `Object.is` determines two values to be equal we need to make sure that
+    // those don't represent objects (we want to make sure that 2 objects are always considered
+    // "unequal"). The null check is needed for the special case of JavaScript reporting null values
+    // as objects (`typeof null === 'object'`).
+    return (a === null || typeof a !== 'object') && Object.is(a, b);
+}
+// clang-format on
+
+/**
+ * Create a computed `Signal` which derives a reactive value from an expression.
+ *
+ * @developerPreview
+ */
+function computed(computation, options) {
+    const node = new ComputedImpl(computation, options?.equal ?? defaultEquals);
+    // Casting here is required for g3, as TS inference behavior is slightly different between our
+    // version/options and g3's.
+    return createSignalFromFunction(node, node.signal.bind(node));
+}
+/**
+ * A dedicated symbol used before a computed value has been calculated for the first time.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+const UNSET = Symbol('UNSET');
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * is in progress. Used to detect cycles in computation chains.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+const COMPUTING = Symbol('COMPUTING');
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * failed. The thrown error is cached until the computation gets dirty again.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+const ERRORED = Symbol('ERRORED');
+/**
+ * A computation, which derives a value from a declarative reactive expression.
+ *
+ * `Computed`s are both producers and consumers of reactivity.
+ */
+class ComputedImpl extends ReactiveNode {
+    constructor(computation, equal) {
+        super();
+        this.computation = computation;
+        this.equal = equal;
+        /**
+         * Current value of the computation.
+         *
+         * This can also be one of the special values `UNSET`, `COMPUTING`, or `ERRORED`.
+         */
+        this.value = UNSET;
+        /**
+         * If `value` is `ERRORED`, the error caught from the last computation attempt which will
+         * be re-thrown.
+         */
+        this.error = null;
+        /**
+         * Flag indicating that the computation is currently stale, meaning that one of the
+         * dependencies has notified of a potential change.
+         *
+         * It's possible that no dependency has _actually_ changed, in which case the `stale`
+         * state can be resolved without recomputing the value.
+         */
+        this.stale = true;
+    }
+    onConsumerDependencyMayHaveChanged() {
+        if (this.stale) {
+            // We've already notified consumers that this value has potentially changed.
+            return;
+        }
+        // Record that the currently cached value may be stale.
+        this.stale = true;
+        // Notify any consumers about the potential change.
+        this.producerMayHaveChanged();
+    }
+    onProducerUpdateValueVersion() {
+        if (!this.stale) {
+            // The current value and its version are already up to date.
+            return;
+        }
+        // The current value is stale. Check whether we need to produce a new one.
+        if (this.value !== UNSET && this.value !== COMPUTING &&
+            !this.consumerPollProducersForChange()) {
+            // Even though we were previously notified of a potential dependency update, all of
+            // our dependencies report that they have not actually changed in value, so we can
+            // resolve the stale state without needing to recompute the current value.
+            this.stale = false;
+            return;
+        }
+        // The current value is stale, and needs to be recomputed. It still may not change -
+        // that depends on whether the newly computed value is equal to the old.
+        this.recomputeValue();
+    }
+    recomputeValue() {
+        if (this.value === COMPUTING) {
+            // Our computation somehow led to a cyclic read of itself.
+            throw new Error('Detected cycle in computations.');
+        }
+        const oldValue = this.value;
+        this.value = COMPUTING;
+        // As we're re-running the computation, update our dependent tracking version number.
+        this.trackingVersion++;
+        const prevConsumer = setActiveConsumer(this);
+        let newValue;
+        try {
+            newValue = this.computation();
+        }
+        catch (err) {
+            newValue = ERRORED;
+            this.error = err;
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+        this.stale = false;
+        if (oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED &&
+            this.equal(oldValue, newValue)) {
+            // No change to `valueVersion` - old and new values are
+            // semantically equivalent.
+            this.value = oldValue;
+            return;
+        }
+        this.value = newValue;
+        this.valueVersion++;
+    }
+    signal() {
+        // Check if the value needs updating before returning it.
+        this.onProducerUpdateValueVersion();
+        // Record that someone looked at this signal.
+        this.producerAccessed();
+        if (this.value === ERRORED) {
+            throw this.error;
+        }
+        return this.value;
+    }
+}
+
+class WritableSignalImpl extends ReactiveNode {
+    constructor(value, equal) {
+        super();
+        this.value = value;
+        this.equal = equal;
+    }
+    onConsumerDependencyMayHaveChanged() {
+        // This never happens for writable signals as they're not consumers.
+    }
+    onProducerUpdateValueVersion() {
+        // Writable signal value versions are always up to date.
+    }
+    /**
+     * Directly update the value of the signal to a new value, which may or may not be
+     * equal to the previous.
+     *
+     * In the event that `newValue` is semantically equal to the current value, `set` is
+     * a no-op.
+     */
+    set(newValue) {
+        if (!this.equal(this.value, newValue)) {
+            this.value = newValue;
+            this.valueVersion++;
+            this.producerMayHaveChanged();
+        }
+    }
+    /**
+     * Derive a new value for the signal from its current value using the `updater` function.
+     *
+     * This is equivalent to calling `set` on the result of running `updater` on the current
+     * value.
+     */
+    update(updater) {
+        this.set(updater(this.value));
+    }
+    /**
+     * Calls `mutator` on the current value and assumes that it has been mutated.
+     */
+    mutate(mutator) {
+        // Mutate bypasses equality checks as it's by definition changing the value.
+        mutator(this.value);
+        this.valueVersion++;
+        this.producerMayHaveChanged();
+    }
+    signal() {
+        this.producerAccessed();
+        return this.value;
+    }
+}
+/**
+ * Create a `Signal` that can be set or updated directly.
+ *
+ * @developerPreview
+ */
+function signal(initialValue, options) {
+    const signalNode = new WritableSignalImpl(initialValue, options?.equal ?? defaultEquals);
+    // Casting here is required for g3, as TS inference behavior is slightly different between our
+    // version/options and g3's.
+    const signalFn = createSignalFromFunction(signalNode, signalNode.signal.bind(signalNode), {
+        set: signalNode.set.bind(signalNode),
+        update: signalNode.update.bind(signalNode),
+        mutate: signalNode.mutate.bind(signalNode),
+    });
+    return signalFn;
+}
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ *
+ * @developerPreview
+ */
+function untracked(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer(prevConsumer);
+    }
+}
+
+const NOOP_CLEANUP_FN = () => { };
+/**
+ * Watches a reactive expression and allows it to be scheduled to re-run
+ * when any dependencies notify of a change.
+ *
+ * `Watch` doesn't run reactive expressions itself, but relies on a consumer-
+ * provided scheduling operation to coordinate calling `Watch.run()`.
+ */
+class Watch extends ReactiveNode {
+    constructor(watch, schedule) {
+        super();
+        this.watch = watch;
+        this.schedule = schedule;
+        this.dirty = false;
+        this.cleanupFn = NOOP_CLEANUP_FN;
+    }
+    notify() {
+        if (!this.dirty) {
+            this.schedule(this);
+        }
+        this.dirty = true;
+    }
+    onConsumerDependencyMayHaveChanged() {
+        this.notify();
+    }
+    onProducerUpdateValueVersion() {
+        // Watches are not producers.
+    }
+    /**
+     * Execute the reactive expression in the context of this `Watch` consumer.
+     *
+     * Should be called by the user scheduling algorithm when the provided
+     * `schedule` hook is called by `Watch`.
+     */
+    run() {
+        this.dirty = false;
+        if (this.trackingVersion !== 0 && !this.consumerPollProducersForChange()) {
+            return;
+        }
+        const prevConsumer = setActiveConsumer(this);
+        this.trackingVersion++;
+        try {
+            this.cleanupFn();
+            this.cleanupFn = this.watch() ?? NOOP_CLEANUP_FN;
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+    }
+    cleanup() {
+        this.cleanupFn();
+    }
+}
+
+/**
+ * Tracks all effects registered within a given application and runs them via `flush`.
+ */
+class EffectManager {
+    constructor() {
+        this.all = new Set();
+        this.queue = new Map();
+    }
+    create(effectFn, destroyRef) {
+        const zone = Zone.current;
+        const watch = new Watch(effectFn, (watch) => {
+            if (!this.all.has(watch)) {
+                return;
+            }
+            this.queue.set(watch, zone);
+        });
+        this.all.add(watch);
+        // Effects start dirty.
+        watch.notify();
+        let unregisterOnDestroy;
+        const destroy = () => {
+            watch.cleanup();
+            unregisterOnDestroy?.();
+            this.all.delete(watch);
+            this.queue.delete(watch);
+        };
+        unregisterOnDestroy = destroyRef?.onDestroy(destroy);
+        return {
+            destroy,
+        };
+    }
+    flush() {
+        if (this.queue.size === 0) {
+            return;
+        }
+        for (const [watch, zone] of this.queue) {
+            this.queue.delete(watch);
+            zone.run(() => watch.run());
+        }
+    }
+    get isQueueEmpty() {
+        return this.queue.size === 0;
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: EffectManager,
+        providedIn: 'root',
+        factory: () => new EffectManager(),
+    }); }
+}
+/**
+ * Create a global `Effect` for the given reactive function.
+ *
+ * @developerPreview
+ */
+function effect(effectFn, options) {
+    !options?.injector && assertInInjectionContext(effect);
+    const injector = options?.injector ?? inject$1(Injector);
+    const effectManager = injector.get(EffectManager);
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    return effectManager.create(effectFn, destroyRef);
 }
 
 /**
@@ -13463,6 +13870,12 @@ class ComponentFactory extends ComponentFactory$1 {
                     'Make sure that any injector used to create this component has a correct parent.');
         }
         const sanitizer = rootViewInjector.get(Sanitizer, null);
+        const effectManager = rootViewInjector.get(EffectManager, null);
+        const environment = {
+            rendererFactory,
+            sanitizer,
+            effectManager,
+        };
         const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
         // Determine a tag name used for creating host elements when this component is created
         // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
@@ -13474,7 +13887,7 @@ class ComponentFactory extends ComponentFactory$1 {
             16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
-        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, rendererFactory, hostRenderer, sanitizer, rootViewInjector, null, null);
+        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, null);
         // rootView is the parent when bootstrapping
         // TODO(misko): it looks like we are entering view here but we don't really need to as
         // `renderView` does that. However as the code is written it is needed because
@@ -13497,7 +13910,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 rootDirectives = [rootComponentDef];
             }
             const hostTNode = createRootComponentTNode(rootLView, hostRNode);
-            const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, rendererFactory, hostRenderer);
+            const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
             tElementNode = getTNode(rootTView, HEADER_OFFSET);
             // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some tests
             // where the renderer is mocked out and `undefined` is returned. We should update the tests so
@@ -13603,7 +14016,7 @@ function createRootComponentTNode(lView, rNode) {
  *
  * @returns Component view created
  */
-function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirectives, rootView, rendererFactory, hostRenderer, sanitizer) {
+function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirectives, rootView, environment, hostRenderer) {
     const tView = rootView[TVIEW];
     applyRootComponentStyling(rootDirectives, tNode, hostRNode, hostRenderer);
     // Hydration info is on the host element and needs to be retreived
@@ -13612,8 +14025,8 @@ function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirecti
     if (hostRNode !== null) {
         hydrationInfo = retrieveHydrationInfo(hostRNode, rootView[INJECTOR$1]);
     }
-    const viewRenderer = rendererFactory.createRenderer(hostRNode, rootComponentDef);
-    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, rendererFactory, viewRenderer, sanitizer || null, null, null, hydrationInfo);
+    const viewRenderer = environment.rendererFactory.createRenderer(hostRNode, rootComponentDef);
+    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, environment, viewRenderer, null, null, hydrationInfo);
     if (tView.firstCreatePass) {
         markAsComponentHost(tView, tNode, rootDirectives.length - 1);
     }
@@ -23367,7 +23780,7 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
      */
     createEmbeddedViewImpl(context, injector, hydrationInfo) {
         const embeddedTView = this._declarationTContainer.tView;
-        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, null, injector || null, hydrationInfo || null);
+        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, injector || null, hydrationInfo || null);
         const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
         ngDevMode && assertLContainer(declarationLContainer);
         embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
