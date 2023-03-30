@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-d786856
+ * @license Angular v16.0.0-next.5+sha-9d96487
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2156,18 +2156,6 @@ declare const DECLARATION_COMPONENT_VIEW = 15;
 declare const DECLARATION_LCONTAINER = 16;
 
 declare const DECLARATION_VIEW = 14;
-
-/**
- * Makes `T` read-only at the property level.
- *
- * Objects have their properties mapped to `DeepReadonly` types and arrays are converted to
- * `ReadonlyArray`s of `DeepReadonly` values.
- *
- * @developerPreview
- */
-export declare type DeepReadonly<T> = T extends (infer R)[] ? ReadonlyArray<DeepReadonly<R>> : (T extends Function ? T : (T extends object ? {
-    readonly [P in keyof T]: DeepReadonly<T[P]>;
-} : T));
 
 /**
  * Provide this token to set the default currency code your application uses for
@@ -8024,7 +8012,7 @@ declare const SIGNAL: unique symbol;
  *
  * @developerPreview
  */
-export declare type Signal<T> = (() => DeepReadonly<T>) & {
+export declare type Signal<T> = (() => T) & {
     [SIGNAL]: unknown;
 };
 

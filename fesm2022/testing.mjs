@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-d786856
+ * @license Angular v16.0.0-next.5+sha-9d96487
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9786,7 +9786,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-d786856');
+const VERSION = new Version('16.0.0-next.5+sha-9d96487');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13070,7 +13070,6 @@ function defaultEquals(a, b) {
     // as objects (`typeof null === 'object'`).
     return (a === null || typeof a !== 'object') && Object.is(a, b);
 }
-// clang-format on
 
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
