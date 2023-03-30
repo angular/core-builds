@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.5+sha-e78a2a4
+ * @license Angular v15.2.5+sha-35f4918
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8322,7 +8322,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.5+sha-e78a2a4');
+const VERSION = new Version('15.2.5+sha-35f4918');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -21148,7 +21148,7 @@ function createTemplateRef(hostTNode, hostLView) {
  * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
  *
  * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-tree).
+ * creating a [view hierarchy](guide/glossary#view-hierarchy).
  *
  * @see `ComponentRef`
  * @see `EmbeddedViewRef`
@@ -25589,7 +25589,7 @@ class ViewRef extends ChangeDetectorRef {
 }
 /**
  * Represents an Angular [view](guide/glossary#view) in a view container.
- * An [embedded view](guide/glossary#view-tree) can be referenced from a component
+ * An [embedded view](guide/glossary#view-hierarchy) can be referenced from a component
  * other than the hosting component whose template defines it, or it can be defined
  * independently by a `TemplateRef`.
  *
