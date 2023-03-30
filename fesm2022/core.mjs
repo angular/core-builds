@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-07a1aa3
+ * @license Angular v16.0.0-next.5+sha-e9dd7f0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -138,7 +138,8 @@ const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
  *
  * Note: the `message` argument contains a descriptive error message as a string in development
  * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
- * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime
+ * logic.
  */
 class RuntimeError extends Error {
     constructor(code, message) {
@@ -9390,7 +9391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-07a1aa3');
+const VERSION = new Version('16.0.0-next.5+sha-e9dd7f0');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9677,6 +9678,10 @@ let _nextReactiveId = 0;
  * consumer).
  */
 let activeConsumer = null;
+/**
+ * Whether the graph is currently propagating change notifications.
+ */
+let inNotificationPhase = false;
 function setActiveConsumer(consumer) {
     const prev = activeConsumer;
     activeConsumer = consumer;
@@ -9767,20 +9772,33 @@ class ReactiveNode {
      * Notify all consumers of this producer that its value may have changed.
      */
     producerMayHaveChanged() {
-        for (const [consumerId, edge] of this.consumers) {
-            const consumer = edge.consumerNode.deref();
-            if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
-                this.consumers.delete(consumerId);
-                consumer?.producers.delete(this.id);
-                continue;
+        // Prevent signal reads when we're updating the graph
+        const prev = inNotificationPhase;
+        inNotificationPhase = true;
+        try {
+            for (const [consumerId, edge] of this.consumers) {
+                const consumer = edge.consumerNode.deref();
+                if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
+                    this.consumers.delete(consumerId);
+                    consumer?.producers.delete(this.id);
+                    continue;
+                }
+                consumer.onConsumerDependencyMayHaveChanged();
             }
-            consumer.onConsumerDependencyMayHaveChanged();
+        }
+        finally {
+            inNotificationPhase = prev;
         }
     }
     /**
      * Mark that this producer node has been accessed in the current reactive context.
      */
     producerAccessed() {
+        if (inNotificationPhase) {
+            throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ?
+                `Assertion error: signal read during notification phase` :
+                '');
+        }
         if (activeConsumer === null) {
             return;
         }
@@ -9806,6 +9824,13 @@ class ReactiveNode {
      */
     get hasProducers() {
         return this.producers.size > 0;
+    }
+    /**
+     * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
+     * based on the current consumer context.
+     */
+    get producerUpdatesAllowed() {
+        return activeConsumer?.consumerAllowSignalWrites !== false;
     }
     /**
      * Checks if a `Producer` has a current value which is different than the value
@@ -9854,6 +9879,7 @@ const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
 class ReactiveLViewConsumer extends ReactiveNode {
     constructor() {
         super(...arguments);
+        this.consumerAllowSignalWrites = false;
         this._lView = null;
     }
     set lView(lView) {
@@ -12780,6 +12806,7 @@ class ComputedImpl extends ReactiveNode {
          * state can be resolved without recomputing the value.
          */
         this.stale = true;
+        this.consumerAllowSignalWrites = false;
     }
     onConsumerDependencyMayHaveChanged() {
         if (this.stale) {
@@ -12853,11 +12880,23 @@ class ComputedImpl extends ReactiveNode {
     }
 }
 
+function defaultThrowError() {
+    throw new Error();
+}
+let throwInvalidWriteToSignalErrorFn = defaultThrowError;
+function throwInvalidWriteToSignalError() {
+    throwInvalidWriteToSignalErrorFn();
+}
+function setThrowInvalidWriteToSignalError(fn) {
+    throwInvalidWriteToSignalErrorFn = fn;
+}
+
 class WritableSignalImpl extends ReactiveNode {
     constructor(value, equal) {
         super();
         this.value = value;
         this.equal = equal;
+        this.consumerAllowSignalWrites = false;
     }
     onConsumerDependencyMayHaveChanged() {
         // This never happens for writable signals as they're not consumers.
@@ -12873,6 +12912,9 @@ class WritableSignalImpl extends ReactiveNode {
      * a no-op.
      */
     set(newValue) {
+        if (!this.producerUpdatesAllowed) {
+            throwInvalidWriteToSignalError();
+        }
         if (!this.equal(this.value, newValue)) {
             this.value = newValue;
             this.valueVersion++;
@@ -12886,12 +12928,18 @@ class WritableSignalImpl extends ReactiveNode {
      * value.
      */
     update(updater) {
+        if (!this.producerUpdatesAllowed) {
+            throwInvalidWriteToSignalError();
+        }
         this.set(updater(this.value));
     }
     /**
      * Calls `mutator` on the current value and assumes that it has been mutated.
      */
     mutate(mutator) {
+        if (!this.producerUpdatesAllowed) {
+            throwInvalidWriteToSignalError();
+        }
         // Mutate bypasses equality checks as it's by definition changing the value.
         mutator(this.value);
         this.valueVersion++;
@@ -12946,12 +12994,13 @@ const NOOP_CLEANUP_FN = () => { };
  * provided scheduling operation to coordinate calling `Watch.run()`.
  */
 class Watch extends ReactiveNode {
-    constructor(watch, schedule) {
+    constructor(watch, schedule, allowSignalWrites) {
         super();
         this.watch = watch;
         this.schedule = schedule;
         this.dirty = false;
         this.cleanupFn = NOOP_CLEANUP_FN;
+        this.consumerAllowSignalWrites = allowSignalWrites;
     }
     notify() {
         if (!this.dirty) {
@@ -12999,14 +13048,14 @@ class EffectManager {
         this.all = new Set();
         this.queue = new Map();
     }
-    create(effectFn, destroyRef) {
+    create(effectFn, destroyRef, allowSignalWrites) {
         const zone = Zone.current;
         const watch = new Watch(effectFn, (watch) => {
             if (!this.all.has(watch)) {
                 return;
             }
             this.queue.set(watch, zone);
-        });
+        }, allowSignalWrites);
         this.all.add(watch);
         // Effects start dirty.
         watch.notify();
@@ -13051,7 +13100,7 @@ function effect(effectFn, options) {
     const injector = options?.injector ?? inject(Injector);
     const effectManager = injector.get(EffectManager);
     const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    return effectManager.create(effectFn, destroyRef);
+    return effectManager.create(effectFn, destroyRef, !!options?.allowSignalWrites);
 }
 
 /**
@@ -27155,6 +27204,16 @@ function compileNgModuleFactory(injector, options, moduleType) {
 function publishDefaultGlobalUtils() {
     ngDevMode && publishDefaultGlobalUtils$1();
 }
+/**
+ * Sets the error for an invalid write to a signal to be an Angular `RuntimeError`.
+ */
+function publishSignalConfiguration() {
+    setThrowInvalidWriteToSignalError(() => {
+        throw new RuntimeError(600 /* RuntimeErrorCode.SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT */, ngDevMode &&
+            'Writing to signals is not allowed in a `computed` or an `effect` by default. ' +
+                'Use `allowSignalWrites` in the `CreateEffectOptions` to enable this inside effects.');
+    });
+}
 function isBoundToModule(cf) {
     return cf.isBoundToModule;
 }
@@ -27181,6 +27240,7 @@ function createPlatform(injector) {
             'There can be only one platform. Destroy the previous one to create a new one.');
     }
     publishDefaultGlobalUtils();
+    publishSignalConfiguration();
     _platformInjector = injector;
     const platform = injector.get(PlatformRef);
     runPlatformInitializers(injector);

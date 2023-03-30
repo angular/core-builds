@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-07a1aa3
+ * @license Angular v16.0.0-next.5+sha-e9dd7f0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1843,6 +1843,13 @@ export declare interface CreateEffectOptions {
      * with the current `DestroyRef`.
      */
     manualCleanup?: boolean;
+    /**
+     * Whether the `effect` should allow writing to signals.
+     *
+     * Using effects to synchronize data by writing to signals can lead to confusing and potentially
+     * incorrect behavior, and should be enabled only when necessary.
+     */
+    allowSignalWrites?: boolean;
 }
 
 /**
@@ -2936,7 +2943,7 @@ export declare type EffectCleanupFn = () => void;
 declare class EffectManager {
     private all;
     private queue;
-    create(effectFn: () => void, destroyRef: DestroyRef | null): EffectRef;
+    create(effectFn: () => void, destroyRef: DestroyRef | null, allowSignalWrites: boolean): EffectRef;
     flush(): void;
     get isQueueEmpty(): boolean;
     /** @nocollapse */
@@ -6860,6 +6867,7 @@ declare const REACTIVE_HOST_BINDING_CONSUMER = 24;
 declare const REACTIVE_TEMPLATE_CONSUMER = 23;
 
 declare class ReactiveLViewConsumer extends ReactiveNode {
+    protected consumerAllowSignalWrites: boolean;
     private _lView;
     set lView(lView: LView);
     protected onConsumerDependencyMayHaveChanged(): void;
@@ -6924,6 +6932,10 @@ declare abstract class ReactiveNode {
      */
     protected valueVersion: number;
     /**
+     * Whether signal writes should be allowed while this `ReactiveNode` is the current consumer.
+     */
+    protected abstract readonly consumerAllowSignalWrites: boolean;
+    /**
      * Called for consumers whenever one of their dependencies notifies that it might have a new
      * value.
      */
@@ -6953,6 +6965,11 @@ declare abstract class ReactiveNode {
      * Whether this consumer currently has any producers registered.
      */
     protected get hasProducers(): boolean;
+    /**
+     * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
+     * based on the current consumer context.
+     */
+    protected get producerUpdatesAllowed(): boolean;
     /**
      * Checks if a `Producer` has a current value which is different than the value
      * last seen at a specific version by a `Consumer` which recorded a dependency on
@@ -7785,6 +7802,7 @@ declare const enum RuntimeErrorCode {
     UNSUPPORTED_PROJECTION_DOM_NODES = 503,
     INVALID_SKIP_HYDRATION_HOST = 504,
     HYDRATION_I18N_NOT_YET_SUPPORTED = 518,
+    SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
@@ -11686,7 +11704,8 @@ export declare function ɵresolveComponentResources(resourceResolver: (url: stri
  *
  * Note: the `message` argument contains a descriptive error message as a string in development
  * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
- * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime
+ * logic.
  */
 export declare class ɵRuntimeError<T extends number = RuntimeErrorCode> extends Error {
     code: T;
