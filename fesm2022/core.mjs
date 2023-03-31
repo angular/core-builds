@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-de55fdf
+ * @license Angular v16.0.0-next.5+sha-6c1895f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9391,7 +9391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.5+sha-de55fdf');
+const VERSION = new Version('16.0.0-next.5+sha-6c1895f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15992,7 +15992,6 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
         elementContainerStartFirstCreatePass(adjustedIndex, tView, lView, attrsIndex, localRefsIndex) :
         tView.data[adjustedIndex];
     setCurrentTNode(tNode, true);
-    ngDevMode && ngDevMode.rendererCreateComment++;
     const comment = _locateOrCreateElementContainerNode(tView, lView, tNode, index);
     lView[adjustedIndex] = comment;
     if (wasLastNodeCreated()) {
