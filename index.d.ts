@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.5+sha-78a3298
+ * @license Angular v16.0.0-next.5+sha-d7d6514
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5990,6 +5990,57 @@ export declare class NgZone {
 }
 
 /**
+ * Used to configure event and run coalescing with `provideZoneChangeDetection`.
+ *
+ * @publicApi
+ *
+ * @see provideZoneChangeDetection
+ */
+export declare interface NgZoneOptions {
+    /**
+     * Optionally specify coalescing event change detections or not.
+     * Consider the following case.
+     *
+     * ```
+     * <div (click)="doSomething()">
+     *   <button (click)="doSomethingElse()"></button>
+     * </div>
+     * ```
+     *
+     * When button is clicked, because of the event bubbling, both
+     * event handlers will be called and 2 change detections will be
+     * triggered. We can coalesce such kind of events to only trigger
+     * change detection only once.
+     *
+     * By default, this option will be false. So the events will not be
+     * coalesced and the change detection will be triggered multiple times.
+     * And if this option be set to true, the change detection will be
+     * triggered async by scheduling a animation frame. So in the case above,
+     * the change detection will only be triggered once.
+     */
+    eventCoalescing?: boolean;
+    /**
+     * Optionally specify if `NgZone#run()` method invocations should be coalesced
+     * into a single change detection.
+     *
+     * Consider the following case.
+     * ```
+     * for (let i = 0; i < 10; i ++) {
+     *   ngZone.run(() => {
+     *     // do something
+     *   });
+     * }
+     * ```
+     *
+     * This case triggers the change detection multiple times.
+     * With ngZoneRunCoalescing options, all change detections in an event loop trigger only once.
+     * In addition, the change detection executes in requestAnimation.
+     *
+     */
+    runCoalescing?: boolean;
+}
+
+/**
  * Defines a schema that allows any property on any element.
  *
  * This schema allows you to ignore the errors related to any unknown elements or properties in a
@@ -6488,6 +6539,28 @@ export declare type Provider = TypeProvider | ValueProvider | ClassProvider | Co
  * @publicApi
  */
 export declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToken<T>;
+
+/**
+ * Provides `NgZone`-based change detection for the application bootstrapped using
+ * `bootstrapApplication`.
+ *
+ * `NgZone` is already provided in applications by default. This provider allows you to configure
+ * options like `eventCoalescing` in the `NgZone`.
+ * This provider is not available for `platformBrowser().bootstrapModule`, which uses
+ * `BootstrapOptions` instead.
+ *
+ * @usageNotes
+ * ```typescript=
+ * bootstrapApplication(MyApp, {providers: [
+ *   provideZoneChangeDetection({eventCoalescing: true}),
+ * ]});
+ * ```
+ *
+ * @publicApi
+ * @see bootstrapApplication
+ * @see NgZoneOptions
+ */
+export declare function provideZoneChangeDetection(options?: NgZoneOptions): EnvironmentProviders;
 
 /**
  * Testability API.
@@ -11531,8 +11604,6 @@ export declare const enum ɵProfilerEvent {
  * @developerPreview
  */
 export declare function ɵprovideHydrationSupport(): EnvironmentProviders;
-
-export declare function ɵprovideNgZoneChangeDetection(ngZone: NgZone): StaticProvider[];
 
 /**
  * Publishes a collection of default debug tools onto`window.ng`.
