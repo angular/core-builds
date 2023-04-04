@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-1aef29c
+ * @license Angular v16.0.0-next.6+sha-34b2d34
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4806,9 +4806,12 @@ export declare interface IterableDifferFactory {
  * @publicApi
  */
 export declare class IterableDiffers {
-    private factories;
     /** @nocollapse */
     static ɵprov: unknown;
+    /**
+     * @deprecated v4.0.0 - Should be private
+     */
+    factories: IterableDifferFactory[];
     constructor(factories: IterableDifferFactory[]);
     static create(factories: IterableDifferFactory[], parent?: IterableDiffers): IterableDiffers;
     /**
