@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-b2327f4
+ * @license Angular v16.0.0-next.6+sha-761e02d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11570,50 +11570,6 @@ export declare const enum ɵProfilerEvent {
 }
 
 /**
- * Returns a set of providers required to setup hydration support
- * for an application that is server side rendered.
- *
- * ## NgModule-based bootstrap
- *
- * You can add the function call to the root AppModule of an application:
- * ```
- * import {provideHydrationSupport} from '@angular/core';
- *
- * @NgModule({
- *   providers: [
- *     // ... other providers ...
- *     provideHydrationSupport()
- *   ],
- *   declarations: [AppComponent],
- *   bootstrap: [AppComponent]
- * })
- * class AppModule {}
- * ```
- *
- * ## Standalone-based bootstrap
- *
- * Add the function to the `bootstrapApplication` call:
- * ```
- * import {provideHydrationSupport} from '@angular/core';
- *
- * bootstrapApplication(RootComponent, {
- *   providers: [
- *     // ... other providers ...
- *     provideHydrationSupport()
- *   ]
- * });
- * ```
- *
- * The function sets up an internal flag that would be recognized during
- * the server side rendering time as well, so there is no need to
- * configure or change anything in NgUniversal to enable the feature.
- *
- * @publicApi
- * @developerPreview
- */
-export declare function ɵprovideHydrationSupport(): EnvironmentProviders;
-
-/**
  * Publishes a collection of default debug tools onto`window.ng`.
  *
  * These functions are available globally when Angular is in development
@@ -12150,6 +12106,18 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
     detachFromAppRef(): void;
     attachToAppRef(appRef: ViewRefTracker): void;
 }
+
+/**
+ * Returns a set of providers required to setup hydration support
+ * for an application that is server side rendered. This function is
+ * included into the `provideClientHydration` public API function from
+ * the `platform-browser` package.
+ *
+ * The function sets up an internal flag that would be recognized during
+ * the server side rendering time as well, so there is no need to
+ * configure or change anything in NgUniversal to enable the feature.
+ */
+export declare function ɵwithDomHydration(): EnvironmentProviders;
 
 /**
  * URL for the XSS security documentation.
