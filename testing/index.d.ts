@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.5+sha-a6def64
+ * @license Angular v15.2.5+sha-bd82fbe
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -142,7 +142,7 @@ export declare function discardPeriodicTasks(): void;
  *
  * Can be used to wrap `inject()` calls.
  *
- * @param fn The function that you want to wrap in the `fakeAysnc` zone.
+ * @param fn The function that you want to wrap in the `fakeAsync` zone.
  *
  * @usageNotes
  * ### Example
