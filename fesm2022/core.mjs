@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-c912294
+ * @license Angular v16.0.0-next.6+sha-4b673d5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9391,7 +9391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-c912294');
+const VERSION = new Version('16.0.0-next.6+sha-4b673d5');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14984,7 +14984,7 @@ function validateMatchingNode(node, nodeType, tagName, lView, tNode, isViewConta
         }
         const footer = getHydrationErrorFooter(componentClassName);
         const message = header + expected + actual + getHydrationAttributeNote() + footer;
-        throw new RuntimeError(500 /* RuntimeErrorCode.HYDRATION_NODE_MISMATCH */, message);
+        throw new RuntimeError(-500 /* RuntimeErrorCode.HYDRATION_NODE_MISMATCH */, message);
     }
 }
 /**
@@ -14997,7 +14997,7 @@ function validateSiblingNodeExists(node) {
         const actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
         const footer = getHydrationErrorFooter();
         const message = header + actual + footer;
-        throw new RuntimeError(501 /* RuntimeErrorCode.HYDRATION_MISSING_SIBLINGS */, message);
+        throw new RuntimeError(-501 /* RuntimeErrorCode.HYDRATION_MISSING_SIBLINGS */, message);
     }
 }
 /**
@@ -15005,7 +15005,7 @@ function validateSiblingNodeExists(node) {
  */
 function validateNodeExists(node) {
     if (!node) {
-        throw new RuntimeError(502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, `Hydration expected an element to be present at this location.`);
+        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, `Hydration expected an element to be present at this location.`);
     }
 }
 /**
@@ -15018,7 +15018,7 @@ function nodeNotFoundError(lView, tNode) {
     const header = 'During serialization, Angular was unable to find an element in the DOM:\n\n';
     const expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
     const footer = getHydrationErrorFooter();
-    throw new RuntimeError(502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
+    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
 }
 /**
  * Builds a hydration error message when a node is not found at a path location
@@ -15030,7 +15030,7 @@ function nodeNotFoundAtPathError(host, path) {
     const header = `During hydration Angular was unable to locate a node ` +
         `using the "${path}" path, starting from the ${describeRNode(host)} node.\n\n`;
     const footer = getHydrationErrorFooter();
-    throw new RuntimeError(502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + footer);
+    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + footer);
 }
 /**
  * Builds the hydration error message in the case that dom nodes are created outside of
@@ -15048,7 +15048,7 @@ function unsupportedProjectionOfDomNodes(rNode) {
         'this pattern or using `ngSkipHydration` on the host element of the component.\n\n';
     const actual = `${describeDomFromNode(rNode)}\n\n`;
     const message = header + actual + getHydrationAttributeNote();
-    return new RuntimeError(503 /* RuntimeErrorCode.UNSUPPORTED_PROJECTION_DOM_NODES */, message);
+    return new RuntimeError(-503 /* RuntimeErrorCode.UNSUPPORTED_PROJECTION_DOM_NODES */, message);
 }
 /**
  * Builds the hydration error message in the case that ngSkipHydration was used on a
@@ -15064,7 +15064,7 @@ function invalidSkipHydrationHost(rNode) {
     const actual = `${describeDomFromNode(rNode)}\n\n`;
     const footer = 'Please move the `ngSkipHydration` attribute to the component host element.';
     const message = header + actual + footer;
-    return new RuntimeError(504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
+    return new RuntimeError(-504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
 }
 /**
  * Builds the hydration error message in the case that a user is attempting to enable
