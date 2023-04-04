@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-31f4efe
+ * @license Angular v16.0.0-next.6+sha-c912294
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -260,7 +260,7 @@ function resetFakeAsyncZone() {
  *
  * Can be used to wrap `inject()` calls.
  *
- * @param fn The function that you want to wrap in the `fakeAysnc` zone.
+ * @param fn The function that you want to wrap in the `fakeAsync` zone.
  *
  * @usageNotes
  * ### Example
@@ -9787,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-31f4efe');
+const VERSION = new Version('16.0.0-next.6+sha-c912294');
 
 // This default value is when checking the hierarchy for a token.
 //
