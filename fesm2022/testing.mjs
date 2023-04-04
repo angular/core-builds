@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-7870fb0
+ * @license Angular v16.0.0-next.6+sha-85ca1f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9787,7 +9787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-7870fb0');
+const VERSION = new Version('16.0.0-next.6+sha-85ca1f9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9866,6 +9866,48 @@ class ErrorHandler {
         }
         return e || null;
     }
+}
+
+/**
+ * The name of an attribute that can be added to the hydration boundary node
+ * (component host node) to disable hydration for the content within that boundary.
+ */
+const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
+/**
+ * Helper function to check if a given node has the 'ngSkipHydration' attribute
+ */
+function hasNgSkipHydrationAttr(tNode) {
+    const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
+    const attrs = tNode.mergedAttrs;
+    if (attrs === null)
+        return false;
+    // only ever look at the attribute name and skip the values
+    for (let i = 0; i < attrs.length; i += 2) {
+        const value = attrs[i];
+        // This is a marker, which means that the static attributes section is over,
+        // so we can exit early.
+        if (typeof value === 'number')
+            return false;
+        if (typeof value === 'string' && value.toLowerCase() === SKIP_HYDRATION_ATTR_NAME_LOWER_CASE) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * Helper function that determines if a given node is within a skip hydration block
+ * by navigating up the TNode tree to see if any parent nodes have skip hydration
+ * attribute.
+ */
+function isInSkipHydrationBlock(tNode) {
+    let currentTNode = tNode.parent;
+    while (currentTNode) {
+        if (hasNgSkipHydrationAttr(currentTNode)) {
+            return true;
+        }
+        currentTNode = currentTNode.parent;
+    }
+    return false;
 }
 
 const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
@@ -11926,7 +11968,7 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
     // tree-shakable one (providedIn:'root'). This code path can be triggered during dynamic
     // component creation (after calling ViewContainerRef.createComponent) when an injector
     // instance can be provided. The injector instance might be disconnected from the main DI
-    // tree, thus the `PRESERVE_HOST_CONTENT` woild not be able to instantiate. In this case, the
+    // tree, thus the `PRESERVE_HOST_CONTENT` would not be able to instantiate. In this case, the
     // default value will be used.
     const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
     // When using native Shadow DOM, do not clear host element to allow native slot
@@ -11961,7 +12003,15 @@ let _applyRootElementTransformImpl = (rootElement) => null;
  * @param rootElement the app root HTML Element
  */
 function applyRootElementTransformImpl(rootElement) {
-    processTextNodeMarkersBeforeHydration(rootElement);
+    if (rootElement.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
+        // Handle a situation when the `ngSkipHydration` attribute is applied
+        // to the root node of an application. In this case, we should clear
+        // the contents and render everything from scratch.
+        clearElementContents(rootElement);
+    }
+    else {
+        processTextNodeMarkersBeforeHydration(rootElement);
+    }
 }
 /**
  * Sets the implementation for the `applyRootElementTransform` function.
@@ -16033,48 +16083,6 @@ function store(tView, lView, index, value) {
 function ɵɵreference(index) {
     const contextLView = getContextLView();
     return load(contextLView, HEADER_OFFSET + index);
-}
-
-/**
- * The name of an attribute that can be added to the hydration boundary node
- * (component host node) to disable hydration for the content within that boundary.
- */
-const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
-/**
- * Helper function to check if a given node has the 'ngSkipHydration' attribute
- */
-function hasNgSkipHydrationAttr(tNode) {
-    const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
-    const attrs = tNode.mergedAttrs;
-    if (attrs === null)
-        return false;
-    // only ever look at the attribute name and skip the values
-    for (let i = 0; i < attrs.length; i += 2) {
-        const value = attrs[i];
-        // This is a marker, which means that the static attributes section is over,
-        // so we can exit early.
-        if (typeof value === 'number')
-            return false;
-        if (typeof value === 'string' && value.toLowerCase() === SKIP_HYDRATION_ATTR_NAME_LOWER_CASE) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * Helper function that determines if a given node is within a skip hydration block
- * by navigating up the TNode tree to see if any parent nodes have skip hydration
- * attribute.
- */
-function isInSkipHydrationBlock(tNode) {
-    let currentTNode = tNode.parent;
-    while (currentTNode) {
-        if (hasNgSkipHydrationAttr(currentTNode)) {
-            return true;
-        }
-        currentTNode = currentTNode.parent;
-    }
-    return false;
 }
 
 /**

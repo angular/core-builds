@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-7870fb0
+ * @license Angular v16.0.0-next.6+sha-85ca1f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -513,6 +513,13 @@ export declare class ApplicationRef {
      */
     detachView(viewRef: ViewRef): void;
     private _loadComponent;
+    /**
+     * Registers a listener to be called when an instance is destroyed.
+     *
+     * @param callback A callback function to add as a listener.
+     * @returns A function which unregisters a listener.
+     */
+    onDestroy(callback: () => void): VoidFunction;
     /**
      * Destroys an Angular application represented by this `ApplicationRef`. Calling this function
      * will destroy the associated environment injectors as well as all the bootstrapped components
