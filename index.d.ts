@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-b203e4c
+ * @license Angular v16.0.0-next.6+sha-1f3f564
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5760,7 +5760,6 @@ export declare interface NgModule {
 
 /**
  * @Annotation
- * @publicApi
  */
 export declare const NgModule: NgModuleDecorator;
 
@@ -11330,15 +11329,6 @@ export declare enum ɵLocaleDataIndex {
     PluralCase = 20,
     ExtraData = 21
 }
-
-/**
- * @suppress {globalThis}
- */
-export declare function ɵmakeDecorator<T>(name: string, props?: (...args: any[]) => any, parentClass?: any, additionalProcessing?: (type: Type<T>) => void, typeFn?: (type: Type<T>, ...args: any[]) => void): {
-    new (...args: any[]): any;
-    (...args: any[]): any;
-    (...args: any[]): (cls: any) => any;
-};
 
 
 export declare const ɵNG_COMP_DEF: string;
