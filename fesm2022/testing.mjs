@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-f0978ad
+ * @license Angular v16.0.0-next.6+sha-b35fa73
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7845,13 +7845,14 @@ function isDOMParserAvailable() {
 }
 
 /**
- * A pattern that recognizes a commonly useful subset of URLs that are safe.
+ * A pattern that recognizes URLs that are safe wrt. XSS in URL navigation
+ * contexts.
  *
  * This regular expression matches a subset of URLs that will not cause script
  * execution if used in URL context within a HTML document. Specifically, this
- * regular expression matches if (comment from here on and regex copied from
- * Soy's EscapingConventions):
- * (1) Either an allowed protocol (http, https, mailto or ftp).
+ * regular expression matches if:
+ * (1) Either a protocol that is not javascript:, and that has valid characters
+ *     (alphanumeric or [+-.]).
  * (2) or no protocol.  A protocol must be followed by a colon. The below
  *     allows that by allowing colons only after one of the characters [/?#].
  *     A colon after a hash (#) must be in the fragment.
@@ -7870,7 +7871,7 @@ function isDOMParserAvailable() {
  *
  * This regular expression was taken from the Closure sanitization library.
  */
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|data|ftp|tel|file|sms):|[^&:/?#]*(?:[/?#]|$))/gi;
+const SAFE_URL_PATTERN = /^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:\/?#]*(?:[\/?#]|$))/i;
 function _sanitizeUrl(url) {
     url = String(url);
     if (url.match(SAFE_URL_PATTERN))
@@ -9787,7 +9788,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-f0978ad');
+const VERSION = new Version('16.0.0-next.6+sha-b35fa73');
 
 // This default value is when checking the hierarchy for a token.
 //
