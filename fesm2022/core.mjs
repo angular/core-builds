@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-6ca1a53
+ * @license Angular v16.0.0-next.6+sha-b2327f4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9391,7 +9391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-6ca1a53');
+const VERSION = new Version('16.0.0-next.6+sha-b2327f4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23351,10 +23351,6 @@ class QueryList {
     map(fn) {
         return this._results.map(fn);
     }
-    /**
-     * See
-     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
-     */
     filter(fn) {
         return this._results.filter(fn);
     }

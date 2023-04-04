@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-6ca1a53
+ * @license Angular v16.0.0-next.6+sha-b2327f4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6697,7 +6697,8 @@ export declare class QueryList<T> implements Iterable<T> {
      * See
      * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
      */
-    filter(fn: (item: T, index: number, array: T[]) => boolean): T[];
+    filter<S extends T>(predicate: (value: T, index: number, array: readonly T[]) => value is S): S[];
+    filter(predicate: (value: T, index: number, array: readonly T[]) => unknown): T[];
     /**
      * See
      * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
