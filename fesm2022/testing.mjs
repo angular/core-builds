@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-d497be7
+ * @license Angular v16.0.0-next.6+sha-aad05eb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1337,6 +1337,11 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
             }
             const decoratorInstance = new PropDecoratorFactory(...args);
             function PropDecorator(target, name) {
+                // target is undefined with standard decorators. This case is not supported and will throw
+                // if this decorator is used in JIT mode with standard decorators.
+                if (target === undefined) {
+                    throw new Error('Standard Angular field decorators are not supported in JIT mode.');
+                }
                 const constructor = target.constructor;
                 // Use of Object.defineProperty is important because it creates a non-enumerable property
                 // which prevents the property from being copied during subclassing.
@@ -9787,7 +9792,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-d497be7');
+const VERSION = new Version('16.0.0-next.6+sha-aad05eb');
 
 // This default value is when checking the hierarchy for a token.
 //

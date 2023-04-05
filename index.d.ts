@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-d497be7
+ * @license Angular v16.0.0-next.6+sha-aad05eb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9536,6 +9536,7 @@ export declare interface TypeDecorator {
      */
     <T extends Type<any>>(type: T): T;
     (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
+    (target: unknown, context: unknown): void;
 }
 
 declare type TypeOrFactory<T> = T | (() => T);
