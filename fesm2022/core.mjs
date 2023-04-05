@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-136ffbc
+ * @license Angular v16.0.0-next.6+sha-d497be7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3048,16 +3048,15 @@ function registerPreOrderHooks(directiveIndex, directiveDef, tView) {
     const { ngOnChanges, ngOnInit, ngDoCheck } = directiveDef.type.prototype;
     if (ngOnChanges) {
         const wrappedOnChanges = NgOnChangesFeatureImpl(directiveDef);
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, wrappedOnChanges);
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = []))
-            .push(directiveIndex, wrappedOnChanges);
+        (tView.preOrderHooks ??= []).push(directiveIndex, wrappedOnChanges);
+        (tView.preOrderCheckHooks ??= []).push(directiveIndex, wrappedOnChanges);
     }
     if (ngOnInit) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(0 - directiveIndex, ngOnInit);
+        (tView.preOrderHooks ??= []).push(0 - directiveIndex, ngOnInit);
     }
     if (ngDoCheck) {
-        (tView.preOrderHooks || (tView.preOrderHooks = [])).push(directiveIndex, ngDoCheck);
-        (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(directiveIndex, ngDoCheck);
+        (tView.preOrderHooks ??= []).push(directiveIndex, ngDoCheck);
+        (tView.preOrderCheckHooks ??= []).push(directiveIndex, ngDoCheck);
     }
 }
 /**
@@ -3089,21 +3088,21 @@ function registerPostOrderHooks(tView, tNode) {
         const lifecycleHooks = directiveDef.type.prototype;
         const { ngAfterContentInit, ngAfterContentChecked, ngAfterViewInit, ngAfterViewChecked, ngOnDestroy } = lifecycleHooks;
         if (ngAfterContentInit) {
-            (tView.contentHooks || (tView.contentHooks = [])).push(-i, ngAfterContentInit);
+            (tView.contentHooks ??= []).push(-i, ngAfterContentInit);
         }
         if (ngAfterContentChecked) {
-            (tView.contentHooks || (tView.contentHooks = [])).push(i, ngAfterContentChecked);
-            (tView.contentCheckHooks || (tView.contentCheckHooks = [])).push(i, ngAfterContentChecked);
+            (tView.contentHooks ??= []).push(i, ngAfterContentChecked);
+            (tView.contentCheckHooks ??= []).push(i, ngAfterContentChecked);
         }
         if (ngAfterViewInit) {
-            (tView.viewHooks || (tView.viewHooks = [])).push(-i, ngAfterViewInit);
+            (tView.viewHooks ??= []).push(-i, ngAfterViewInit);
         }
         if (ngAfterViewChecked) {
-            (tView.viewHooks || (tView.viewHooks = [])).push(i, ngAfterViewChecked);
-            (tView.viewCheckHooks || (tView.viewCheckHooks = [])).push(i, ngAfterViewChecked);
+            (tView.viewHooks ??= []).push(i, ngAfterViewChecked);
+            (tView.viewCheckHooks ??= []).push(i, ngAfterViewChecked);
         }
         if (ngOnDestroy != null) {
-            (tView.destroyHooks || (tView.destroyHooks = [])).push(i, ngOnDestroy);
+            (tView.destroyHooks ??= []).push(i, ngOnDestroy);
         }
     }
 }
@@ -9392,7 +9391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-136ffbc');
+const VERSION = new Version('16.0.0-next.6+sha-d497be7');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11239,11 +11238,11 @@ function initializeDirectives(tView, lView, tNode, directives, exportsMap, hostD
             // We will push the actual hook function into this array later during dir instantiation.
             // We cannot do it now because we must ensure hooks are registered in the same
             // order that directives are created (i.e. injection order).
-            (tView.preOrderHooks || (tView.preOrderHooks = [])).push(tNode.index);
+            (tView.preOrderHooks ??= []).push(tNode.index);
             preOrderHooksFound = true;
         }
         if (!preOrderCheckHooksFound && (lifeCycleHooks.ngOnChanges || lifeCycleHooks.ngDoCheck)) {
-            (tView.preOrderCheckHooks || (tView.preOrderCheckHooks = [])).push(tNode.index);
+            (tView.preOrderCheckHooks ??= []).push(tNode.index);
             preOrderCheckHooksFound = true;
         }
         directiveIdx++;
@@ -11429,7 +11428,7 @@ function markAsComponentHost(tView, hostTNode, componentOffset) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && assertGreaterThan(componentOffset, -1, 'componentOffset must be great than -1');
     hostTNode.componentOffset = componentOffset;
-    (tView.components || (tView.components = [])).push(hostTNode.index);
+    (tView.components ??= []).push(hostTNode.index);
 }
 /** Caches local names and their matching directive indices for query and template lookups. */
 function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
@@ -22301,7 +22300,7 @@ function ɵɵpipe(index, pipeName) {
         pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
         tView.data[adjustedIndex] = pipeDef;
         if (pipeDef.onDestroy) {
-            (tView.destroyHooks || (tView.destroyHooks = [])).push(adjustedIndex, pipeDef.onDestroy);
+            (tView.destroyHooks ??= []).push(adjustedIndex, pipeDef.onDestroy);
         }
     }
     else {
