@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-aad05eb
+ * @license Angular v16.0.0-next.6+sha-a4e749f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9792,7 +9792,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-aad05eb');
+const VERSION = new Version('16.0.0-next.6+sha-a4e749f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -9812,6 +9812,31 @@ const VERSION = new Version('16.0.0-next.6+sha-aad05eb');
 // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+
+/**
+ * Marks current view and all ancestors dirty.
+ *
+ * Returns the root view because it is found as a byproduct of marking the view tree
+ * dirty, and can be used by methods that consume markViewDirty() to easily schedule
+ * change detection. Otherwise, such methods would need to traverse up the view tree
+ * an additional time to get the root view and schedule a tick on it.
+ *
+ * @param lView The starting LView to mark dirty
+ * @returns the root LView
+ */
+function markViewDirty(lView) {
+    while (lView) {
+        lView[FLAGS] |= 32 /* LViewFlags.Dirty */;
+        const parent = getLViewParent(lView);
+        // Stop traversing up as soon as you find a root view that wasn't attached to any container
+        if (isRootView(lView) && !parent) {
+            return lView;
+        }
+        // continue otherwise
+        lView = parent;
+    }
+    return null;
+}
 
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
@@ -10243,31 +10268,6 @@ class ReactiveNode {
         // At this point, we can trust `producer.valueVersion`.
         return this.valueVersion !== lastSeenValueVersion;
     }
-}
-
-/**
- * Marks current view and all ancestors dirty.
- *
- * Returns the root view because it is found as a byproduct of marking the view tree
- * dirty, and can be used by methods that consume markViewDirty() to easily schedule
- * change detection. Otherwise, such methods would need to traverse up the view tree
- * an additional time to get the root view and schedule a tick on it.
- *
- * @param lView The starting LView to mark dirty
- * @returns the root LView
- */
-function markViewDirty(lView) {
-    while (lView) {
-        lView[FLAGS] |= 32 /* LViewFlags.Dirty */;
-        const parent = getLViewParent(lView);
-        // Stop traversing up as soon as you find a root view that wasn't attached to any container
-        if (isRootView(lView) && !parent) {
-            return lView;
-        }
-        // continue otherwise
-        lView = parent;
-    }
-    return null;
 }
 
 const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
@@ -13306,7 +13306,8 @@ class ComponentRef extends ComponentRef$1 {
             const lView = this._rootLView;
             setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
             this.previousInputValues.set(name, value);
-            markDirtyIfOnPush(lView, this._tNode.index);
+            const childComponentLView = getComponentLViewByIndex(this._tNode.index, lView);
+            markViewDirty(childComponentLView);
         }
         else {
             if (ngDevMode) {
