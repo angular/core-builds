@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-1c16be4
+ * @license Angular v16.0.0-next.6+sha-a6fc8b3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2215,6 +2215,7 @@ function defaultEquals(a, b) {
     return (a === null || typeof a !== 'object') && Object.is(a, b);
 }
 
+// Required as the signals library is in a separate package, so we need to explicitly ensure the
 /**
  * A `WeakRef`-compatible reference that fakes the API with a strong reference
  * internally.
@@ -2242,6 +2243,7 @@ function setAlternateWeakRefImpl(impl) {
     // migration is complete.
 }
 
+// Required as the signals library is in a separate package, so we need to explicitly ensure the
 /**
  * Counter tracking the next `ProducerId` or `ConsumerId`.
  */
@@ -2565,6 +2567,13 @@ function setThrowInvalidWriteToSignalError(fn) {
     throwInvalidWriteToSignalErrorFn = fn;
 }
 
+/**
+ * If set, called after `WritableSignal`s are updated.
+ *
+ * This hook can be used to achieve various effects, such as running effects synchronously as part
+ * of setting a signal.
+ */
+let postSignalSetFn = null;
 class WritableSignalImpl extends ReactiveNode {
     constructor(value, equal) {
         super();
@@ -2593,6 +2602,7 @@ class WritableSignalImpl extends ReactiveNode {
             this.value = newValue;
             this.valueVersion++;
             this.producerMayHaveChanged();
+            postSignalSetFn?.();
         }
     }
     /**
@@ -2618,6 +2628,7 @@ class WritableSignalImpl extends ReactiveNode {
         mutator(this.value);
         this.valueVersion++;
         this.producerMayHaveChanged();
+        postSignalSetFn?.();
     }
     signal() {
         this.producerAccessed();
@@ -2639,6 +2650,11 @@ function signal(initialValue, options) {
         mutate: signalNode.mutate.bind(signalNode),
     });
     return signalFn;
+}
+function setPostSignalSetFn(fn) {
+    const prev = postSignalSetFn;
+    postSignalSetFn = fn;
+    return prev;
 }
 
 /**
@@ -9938,7 +9954,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.6+sha-1c16be4');
+const VERSION = new Version('16.0.0-next.6+sha-a6fc8b3');
 
 // This default value is when checking the hierarchy for a token.
 //

@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.6+sha-1c16be4
+ * @license Angular v16.0.0-next.6+sha-a6fc8b3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10044,7 +10044,6 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
 declare interface ViewRefTracker {
     detachView(viewRef: ViewRef): void;
 }
-
 
 declare interface WeakRef<T extends object> {
     deref(): T | undefined;
