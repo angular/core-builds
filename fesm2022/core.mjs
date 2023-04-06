@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-bf1b5b4
+ * @license Angular v16.1.0-next.0+sha-e08d679
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9954,7 +9954,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-bf1b5b4');
+const VERSION = new Version('16.1.0-next.0+sha-e08d679');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27074,7 +27074,7 @@ class ApplicationRef {
         this._loadComponent(compRef);
         if (typeof ngDevMode === 'undefined' || ngDevMode) {
             const _console = this._injector.get(Console);
-            _console.log(`Angular is running in development mode.`);
+            _console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
         }
         return compRef;
     }
