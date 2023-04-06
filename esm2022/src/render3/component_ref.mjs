@@ -144,8 +144,8 @@ export class ComponentFactory extends AbstractComponentFactory {
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation, rootViewInjector) :
             createElementNode(hostRenderer, elementName, getNamespace(elementName));
-        const rootFlags = this.componentDef.onPush ? 32 /* LViewFlags.Dirty */ | 256 /* LViewFlags.IsRoot */ :
-            16 /* LViewFlags.CheckAlways */ | 256 /* LViewFlags.IsRoot */;
+        const rootFlags = this.componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
+            16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
         const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, null);
@@ -288,7 +288,7 @@ function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirecti
         hydrationInfo = retrieveHydrationInfo(hostRNode, rootView[INJECTOR]);
     }
     const viewRenderer = environment.rendererFactory.createRenderer(hostRNode, rootComponentDef);
-    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 32 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, environment, viewRenderer, null, null, hydrationInfo);
+    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 64 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, environment, viewRenderer, null, null, hydrationInfo);
     if (tView.firstCreatePass) {
         markAsComponentHost(tView, tNode, rootDirectives.length - 1);
     }
