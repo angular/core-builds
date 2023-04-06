@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-e08d679
+ * @license Angular v16.1.0-next.0+sha-fe58f0a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9954,7 +9954,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-e08d679');
+const VERSION = new Version('16.1.0-next.0+sha-fe58f0a');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27074,7 +27074,7 @@ class ApplicationRef {
         this._loadComponent(compRef);
         if (typeof ngDevMode === 'undefined' || ngDevMode) {
             const _console = this._injector.get(Console);
-            _console.log(`Angular is running in development mode. Call enableProdMode() to enable production mode.`);
+            _console.log(`Angular is running in development mode.`);
         }
         return compRef;
     }
@@ -29708,7 +29708,7 @@ function printHydrationStats(console) {
         `and ${ngDevMode.hydratedNodes} node(s), ` +
         `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
         `Note: this feature is in Developer Preview mode. ` +
-        `Learn more at https://angular.io/guides/hydration.`;
+        `Learn more at https://next.angular.io/guide/hydration.`;
     // tslint:disable-next-line:no-console
     console.log(message);
 }
