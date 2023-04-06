@@ -34,7 +34,7 @@ export function isComponentDef(def) {
     return !!def.template;
 }
 export function isRootView(target) {
-    return (target[FLAGS] & 256 /* LViewFlags.IsRoot */) !== 0;
+    return (target[FLAGS] & 512 /* LViewFlags.IsRoot */) !== 0;
 }
 export function isProjectionTNode(tNode) {
     return (tNode.type & 16 /* TNodeType.Projection */) === 16 /* TNodeType.Projection */;

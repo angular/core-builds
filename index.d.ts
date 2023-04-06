@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-ec0b44d
+ * @license Angular v16.1.0-next.0+sha-bf1b5b4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5452,27 +5452,29 @@ declare const enum LViewFlags {
     FirstLViewPass = 8,
     /** Whether this view has default change detection strategy (checks always) or onPush */
     CheckAlways = 16,
+    /** Whether there are any i18n blocks inside this LView. */
+    HasI18n = 32,
     /** Whether or not this view is currently dirty (needing check) */
-    Dirty = 32,
+    Dirty = 64,
     /** Whether or not this view is currently attached to change detection tree. */
-    Attached = 64,
+    Attached = 128,
     /** Whether or not this view is destroyed. */
-    Destroyed = 128,
+    Destroyed = 256,
     /** Whether or not this view is the root view */
-    IsRoot = 256,
+    IsRoot = 512,
     /**
      * Whether this moved LView was needs to be refreshed at the insertion location because the
      * declaration was dirty.
      */
-    RefreshTransplantedView = 512,
+    RefreshTransplantedView = 1024,
     /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
-    HasEmbeddedViewInjector = 1024,
+    HasEmbeddedViewInjector = 2048,
     /**
      * Index of the current init phase on last 21 bits
      */
-    IndexWithinInitPhaseIncrementer = 2048,
-    IndexWithinInitPhaseShift = 11,
-    IndexWithinInitPhaseReset = 2047
+    IndexWithinInitPhaseIncrementer = 4096,
+    IndexWithinInitPhaseShift = 12,
+    IndexWithinInitPhaseReset = 4095
 }
 
 /**
@@ -7535,7 +7537,6 @@ declare const enum RuntimeErrorCode {
     HYDRATION_MISSING_NODE = -502,
     UNSUPPORTED_PROJECTION_DOM_NODES = -503,
     INVALID_SKIP_HYDRATION_HOST = -504,
-    HYDRATION_I18N_NOT_YET_SUPPORTED = 518,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,

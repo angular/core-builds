@@ -21,7 +21,7 @@ import { getLViewParent } from '../util/view_traversal_utils';
  */
 export function markViewDirty(lView) {
     while (lView) {
-        lView[FLAGS] |= 32 /* LViewFlags.Dirty */;
+        lView[FLAGS] |= 64 /* LViewFlags.Dirty */;
         const parent = getLViewParent(lView);
         // Stop traversing up as soon as you find a root view that wasn't attached to any container
         if (isRootView(lView) && !parent) {
