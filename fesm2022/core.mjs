@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.7+sha-c713d9f
+ * @license Angular v16.0.0-next.7+sha-bab36d0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9954,7 +9954,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.7+sha-c713d9f');
+const VERSION = new Version('16.0.0-next.7+sha-bab36d0');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29268,11 +29268,14 @@ function annotateForHydration(appRef, doc) {
             }
         }
     }
-    const allSerializedViews = serializedViewCollection.getAll();
-    if (allSerializedViews.length > 0) {
-        const transferState = appRef.injector.get(TransferState);
-        transferState.set(NGH_DATA_KEY, allSerializedViews);
-    }
+    // Note: we *always* include hydration info key and a corresponding value
+    // into the TransferState, even if the list of serialized views is empty.
+    // This is needed as a signal to the client that the server part of the
+    // hydration logic was setup and enabled correctly. Otherwise, if a client
+    // hydration doesn't find a key in the transfer state - an error is produced.
+    const serializedViews = serializedViewCollection.getAll();
+    const transferState = appRef.injector.get(TransferState);
+    transferState.set(NGH_DATA_KEY, serializedViews);
 }
 /**
  * Serializes the lContainer data into a list of SerializedView objects,
@@ -29703,14 +29706,26 @@ function isBrowser() {
 /**
  * Outputs a message with hydration stats into a console.
  */
-function printHydrationStats(console) {
-    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
-        `and ${ngDevMode.hydratedNodes} node(s), ` +
-        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
-        `Note: this feature is in Developer Preview mode. ` +
-        `Learn more at https://next.angular.io/guide/hydration.`;
-    // tslint:disable-next-line:no-console
-    console.log(message);
+function printHydrationInfo(injector) {
+    const console = injector.get(Console);
+    const transferState = injector.get(TransferState, null, { optional: true });
+    if (transferState && transferState.get(NGH_DATA_KEY, null)) {
+        const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
+            `and ${ngDevMode.hydratedNodes} node(s), ` +
+            `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+            `Note: this feature is in Developer Preview mode. ` +
+            `Learn more at https://next.angular.io/guide/hydration.`;
+        // tslint:disable-next-line:no-console
+        console.log(message);
+    }
+    else {
+        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was enabled on the client, but there was no ' +
+            'serialized information present in the server response. ' +
+            'Make sure the `provideClientHydration()` is included into the list ' +
+            'of providers in the server part of the application configuration.');
+        // tslint:disable-next-line:no-console
+        console.warn(message);
+    }
 }
 /**
  * Returns a Promise that is resolved when an application becomes stable.
@@ -29763,7 +29778,7 @@ function withDomHydration() {
                 if (isBrowser()) {
                     const appRef = inject(ApplicationRef);
                     const pendingTasks = inject(InitialRenderPendingTasks);
-                    const console = inject(Console);
+                    const injector = inject(Injector);
                     return () => {
                         whenStable(appRef, pendingTasks).then(() => {
                             // Wait until an app becomes stable and cleanup all views that
@@ -29772,7 +29787,7 @@ function withDomHydration() {
                             // on the server.
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-                                printHydrationStats(console);
+                                printHydrationInfo(injector);
                             }
                         });
                     };
