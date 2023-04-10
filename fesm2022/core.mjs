@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-fe34de4
+ * @license Angular v16.1.0-next.0+sha-83262dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9954,7 +9954,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-fe34de4');
+const VERSION = new Version('16.1.0-next.0+sha-83262dc');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29706,26 +29706,15 @@ function isBrowser() {
 /**
  * Outputs a message with hydration stats into a console.
  */
-function printHydrationInfo(injector) {
+function printHydrationStats(injector) {
     const console = injector.get(Console);
-    const transferState = injector.get(TransferState, null, { optional: true });
-    if (transferState && transferState.get(NGH_DATA_KEY, null)) {
-        const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
-            `and ${ngDevMode.hydratedNodes} node(s), ` +
-            `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
-            `Note: this feature is in Developer Preview mode. ` +
-            `Learn more at https://next.angular.io/guide/hydration.`;
-        // tslint:disable-next-line:no-console
-        console.log(message);
-    }
-    else {
-        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was enabled on the client, but there was no ' +
-            'serialized information present in the server response. ' +
-            'Make sure the `provideClientHydration()` is included into the list ' +
-            'of providers in the server part of the application configuration.');
-        // tslint:disable-next-line:no-console
-        console.warn(message);
-    }
+    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
+        `and ${ngDevMode.hydratedNodes} node(s), ` +
+        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+        `Note: this feature is in Developer Preview mode. ` +
+        `Learn more at https://next.angular.io/guide/hydration.`;
+    // tslint:disable-next-line:no-console
+    console.log(message);
 }
 /**
  * Returns a Promise that is resolved when an application becomes stable.
@@ -29748,6 +29737,30 @@ function whenStable(appRef, pendingTasks) {
 function withDomHydration() {
     return makeEnvironmentProviders([
         {
+            provide: IS_HYDRATION_FEATURE_ENABLED,
+            useFactory: () => {
+                if (isBrowser()) {
+                    // On the client, verify that the server response contains
+                    // hydration annotations. Otherwise, keep hydration disabled.
+                    const transferState = inject(TransferState, { optional: true });
+                    const hasHydrationAnnotations = !!transferState?.get(NGH_DATA_KEY, null);
+                    if (!hasHydrationAnnotations) {
+                        const console = inject(Console);
+                        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was requested on the client, but there was no ' +
+                            'serialized information present in the server response, ' +
+                            'thus hydration was not enabled. ' +
+                            'Make sure the `provideClientHydration()` is included into the list ' +
+                            'of providers in the server part of the application configuration.');
+                        // tslint:disable-next-line:no-console
+                        console.warn(message);
+                    }
+                    return hasHydrationAnnotations;
+                }
+                // We are running on the server, always return `true`.
+                return true;
+            },
+        },
+        {
             provide: ENVIRONMENT_INITIALIZER,
             useValue: () => {
                 // Since this function is used across both server and client,
@@ -29755,27 +29768,26 @@ function withDomHydration() {
                 // on the client. Moving forward, the `isBrowser` check should
                 // be replaced with a tree-shakable alternative (e.g. `isServer`
                 // flag).
-                if (isBrowser()) {
+                if (isBrowser() && inject(IS_HYDRATION_FEATURE_ENABLED)) {
                     enableHydrationRuntimeSupport();
                 }
             },
             multi: true,
         },
         {
-            provide: IS_HYDRATION_FEATURE_ENABLED,
-            useValue: true,
-        },
-        {
             provide: PRESERVE_HOST_CONTENT,
-            // Preserve host element content only in a browser
-            // environment. On a server, an application is rendered
-            // from scratch, so the host content needs to be empty.
-            useFactory: () => isBrowser(),
+            useFactory: () => {
+                // Preserve host element content only in a browser
+                // environment and when hydration is configured properly.
+                // On a server, an application is rendered from scratch,
+                // so the host content needs to be empty.
+                return isBrowser() && inject(IS_HYDRATION_FEATURE_ENABLED);
+            }
         },
         {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
-                if (isBrowser()) {
+                if (isBrowser() && inject(IS_HYDRATION_FEATURE_ENABLED)) {
                     const appRef = inject(ApplicationRef);
                     const pendingTasks = inject(InitialRenderPendingTasks);
                     const injector = inject(Injector);
@@ -29787,7 +29799,7 @@ function withDomHydration() {
                             // on the server.
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-                                printHydrationInfo(injector);
+                                printHydrationStats(injector);
                             }
                         });
                     };
