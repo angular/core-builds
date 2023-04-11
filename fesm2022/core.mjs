@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.7+sha-2eb9b8b
+ * @license Angular v16.0.0-next.7+sha-15c91a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9968,7 +9968,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.7+sha-2eb9b8b');
+const VERSION = new Version('16.0.0-next.7+sha-15c91a5');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29628,12 +29628,10 @@ function isDisconnectedNode(tNode, lView) {
  */
 class InitialRenderPendingTasks {
     get whenAllTasksComplete() {
-        if (this.collection.size > 0) {
-            return this.promise;
+        if (this.collection.size === 0) {
+            this.complete();
         }
-        return Promise.resolve().then(() => {
-            this.completed = true;
-        });
+        return this.promise;
     }
     constructor() {
         this.taskId = 0;
@@ -29663,14 +29661,16 @@ class InitialRenderPendingTasks {
             return;
         this.collection.delete(taskId);
         if (this.collection.size === 0) {
-            // We've removed the last task, resolve the promise.
-            this.completed = true;
-            this.resolve();
+            this.complete();
         }
     }
     ngOnDestroy() {
-        this.completed = true;
+        this.complete();
         this.collection.clear();
+    }
+    complete() {
+        this.completed = true;
+        this.resolve();
     }
     static { this.ɵfac = function InitialRenderPendingTasks_Factory(t) { return new (t || InitialRenderPendingTasks)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: InitialRenderPendingTasks, factory: InitialRenderPendingTasks.ɵfac, providedIn: 'root' }); }

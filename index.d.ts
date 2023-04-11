@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.7+sha-2eb9b8b
+ * @license Angular v16.0.0-next.7+sha-15c91a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10835,6 +10835,7 @@ export declare class ɵInitialRenderPendingTasks implements OnDestroy {
     add(): number;
     remove(taskId: number): void;
     ngOnDestroy(): void;
+    private complete;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵInitialRenderPendingTasks, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ɵInitialRenderPendingTasks>;
 }
