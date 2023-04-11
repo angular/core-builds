@@ -16099,7 +16099,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("15.2.6+sha-9c07a42");
+var VERSION2 = new Version("15.2.6+sha-b0c1a90");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -17414,7 +17414,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -17483,7 +17483,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -17665,7 +17665,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -17688,7 +17688,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.providedIn !== void 0) {
@@ -17726,7 +17726,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   definitionMap.set("providers", meta.providers);
@@ -17747,7 +17747,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.bootstrap.length > 0) {
@@ -17782,7 +17782,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("15.2.6+sha-9c07a42"));
+  definitionMap.set("version", literal("15.2.6+sha-b0c1a90"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.internalType);
   if (meta.isStandalone) {
@@ -17799,7 +17799,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("15.2.6+sha-9c07a42");
+var VERSION3 = new Version("15.2.6+sha-b0c1a90");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -22810,6 +22810,7 @@ var TraitImpl = class {
     this.resolution = null;
     this.analysisDiagnostics = null;
     this.resolveDiagnostics = null;
+    this.typeCheckDiagnostics = null;
     this.handler = handler;
     this.detected = detected;
   }
@@ -22829,6 +22830,7 @@ var TraitImpl = class {
     this.resolution = resolution;
     this.state = TraitState.Resolved;
     this.resolveDiagnostics = diagnostics;
+    this.typeCheckDiagnostics = null;
     return this;
   }
   toSkipped() {
@@ -23265,6 +23267,7 @@ var TraitCompiler = class {
     return decorators;
   }
   get diagnostics() {
+    var _a;
     const diagnostics = [];
     for (const clazz of this.classes.keys()) {
       const record = this.classes.get(clazz);
@@ -23275,8 +23278,8 @@ var TraitCompiler = class {
         if ((trait.state === TraitState.Analyzed || trait.state === TraitState.Resolved) && trait.analysisDiagnostics !== null) {
           diagnostics.push(...trait.analysisDiagnostics);
         }
-        if (trait.state === TraitState.Resolved && trait.resolveDiagnostics !== null) {
-          diagnostics.push(...trait.resolveDiagnostics);
+        if (trait.state === TraitState.Resolved) {
+          diagnostics.push(...(_a = trait.resolveDiagnostics) != null ? _a : []);
         }
       }
     }
@@ -24433,7 +24436,7 @@ var QUERY_TYPES = /* @__PURE__ */ new Set([
   "ViewChild",
   "ViewChildren"
 ]);
-function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmitter, isCore, flags, annotateForClosureCompiler, defaultSelector = null) {
+function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmitter, referencesRegistry, isCore, flags, annotateForClosureCompiler, defaultSelector = null) {
   let directive;
   if (decorator === null || decorator.args === null || decorator.args.length === 0) {
     directive = /* @__PURE__ */ new Map();
@@ -24511,6 +24514,9 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const outputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, outputsFromMeta), outputsFromFields));
   const rawHostDirectives = directive.get("hostDirectives") || null;
   const hostDirectives = rawHostDirectives === null ? null : extractHostDirectives(rawHostDirectives, evaluator);
+  if (hostDirectives !== null) {
+    referencesRegistry.add(clazz, ...hostDirectives.map((hostDir) => hostDir.directive));
+  }
   const metadata = {
     name: clazz.name.text,
     deps: ctorDeps,
@@ -24939,7 +24945,7 @@ var LIFECYCLE_HOOKS = /* @__PURE__ */ new Set([
   "ngAfterContentChecked"
 ]);
 var DirectiveDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, compileUndecoratedClassesWithAngularFeatures, perf) {
+  constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, compileUndecoratedClassesWithAngularFeatures, perf) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -24947,6 +24953,7 @@ var DirectiveDecoratorHandler = class {
     this.metaReader = metaReader;
     this.injectableRegistry = injectableRegistry;
     this.refEmitter = refEmitter;
+    this.referencesRegistry = referencesRegistry;
     this.isCore = isCore;
     this.strictCtorDeps = strictCtorDeps;
     this.semanticDepGraphUpdater = semanticDepGraphUpdater;
@@ -24974,7 +24981,7 @@ var DirectiveDecoratorHandler = class {
       return { diagnostics: [getUndecoratedClassWithAngularFeaturesDiagnostic(node)] };
     }
     this.perf.eventCount(PerfEvent.AnalyzeDirective);
-    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.isCore, flags, this.annotateForClosureCompiler);
+    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, flags, this.annotateForClosureCompiler);
     if (directiveResult === void 0) {
       return {};
     }
@@ -26100,7 +26107,7 @@ function isLikelyModuleWithProviders(value) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/handler.mjs
 var EMPTY_ARRAY2 = [];
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -26123,6 +26130,7 @@ var ComponentDecoratorHandler = class {
     this.cycleAnalyzer = cycleAnalyzer;
     this.cycleHandlingStrategy = cycleHandlingStrategy;
     this.refEmitter = refEmitter;
+    this.referencesRegistry = referencesRegistry;
     this.depTracker = depTracker;
     this.injectableRegistry = injectableRegistry;
     this.semanticDepGraphUpdater = semanticDepGraphUpdater;
@@ -26204,7 +26212,7 @@ var ComponentDecoratorHandler = class {
     this.literalCache.delete(decorator);
     let diagnostics;
     let isPoisoned = false;
-    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.isCore, flags, this.annotateForClosureCompiler, this.elementSchemaRegistry.getDefaultComponentElementName());
+    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, flags, this.annotateForClosureCompiler, this.elementSchemaRegistry.getDefaultComponentElementName());
     if (directiveResult === void 0) {
       return {};
     }
@@ -33902,7 +33910,14 @@ var NgCompiler = class {
       if (sf.isDeclarationFile || this.adapter.isShim(sf)) {
         continue;
       }
-      diagnostics.push(...compilation.templateTypeChecker.getDiagnosticsForFile(sf, OptimizeFor.WholeProgram));
+      try {
+        diagnostics.push(...compilation.templateTypeChecker.getDiagnosticsForFile(sf, OptimizeFor.WholeProgram));
+      } catch (err) {
+        if (!(err instanceof FatalDiagnosticError)) {
+          throw err;
+        }
+        diagnostics.push(err.toDiagnostic());
+      }
     }
     const program = this.programDriver.getProgram();
     this.incrementalStrategy.setIncrementalState(this.incrementalCompilation.state, program);
@@ -33913,7 +33928,14 @@ var NgCompiler = class {
     const compilation = this.ensureAnalyzed();
     const diagnostics = [];
     if (!sf.isDeclarationFile && !this.adapter.isShim(sf)) {
-      diagnostics.push(...compilation.templateTypeChecker.getDiagnosticsForFile(sf, optimizeFor));
+      try {
+        diagnostics.push(...compilation.templateTypeChecker.getDiagnosticsForFile(sf, optimizeFor));
+      } catch (err) {
+        if (!(err instanceof FatalDiagnosticError)) {
+          throw err;
+        }
+        diagnostics.push(err.toDiagnostic());
+      }
     }
     const program = this.programDriver.getProgram();
     this.incrementalStrategy.setIncrementalState(this.incrementalCompilation.state, program);
@@ -34004,8 +34026,8 @@ var NgCompiler = class {
     const cycleHandlingStrategy = compilationMode === CompilationMode.FULL ? 0 : 1;
     const strictCtorDeps = this.options.strictInjectionParameters || false;
     const handlers = [
-      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver),
-      new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, false, this.delegatingPerfRecorder),
+      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver),
+      new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, false, this.delegatingPerfRecorder),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder),
       new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, isCore, refEmitter, this.adapter.factoryTracker, this.closureCompilerEnabled, (_a = this.options.onlyPublishPublicTypingsForNgModules) != null ? _a : false, injectableRegistry, this.delegatingPerfRecorder)
@@ -36202,6 +36224,7 @@ function standalone_migration_default(options) {
     }
     context.logger.info("\u{1F389} Automated migration step has finished! \u{1F389}");
     context.logger.info("IMPORTANT! Please verify manually that your application builds and behaves as expected.");
+    context.logger.info(`See https://angular.io/guide/standalone-migration for more information.`);
   });
 }
 function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions, oldProgram) {

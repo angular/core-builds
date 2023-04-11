@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.6+sha-9c07a42
+ * @license Angular v15.2.6+sha-b0c1a90
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8697,7 +8697,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.6+sha-9c07a42');
+const VERSION = new Version('15.2.6+sha-b0c1a90');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12529,7 +12529,8 @@ class ComponentRef extends ComponentRef$1 {
         if (inputData !== null && (dataValue = inputData[name])) {
             const lView = this._rootLView;
             setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
-            markDirtyIfOnPush(lView, this._tNode.index);
+            const childComponentLView = getComponentLViewByIndex(this._tNode.index, lView);
+            markViewDirty(childComponentLView);
         }
         else {
             if (ngDevMode) {
