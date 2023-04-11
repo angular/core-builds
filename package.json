@@ -1,11 +1,11 @@
 {
   "name": "@angular/core",
-  "version": "16.0.0-next.7+sha-bab36d0",
+  "version": "16.0.0-next.7+sha-898eecb",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
   "engines": {
-    "node": "^16.13.0 || >=18.10.0"
+    "node": "^16.14.0 || >=18.10.0"
   },
   "exports": {
     "./schematics/*": {
