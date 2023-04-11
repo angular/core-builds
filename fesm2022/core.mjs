@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-7ee542d
+ * @license Angular v16.1.0-next.0+sha-ce38be0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2690,6 +2690,9 @@ class Watch extends ReactiveNode {
         this.schedule = schedule;
         this.dirty = false;
         this.cleanupFn = NOOP_CLEANUP_FN;
+        this.registerOnCleanup = (cleanupFn) => {
+            this.cleanupFn = cleanupFn;
+        };
         this.consumerAllowSignalWrites = allowSignalWrites;
     }
     notify() {
@@ -2719,7 +2722,8 @@ class Watch extends ReactiveNode {
         this.trackingVersion++;
         try {
             this.cleanupFn();
-            this.cleanupFn = this.watch() ?? NOOP_CLEANUP_FN;
+            this.cleanupFn = NOOP_CLEANUP_FN;
+            this.watch(this.registerOnCleanup);
         }
         finally {
             setActiveConsumer(prevConsumer);
@@ -9964,7 +9968,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-7ee542d');
+const VERSION = new Version('16.1.0-next.0+sha-ce38be0');
 
 // This default value is when checking the hierarchy for a token.
 //
