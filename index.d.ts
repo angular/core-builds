@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-8020347
+ * @license Angular v16.1.0-next.0+sha-7ee542d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10660,6 +10660,14 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
     ɵdir: unknown;
     ɵfac: unknown;
 }
+
+/**
+ * Internal token to collect all SSR-related features enabled for this application.
+ *
+ * Note: the token is in `core` to let other packages register features (the `core`
+ * package is imported in other packages).
+ */
+export declare const ɵENABLED_SSR_FEATURES: InjectionToken<Set<string>>;
 
 
 export declare function ɵescapeTransferStateContent(text: string): string;

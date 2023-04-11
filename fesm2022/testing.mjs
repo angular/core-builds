@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-8020347
+ * @license Angular v16.1.0-next.0+sha-7ee542d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9797,6 +9797,16 @@ const CSP_NONCE = new InjectionToken('CSP nonce', {
         return getDocument().body.querySelector('[ngCspNonce]')?.getAttribute('ngCspNonce') || null;
     },
 });
+/**
+ * Internal token to collect all SSR-related features enabled for this application.
+ *
+ * Note: the token is in `core` to let other packages register features (the `core`
+ * package is imported in other packages).
+ */
+const ENABLED_SSR_FEATURES = new InjectionToken((typeof ngDevMode === 'undefined' || ngDevMode) ? 'ENABLED_SSR_FEATURES' : '', {
+    providedIn: 'root',
+    factory: () => new Set(),
+});
 
 function escapeTransferStateContent(text) {
     const escapedText = {
@@ -10350,7 +10360,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-8020347');
+const VERSION = new Version('16.1.0-next.0+sha-7ee542d');
 
 // This default value is when checking the hierarchy for a token.
 //
