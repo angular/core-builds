@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-next.7+sha-d980af6
+ * @license Angular v16.0.0-next.7+sha-f8e2586
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3954,6 +3954,9 @@ class Watch extends ReactiveNode {
         this.schedule = schedule;
         this.dirty = false;
         this.cleanupFn = NOOP_CLEANUP_FN;
+        this.registerOnCleanup = (cleanupFn) => {
+            this.cleanupFn = cleanupFn;
+        };
         this.consumerAllowSignalWrites = allowSignalWrites;
     }
     notify() {
@@ -3983,7 +3986,8 @@ class Watch extends ReactiveNode {
         this.trackingVersion++;
         try {
             this.cleanupFn();
-            this.cleanupFn = this.watch() ?? NOOP_CLEANUP_FN;
+            this.cleanupFn = NOOP_CLEANUP_FN;
+            this.watch(this.registerOnCleanup);
         }
         finally {
             setActiveConsumer(prevConsumer);
@@ -9797,6 +9801,16 @@ const CSP_NONCE = new InjectionToken('CSP nonce', {
         return getDocument().body.querySelector('[ngCspNonce]')?.getAttribute('ngCspNonce') || null;
     },
 });
+/**
+ * Internal token to collect all SSR-related features enabled for this application.
+ *
+ * Note: the token is in `core` to let other packages register features (the `core`
+ * package is imported in other packages).
+ */
+const ENABLED_SSR_FEATURES = new InjectionToken((typeof ngDevMode === 'undefined' || ngDevMode) ? 'ENABLED_SSR_FEATURES' : '', {
+    providedIn: 'root',
+    factory: () => new Set(),
+});
 
 function escapeTransferStateContent(text) {
     const escapedText = {
@@ -10350,7 +10364,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-next.7+sha-d980af6');
+const VERSION = new Version('16.0.0-next.7+sha-f8e2586');
 
 // This default value is when checking the hierarchy for a token.
 //
