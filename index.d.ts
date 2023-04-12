@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-d966fdd
+ * @license Angular v16.1.0-next.0+sha-1dddb78
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7544,6 +7544,7 @@ declare const enum RuntimeErrorCode {
     INVALID_SKIP_HYDRATION_HOST = -504,
     MISSING_HYDRATION_ANNOTATIONS = -505,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
+    REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
