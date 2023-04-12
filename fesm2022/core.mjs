@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.0+sha-61f63cf
+ * @license Angular v16.0.0-rc.0+sha-4721c48
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9402,7 +9402,7 @@ const CSP_NONCE = new InjectionToken('CSP nonce', {
         // 4. Have the `ComponentFactory` read the attribute and provide it to the injector under the
         // hood - has the same problem as #1 and #2 in that the renderer is used to query for the root
         // node and the nonce value needs to be available when the renderer is created.
-        return getDocument().body.querySelector('[ngCspNonce]')?.getAttribute('ngCspNonce') || null;
+        return getDocument().body?.querySelector('[ngCspNonce]')?.getAttribute('ngCspNonce') || null;
     },
 });
 /**
@@ -9968,7 +9968,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.0+sha-61f63cf');
+const VERSION = new Version('16.0.0-rc.0+sha-4721c48');
 
 // This default value is when checking the hierarchy for a token.
 //
