@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-38fe1b9
+ * @license Angular v16.1.0-next.0+sha-90166be
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10879,9 +10879,10 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
 }
 
 /**
- * Internal token that specifies whether hydration is enabled.
+ * Internal token that specifies whether DOM reuse logic
+ * during hydration is enabled.
  */
-export declare const ɵIS_HYDRATION_FEATURE_ENABLED: InjectionToken<boolean>;
+export declare const ɵIS_HYDRATION_DOM_REUSE_ENABLED: InjectionToken<boolean>;
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 

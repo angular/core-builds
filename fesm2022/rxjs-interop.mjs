@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-38fe1b9
+ * @license Angular v16.1.0-next.0+sha-90166be
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,6 @@
 import { assertInInjectionContext, inject, DestroyRef, Injector, effect, signal as signal$1, computed as computed$1 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RuntimeError } from '@angular/core/src/errors';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -60,6 +59,60 @@ function toObservable(source, options) {
         }, { injector, manualCleanup: true, allowSignalWrites: true });
         return () => watcher.destroy();
     });
+}
+
+/**
+ * Base URL for the error details page.
+ *
+ * Keep this constant in sync across:
+ *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
+ *  - packages/core/src/error_details_base_url.ts
+ */
+const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+/**
+ * URL for the XSS security documentation.
+ */
+const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
+
+/**
+ * Class that represents a runtime error.
+ * Formats and outputs the error message in a consistent way.
+ *
+ * Example:
+ * ```
+ *  throw new RuntimeError(
+ *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
+ *    ngDevMode && 'Injector has already been destroyed.');
+ * ```
+ *
+ * Note: the `message` argument contains a descriptive error message as a string in development
+ * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime
+ * logic.
+ */
+class RuntimeError extends Error {
+    constructor(code, message) {
+        super(formatRuntimeError(code, message));
+        this.code = code;
+    }
+}
+/**
+ * Called to format a runtime error.
+ * See additional info on the `message` argument type in the `RuntimeError` class description.
+ */
+function formatRuntimeError(code, message) {
+    // Error code might be a negative number, which is a special marker that instructs the logic to
+    // generate a link to the error details page on angular.io.
+    // We also prepend `0` to non-compile-time errors.
+    const fullCode = `NG0${Math.abs(code)}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
+    if (ngDevMode && code < 0) {
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const separator = addPeriodSeparator ? '.' : '';
+        errorMessage =
+            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
+    }
+    return errorMessage;
 }
 
 /**

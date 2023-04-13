@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-38fe1b9
+ * @license Angular v16.1.0-next.0+sha-90166be
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10348,7 +10348,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-38fe1b9');
+const VERSION = new Version('16.1.0-next.0+sha-90166be');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10498,9 +10498,10 @@ function isInSkipHydrationBlock(tNode) {
 
 const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
 /**
- * Internal token that specifies whether hydration is enabled.
+ * Internal token that specifies whether DOM reuse logic
+ * during hydration is enabled.
  */
-const IS_HYDRATION_FEATURE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_FEATURE_ENABLED' : '');
+const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
 // By default (in client rendering mode), we remove all the contents
 // of the host element and render an application after that.
 const PRESERVE_HOST_CONTENT_DEFAULT = false;
