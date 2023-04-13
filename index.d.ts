@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.0+sha-6ade3ec
+ * @license Angular v16.0.0-rc.0+sha-c34d7e0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7558,7 +7558,8 @@ declare const enum RuntimeErrorCode {
     TYPE_IS_NOT_STANDALONE = 907,
     MISSING_ZONEJS = 908,
     UNEXPECTED_ZONE_STATE = 909,
-    UNSAFE_IFRAME_ATTRS = -910
+    UNSAFE_IFRAME_ATTRS = -910,
+    VIEW_ALREADY_DESTROYED = 911
 }
 
 /**
